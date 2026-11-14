@@ -7,6 +7,7 @@ import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
 import { Contador } from '@/components/ui/badge'
 import { useEstadoChat, useNaoLidasInternas, type AbaChat } from '@/ambiente/interna'
 import { AbaEquipe } from './interna/AbaEquipe'
+import { JanelaFlutuante } from './interna/JanelaFlutuante'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Integrante, Mensagem, Tarefa } from '@/dados/tipos'
@@ -85,6 +86,8 @@ export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirInt
   const equipe = useNaoLidasInternas().total
   const doTime = integrantes.reduce((s, i) => s + (i.pendentes ?? 0), 0)
   return (
+    <>
+    <JanelaFlutuante />
     <Sheet open={chat.aberto} onOpenChange={chat.setAberto}>
       <SheetTrigger asChild>
         <Button className="absolute right-4 bottom-4 z-10 rounded-full shadow-lg sm:right-6 sm:bottom-6" size="lg" aria-label={`Chat${equipe + doTime ? `, ${equipe + doTime} não lidas` : ''}`}>
@@ -124,5 +127,6 @@ export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirInt
         )}
       </SheetContent>
     </Sheet>
+    </>
   )
 }
