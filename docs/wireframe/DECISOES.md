@@ -433,6 +433,96 @@ Formato de cada registro:
 
 ### S06 · Timesheet
 
+#### 2026-11-14 · S06 · Entidades do Timesheet e migração nova (não aplicada)
+
+- **Decisão:** o Timesheet passa a morar em onze entidades novas, no fim de `entidades.ts`: `sessao_trabalho` (Fundações 5.4, com `substituida_por`, `contestacao`, `anomalia`, `custo` do integrante e `pacote`), `item_confirmacao`, `ausencia` (05, ad. 16), `custo_hora` (05, A7, uma linha por definição), `vinculo_extensao` (termo e extensão por pessoa), `pulso_portal` (pulsos agregados por dia, portal e cliente), `portal_extensao` (lista versionada, desligável), `conector_core`, `equivalencia_core`, `duracao_padrao` (calibração) e `fechamento_timesheet` (o mês fechado por cliente, para a série de 12 meses). Esquema em `app/supabase/migrations/20261114180000_s06_timesheet.sql`, no padrão da de fundações.
+- **Por quê:** o backend real deve nascer em cima destas tabelas; `usePersistente` não serve para dado que três telas e o Financeiro leem. A sessão não aplicou a migração no projeto Supabase: a arquitetura (seção 9) pede autorização do dono. **Sem ela aplicada, o modo Supabase não abre** (o adaptador lê todas as tabelas de `nomesTabelas`): a coordenação aplica ao integrar.
+- **Telas e ações:** S06-T01 a T06.
+- **Impacto no plano:** nenhum (implementa 01, 5.4 e 05, A7, A11 no wireframe).
+- **Arquivos compartilhados:** `entidades.ts`, `repositorios/index.ts` (repositórios no fim e uma linha que liga o repositório de sessões ao de itens), `permissoes/ferramentas.ts` (ferramentas `timesheet.*`, `ausencia.registrar`, `custo_hora.definir`, `extensao.*`, `core.*`), `semente/andrade.ts` e `horizonte.ts` (uma linha `// S06` cada), só acrescentando.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · "Sem classificação" calculado e intervalo de almoço
+
+- **Decisão:** "sem classificação" não é sessão guardada: é calculado como as lacunas de 10 min ou mais dentro da jornada (05, 9.1), menos o intervalo de almoço, que entra na configuração do módulo (padrão 12:00 a 13:00); hoje, só até o último registro. Item de confirmação pendente com sugestão aparece na linha do dia como estimado; sem sugestão, como sem classificação.
+- **Por quê:** o 05 define a métrica pelas lacunas; sem o intervalo, todo almoço viraria item. **[sem regra no plano]** o intervalo.
+- **Telas e ações:** S06-T01, S06-A06; S06-A39 (campo novo).
+- **Impacto no plano:** 05, ad. 16 ganha o intervalo na configuração.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Quem mexe no tempo de quem
+
+- **Decisão:** confirmar, corrigir, dividir, classificar e contestar são só da própria pessoa (a regra fica no repositório, além da ferramenta). Quem contestou não decide a própria contestação (outro Gestor do setor ou o Administrador decide). O Gestor não altera o tempo de outra pessoa: "corrigir" uma sessão anômala manda um item "confirma 6h30 em FIS-010?" para ela (05, 11.3); descartar e manter são do Gestor.
+- **Por quê:** 05, H4 e 8.3 (a pessoa contesta, o Gestor decide); o caso do Administrador que contesta o próprio tempo não estava coberto.
+- **Telas e ações:** S06-A03 a A06, A24, A29.
+- **Impacto no plano:** nenhum (explicita 05, 8.3 e 11.3).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Custo-hora só do Administrador, margem também do Gestor de Gestão ou Financeiro
+
+- **Decisão:** a Rentabilidade abre ao Administrador e ao Gestor com Gestão ou Financeiro (05, 8.4), mas o valor do custo-hora só o Administrador vê e edita (o Gestor vê horas, custo total e margem, com "custo-hora definido pelo Administrador"). O valor-hora de cobrança (Jurídico) é configuração do escritório, visível ao Gestor; o chip "Jurídico" aparece quando a assinatura tiver o módulo `juridico` (S11).
+- **Por quê:** o mapa manda "custo-hora só do Administrador" e "valor-hora visível ao Gestor"; o 05 abre a aba ao Gestor de Gestão ou Financeiro.
+- **Telas e ações:** S06-T04, S06-A38, S06-A40.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Rentabilidade: mês fechado e mês corrente
+
+- **Decisão:** competências fechadas leem `fechamento_timesheet` (horas, honorário, variáveis e marcos do mês); a corrente lê as sessões até hoje, com o honorário proporcional aos dias úteis decorridos e o custo dos integrantes em centavos nas variáveis. O honorário vem do último fechamento até a S07 expor `contrato.honorario_na_competencia` (05, ad. 15). Deficitário = margem negativa no mês e em pelo menos um dos dois anteriores (2 de 3).
+- **Por quê:** o mês corrente sem proporção daria margem enganosa; a série de 12 meses precisa de fotografia mensal (09, fechamento). **[sem regra no plano]** a proporção.
+- **Telas e ações:** S06-A31 a A33, A36.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Captura pela tarefa aberta
+
+- **Decisão:** `CapturaTempo` (`src/telas/timesheet/captura.tsx`), montada uma vez na Plataforma, abre a sessão ao vivo da tarefa aberta (em qualquer tela) ou, sem tarefa, do Painel com cliente e da conversa do CRM (01, 5.4, regra 1), depois de 60 s com ação (H2); o fim avança a cada ação; troca de tarefa, saída e modo de espera fecham no último evento; voltar da espera com 10 min ou mais cria o item "em espera" pré-preenchido (05, 3.7). Sessão sem tarefa no Painel fica com atividade em branco ("Painel › Fiscal (sem tarefa)") para a pessoa classificar. A data é a do dia da demonstração (18/11) com a hora do relógio. O painel Demonstração liga "sessão nasce em 5 s" para mostrar ao vivo.
+- **Por quê:** o modo de espera é da S01 (`espera.tsx`); a S06 só lê `tempo.espera`, sem mexer nele.
+- **Telas e ações:** S06-T01; lado do Timesheet de S01-A83 a A85.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `Plataforma.tsx` (uma linha montando a captura, o contador da aba Confirmações no mapa das abas, `clienteId` nas quatro telas e o Timesheet fora de `telaAindaFixa`), `PainelLab.tsx` (uma linha com a seção do Timesheet).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Contratos com a S04 ("não era esta", ausências, serviço extra)
+
+- **Decisão:** a S06 consome o que a S04 grava: cada pedido em `s04:timesheet:nao-era-esta` vira item `nao_era_esta` em Confirmações, ligado à sessão da tarefa errada e com a tarefa certa como sugestão; as férias com substituto de `s04:gestao` (`ausencias`) entram na capacidade da Equipe (só leitura, "pela Gestão"); `tarefa.extras.servico_extra` marca as horas como serviço extra (C2-25). Para quem quiser chamar direto, `naoEraEsta(tarefaId)` em `captura.tsx`.
+- **Por quê:** registro da S04 de 14/11 ("S06 e S07 consomem").
+- **Telas e ações:** S06-A13, A22, A25.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Extensão e cores como serviços simulados
+
+- **Decisão:** `src/servicos/timesheet.ts` traz `extensao` (API-26: detectar, vincular, visitar portal, com o que é enviado e o que nunca sai) e `cores` (API-18: testar token, importar relatório, ler agora), com uma linha em `Servicos`, `servicos` e `catalogoServicos`. A tela "como a extensão vê" (S06-T06) fica no painel Demonstração, como o mapa sugere; o pulso sem tarefa e com CNPJ vira "trecho de portal" em Confirmações, nunca sessão.
+- **Por quê:** 1.7 do mapa e ARQUITETURA, 6.
+- **Telas e ações:** S06-A11, A27, A43 a A45.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/servicos/index.ts` (só acrescentando).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Abertura da Equipe ao Gestor e o que ficou fixo
+
+- **Decisão:** "abrir a Equipe ao Gestor após N semanas" conta a partir de 02/11/2026 (ativação do módulo nos exemplos); com 3 ou 4 semanas, o Gestor vê "a aba Equipe abre em dd/mm". O percentual do limite de IA (5 h e 7 dias) continua o do protótipo (o limite de uso é da S01). Os filtros de contratante e frente existem; nos exemplos todo o BPO é do próprio escritório e da frente financeira, então "entre escritórios" esvazia a tela (S08 traz os dados).
+- **Por quê:** 05, 10.6; o resto depende de outras sessões.
+- **Telas e ações:** S06-T03, S06-A23, S06-A39.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S06 · Ordem das abas aplicada em `modulos.ts`
+
+- **Decisão:** a lista do Timesheet em `src/telas/modulos.ts` passa a Meu tempo · Confirmações · Equipe · Rentabilidade, como escrito no registro da Coordenação; o `contador: 6` fixo de Confirmações sai (o número vem dos itens pendentes da pessoa, na Plataforma).
+- **Por quê:** o registro diz "a ordem atual do protótipo", mas o protótipo tinha Confirmações por último; a sessão seguiu a ordem escrita, que é a mesma do pedido do dono para a S06.
+- **Telas e ações:** S06-T01 a T04, S06-A19.
+- **Impacto no plano:** nenhum (03, U5 já fechada pela Coordenação).
+- **Arquivos compartilhados:** `src/telas/modulos.ts` (reordena as quatro abas do Timesheet; mudança fora do "só acrescentar", registrada aqui).
+- **Situação:** proposta.
+
 ### S07 · Financeiro do escritório
 
 ### S08 · BPO

@@ -5,9 +5,11 @@ import { ErroRegra } from '../permissoes/autorizar'
 import { idDoAtor, nomeDoAtor } from '../permissoes/perfil'
 import { contextoAtual } from './contexto'
 import { agora, novoId, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
+import { registrarRepoSessoes, RepositorioItensConfirmacao, RepositorioSessoes } from './s06-timesheet'
 
 export * from './contexto'
 export * from './repositorio'
+export * from './s06-timesheet'
 
 const b = (): Banco => banco
 
@@ -184,9 +186,23 @@ export const repos = {
   ),
   telas: new RepositorioTela(b, regras({ tabela: 'registro_tela', prefixo: 'rt', artigo: 'o estado de tela', ferramentas: { criar: 'tela.lembrar', atualizar: 'tela.lembrar', excluir: 'tela.lembrar' }, exclusao: 'definitiva', rotulo: (r) => r.id, semEvento: true })),
   notas: new Repositorio(b, regras({ tabela: 'nota_emitida', prefixo: 'nf', artigo: 'a nota', ferramentas: { criar: 'nfse.emitir', atualizar: 'nfse.cancelar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Nota emitida não se apaga: cancele.', rotulo: (r) => `NFS-e ${r.numero}`, alvo: (r) => ({ cliente_id: r.cliente_id ?? null }) })),
+  // S06 · Timesheet (05; Fundações 5.4). Nada se apaga: sessão corrigida fica com `substituida_por`.
+  sessoes: new RepositorioSessoes(b, regras({ tabela: 'sessao_trabalho', prefixo: 'ss', artigo: 'a sessão', ferramentas: { criar: 'timesheet.registrar', atualizar: 'timesheet.registrar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Sessão de trabalho não se apaga: corrija ou descarte (fica substituída).', rotulo: (r) => `${r.atividade_id ?? ''} ${r.rotulo}`.trim(), alvo: porSetor, linhaDoTempo: false })),
+  itensConfirmacao: new RepositorioItensConfirmacao(b, regras({ tabela: 'item_confirmacao', prefixo: 'ic', artigo: 'o item', ferramentas: { criar: 'timesheet.registrar', atualizar: 'timesheet.confirmar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Item de confirmação não se apaga: expira em 7 dias.', rotulo: (r) => r.texto, alvo: (r) => ({ setor_id: r.setor_id ?? null }), linhaDoTempo: false })),
+  ausencias: new Repositorio(b, regras({ tabela: 'ausencia', prefixo: 'au', artigo: 'a ausência de', ferramentas: { criar: 'ausencia.registrar', atualizar: 'ausencia.registrar', arquivar: 'ausencia.registrar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Ausência registrada não se apaga: cancele (fica no histórico).', rotulo: (r) => String(r.extras?.pessoa_nome ?? r.usuario_id), validar: (r) => (!r.inicio || !r.fim ? 'Informe o início e o fim.' : r.fim < r.inicio ? 'O fim é antes do início.' : null) })),
+  custosHora: new Repositorio(b, regras({ tabela: 'custo_hora', prefixo: 'ch', artigo: 'o custo-hora', ferramentas: { criar: 'custo_hora.definir', atualizar: 'custo_hora.definir' }, exclusao: 'proibida', motivoExclusaoProibida: 'Custo-hora é versionado: defina um novo.', rotulo: (r) => `${r.competencia} · R$ ${r.valor}/h`, validar: (r) => (r.valor > 0 ? null : 'O custo-hora precisa ser maior que zero.') })),
+  vinculosExtensao: new Repositorio(b, regras({ tabela: 'vinculo_extensao', prefixo: 've', artigo: 'a extensão de', ferramentas: { criar: 'extensao.vincular', atualizar: 'extensao.vincular' }, exclusao: 'proibida', rotulo: (r) => r.usuario_id, linhaDoTempo: false })),
+  pulsos: new Repositorio(b, regras({ tabela: 'pulso_portal', prefixo: 'pp', artigo: 'os pulsos', ferramentas: { criar: 'extensao.pulso', atualizar: 'extensao.pulso' }, exclusao: 'proibida', rotulo: (r) => `${r.portal} · ${r.minutos} min`, semEvento: true })),
+  portaisExtensao: new Repositorio(b, regras({ tabela: 'portal_extensao', prefixo: 'px', artigo: 'o portal', ferramentas: { criar: 'extensao.portal.pedir', atualizar: 'extensao.portal.configurar' }, exclusao: 'proibida', rotulo: (r) => r.portal, validar: (r) => (!r.portal.trim() ? 'Informe o portal.' : !/\./.test(r.dominio) ? 'Domínio inválido.' : null) })),
+  conectoresCore: new Repositorio(b, regras({ tabela: 'conector_core', prefixo: 'cn', artigo: 'o conector', ferramentas: { criar: 'core.conectar', atualizar: 'core.conectar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Conector não se apaga: desconecte.', rotulo: (r) => r.core })),
+  equivalencias: new Repositorio(b, regras({ tabela: 'equivalencia_core', prefixo: 'eq', artigo: 'a equivalência', ferramentas: { criar: 'core.equivalencia', atualizar: 'core.equivalencia' }, exclusao: 'proibida', rotulo: (r) => `"${r.core_tipo_tarefa}"` })),
+  duracoesPadrao: new Repositorio(b, regras({ tabela: 'duracao_padrao', prefixo: 'dp', artigo: 'a duração padrão de', ferramentas: { criar: 'timesheet.calibrar', atualizar: 'timesheet.calibrar' }, exclusao: 'proibida', rotulo: (r) => r.atividade_id, validar: (r) => (r.adotada_min != null && r.adotada_min <= 0 ? 'A duração precisa ser maior que zero.' : null) })),
+  fechamentos: new Repositorio(b, regras({ tabela: 'fechamento_timesheet', prefixo: 'ft', artigo: 'o fechamento', ferramentas: { criar: 'timesheet.fechar_mes', atualizar: 'timesheet.fechar_mes' }, exclusao: 'proibida', rotulo: (r) => `${r.competencia} · ${r.cliente_id}`, linhaDoTempo: false })),
 }
 
 export type Repos = typeof repos
+
+registrarRepoSessoes(() => repos.sessoes) // S06
 
 /** Registra um evento avulso (algo que aconteceu sem mudar uma linha: "Começou: conferir PGDAS-D"). */
 export function registrar(texto: string, nome = 'atividade.registrar', op: { ctx?: OpcoesEscrita['ctx']; cliente_id?: Id | null; setor_id?: Id | null } = {}) {

@@ -1,6 +1,9 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import { Tooltip } from '@/components/ui/tooltip'
-import { fmtH, min, rotuloConfianca, type Confianca, type SessaoTs } from '@/dados/timesheet'
+import { fmtH, hm, minDoDia } from '@/dados/timesheet-tempo'
+import { confiancaDaLinha, rotuloConfianca, type ConfiancaVisual, type LinhaDia } from './dados'
+
+type Confianca = ConfiancaVisual
 import { cn } from '@/lib/utils'
 
 /**
@@ -54,28 +57,32 @@ export function Pergunta({ children, acao }: { children: ReactNode; acao?: React
 }
 
 /** Linha do dia: blocos por confiança sobre a régua de horas; o agente numa faixa à parte. */
-export function LinhaDoDia({ sessoes, agente, onAbrir }: { sessoes: SessaoTs[]; agente?: { hora: string; minutos: number; cor: string; texto: string }[]; onAbrir?: (s: SessaoTs) => void }) {
-  // A escala cobre as sessões e o trabalho dos integrantes: com filtro de cliente, o agente pode cair fora das sessões visíveis.
-  const inicios = [...sessoes.map((s) => min(s.inicio)), ...(agente ?? []).map((a) => min(a.hora))]
-  const fins = [...sessoes.map((s) => min(s.fim)), ...(agente ?? []).map((a) => min(a.hora) + a.minutos)]
+export function LinhaDoDia({ linhas, agente, onAbrir, rotulo }: { linhas: LinhaDia[]; agente?: { inicio: string; minutos: number; cor: string; texto: string }[]; onAbrir?: (l: LinhaDia) => void; rotulo: (l: LinhaDia) => string }) {
+  if (!linhas.length && !agente?.length) return <p className="text-muted-foreground py-4 text-center text-sm">Nada registrado neste dia.</p>
+  // A escala cobre as sessões e o trabalho dos integrantes.
+  const inicios = [...linhas.map((s) => minDoDia(s.inicio)), ...(agente ?? []).map((a) => minDoDia(a.inicio))]
+  const fins = [...linhas.map((s) => minDoDia(s.fim)), ...(agente ?? []).map((a) => minDoDia(a.inicio) + a.minutos)]
   const ini = Math.floor(Math.min(...inicios) / 60)
   const fim = Math.max(ini + 1, Math.ceil(Math.max(...fins) / 60))
   const total = (fim - ini) * 60
-  const pos = (h: string) => ((min(h) - ini * 60) / total) * 100
+  const pos = (m: number) => ((m - ini * 60) / total) * 100
   const horas = Array.from({ length: fim - ini + 1 }, (_, i) => ini + i)
+  const passo = horas.length > 14 ? 2 : 1
   return (
     <div className="flex flex-col gap-1.5">
       <div className="relative h-11">
-        {sessoes.map((s) => {
-          const e = estiloConfianca(s.confianca)
+        {linhas.map((l) => {
+          const c = confiancaDaLinha(l)
+          const e = estiloConfianca(c)
+          const fora = l.tipo === 'sessao' && l.s.fora_da_jornada
           return (
-            <Tooltip key={s.id} conteudo={`${s.inicio}–${s.fim} · ${s.atividade ? `${s.atividade} ${s.rotulo}` : s.rotulo}${s.cliente ? ` · ${s.cliente}` : ''} · ${rotuloConfianca[s.confianca]}`}>
+            <Tooltip key={l.id} conteudo={`${hm(l.inicio)}–${hm(l.fim)} · ${rotulo(l)} · ${rotuloConfianca[c]}`}>
               <button
                 type="button"
-                onClick={() => onAbrir?.(s)}
-                aria-label={`${s.inicio} a ${s.fim}, ${s.rotulo}, ${rotuloConfianca[s.confianca]}`}
-                className={cn('absolute inset-y-0 cursor-pointer rounded-[4px] transition-opacity hover:opacity-80', e.className, s.foraJornada && 'ring-warning ring-2 ring-inset')}
-                style={{ ...e.style, left: `calc(${pos(s.inicio)}% + 1px)`, width: `calc(${pos(s.fim) - pos(s.inicio)}% - 2px)` }}
+                onClick={() => onAbrir?.(l)}
+                aria-label={`${hm(l.inicio)} a ${hm(l.fim)}, ${rotulo(l)}, ${rotuloConfianca[c]}`}
+                className={cn('absolute inset-y-0 cursor-pointer rounded-[4px] transition-opacity hover:opacity-80', e.className, fora && 'ring-warning ring-2 ring-inset', l.tipo === 'sessao' && l.s.ao_vivo && 'animate-pulse')}
+                style={{ ...e.style, left: `calc(${pos(minDoDia(l.inicio))}% + 1px)`, width: `max(4px, calc(${pos(minDoDia(l.fim)) - pos(minDoDia(l.inicio))}% - 2px))` }}
               />
             </Tooltip>
           )
@@ -83,15 +90,15 @@ export function LinhaDoDia({ sessoes, agente, onAbrir }: { sessoes: SessaoTs[]; 
       </div>
       {agente && agente.length > 0 && (
         <div className="relative h-3 overflow-hidden" aria-label="Trabalho dos integrantes (série separada)">
-          {agente.map((a) => (
-            <Tooltip key={a.hora} conteudo={`agente · ${a.hora} · ${a.texto} · ${a.minutos} min de máquina`}>
-              <span className="absolute inset-y-0 rounded-full" style={{ left: `${pos(a.hora)}%`, width: `max(6px, ${(a.minutos / total) * 100}%)`, background: a.cor }} />
+          {agente.map((a, i) => (
+            <Tooltip key={`${a.inicio}-${i}`} conteudo={`agente · ${hm(a.inicio)} · ${a.texto} · ${a.minutos} min de máquina`}>
+              <span className="absolute inset-y-0 rounded-full" style={{ left: `${pos(minDoDia(a.inicio))}%`, width: `max(6px, ${(a.minutos / total) * 100}%)`, background: a.cor }} />
             </Tooltip>
           ))}
         </div>
       )}
       <div className="text-muted-foreground relative h-4 text-[11px] tabular-nums">
-        {horas.map((h) => (
+        {horas.filter((_, i) => i % passo === 0).map((h) => (
           <span key={h} className="absolute -translate-x-1/2" style={{ left: `${((h - ini) / (fim - ini)) * 100}%` }}>
             {String(h).padStart(2, '0')}
           </span>
@@ -105,7 +112,7 @@ type Pilha = { rotulo: string; partes: { c: Confianca; v: number }[] }
 
 /** Barras verticais empilhadas por confiança (ex.: horas por dia). */
 export function ColunasEmpilhadas({ dados, unidade = 'min', altura = 150, onClicar }: { dados: Pilha[]; unidade?: 'min' | 'h' | '%'; altura?: number; onClicar?: (rotulo: string) => void }) {
-  const max = Math.max(...dados.map((d) => d.partes.reduce((s, p) => s + p.v, 0)))
+  const max = Math.max(1, ...dados.map((d) => d.partes.reduce((s, p) => s + p.v, 0)))
   const fmt = (v: number) => (unidade === 'min' ? fmtH(v) : unidade === '%' ? `${Math.round(v)}%` : `${Math.round(v)} h`)
   return (
     <div className="flex items-end gap-3" style={{ height: altura + 36 }}>
@@ -131,16 +138,23 @@ export function ColunasEmpilhadas({ dados, unidade = 'min', altura = 150, onClic
 }
 
 /** Barras horizontais empilhadas por confiança, uma linha por pessoa. */
-export function LinhasEmpilhadas({ dados, unidade = 'h' }: { dados: Pilha[]; unidade?: 'h' }) {
-  const max = Math.max(...dados.map((d) => d.partes.reduce((s, p) => s + p.v, 0)))
+export function LinhasEmpilhadas({ dados, unidade = 'h', onClicar }: { dados: Pilha[]; unidade?: 'h'; onClicar?: (rotulo: string) => void }) {
+  if (!dados.length) return <p className="text-muted-foreground py-4 text-center text-sm">Ninguém com horas neste filtro.</p>
+  const max = Math.max(1, ...dados.map((d) => d.partes.reduce((s, p) => s + p.v, 0)))
   return (
     <ul className="flex flex-col gap-2.5">
       {dados.map((d) => {
         const tot = d.partes.reduce((s, p) => s + p.v, 0)
         return (
-          <li key={d.rotulo} className="grid grid-cols-[7.5rem_1fr_3.5rem] items-center gap-3 text-sm">
-            <span className="truncate">{d.rotulo}</span>
-            <Tooltip conteudo={d.partes.map((p) => `${rotuloConfianca[p.c]} ${p.v} ${unidade}`).join(' · ')}>
+          <li key={d.rotulo} className="grid grid-cols-[6rem_1fr_3rem] sm:grid-cols-[7.5rem_1fr_3.5rem] items-center gap-3 text-sm">
+            {onClicar ? (
+              <button type="button" className="cursor-pointer truncate text-left hover:underline" onClick={() => onClicar(d.rotulo)}>
+                {d.rotulo}
+              </button>
+            ) : (
+              <span className="truncate">{d.rotulo}</span>
+            )}
+            <Tooltip conteudo={d.partes.map((p) => `${rotuloConfianca[p.c]} ${Math.round(p.v * 10) / 10} ${unidade}`).join(' · ')}>
               <span className="flex h-4 gap-[2px]" style={{ width: `${(tot / max) * 100}%` }}>
                 {d.partes.map((p, i) => {
                   const e = estiloConfianca(p.c)
@@ -149,7 +163,7 @@ export function LinhasEmpilhadas({ dados, unidade = 'h' }: { dados: Pilha[]; uni
               </span>
             </Tooltip>
             <span className="text-right tabular-nums">
-              {tot} {unidade}
+              {Math.round(tot)} {unidade}
             </span>
           </li>
         )
@@ -159,18 +173,25 @@ export function LinhasEmpilhadas({ dados, unidade = 'h' }: { dados: Pilha[]; uni
 }
 
 /** Barras horizontais de uma série (os maiores + outros). */
-export function Barras({ dados, unidade = 'h', destacar }: { dados: { nome: string; h: number }[]; unidade?: string; destacar?: string }) {
-  const max = Math.max(...dados.map((d) => d.h))
+export function Barras({ dados, unidade = 'h', destacar, onClicar }: { dados: { nome: string; h: number }[]; unidade?: string; destacar?: string; onClicar?: (nome: string) => void }) {
+  if (!dados.length) return <p className="text-muted-foreground py-4 text-center text-sm">Nada neste período.</p>
+  const max = Math.max(0.1, ...dados.map((d) => d.h))
   return (
     <ul className="flex flex-col gap-2">
       {dados.map((d) => (
-        <li key={d.nome} className="grid grid-cols-[minmax(0,11rem)_1fr_3rem] items-center gap-3 text-sm">
-          <span className={cn('truncate', d.nome === 'outros' || d.nome === 'Interno' ? 'text-muted-foreground' : '', destacar === d.nome && 'font-medium')}>{d.nome}</span>
+        <li key={d.nome} className="grid grid-cols-[minmax(0,8rem)_1fr_3.5rem] sm:grid-cols-[minmax(0,11rem)_1fr_3.5rem] items-center gap-3 text-sm">
+          {onClicar ? (
+            <button type="button" onClick={() => onClicar(d.nome)} className={cn('cursor-pointer truncate text-left hover:underline', d.nome === 'outros' || d.nome === 'interno' ? 'text-muted-foreground' : '', destacar === d.nome && 'font-medium')}>
+              {d.nome}
+            </button>
+          ) : (
+            <span className={cn('truncate', d.nome === 'outros' || d.nome === 'interno' ? 'text-muted-foreground' : '', destacar === d.nome && 'font-medium')}>{d.nome}</span>
+          )}
           <Tooltip conteudo={`${d.nome}: ${d.h} ${unidade}`}>
-            <span className="h-3 rounded-r-[4px]" style={{ width: `${(d.h / max) * 100}%`, background: `color-mix(in oklab, var(--foreground) ${destacar === d.nome ? 78 : d.nome === 'outros' || d.nome === 'Interno' ? 25 : 55}%, transparent)` }} />
+            <span className="h-3 rounded-r-[4px]" style={{ width: `${(d.h / max) * 100}%`, background: `color-mix(in oklab, var(--foreground) ${destacar === d.nome ? 78 : d.nome === 'outros' || d.nome === 'interno' ? 25 : 55}%, transparent)` }} />
           </Tooltip>
           <span className="text-right tabular-nums">
-            {d.h} {unidade}
+            {String(d.h).replace('.', ',')} {unidade}
           </span>
         </li>
       ))}
@@ -180,13 +201,14 @@ export function Barras({ dados, unidade = 'h', destacar }: { dados: { nome: stri
 
 /** Barras divergentes de margem: prejuízo à esquerda, lucro à direita, ordenadas. */
 export function Divergente({ dados, selecionado, onSelecionar }: { dados: { nome: string; valor: number; pct: number; detalhe: string }[]; selecionado?: string; onSelecionar?: (n: string) => void }) {
-  const max = Math.max(...dados.map((d) => Math.abs(d.valor)))
+  if (!dados.length) return <p className="text-muted-foreground py-4 text-center text-sm">Nenhum cliente com contrato informado neste filtro.</p>
+  const max = Math.max(1, ...dados.map((d) => Math.abs(d.valor)))
   const brl = (v: number) => `${v < 0 ? '−' : '+'}R$ ${Math.abs(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
   return (
     <ul className="flex flex-col gap-1">
       {dados.map((d) => (
         <li key={d.nome}>
-          <button type="button" onClick={() => onSelecionar?.(d.nome)} className={cn('grid w-full cursor-pointer grid-cols-[minmax(0,13rem)_1fr_1fr_minmax(0,9rem)] items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm', selecionado === d.nome ? 'bg-raised shadow-cartao' : 'hover:bg-sunken/60')}>
+          <button type="button" onClick={() => onSelecionar?.(d.nome)} className={cn('grid w-full cursor-pointer grid-cols-[minmax(0,8rem)_1fr_1fr_minmax(0,7.5rem)] sm:grid-cols-[minmax(0,13rem)_1fr_1fr_minmax(0,9rem)] items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm', selecionado === d.nome ? 'bg-raised shadow-cartao' : 'hover:bg-sunken/60')}>
             <span className={cn('truncate', selecionado === d.nome && 'font-medium')}>{d.nome}</span>
             <span className="flex h-4 justify-end border-r" style={{ borderColor: 'color-mix(in oklab, var(--foreground) 35%, transparent)' }}>
               {d.valor < 0 && <span className="bg-destructive/75 h-full rounded-l-[4px]" style={{ width: `${(Math.abs(d.valor) / max) * 100}%` }} />}
@@ -255,10 +277,10 @@ export function Capacidade({ dados }: { dados: { nome: string; usadas: number; d
   return (
     <ul className="flex flex-col gap-3">
       {dados.map((d) => {
-        const pct = Math.round((d.usadas / d.disponivel) * 100)
+        const pct = d.disponivel ? Math.round((d.usadas / d.disponivel) * 100) : 0
         const acima = pct > 100
         return (
-          <li key={d.nome} className="grid grid-cols-[7.5rem_1fr_6.5rem] items-center gap-3 text-sm">
+          <li key={d.nome} className="grid grid-cols-[6rem_1fr_6.5rem] sm:grid-cols-[7.5rem_1fr_6.5rem] items-center gap-3 text-sm">
             <span className="truncate">{d.nome}</span>
             <span className="bg-sunken relative h-3 rounded-full">
               <span className="bg-success/20 absolute inset-y-0 rounded-sm" style={{ left: '85%', width: '15%' }} title="faixa de 85 a 100%" />
