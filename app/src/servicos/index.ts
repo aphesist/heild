@@ -6,6 +6,8 @@ import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
 import { erpDemonstracao, type ServicoErp } from './erp'
 import type { InfoServico } from './tipos'
+import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores } from './conectores'
+import { cadastrosDemonstracao, type ServicoCadastros } from './cadastros'
 
 export * from './tipos'
 export { definirEscalaLatencia, definirInstabilidade } from './simular'
@@ -16,6 +18,8 @@ export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
 export type * from './erp'
+export type * from './conectores'
+export type * from './cadastros'
 
 /**
  * Os serviços externos do sistema. Hoje todos são de demonstração. Para ligar
@@ -43,6 +47,12 @@ export interface Servicos {
   djen: ServicoDjen
   /** S08: ERPs financeiros dos clientes do BPO (API-25). */
   erp: ServicoErp
+  // S09: conectores, cofre e leitura da árvore do Drive (Raio-X).
+  conectores: ServicoConectores
+  cofre: ServicoCofre
+  arvore: ServicoArvore
+  /** S02: consulta CNPJ, procurações e Domicílio Judicial. */
+  cadastros: ServicoCadastros
 }
 
 export const servicos: Servicos = {
@@ -62,6 +72,10 @@ export const servicos: Servicos = {
   armazenamento: armazenamentoDemonstracao,
   djen: djenDemonstracao,
   erp: erpDemonstracao,
+  conectores: conectoresDemonstracao,
+  cofre: cofreDemonstracao,
+  arvore: arvoreDemonstracao,
+  cadastros: cadastrosDemonstracao,
 }
 
 const reais = new Set<keyof Servicos>()
@@ -90,7 +104,11 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'assinatura', api: 'API-22', nome: 'Assinatura eletrônica', descricao: 'Contratos, procurações e termos com validade.', modo: 'demonstracao', requisito: 'Provedor de assinatura (pago por envelope)' },
   { id: 'armazenamento', api: 'API-24', nome: 'Armazenamento em nuvem', descricao: 'Drive, OneDrive, Dropbox ou o da Heild.', modo: 'demonstracao', requisito: 'Conector OAuth da nuvem do escritório' },
   { id: 'erp', api: 'API-25', nome: 'ERPs dos clientes (BPO)', descricao: 'Espelho do ERP que o cliente já usa: contas, lançamentos e baixas.', modo: 'demonstracao', requisito: 'Conta Azul, Omie e Bling por API com a credencial do cliente; Nibo e Granatum por arquivo' },
+  { id: 'cadastros', api: 'API-12, API-06', nome: 'Cadastros (CNPJ, procurações, Domicílio Judicial)', descricao: 'Cadastra o cliente pelo CNPJ, confere procurações e lista comunicações sem dar ciência.', modo: 'demonstracao', requisito: 'Contrato SERPRO (ou dados abertos) e certificado do escritório' },
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
+  { id: 'conectores', api: 'API-06 a API-25', nome: 'Conectores (teste e conexão)', descricao: 'Conectar, testar e reprocessar cada integração.', modo: 'demonstracao', requisito: 'Backend dos conectores (08)' },
+  { id: 'cofre', api: 'API-29', nome: 'Cofre de credenciais', descricao: 'Certificados, procurações e tokens guardados fora do banco.', modo: 'demonstracao', requisito: 'Cofre e KMS no backend' },
+  { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore do Drive', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo.', modo: 'demonstracao', requisito: 'Conector OAuth do Drive em leitura' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 
 /** Os serviços (para componentes; o mesmo objeto de `servicos`). */

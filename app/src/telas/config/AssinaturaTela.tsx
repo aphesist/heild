@@ -11,6 +11,7 @@ import { useSessao } from '@/ambiente/sessao'
 import { assinatura as inicial, modulosAssinatura, planos } from '@/dados/configuracoes'
 import { cn } from '@/lib/utils'
 import { CabecalhoConfig } from './EscritorioTela'
+import { Complementos, Pacotes, PlanosIa } from './assinatura-s09'
 
 /**
  * Configurações › Assinatura (Fundações 2.2; 06, saída do escritório): plano e
@@ -45,12 +46,13 @@ export function AssinaturaTela() {
             <ul className="divide-border/70 flex flex-col divide-y">
               {modulos.map((m) => (
                 <li key={m.id} className="flex items-center gap-3 py-2.5">
-                  <span className={cn('flex size-6 shrink-0 items-center justify-center rounded-full', m.contratado ? 'bg-success/15' : 'bg-sunken')}>{m.contratado && <CheckIcon weight="bold" className="text-success size-3.5" />}</span>
+                  <span className={cn('flex size-6 shrink-0 items-center justify-center rounded-full', m.contratado || m.id === 'app_cliente' ? 'bg-success/15' : 'bg-sunken')}>{(m.contratado || m.id === 'app_cliente') && <CheckIcon weight="bold" className="text-success size-3.5" />}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm">{m.nome}</span>
                     <span className="text-muted-foreground block text-xs">{m.descricao}</span>
                   </span>
-                  {!m.contratado && (
+                  {m.id === 'app_cliente' && <Badge variant="sucesso">incluído</Badge>}
+                  {!m.contratado && m.id !== 'app_cliente' && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -111,6 +113,12 @@ export function AssinaturaTela() {
             </Caixa>
           </div>
         </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Complementos />
+          <Pacotes />
+        </div>
+        <PlanosIa />
 
         <Caixa>
           <TituloBloco>Faturas</TituloBloco>

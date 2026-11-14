@@ -1,18 +1,19 @@
 import { HourglassMediumIcon, PauseCircleIcon } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
 import { useLoja, usePersistente } from '@/ambiente/loja'
+import { useSessao } from '@/ambiente/sessao'
 import { ProgressoTrabalho } from '@/components/compostos/progresso-trabalho'
-import { fluxos, respostasProntas } from '@/dados/simulacao'
 import { CabecalhoIntegrante, FilaIntegrante } from '@/components/compostos/cabecalho-integrante'
 import { CampoChat } from '@/components/compostos/campo-chat'
 import { ListaIntegrantes, ordenarIntegrantes } from '@/components/compostos/lista-integrantes'
 import { NovoIntegrante } from '@/components/compostos/novo-integrante'
 import { Button } from '@/components/ui/button'
 import { EspelhoOrbs, Orb } from '@/components/ui/orb'
-import type { Anexo, Integrante, Mensagem } from '@/dados/tipos'
+import type { Integrante, Mensagem } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import { ListaMensagens } from './ListaMensagens'
-import { agora, respostaDeExemplo } from './useConversa'
+import { useEnviarAoIntegrante } from './inicio/chat-integrante'
+import { GavetaConfigurar, GavetaHistorico, GavetaJobs, GavetaMemoria } from './inicio/gavetas-integrante'
 
 interface Props {
   nomeUsuario: string
@@ -39,6 +40,7 @@ export function TimeTela({ nomeUsuario, contexto, integrantes: iniciais, selecio
   const [pausados, setPausados] = usePersistente<string[]>('time.pausados', [])
   const integrantes = [...iniciais, ...novos].map((i) => (pausados.includes(i.id) ? { ...i, situacao: 'pausado' as const } : i))
   const [criando, setCriando] = useState(false)
+  const { contas } = useSessao()
   const atual = integrantes.find((i) => i.id === selecionado) ?? ordenarIntegrantes(integrantes).fixos[0] ?? integrantes[0]
   const limiteAtingido = !!limite && limite.usado >= 100
 
@@ -72,6 +74,8 @@ export function TimeTela({ nomeUsuario, contexto, integrantes: iniciais, selecio
           />
         </div>
         <NovoIntegrante
+          criados={novos.length + iniciais.filter((i) => i.tipo === 'criado_pelo_usuario').length}
+          pessoas={contas.map((c) => c.nome)}
           aberto={criando}
           onFechar={() => setCriando(false)}
           onAtivar={(novo) => {
@@ -112,22 +116,9 @@ function ChatIntegrante({
   // A conversa mora na loja: sair e voltar da aba mantém o que foi dito, e o trabalho simulado escreve aqui.
   const loja = useLoja()
   const mensagens = inicial
-  const [pensando, setPensando] = useState(false)
+  const { enviar, pensando } = useEnviarAoIntegrante(integrante, nomeUsuario)
   const trabalhos = loja.estado.trabalhos.filter((x) => x.situacao === 'rodando' && x.integrante === integrante.id)
-  const enviar = (texto: string, anexos: Anexo[]) => {
-    loja.mensagemTimeComId(integrante.id, { id: crypto.randomUUID(), autor: { tipo: 'usuario', nome: nomeUsuario }, hora: agora(), texto, anexos })
-    // Pedido que é trabalho (as sugestões do integrante): ele começa a fazer, com etapas e aviso ao terminar.
-    const fluxo = Object.values(fluxos).find((f) => f.integrante === integrante.id && f.gatilho?.test(texto))
-    if (fluxo && !anexos.length) return loja.iniciarTrabalho(fluxo)
-    const id = crypto.randomUUID()
-    loja.mensagemTimeComId(integrante.id, { id, autor: { tipo: 'integrante', setor: integrante.setor, nome: integrante.nome, cor: integrante.cor }, hora: agora(), pendente: true })
-    setPensando(true)
-    const pronta = respostasProntas.find((r) => r.re.test(texto))
-    window.setTimeout(() => {
-      setPensando(false)
-      loja.ajustarMensagemTime(integrante.id, id, { pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: !anexos.length && pronta ? pronta.texto : respostaDeExemplo(anexos), demonstracao: true })
-    }, 2200)
-  }
+  const [gaveta, setGaveta] = useState<'memoria' | 'configurar' | 'jobs' | 'historico' | null>(null)
   const pausado = integrante.situacao === 'pausado'
 
   return (
@@ -135,7 +126,21 @@ function ChatIntegrante({
       {/* Em tela estreita a coluna some; os integrantes viram uma faixa de orbs. */}
       {faixa}
       <div className="px-4 pt-4 pb-2 sm:px-6 sm:pt-5 sm:pb-3 baixa:pt-3 baixa:pb-1">
-        <CabecalhoIntegrante className="mx-auto max-w-3xl ultra:max-w-4xl" integrante={pensando ? { ...integrante, estado: 'pensando' } : integrante} contexto={contexto} limite={limite} onPausar={onPausar} />
+        <CabecalhoIntegrante
+          className="mx-auto max-w-3xl ultra:max-w-4xl"
+          integrante={pensando ? { ...integrante, estado: 'pensando' } : integrante}
+          contexto={contexto}
+          limite={limite}
+          onPausar={onPausar}
+          onVerMemoria={() => setGaveta('memoria')}
+          onConfigurar={() => setGaveta('configurar')}
+          onJobs={() => setGaveta('jobs')}
+          onHistorico={() => setGaveta('historico')}
+        />
+        <GavetaMemoria integrante={integrante} aberta={gaveta === 'memoria'} onFechar={() => setGaveta(null)} />
+        {gaveta === 'configurar' && <GavetaConfigurar integrante={integrante} aberta onFechar={() => setGaveta(null)} />}
+        <GavetaJobs integrante={integrante} aberta={gaveta === 'jobs'} onFechar={() => setGaveta(null)} />
+        <GavetaHistorico integrante={integrante} aberta={gaveta === 'historico'} onFechar={() => setGaveta(null)} />
       </div>
 
       {(pausado || limiteAtingido) && (
