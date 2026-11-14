@@ -12,6 +12,7 @@ import type { ContatoCliente } from './clientes'
 import { GavetaTrilha } from '@/telas/painel/trilha'
 import { FichaTarefa } from '@/telas/tarefas/FichaTarefa'
 import { NovaTarefa } from '@/telas/tarefas/NovaTarefa'
+import { GavetaTarefas } from '@/telas/tarefas/GavetaTarefas'
 import { NavegacaoProvider, useContas, useLoja, useNavegacao, type Destino } from './loja'
 import { rotuloSetorCurto, useSessao } from './sessao'
 
@@ -59,6 +60,8 @@ interface Fluxos {
   fichaCliente: (clienteId: string) => void
   /** Trilha de implantação ou de saída do cliente por cima (S04, C6). */
   abrirTrilha: (clienteId: string) => void
+  /** Todas as tarefas (S04-T03, "ver todas"), com lista, por responsável, calendário e revisão. */
+  verTarefas: (p?: { setor?: SetorIntegrante; cliente?: string }) => void
   /** Ação feita direto, sem gaveta: registra, avisa e devolve o link. */
   feito: (texto: string, destino?: Destino, rotulo?: string) => void
 }
@@ -70,6 +73,7 @@ type Aberto =
   | ({ tipo: 'nova' } & PedidoNovaTarefa)
   | { tipo: 'tarefa'; id: string }
   | { tipo: 'trilha'; clienteId: string }
+  | { tipo: 'lista'; setor?: SetorIntegrante; cliente?: string }
   | { tipo: 'cobrar'; p: PedidoCobrar }
   | { tipo: 'preparar'; p: PedidoPreparar }
   | { tipo: 'transmitir'; p: PedidoTransmitir }
@@ -118,6 +122,7 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
       novaTarefa: (p) => setAberto({ tipo: 'nova', ...p }),
       fichaCliente: (clienteId) => setAberto({ tipo: 'ficha', clienteId }),
       abrirTrilha: (clienteId) => setAberto({ tipo: 'trilha', clienteId }),
+      verTarefas: (p) => setAberto({ tipo: 'lista', ...p }),
       feito: (texto, destino, rotulo) => loja.toast(texto, destino, rotulo),
     }),
     [loja],
@@ -161,6 +166,7 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
             onAbrirTarefa={(id) => setAberto({ tipo: 'tarefa', id })}
           />
         )}
+        {aberto?.tipo === 'lista' && <GavetaTarefas setor={aberto.setor} cliente={aberto.cliente} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'trilha' && <GavetaTrilha clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'ficha' && <GavetaFichaCliente clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'nova' && <NovaTarefa p={aberto} onFechar={() => setAberto(null)} onCriada={(id) => setAberto({ tipo: 'tarefa', id })} />}
@@ -177,7 +183,7 @@ export function useFluxos(): Fluxos {
   const f = useContext(Ctx)
   if (f) return f
   const nada = () => {}
-  return { abrirTarefa: nada, cobrar: nada, enviar: nada, preparar: nada, transmitir: nada, baixar: nada, novaTarefa: nada, fichaCliente: nada, abrirTrilha: nada, feito: nada }
+  return { abrirTarefa: nada, cobrar: nada, enviar: nada, preparar: nada, transmitir: nada, baixar: nada, novaTarefa: nada, fichaCliente: nada, abrirTrilha: nada, verTarefas: nada, feito: nada }
 }
 
 /** Acha (ou abre) a conversa do cliente naquele setor e devolve o id. */
