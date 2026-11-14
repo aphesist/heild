@@ -6,10 +6,13 @@ import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
-import { escritorio as inicial, setoresCfg, subinquilinos as subIniciais, usuariosCfg, type SetorCfg } from '@/dados/configuracoes'
+import { subinquilinos as subIniciais, type SetorCfg } from '@/dados/configuracoes'
+import { useEscritorioCfg, useSetoresCfg, type EscritorioCfg } from '@/ambiente/configuracoes'
+import { useContas } from '@/ambiente/loja'
 import { cn } from '@/lib/utils'
 
-const pessoas = usuariosCfg.filter((u) => u.situacao === 'ativo').map((u) => u.nome)
+/** Pessoas ativas do escritório (do banco), para escolher responsáveis. */
+const usePessoas = () => useContas().filter((u) => u.situacao === 'ativo').map((u) => u.nome)
 
 /** Cabeçalho comum das abas de Configurações. */
 export function CabecalhoConfig({ titulo, sub, acao }: { titulo: string; sub: string; acao?: React.ReactNode }) {
@@ -30,8 +33,8 @@ export function CabecalhoConfig({ titulo, sub, acao }: { titulo: string; sub: st
  * padrão), regras de acesso, notificações padrão e subinquilinos (BPO).
  */
 export function EscritorioTela() {
-  const [e, setE] = usePersistente('cfg.esc.e', inicial)
-  const [setores, setSetores] = usePersistente('cfg.esc.setores', setoresCfg)
+  const [e, setE] = useEscritorioCfg()
+  const [setores, setSetores] = useSetoresCfg()
   const [subs, setSubs] = usePersistente('cfg.esc.subs', subIniciais)
   const [modal, setModal] = useState<'dados' | 'regras' | 'notificacoes' | 'sub' | 'carteira' | null>(null)
   const [setorEd, setSetorEd] = useState<SetorCfg | null>(null)
@@ -250,7 +253,7 @@ function EditarBotao({ onClick }: { onClick: () => void }) {
   )
 }
 
-type Esc = typeof inicial
+type Esc = EscritorioCfg
 
 function EditarDados({ e, onFechar, onSalvar }: { e: Esc; onFechar: () => void; onSalvar: (e: Esc) => void }) {
   const [d, setD] = useState(e)
@@ -340,6 +343,7 @@ function EditarNotificacoes({ e, onFechar, onSalvar }: { e: Esc; onFechar: () =>
 
 function EditarSetor({ s, onFechar, onSalvar }: { s: SetorCfg; onFechar: () => void; onSalvar: (s: SetorCfg) => void }) {
   const [d, setD] = useState(s)
+  const pessoas = usePessoas()
   return (
     <GavetaFormulario
       aberta

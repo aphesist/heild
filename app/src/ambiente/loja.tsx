@@ -1,27 +1,61 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
-import { conversasCrm, type ConversaCrm, type ItemConversa, type StatusConversa } from '@/dados/crm'
-import { documentosBase, type Documento } from '@/dados/arquivos'
+import type { ConversaCrm, ItemConversa, StatusConversa } from '@/dados/crm'
+import { visivelAoCliente, type Documento } from '@/dados/arquivos'
 import { emissorDe, type NotaEmitida } from '@/dados/servicos-extras'
 import * as exemplo from '@/dados/exemplo'
-import type { Cartao, Mensagem, Tarefa } from '@/dados/tipos'
+import type { Cartao, Cliente as ClienteTela, Mensagem, Tarefa } from '@/dados/tipos'
+import type { UsuarioCfg } from '@/dados/configuracoes'
 import { fichas, type FichaCliente } from './clientes'
 import { type ContaBpo, lotesBpo } from '@/dados/bpo'
 import { duracaoEscrita } from '@/lib/escrita'
-import { fluxos as catalogoFluxos, nomeDoSetor, rotinas, type FluxoSimulado, type PedidoAssistente } from '@/dados/simulacao'
+import { fluxos as catalogoFluxos, nomeDoSetor, type FluxoSimulado, type PedidoAssistente } from '@/dados/simulacao'
 import type { SetorIntegrante } from '@/theme/tipos'
+import { banco } from '@/nucleo/banco'
+import type { Escritorio, Id, Notificacao } from '@/nucleo/modelo/entidades'
+import {
+  avisoParaModelo,
+  avisoParaTela,
+  clienteParaTela,
+  contaParaModelo,
+  contaParaTela,
+  conversaParaModelo,
+  conversaParaTela,
+  documentoParaModelo,
+  documentoParaTela,
+  horaCurta,
+  itemParaMensagem,
+  mensagemModeloParaTela,
+  mensagemTelaParaModelo,
+  notaParaModelo,
+  notaParaTela,
+  tarefaParaModelo,
+  tarefaParaTela,
+  trabalhoParaModelo,
+  trabalhoParaTela,
+  type Consulta,
+} from '@/nucleo/mapeadores'
+import { contextoSistema, ErroPermissao, ErroRegra, type Contexto } from '@/nucleo/permissoes'
+import { agora, comoAtor, contextoAtual, linhaNova, registrarEvento, repos } from '@/nucleo/repositorios'
+import { BancoOpcional, useBanco, useTabela } from '@/nucleo/react'
 
 /**
  * Loja do escritório de demonstração: o que as ações mudam e que outros
  * módulos precisam enxergar (a mensagem enviada aparece na conversa do CRM,
  * o documento preparado aparece no chat do integrante, a tarefa concluída sai
  * da fila do Painel, o aviso chega no sino de quem deve receber).
+ *
+ * Desde a S00 a loja é uma fachada sobre o banco (src/nucleo): os dados ficam
+ * nas entidades das Fundações e persistem no navegador (ou no Supabase). A
+ * API para as telas não mudou. Tela nova deve ler e escrever pelos
+ * repositórios (`repos.tarefas`, `useTabela('tarefa')`); ver
+ * docs/wireframe/ARQUITETURA.md.
  */
 
 export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config'
 /** Cenário da demonstração (10, 2): contabilidade com o BPO como módulo, ou escritório só de BPO. */
 export type Cenario = 'contabil_bpo' | 'bpo_puro'
 
-/** Para onde um link leva: módulo, aba e o item exato. */
+/** Para onde um link leva: módulo, aba e o item exato. Também é a rota (src/nucleo/rotas.ts). */
 export interface Destino {
   modulo: IdModulo
   aba?: string
@@ -50,6 +84,10 @@ export interface Toast {
   quem?: QuemToast
   /** Hora em que chegou (a notificação mostra "agora" e depois a hora). */
   em?: number
+  /** Botão de ação no toast (ex.: Desfazer). */
+  acao?: { rotulo: string; executar: () => void }
+  /** Erro (permissão negada, regra de negócio). */
+  erro?: boolean
 }
 
 export interface AvisoSistema {
@@ -76,29 +114,14 @@ interface Estado {
   toasts: Toast[]
   avisos: AvisoSistema[]
   eventos: Evento[]
-  crmExtras: Record<string, ItemConversa[]>
-  crmStatus: Record<string, StatusConversa>
-  crmNovas: ConversaCrm[]
-  /** Conversa inteira regravada pela tela do CRM (assumir, responder, status). */
-  crmOverride: Record<string, ConversaCrm>
-  tarefasPatch: Record<string, Partial<Tarefa>>
-  tarefasNovas: Tarefa[]
-  timeExtras: Record<string, Mensagem[]>
-  /** Decisões tomadas nos cartões de aprovação (sobrevivem à troca de tela). */
+  /** Decisões tomadas nos cartões de aprovação (sobrevivem à troca de tela e ao recarregar). */
   decisoes: Record<string, string>
-  /** NFS-e emitidas pelo app do cliente (serviço NFE-201), por cliente. */
-  notasEmitidas: NotaEmitida[]
-  /** Documentos novos (app, conversas, integrantes, equipe) e ajustes nos existentes (Fundações 4.11). */
-  documentosNovos: Documento[]
-  documentosPatch: Record<string, Partial<Documento>>
-  /** Fichas de cliente editadas (contatos por assunto, responsáveis). */
-  fichasEditadas: Record<string, FichaCliente>
   /** Módulo BPO ligado na assinatura (Configurações › Assinatura). */
   bpoModulo: boolean
   cenario: Cenario
   /** Timesheet › Configurar: custo-hora por pacote (extra opcional, desligado por padrão). */
   custoPorPacote: boolean
-  /** Estado das telas que precisa sobreviver à troca de aba (ver usePersistente). */
+  /** Estado das telas que precisa sobreviver à troca de aba e ao recarregar (ver usePersistente). */
   memoria: Record<string, unknown>
   /** Trabalho simulado dos integrantes (ver src/dados/simulacao.ts). */
   trabalhos: Trabalho[]
@@ -191,139 +214,236 @@ type Acao =
   | { t: 'alcadaAceita'; clienteId: string; alcadas: { faixa1: number; faixa2: number; janela: string; aceitoPor: string; alteradaPor: string } }
   | { t: 'bpoLote'; id: string; decisao: DecisaoLote }
   | { t: 'bpoConta'; id: string; patch: Partial<ContaBpo> }
-  | { t: 'reiniciar' }
 
 const hora = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 const novoId = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`
+const ctxIntegrante = (id: string, setor: SetorIntegrante): Contexto => ({ ator: { tipo: 'integrante', id, nome: nomeDoSetor(setor) }, origem: 'job' })
 
-function inicial(avisos: AvisoSistema[], semRotinas?: boolean): Estado {
-  return {
-    toasts: [],
-    avisos,
-    eventos: [],
-    crmExtras: {},
-    crmStatus: {},
-    crmNovas: [],
-    crmOverride: {},
-    tarefasPatch: {},
-    tarefasNovas: [],
-    timeExtras: {},
-    decisoes: {},
-    fichasEditadas: {},
-    notasEmitidas: [],
-    documentosNovos: [],
-    documentosPatch: {},
-    bpoModulo: true,
-    cenario: 'contabil_bpo',
-    custoPorPacote: false,
-    memoria: {},
-    // O time já está trabalhando quando a demonstração abre (rotinas que andam e terminam).
-    trabalhos: semRotinas ? [] : rotinas.map(({ feitoSeg, ...r }) => ({ ...r, uid: `rot-${r.id}`, inicioEm: Date.now() - feitoSeg * 1000, situacao: 'rodando' as const, silencioso: true })),
-    digitando: {},
-    assistente: {},
-    bpoAlcadaProposta: {},
-    bpoAlcadas: {},
-    bpoLotes: {},
-    bpoContas: {},
-  }
+/* ---------- O que só vive na tela (não persiste) ---------- */
+
+interface Volatil {
+  toasts: Toast[]
+  digitando: Record<string, string>
 }
 
-function reduzir(s: Estado, a: Acao): Estado {
+function reduzirVolatil(s: Volatil, a: Acao): Volatil {
   switch (a.t) {
     case 'toast':
       return { ...s, toasts: [...s.toasts.slice(-2), a.toast] }
     case 'fecharToast':
       return { ...s, toasts: s.toasts.filter((x) => x.id !== a.id) }
-    case 'avisar':
-      return { ...s, avisos: [a.aviso, ...s.avisos] }
-    case 'ler':
-      return { ...s, avisos: s.avisos.map((x) => (x.id === a.id && !x.lidoPor.includes(a.usuario) ? { ...x, lidoPor: [...x.lidoPor, a.usuario] } : x)) }
-    case 'lerTodos':
-      return { ...s, avisos: s.avisos.map((x) => (x.lidoPor.includes(a.usuario) ? x : { ...x, lidoPor: [...x.lidoPor, a.usuario] })) }
-    case 'evento':
-      return { ...s, eventos: [a.evento, ...s.eventos] }
-    case 'crmItem':
-      return { ...s, crmExtras: { ...s.crmExtras, [a.conversa]: [...(s.crmExtras[a.conversa] ?? []), a.item] } }
-    case 'crmStatus':
-      return { ...s, crmStatus: { ...s.crmStatus, [a.conversa]: a.status } }
-    case 'crmSalvar': {
-      const { [a.conversa.id]: _fora, ...extras } = s.crmExtras
-      void _fora
-      return { ...s, crmOverride: { ...s.crmOverride, [a.conversa.id]: a.conversa }, crmExtras: extras, crmStatus: { ...s.crmStatus, [a.conversa.id]: a.conversa.status } }
-    }
-    case 'crmNova':
-      return { ...s, crmNovas: [a.conversa, ...s.crmNovas] }
-    case 'tarefa':
-      return { ...s, tarefasPatch: { ...s.tarefasPatch, [a.id]: { ...s.tarefasPatch[a.id], ...a.patch } } }
-    case 'tarefaNova':
-      return { ...s, tarefasNovas: [a.tarefa, ...s.tarefasNovas] }
-    case 'timeMsg':
-      return { ...s, timeExtras: { ...s.timeExtras, [a.integrante]: [...(s.timeExtras[a.integrante] ?? []), a.msg] } }
-    case 'ficha':
-      return { ...s, fichasEditadas: { ...s.fichasEditadas, [a.ficha.id]: a.ficha } }
-    case 'decidir':
-      return { ...s, decisoes: { ...s.decisoes, [a.cartao]: a.decisao } }
-    case 'nota':
-      return { ...s, notasEmitidas: [a.nota, ...s.notasEmitidas] }
-    case 'cancelarNota':
-      return {
-        ...s,
-        notasEmitidas: s.notasEmitidas.some((n) => n.clienteId === a.clienteId && n.numero === a.numero)
-          ? s.notasEmitidas.map((n) => (n.clienteId === a.clienteId && n.numero === a.numero ? { ...n, situacao: 'cancelada' } : n))
-          : [{ ...(emissorDe(a.clienteId).notas.find((n) => n.numero === a.numero) as NotaEmitida), clienteId: a.clienteId, situacao: 'cancelada' }, ...s.notasEmitidas],
-      }
-    case 'documento':
-      return { ...s, documentosNovos: [a.documento, ...s.documentosNovos] }
-    case 'documentoPatch':
-      return { ...s, documentosPatch: { ...s.documentosPatch, [a.id]: { ...s.documentosPatch[a.id], ...a.patch } } }
-    case 'bpoModulo':
-      return { ...s, bpoModulo: a.ligado }
-    case 'cenario':
-      return { ...s, cenario: a.cenario }
-    case 'custoPorPacote':
-      return { ...s, custoPorPacote: a.ligado }
-    case 'trabalho':
-      return { ...s, trabalhos: [...s.trabalhos, a.trabalho] }
-    case 'crmItemPatch':
-      return { ...s, crmExtras: { ...s.crmExtras, [a.conversa]: (s.crmExtras[a.conversa] ?? []).map((i) => (i.tipo !== 'dia' && 'id' in i && i.id === a.id ? ({ ...i, ...a.patch } as ItemConversa) : i)) } }
     case 'digitando': {
       const d = { ...s.digitando }
       if (a.quem) d[a.conversa] = a.quem
       else delete d[a.conversa]
       return { ...s, digitando: d }
     }
-    case 'trabalhoFim':
-      return { ...s, trabalhos: s.trabalhos.map((t) => (t.uid === a.uid ? { ...t, situacao: 'concluido', fimEm: Date.now() } : t)) }
-    case 'assistMsg':
-      return { ...s, assistente: { ...s.assistente, [a.conversa]: [...(s.assistente[a.conversa] ?? []), a.msg] } }
-    case 'assistMsgPatch':
-      return { ...s, assistente: { ...s.assistente, [a.conversa]: (s.assistente[a.conversa] ?? []).map((m) => (m.id === a.id ? { ...m, ...a.patch } : m)) } }
+    default:
+      return s
+  }
+}
+
+/* ---------- O que persiste: cada ação vira escrita no banco ---------- */
+
+const CHAVES_BPO = { alcadaProposta: 'bpo.alcadaProposta', alcadas: 'bpo.alcadas', lotes: 'bpo.lotes', contas: 'bpo.contas' } as const
+const valorTela = <T,>(chave: string, padrao: T): T => (banco.obter('registro_tela', chave)?.valor as T | undefined) ?? padrao
+const consulta = (): Consulta => ({ clientes: banco.ler('cliente'), usuarios: banco.ler('usuario'), integrantes: banco.ler('integrante') })
+const menorOrdem = (t: 'tarefa' | 'conversa' | 'documento') => banco.ler(t).reduce((m, r) => Math.min(m, r.ordem ?? 0), 0) - 1
+const maiorOrdem = (t: 'notificacao' | 'mensagem' | 'mensagem_integrante') => banco.ler(t).reduce((m, r) => Math.max(m, r.ordem ?? 0), 0) + 1
+const statusDaDecisao = (d: string) => (d === 'recusar' ? 'recusado' : d === 'editar_e_aprovar' ? 'editado_e_aprovado' : 'aprovado')
+
+function atualizarEscritorio(patch: (e: Escritorio) => Partial<Escritorio>) {
+  const e = banco.ler('escritorio')[0]
+  if (e) repos.escritorios.atualizar(e.id, patch(e), { ctx: contextoAtual().ator.tipo === 'pessoa' ? undefined : contextoSistema })
+}
+
+function ajustarMensagemIntegrante(sessao: string, id: string, patch: Partial<Mensagem>) {
+  const r = banco.obter('mensagem_integrante', id)
+  if (!r || r.sessao_chave !== sessao) return
+  const msg = { ...mensagemModeloParaTela(r), ...patch }
+  banco.transacao((tx) => tx.gravar('mensagem_integrante', { ...r, corpo: msg.texto, extras: { ...r.extras, mensagem: msg }, atualizado_em: agora() }))
+}
+
+function gravarMensagemIntegrante(sessao: string, msg: Mensagem) {
+  banco.transacao((tx) => tx.gravar('mensagem_integrante', linhaNova('mensagem_integrante', mensagemTelaParaModelo(sessao, msg, maiorOrdem('mensagem_integrante')))))
+}
+
+function aplicar(a: Acao): void {
+  switch (a.t) {
+    case 'avisar':
+      repos.notificacoes.criar(avisoParaModelo(a.aviso, maiorOrdem('notificacao')), { ctx: contextoSistema })
+      return
+    case 'ler':
+      return repos.notificacoes.ler(a.id, a.usuario)
+    case 'lerTodos':
+      return repos.notificacoes.lerTodas(
+        a.usuario,
+        banco
+          .ler('notificacao')
+          .filter((n) => n.destinatario_ids.length === 0 || n.destinatario_ids.includes(a.usuario))
+          .map((n) => n.id),
+      )
+    case 'evento':
+      banco.transacao((tx) => registrarEvento(tx, contextoAtual(), { nome: 'atividade.registrar', ferramenta: 'evento.listar', texto: a.evento.texto, ator_nome: a.evento.ator }))
+      return
+    case 'crmItem': {
+      const conversa = banco.obter('conversa', a.conversa)
+      const m = linhaNova('mensagem', itemParaMensagem(a.conversa, a.item, maiorOrdem('mensagem')))
+      banco.transacao((tx) => {
+        tx.gravar('mensagem', m)
+        if (conversa) {
+          const tela = (conversa.extras?.tela ?? {}) as Partial<ConversaCrm>
+          const previa = a.item.tipo === 'mensagem' && a.item.texto ? `${a.item.autor ?? ''}${a.item.autor ? ': ' : ''}${a.item.texto}` : tela.previa
+          tx.gravar('conversa', { ...conversa, ultima_mensagem_em: agora(), atualizado_em: agora(), extras: { ...conversa.extras, tela: { ...tela, previa } } })
+        }
+        if (a.item.tipo === 'mensagem' || a.item.tipo === 'nota')
+          registrarEvento(tx, contextoAtual(), {
+            nome: a.item.tipo === 'nota' ? 'conversa.nota_interna' : 'conversa.responder',
+            ferramenta: a.item.tipo === 'nota' ? 'conversa.nota_interna' : 'conversa.responder',
+            texto: `${a.item.tipo === 'nota' ? 'Nota interna' : 'Mensagem'} em ${String(conversa?.extras?.pessoa_nome ?? a.conversa)}`,
+            setor_id: conversa?.setor_id,
+            cliente_id: conversa?.cliente_id,
+            resultado_ref: m.id,
+            visivel_na_linha_do_tempo: false,
+          })
+      })
+      return
+    }
+    case 'crmItemPatch': {
+      const m = banco.obter('mensagem', a.id)
+      if (!m || m.conversa_id !== a.conversa) return
+      const item = { ...(m.extras?.item as object), ...a.patch } as ItemConversa
+      const espelho = item.tipo === 'mensagem' ? { status_entrega: item.entrega ?? m.status_entrega, corpo: item.texto ?? m.corpo } : {}
+      banco.transacao((tx) => tx.gravar('mensagem', { ...m, ...espelho, extras: { ...m.extras, item }, atualizado_em: agora() }))
+      return
+    }
+    case 'crmStatus':
+      if (banco.obter('conversa', a.conversa)) repos.conversas.atualizar(a.conversa, { status: a.status }, { ferramenta: a.status === 'resolvida' ? 'conversa.resolver' : 'conversa.atualizar' })
+      return
+    case 'crmNova':
+    case 'crmSalvar': {
+      const q = consulta()
+      const existente = banco.obter('conversa', a.conversa.id)
+      const pessoa = banco.ler('pessoa').find((p) => p.nome === a.conversa.pessoa.nome)
+      const linha = { ...conversaParaModelo(a.conversa, q, pessoa?.id ?? existente?.pessoa_id ?? undefined), ordem: existente?.ordem ?? menorOrdem('conversa') }
+      banco.transacao((tx) => {
+        tx.gravar('conversa', existente ? { ...existente, ...linha, atualizado_em: agora() } : linhaNova('conversa', linha))
+        a.conversa.itens.forEach((item, i) => {
+          const nova = itemParaMensagem(a.conversa.id, item, i + 1)
+          const antes = tx.obter('mensagem', nova.id)
+          tx.gravar('mensagem', antes ? { ...antes, ...nova, atualizado_em: agora() } : linhaNova('mensagem', nova))
+        })
+        registrarEvento(tx, contextoAtual(), { nome: existente ? 'conversa.atualizar' : 'conversa.criar', ferramenta: existente ? 'conversa.atualizar' : 'conversa.criar', texto: `${existente ? 'Atualizou' : 'Abriu'} a conversa com ${a.conversa.pessoa.nome}`, setor_id: a.conversa.setor, cliente_id: a.conversa.clienteId ?? null, resultado_ref: a.conversa.id })
+      })
+      return
+    }
+    case 'tarefa': {
+      const antes = banco.obter('tarefa', a.id)
+      if (!antes) return
+      const q = consulta()
+      const tela = { ...tarefaParaTela(antes, q), ...a.patch }
+      const depois = tarefaParaModelo(tela, q, antes)
+      if (depois.status !== antes.status) repos.tarefas.mudarStatus(a.id, depois.status, { motivo: 'cancelada pela tela' })
+      const { status: _s, status_desde: _d, ...resto } = depois
+      void _s
+      void _d
+      const atual = banco.obter('tarefa', a.id)!
+      const mudou = Object.entries(resto).some(([k, v]) => JSON.stringify((atual as unknown as Record<string, unknown>)[k]) !== JSON.stringify(v))
+      if (mudou) repos.tarefas.atualizar(a.id, resto)
+      return
+    }
+    case 'tarefaNova':
+      repos.tarefas.criar({ ...tarefaParaModelo(a.tarefa, consulta()), ordem: menorOrdem('tarefa') })
+      return
+    case 'timeMsg':
+      return gravarMensagemIntegrante(`time:${a.integrante}`, a.msg)
     case 'timeMsgPatch':
-      return { ...s, timeExtras: { ...s.timeExtras, [a.integrante]: (s.timeExtras[a.integrante] ?? []).map((m) => (m.id === a.id ? { ...m, ...a.patch } : m)) } }
+      return ajustarMensagemIntegrante(`time:${a.integrante}`, a.id, a.patch)
+    case 'assistMsg':
+      return gravarMensagemIntegrante(`assistente:${a.conversa}`, a.msg)
+    case 'assistMsgPatch':
+      return ajustarMensagemIntegrante(`assistente:${a.conversa}`, a.id, a.patch)
+    case 'decidir':
+      repos.cartoes.decidir(a.cartao, statusDaDecisao(a.decisao), { criarSeFaltar: { resumo_humano: `cartão ${a.cartao}`, extras: { decisao_texto: a.decisao } } })
+      return
+    case 'ficha': {
+      const c = banco.obter('cliente', a.ficha.id)
+      if (c) repos.clientes.atualizar(c.id, { extras: { ...c.extras, ficha: a.ficha } }, { texto: `Atualizou a ficha de ${c.nome}` })
+      return
+    }
+    case 'nota': {
+      const n = { ...a.nota, clienteId: a.nota.clienteId ?? '' }
+      const linha = notaParaModelo(n)
+      if (banco.obter('nota_emitida', linha.id)) repos.notas.atualizar(linha.id, linha)
+      else repos.notas.criar(linha, { texto: `Emitiu a NFS-e ${n.numero}` })
+      return
+    }
+    case 'cancelarNota': {
+      const id = `nf-${a.clienteId}-${a.numero}`
+      if (banco.obter('nota_emitida', id)) {
+        const n = banco.obter('nota_emitida', id)!
+        repos.notas.atualizar(id, { situacao: 'cancelada', extras: { ...n.extras, nota: { ...(n.extras?.nota as object), situacao: 'cancelada' } } }, { ferramenta: 'nfse.cancelar', texto: `Cancelou a NFS-e ${a.numero}` })
+      } else {
+        const base = emissorDe(a.clienteId).notas.find((n) => n.numero === a.numero)
+        if (base) repos.notas.criar(notaParaModelo({ ...base, clienteId: a.clienteId, situacao: 'cancelada' }), { ferramenta: 'nfse.cancelar', texto: `Cancelou a NFS-e ${a.numero}` })
+      }
+      return
+    }
+    case 'documento':
+      repos.documentos.criar({ ...documentoParaModelo(a.documento, visivelAoCliente(a.documento)), ordem: menorOrdem('documento') }, { texto: `Registrou ${a.documento.nome}` })
+      return
+    case 'documentoPatch': {
+      const antes = banco.obter('documento', a.id)
+      if (!antes) return
+      const tela = { ...documentoParaTela(antes), ...a.patch }
+      repos.documentos.atualizar(a.id, { ...documentoParaModelo(tela, visivelAoCliente(tela)), ordem: antes.ordem })
+      return
+    }
+    case 'bpoModulo': {
+      const ass = banco.ler('assinatura')[0]
+      if (ass) repos.assinaturas.atualizar(ass.id, { modulos: a.ligado ? [...new Set([...ass.modulos, 'bpo' as const])] : ass.modulos.filter((m) => m !== 'bpo') }, { texto: `${a.ligado ? 'Ligou' : 'Desligou'} o módulo BPO na assinatura` })
+      return
+    }
+    case 'cenario':
+      return atualizarEscritorio((e) => ({ configuracao: { ...e.configuracao, cenario: a.cenario } }))
+    case 'custoPorPacote':
+      return atualizarEscritorio((e) => ({ configuracao: { ...e.configuracao, custo_por_pacote: a.ligado } }))
     case 'memoria': {
-      const antes = a.chave in s.memoria ? s.memoria[a.chave] : a.inicial
+      const r = banco.obter('registro_tela', a.chave)
+      const antes = r ? r.valor : a.inicial
       const depois = typeof a.valor === 'function' ? (a.valor as (x: unknown) => unknown)(antes) : a.valor
-      return { ...s, memoria: { ...s.memoria, [a.chave]: depois } }
+      repos.telas.lembrar(a.chave, depois)
+      return
+    }
+    case 'trabalho':
+      banco.transacao((tx) => tx.gravar('item_fila', linhaNova('item_fila', trabalhoParaModelo(a.trabalho))))
+      return
+    case 'trabalhoFim': {
+      const r = banco.obter('item_fila', a.uid)
+      if (r) banco.transacao((tx) => tx.gravar('item_fila', { ...r, status: 'concluido', concluido_em: agora(), atualizado_em: agora() }))
+      return
     }
     case 'alcadaProposta': {
-      const resto = { ...s.bpoAlcadaProposta }
+      const resto = { ...valorTela<Record<string, PropostaAlcada>>(CHAVES_BPO.alcadaProposta, {}) }
       if (a.proposta) resto[a.clienteId] = a.proposta
       else delete resto[a.clienteId]
-      return { ...s, bpoAlcadaProposta: resto }
+      return repos.telas.lembrar(CHAVES_BPO.alcadaProposta, resto)
     }
     case 'alcadaAceita':
-      return { ...s, bpoAlcadas: { ...s.bpoAlcadas, [a.clienteId]: a.alcadas } }
+      return repos.telas.lembrar(CHAVES_BPO.alcadas, { ...valorTela(CHAVES_BPO.alcadas, {}), [a.clienteId]: a.alcadas })
     case 'bpoLote':
-      return { ...s, bpoLotes: { ...s.bpoLotes, [a.id]: a.decisao } }
-    case 'bpoConta':
-      return { ...s, bpoContas: { ...s.bpoContas, [a.id]: { ...s.bpoContas[a.id], ...a.patch } } }
-    case 'reiniciar':
-      return inicial(avisosIniciais)
+      return repos.telas.lembrar(CHAVES_BPO.lotes, { ...valorTela(CHAVES_BPO.lotes, {}), [a.id]: a.decisao })
+    case 'bpoConta': {
+      const contas = valorTela<Record<string, Partial<ContaBpo>>>(CHAVES_BPO.contas, {})
+      return repos.telas.lembrar(CHAVES_BPO.contas, { ...contas, [a.id]: { ...contas[a.id], ...a.patch } })
+    }
   }
 }
 
 interface Loja {
   estado: Estado
+  /** Clientes do escritório (formato de tela). */
+  clientes: ClienteTela[]
   /** Conversas do CRM com o que as ações acrescentaram. */
   conversas: ConversaCrm[]
   /** Tarefas com os estados mudados pelas ações. */
@@ -331,6 +451,10 @@ interface Loja {
   /** Conversas de cada integrante no Time, com as mensagens novas. */
   conversasTime: Record<string, Mensagem[]>
   toast: (texto: string, destino?: Destino, rotuloDestino?: string, quem?: QuemToast) => void
+  /** Toast com o botão Desfazer (o kit usa depois de editar, mover ou excluir). */
+  toastDesfazer: (texto: string, desfazer: () => void) => void
+  /** Toast de erro (permissão negada, regra de negócio). */
+  toastErro: (texto: string) => void
   fecharToast: (id: string) => void
   avisar: (a: Omit<AvisoSistema, 'id' | 'quando' | 'lidoPor'>) => void
   ler: (id: string, usuario: string) => void
@@ -358,7 +482,7 @@ interface Loja {
   ligarBpo: (ligado: boolean) => void
   definirCenario: (c: Cenario) => void
   ligarCustoPorPacote: (v: boolean) => void
-  /** Grava um valor de tela na sessão (usePersistente). */
+  /** Grava um valor de tela (usePersistente). */
   lembrar: (chave: string, inicial: unknown, valor: unknown) => void
   /** Põe um integrante para "fazer" um fluxo simulado (etapas, aviso ao terminar, passagens). */
   iniciarTrabalho: (f: FluxoSimulado, opcoes?: { tarefaId?: string; origem?: string; final?: PedidoAssistente['final'] }) => void
@@ -376,113 +500,127 @@ interface Loja {
   /** Registra a aprovação (ou recusa) de um lote; o lote só fica aprovado com o número de aprovadores da alçada. */
   decidirLote: (id: string, acao: { tipo: 'aprovar'; nome: string; removidos?: string[] } | { tipo: 'recusar'; nome: string; motivo: string } | { tipo: 'liberar'; nome: string }) => void
   ajustarContaBpo: (id: string, patch: Partial<ContaBpo>) => void
+  /** Volta o escritório aos dados de exemplo (o painel da demonstração confirma antes). */
   reiniciar: () => void
 }
 
 const Ctx = createContext<Loja | null>(null)
 
-/** Avisos com que o escritório amanhece (cada um para quem deve receber). */
-export const avisosIniciais: AvisoSistema[] = [
-  {
-    id: 'av1',
-    para: ['u1'],
-    tipo: 'cartao',
-    setor: 'fiscal',
-    titulo: 'Fiscal: PGDAS-D de 14 clientes pronto para transmitir',
-    detalhe: 'R$ 38.402,15 em DAS · a aprovação expira em 2 dias',
-    quando: '09:32',
-    lidoPor: [],
-    destino: { modulo: 'inicio', aba: 'time', integrante: 'i-fiscal' },
-  },
-  {
-    id: 'av2',
-    para: ['u1', 'u7'],
-    tipo: 'conversa',
-    setor: 'fiscal',
-    titulo: 'Rita Campos (Metalúrgica Andrade) perguntou do ISS',
-    detalhe: 'WhatsApp · primeira resposta vence em 18 min',
-    quando: '09:30',
-    lidoPor: [],
-    destino: { modulo: 'crm', aba: 'conversas', conversa: 'cv1' },
-  },
-  {
-    id: 'av3',
-    para: ['u1', 'u3'],
-    tipo: 'cliente',
-    setor: 'dp',
-    titulo: 'Padaria Pão Quente contratou dois funcionários',
-    detalhe: 'áudio de João Batista · o integrante DP já abriu a admissão',
-    quando: '08:55',
-    lidoPor: [],
-    destino: { modulo: 'crm', aba: 'conversas', conversa: 'cv2' },
-  },
-  {
-    id: 'av4',
-    para: ['u1', 'u4'],
-    tipo: 'prazo',
-    setor: 'societario',
-    titulo: 'Exigência da JUCESP vence em 14 dias',
-    detalhe: 'Metalúrgica Andrade · alteração contratual',
-    quando: 'ontem',
-    lidoPor: ['u1'],
-    destino: { modulo: 'painel', aba: 'societario', tarefa: 't18' },
-  },
-  {
-    id: 'av5',
-    para: ['u2'],
-    tipo: 'conversa',
-    setor: 'contabil',
-    titulo: 'Dra. Lívia (Clínica Sorriso) aguarda o balanço de abertura',
-    detalhe: 'conversa parada em "aguardando interno" desde ontem',
-    quando: 'ontem',
-    lidoPor: [],
-    destino: { modulo: 'crm', aba: 'conversas', conversa: 'cv7' },
-  },
-  { id: 'av6', para: ['u1', 'u2'], tipo: 'sistema', titulo: '6 itens do Timesheet esperam confirmação', detalhe: 'leva uns 2 minutos', quando: '08:00', lidoPor: [], destino: { modulo: 'timesheet', aba: 'confirmacoes' } },
-  {
-    id: 'av7',
-    para: ['u1'],
-    tipo: 'sistema',
-    titulo: 'Loja Bela Vista: fatura de novembro venceu há 2 dias',
-    detalhe: 'a régua manda o aviso cordial amanhã',
-    quando: '07:00',
-    lidoPor: [],
-    destino: { modulo: 'financeiro', aba: 'cobranca', fatura: 'f3' },
-  },
-  {
-    id: 'av8',
-    para: ['u3'],
-    tipo: 'cartao',
-    setor: 'dp',
-    titulo: 'DP: contrato de experiência de Rafael Moura pronto',
-    detalhe: 'Metalúrgica Andrade · revisar e mandar para assinatura',
-    quando: '09:10',
-    lidoPor: [],
-    destino: { modulo: 'inicio', aba: 'time', integrante: 'i-dp' },
-  },
-  {
-    id: 'av9',
-    para: ['u7'],
-    tipo: 'prazo',
-    setor: 'notas',
-    titulo: 'Certificado da Clínica Sorriso vence em 3 dias',
-    detalhe: 'sem ele, a captura de notas para',
-    quando: '08:00',
-    lidoPor: [],
-    destino: { modulo: 'painel', aba: 'notas', tarefa: 't8' },
-  },
-]
+export { avisosIniciais } from '@/dados/avisos'
+
+/** Mensagem "pensando" que ficou para trás num recarregar (o relógio dela se perdeu): sai da conversa. */
+const PENSANDO_MAX_MS = 60_000
 
 /** `semRotinas`: sem o trabalho de fundo do time (a demonstração do site mostra só o pedido da pessoa). */
 export function LojaProvider({ children, semRotinas }: { children: ReactNode; semRotinas?: boolean }) {
-  const [estado, despachar] = useReducer(reduzir, semRotinas, (sem?: boolean) => inicial(avisosIniciais, sem))
+  return (
+    <BancoOpcional>
+      <LojaInterna semRotinas={semRotinas}>{children}</LojaInterna>
+    </BancoOpcional>
+  )
+}
 
-  const toast = useCallback((texto: string, destino?: Destino, rotuloDestino?: string, quem?: QuemToast) => {
+function LojaInterna({ children, semRotinas }: { children: ReactNode; semRotinas?: boolean }) {
+  const [volatil, despacharVolatil] = useReducer(reduzirVolatil, { toasts: [], digitando: {} })
+  const { restaurar } = useBanco()
+
+  const toast = useCallback((texto: string, destino?: Destino, rotuloDestino?: string, quem?: QuemToast, extra?: Pick<Toast, 'acao' | 'erro'>) => {
     const id = novoId('t')
-    despachar({ t: 'toast', toast: { id, texto, destino, rotuloDestino, quem, em: Date.now() } })
-    // Quem traz pessoa (integrante, cliente) fica um pouco mais: é para ler.
-    setTimeout(() => despachar({ t: 'fecharToast', id }), quem ? 8000 : 6000)
+    despacharVolatil({ t: 'toast', toast: { id, texto, destino, rotuloDestino, quem, em: Date.now(), ...extra } })
+    // Quem traz pessoa (integrante, cliente) ou um desfazer fica um pouco mais: é para ler.
+    setTimeout(() => despacharVolatil({ t: 'fecharToast', id }), quem || extra?.acao ? 8000 : 6000)
   }, [])
+
+  /** Toda ação passa por aqui: o que é de tela fica no estado; o resto vira escrita no banco (com permissão e evento). */
+  const despachar = useCallback(
+    (a: Acao) => {
+      if (a.t === 'toast' || a.t === 'fecharToast' || a.t === 'digitando') return despacharVolatil(a)
+      try {
+        aplicar(a)
+      } catch (e) {
+        if (e instanceof ErroPermissao || e instanceof ErroRegra) toast(e.message, undefined, undefined, undefined, { erro: true })
+        else throw e
+      }
+    },
+    [toast],
+  )
+  const despacharComo = (ctx: Contexto, a: Acao) => comoAtor(ctx, () => despachar(a))
+
+  /* ---------- Leitura: as tabelas do banco em formato de tela ---------- */
+  const tCliente = useTabela('cliente')
+  const tTarefa = useTabela('tarefa')
+  const tConversa = useTabela('conversa')
+  const tMensagem = useTabela('mensagem')
+  const tDocumento = useTabela('documento')
+  const tNotificacao = useTabela('notificacao')
+  const tEvento = useTabela('evento')
+  const tCartao = useTabela('cartao_aprovacao')
+  const tMsgIntegrante = useTabela('mensagem_integrante')
+  const tFila = useTabela('item_fila')
+  const tTela = useTabela('registro_tela')
+  const tNota = useTabela('nota_emitida')
+  const tEscritorio = useTabela('escritorio')
+  const tAssinatura = useTabela('assinatura')
+
+  const clientes = useMemo(() => tCliente.filter((c) => !c.arquivado_em).map(clienteParaTela), [tCliente])
+  const tarefas = useMemo(() => {
+    const q = { clientes: tCliente }
+    return repos.tarefas.listar((t) => t.status !== 'cancelada').map((t) => tarefaParaTela(t, q))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tTarefa, tCliente])
+  const conversas = useMemo(() => {
+    const porConversa = new Map<Id, typeof tMensagem>()
+    for (const m of tMensagem) porConversa.set(m.conversa_id, [...(porConversa.get(m.conversa_id) ?? []), m])
+    return repos.conversas.listar().map((c) => conversaParaTela(c, (porConversa.get(c.id) ?? []).sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tConversa, tMensagem])
+  const documentos = useMemo(() => repos.documentos.listar().map(documentoParaTela), [tDocumento]) // eslint-disable-line react-hooks/exhaustive-deps
+  const mensagensDeSessao = useMemo(() => {
+    const porSessao: Record<string, Mensagem[]> = {}
+    const limite = Date.now() - PENSANDO_MAX_MS
+    for (const r of [...tMsgIntegrante].sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))) {
+      const m = mensagemModeloParaTela(r)
+      if (m.pendente && Date.parse(r.atualizado_em) < limite) continue
+      ;(porSessao[r.sessao_chave] ??= []).push(m)
+    }
+    return porSessao
+  }, [tMsgIntegrante])
+  const conversasTime = useMemo(() => {
+    const r: Record<string, Mensagem[]> = {}
+    for (const [k, v] of Object.entries(mensagensDeSessao)) if (k.startsWith('time:')) r[k.slice(5)] = v
+    return r
+  }, [mensagensDeSessao])
+  const trabalhos = useMemo(() => tFila.map(trabalhoParaTela).filter((t) => t && t.uid && !(semRotinas && t.uid.startsWith('rot-'))), [tFila, semRotinas])
+
+  const estado = useMemo<Estado>(() => {
+    const tela = Object.fromEntries(tTela.map((r) => [r.id, r.valor]))
+    const escritorio = tEscritorio[0]
+    const assistente: Record<string, Mensagem[]> = {}
+    for (const [k, v] of Object.entries(mensagensDeSessao)) if (k.startsWith('assistente:')) assistente[k.slice(11)] = v
+    return {
+      toasts: volatil.toasts,
+      digitando: volatil.digitando,
+      avisos: [...tNotificacao].sort((a, b) => (b.ordem ?? 0) - (a.ordem ?? 0)).map((n: Notificacao) => avisoParaTela(n)),
+      eventos: tEvento
+        .filter((e) => e.nome === 'atividade.registrar')
+        .sort((a, b) => b.criado_em.localeCompare(a.criado_em))
+        .map((e) => ({ id: e.id, quando: horaCurta(e.criado_em), ator: e.ator_nome ?? '', texto: e.texto })),
+      decisoes: Object.fromEntries(tCartao.filter((c) => c.decidido_em).map((c) => [c.id, String(c.extras?.decisao_texto ?? (c.status === 'recusado' ? 'recusar' : 'aprovar'))])),
+      bpoModulo: tAssinatura[0]?.modulos.includes('bpo') ?? false,
+      cenario: escritorio?.configuracao.cenario ?? 'contabil_bpo',
+      custoPorPacote: !!escritorio?.configuracao.custo_por_pacote,
+      memoria: Object.fromEntries(Object.entries(tela).filter(([k]) => !k.startsWith('bpo.'))),
+      trabalhos,
+      assistente,
+      bpoAlcadaProposta: (tela[CHAVES_BPO.alcadaProposta] as Estado['bpoAlcadaProposta']) ?? {},
+      bpoAlcadas: (tela[CHAVES_BPO.alcadas] as Estado['bpoAlcadas']) ?? {},
+      bpoLotes: (tela[CHAVES_BPO.lotes] as Estado['bpoLotes']) ?? {},
+      bpoContas: (tela[CHAVES_BPO.contas] as Estado['bpoContas']) ?? {},
+    }
+  }, [volatil, tNotificacao, tEvento, tCartao, tAssinatura, tEscritorio, tTela, trabalhos, mensagensDeSessao])
+
+  const conversasRef = useRef<ConversaCrm[]>([])
+  conversasRef.current = conversas
 
   /* ---------- Motor do trabalho simulado ---------- */
   // Nada é instantâneo: o integrante pensa antes de falar, a passagem leva um tempo, a mensagem ao cliente
@@ -530,7 +668,7 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
     })
   }
   const iniciarTrabalho = useCallback(
-    (f: FluxoSimulado, opcoes?: { tarefaId?: string; origem?: string; final?: PedidoAssistente['final'] }) => {
+    (f: FluxoSimulado, opcoes?: { tarefaId?: string; origem?: string; final?: PedidoAssistente['final'] }) => comoAtor(ctxIntegrante(f.integrante, f.setor), () => {
       falar(f.integrante, f.setor, f.inicio)
       if (opcoes?.tarefaId) despachar({ t: 'tarefa', id: opcoes.tarefaId, patch: { status: 'em_andamento' } })
       if (opcoes?.origem && opcoes.final) finaisRef.current[opcoes.origem] = opcoes.final
@@ -540,7 +678,7 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
       // Pedido do Assistente: o cartão do trabalho aparece no chat dele, anda e fica concluído ali.
       if (opcoes?.origem) noAssistente(opcoes.origem, { autor: { tipo: 'integrante', setor: f.setor }, cartoes: [{ tipo: 'trabalho', id: `c${uid}`, uid }] })
       despachar({ t: 'evento', evento: { id: novoId('e'), quando: hora(), ator: f.integrante, texto: `Começou: ${f.titulo}${f.cliente ? ` · ${f.cliente}` : ''}` } })
-    },
+    }),
     [falar],
   )
   /** Passagem animada: o cartão aparece no chat de quem passa e o outro começa depois de um instante. */
@@ -558,19 +696,20 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
   const enviarAoCliente = useCallback(
     (t: Trabalho, crm: NonNullable<Trabalho['fim']['crm']>) => {
       const id = novoId('m')
-      despachar({ t: 'crmItem', conversa: crm.conversa, item: { tipo: 'mensagem', id, hora: hora(), de: 'integrante', setor: t.setor, canal: 'whatsapp', texto: crm.texto, entrega: 'enviada' } as ItemConversa })
+      const comoCliente = (autor: string, f: () => void) => comoAtor({ ator: { tipo: 'pessoa_cliente', nome: autor }, origem: 'api_externa' }, f)
+      despacharComo(ctxIntegrante(t.integrante, t.setor), { t: 'crmItem', conversa: crm.conversa, item: { tipo: 'mensagem', id, hora: hora(), de: 'integrante', setor: t.setor, canal: 'whatsapp', texto: crm.texto, entrega: 'enviada' } as ItemConversa })
       depois(1400, () => despachar({ t: 'crmItemPatch', conversa: crm.conversa, id, patch: { entrega: 'entregue' } }))
       depois(4200, () => despachar({ t: 'crmItemPatch', conversa: crm.conversa, id, patch: { entrega: 'lida' } }))
       const r = crm.resposta
       if (!r) return
       const começa = 4200 + r.depoisDeSeg * 1000
       depois(começa, () => despachar({ t: 'digitando', conversa: crm.conversa, quem: r.autor }))
-      depois(começa + r.digitarSeg * 1000, () => {
+      depois(começa + r.digitarSeg * 1000, () => comoCliente(r.autor, () => {
         despachar({ t: 'digitando', conversa: crm.conversa, quem: null })
         despachar({ t: 'crmItem', conversa: crm.conversa, item: { tipo: 'mensagem', id: novoId('m'), hora: hora(), de: 'cliente', autor: r.autor, canal: 'whatsapp', texto: r.texto } as ItemConversa })
         despachar({ t: 'crmStatus', conversa: crm.conversa, status: 'em_atendimento' })
         const destino: Destino = { modulo: 'crm', aba: 'conversas', conversa: crm.conversa }
-        const conversaCrm = conversasCrm.find((x) => x.id === crm.conversa)
+        const conversaCrm = conversasRef.current.find((x) => x.id === crm.conversa)
         notificar({ para: [], tipo: 'conversa', setor: t.setor, titulo: `${r.autor} respondeu`, detalhe: r.texto.slice(0, 80), destino }, vendoConversa(crm.conversa), r.texto, 'Responder', {
           tipo: 'contato',
           nome: r.autor,
@@ -582,13 +721,13 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
           const conv = t.origem
           if (prox) assistenteFala(conv, `${r.autor} respondeu: “${r.texto}” Passei de volta ao ${nomeDoSetor(prox.setor)}.`, passagemNoAssistente(t.setor, prox), () => passarAdiante(t, prox))
           else {
-            const c = conversasCrm.find((x) => x.id === crm.conversa)
+            const c = conversasRef.current.find((x) => x.id === crm.conversa)
             assistenteFala(conv, `${r.autor} já respondeu: “${r.texto}”`, () => [
               { tipo: 'conversa_crm', id: novoId('cc'), conversa: crm.conversa, cliente: c?.cliente ?? t.cliente ?? '', pessoa: r.autor, canal: 'WhatsApp', status: 'aberta', ultima: r.texto },
             ])
           }
         } else if (prox) passarAdiante(t, prox)
-      })
+      }))
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [toast],
@@ -604,7 +743,7 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
         cartoes.push({ tipo: 'tarefa', id: `c${novaId}`, tarefa: { ...fim.tarefaNova, id: novaId } })
       }
       // Ele escreve o resultado (pensando) antes de entregar; os efeitos vêm junto com a mensagem.
-      falar(t.integrante, t.setor, fim.texto, cartoes.length ? cartoes : undefined, 1800, () => {
+      falar(t.integrante, t.setor, fim.texto, cartoes.length ? cartoes : undefined, 1800, () => comoAtor(ctxIntegrante(t.integrante, t.setor), () => {
         if (novaId && fim.tarefaNova) despachar({ t: 'tarefaNova', tarefa: { ...fim.tarefaNova, id: novaId } })
         if (t.tarefaId && fim.tarefaStatus) despachar({ t: 'tarefa', id: t.tarefaId, patch: { status: fim.tarefaStatus, atrasada: fim.tarefaStatus === 'concluida' ? false : undefined } })
         if (fim.tarefaPorCodigo) {
@@ -641,12 +780,12 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
           const final = finaisRef.current[conv]
           depois(1300, () => assistenteFala(conv, final?.texto ?? `Pronto: ${t.titulo}.`, () => final?.cartoes ?? fim.cartoes ?? []))
         }
-      })
+      }))
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [toast, falar, enviarAoCliente],
   )
-  const rodando = estado.trabalhos.filter((t) => t.situacao === 'rodando')
+  const rodando = trabalhos.filter((t) => t.situacao === 'rodando')
   const chaveRodando = rodando.map((t) => t.uid).join(',')
   const rodandoRef = useRef(rodando)
   rodandoRef.current = rodando
@@ -658,24 +797,30 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
     return () => window.clearInterval(id)
   }, [chaveRodando, concluirTrabalho])
 
+
   const valor = useMemo<Loja>(() => {
-    const conversas = [...estado.crmNovas, ...conversasCrm].map((c0) => {
-      const c = estado.crmOverride[c0.id] ?? c0
-      const extras = estado.crmExtras[c.id] ?? []
-      const ultima = [...extras].reverse().find((x) => x.tipo === 'mensagem') as Extract<ItemConversa, { tipo: 'mensagem' }> | undefined
-      return extras.length || estado.crmStatus[c.id]
-        ? { ...c, itens: [...c.itens, ...extras], status: estado.crmStatus[c.id] ?? c.status, previa: ultima?.texto ? `${ultima.autor ?? ''}${ultima.autor ? ': ' : ''}${ultima.texto}` : c.previa }
-        : c
-    })
-    const tarefas = [...estado.tarefasNovas, ...exemplo.tarefas].map((t) => (estado.tarefasPatch[t.id] ? { ...t, ...estado.tarefasPatch[t.id] } : t))
-    const conversasTime: Record<string, Mensagem[]> = { ...exemplo.conversasPorIntegrante }
-    for (const [k, v] of Object.entries(estado.timeExtras)) conversasTime[k] = [...(conversasTime[k] ?? []), ...v]
+    const fichaDe = (id?: string) => (id ? ((tCliente.find((c) => c.id === id)?.extras?.ficha as FichaCliente | undefined) ?? (banco.escritorioId === 'esc-andrade' ? fichas[id] : undefined)) : undefined)
     return {
       estado,
+      clientes,
       conversas,
       tarefas,
       conversasTime,
       toast,
+      toastDesfazer: (texto, desfazer) =>
+        toast(texto, undefined, undefined, undefined, {
+          acao: {
+            rotulo: 'Desfazer',
+            executar: () => {
+              try {
+                desfazer()
+              } catch (e) {
+                toast(e instanceof Error ? e.message : String(e), undefined, undefined, undefined, { erro: true })
+              }
+            },
+          },
+        }),
+      toastErro: (texto) => toast(texto, undefined, undefined, undefined, { erro: true }),
       fecharToast: (id) => despachar({ t: 'fecharToast', id }),
       avisar: (a) => despachar({ t: 'avisar', aviso: { ...a, id: novoId('av'), quando: hora(), lidoPor: [] } }),
       ler: (id, usuario) => despachar({ t: 'ler', id, usuario }),
@@ -693,16 +838,16 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
       },
       mensagemTime: (integrante, msg) => despachar({ t: 'timeMsg', integrante, msg: { ...msg, id: novoId('mt'), hora: hora() } }),
       decidir: (cartao, decisao) => despachar({ t: 'decidir', cartao, decisao }),
-      fichaDe: (id) => (id ? (estado.fichasEditadas[id] ?? fichas[id]) : undefined),
+      fichaDe,
       salvarFicha: (f) => despachar({ t: 'ficha', ficha: f }),
       emitirNota: (n) => despachar({ t: 'nota', nota: n }),
       cancelarNota: (clienteId, numero) => despachar({ t: 'cancelarNota', clienteId, numero }),
       notasDe: (clienteId) => {
-        const daLoja = estado.notasEmitidas.filter((n) => n.clienteId === clienteId)
+        const daLoja = tNota.filter((n) => n.cliente_id === clienteId).map(notaParaTela)
         const base = emissorDe(clienteId).notas.filter((n) => !daLoja.some((x) => x.numero === n.numero))
         return [...daLoja, ...base].sort((a, b) => b.numero - a.numero)
       },
-      documentos: [...estado.documentosNovos, ...documentosBase()].map((d) => (estado.documentosPatch[d.id] ? { ...d, ...estado.documentosPatch[d.id] } : d)),
+      documentos,
       adicionarDocumento: (d) => {
         const doc: Documento = { versao: 1, ...d, id: novoId('docn'), hash: Math.random().toString(16).slice(2, 14) }
         despachar({ t: 'documento', documento: doc })
@@ -723,7 +868,7 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
       aceitarAlcada: (clienteId, quem) => {
         const p = estado.bpoAlcadaProposta[clienteId]
         if (!p) return
-        const f = estado.fichasEditadas[clienteId] ?? fichas[clienteId]
+        const f = fichaDe(clienteId)
         if (f) despachar({ t: 'ficha', ficha: { ...f, contatos: f.contatos.map((c) => (p.pessoas[c.nome] !== undefined ? { ...c, alcadaPagamento: p.pessoas[c.nome] || undefined } : c)) } })
         despachar({ t: 'alcadaAceita', clienteId, alcadas: { faixa1: p.faixa1, faixa2: p.faixa2, janela: p.janela, aceitoPor: quem, alteradaPor: p.por } })
         despachar({ t: 'alcadaProposta', clienteId, proposta: null })
@@ -739,9 +884,10 @@ export function LojaProvider({ children, semRotinas }: { children: ReactNode; se
         despachar({ t: 'bpoLote', id, decisao: { situacao: aprovacoes.length >= (lote?.aprovadoresNecessarios ?? 1) ? 'aprovado' : 'parcial', aprovacoes, removidos } })
       },
       ajustarContaBpo: (id, patch) => despachar({ t: 'bpoConta', id, patch }),
-      reiniciar: () => despachar({ t: 'reiniciar' }),
+      reiniciar: () => void restaurar(),
     }
-  }, [estado, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estado, clientes, conversas, tarefas, conversasTime, documentos, tNota, tCliente, toast, despachar, restaurar])
 
   tarefasRef.current = valor.tarefas
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>
@@ -753,11 +899,14 @@ export function useLoja(): Loja {
   if (l) return l
   const nada = () => {}
   return {
-    estado: inicial(avisosIniciais),
-    conversas: conversasCrm,
+    estado: { toasts: [], avisos: [], eventos: [], decisoes: {}, bpoModulo: true, cenario: 'contabil_bpo', custoPorPacote: false, memoria: {}, trabalhos: [], digitando: {}, assistente: {}, bpoAlcadaProposta: {}, bpoAlcadas: {}, bpoLotes: {}, bpoContas: {} },
+    clientes: exemplo.clientes,
+    conversas: [],
     tarefas: exemplo.tarefas,
     conversasTime: exemplo.conversasPorIntegrante,
     toast: nada,
+    toastDesfazer: nada,
+    toastErro: nada,
     fecharToast: nada,
     avisar: nada,
     ler: nada,
@@ -776,7 +925,7 @@ export function useLoja(): Loja {
     emitirNota: nada,
     cancelarNota: nada,
     notasDe: (id) => emissorDe(id).notas,
-    documentos: documentosBase(),
+    documentos: [],
     adicionarDocumento: (d) => ({ versao: 1, ...d, id: 'x', hash: '' }) as Documento,
     ajustarDocumento: nada,
     ligarBpo: nada,
@@ -794,6 +943,52 @@ export function useLoja(): Loja {
     decidirLote: nada,
     ajustarContaBpo: nada,
     reiniciar: nada,
+  }
+}
+
+/* ---------- Contas do escritório (Configurações › Usuários e a sessão) ---------- */
+
+/** As contas do escritório no formato das telas (usuário + vínculos + exceções + carteira). */
+export function useContas(): UsuarioCfg[] {
+  const usuarios = useTabela('usuario')
+  const vinculos = useTabela('vinculo_setor')
+  const excecoes = useTabela('excecao_tela')
+  const carteira = useTabela('carteira_cliente')
+  return useMemo(() => usuarios.map((u) => contaParaTela(u, vinculos, excecoes, carteira)), [usuarios, vinculos, excecoes, carteira])
+}
+
+/**
+ * Grava a lista de contas editada na tela: cria ou atualiza o usuário, troca
+ * os vínculos e as exceções (cada exceção removida vira evento) e a carteira.
+ */
+export function salvarContas(lista: UsuarioCfg[]) {
+  const ctx = contextoAtual()
+  for (const u of lista) {
+    const novo = contaParaModelo(u)
+    const antes = banco.obter('usuario', u.id)
+    const igual = antes && JSON.stringify(contaParaTela(antes, banco.ler('vinculo_setor'), banco.ler('excecao_tela'), banco.ler('carteira_cliente'))) === JSON.stringify(u)
+    if (igual) continue
+    if (!antes) {
+      if (!banco.obter('pessoa', novo.pessoa.id)) repos.pessoas.criar(novo.pessoa, { ctx })
+      repos.usuarios.criar(novo.usuario, { ctx, texto: `Criou a conta de ${u.nome}` })
+    } else {
+      const { preferencias: _p, ...semPreferencias } = novo.usuario
+      void _p
+      repos.usuarios.atualizar(u.id, { ...semPreferencias, pessoa_id: antes.pessoa_id }, { ctx, texto: `Atualizou a conta de ${u.nome}` })
+    }
+    const vinculosAntes = banco.ler('vinculo_setor').filter((v) => v.usuario_id === u.id)
+    for (const v of vinculosAntes) if (!novo.vinculos.some((n) => n.setor_id === v.setor_id && n.modo === v.modo)) repos.vinculos.excluir(v.id, { ctx, texto: `Tirou ${v.setor_id} de ${u.nome}` })
+    for (const v of novo.vinculos) if (!vinculosAntes.some((a) => a.setor_id === v.setor_id && a.modo === v.modo)) repos.vinculos.criar({ ...v, id: `${v.id}-${Date.now().toString(36)}` }, { ctx, texto: `Deu ${v.setor_id} (${v.modo}) a ${u.nome}` })
+    const excecoesAntes = banco.ler('excecao_tela').filter((x) => x.usuario_id === u.id)
+    for (const x of excecoesAntes) if (!novo.excecoes.some((n) => n.id === x.id)) repos.excecoes.excluir(x.id, { ctx, texto: `Removeu a exceção ${x.tela_ou_ferramenta} de ${u.nome}` })
+    for (const x of novo.excecoes) {
+      const a = banco.obter('excecao_tela', x.id)
+      if (!a) repos.excecoes.criar(x, { ctx, texto: `${x.efeito === 'liberar' ? 'Liberou' : 'Bloqueou'} ${x.tela_ou_ferramenta} para ${u.nome}: ${x.motivo}` })
+      else if (JSON.stringify({ ...a, ...x }) !== JSON.stringify(a)) repos.excecoes.atualizar(x.id, x, { ctx })
+    }
+    const carteiraAntes = banco.ler('carteira_cliente').filter((c) => c.usuario_id === u.id)
+    for (const c of carteiraAntes) if (!u.carteira.includes(c.cliente_id)) repos.carteiras.excluir(c.id, { ctx })
+    for (const c of novo.carteira) if (!carteiraAntes.some((a) => a.cliente_id === c.cliente_id)) repos.carteiras.criar(c, { ctx })
   }
 }
 
@@ -816,10 +1011,10 @@ export function LojaOpcional({ children }: { children: ReactNode }) {
 }
 
 /**
- * useState que sobrevive à troca de aba durante a demonstração: o valor fica
- * na loja do escritório (memória da sessão), não no componente. Sair e voltar
- * da tela, ou abrir outra que leia a mesma chave, mostra o que foi feito.
- * "Resetar o ambiente" limpa. Sem backend: dura enquanto a página estiver aberta.
+ * useState que sobrevive à troca de aba e ao recarregar a página: o valor fica
+ * no banco do escritório (tabela `registro_tela`), não no componente. Sair e
+ * voltar da tela, ou abrir outra que leia a mesma chave, mostra o que foi
+ * feito. "Restaurar demonstração" limpa.
  */
 export function usePersistente<T>(chave: string, inicial: T | (() => T)): [T, (v: T | ((x: T) => T)) => void] {
   const l = useContext(Ctx)

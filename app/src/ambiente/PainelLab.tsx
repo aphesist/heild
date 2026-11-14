@@ -1,16 +1,17 @@
-import { ArrowCounterClockwiseIcon, ClockIcon, DeviceMobileIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SunIcon, XIcon } from '@phosphor-icons/react'
+import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SunIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { usePreferencia } from '@/hooks/usePreferencia'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { CampoEscolha, TextoFixo } from '@/components/ui/formulario'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { escritorio, usuariosCfg } from '@/dados/configuracoes'
 import { cn } from '@/lib/utils'
 import { temas } from '@/theme/temas'
 import type { ModoCor } from '@/theme/tipos'
 import { pessoasDoApp } from '@/cliente/ClienteApp'
-import * as exemplo from '@/dados/exemplo'
+import { useBanco, useEscritorio } from '@/nucleo/react'
+import { escritoriosDeExemplo } from '@/nucleo/semente'
+import { VerComoSeletor } from './ver-como'
 import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
@@ -49,7 +50,9 @@ export function PainelLab({
   const [aberto, setAberto] = useState(false)
   const [confirmar, setConfirmar] = useState(false)
   const [foraHorario, setForaHorario] = useState(false)
-  const ativas = usuariosCfg.filter((u) => u.situacao === 'ativo')
+  const ativas = (sessao?.contas ?? []).filter((u) => u.situacao === 'ativo')
+  const banco = useBanco()
+  const escritorio = { inatividadeMin: useEscritorio()?.inatividade_min ?? 3 }
   // Fechada, a aba vira uma alça fina na borda (não cobre o sistema); Ctrl+Shift+D alterna.
   const [escondida, setEscondida] = usePreferencia('ui-lab:demonstracao-escondida', false)
   useEffect(() => {
@@ -122,6 +125,22 @@ export function PainelLab({
             </button>
           ))}
         </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <BuildingsIcon className="size-3.5" /> Escritório de exemplo
+          </span>
+          <CampoEscolha
+            rotulo="Escritório de exemplo"
+            valor={banco.escritorio.id}
+            onMudar={(id) => {
+              setAberto(false)
+              onVisao('escritorio')
+              void banco.trocarEscritorio(id)
+            }}
+            opcoes={escritoriosDeExemplo.map((e) => ({ valor: e.id, rotulo: e.nome }))}
+          />
+          <span className="text-muted-foreground text-[11px]">{banco.escritorio.descricao} Os dados de cada escritório ficam separados.</span>
+        </div>
         {visao === 'escritorio' && (
           <div className="flex flex-col gap-1">
             <span className="text-muted-foreground text-xs">Cenário do escritório</span>
@@ -166,6 +185,14 @@ export function PainelLab({
                 </span>
               </button>
             ))}
+            {sessao?.usuario && (
+              <div className="bg-sunken/60 mt-1 flex flex-col gap-1.5 rounded-[12px] p-2">
+                <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <EyeIcon className="size-3.5" /> Ver como (papel e setores de faz de conta)
+                </span>
+                <VerComoSeletor />
+              </div>
+            )}
             {sessao?.usuario && (
               <button type="button" onClick={() => sessao.sair()} className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
                 <SignOutIcon className="size-4" /> Voltar para a tela de login
@@ -215,7 +242,7 @@ export function PainelLab({
                 <Avatar nome={p.nome} tamanho="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm">{p.nome}</span>
-                  <span className="text-muted-foreground block truncate text-[11px]">{p.empresas.map((e) => `${exemplo.clientes.find((c) => c.id === e.clienteId)?.nome} · ${e.contato.papel}`).join(' / ')}</span>
+                  <span className="text-muted-foreground block truncate text-[11px]">{p.empresas.map((e) => `${loja.clientes.find((c) => c.id === e.clienteId)?.nome} · ${e.contato.papel}`).join(' / ')}</span>
                 </span>
               </button>
             ))}
@@ -237,13 +264,16 @@ export function PainelLab({
             {modo === 'claro' ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
           </button>
         </div>
+        <p className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
+          <DatabaseIcon className="size-3.5 shrink-0" /> Dados guardados: {banco.armazenamento.descricao}. Recarregar a página não perde nada.
+        </p>
         {!confirmar ? (
           <Button variant="outline" className="rounded-full" onClick={() => setConfirmar(true)}>
-            <ArrowCounterClockwiseIcon /> Resetar o ambiente
+            <ArrowCounterClockwiseIcon /> Restaurar demonstração
           </Button>
         ) : (
           <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3 text-sm">
-            <p>Volta tudo à configuração original: mensagens, tarefas, avisos, fichas, serviços e notas emitidas; sai das contas do escritório e do app e volta ao tema padrão.</p>
+            <p>Volta {banco.escritorio.nome} aos dados de exemplo: o que foi criado, editado ou excluído na demonstração se perde (mensagens, tarefas, avisos, fichas, serviços e notas). Sai das contas do escritório e do app e volta ao tema padrão. Os outros escritórios de exemplo não mudam.</p>
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -255,7 +285,7 @@ export function PainelLab({
                   onReiniciar()
                 }}
               >
-                Resetar agora
+                Restaurar agora
               </Button>
               <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setConfirmar(false)}>
                 Cancelar

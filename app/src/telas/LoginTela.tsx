@@ -4,9 +4,9 @@ import { Marca } from '@/components/compostos/marca'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoTexto } from '@/components/ui/formulario'
-import { escritorio, usuariosCfg } from '@/dados/configuracoes'
+import { useEscritorio } from '@/nucleo/react'
 import { cn } from '@/lib/utils'
-import { papelExibido, permissoesDe } from '@/ambiente/sessao'
+import { papelExibido, permissoesDe, useSessao } from '@/ambiente/sessao'
 
 /**
  * Entrada do painel da equipe (Fundações 2.1): e-mail e senha, segundo fator
@@ -21,6 +21,10 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
   const [passo, setPasso] = useState<'senha' | 'codigo' | 'esqueci' | 'enviado'>('senha')
   const [codigo, setCodigo] = useState('')
   const [erro, setErro] = useState<string | null>(null)
+  const usuariosCfg = useSessao().contas
+  const escritorio = { razaoSocial: useEscritorio()?.razao_social ?? '' }
+  // O endereço do painel sai do domínio do escritório (marca branca, Fundações 10).
+  const dominio = usuariosCfg[0]?.email.split('@')[1] ?? 'escritorio.com.br'
   const titulo = { senha: 'Entrar', codigo: 'Segundo fator', esqueci: 'Trocar a senha', enviado: 'Confira o e-mail' }
   const conta = usuariosCfg.find((u) => u.email.toLowerCase() === email.trim().toLowerCase())
 
@@ -64,7 +68,7 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
                 entrar()
               }}
             >
-              <Campo rotulo="E-mail">{(id) => <CampoTexto id={id} tipo="email" valor={email} onMudar={setEmail} placeholder="voce@contabilandrade.com.br" />}</Campo>
+              <Campo rotulo="E-mail">{(id) => <CampoTexto id={id} tipo="email" valor={email} onMudar={setEmail} placeholder={`voce@${dominio}`} />}</Campo>
               <Campo rotulo="Senha" erro={erro ?? undefined}>
                 {(id) => (
                   <span className="relative">
@@ -173,7 +177,7 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
       </main>
 
       <footer className="text-muted-foreground flex items-center justify-center gap-1.5 px-4 pb-4 text-center text-xs">
-        <LockKeyIcon className="size-3.5 shrink-0" /> painel.contabilandrade.com.br · conexão protegida
+        <LockKeyIcon className="size-3.5 shrink-0" /> painel.{dominio} · conexão protegida
       </footer>
     </div>
   )

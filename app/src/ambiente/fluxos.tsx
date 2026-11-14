@@ -11,9 +11,8 @@ import type { Tarefa } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import type { SetorIntegrante } from '@/theme/tipos'
 import type { ContatoCliente } from './clientes'
-import { usuariosCfg } from '@/dados/configuracoes'
 import { usePedirIntegrante } from './pedir'
-import { NavegacaoProvider, useLoja, useNavegacao, type Destino } from './loja'
+import { NavegacaoProvider, useContas, useLoja, useNavegacao, type Destino } from './loja'
 import { rotuloSetorCurto, useSessao } from './sessao'
 
 /** Cliente pelo nome (os dados de exemplo guardam o nome). */
@@ -565,7 +564,8 @@ function GavetaFichaCliente({ clienteId, onFechar }: { clienteId: string; onFech
   // Responsáveis pelos pacotes que o cliente contratou (o BPO só onde há BPO).
   const pacotes = cliente?.servicos ?? ['contabil']
   const setoresEquipe: SetorIntegrante[] = [...(pacotes.includes('contabil') && loja.estado.cenario !== 'bpo_puro' ? (['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor'] as const) : []), ...(pacotes.includes('bpo') ? (['bpo_financeiro'] as const) : [])]
-  const pessoasDo = (s: SetorIntegrante) => usuariosCfg.filter((u) => u.situacao === 'ativo' && (u.papel === 'administrador' || u.vinculos.some((v) => v.setor === s))).map((u) => u.nome)
+  const contas = useContas()
+  const pessoasDo = (s: SetorIntegrante) => contas.filter((u) => u.situacao === 'ativo' && (u.papel === 'administrador' || u.vinculos.some((v) => v.setor === s))).map((u) => u.nome)
   const muda = (i: number, p: Partial<ContatoCliente>) => setContatos((xs) => xs.map((x, k) => (k === i ? { ...x, ...p } : x)))
   const semAssunto = assuntos.filter((a) => !contatos.some((c) => c.assuntos.includes(a.valor)))
   return (

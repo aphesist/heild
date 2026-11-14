@@ -1,119 +1,44 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { usuariosCfg, type UsuarioCfg } from '@/dados/configuracoes'
+import type { Papel } from '@/nucleo/modelo/entidades'
+import { permissoesDoPerfil, rotuloSetorCurto, type Contexto, type Perfil, type Permissoes } from '@/nucleo/permissoes'
+import { definirContexto } from '@/nucleo/repositorios'
+import { useTabela } from '@/nucleo/react'
 import type { SetorIntegrante } from '@/theme/tipos'
+import { useContas } from './loja'
 
 /**
  * Sessão do escritório de demonstração: quem entrou e o que essa conta pode
- * ver. As permissões saem da função única das Fundações (3.4), aqui reduzida
- * ao que as telas usam: papel + vínculos por setor + exceções por tela.
+ * ver. As permissões saem da função única das Fundações (3.4), em
+ * src/nucleo/permissoes: o mesmo perfil decide o que a tela mostra e o que o
+ * repositório aceita gravar.
+ *
+ * "Ver como" (painel da demonstração): mostra o sistema com outro papel e
+ * outros setores sem trocar de pessoa, para os contadores verem o que cada um
+ * enxerga. Fica marcado no topo e não muda a conta guardada.
  */
 
-export type IdModuloSessao = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config'
+export { integrantesBpo, rotuloSetorCurto, setoresContabeis } from '@/nucleo/permissoes'
+export type { IdModuloSessao, Permissoes } from '@/nucleo/permissoes'
 
-export interface Permissoes {
-  modulos: IdModuloSessao[]
-  abas: Partial<Record<IdModuloSessao, string[]>>
-  /** Setores com vínculo (todos, para o Administrador). */
-  setores: SetorIntegrante[]
-  /** Setores que gere (Gestor) ou todos (Administrador). */
-  gere: SetorIntegrante[]
-  papelTimesheet: 'colaborador' | 'gestor' | 'admin'
-  /** Financeiro só leitura (exceção por tela). */
-  financeiroSoLeitura: boolean
-  /** BPO (10, 5.4): margem só do Administrador; Configuração só ele edita. */
-  bpoMargem: boolean
-  bpoEditaConfig: boolean
-  /** Texto curto para o menu do usuário. */
-  resumo: string
+/** Visibilidade de uma conta (a lista de Configurações e a tela de entrada usam). */
+export function permissoesDe(u: UsuarioCfg, extra: Pick<Perfil, 'carteira_ligada' | 'modulos'> = { carteira_ligada: false, modulos: ['painel', 'crm', 'timesheet', 'agentes', 'consultor', 'app_cliente', 'financeiro', 'arquivos', 'bpo'] }): Permissoes {
+  return permissoesDoPerfil(perfilDe(u, extra))
 }
 
-const todosSetores: SetorIntegrante[] = ['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor', 'gestao_atendimento', 'financeiro_escritorio', 'bpo_financeiro']
-/** Setores do pacote Contábil: só eles abrem o Painel (DA-02; 10, 2.5). */
-export const setoresContabeis: SetorIntegrante[] = ['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor']
-const abaDoSetor: Partial<Record<SetorIntegrante, string>> = { societario: 'societario', fiscal: 'fiscal', notas: 'notas', dp: 'dp', contabil: 'contabil', consultor: 'consultoria' }
-const ordemPainel = ['societario', 'obrigacoes', 'notas', 'fiscal', 'dp', 'contabil', 'consultoria', 'gestao']
-export const rotuloSetorCurto: Record<SetorIntegrante, string> = {
-  geral: 'Geral',
-  societario: 'Societário',
-  fiscal: 'Fiscal',
-  notas: 'Notas',
-  dp: 'DP',
-  contabil: 'Contábil',
-  consultor: 'Consultoria',
-  gestao_atendimento: 'Gestão e Atendimento',
-  financeiro_escritorio: 'Financeiro do escritório',
-  bpo_financeiro: 'BPO Financeiro',
-  bpo_pagar: 'Contas a Pagar',
-  bpo_receber: 'Contas a Receber',
-  bpo_conciliacao: 'Conciliação',
-  bpo_gerencial: 'Gerencial',
-}
-/** Integrantes do BPO, um por função; quem é do setor BPO Financeiro vê todos (8/11/2026). */
-export const integrantesBpo: SetorIntegrante[] = ['bpo_pagar', 'bpo_receber', 'bpo_conciliacao', 'bpo_gerencial']
-
-export function permissoesDe(u: UsuarioCfg): Permissoes {
-  const admin = u.papel === 'administrador'
-  const setores = admin ? todosSetores : u.vinculos.map((v) => v.setor)
-  const gere = admin ? todosSetores : u.vinculos.filter((v) => v.modo === 'gestao').map((v) => v.setor)
-  const bloqueadas = new Set(u.excecoes.filter((x) => x.efeito === 'bloquear').map((x) => x.tela))
-  const liberadas = u.excecoes.filter((x) => x.efeito === 'liberar').map((x) => x.tela)
-
-  const contabeis = setores.filter((x) => setoresContabeis.includes(x))
-  const painel = admin ? ordemPainel : ordemPainel.filter((a) => (a === 'obrigacoes' ? contabeis.length > 0 : a === 'gestao' ? gere.some((x) => setoresContabeis.includes(x)) : contabeis.some((x) => abaDoSetor[x] === a)))
-  // 04, 10.1: conversas dos próprios setores para todos; leads com Gestão e Atendimento; comunicados
-  // para todos (o Colaborador rascunha e envia com aprovação); Números para Gestor (o próprio setor) e Administrador.
-  const atende = admin || setores.includes('gestao_atendimento')
-  const crm = ['conversas', ...(atende ? ['leads'] : []), 'comunicados', ...(admin || gere.length > 0 ? ['numeros'] : [])]
-  // 05, 8.1 com a revisão de consistência (00): Colaborador vê Meu tempo e Confirmações; Gestor, a Equipe dos
-  // setores que gere; Rentabilidade (fase 3) só Administrador e Gestor com Gestão ou Financeiro.
-  const papelTimesheet: Permissoes['papelTimesheet'] = admin ? 'admin' : gere.length > 0 ? 'gestor' : 'colaborador'
-  const veRentabilidade = admin || gere.includes('gestao_atendimento') || gere.includes('financeiro_escritorio')
-  const timesheet = papelTimesheet === 'colaborador' ? ['meu', 'confirmacoes'] : ['meu', 'equipe', ...(veRentabilidade ? ['rentabilidade'] : []), 'confirmacoes']
-  const financeiroTotal = admin || gere.includes('financeiro_escritorio')
-  // Colaborador só por exceção na conta (09, 10.6); Resultado, remuneração e sócios nunca se liberam assim.
-  const porExcecao: Record<string, string> = {
-    'aba.financeiro.honorarios': 'contratos',
-    'aba.financeiro.contratos': 'contratos',
-    'aba.financeiro.cobrancas': 'cobranca',
-    'aba.financeiro.contas_pagar': 'pagar',
-    'aba.financeiro.conciliacao': 'conciliacao',
-  }
-  const liberadasFin = financeiroTotal ? [] : [...new Set(liberadas.map((t) => porExcecao[t]).filter(Boolean))]
-  const financeiroLeitura = !financeiroTotal && liberadasFin.length > 0
-  const financeiro = financeiroTotal ? ['visao', 'contratos', 'cobranca', 'pagar', 'conciliacao', 'caixa', 'resultado'] : liberadasFin
-
-  // BPO (10, 2.5 e 5.4): aparece com o setor; a assinatura (módulo ligado) é conferida na Plataforma.
-  const noBpo = admin || setores.includes('bpo_financeiro')
-  const gereBpo = admin || gere.includes('bpo_financeiro')
-  const bpoRentabilidade = admin || (gereBpo && (gere.includes('gestao_atendimento') || gere.includes('financeiro_escritorio')))
-  const bpo = !noBpo ? [] : ['visao', 'carteira', 'fila', 'rotinas', 'aprovacoes', 'entregas', ...(gereBpo ? ['volume'] : []), ...(bpoRentabilidade ? ['rentabilidade'] : []), ...(gereBpo ? ['configuracao'] : [])]
-  const modulos: IdModuloSessao[] = [
-    'inicio',
-    // Sem Painel, o cadastro dos clientes vira item próprio (10, 2.2: [Painel | BPO] + Financeiro + Clientes).
-    ...(painel.length ? (['painel'] as const) : (['clientes'] as const)),
-    'crm',
-    'arquivos',
-    'timesheet',
-    ...(financeiro.length ? (['financeiro'] as const) : []),
-    ...(bpo.length ? (['bpo'] as const) : []),
-    ...(admin ? (['config'] as const) : []),
-  ]
-  const nomes = setores.map((s) => rotuloSetorCurto[s])
+export function perfilDe(u: UsuarioCfg, extra: Pick<Perfil, 'carteira_ligada' | 'modulos'>): Perfil {
   return {
-    modulos,
-    abas: { painel: painel.filter((a) => !bloqueadas.has(`aba.${a}`)), crm, timesheet, financeiro, bpo },
-    bpoMargem: admin,
-    bpoEditaConfig: gereBpo,
-    // O setor do escritório (bpo_financeiro) abre os integrantes das funções do BPO.
-    setores: setores.includes('bpo_financeiro') ? [...setores, ...integrantesBpo] : setores,
-    gere,
-    papelTimesheet,
-    financeiroSoLeitura: financeiroLeitura,
-    resumo: admin ? 'todos os setores' : nomes.join(', '),
+    usuario_id: u.id,
+    nome: u.nome,
+    papel: u.papel,
+    vinculos: u.vinculos,
+    excecoes: u.excecoes.map((x) => ({ tela: x.tela, efeito: x.efeito, nivel_max: x.nivel, motivo: x.motivo })),
+    carteira: u.carteira,
+    ...extra,
   }
 }
 
-export const rotuloPapel = { administrador: 'Administradora', gestor: 'Gestor', colaborador: 'Colaborador' } as const
+/** Nome do papel nas telas: Administrador, Gestor (com os setores que gere) e Membro. */
 export const papelExibido = (u: UsuarioCfg) =>
   u.papel === 'administrador'
     ? 'Administradora'
@@ -122,26 +47,83 @@ export const papelExibido = (u: UsuarioCfg) =>
           .filter((v) => v.modo === 'gestao')
           .map((v) => rotuloSetorCurto[v.setor])
           .join(', ')}`
-      : `Colaborador${u.nome.split(' ')[0].endsWith('a') ? 'a' : ''}`
+      : 'Membro'
 
-/** Contas que conseguem entrar (ativas). */
-export const contasAtivas = () => usuariosCfg.filter((u) => u.situacao === 'ativo')
+/** Papel e setores de faz de conta, escolhidos no painel da demonstração. */
+export interface VerComo {
+  papel: Papel
+  vinculos: { setor: SetorIntegrante; modo: 'gestao' | 'execucao' }[]
+}
 
 interface Sessao {
   usuario: UsuarioCfg | null
   permissoes: Permissoes | null
+  perfil: Perfil | null
+  /** Contas do escritório (do banco). */
+  contas: UsuarioCfg[]
   entrar: (id: string) => void
   sair: () => void
+  verComo: VerComo | null
+  definirVerComo: (v: VerComo | null) => void
 }
 
 const Ctx = createContext<Sessao | null>(null)
+const CHAVE = 'heild:sessao'
 
-export function SessaoProvider({ children, inicial = null }: { children: ReactNode; inicial?: string | null }) {
-  const [id, setId] = useState<string | null>(inicial)
+/**
+ * `contextoExterno`: quem age quando a tela não é do escritório (o app do
+ * cliente passa a pessoa do cliente); sem ele, é a conta que entrou.
+ */
+export function SessaoProvider({ children, inicial = null, contextoExterno = null }: { children: ReactNode; inicial?: string | null; contextoExterno?: Contexto | null }) {
+  // A conta fica guardada no navegador: recarregar a página continua na mesma pessoa.
+  const [id, setId] = useState<string | null>(() => {
+    if (inicial) return inicial
+    try {
+      return window.sessionStorage.getItem(CHAVE)
+    } catch {
+      return null
+    }
+  })
+  const [verComo, setVerComo] = useState<VerComo | null>(null)
+  const contas = useContas()
+  const escritorio = useTabela('escritorio')[0]
+  const assinatura = useTabela('assinatura')[0]
   const valor = useMemo<Sessao>(() => {
-    const usuario = usuariosCfg.find((u) => u.id === id) ?? null
-    return { usuario, permissoes: usuario ? permissoesDe(usuario) : null, entrar: setId, sair: () => setId(null) }
-  }, [id])
+    const real = contas.find((u) => u.id === id && u.situacao === 'ativo') ?? null
+    const usuario = real && verComo ? { ...real, papel: verComo.papel, vinculos: verComo.vinculos, excecoes: [] } : real
+    const extra = { carteira_ligada: escritorio?.carteira_ligada ?? false, modulos: assinatura?.modulos ?? [] }
+    const perfil = usuario ? perfilDe(usuario, extra) : null
+    const lembrar = (v: string | null) => {
+      try {
+        if (v) window.sessionStorage.setItem(CHAVE, v)
+        else window.sessionStorage.removeItem(CHAVE)
+      } catch {
+        /* sem armazenamento */
+      }
+    }
+    return {
+      usuario,
+      perfil,
+      permissoes: perfil ? permissoesDoPerfil(perfil) : null,
+      contas,
+      entrar: (novo) => {
+        setVerComo(null)
+        lembrar(novo)
+        setId(novo)
+      },
+      sair: () => {
+        setVerComo(null)
+        lembrar(null)
+        setId(null)
+      },
+      verComo,
+      definirVerComo: setVerComo,
+    }
+  }, [id, contas, escritorio, assinatura, verComo])
+  // Os repositórios conferem a permissão de quem está na tela.
+  const ctx: Contexto | null = contextoExterno ?? (valor.perfil ? { ator: { tipo: 'pessoa', perfil: valor.perfil }, origem: 'tela' } : null)
+  definirContexto(ctx)
+  useEffect(() => () => definirContexto(null), [])
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>
 }
 
@@ -149,9 +131,12 @@ export function SessaoProvider({ children, inicial = null }: { children: ReactNo
 export function useSessao(): Sessao & { usuario: UsuarioCfg; permissoes: Permissoes } {
   const s = useContext(Ctx)
   const u = s?.usuario ?? usuariosCfg[0]
-  return { entrar: () => {}, sair: () => {}, ...s, usuario: u, permissoes: s?.permissoes ?? permissoesDe(u) }
+  return { entrar: () => {}, sair: () => {}, contas: usuariosCfg, verComo: null, definirVerComo: () => {}, perfil: null, ...s, usuario: u, permissoes: s?.permissoes ?? permissoesDe(u) }
 }
 
 export function useSessaoBruta() {
   return useContext(Ctx)
 }
+
+/** Contas que conseguem entrar (ativas). */
+export const contasAtivas = (contas: UsuarioCfg[]) => contas.filter((u) => u.situacao === 'ativo')

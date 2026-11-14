@@ -1,5 +1,6 @@
 import { ArrowCounterClockwiseIcon, EyeIcon, PlusIcon, ShieldCheckIcon, TrashIcon, UserPlusIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
-import { usePersistente } from '@/ambiente/loja'
+import { salvarContas, useContas, useLoja, usePersistente } from '@/ambiente/loja'
+import { useEscritorioCfg } from '@/ambiente/configuracoes'
 import { BotaoFeito } from '@/ambiente/interface'
 import { useState } from 'react'
 import { Caixa, TituloBloco } from '@/components/compostos/blocos'
@@ -8,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoArea, CampoEscolha, CampoTexto, GavetaFormulario, Segmentado } from '@/components/ui/formulario'
 import { rotuloSetor } from '@/dados/crm'
-import { convitesPendentes as convIniciais, escritorio, telasSistema, usuariosCfg, type ExcecaoTela, type Papel, type UsuarioCfg, type Vinculo } from '@/dados/configuracoes'
+import { convitesPendentes as convIniciais, telasSistema, type ExcecaoTela, type Papel, type UsuarioCfg, type Vinculo } from '@/dados/configuracoes'
 import { clientes } from '@/dados/exemplo'
 import { cn } from '@/lib/utils'
 import type { SetorIntegrante } from '@/theme/tipos'
@@ -29,7 +30,17 @@ const nomeSetor = (s: SetorIntegrante) => (s === 'financeiro_escritorio' ? 'Fina
  * "o que Fulano vê?" calculado.
  */
 export function UsuariosTela() {
-  const [usuarios, setUsuarios] = usePersistente('cfg.usu.usuarios', usuariosCfg)
+  // As contas moram no banco (usuário, vínculos, exceções, carteira): mudar aqui muda o que a pessoa vê.
+  const usuarios = useContas()
+  const loja = useLoja()
+  const [escritorio] = useEscritorioCfg()
+  const setUsuarios = (v: UsuarioCfg[] | ((x: UsuarioCfg[]) => UsuarioCfg[])) => {
+    try {
+      salvarContas(typeof v === 'function' ? v(usuarios) : v)
+    } catch (e) {
+      loja.toastErro(e instanceof Error ? e.message : String(e))
+    }
+  }
   const [convites, setConvites] = usePersistente('cfg.usu.convites', convIniciais)
   const [editando, setEditando] = useState<UsuarioCfg | null>(null)
   const [convidando, setConvidando] = useState(false)
@@ -252,6 +263,8 @@ function Convidar({ existentes, onFechar, onConvidar }: { existentes: string[]; 
 
 function EditarUsuario({ u, onFechar, onSalvar }: { u: UsuarioCfg; onFechar: () => void; onSalvar: (u: UsuarioCfg) => void }) {
   const [d, setD] = useState(u)
+  const usuariosCfg = useContas()
+  const [escritorio] = useEscritorioCfg()
   const [excecao, setExcecao] = useState<ExcecaoTela | null>(null)
   const [desativando, setDesativando] = useState(false)
   const [repasse, setRepasse] = useState('Fernanda Lima')

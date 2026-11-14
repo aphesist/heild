@@ -33,7 +33,7 @@ import { SiglaMarca } from '@/components/compostos/barra-lateral'
 import { ehHeild, Marca } from '@/components/compostos/marca'
 import { Button } from '@/components/ui/button'
 import { CampoEscolha, CampoTexto } from '@/components/ui/formulario'
-import { usuariosCfg } from '@/dados/configuracoes'
+import { banco } from '@/nucleo/banco'
 import type { ItemConversa } from '@/dados/crm'
 import * as exemplo from '@/dados/exemplo'
 import { faturasDoCenario, rotuloFatura } from '@/dados/financeiro'
@@ -103,7 +103,7 @@ const nomeSetor: Partial<Record<SetorIntegrante, string>> = {
   bpo_financeiro: 'BPO Financeiro',
 }
 export const primeiroNome = (n: string) => n.replace('Dra. ', '').split(' ')[0]
-export const idDoUsuario = (nome?: string) => usuariosCfg.find((u) => u.nome === nome)?.id
+export const idDoUsuario = (nome?: string) => banco.ler('usuario').find((u) => u.nome === nome)?.id
 
 export type Tela = 'inicio' | 'documentos' | 'pendencias' | 'conversa' | 'mais' | 'pedidos' | 'financeiro' | 'empresa' | 'agenda' | 'servicos' | 'servico' | 'aprovacoes' | 'caixa'
 
