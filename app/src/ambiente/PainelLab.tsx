@@ -21,6 +21,8 @@ import { LabS05 } from './lab-s05'
 import { papelExibido, useSessaoBruta } from './sessao'
 import { SecaoTimesheetLab } from '@/telas/timesheet/lab' // S06
 import { SecaoS03 } from '@/telas/painel/s03/gatilhos' // S03
+// S08: controles do BPO (cenário 3, cartão que expira, ERP fora do ar).
+import { SecaoDemonstracaoBpo } from '@/telas/bpo/DemonstracaoBpo'
 import { SecaoLabS09 } from '@/telas/config/lab-s09'
 
 export type Visao = 'escritorio' | 'cliente'
@@ -173,6 +175,7 @@ export function PainelLab({
             </div>
           </div>
         )}
+        {visao === 'escritorio' && <SecaoDemonstracaoBpo />}
         {visao === 'escritorio' && (
           <div className="flex flex-col gap-1">
             <span className="text-muted-foreground text-xs">Entrar como</span>

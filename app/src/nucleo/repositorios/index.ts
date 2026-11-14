@@ -3,6 +3,7 @@ import type { Banco } from '../banco/banco'
 import type { CartaoAprovacao, Id, MensagemInterna, NomeTabela, Notificacao, StatusTarefa, Tabelas, Tarefa } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
 import { idDoAtor, nomeDoAtor } from '../permissoes/perfil'
+import { criarReposBpo } from './bpo'
 import { contextoAtual } from './contexto'
 import { agora, novoId, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
 import { registrarRepoSessoes, RepositorioItensConfirmacao, RepositorioSessoes } from './s06-timesheet'
@@ -10,6 +11,7 @@ import { registrarRepoSessoes, RepositorioItensConfirmacao, RepositorioSessoes }
 export * from './contexto'
 export * from './repositorio'
 export * from './s06-timesheet'
+export { ehGestorBpo, eventoBpo } from './bpo'
 
 const b = (): Banco => banco
 
@@ -198,6 +200,8 @@ export const repos = {
   equivalencias: new Repositorio(b, regras({ tabela: 'equivalencia_core', prefixo: 'eq', artigo: 'a equivalência', ferramentas: { criar: 'core.equivalencia', atualizar: 'core.equivalencia' }, exclusao: 'proibida', rotulo: (r) => `"${r.core_tipo_tarefa}"` })),
   duracoesPadrao: new Repositorio(b, regras({ tabela: 'duracao_padrao', prefixo: 'dp', artigo: 'a duração padrão de', ferramentas: { criar: 'timesheet.calibrar', atualizar: 'timesheet.calibrar' }, exclusao: 'proibida', rotulo: (r) => r.atividade_id, validar: (r) => (r.adotada_min != null && r.adotada_min <= 0 ? 'A duração precisa ser maior que zero.' : null) })),
   fechamentos: new Repositorio(b, regras({ tabela: 'fechamento_timesheet', prefixo: 'ft', artigo: 'o fechamento', ferramentas: { criar: 'timesheet.fechar_mes', atualizar: 'timesheet.fechar_mes' }, exclusao: 'proibida', rotulo: (r) => `${r.competencia} · ${r.cliente_id}`, linhaDoTempo: false })),
+  // S08: BPO (subplano 10), regras em ./bpo.ts
+  bpo: criarReposBpo(b),
 }
 
 export type Repos = typeof repos

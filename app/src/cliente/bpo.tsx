@@ -1,35 +1,91 @@
-import { BankIcon, CheckIcon, PencilSimpleIcon, ShieldCheckIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
-import { useState } from 'react'
-import { type DecisaoLote, useLoja } from '@/ambiente/loja'
+import { BankIcon, ChatCircleIcon, CheckIcon, FileTextIcon, PencilSimpleIcon, PlugsConnectedIcon, ShieldCheckIcon, WarningIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLoja } from '@/ambiente/loja'
 import { Button } from '@/components/ui/button'
-import { CampoArea } from '@/components/ui/formulario'
-import { aprovadoresDe, empresaBpo, inicioProjecaoBpo, lotesBpo, mesesBpo, type LoteBpo } from '@/dados/bpo'
+import { CampoArea, CampoTexto } from '@/components/ui/formulario'
 import { cn } from '@/lib/utils'
+import { banco } from '@/nucleo/banco'
+import type { BpoConta, BpoLote } from '@/nucleo/modelo/entidades'
+import type { Contexto } from '@/nucleo/permissoes'
+import { temBanco, useTabela } from '@/nucleo/react'
+import { garantirSementeBpo } from '@/nucleo/semente/s08'
+import { comoAtor, repos } from '@/nucleo/repositorios'
 import { FluxoMensal } from '@/telas/financeiro/pecas'
+import { agoraBpo, aprovadoresPara, quando, useEmpresaBpo } from '@/telas/bpo/dados'
 import { Bloco, primeiroNome, TituloTela, type Ctx } from './ClienteApp'
+
+/*
+ * S08 · Contrato C10: as telas do BPO no app do cliente (S08-T10). Continua
+ * exportando AprovacoesApp, CaixaApp, PropostaAlcadaApp e useLotesAbertos com
+ * os mesmos pontos de uso do ClienteApp (S10). Agora leem e gravam nas
+ * entidades do BPO (lote, conta, alçada, fila), como a pessoa do cliente.
+ */
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 
-/** Lotes desta empresa que ainda esperam alguém. */
-export function useLotesAbertos(ctx: Ctx) {
+/** Lote com as contas, no formato que o Início do app usa (`itens` com `valor`). */
+export type LoteApp = BpoLote & { itens: { conta: string; fornecedor: string; valor: number; vencimento: string; alerta?: string | null }[] }
+
+function comItens(l: BpoLote, contas: BpoConta[]): LoteApp {
+  const itens = l.conta_ids.map((id) => contas.find((c) => c.id === id)).filter((c): c is BpoConta => !!c)
+  return { ...l, itens: itens.map((c) => ({ conta: c.id, fornecedor: c.contraparte, valor: c.valor, vencimento: c.vencimento, alerta: c.alerta })) }
+}
+
+/** Lotes desta empresa que ainda esperam alguém (Início do app: "Pagamentos para aprovar"). */
+export function useLotesAbertos(ctx: Ctx): LoteApp[] {
+  // Banco guardado antes das tabelas do BPO: semeia o BPO uma vez (sem apagar o resto).
+  useEffect(() => {
+    if (temBanco()) garantirSementeBpo()
+  }, [])
+  const tLote = useTabela('bpo_lote')
+  const tConta = useTabela('bpo_conta')
+  return useMemo(() => tLote.filter((l) => l.cliente_id === ctx.clienteId && !l.arquivado_em && (l.situacao === 'aguardando' || l.situacao === 'parcial')).map((l) => comItens(l, tConta)), [tLote, tConta, ctx.clienteId])
+}
+
+/** Quem age no app: a pessoa do cliente (ferramentas expostas ao cliente, Fundações 3.2). */
+const ctxCliente = (ctx: Ctx): Contexto => ({ ator: { tipo: 'pessoa_cliente', nome: ctx.contato.nome, cliente_id: ctx.clienteId }, origem: 'tela' })
+
+function useNoApp(ctx: Ctx) {
   const loja = useLoja()
-  return lotesBpo.filter((l) => l.clienteId === ctx.clienteId && ['aguardando', 'parcial'].includes((loja.estado.bpoLotes[l.id] ?? { situacao: 'aguardando' }).situacao))
+  return <R,>(fazer: () => R, aviso?: string): R | undefined => {
+    try {
+      const r = comoAtor(ctxCliente(ctx), fazer)
+      if (aviso) ctx.avisarApp(aviso)
+      return r
+    } catch (e) {
+      loja.toastErro(e instanceof Error ? e.message : String(e))
+      return undefined
+    }
+  }
+}
+
+/** Avisa a equipe do BPO no sino (cada decisão do cliente avisa, 10, 3.6). */
+function useAvisarEquipe(ctx: Ctx) {
+  const loja = useLoja()
+  return (titulo: string, aba = 'aprovacoes') => loja.avisar({ para: [], tipo: 'cliente', setor: 'bpo_financeiro', titulo, detalhe: ctx.clienteNome, destino: { modulo: 'bpo', aba, cliente: ctx.clienteId } })
 }
 
 /**
- * App › Aprovações de pagamento (10, 3.6): o cartão do lote com Aprovar,
- * Editar e aprovar, Recusar. A aprovação fica registrada (quem, quando, o
- * quê); no M1, depois de aprovar, o cliente libera no banco. Nada é pago
- * sem esse passo humano.
+ * App › Aprovações de pagamento (S08-A47 a A50): o cartão do lote com Aprovar,
+ * Editar e aprovar, Recusar, aprovação pelo WhatsApp com código (só abaixo do
+ * teto) e, no M1, "Já liberei no banco". Antes, os pedidos do escritório que
+ * dependem da pessoa (autorizar o ERP de novo, mandar o boleto que faltou).
  */
 export function AprovacoesApp({ ctx }: { ctx: Ctx }) {
-  const lotes = lotesBpo.filter((l) => l.clienteId === ctx.clienteId)
+  const tLote = useTabela('bpo_lote')
+  const tConta = useTabela('bpo_conta')
+  const tFila = useTabela('bpo_item_fila')
+  const lotes = useMemo(() => tLote.filter((l) => l.cliente_id === ctx.clienteId && !l.arquivado_em).sort((a, b) => b.criado_em.localeCompare(a.criado_em)).map((l) => comItens(l, tConta)), [tLote, tConta, ctx.clienteId])
+  const pedidos = tFila.filter((f) => f.cliente_id === ctx.clienteId && f.situacao === 'aberto' && f.bola === 'cliente' && f.tipo !== 'pagamento')
   return (
     <div className="flex flex-col gap-3">
       <TituloTela voltar={() => ctx.ir('mais')}>Aprovações de pagamento</TituloTela>
       <p className="text-muted-foreground flex items-start gap-2 text-xs">
         <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" /> O escritório prepara e confere; só você aprova. Nenhum pagamento sai sem a sua aprovação.
       </p>
+      {pedidos.map((f) => (
+        <PedidoDoEscritorio key={f.id} ctx={ctx} id={f.id} />
+      ))}
       {lotes.length === 0 && <p className="text-muted-foreground py-6 text-center text-sm">Nenhum pagamento para aprovar.</p>}
       {lotes.map((l) => (
         <CartaoLoteApp key={l.id} l={l} ctx={ctx} />
@@ -38,57 +94,85 @@ export function AprovacoesApp({ ctx }: { ctx: Ctx }) {
   )
 }
 
-function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
-  const loja = useLoja()
-  const e = empresaBpo(ctx.clienteId)
-  const s: DecisaoLote = loja.estado.bpoLotes[l.id] ?? { situacao: 'aguardando', aprovacoes: [], removidos: [] }
+/** Pedido do escritório que depende da pessoa: autorizar de novo o ERP, ou mandar o que faltou no pedido. */
+function PedidoDoEscritorio({ ctx, id }: { ctx: Ctx; id: string }) {
+  const noApp = useNoApp(ctx)
+  const avisar = useAvisarEquipe(ctx)
+  const f = useTabela('bpo_item_fila').find((x) => x.id === id)
+  if (!f) return null
+  const autorizar = f.texto.startsWith('Autorizar de novo')
+  return (
+    <Bloco titulo={autorizar ? f.texto : `O escritório precisa: ${f.faltando.join(', ') || f.texto}`}>
+      <p className="text-muted-foreground text-xs">{autorizar ? 'A autorização do seu sistema financeiro venceu. Sem ela o escritório não enxerga as contas novas. Leva um minuto, no site do seu sistema.' : f.texto}</p>
+      <Button
+        size="sm"
+        className="w-fit rounded-full"
+        onClick={() => {
+          const ok = noApp(() => {
+            if (autorizar) {
+              const x = banco.ler('bpo_conexao_erp').find((c) => c.cliente_id === ctx.clienteId)
+              if (x) repos.bpo.conexoes.atualizar(x.id, { situacao: 'ok', ultima_sincronizacao: agoraBpo() }, { ferramenta: 'erp.autorizar', texto: `${ctx.contato.nome} autorizou de novo o ${x.provedor} pelo app` })
+              return repos.bpo.fila.atualizar(f.id, { situacao: 'resolvido', bola: 'bpo' }, { ferramenta: 'erp.autorizar', texto: `Resolvido pelo cliente: ${f.texto}` })
+            }
+            return repos.bpo.fila.atualizar(f.id, { faltando: [], bola: 'bpo', sla_inicio: agoraBpo() }, { ferramenta: 'fila.responder', texto: `${ctx.contato.nome} mandou pelo app: ${f.faltando.join(', ')}` })
+          }, autorizar ? 'Autorizado (demonstração). O escritório volta a ler as contas.' : 'Enviado ao escritório.')
+          if (ok) avisar(autorizar ? `${primeiroNome(ctx.contato.nome)} autorizou o ERP de novo` : `${primeiroNome(ctx.contato.nome)} mandou o que faltava`, 'fila')
+        }}
+      >
+        {autorizar ? (
+          <>
+            <PlugsConnectedIcon /> Autorizar
+          </>
+        ) : (
+          'Enviar'
+        )}
+      </Button>
+    </Bloco>
+  )
+}
+
+function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
+  const e = useEmpresaBpo(ctx.clienteId)
+  const tConfig = useTabela('bpo_configuracao')
+  const noApp = useNoApp(ctx)
+  const avisar = useAvisarEquipe(ctx)
   const [editando, setEditando] = useState(false)
-  const [fora, setFora] = useState<string[]>(s.removidos)
+  const [fora, setFora] = useState<string[]>([])
   const [recusando, setRecusando] = useState(false)
   const [motivo, setMotivo] = useState('')
-  const itens = l.itens.filter((i) => !(editando ? fora : s.removidos).includes(i.conta))
+  const [zap, setZap] = useState<{ codigo: string; digitado: string } | null>(null)
+  const tirados = editando ? fora : l.removidos
+  const itens = l.itens.filter((i) => !tirados.includes(i.conta))
   const total = itens.reduce((t, i) => t + i.valor, 0)
-  const podem = aprovadoresDe(loja.fichaDe(ctx.clienteId)?.contatos ?? [], total, e?.alcadas.faixa2)
+  const faixa2 = e?.faixa2 ?? 20_000
+  const podem = aprovadoresPara(e?.ficha ?? { id: ctx.clienteId, contatos: [ctx.contato], responsaveis: {}, conversas: {} }, total, faixa2)
   const eu = ctx.contato.nome
   const posso = podem.some((p) => p.nome === eu)
-  const jaAprovei = s.aprovacoes.some((a) => a.nome === eu)
-  const aberto = s.situacao === 'aguardando' || s.situacao === 'parcial'
-  const ator = `${eu} (cliente, app)`
-  const avisarEquipe = (titulo: string) =>
-    loja.avisar({ para: ['u1', 'u8', 'u9'], tipo: 'cliente', setor: 'bpo_financeiro', titulo, detalhe: `${ctx.clienteNome} · ${l.titulo}`, destino: { modulo: 'bpo', aba: 'aprovacoes', cliente: ctx.clienteId } })
-
-  const aprovar = () => {
-    const removidos = editando ? fora : s.removidos
-    loja.decidirLote(l.id, { tipo: 'aprovar', nome: eu, removidos })
-    const completa = s.aprovacoes.length + 1 >= l.aprovadoresNecessarios
-    loja.registrar(ator, `Aprovou ${editando ? 'com edição ' : ''}o lote “${l.titulo}” de ${ctx.clienteNome} (${brl(total)})`)
-    avisarEquipe(completa ? `${primeiroNome(eu)} aprovou o lote de ${brl(total)}` : `${primeiroNome(eu)} aprovou; falta a segunda aprovação`)
+  const jaAprovei = l.aprovacoes.some((a) => a.nome === eu)
+  const aberto = l.situacao === 'aguardando' || l.situacao === 'parcial'
+  const teto = tConfig[0]?.teto_whatsapp ?? 3_000
+  const aprovar = (canal: 'app' | 'whatsapp') => {
+    const depois = noApp(() => repos.bpo.lotes.aprovar(l.id, eu, editando ? fora : [], canal))
+    if (!depois) return
     setEditando(false)
-    ctx.avisarApp(
-      completa ? (e?.modoPagamento === 'M1' ? 'Aprovado. Agora libere no seu banco; o escritório confere a baixa.' : 'Aprovado e registrado. O pagamento sai no vencimento.') : 'Aprovação registrada. Falta a segunda pessoa aprovar.',
-    )
+    setZap(null)
+    const completo = depois.situacao === 'aprovado'
+    avisar(completo ? `${primeiroNome(eu)} aprovou o lote de ${brl(depois.total)}` : `${primeiroNome(eu)} aprovou; falta a segunda aprovação`)
+    ctx.avisarApp(completo ? (l.modo_pagamento === 'M1' ? 'Aprovado. Agora libere no seu banco; o escritório confere a baixa.' : 'Aprovado e registrado. O pagamento sai no vencimento.') : 'Aprovação registrada. Falta a segunda pessoa aprovar.')
   }
 
   return (
     <Bloco titulo={l.titulo}>
       <ul className="flex flex-col gap-2 text-sm">
         {l.itens.map((i) => {
-          const tirado = (editando ? fora : s.removidos).includes(i.conta)
+          const tirado = tirados.includes(i.conta)
           return (
             <li key={i.conta} className="flex items-start gap-2">
-              {editando && (
-                <input
-                  type="checkbox"
-                  aria-label={`Manter ${i.fornecedor}`}
-                  checked={!tirado}
-                  onChange={(ev) => setFora((xs) => (ev.target.checked ? xs.filter((x) => x !== i.conta) : [...xs, i.conta]))}
-                  className="accent-foreground mt-0.5 size-4 shrink-0"
-                />
-              )}
+              {editando && <input type="checkbox" aria-label={`Manter ${i.fornecedor}`} checked={!tirado} onChange={(ev) => setFora((xs) => (ev.target.checked ? xs.filter((x) => x !== i.conta) : [...xs, i.conta]))} className="accent-foreground mt-0.5 size-4 shrink-0" />}
               <span className={cn('min-w-0 flex-1', tirado && 'text-muted-foreground line-through')}>
                 <span className="block">{i.fornecedor}</span>
                 <span className="text-muted-foreground block text-xs">
-                  vence {i.vencimento} · {i.marca}
+                  vence {quando(i.vencimento)} · {e?.fornecedores.find((f) => f.nome === i.fornecedor)?.risco === 'recorrente' ? 'OK (fornecedor recorrente)' : 'conferido pelo escritório'}
                 </span>
                 {i.alerta && (
                   <span className="text-warning-foreground flex items-start gap-1 text-xs">
@@ -105,26 +189,26 @@ function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
         <span className="flex-1">
           Total <strong className="font-medium tabular-nums">{brl(total)}</strong>
           <span className="text-muted-foreground block text-xs">
-            saldo {brl(l.saldo)} · expira {l.expira}
+            saldo {brl(l.saldo)} · depois {brl(l.saldo - total)} · expira {quando(l.expira_em.slice(0, 10))}
           </span>
         </span>
       </div>
       <p className="text-muted-foreground text-xs">
-        Preparado por {l.preparadoPor} · conferido por {l.conferidoPor}
-        {l.aprovadoresNecessarios > 1 && ` · acima de ${brl(e?.alcadas.faixa2 ?? 20_000)}: ${podem.map((p) => primeiroNome(p.nome)).join(' e ')} aprovam`}
+        Preparado por {l.preparado_por} · conferido por {l.conferido_por}
+        {total > faixa2 && ` · acima de ${brl(faixa2)}: ${podem.map((p) => primeiroNome(p.nome)).join(' e ')} aprovam`}
       </p>
 
-      {aberto && !jaAprovei && posso && !recusando && (
+      {aberto && !jaAprovei && posso && !recusando && !zap && (
         <div className="flex flex-wrap gap-1.5">
-          <Button size="sm" className="rounded-full" onClick={aprovar} disabled={itens.length === 0}>
+          <Button size="sm" className="rounded-full" onClick={() => aprovar('app')} disabled={itens.length === 0}>
             <CheckIcon /> {editando ? 'Aprovar o que ficou' : 'Aprovar'}
           </Button>
           {!editando && (
-            <Button size="sm" variant="outline" className="rounded-full" onClick={() => setEditando(true)}>
+            <Button size="sm" variant="outline" className="rounded-full" onClick={() => (setFora([]), setEditando(true))}>
               <PencilSimpleIcon /> Editar e aprovar
             </Button>
           )}
-          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => (editando ? (setEditando(false), setFora(s.removidos)) : setRecusando(true))}>
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => (editando ? setEditando(false) : setRecusando(true))}>
             {editando ? (
               'Cancelar'
             ) : (
@@ -133,6 +217,46 @@ function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
               </>
             )}
           </Button>
+          {!editando && (
+            <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setZap({ codigo: String(100000 + Math.floor(Math.random() * 900000)), digitado: '' })}>
+              <WhatsappLogoIcon /> Pelo WhatsApp
+            </Button>
+          )}
+          {!editando && (
+            <Button size="sm" variant="ghost" className="rounded-full" onClick={() => ctx.abrirConversa('bpo_financeiro')}>
+              <ChatCircleIcon /> Perguntar
+            </Button>
+          )}
+        </div>
+      )}
+      {zap && (
+        <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm" aria-label="Aprovação pelo WhatsApp (simulada)">
+          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <WhatsappLogoIcon /> WhatsApp do escritório · demonstração
+          </span>
+          {total <= teto ? (
+            <>
+              <span>
+                “{l.titulo}: {brl(total)}. Para aprovar, responda com o código <strong className="font-mono font-medium">{zap.codigo}</strong> (vale uma vez, por 10 minutos).”
+              </span>
+              <CampoTexto aria-label="Código de uso único" mono valor={zap.digitado} onMudar={(v) => setZap({ ...zap, digitado: v.replace(/\D/g, '').slice(0, 6) })} placeholder="000000" />
+              <div className="flex gap-1.5">
+                <Button size="sm" className="rounded-full" disabled={zap.digitado !== zap.codigo} onClick={() => aprovar('whatsapp')}>
+                  Responder com o código
+                </Button>
+                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setZap(null)}>
+                  Voltar
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <span>“{l.titulo}: {brl(total)}. Acima de {brl(teto)} a aprovação é no app, com segundo fator. Toque para abrir.”</span>
+              <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={() => setZap(null)}>
+                Abrir no app
+              </Button>
+            </>
+          )}
         </div>
       )}
       {recusando && (
@@ -145,11 +269,11 @@ function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
               className="rounded-full"
               disabled={!motivo.trim()}
               onClick={() => {
-                loja.decidirLote(l.id, { tipo: 'recusar', nome: eu, motivo: motivo.trim() })
-                loja.registrar(ator, `Recusou o lote “${l.titulo}” de ${ctx.clienteNome}: ${motivo.trim()}`)
-                avisarEquipe(`${primeiroNome(eu)} recusou o lote`)
-                setRecusando(false)
-                ctx.avisarApp('Recusado. O escritório refaz o lote com o seu motivo.')
+                const ok = noApp(() => repos.bpo.lotes.recusar(l.id, eu, motivo.trim()), 'Recusado. O escritório refaz o lote com o seu motivo.')
+                if (ok) {
+                  avisar(`${primeiroNome(eu)} recusou o lote`)
+                  setRecusando(false)
+                }
               }}
             >
               Recusar o lote
@@ -160,25 +284,21 @@ function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
           </div>
         </div>
       )}
-      {aberto && !posso && (
-        <p className="text-muted-foreground text-xs">
-          Acima da sua alçada ({brl(ctx.contato.alcadaPagamento ?? 0)}): quem aprova é {podem.map((p) => p.nome).join(' ou ') || 'o sócio'}.
-        </p>
-      )}
-      {s.situacao === 'parcial' && jaAprovei && (
+      {aberto && !posso && !jaAprovei && <p className="text-muted-foreground text-xs">Acima da sua alçada ({brl(Math.min(ctx.contato.alcadaPagamento ?? 0, faixa2))}): quem aprova é {podem.map((p) => p.nome).join(' ou ') || 'o sócio'}.</p>}
+      {l.situacao === 'parcial' && jaAprovei && (
         <p className="text-muted-foreground text-xs">
           Você aprovou. Falta{' '}
           {podem
-            .filter((p) => !s.aprovacoes.some((a) => a.nome === p.nome))
+            .filter((p) => !l.aprovacoes.some((a) => a.nome === p.nome))
             .map((p) => primeiroNome(p.nome))
             .join(' ou ')}
           .
         </p>
       )}
-      {s.situacao === 'aprovado' && (
+      {l.situacao === 'aprovado' && (
         <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
-          <span>Aprovado por {s.aprovacoes.map((a) => `${primeiroNome(a.nome)} às ${a.quando}`).join(' e ')}.</span>
-          {e?.modoPagamento === 'M1' ? (
+          <span>Aprovado por {l.aprovacoes.map((a) => `${primeiroNome(a.nome)} às ${new Date(a.quando).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`).join(' e ')}.</span>
+          {l.modo_pagamento === 'M1' ? (
             <>
               <span className="text-muted-foreground text-xs">Agora libere o pagamento no seu banco. O escritório confere a baixa no extrato.</span>
               <Button
@@ -186,10 +306,8 @@ function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
                 variant="outline"
                 className="w-fit rounded-full"
                 onClick={() => {
-                  loja.decidirLote(l.id, { tipo: 'liberar', nome: eu })
-                  loja.registrar(ator, `Liberou no banco o lote “${l.titulo}” de ${ctx.clienteNome}`)
-                  avisarEquipe(`${primeiroNome(eu)} liberou o lote no banco`)
-                  ctx.avisarApp('Anotado. A conciliação confirma cada baixa.')
+                  const ok = noApp(() => repos.bpo.lotes.liberar(l.id, eu), 'Anotado. A conciliação confirma cada baixa.')
+                  if (ok) avisar(`${primeiroNome(eu)} liberou o lote no banco`)
                 }}
               >
                 <BankIcon /> Já liberei no banco
@@ -200,26 +318,30 @@ function CartaoLoteApp({ l, ctx }: { l: LoteBpo; ctx: Ctx }) {
           )}
         </div>
       )}
-      {s.situacao === 'liberado' && <p className="text-muted-foreground text-xs">Liberado no banco. O escritório confere as baixas na conciliação.</p>}
-      {s.situacao === 'recusado' && <p className="text-muted-foreground text-xs">Recusado: {s.motivo}</p>}
+      {l.situacao === 'liberado' && <p className="text-muted-foreground text-xs">Liberado no banco. O escritório confere as baixas na conciliação.</p>}
+      {l.situacao === 'recusado' && <p className="text-muted-foreground text-xs">Recusado: {l.motivo}</p>}
+      {l.situacao === 'expirado' && <p className="text-muted-foreground text-xs">Expirou sem resposta: nada foi pago. O escritório monta um lote novo.</p>}
     </Bloco>
   )
 }
 
-/** App › Fluxo de caixa (10, 3.4): saldos lidos do banco, próximos pagamentos e a projeção. */
+/** App › Fluxo de caixa (S08-A52): saldos lidos do banco, próximos pagamentos, a projeção e o relatório do BPO. */
 export function CaixaApp({ ctx }: { ctx: Ctx }) {
-  const e = empresaBpo(ctx.clienteId)
+  const e = useEmpresaBpo(ctx.clienteId)
+  const loja = useLoja()
+  const [aberto, setAberto] = useState<string | null>(null)
   if (!e) return null
-  const saldo = e.bancos.reduce((s, b) => s + b.saldo, 0)
-  const proximas = e.contas.filter((c) => c.situacao !== 'paga')
+  const proximas = e.contas.filter((c) => !['paga', 'cancelada'].includes(c.etapa)).sort((a, b) => a.vencimento.localeCompare(b.vencimento))
+  const relatorios = loja.documentos.filter((d) => d.clienteId === ctx.clienteId && d.tipo === 'relatorio' && d.pasta.join('/').includes('BPO financeiro'))
+  const novos = new Set(e.entregas.filter((x) => x.tipo === 'relatorio' && x.situacao === 'enviado').map((x) => x.documento_id))
   return (
     <div className="flex flex-col gap-3">
       <TituloTela voltar={() => ctx.ir('mais')}>Fluxo de caixa</TituloTela>
       <Bloco titulo="Quanto tem hoje">
-        <span className="font-heading text-2xl font-light tabular-nums">{brl(saldo)}</span>
-        {saldo < e.caixaMinimo && (
+        <span className="font-heading text-2xl font-light tabular-nums">{brl(e.caixa)}</span>
+        {e.caixa < e.perfil.caixa_minimo && (
           <span className="text-warning-foreground flex items-center gap-1 text-xs">
-            <WarningIcon className="text-warning size-3.5" weight="fill" /> abaixo do mínimo combinado ({brl(e.caixaMinimo)})
+            <WarningIcon className="text-warning size-3.5" weight="fill" /> abaixo do mínimo combinado ({brl(e.perfil.caixa_minimo)})
           </span>
         )}
         <ul className="flex flex-col gap-1 text-sm">
@@ -230,15 +352,35 @@ export function CaixaApp({ ctx }: { ctx: Ctx }) {
             </li>
           ))}
         </ul>
-        <span className="text-muted-foreground text-xs">lido do banco · {e.bancos[0]?.atualizado}</span>
+        <span className="text-muted-foreground text-xs">lido do banco · {e.bancos[0] ? quando(e.bancos[0].saldo_em.slice(0, 10)) : ''}</span>
+      </Bloco>
+      <Bloco titulo="Relatório do BPO">
+        {relatorios.length === 0 && <p className="text-muted-foreground text-sm">O relatório do mês chega aqui até o dia 5.</p>}
+        <ul className="flex flex-col gap-1.5 text-sm">
+          {relatorios.map((d) => (
+            <li key={d.id} className="flex flex-col gap-1">
+              <button type="button" className="flex cursor-pointer items-center gap-2 text-left" onClick={() => setAberto((x) => (x === d.id ? null : d.id))} aria-expanded={aberto === d.id}>
+                <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{d.nome}</span>
+                {novos.has(d.id) && <span className="bg-warning/20 rounded-full px-2 py-0.5 text-[11px]">novo</span>}
+              </button>
+              {aberto === d.id && (
+                <span className="bg-sunken/60 text-muted-foreground rounded-[10px] px-3 py-2 text-xs">
+                  Entregáveis › BPO financeiro · competência {d.competencia} · caixa no fim do mês, pagamentos feitos, DRE gerencial, atrasos e riscos.
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
       </Bloco>
       <Bloco titulo="Próximos pagamentos">
         <ul className="flex flex-col gap-1.5 text-sm">
+          {proximas.length === 0 && <li className="text-muted-foreground">Nada a pagar.</li>}
           {proximas.map((c) => (
             <li key={c.id} className="flex gap-2">
               <span className="min-w-0 flex-1">
-                <span className="block truncate">{c.fornecedor}</span>
-                <span className="text-muted-foreground block text-xs">vence {c.vencimento}</span>
+                <span className="block truncate">{c.contraparte}</span>
+                <span className="text-muted-foreground block text-xs">vence {quando(c.vencimento)}</span>
               </span>
               <span className="tabular-nums">{brl(c.valor)}</span>
             </li>
@@ -246,18 +388,20 @@ export function CaixaApp({ ctx }: { ctx: Ctx }) {
         </ul>
       </Bloco>
       <Bloco titulo="Próximos meses">
-        <FluxoMensal altura="h-32" d={{ meses: mesesBpo, entradas: e.fluxo.entradas, saidas: e.fluxo.saidas, inicio: inicioProjecaoBpo, marcos: [{ mes: 3, texto: '13º e férias' }] }} />
+        <FluxoMensal altura="h-32" d={{ meses: ['set', 'out', 'nov', 'dez', 'jan', 'fev'], entradas: e.perfil.fluxo.entradas, saidas: e.perfil.fluxo.saidas, inicio: 2, marcos: [{ mes: 3, texto: '13º e férias' }] }} />
       </Bloco>
     </div>
   )
 }
 
-/** Proposta de alçadas do escritório: só vale depois do aceite de quem responde pela empresa (10, 3.7). */
+/** Proposta de alçadas do escritório (S08-A51): só vale depois do aceite de quem responde pela empresa. */
 export function PropostaAlcadaApp({ ctx }: { ctx: Ctx }) {
-  const loja = useLoja()
-  const p = loja.estado.bpoAlcadaProposta[ctx.clienteId]
+  const tAlcada = useTabela('bpo_alcada')
+  const noApp = useNoApp(ctx)
+  const avisar = useAvisarEquipe(ctx)
+  const p = tAlcada.find((a) => a.cliente_id === ctx.clienteId && a.situacao === 'proposta')
   if (!p || !ctx.contato.reforcada) return null
-  const ator = `${ctx.contato.nome} (cliente, app)`
+  const modo = p.extras?.modo_pagamento as string | undefined
   return (
     <Bloco titulo="O escritório propôs novas alçadas de pagamento">
       <ul className="flex flex-col gap-1 text-sm">
@@ -265,6 +409,7 @@ export function PropostaAlcadaApp({ ctx }: { ctx: Ctx }) {
         <li>Até {brl(p.faixa2)}: 1 aprovador com alçada</li>
         <li>Acima de {brl(p.faixa2)}: duas pessoas aprovam</li>
         <li>Janela: {p.janela}</li>
+        {modo && <li>Modo de pagamento: {modo === 'M2' ? `pagamento agendado por API depois da sua aprovação (até ${brl(Number(p.extras?.teto_m2 ?? 0))})` : 'você libera no seu banco depois de aprovar'}</li>}
         {Object.entries(p.pessoas)
           .filter(([, v]) => v > 0)
           .map(([n, v]) => (
@@ -273,23 +418,14 @@ export function PropostaAlcadaApp({ ctx }: { ctx: Ctx }) {
             </li>
           ))}
       </ul>
-      <p className="text-muted-foreground text-xs">Proposta por {p.por}. Nada muda até você aceitar.</p>
+      <p className="text-muted-foreground text-xs">Proposta por {p.proposta_por_nome}. Nada muda até você aceitar.</p>
       <div className="flex gap-1.5">
         <Button
           size="sm"
           className="rounded-full"
           onClick={() => {
-            loja.aceitarAlcada(ctx.clienteId, ctx.contato.nome)
-            loja.registrar(ator, `Aceitou as novas alçadas de pagamento de ${ctx.clienteNome}`)
-            loja.avisar({
-              para: ['u1', 'u8', 'u9'],
-              tipo: 'cliente',
-              setor: 'bpo_financeiro',
-              titulo: `${primeiroNome(ctx.contato.nome)} aceitou as novas alçadas`,
-              detalhe: ctx.clienteNome,
-              destino: { modulo: 'bpo', aba: 'configuracao', cliente: ctx.clienteId },
-            })
-            ctx.avisarApp('Alçadas aceitas. Valem a partir do próximo lote.')
+            const ok = noApp(() => repos.bpo.alcadas.aceitar(p.id, ctx.contato.nome), 'Alçadas aceitas. Valem a partir do próximo lote.')
+            if (ok) avisar(`${primeiroNome(ctx.contato.nome)} aceitou as novas alçadas`, 'configuracao')
           }}
         >
           <CheckIcon /> Aceitar
@@ -299,9 +435,8 @@ export function PropostaAlcadaApp({ ctx }: { ctx: Ctx }) {
           variant="ghost"
           className="rounded-full"
           onClick={() => {
-            loja.proporAlcada(ctx.clienteId, null)
-            loja.registrar(ator, `Recusou a proposta de alçadas de ${ctx.clienteNome}`)
-            ctx.avisarApp('Proposta recusada. As alçadas de antes continuam valendo.')
+            const ok = noApp(() => repos.bpo.alcadas.recusar(p.id, ctx.contato.nome), 'Proposta recusada. As alçadas de antes continuam valendo.')
+            if (ok) avisar(`${primeiroNome(ctx.contato.nome)} recusou a proposta de alçadas`, 'configuracao')
           }}
         >
           <XIcon /> Recusar
