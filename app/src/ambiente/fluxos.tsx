@@ -3,9 +3,8 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { definirItemDaRota, hashParaDestino, rotaAtual, useHash } from '@/nucleo/rotas'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
+import { Campo, CampoArea, CampoEscolha, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
 import * as exemplo from '@/dados/exemplo'
-import { catalogoServicos, rotuloEstadoServico, type EstadoServico } from '@/dados/servicos-extras'
 import { faturas } from '@/dados/financeiro'
 import { sessoesDia } from '@/dados/timesheet'
 import type { PedidoNovaTarefa, Tarefa } from '@/dados/tipos'
@@ -15,8 +14,9 @@ import type { SetorIntegrante } from '@/theme/tipos'
 import type { ContatoCliente } from './clientes'
 import { usePedirIntegrante } from './pedir'
 import { GavetaTrilha } from '@/telas/painel/trilha'
-import { NavegacaoProvider, useContas, useLoja, useNavegacao, type Destino } from './loja'
-import { rotuloSetorCurto, useSessao } from './sessao'
+import { FichaClienteGaveta } from '@/telas/painel/ficha-cliente'
+import { NavegacaoProvider, useLoja, useNavegacao, type Destino } from './loja'
+import { useSessao } from './sessao'
 
 /** Cliente pelo nome (os dados de exemplo guardam o nome). */
 export const clientePorNome = (nome?: string) => exemplo.clientes.find((c) => c.nome === nome)
@@ -582,113 +582,11 @@ function NovaTarefa({ p, onFechar, onCriada }: { p: PedidoNovaTarefa; onFechar: 
   )
 }
 
-const papeis: ContatoCliente['papel'][] = ['sócio', 'sócia', 'titular', 'financeiro', 'RH', 'fiscal da empresa', 'diretor financeiro']
-const assuntos = [
-  { valor: 'guias', rotulo: 'guias' },
-  { valor: 'folha', rotulo: 'folha' },
-  { valor: 'documentos_pendentes', rotulo: 'documentos' },
-  { valor: 'honorarios', rotulo: 'honorários' },
-  { valor: 'societario', rotulo: 'societário' },
-  { valor: 'comunicados', rotulo: 'comunicados' },
-]
-
 /**
- * Ficha do cliente (03, 6.1 e 04 A1): quem recebe cada assunto, quem usa o app
- * e quem responde por cada setor no escritório. É daqui que a cobrança, a
- * entrega de guias e a lateral do CRM tiram o contato e o responsável.
+ * Ficha do cliente (S02-T05): contatos com papel por serviço e assuntos,
+ * alçada (proposta), responsáveis, serviços extras, entrega e malote, resumo
+ * da relação e histórico. A gaveta mora em `telas/painel/ficha-cliente.tsx`.
  */
 function GavetaFichaCliente({ clienteId, onFechar }: { clienteId: string; onFechar: () => void }) {
-  const loja = useLoja()
-  const { usuario } = useSessao()
-  const cliente = exemplo.clientes.find((c) => c.id === clienteId)
-  const base = loja.fichaDe(clienteId) ?? { id: clienteId, contatos: [], responsaveis: {}, conversas: {} }
-  const [contatos, setContatos] = useState(base.contatos)
-  const [resp, setResp] = useState(base.responsaveis)
-  const [servicos, setServicos] = useState(base.servicos ?? {})
-  const pode = usuario.papel !== 'colaborador'
-  // Responsáveis pelos pacotes que o cliente contratou (o BPO só onde há BPO).
-  const pacotes = cliente?.servicos ?? ['contabil']
-  const setoresEquipe: SetorIntegrante[] = [...(pacotes.includes('contabil') && loja.estado.cenario !== 'bpo_puro' ? (['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor'] as const) : []), ...(pacotes.includes('bpo') ? (['bpo_financeiro'] as const) : [])]
-  const contas = useContas()
-  const pessoasDo = (s: SetorIntegrante) => contas.filter((u) => u.situacao === 'ativo' && (u.papel === 'administrador' || u.vinculos.some((v) => v.setor === s))).map((u) => u.nome)
-  const muda = (i: number, p: Partial<ContatoCliente>) => setContatos((xs) => xs.map((x, k) => (k === i ? { ...x, ...p } : x)))
-  const semAssunto = assuntos.filter((a) => !contatos.some((c) => c.assuntos.includes(a.valor)))
-  return (
-    <GavetaFormulario
-      aberta
-      largura="lg"
-      onFechar={onFechar}
-      titulo={`Ficha · ${cliente?.nome ?? ''}`}
-      descricao={`${cliente?.codigo ?? ''} · ${cliente?.regime ?? ''} · ${cliente?.documento ?? ''}. Contatos por assunto e responsáveis por setor.`}
-      acao={pode ? 'Salvar' : 'Fechar'}
-      acaoDesabilitada={pode && contatos.some((c) => !c.nome.trim())}
-      onAcao={() => {
-        if (pode) {
-          loja.salvarFicha({ ...base, contatos, responsaveis: resp, servicos })
-          loja.registrar(usuario.nome, `Atualizou a ficha de ${cliente?.nome}`)
-          loja.toast(`Ficha de ${cliente?.nome} salva. Cobranças e entregas já usam os contatos novos.`)
-        }
-        onFechar()
-      }}
-    >
-      <fieldset disabled={!pode} className="contents">
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Contatos e o que cada um recebe</h3>
-          {contatos.map((c, i) => (
-            <div key={i} className="bg-sunken/50 flex flex-col gap-2 rounded-[14px] p-3">
-              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem]">
-                <CampoTexto valor={c.nome} onMudar={(v) => muda(i, { nome: v })} placeholder="Nome" aria-label={`Nome do contato ${i + 1}`} />
-                <CampoEscolha rotulo={`Papel de ${c.nome || 'contato'}`} valor={c.papel} onMudar={(v) => muda(i, { papel: v })} opcoes={papeis.map((x) => ({ valor: x, rotulo: x }))} />
-                <CampoTexto valor={c.whatsapp ?? ''} onMudar={(v) => muda(i, { whatsapp: v || undefined })} placeholder="WhatsApp" aria-label={`WhatsApp de ${c.nome || 'contato'}`} />
-                <CampoTexto valor={c.email ?? ''} onMudar={(v) => muda(i, { email: v || undefined })} placeholder="E-mail" aria-label={`E-mail de ${c.nome || 'contato'}`} />
-              </div>
-              <Fichas rotulo={`Assuntos de ${c.nome || 'contato'}`} valores={c.assuntos} onMudar={(v) => muda(i, { assuntos: v })} opcoes={assuntos} />
-              <div className="flex items-center gap-2">
-                <Interruptor ligado={!!c.app} onMudar={(v) => muda(i, { app: v })} rotulo="Usa o app do cliente" />
-                <Button type="button" size="sm" variant="ghost" className="text-destructive ml-auto rounded-full" onClick={() => setContatos((xs) => xs.filter((_, k) => k !== i))}>
-                  Tirar
-                </Button>
-              </div>
-            </div>
-          ))}
-          <Button type="button" size="sm" variant="outline" className="w-fit rounded-full" onClick={() => setContatos((xs) => [...xs, { nome: '', papel: 'financeiro', assuntos: [] }])}>
-            Adicionar contato
-          </Button>
-          {semAssunto.length > 0 && <p className="text-muted-foreground text-xs">Sem ninguém: {semAssunto.map((a) => a.rotulo).join(', ')}. Esses assuntos vão para o sócio.</p>}
-        </section>
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Responsáveis no escritório</h3>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {setoresEquipe.map((s) => (
-              <Campo key={s} rotulo={rotuloSetorCurto[s]}>
-                {(id) => <CampoEscolha id={id} valor={resp[s] ?? ''} onMudar={(v) => setResp({ ...resp, [s]: v || undefined })} opcoes={[{ valor: '', rotulo: 'padrão do setor' }, ...pessoasDo(s).map((n) => ({ valor: n, rotulo: n }))]} />}
-              </Campo>
-            ))}
-          </div>
-        </section>
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Serviços extras no app do cliente</h3>
-          <p className="text-muted-foreground text-xs">Ativo: o cliente usa. Disponível: aparece com “tenho interesse”. Oculto: não aparece. O cliente nunca ativa sozinho (06, 8).</p>
-          <div className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
-            {catalogoServicos.map((sv) => (
-              <div key={sv.id} className="flex items-center gap-2">
-                <span className="min-w-0 flex-1 text-sm">
-                  {sv.nome} <span className="text-muted-foreground text-[11px]">· fase {sv.fase}</span>
-                </span>
-                <div className="w-32 shrink-0">
-                  <CampoEscolha
-                    rotulo={`Estado de ${sv.nome}`}
-                    valor={servicos[sv.id] ?? 'disponivel'}
-                    onMudar={(v) => setServicos({ ...servicos, [sv.id]: v as EstadoServico })}
-                    opcoes={(['ativo', 'disponivel', 'oculto'] as const).map((e) => ({ valor: e, rotulo: rotuloEstadoServico[e] }))}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </fieldset>
-      {!pode && <p className="text-muted-foreground text-xs">Só Gestor e Administrador mudam a ficha; você vê.</p>}
-    </GavetaFormulario>
-  )
+  return <FichaClienteGaveta clienteId={clienteId} onFechar={onFechar} />
 }
