@@ -174,6 +174,8 @@ export const ferramentas: Ferramenta[] = [
   f('notas.configurar_captura', 'painel', 'executar', 'notas'),
   f('notas.manifestar', 'painel', 'executar', 'notas', { irreversivel: true, exige_aprovacao: 'se_integrante' }),
   f('painel.acao_lote', 'painel', 'executar', 'alvo', { papel_minimo: 'gestor', gestao: true }),
+  // S10: app do cliente (06, 4.3, regra 5: o cliente cancela o pedido enquanto ninguém iniciou)
+  f('pedido.cancelar', 'painel', 'executar', 'alvo', { exposta_ao_cliente: true }),
 ]
 
 const indice = new Map(ferramentas.map((x) => [x.nome, x]))

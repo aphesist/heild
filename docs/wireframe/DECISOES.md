@@ -627,6 +627,48 @@ Formato de cada registro:
 
 ### S10 · App do cliente
 
+#### 2026-11-14 · S10 · Estado do app no `registro_tela`, sem migração nova
+
+- **Decisão:** o que só o app guarda (acesso e forma de entrar, sessões, preferências de aviso, central do app, recibos, links para terceiros, assinaturas pendentes, extras do pedido, reuniões, Pix Automático, termo do certificado, saída do escritório) fica em `usePersistente('s10:…')`, que grava na tabela `registro_tela` nos dois modos (local e Supabase). O que o escritório vê e age continua nas entidades pela loja: tarefa (pedido e pendência), conversa e mensagem, documento e registro de entrega, notificação, evento, ficha do cliente.
+- **Por quê:** nenhuma entidade nova sem necessidade; funciona no Supabase sem migração. Hipótese da sessão; o backend pode abrir em tabelas (Conta de cliente, Preferência, Credencial, Registro de entrega com `enviado_*` e `confirmado_pelo_cliente`).
+- **Telas e ações:** S10-T01 a T11.
+- **Impacto no plano:** nenhum (simplificação do wireframe).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S10 · Ferramenta `pedido.cancelar` exposta ao cliente
+
+- **Decisão:** o cliente cancela o pedido que ninguém começou (06, 4.3, regra 5) pela ferramenta nova `pedido.cancelar` (exposta ao cliente); conferida a permissão, o sistema executa o cancelamento da tarefa com o motivo. A loja do escritório esconde tarefa cancelada; o app lê os pedidos direto do repositório para mostrar "cancelado, com o motivo".
+- **Por quê:** `tarefa.cancelar` não é exposta ao cliente (e não deve ser).
+- **Telas e ações:** S10-A31.
+- **Impacto no plano:** 01, catálogo de ferramentas ganha `pedido.cancelar`.
+- **Arquivos compartilhados:** `src/nucleo/permissoes/ferramentas.ts` (só acrescentar). O aceite do convite grava a ficha como sistema (`conta.convite.aceitar`), pelo mesmo motivo.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S10 · Cartões `s10-*` e o efeito ao aprovar
+
+- **Decisão:** o que sai ao cliente nasce agentificado e passa por cartão no chat do integrante: simulado de rescisão (DP, C2-02), declaração de faturamento assinada pelo contador (Contábil, C2-14 com D-16), termo de ciência (DP, C2-06), reenvio por outro canal do farol de abertura (Atendimento, D-17) e resposta factual na conversa (Atendimento, 06, 7.2). O efeito de cada um está em `src/cliente/motor.ts` e é chamado por uma linha em `efeitos.tsx` para os ids com prefixo `s10-`.
+- **Por quê:** "nada sai ao cliente sem aprovação humana no início" (mapa, 0.7).
+- **Telas e ações:** S10-A28, A33, A35; C2-02, C2-06, C2-14, D-16, D-17.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/ambiente/efeitos.tsx` (uma linha e um import, ao lado da linha da S04).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S10 · Lacunas que o plano não fecha, decididas pela sessão
+
+- **Decisão:** (1) na demonstração, o código de acesso aparece numa mensagem simulada do WhatsApp; qualquer código de 6 dígitos entra e `000000` simula o código errado (5 tentativas, depois bloqueio de 15 min com aviso ao escritório). (2) O cartão de push só aparece depois do primeiro toque e no fim do Início (não desloca o que está sob o dedo). (3) Grupo econômico de exemplo: Padaria e Café do João Batista. (4) Revisão anual de acessos aparece ao sócio em Empresa até ser respondida. (5) O sócio pede convite para outra pessoa como pedido ao escritório (GES-104), não convida direto: a conta é do escritório (06, 2.5). (6) Pausa parcial da fatura: contestar citando um serviço deixa essa linha "em espera". (7) Franquia do Consultor de 40 perguntas por mês no exemplo. (8) Domínio do app pela razão social (`app.contabilandrade.com.br`); textos do app (termo, "tudo em dia", fora do horário) vêm de um modelo com o nome do produto do tema, porque o `Tema` ainda não tem campos de app.
+- **Por quê:** o mapa marca como sem regra ou não detalha; hipótese da sessão.
+- **Telas e ações:** S10-A02, A07, A09, A47, A49, A59; S10-T01.
+- **Impacto no plano:** sugestão ao 01, 10 (Tema): campos `textos_app` (termo, tudo em dia, fora do horário).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S10 · Testes antigos do app que mudaram de comportamento
+
+- **Decisão:** `scripts/app-cliente.cjs` e `scripts/servicos-app.cjs` (não editados, regra do `SESSOES.md`) falham em pontos que a S10 mudou de propósito: o envio da pendência agora abre a folha com foto, recorte e arquivos e o integrante confere antes do "recebido"; o pedido tem formulário por tipo com campos obrigatórios; NFS-e e Consultor respondem com latência simulada. A cobertura passou para `scripts/s10-app-cliente.cjs`.
+- **Por quê:** mapa, S10-A20, A28, A58, A59.
+- **Situação:** proposta (a coordenação decide se aposenta os dois scripts).
+
 ### S11 · Pacote Jurídico
 
 ### S00 · Fundação (base comum)
