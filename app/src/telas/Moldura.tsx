@@ -13,7 +13,7 @@ import { useModoLateral, type ModoLateral } from '@/hooks/useMedia'
 import { usePreferencia } from '@/hooks/usePreferencia'
 import { cn } from '@/lib/utils'
 import { hashParaDestino, useHash } from '@/nucleo/rotas'
-import { MinhaFila } from './inicio/minha-fila'
+import { TarefasTela } from './tarefas/GavetaTarefas'
 import { ListaPendencias, usePendenciasPorCliente } from './inicio/pendencias'
 
 export interface EstadoLateral {
@@ -187,9 +187,9 @@ function MenuInferior({ maisAberto, onMais, onFecharMais }: { maisAberto: boolea
         <SheetContent className="bg-background gap-0 sm:max-w-md">
           <SheetHeader>
             <SheetTitle>{gaveta === 'tarefas' ? 'Tarefas' : 'Pendências'}</SheetTitle>
-            <SheetDescription>{gaveta === 'tarefas' ? 'A sua fila: iniciar e concluir num toque. O resto, na ficha da tarefa.' : 'O que os clientes devem. Cobrar vai pela conversa do setor, com o seu nome.'}</SheetDescription>
+            <SheetDescription>{gaveta === 'tarefas' ? 'As tarefas dos seus setores: decidir num toque; editar, na ficha da tarefa.' : 'O que os clientes devem. Cobrar vai pela conversa do setor, com o seu nome.'}</SheetDescription>
           </SheetHeader>
-          <div className="area-rolagem-dupla min-h-0 flex-1 overflow-y-auto p-4">{gaveta === 'tarefas' ? <MinhaFila /> : <ListaPendencias compacta />}</div>
+          <div className="area-rolagem-dupla min-h-0 flex-1 overflow-y-auto p-4">{gaveta === 'tarefas' ? <TarefasTela /> : <ListaPendencias compacta />}</div>
         </SheetContent>
       </Sheet>
     </>
