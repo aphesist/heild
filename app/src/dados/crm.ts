@@ -54,6 +54,14 @@ export type ItemConversa =
       /** Apagada ou editada pelo cliente: guarda a versão anterior (GES-203). */
       apagada?: boolean
       modelo?: string
+      /** S05: editada pelo cliente; a versão anterior fica (GES-203). */
+      editadaDe?: string
+      /** S05: farol de entrega do documento (D-17): verde abriu, amarelo no prazo de 3 dias úteis, vermelho passou sem abrir. */
+      farol?: 'verde' | 'amarelo' | 'vermelho'
+      /** S05: e-mail lido da caixa do setor (entrada ou enviado fora do sistema, C2-08). */
+      daCaixa?: 'entrada' | 'enviado'
+      /** S05: e-mail que voltou (D-18). */
+      devolvido?: string
     }
   | { tipo: 'nota'; id: string; autor: string; hora: string; texto: string }
   | { tipo: 'marco'; id: string; hora: string; texto: string }
@@ -443,6 +451,15 @@ export interface Lead {
   trilha?: { feitos: number; total: number }
   conversaId?: string
   desde: string
+  /** S05: proposta e contrato como documentos, com envio, "visto" e assinatura (04, 6.1). */
+  documentos?: { nome: string; tipo: 'proposta' | 'contrato'; situacao: 'rascunho' | 'enviado' | 'visto' | 'aguardando_assinatura' | 'assinado'; visto?: string }[]
+  /** S05: qualificação que o integrante preencheu pela conversa, esperando a pessoa confirmar (GES-042). */
+  qualificacaoProposta?: string
+  /** S05: fundido a um cliente existente por cartão (04, 5.2). */
+  fundidoEm?: string
+  /** S05: cliente criado ao fechar o contrato. */
+  clienteId?: string
+  cnpj?: string
 }
 
 export const leads: Lead[] = [

@@ -44,6 +44,11 @@ import { integranteDoSetor, useFluxos } from '@/ambiente/fluxos'
 import { usePersistente, useLoja, useNavegacao } from '@/ambiente/loja'
 import { useDocumentos } from '@/ambiente/documentos'
 import { useSessao } from '@/ambiente/sessao'
+import { repos } from '@/nucleo/repositorios'
+import { useTabela } from '@/nucleo/react'
+import { assinar, useBloqueados, useCfgAtendimento } from './s05/config'
+import { DialogoAgendar, DialogoAutorizacao, DialogoLigarCliente, DialogoMover, exportarConversa, SimulacaoAtendimento } from './s05/acoes'
+import { CalendarPlusIcon, DownloadSimpleIcon, EnvelopeOpenIcon, FlaskIcon, ArrowsDownUpIcon, SealCheckIcon } from '@phosphor-icons/react'
 
 type Visao = 'sem' | 'minhas' | 'setor' | 'todas'
 
@@ -134,10 +139,21 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
   // No computador, abre a primeira da lista; no celular, começa na lista.
   const aberta = conversas.find((c) => c.id === abertaId) ?? (largo ? lista[0] : undefined)
 
+  // Lê a conversa mais recente (as respostas simuladas chegam depois, com a tela já atualizada).
+  const recentes = useRef(conversas)
+  recentes.current = conversas
+  const salvar = useRef(loja.salvarConversa)
+  salvar.current = loja.salvarConversa
   const atualizar = (id: string, f: (c: ConversaCrm) => ConversaCrm) => {
-    const atual = conversas.find((c) => c.id === id)
-    if (atual) loja.salvarConversa(f(atual))
+    const atual = recentes.current.find((c) => c.id === id) ?? loja.conversas.find((c) => c.id === id)
+    if (atual) {
+      const nova = f(atual)
+      recentes.current = recentes.current.map((c) => (c.id === id ? nova : c))
+      salvar.current(nova)
+    }
   }
+  const [simulacao, setSimulacao] = useState(false)
+  const podeGerir = usuario.papel === 'administrador' || permissoes.gere.length > 0
   const marco = (texto: string): ItemConversa => ({ tipo: 'marco', id: `x${Math.random()}`, hora: hora(), texto })
 
   return (
@@ -223,7 +239,13 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
               ) : (
                 <span>Todos os clientes e leads</span>
               )}
-              <span>ordem: prazo de resposta</span>
+              {podeGerir ? (
+                <button type="button" onClick={() => setSimulacao(true)} className="hover:text-foreground flex cursor-pointer items-center gap-1">
+                  <FlaskIcon className="size-3" /> modo simulação
+                </button>
+              ) : (
+                <span>ordem: prazo de resposta</span>
+              )}
             </div>
           </div>
           <AreaRolagem className="area-rolagem-dupla flex-1 px-2 pb-2">
@@ -264,12 +286,29 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
 
         {/* Conversa */}
         {aberta ? (
-          <Conversa key={aberta.id} c={aberta} largo={largo} lateralFixa={lateralFixa} onVoltar={() => setAbertaId(null)} onLateral={() => setLateral(true)} onAtualizar={(f) => atualizar(aberta.id, f)} marco={marco} />
+          <Conversa
+            key={aberta.id}
+            c={aberta}
+            largo={largo}
+            lateralFixa={lateralFixa}
+            onVoltar={() => setAbertaId(null)}
+            onLateral={() => setLateral(true)}
+            onAtualizar={(f) => atualizar(aberta.id, f)}
+            marco={marco}
+            conversas={conversas}
+            onMover={(ids, destino) => {
+              const itens = aberta.itens.filter((i) => 'id' in i && ids.includes(i.id))
+              const nomeDestino = conversas.find((x) => x.id === destino)
+              atualizar(aberta.id, (x) => ({ ...x, itens: [...x.itens.filter((i) => !('id' in i && ids.includes(i.id))), marco(`${ids.length} ${ids.length === 1 ? 'mensagem movida' : 'mensagens movidas'} para ${nomeDestino?.cliente ?? 'outra conversa'} · ${rotuloSetor[nomeDestino?.setor ?? aberta.setor]} por ${usuario.nome}`)] }))
+              atualizar(destino, (x) => ({ ...x, itens: [...x.itens, marco(`chegou de outra conversa da mesma pessoa, movida por ${usuario.nome}`), ...itens.map((i) => ({ ...i, id: `${'id' in i ? i.id : 'm'}-mv` }) as ItemConversa)] }))
+              loja.toast('Mensagem movida para a conversa certa.', { modulo: 'crm', aba: 'conversas', conversa: destino }, 'Abrir')
+            }}
+          />
         ) : (
           largo && <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">Escolha uma conversa.</div>
         )}
 
-        {aberta && lateralFixa && <Lateral c={aberta} tarefas={tarefas} onAbrirLead={onAbrirLead} className="w-80 shrink-0 border-l" />}
+        {aberta && lateralFixa && <Lateral c={aberta} tarefas={tarefas} onAbrirLead={onAbrirLead} className="area-rolagem-dupla w-80 shrink-0 overflow-y-auto border-l pb-24" />}
       </div>
       {aberta && !lateralFixa && (
         <Sheet open={lateral} onOpenChange={setLateral}>
@@ -282,6 +321,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
           </SheetContent>
         </Sheet>
       )}
+      <SimulacaoAtendimento aberto={simulacao} onFechar={() => setSimulacao(false)} />
     </div>
   )
 }
@@ -294,6 +334,8 @@ function Conversa({
   onLateral,
   onAtualizar,
   marco,
+  conversas,
+  onMover,
 }: {
   c: ConversaCrm
   largo: boolean
@@ -302,9 +344,24 @@ function Conversa({
   onLateral: () => void
   onAtualizar: (f: (c: ConversaCrm) => ConversaCrm) => void
   marco: (t: string) => ItemConversa
+  conversas: ConversaCrm[]
+  onMover: (ids: string[], destino: string) => void
 }) {
   const [modo, setModo] = useState<'responder' | 'nota'>('responder')
-  const [anexo, setAnexo] = useState<string | null>(null)
+  // D-34: o anexo guarda o cliente do documento, para conferir o CNPJ antes de enviar.
+  const [anexoDoc, setAnexoDoc] = useState<{ nome: string; clienteId?: string | null } | null>(null)
+  const anexo = anexoDoc?.nome ?? null
+  const setAnexo = (v: string | null) => setAnexoDoc(v ? { nome: v, clienteId: c.clienteId } : null)
+  const [dialogo, setDialogo] = useState<'agendar' | 'mover' | 'autorizacao' | 'ligar' | null>(null)
+  const [cfgAtend] = useCfgAtendimento()
+  const tDocs = useTabela('documento')
+  const { usuario: usuarioConv, permissoes: permConv } = useSessao()
+  const podeGerirConv = usuarioConv.papel === 'administrador' || permConv.gere.length > 0
+  const docsDoCliente = tDocs.filter((d) => d.cliente_id === c.clienteId && !d.arquivado_em).slice(0, 5)
+  const docOutraEmpresa = tDocs.find((d) => d.cliente_id && d.cliente_id !== c.clienteId)
+  const cnpjErrado = !!(anexoDoc?.clienteId && c.clienteId && anexoDoc.clienteId !== c.clienteId)
+  const piloto = !!c.clienteId && cfgAtend.pilotos.includes(c.clienteId)
+  const [, setBloqueados] = useBloqueados()
   const [texto, setTexto] = useState('')
   const [canal, setCanal] = useState<CanalCrm>(c.canal)
   const [resumoAberto, setResumoAberto] = useState(true)
@@ -355,8 +412,14 @@ function Conversa({
   }
 
   const enviar = () => {
-    const t = texto.trim()
-    if (!t) return
+    const t0 = texto.trim()
+    if (!t0) return
+    if (cnpjErrado) {
+      lojaConv.toastErro('Envio bloqueado: o CNPJ do documento não é o da empresa desta conversa (D-34).')
+      return
+    }
+    // C2-07: o nome de quem atende entra na mensagem ao cliente (nota interna não leva).
+    const t = modo === 'nota' ? t0 : assinar(t0, eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura)
     const id = `e${Date.now()}`
     if (modo === 'nota') {
       onAtualizar((x) => ({ ...x, itens: [...x.itens, { tipo: 'nota', id, autor: eu, hora: hora(), texto: t }] }))
@@ -421,9 +484,28 @@ function Conversa({
             <h2 className="truncate text-base font-medium">
               {c.lead ? `Lead · ${c.pessoa.contato}` : c.cliente}
               {c.clienteInferido && (
-                <Badge variant="destaque" className="ml-2 align-middle">
-                  cliente inferido
-                </Badge>
+                <Menu
+                  gatilho={
+                    <button type="button" className="ml-2 cursor-pointer align-middle">
+                      <Badge variant="destaque">cliente inferido · confirmar</Badge>
+                    </button>
+                  }
+                >
+                  <RotuloMenu>O integrante deduziu pelo número e pelo assunto</RotuloMenu>
+                  <ItemMenu icone={<CheckCircleIcon />} onClick={() => onAtualizar((x) => ({ ...x, clienteInferido: false, itens: [...x.itens, marco(`${eu} confirmou o cliente ${x.cliente}`)] }))}>
+                    Confirmar {c.cliente}
+                  </ItemMenu>
+                  <ItemMenu icone={<LinkSimpleIcon />} onClick={() => setDialogo('ligar')}>
+                    É outra empresa…
+                  </ItemMenu>
+                </Menu>
+              )}
+              {piloto && (
+                <Tooltip conteudo="Cliente-piloto (D-31): o integrante responde sozinho só as categorias liberadas.">
+                  <Badge variant="outline" className="ml-2 align-middle">
+                    cliente-piloto
+                  </Badge>
+                </Tooltip>
               )}
             </h2>
             <p className="text-muted-foreground truncate text-xs">
@@ -516,7 +598,23 @@ function Conversa({
                 size="sm"
                 variant="outline"
                 className="rounded-full"
-                onClick={() => onAtualizar((x) => ({ ...x, status: 'resolvida', prazoMin: null, prazoTexto: 'agora', itens: [...x.itens, marco(`resolvida por ${eu} · pesquisa de satisfação enviada`)] }))}
+                onClick={() => {
+                  const idPesquisa = `sat${Date.now()}`
+                  onAtualizar((x) => ({
+                    ...x,
+                    status: 'resolvida',
+                    prazoMin: null,
+                    prazoTexto: 'agora',
+                    itens: [
+                      ...x.itens,
+                      marco(`resolvida por ${eu} · reabre se o cliente escrever em até 7 dias`),
+                      ...(cfgAtend.satisfacao && !x.lead ? [{ tipo: 'mensagem' as const, id: idPesquisa, de: 'auto' as const, hora: hora(), canal: x.canal, modelo: 'pesquisa_satisfacao', texto: 'Como foi o seu atendimento? Toque de 1 a 5.', botoes: ['1', '2', '3', '4', '5'].map((r) => ({ rotulo: r })) }] : []),
+                    ],
+                  }))
+                  // O cliente responde a pesquisa (demonstração).
+                  if (cfgAtend.satisfacao && !c.lead)
+                    window.setTimeout(() => onAtualizar((x) => ({ ...x, itens: [...x.itens.map((i) => (i.tipo === 'mensagem' && i.id === idPesquisa ? { ...i, botoes: i.botoes?.map((b) => ({ ...b, escolhido: b.rotulo === '5' })) } : i)), marco(`${x.pessoa.nome.split(' ')[0]} deu nota 5 ao atendimento`)] })), 4000)
+                }}
               >
                 <CheckCircleIcon /> Resolver
               </Button>
@@ -575,15 +673,59 @@ function Conversa({
               >
                 Resumir conversa
               </ItemMenu>
-              {c.lead && (
-                <ItemMenu icone={<LinkSimpleIcon />} detalhe="se já é cliente: o integrante propõe a fusão por cartão">
-                  Ligar a cliente
+              <ItemMenu icone={<CalendarPlusIcon />} detalhe="três horários livres; o cliente confirma por botão" onClick={() => setDialogo('agendar')}>
+                Agendar reunião
+              </ItemMenu>
+              <ItemMenu icone={<LinkSimpleIcon />} detalhe="lead que já é cliente ou pessoa com várias empresas: cartão ao Gestor" onClick={() => setDialogo('ligar')}>
+                Ligar a cliente
+              </ItemMenu>
+              <ItemMenu icone={<ArrowsDownUpIcon />} detalhe="para a conversa certa da mesma pessoa" onClick={() => setDialogo('mover')}>
+                Mover mensagem
+              </ItemMenu>
+              {!c.lead && (
+                <ItemMenu icone={<SealCheckIcon />} detalhe='"pode transmitir" vira prova na tarefa' onClick={() => setDialogo('autorizacao')}>
+                  Registrar autorização
+                </ItemMenu>
+              )}
+              <ItemMenu
+                icone={<EnvelopeOpenIcon />}
+                detalhe="entrada, enviados e anexos, arquivados no cliente (C2-08)"
+                onClick={() => {
+                  lojaConv.toast('O integrante está lendo a caixa de e-mail do setor…')
+                  window.setTimeout(() => {
+                    const nome = `Extrato ${c.cliente ?? 'cliente'} 10-2026.pdf`
+                    try {
+                      if (c.clienteId) repos.documentos.criar({ cliente_id: c.clienteId, tipo: 'extrato', competencia: '10/2026', nome_arquivo: nome, mime: 'application/pdf', tamanho_bytes: 184320, hash_sha256: `demo-${Date.now()}`, origem: 'conversa', enviado_por_tipo: 'integrante', backend_id: 'a1', caminho: `${c.cliente}/Contábil/2026-10`, visivel_ao_cliente: false, versao: 1, extras: { pasta: [c.cliente ?? '', 'Contábil', '2026-10'], quando: 'agora', por: 'caixa de e-mail do setor', tamanho: '180 KB' } })
+                    } catch {
+                      /* sem permissão para registrar documento: fica só no fio */
+                    }
+                    onAtualizar((x) => ({
+                      ...x,
+                      itens: [
+                        ...x.itens,
+                        { tipo: 'mensagem', id: `cx${Date.now()}`, de: 'atendente', autor: x.responsavel ?? eu, hora: hora(), canal: 'email', assunto: `Extrato de outubro · ${x.cliente ?? ''}`, texto: 'Segue o extrato que faltava para o fechamento. Qualquer coisa, me avisem.', anexos: [{ nome, tipo: 'pdf' }], daCaixa: 'enviado', entrega: 'entregue' },
+                        marco(`integrante de Atendimento registrou 1 e-mail enviado fora do sistema · anexo arquivado em ${x.cliente ?? 'cliente'}/Contábil/2026-10`),
+                      ],
+                    }))
+                  }, 1500)
+                }}
+              >
+                Ler a caixa de e-mail agora
+              </ItemMenu>
+              {podeGerirConv && (
+                <ItemMenu icone={<DownloadSimpleIcon />} detalhe="prova de autorização ou disputa · fica registrado" onClick={() => exportarConversa(c, eu)}>
+                  Exportar conversa
                 </ItemMenu>
               )}
               <ItemMenu
                 icone={<ProhibitIcon />}
+                desabilitado={!podeGerirConv}
                 detalhe="spam ou golpe · só Gestor"
-                onClick={() => onAtualizar((x) => ({ ...x, status: 'resolvida', prazoMin: null, prazoTexto: 'bloqueada', itens: [...x.itens, marco(`identidade bloqueada por ${eu} · mensagens futuras guardadas sem abrir conversa`)] }))}
+                onClick={() => {
+                  setBloqueados((xs) => [...xs.filter((b) => b.numero !== c.pessoa.contato), { numero: c.pessoa.contato, motivo: 'Spam ou golpe (marcado na conversa)', por: eu, em: new Date().toLocaleDateString('pt-BR').slice(0, 5), mensagens: 0 }])
+                  onAtualizar((x) => ({ ...x, status: 'resolvida', prazoMin: null, prazoTexto: 'bloqueada', itens: [...x.itens, marco(`identidade bloqueada por ${eu} · mensagens futuras guardadas sem abrir conversa`)] }))
+                  lojaConv.toast('Número bloqueado. Dá para desbloquear em Números › Bloqueados.', { modulo: 'crm', aba: 'numeros' }, 'Ver bloqueados')
+                }}
               >
                 Bloquear número
               </ItemMenu>
@@ -613,8 +755,28 @@ function Conversa({
               key={'id' in i ? i.id : `d${k}`}
               item={i}
               onAbrirAnexo={(nome) => docsConv.abrir(nome, { clienteNome: c.cliente, setor: c.setor, origem: 'conversa', por: `${c.pessoa.nome} (${c.lead ? 'lead' : 'cliente'})` })}
+              onReenviar={(id) =>
+                onAtualizar((x) => {
+                  const m = x.itens.find((i) => i.tipo === 'mensagem' && i.id === id) as Extract<ItemConversa, { tipo: 'mensagem' }> | undefined
+                  const outro = m?.canal === 'email' ? 'WhatsApp' : 'e-mail'
+                  return { ...x, itens: [...x.itens, { tipo: 'cartao', id: `reenv-${id}-${Date.now()}`, hora: hora(), setor: 'gestao_atendimento', titulo: `Reenviar por ${outro}`, detalhe: `${m?.anexos?.map((a) => a.nome).join(', ') || m?.texto?.slice(0, 60) || 'a mensagem'} · para ${x.pessoa.nome}. Nada sai sem você aprovar.`, acoes: ['Reenviar', 'Agora não'] }] }
+                })
+              }
               onDecidir={(id, acao) => {
                 let texto = ''
+                if (id.startsWith('lig-') && acao === 'Ligar à empresa') {
+                  const cli = lojaConv.clientes.find((k) => id.startsWith(`lig-${k.id}-`))
+                  if (cli) {
+                    onAtualizar((x) => ({ ...x, lead: false, clienteId: cli.id, cliente: cli.nome, clienteInferido: false, itens: [...x.itens.map((it) => (it.tipo === 'cartao' && it.id === id ? { ...it, decidido: acao } : it)), marco(`${eu} ligou a conversa a ${cli.nome}`)] }))
+                    return
+                  }
+                }
+                if (id.startsWith('reenv-') && acao === 'Reenviar') {
+                  const orig = c.itens.find((i) => i.tipo === 'mensagem' && id.startsWith(`reenv-${i.id}-`)) as Extract<ItemConversa, { tipo: 'mensagem' }> | undefined
+                  const canalNovo = orig?.canal === 'email' ? 'whatsapp' : 'email'
+                  onAtualizar((x) => ({ ...x, itens: [...x.itens.map((it) => (it.tipo === 'cartao' && it.id === id ? { ...it, decidido: acao } : it)), { tipo: 'mensagem', id: `rv${Date.now()}`, de: 'atendente', autor: eu, hora: hora(), canal: canalNovo, texto: `Reenviando ${orig?.anexos?.length ? 'o documento' : 'a mensagem'} por aqui, ${x.pessoa.nome.split(' ')[0]}.`, anexos: orig?.anexos, entrega: 'enviada' }] }))
+                  return
+                }
                 if (acao.startsWith('Criar') && c.cliente) {
                   const existente = lojaConv.tarefas.find((t) => t.conversa === c.id && t.status !== 'concluida')
                   if (existente && acao === 'Criar tarefas') texto = `tarefa ${existente.codigo} já ligada a esta conversa`
@@ -658,8 +820,8 @@ function Conversa({
         </div>
       </AreaRolagem>
 
-      {/* Campo */}
-      <div className="px-3 pb-3 sm:px-5 sm:pb-4">
+      {/* Campo (deixa o canto livre para o botão Chat) */}
+      <div className={cn('px-3 pb-3 sm:px-5 sm:pb-4', !lateralFixa && 'md:pr-28')}>
         <div className="mx-auto max-w-3xl">
           {somenteLeitura ? (
             <div className="bg-sunken flex items-start gap-2.5 rounded-[16px] px-4 py-3 text-sm">
@@ -716,6 +878,17 @@ function Conversa({
                 </div>
               )}
 
+              {cnpjErrado && (
+                <div role="alert" className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-[14px] px-3 py-2 text-xs">
+                  <WarningIcon weight="fill" className="mt-0.5 size-4 shrink-0" />
+                  <span>
+                    Envio bloqueado: {anexo} é de {lojaConv.clientes.find((k) => k.id === anexoDoc?.clienteId)?.nome} ({lojaConv.clientes.find((k) => k.id === anexoDoc?.clienteId)?.documento}), não de {c.cliente} ({lojaConv.clientes.find((k) => k.id === c.clienteId)?.documento}). Troque o anexo.
+                  </span>
+                </div>
+              )}
+              {modo === 'responder' && cfgAtend.assinatura.modo !== 'desligado' && (
+                <span className="text-muted-foreground px-1.5 text-[11px]">sai assinada: {assinar('…', eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura).replace(/\n/g, ' ')}</span>
+              )}
               <textarea
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
@@ -743,17 +916,34 @@ function Conversa({
                 </ul>
               )}
               <div className="flex items-center gap-1">
-                <Tooltip conteudo="Anexar">
-                  <Button
-                    size="icon-sm"
-                    variant={anexo ? 'secondary' : 'ghost'}
-                    className="rounded-full"
-                    aria-label={anexo ? `Tirar anexo ${anexo}` : 'Anexar'}
-                    onClick={() => setAnexo(anexo ? null : `Documento ${c.cliente ?? ''} ${new Date().toLocaleDateString('pt-BR')}.pdf`.replace('  ', ' '))}
+                {anexo ? (
+                  <Tooltip conteudo={`Tirar ${anexo}`}>
+                    <Button size="icon-sm" variant="secondary" className="rounded-full" aria-label={`Tirar anexo ${anexo}`} onClick={() => setAnexoDoc(null)}>
+                      <PaperclipIcon />
+                    </Button>
+                  </Tooltip>
+                ) : (
+                  <Menu
+                    gatilho={
+                      <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label="Anexar">
+                        <PaperclipIcon />
+                      </Button>
+                    }
                   >
-                    <PaperclipIcon />
-                  </Button>
-                </Tooltip>
+                    <RotuloMenu>Documentos de {c.cliente ?? 'quem escreve'}</RotuloMenu>
+                    {docsDoCliente.map((d) => (
+                      <ItemMenu key={d.id} onClick={() => setAnexoDoc({ nome: d.nome_arquivo, clienteId: d.cliente_id })}>
+                        {d.nome_arquivo}
+                      </ItemMenu>
+                    ))}
+                    <ItemMenu onClick={() => setAnexo(`Documento ${c.cliente ?? ''} ${new Date().toLocaleDateString('pt-BR')}.pdf`.replace('  ', ' '))}>Enviar arquivo do computador</ItemMenu>
+                    {docOutraEmpresa && c.clienteId && (
+                      <ItemMenu detalhe="demonstra a conferência do CNPJ (D-34)" onClick={() => setAnexoDoc({ nome: docOutraEmpresa.nome_arquivo, clienteId: docOutraEmpresa.cliente_id })}>
+                        {docOutraEmpresa.nome_arquivo} (de outra empresa)
+                      </ItemMenu>
+                    )}
+                  </Menu>
+                )}
                 {modo === 'responder' && (
                   <>
                     <Tooltip conteudo="Respostas rápidas">
@@ -781,7 +971,7 @@ function Conversa({
                     </Menu>
                   </>
                 )}
-                <Button size="sm" className="ml-auto rounded-full" onClick={enviar} disabled={!texto.trim() || texto === '/'}>
+                <Button size="sm" className="ml-auto rounded-full" onClick={enviar} disabled={!texto.trim() || texto === '/' || cnpjErrado}>
                   {modo === 'nota' ? (
                     <>
                       <NotePencilIcon /> Salvar nota
@@ -797,6 +987,10 @@ function Conversa({
           )}
         </div>
       </div>
+      <DialogoAgendar c={c} aberto={dialogo === 'agendar'} onFechar={() => setDialogo(null)} onAtualizar={onAtualizar} />
+      <DialogoMover c={c} conversas={conversas} aberto={dialogo === 'mover'} onFechar={() => setDialogo(null)} onMover={onMover} />
+      <DialogoAutorizacao c={c} aberto={dialogo === 'autorizacao'} onFechar={() => setDialogo(null)} onAtualizar={onAtualizar} />
+      <DialogoLigarCliente c={c} aberto={dialogo === 'ligar'} onFechar={() => setDialogo(null)} onAtualizar={onAtualizar} />
     </section>
   )
 }
