@@ -37,6 +37,8 @@ import { IntegrantesTela } from './config/IntegrantesTela'
 import { TemaTela } from './config/TemaTela'
 import { UsuariosTela } from './config/UsuariosTela'
 import { ConectoresTela } from './config/ConectoresTela'
+import { PermissoesTela } from './config/PermissoesTela'
+import { TelasCheiasS09 } from './config/telas-cheias'
 import { CaixaTela } from './financeiro/CaixaTela'
 import { CobrancaTela } from './financeiro/CobrancaTela'
 import { ContratosTela } from './financeiro/ContratosTela'
@@ -386,6 +388,7 @@ function PlataformaInterna(props: Props) {
           {modulo === 'config' && aba === 'integrantes' && <IntegrantesTela />}
           {modulo === 'config' && aba === 'assinatura' && <AssinaturaTela />}
           {modulo === 'config' && aba === 'conectores' && <ConectoresTela />}
+          {modulo === 'config' && aba === 'permissoes' && <PermissoesTela />}
           {modulo === 'financeiro' && aba === 'contratos' && <ContratosTela somenteLeitura={permissoes.financeiroSoLeitura} />}
           {modulo === 'financeiro' && aba === 'cobranca' && <CobrancaTela key={`${faturaAberta ?? 'lista'}-${nonce}`} faturaInicial={faturaAberta} />}
           {modulo === 'financeiro' && aba === 'visao' && <VisaoFinTela />}
@@ -415,6 +418,8 @@ function PlataformaInterna(props: Props) {
         </Moldura>
         <Toasts />
         {minhaConta && <MinhaConta onFechar={() => setMinhaConta(false)} onAlternarModo={onAlternarModo} />}
+        {/* S09: implantação do escritório e Raio-X do Drive (telas cheias). */}
+        <TelasCheiasS09 />
         </SuporteProvider>
         </DocumentosProvider>
       </FluxosProvider>

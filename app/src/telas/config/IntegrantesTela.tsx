@@ -12,6 +12,7 @@ import { criadosPorUsuarios, integrantesPadraoCfg, limitesUsuario as limitesInic
 import { useAparencia } from '@/hooks/useAparencia'
 import { cn } from '@/lib/utils'
 import { CabecalhoConfig } from './EscritorioTela'
+import { LiberacaoAtendimento, TetoEscritorio } from './integrantes-s09'
 
 const nomeCanal = {
   chat: 'no chat',
@@ -194,6 +195,9 @@ export function IntegrantesTela() {
             ))}
           </ul>
         </Caixa>
+
+        <LiberacaoAtendimento />
+        <TetoEscritorio />
 
         <Caixa>
           <TituloBloco descricao="Criados por cada pessoa no Time. Novos ficam 14 dias em observação: o que fariam sozinhos vira cartão.">Criados pelas pessoas</TituloBloco>

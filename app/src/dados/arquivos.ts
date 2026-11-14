@@ -1,4 +1,5 @@
 import { fichas } from '@/ambiente/clientes'
+import { banco } from '@/nucleo/banco'
 import { arvoreModelo, conectoresArmazenamento } from './configuracoes'
 import * as exemplo from './exemplo'
 import { contratos } from './financeiro'
@@ -42,6 +43,36 @@ export interface Documento {
   entregas?: Entrega[]
   /** Visibilidade forçada no arquivo (7.8); sem isso, vale a da pasta. */
   forcarVisivel?: boolean
+  /** S09: estado do índice que as telas de Arquivos mostram (01, 7.4 e 7.7; D-05). */
+  s09?: ExtrasDocumento
+}
+
+export interface VersaoDocumento {
+  versao: number
+  quando: string
+  por: string
+  origem: string
+  hash: string
+  /** O que mudou (para a comparação lado a lado). */
+  mudanca?: string
+}
+
+export interface ExtrasDocumento {
+  /** Chegou direto na nuvem, sem `enviado_por`: entra na fila "confirmar origem" (7.4). */
+  semOrigem?: boolean
+  origemConfirmada?: { por: string; quando: string; enviadoPor: string; tarefa?: string }
+  /** Versões anteriores (alterado na nuvem cria versão, 7.4). */
+  versoes?: VersaoDocumento[]
+  /** Conflito de edição: a cópia com sufixo e o original (7.4). */
+  conflito?: { original: string; quando: string; resolvido?: string }
+  /** Bytes sumiram do conector: "indisponível desde" (7.4). */
+  indisponivelDesde?: string
+  /** Mudança de cliente esperando a conferência de um Gestor (7.4). */
+  conferencia?: { clienteDestino: string; pastaDestino: string[]; por: string; quando: string }
+  /** Quem forçou a visibilidade (7.8). */
+  forcadoPor?: string
+  /** Resultado da conferência de assinatura dentro do PDF (D-16). */
+  assinatura?: { resultado: 'valida' | 'ausente'; detalhe: string; quando: string }
 }
 
 export const rotuloOrigem: Record<OrigemDocumento, string> = {
@@ -87,7 +118,8 @@ export const P = {
 
 /** Nome da pasta do cliente na raiz: "CNPJ - Nome" (7.2). */
 export const pastaDoCliente = (clienteId?: string) => {
-  const c = exemplo.clientes.find((x) => x.id === clienteId)
+  // Os clientes do escritório aberto (o banco); fora dele, os de exemplo.
+  const c = (banco.estado === 'pronto' ? banco.ler('cliente') : []).find((x) => x.id === clienteId) ?? exemplo.clientes.find((x) => x.id === clienteId)
   return c ? `${c.documento} - ${c.nome}` : '_escritorio'
 }
 
@@ -302,6 +334,29 @@ function base(): Documento[] {
     })
   }
   add({ nome: 'NFS-e de honorários 10-2026 (lote).zip', pasta: ['2026', 'NFS-e emitidas'], tipo: 'nfse', competencia: '10/2026', origem: 'gerado_plataforma', tamanho: kb(2300), quando: '01/10/2026', por: 'Financeiro (integrante)' })
+
+  // S09: o que as filas de Arquivos mostram (confirmar origem, conflito, sem bytes, versões, repetidos).
+  add({ clienteId: 'c1', nome: 'Extrato Santander conta 2 10-2026.ofx', pasta: P.interno(), tipo: 'extrato', competencia: '10/2026', origem: 'nuvem_escritorio', tamanho: kb(64), quando: '07/11/2026', por: 'posto direto na nuvem', s09: { semOrigem: true } })
+  add({ clienteId: 'c2', nome: 'NF entrada fornecedor 0912.pdf', pasta: P.interno(), tipo: 'outro', competencia: '10/2026', origem: 'nuvem_escritorio', tamanho: kb(118), quando: '07/11/2026', por: 'posto direto na nuvem', s09: { semOrigem: true } })
+  add({ clienteId: 'c3', nome: 'Folha de ponto novembro.pdf', pasta: P.interno('2026-11'), tipo: 'folha', competencia: '11/2026', origem: 'nuvem_escritorio', tamanho: kb(210), quando: '08/11/2026', por: 'posto direto na nuvem', s09: { semOrigem: true } })
+  add({ clienteId: 'c1', nome: 'Balancete 09-2026 (cópia de conflito de Rafael Nunes).pdf', pasta: P.contabil, tipo: 'balancete', competencia: '09/2026', origem: 'nuvem_escritorio', tamanho: kb(214), quando: '06/11/2026', por: 'Rafael Nunes', s09: { conflito: { original: 'Balancete 09-2026.pdf', quando: '06/11/2026 15:42' } } })
+  add({ clienteId: 'c5', nome: 'Livro razão 2025.pdf', pasta: ['2025', 'Contábil'], tipo: 'balancete', competencia: '2025', origem: 'core', tamanho: kb(3900), quando: '28/02/2026', por: 'João Pereira', s09: { indisponivelDesde: '03/11/2026' } })
+  add({ clienteId: 'c1', nome: 'Cartão CNPJ (1).pdf', pasta: P.interno(), tipo: 'cadastro', origem: 'upload_equipe', tamanho: kb(96), quando: '05/11/2026', por: 'Bruno Costa' })
+  const original = l.find((d) => d.clienteId === 'c1' && d.nome === 'Cartão CNPJ.pdf')
+  const repetido = l.find((d) => d.clienteId === 'c1' && d.nome === 'Cartão CNPJ (1).pdf')
+  if (original && repetido) repetido.hash = original.hash
+  const contrato = l.find((d) => d.clienteId === 'c1' && d.nome === 'Contrato social consolidado.pdf')
+  if (contrato) {
+    contrato.versao = 3
+    contrato.quando = '02/09/2026'
+    contrato.por = 'Societário (integrante)'
+    contrato.s09 = {
+      versoes: [
+        { versao: 1, quando: '12/03/2025', por: 'Bruno Costa', origem: 'nuvem do escritório', hash: hashDe('cs-v1'), mudanca: 'versão inicial (consolidação 2025)' },
+        { versao: 2, quando: '18/08/2025', por: 'Societário (integrante)', origem: 'alterado na nuvem', hash: hashDe('cs-v2'), mudanca: 'entrada da sócia Juliana Prado (cláusula 5ª)' },
+      ],
+    }
+  }
   return l
 }
 

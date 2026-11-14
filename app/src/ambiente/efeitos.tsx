@@ -2,6 +2,7 @@ import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
 import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
+import { efeitoS09 } from './efeitos-s09'
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -18,6 +19,8 @@ export function useEfeitosCartao() {
     loja.decidir(cartao, decisao)
     // S04: cartões da S04 (id s04-...) têm o efeito registrado pela tela que os criou.
     if (cartao.startsWith('s04-') && aplicarEfeitoS04(cartao, decisao, { loja, usuario, conversaDe })) return
+    // S09: cartões do Raio-X, da implantação e do envio de documentos (chaves s09-*).
+    if (efeitoS09(loja, usuario.nome, cartao, decisao)) return
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
     if (!aprovou && cartao.startsWith('s01-promo')) {

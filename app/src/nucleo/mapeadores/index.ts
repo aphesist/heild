@@ -230,7 +230,7 @@ export function documentoParaModelo(d: DocumentoTela, visivel: boolean): SemRegi
     visivel_ao_cliente: visivel,
     versao: d.versao,
     metadados: d.dados,
-    extras: { pasta: d.pasta, quando: d.quando, por: d.por, tamanho: d.tamanho, entregas: d.entregas, forcarVisivel: d.forcarVisivel },
+    extras: { pasta: d.pasta, quando: d.quando, por: d.por, tamanho: d.tamanho, entregas: d.entregas, forcarVisivel: d.forcarVisivel, ...(d.s09 ? { s09: d.s09 } : {}) },
   }
 }
 
@@ -253,6 +253,7 @@ export function documentoParaTela(d: Documento): DocumentoTela {
     ...(d.metadados ? { dados: d.metadados } : {}),
     ...(e.entregas ? { entregas: e.entregas as DocumentoTela['entregas'] } : {}),
     ...(e.forcarVisivel !== undefined ? { forcarVisivel: e.forcarVisivel as boolean } : {}),
+    ...(e.s09 ? { s09: e.s09 as DocumentoTela['s09'] } : {}),
   }
 }
 

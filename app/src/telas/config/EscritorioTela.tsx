@@ -10,6 +10,7 @@ import { subinquilinos as subIniciais, type SetorCfg } from '@/dados/configuraco
 import { useEscritorioCfg, useSetoresCfg, type EscritorioCfg } from '@/ambiente/configuracoes'
 import { useContas } from '@/ambiente/loja'
 import { cn } from '@/lib/utils'
+import { CalendarioEscritorio, FaixaImplantacao, SetoresNaoAtendidos } from './escritorio-s09'
 
 /** Pessoas ativas do escritório (do banco), para escolher responsáveis. */
 const usePessoas = () => useContas().filter((u) => u.situacao === 'ativo').map((u) => u.nome)
@@ -45,6 +46,7 @@ export function EscritorioTela() {
     <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
         <CabecalhoConfig titulo="Escritório" sub="Só o Administrador muda. Toda mudança vira evento." />
+        <FaixaImplantacao />
 
         <div className="grid gap-4 lg:grid-cols-2">
           <Caixa>
@@ -167,6 +169,10 @@ export function EscritorioTela() {
               </ul>
             )}
           </Caixa>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <CalendarioEscritorio />
+          <SetoresNaoAtendidos />
         </div>
       </div>
 

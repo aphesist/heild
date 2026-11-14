@@ -1,7 +1,6 @@
 import { ArrowCounterClockwiseIcon, EyeIcon, PlusIcon, ShieldCheckIcon, TrashIcon, UserPlusIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
 import { salvarContas, useContas, useLoja, usePersistente } from '@/ambiente/loja'
 import { useEscritorioCfg } from '@/ambiente/configuracoes'
-import { BotaoFeito } from '@/ambiente/interface'
 import { useState } from 'react'
 import { Caixa, TituloBloco } from '@/components/compostos/blocos'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
@@ -14,12 +13,18 @@ import { clientes } from '@/dados/exemplo'
 import { cn } from '@/lib/utils'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { CabecalhoConfig } from './EscritorioTela'
+import { useTabela } from '@/nucleo/react'
+import { repos } from '@/nucleo/repositorios'
+import { useConfirmar } from '@/components/kit'
+import { modelosPapel } from '@/dados/implantacao'
+import { useSessao } from '@/ambiente/sessao'
+import { perfilApoio, telasApoio } from './usuarios-s09'
 
 const setoresEquipe: SetorIntegrante[] = ['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor', 'gestao_atendimento', 'financeiro_escritorio', 'bpo_financeiro']
 const rotuloPapel: Record<Papel, string> = {
   administrador: 'Administrador',
   gestor: 'Gestor',
-  colaborador: 'Colaborador',
+  colaborador: 'Membro',
 }
 const nomeSetor = (s: SetorIntegrante) => (s === 'financeiro_escritorio' ? 'Financeiro do escritório' : rotuloSetor[s])
 
@@ -41,7 +46,13 @@ export function UsuariosTela() {
       loja.toastErro(e instanceof Error ? e.message : String(e))
     }
   }
-  const [convites, setConvites] = usePersistente('cfg.usu.convites', convIniciais)
+  // Convites são a entidade `convite` (01, 2.4): reenviar renova os 7 dias; cancelar exclui (com desfazer).
+  const convitesBanco = useTabela('convite')
+  const convites = convitesBanco.filter((c) => c.tipo === 'usuario_escritorio' && !c.aceito_em && !c.recusado_em)
+  const confirmar = useConfirmar()
+  const { usuario } = useSessao()
+  void convIniciais
+  void usePersistente
   const [editando, setEditando] = useState<UsuarioCfg | null>(null)
   const [convidando, setConvidando] = useState(false)
   const [vendo, setVendo] = useState<UsuarioCfg | null>(null)
@@ -115,22 +126,53 @@ export function UsuariosTela() {
           <Caixa>
             <TituloBloco descricao="Convites valem 7 dias. Aceitar cria a conta e grava os setores.">Convites pendentes</TituloBloco>
             <ul className="flex flex-col gap-2">
-              {convites.map((c) => (
-                <li key={c.email} className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="min-w-0 flex-1">
-                    {c.email}{' '}
-                    <span className="text-muted-foreground">
-                      · {c.papel} · {c.setores} · enviado {c.enviado} · expira {c.expira}
+              {convites.map((c) => {
+                const vencido = new Date(c.expira_em).getTime() < Date.now()
+                const dias = Math.max(0, Math.ceil((new Date(c.expira_em).getTime() - Date.now()) / 86_400_000))
+                return (
+                  <li key={c.id} data-convite={c.destino} className="flex flex-wrap items-center gap-3 text-sm">
+                    <span className="min-w-0 flex-1">
+                      {c.destino}{' '}
+                      <span className="text-muted-foreground">
+                        · {c.papel_proposto ? rotuloPapel[c.papel_proposto] : 'Membro'} · {(c.setores_propostos ?? []).map((x) => nomeSetor(x as SetorIntegrante)).join(', ') || 'todos'} · {vencido ? 'vencido' : `expira em ${dias} dia(s)`}
+                      </span>
                     </span>
-                  </span>
-                  <BotaoFeito size="sm" variant="ghost" className="rounded-full" texto={`Convite reenviado para ${c.email}; vale por mais 7 dias.`}>
-                    Reenviar
-                  </BotaoFeito>
-                  <Button size="sm" variant="ghost" className="text-muted-foreground rounded-full" onClick={() => setConvites((xs) => xs.filter((x) => x.email !== c.email))}>
-                    <XIcon /> Cancelar
-                  </Button>
-                </li>
-              ))}
+                    {vencido && <Badge variant="destaque">vencido</Badge>}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full"
+                      onClick={() => {
+                        repos.convites.atualizar(c.id, { expira_em: new Date(Date.now() + 7 * 86_400_000).toISOString() }, { texto: `Reenviou o convite para ${c.destino}` })
+                        loja.toast(`Convite reenviado para ${c.destino}; vale por mais 7 dias.`)
+                      }}
+                    >
+                      Reenviar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground rounded-full"
+                      onClick={async () => {
+                        if (!(await confirmar({ titulo: `Cancelar o convite de ${c.destino}?`, descricao: 'O link deixa de funcionar na hora. A conta convidada fica desativada.', acao: 'Cancelar convite', perigo: true }))) return
+                        try {
+                          const antes = repos.convites.excluir(c.id, { texto: `Cancelou o convite de ${c.destino}` })
+                          const u = usuarios.find((x) => x.email === c.destino && x.situacao === 'convidado')
+                          if (u) setUsuarios((xs) => xs.map((x) => (x.id === u.id ? { ...x, situacao: 'desativado', ultimoAcesso: 'convite cancelado' } : x)))
+                          loja.toastDesfazer(`Convite de ${c.destino} cancelado.`, () => {
+                            if (antes) repos.convites.reverter(antes)
+                            if (u) setUsuarios((xs) => xs.map((x) => (x.id === u.id ? { ...x, situacao: 'convidado', ultimoAcesso: u.ultimoAcesso } : x)))
+                          })
+                        } catch (e) {
+                          loja.toastErro(e instanceof Error ? e.message : String(e))
+                        }
+                      }}
+                    >
+                      <XIcon /> Cancelar
+                    </Button>
+                  </li>
+                )
+              })}
             </ul>
           </Caixa>
         )}
@@ -142,16 +184,12 @@ export function UsuariosTela() {
           onFechar={() => setConvidando(false)}
           onConvidar={(u) => {
             setUsuarios((xs) => [...xs, u])
-            setConvites((xs) => [
-              ...xs,
-              {
-                email: u.email,
-                papel: u.papel,
-                setores: u.vinculos.map((v) => nomeSetor(v.setor)).join(', ') || 'todos',
-                enviado: 'agora',
-                expira: 'em 7 dias',
-              },
-            ])
+            try {
+              repos.convites.criar({ tipo: 'usuario_escritorio', destino: u.email, papel_proposto: u.papel, setores_propostos: u.vinculos.map((v) => v.setor), expira_em: new Date(Date.now() + 7 * 86_400_000).toISOString(), enviado_por: usuario.id }, { texto: `Convidou ${u.email}` })
+              loja.toast(`Convite enviado para ${u.email}. Vale 7 dias.`)
+            } catch (e) {
+              loja.toastErro(e instanceof Error ? e.message : String(e))
+            }
             setConvidando(false)
           }}
         />
@@ -202,6 +240,7 @@ function Convidar({ existentes, onFechar, onConvidar }: { existentes: string[]; 
   const [email, setEmail] = useState('')
   const [papel, setPapel] = useState<Papel>('colaborador')
   const [vinculos, setVinculos] = useState<Vinculo[]>([])
+  const [modelo, setModelo] = useState<string>('')
   const repetido = existentes.includes(email.trim().toLowerCase())
   const ok = nome.trim() && /^\S+@\S+\.\S+$/.test(email) && !repetido && (papel === 'administrador' || vinculos.length > 0)
   return (
@@ -221,13 +260,35 @@ function Convidar({ existentes, onFechar, onConvidar }: { existentes: string[]; 
           papel,
           situacao: 'convidado',
           vinculos: papel === 'administrador' ? [] : vinculos,
-          excecoes: [],
+          excecoes: modelosPapel.find((m) => m.id === modelo)?.apoio ? perfilApoio() : [],
           carteira: [],
-          segundoFator: false,
+          segundoFator: papel === 'administrador',
           ultimoAcesso: 'convite enviado agora',
         })
       }
     >
+      <Campo rotulo="Começar de um modelo (opcional)" ajuda="Recepção, Supervisão e Direção são papéis, não abas (E-05). O modelo preenche papel, setores e exceções; dá para ajustar.">
+        {() => (
+          <div className="flex flex-wrap gap-1.5">
+            {modelosPapel.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={modelo === m.id}
+                title={m.descricao}
+                onClick={() => {
+                  setModelo(m.id)
+                  setPapel(m.papel)
+                  setVinculos(m.vinculos)
+                }}
+                className={cn('cursor-pointer rounded-full border px-3 py-1 text-xs', modelo === m.id ? 'border-foreground/30 bg-raised font-medium' : 'text-muted-foreground')}
+              >
+                {m.nome}
+              </button>
+            ))}
+          </div>
+        )}
+      </Campo>
       <div className="grid gap-3 sm:grid-cols-2">
         <Campo rotulo="Nome">{(id) => <CampoTexto id={id} valor={nome} onMudar={setNome} />}</Campo>
         <Campo rotulo="E-mail" erro={repetido ? 'Já existe uma pessoa com esse e-mail.' : undefined}>
@@ -447,6 +508,19 @@ function EditarUsuario({ u, onFechar, onSalvar }: { u: UsuarioCfg; onFechar: () 
               <PlusIcon /> Exceção
             </Button>
           </div>
+          {d.vinculos.some((v) => v.setor === 'gestao_atendimento') && !telasApoio.every((t) => d.excecoes.some((x) => x.tela === t)) && (
+            <button
+              type="button"
+              className="bg-sunken/60 hover:bg-sunken flex cursor-pointer items-start gap-2 rounded-[12px] px-3 py-2 text-left text-sm"
+              onClick={() => setD({ ...d, excecoes: [...d.excecoes.filter((x) => !telasApoio.includes(x.tela)), ...perfilApoio()] })}
+            >
+              <PlusIcon className="mt-0.5 size-4 shrink-0" />
+              <span>
+                Aplicar o perfil de apoio (Recepção)
+                <span className="text-muted-foreground block text-xs">Vê e conclui só o que é de apoio no Societário, Fiscal, DP e Contábil: separar, consultar, cobrar e digitalizar. Nunca transmite nem aprova (C2-26).</span>
+              </span>
+            </button>
+          )}
           {d.excecoes.length ? (
             d.excecoes.map((x) => (
               <div key={x.id} className="bg-sunken/60 flex items-start gap-2 rounded-[12px] px-3 py-2 text-sm">
