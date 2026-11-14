@@ -187,6 +187,7 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
                             </div>
                           ))}
                         </dl>
+                        {!!escolhido.horasExtra && <p className="text-muted-foreground text-xs">{String(escolhido.horasExtra).replace('.', ',')} h de serviço extra (C2-25): entram no custo e vão para a comanda do Financeiro, que fatura à parte.</p>}
                         {escolhido.horasEstimadas > 0 && <p className="text-muted-foreground text-xs">Inclui {String(escolhido.horasEstimadas).replace('.', ',')} h estimadas {soMedidas ? '(tiradas pelo filtro)' : ''}.</p>}
                       </Caixa>
                       <Caixa>

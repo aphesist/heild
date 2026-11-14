@@ -117,6 +117,8 @@ export interface LinhaRent {
   porSetor: { nome: string; h: number }[]
   porAtividade: { nome: string; h: number }[]
   deficitario: boolean
+  /** C2-25: horas de serviço extra (tarefa marcada como extra pela S04), a faturar à parte. */
+  horasExtra?: number
 }
 
 export const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
@@ -279,6 +281,7 @@ export function rentabilidadeDe(ts: Ts, competencia: string, pacote: PacoteFiltr
       porSetor: agrupar(doCli, (s) => nomeSetor(s.setor_id), duracaoMin).map((x) => ({ nome: x.nome, h: Math.round((x.v / 60) * 10) / 10 })),
       porAtividade: agrupar(doCli, (s) => `${s.atividade_id ?? '—'} · ${rotuloAtividade(s.atividade_id)}`, duracaoMin, 6).map((x) => ({ nome: x.nome, h: Math.round((x.v / 60) * 10) / 10 })),
       deficitario: deficit(cid, atual, margem),
+      horasExtra: Math.round((doCli.filter((s) => ts.ehExtra(s)).reduce((t, s) => t + duracaoMin(s), 0) / 60) * 10) / 10,
     }
   })
 }
