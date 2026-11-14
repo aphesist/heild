@@ -123,7 +123,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                 <span className="bg-sunken h-2 w-full overflow-hidden rounded-full">
                   <span className="bg-foreground/70 block h-full rounded-full transition-[width]" style={{ width: `${(progresso.lidas / progresso.total) * 100}%` }} />
                 </span>
-                <span className="text-muted-foreground text-xs">Acompanhe o Geral no chat do Assistente: ele avisa quando terminar.</span>
+                <span className="text-muted-foreground text-xs">Acompanhe o Geral em Início › Time: ele avisa quando terminar e deixa o cartão em lote.</span>
               </div>
             ) : podeRodar ? (
               <Button className="rounded-full" onClick={() => void rodar()}>

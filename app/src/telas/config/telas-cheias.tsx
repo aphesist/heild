@@ -1,6 +1,7 @@
 import { XIcon } from '@phosphor-icons/react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { useHash } from '@/nucleo/rotas'
 import { usePersistente } from '@/ambiente/loja'
 import { Button } from '@/components/ui/button'
 import { ImplantacaoTela } from '../implantacao/ImplantacaoTela'
@@ -30,8 +31,8 @@ export function MolduraTelaCheia({ titulo, sub, onFechar, children, acao }: { ti
   return (
     <DialogPrimitive.Root open onOpenChange={(v) => !v && onFechar()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-[55] bg-black/45" />
-        <DialogPrimitive.Content aria-describedby={undefined} className="from-background to-background-end text-foreground fixed inset-0 z-[55] flex flex-col overflow-hidden bg-gradient-to-b outline-none sm:inset-4 sm:rounded-[28px] sm:shadow-2xl">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[45] bg-black/45" />
+        <DialogPrimitive.Content aria-describedby={undefined} className="from-background to-background-end text-foreground fixed inset-0 z-[45] flex flex-col overflow-hidden bg-gradient-to-b outline-none sm:inset-4 sm:rounded-[28px] sm:shadow-2xl">
           <header className="flex shrink-0 items-center gap-2 border-b px-3 py-2.5 sm:px-5">
             <div className="min-w-0 flex-1">
               <DialogPrimitive.Title className="truncate text-base font-medium sm:text-lg">{titulo}</DialogPrimitive.Title>
@@ -54,6 +55,13 @@ export function MolduraTelaCheia({ titulo, sub, onFechar, children, acao }: { ti
 /** Montada uma vez na Plataforma. */
 export function TelasCheiasS09() {
   const { abertas, fechar } = useTelasCheias()
+  // Ir para outro módulo ou aba (um link de toast, o menu) fecha as telas cheias.
+  const caminho = useHash().split('?')[0]
+  const anterior = useRef(caminho)
+  useEffect(() => {
+    if (anterior.current !== caminho) abertas.forEach(fechar)
+    anterior.current = caminho
+  }, [caminho]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
       {abertas.map((t) =>

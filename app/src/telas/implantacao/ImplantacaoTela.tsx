@@ -282,7 +282,7 @@ function PassoClientes({ e, setE }: { e: EstadoImplantacao; setE: (f: (x: Estado
       cartoes: [{ tipo: 'aprovacao', id: `s09-importar-${Date.now()}`, resumo: `Gravar ${n} cliente(s) importado(s)`, argumentos: [{ rotulo: 'Fonte', valor: imp!.fonte }, { rotulo: 'Novos', valor: String(n) }, { rotulo: 'Situação', valor: 'em implantação' }], lote: n, expiraEm: 'expira em 3 dias' }],
     })
     registrar(`${usuario.nome} enviou a importação de ${n} cliente(s) para aprovação`, 'implantacao.importar')
-    loja.toast('Cartão de aprovação no chat do Assistente. Nada é gravado antes do sim.', { modulo: 'inicio', aba: 'assistente' }, 'Abrir o Assistente')
+    loja.toast('Cartão de aprovação no chat do Geral, no Time. Nada é gravado antes do sim.', { modulo: 'inicio', aba: 'time', integrante: 'i-geral' }, 'Abrir o cartão')
   }
   return (
     <>
@@ -297,7 +297,7 @@ function PassoClientes({ e, setE }: { e: EstadoImplantacao; setE: (f: (x: Estado
       ) : (
         <>
           <p className="text-sm">
-            Prévia de {imp.fonte}. Divergências ficam desmarcadas; marque ou desmarque o que entra. {imp.gravada_em ? 'Gravado.' : imp.enviada_em ? 'Enviado para aprovação: decida o cartão no chat do Assistente.' : ''}
+            Prévia de {imp.fonte}. Divergências ficam desmarcadas; marque ou desmarque o que entra. {imp.gravada_em ? 'Gravado.' : imp.enviada_em ? 'Enviado para aprovação: decida o cartão no chat do Geral (Início › Time).' : ''}
           </p>
           <ul className="divide-border/70 flex flex-col divide-y">
             {imp.linhas.map((l) => (

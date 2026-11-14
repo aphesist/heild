@@ -1,4 +1,4 @@
-import { CaretDownIcon, CaretRightIcon, CloudIcon, EyeIcon, FileTextIcon, FolderIcon, FolderOpenIcon, FolderPlusIcon, GearSixIcon, LockSimpleIcon, MagnifyingGlassIcon, UploadSimpleIcon } from '@phosphor-icons/react'
+import { ArrowsLeftRightIcon, CaretDownIcon, CaretRightIcon, CloudIcon, CloudSlashIcon, CopyIcon, EyeIcon, EyeSlashIcon, FileTextIcon, FolderIcon, FolderOpenIcon, FolderPlusIcon, GearSixIcon, LockSimpleIcon, MagnifyingGlassIcon, PencilSimpleIcon, ReceiptIcon, UploadSimpleIcon, WarningIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { useItemNaRota } from '@/nucleo/rotas'
 import { useDocumentos } from '@/ambiente/documentos'
@@ -10,7 +10,9 @@ import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario } from '@/components/ui/formulario'
 import { conectorDe, pastaDoCliente, pastaPeloTipo, rotuloOrigem, rotuloTipoDoc, visivelAoCliente, type Documento, type TipoDocumento } from '@/dados/arquivos'
 import { arvoreModelo, conectoresArmazenamento, rotuloTipoArmazenamento } from '@/dados/configuracoes'
-import * as exemplo from '@/dados/exemplo'
+import { BotaoAcoes, Carregando, EstadoVazio, MenuContexto, usePode, type AcaoMenu } from '@/components/kit'
+import { FilaAtencao, avisarPastaForaDoPadrao } from './arquivos/fila-atencao'
+import { useCarregandoInicial } from './config/comum-s09'
 import { cn } from '@/lib/utils'
 
 /** Pastas fixas da árvore-modelo (aparecem mesmo vazias). */
@@ -47,16 +49,17 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
   const docs = useDocumentos()
   const { usuario } = useSessao()
   const admin = usuario.papel === 'administrador'
-  const [raiz, setRaiz] = useState<string | undefined>(inicial ? (inicial.clienteId ?? '_escritorio') : 'c1')
+  const [raiz, setRaiz] = useState<string | undefined>(inicial ? (inicial.clienteId ?? '_escritorio') : loja.clientes[0]?.id)
   const [caminho, setCaminho] = useState<string[]>(inicial?.caminho ?? [])
   useItemNaRota({ pasta: raiz ? { ...(raiz === '_escritorio' ? {} : { clienteId: raiz }), caminho } : undefined })
-  const [abertos, setAbertos] = useState<string[]>([inicial?.clienteId ?? 'c1'])
+  const [abertos, setAbertos] = useState<string[]>([inicial?.clienteId ?? loja.clientes[0]?.id ?? '_escritorio'])
   const [busca, setBusca] = useState('')
   const [extras, setExtras] = usePersistente<Record<string, string[][]>>('arq.extras', {})
   const [modal, setModal] = useState<'enviar' | 'pasta' | null>(null)
 
   const clienteId = raiz === '_escritorio' ? undefined : raiz
-  const raizes = [...(admin ? [{ id: '_escritorio', nome: '_escritorio', sub: 'contratos, NFS-e emitidas' }] : []), ...exemplo.clientes.map((c) => ({ id: c.id, nome: `${c.codigo} · ${c.nome}`, sub: c.documento }))]
+  const carregando = useCarregandoInicial(300)
+  const raizes = [...(admin ? [{ id: '_escritorio', nome: '_escritorio', sub: 'contratos, NFS-e emitidas' }] : []), ...loja.clientes.map((c) => ({ id: c.id, nome: `${c.codigo} · ${c.nome}`, sub: c.documento }))]
   const doRaiz = loja.documentos.filter((d) => (d.clienteId ?? '_escritorio') === (raiz ?? ''))
 
   // Pastas desta raiz: as do modelo (clientes), as dos arquivos e as criadas aqui.
@@ -114,10 +117,18 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
           )}
         </header>
 
-        {lista ? (
+        {aba === 'pastas' && !busca && !carregando && <FilaAtencao onIrPasta={(d) => irPara(d.clienteId ?? '_escritorio', d.pasta)} />}
+
+        {carregando ? (
+          <Carregando rotulo="Lendo o índice de arquivos" linhas={5} />
+        ) : lista ? (
           <Caixa>
             <p className="text-muted-foreground text-xs">{aba === 'recentes' && !busca ? 'O que chegou por último, de qualquer origem (app, conversas, integrantes, equipe, nuvem)' : `${lista.length} resultado(s) para “${busca}”`}</p>
-            <ListaArquivos itens={aba === 'recentes' && busca ? (resultados ?? []) : lista} comCaminho onAbrir={docs.abrirDoc} onPasta={(d) => irPara(d.clienteId ?? '_escritorio', d.pasta)} />
+            {(aba === 'recentes' && busca ? (resultados ?? []) : lista).length === 0 ? (
+              <EstadoVazio icone={MagnifyingGlassIcon} titulo="Nada encontrado" descricao="A busca olha o nome, a pasta e o cliente de todos os arquivos que você pode ver." compacto />
+            ) : (
+              <ListaArquivos itens={aba === 'recentes' && busca ? (resultados ?? []) : lista} comCaminho onAbrir={docs.abrirDoc} onPasta={(d) => irPara(d.clienteId ?? '_escritorio', d.pasta)} />
+            )}
           </Caixa>
         ) : (
           <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
@@ -191,7 +202,8 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
             const d = loja.adicionarDocumento({ nome, clienteId, pasta, tipo, origem: 'upload_equipe', conector: 'a1', tamanho: '220 KB', quando: 'hoje', por: usuario.nome })
             setCaminho(pasta)
             loja.registrar(usuario.nome, `Enviou ${nome} para ${pastaDoCliente(clienteId)}/${pasta.join('/')}`)
-            loja.toast(`${nome} guardado${pastaVisivel(pasta) && clienteId ? ' e já visível no app do cliente' : ''}.`)
+            loja.toast(`${nome} guardado${pastaVisivel(pasta) && clienteId ? ' e já visível no app do cliente' : ''}. Impressão digital ${d.hash.slice(0, 8)}….`)
+            avisarPastaForaDoPadrao(loja, pasta, usuario.nome)
             setModal(null)
             docs.abrirDoc(d)
           }}
@@ -203,6 +215,7 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
           onCriar={(nome) => {
             setExtras((x) => ({ ...x, [raiz ?? '']: [...(x[raiz ?? ''] ?? []), [...caminho, nome]] }))
             loja.registrar(usuario.nome, `Criou a pasta ${[pastaDoCliente(clienteId), ...caminho, nome].join('/')}`)
+            avisarPastaForaDoPadrao(loja, [...caminho, nome], usuario.nome)
             setModal(null)
           }}
         />
@@ -238,13 +251,46 @@ function Ramo({ base, filhas, caminho, onIr }: { base: string[]; filhas: (b: str
 }
 
 function ListaArquivos({ itens, comCaminho, onAbrir, onPasta }: { itens: Documento[]; comCaminho?: boolean; onAbrir: (d: Documento) => void; onPasta?: (d: Documento) => void }) {
+  const docs = useDocumentos()
+  const loja = useLoja()
+  const { usuario } = useSessao()
+  const podeMover = usePode('documento.mover')
+  const podeForcar = usePode('documento.forcar_visibilidade')
   if (!itens.length) return null
+  const repetidos = new Set(loja.documentos.filter((x, _, todos) => todos.some((y) => y.id !== x.id && y.hash === x.hash)).map((x) => x.id))
+  const acoesDe = (d: Documento): AcaoMenu[] => {
+    const leitura = conectorDe(d.conector)?.situacao === 'somente_leitura'
+    const visivel = visivelAoCliente(d)
+    return [
+      { rotulo: 'Abrir', icone: <FileTextIcon />, onSelecionar: () => onAbrir(d) },
+      { rotulo: 'Mover ou renomear', icone: <PencilSimpleIcon />, onSelecionar: () => docs.acao('mover', d), motivo: leitura ? 'Somente leitura: espelhado do Drive antigo' : !podeMover ? 'Só Gestor ou Administrador move' : undefined },
+      { rotulo: 'Versões lado a lado', icone: <ArrowsLeftRightIcon />, onSelecionar: () => docs.acao('versoes', d) },
+      { rotulo: 'Comprovante de entrega', icone: <ReceiptIcon />, onSelecionar: () => docs.acao('comprovante', d) },
+      ...(d.clienteId
+        ? [
+            {
+              rotulo: visivel ? 'Ocultar do cliente' : 'Mostrar ao cliente',
+              icone: visivel ? <EyeSlashIcon /> : <EyeIcon />,
+              motivo: leitura ? 'Somente leitura' : !podeForcar ? 'Só Gestor ou Administrador força' : undefined,
+              onSelecionar: () => {
+                loja.ajustarDocumento(d.id, { forcarVisivel: !visivel, s09: { ...d.s09, forcadoPor: `${usuario.nome} em ${new Date().toLocaleDateString('pt-BR')}` } })
+                loja.registrar(usuario.nome, `${!visivel ? 'Mostrou ao cliente' : 'Ocultou do cliente'}: ${d.nome}`)
+                loja.toastDesfazer(`${d.nome}: ${!visivel ? 'visível' : 'oculto'} no app do cliente.`, () => loja.ajustarDocumento(d.id, { forcarVisivel: d.forcarVisivel, s09: d.s09 }))
+              },
+            },
+          ]
+        : []),
+      ...(d.s09?.semOrigem ? [{ rotulo: 'Confirmar origem', icone: <WarningIcon />, separar: true, onSelecionar: () => docs.acao('origem', d) }] : []),
+      ...(d.s09?.conflito && !d.s09.conflito.resolvido ? [{ rotulo: 'Resolver conflito', icone: <CopyIcon />, separar: !d.s09?.semOrigem, onSelecionar: () => docs.acao('conflito', d) }] : []),
+    ]
+  }
   return (
     <ul className="divide-border/70 flex flex-col divide-y">
       {itens.map((d) => {
         const con = conectorDe(d.conector)
         return (
-          <li key={d.id} className="hover:bg-sunken/50 -mx-2 flex items-center gap-3 rounded-[10px] px-2 py-2 text-sm">
+          <MenuContexto key={d.id} acoes={acoesDe(d)} rotulo={`Ações de ${d.nome}`}>
+          <li data-doc={d.nome} className="hover:bg-sunken/50 -mx-2 flex items-center gap-3 rounded-[10px] px-2 py-2 text-sm">
             <FileTextIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
             <button type="button" onClick={() => onAbrir(d)} className="min-w-0 flex-1 cursor-pointer text-left">
               <span className="block truncate">{d.nome}</span>
@@ -263,9 +309,20 @@ function ListaArquivos({ itens, comCaminho, onAbrir, onPasta }: { itens: Documen
                 <CloudIcon className="size-3.5" /> {con.nome}
               </span>
             )}
+            {d.s09?.semOrigem && <span className="bg-warning/15 hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">origem a confirmar</span>}
+            {d.s09?.conflito && !d.s09.conflito.resolvido && <span className="bg-warning/15 hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">conflito</span>}
+            {d.s09?.indisponivelDesde && (
+              <span className="bg-destructive/15 text-destructive flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px]">
+                <CloudSlashIcon className="size-3.5" /> sem bytes
+              </span>
+            )}
+            {d.s09?.conferencia && <span className="bg-sunken hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">em conferência</span>}
+            {repetidos.has(d.id) && <span className="bg-sunken hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">repetido</span>}
             {d.clienteId && visivelAoCliente(d) && <EyeIcon className="text-success size-4 shrink-0" aria-label="visível ao cliente" />}
             <span className="text-muted-foreground hidden w-16 shrink-0 text-right text-xs tabular-nums sm:block">{d.tamanho}</span>
+            <BotaoAcoes acoes={acoesDe(d)} rotulo={`Ações de ${d.nome}`} />
           </li>
+          </MenuContexto>
         )
       })}
     </ul>
