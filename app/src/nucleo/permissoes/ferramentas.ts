@@ -105,6 +105,31 @@ export const ferramentas: Ferramenta[] = [
   f('nfse.cancelar', 'painel', 'executar', 'geral', { irreversivel: true, exposta_ao_cliente: true }),
   // Estado de tela (preferências e o que a tela guarda entre abas)
   f('tela.lembrar', 'plataforma', 'executar', 'geral', { exposta_ao_cliente: true }),
+  // S09 · Arquivos (01, 7): mover, visibilidade, origem, conflito, envio ao cliente.
+  f('documento.mover', 'arquivos', 'executar', 'geral', { papel_minimo: 'gestor' }),
+  f('documento.forcar_visibilidade', 'arquivos', 'executar', 'geral', { papel_minimo: 'gestor' }),
+  f('documento.confirmar_origem', 'arquivos', 'executar', 'geral'),
+  f('documento.resolver_conflito', 'arquivos', 'executar', 'geral', { papel_minimo: 'gestor' }),
+  f('documento.enviar_cliente', 'arquivos', 'executar', 'geral', { irreversivel: true, exige_aprovacao: 'se_integrante' }),
+  // S09 · Configurações: só o Administrador, salvo exceção por tela (setor "configuracoes" não existe em vínculo).
+  f('conector.configurar', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores' }),
+  f('conector.testar', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores' }),
+  f('conector.ver', 'plataforma', 'ler', 'configuracoes', { tela: 'config.conectores' }),
+  f('credencial.vincular', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores' }),
+  f('credencial.rotacionar', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores' }),
+  f('credencial.revogar', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores', irreversivel: true }),
+  f('credencial.usar', 'plataforma', 'ler', 'configuracoes', { tela: 'config.conectores' }),
+  f('conector.teto', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores' }),
+  f('rotina.reprocessar', 'plataforma', 'executar', 'configuracoes', { tela: 'config.conectores' }),
+  f('armazenamento.configurar', 'arquivos', 'executar', 'configuracoes', { tela: 'config.armazenamento' }),
+  f('raiox.rodar', 'arquivos', 'executar', 'configuracoes', { tela: 'config.armazenamento' }),
+  f('raiox.decidir', 'arquivos', 'executar', 'configuracoes', { tela: 'config.armazenamento' }),
+  f('raiox.ver_nomes', 'arquivos', 'ler', 'configuracoes', { tela: 'config.armazenamento' }),
+  f('integrante.configurar', 'agentes', 'executar', 'configuracoes', { tela: 'config.integrantes' }),
+  f('permissao.ver_matriz', 'plataforma', 'ler', 'configuracoes', { tela: 'config.permissoes' }),
+  f('tema.publicar', 'plataforma', 'executar', 'geral', { papel_minimo: 'administrador' }),
+  f('assinatura.alterar', 'plataforma', 'executar', 'geral', { papel_minimo: 'administrador' }),
+  f('implantacao.conduzir', 'plataforma', 'executar', 'geral', { papel_minimo: 'administrador' }),
 ]
 
 const indice = new Map(ferramentas.map((x) => [x.nome, x]))
