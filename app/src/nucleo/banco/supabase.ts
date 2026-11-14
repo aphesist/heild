@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { nomesTabelas, type Fotografia, type Id, type NomeTabela } from '../modelo/entidades'
+import { nomesTabelas, type Fotografia, type NomeTabela } from '../modelo/entidades'
 import { ErroAdaptador, type Adaptador } from './adaptador'
 import { fotografiaVazia } from './navegador'
 
@@ -41,12 +41,11 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
     if (e) throw new ErroAdaptador('supabase', `${onde}: ${e.message}`)
   }
 
-  const apagarTudo = async (c: SupabaseClient, escritorioId: Id) => {
-    // Filhos antes do escritório (a tabela `escritorio` é a raiz das chaves).
-    for (const t of [...nomesTabelas].reverse()) {
-      const { error } = await c.from(t).delete().eq(t === 'escritorio' ? 'id' : 'escritorio_id', escritorioId)
-      falhou(`apagar ${t}`, error)
-    }
+  // Apaga o escritório inteiro pela função da migração (a única porta que limpa eventos e mensagens
+  // internas, só para o escritório do JWT); as tabelas filhas vão junto por cascata.
+  const apagarTudo = async (c: SupabaseClient) => {
+    const { error } = await c.rpc('restaurar_demonstracao')
+    falhou('restaurar a demonstração', error)
   }
 
   return {
@@ -80,9 +79,9 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
         }
       }
     },
-    async substituir(escritorioId, foto: Fotografia) {
+    async substituir(_escritorioId, foto: Fotografia) {
       const c = await conectar()
-      await apagarTudo(c, escritorioId)
+      await apagarTudo(c)
       for (const t of nomesTabelas) {
         const linhas = foto[t] as unknown as Record<string, unknown>[]
         for (let i = 0; i < linhas.length; i += LOTE) {
@@ -91,8 +90,8 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
         }
       }
     },
-    async esquecer(escritorioId) {
-      await apagarTudo(await conectar(), escritorioId)
+    async esquecer() {
+      await apagarTudo(await conectar())
     },
   }
 }
