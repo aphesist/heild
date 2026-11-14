@@ -21,7 +21,7 @@ export const padroes: Record<string, ItemGrade[]> = {
   notas: a('fluxos:L manifestacao:M tributaria:G completude:G configuracao:G pendencias:M acoes:G lotes:G obrigacoes-setor:G tarefas:G documentos:M relatorios:M'),
   'fiscal-simples': a('simples:M caixas:G pendencias:G guias:XL situacao:M certidoes:M acoes:G tarefas:G documentos:G relatorios:M'),
   fiscal: a('caixas:G pendencias:G situacao:M certidoes:M guias:XL acoes:G tarefas:G documentos:G relatorios:G'),
-  dp: a('admissoes:XL quadro:M rescisoes:M pendencias:M folha:G esocial:G ferias:M acoes:G tarefas:G documentos:M relatorios:M'),
+  dp: a('dp-visao:L obrigacoes-setor:M admissoes:XL rescisoes:XL simulados:G quadro:M folha:G esocial:G guias:XL ferias:G convencoes:G det:M termos:G recalculo:M fase45:M dp-vazio:XL pendencias:M acoes:G tarefas:XL documentos:M relatorios:M'),
   contabil: a('fechamento:L deve-chegar:G pendencias:M documentos:M classificacao:XL conciliacao:G acoes:G tarefas:G relatorios:G'),
   consultoria: a('perguntas:XL vigilancia:G pareceres:G acoes:G simulacoes:M tarefas:G documentos:M relatorios:M'),
   gestao: a('produtividade:G ia:G equipe:M permissoes:XL migracao:XL acoes:G tarefas:G relatorios:M'),
@@ -29,7 +29,7 @@ export const padroes: Record<string, ItemGrade[]> = {
   'obrigacoes-carteira': a('carteira-semana:XL riscos:M prerequisitos:M prorrogacoes:M acoes:G tarefas:G relatorios:M'),
   'notas-carteira': a('carteira-captura:XL manifestacao:M obrigacoes-setor:G acoes:G tarefas:XL relatorios:M'),
   'fiscal-carteira': a('guias:M caixas:G situacao:M certidoes:M acoes:G tarefas:XL relatorios:M'),
-  'dp-carteira': a('carteira-folha:XL acoes:G tarefas:XL relatorios:G'),
+  'dp-carteira': a('dp-visao:L obrigacoes-setor:M carteira-folha:XL carteira-rescisao:XL acoes:G tarefas:XL relatorios:G'),
   'contabil-carteira': a('carteira-fechamento:XL acoes:G tarefas:XL relatorios:G'),
   'consultoria-carteira': a('carteira-consultoria:XL acoes:G tarefas:XL relatorios:G'),
 }
