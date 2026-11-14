@@ -86,6 +86,8 @@ export const abasInternas: Record<IdModulo, AbaSegmentada[]> = {
     { id: 'tema', rotulo: 'Tema' },
     { id: 'integrantes', rotulo: 'Integrantes' },
     { id: 'assinatura', rotulo: 'Assinatura' },
+    // S09: aba nova (S09-T09, contrato C9).
+    { id: 'conectores', rotulo: 'Conectores' },
   ],
   // S05: comunicação interna em tela cheia (subplano 11). Sem item na barra: abre pelo botão Chat (DECISOES.md).
   interna: [
@@ -107,4 +109,5 @@ export const nomeCompleto: Record<string, string> = {
   fila: 'Fila e pedidos',
   entregas: 'Entregas e SLA',
   volume: 'Volume e faturamento',
+  conectores: 'Conectores e cofre',
 }

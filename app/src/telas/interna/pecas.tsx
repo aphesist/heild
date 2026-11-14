@@ -41,6 +41,7 @@ import { Orb } from '@/components/ui/orb'
 import { Tooltip } from '@/components/ui/tooltip'
 import { dadoSensivel, extrasDe, linkReuniao, partesDoTexto, quando, type Citacao, type Mencao } from '@/dados/interna'
 import { cn } from '@/lib/utils'
+import type { PedidoNovaTarefa } from '@/dados/tipos'
 import type { ConversaInterna, Id, MensagemInterna } from '@/nucleo/modelo/entidades'
 import { rotuloSetorCurto, todosSetores } from '@/nucleo/permissoes/setores'
 import { useEscritorio, useTabela } from '@/nucleo/react'
@@ -282,7 +283,7 @@ export function DialogoVirarTarefa({ m, inicial, onFechar, onCriada }: { m: Mens
         className="text-primary -mt-1 self-start text-xs underline-offset-2 hover:underline"
         onClick={() => {
           // Contrato C4: o formulário completo da S04 recebe os campos que ele já souber usar.
-          const pedido = { setor: f.valores.setor as SetorIntegrante, cliente: f.valores.cliente || undefined, titulo: f.valores.titulo, origem: 'conversa', origemRef: m?.id }
+          const pedido: PedidoNovaTarefa = { setor: f.valores.setor as SetorIntegrante, cliente: loja.clientes.find((c) => c.id === f.valores.cliente)?.nome, titulo: f.valores.titulo, origem: 'conversa_interna', origemRef: m?.id }
           onFechar()
           fluxos.novaTarefa(pedido)
         }}

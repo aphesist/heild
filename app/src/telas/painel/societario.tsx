@@ -1,3 +1,4 @@
+import { widgetObrigacoesDoSetor } from './obrigacoes-setor'
 import { useContext } from 'react'
 import { clientePorNome, useFluxos } from '@/ambiente/fluxos'
 import { useLoja } from '@/ambiente/loja'
@@ -20,14 +21,15 @@ import type { CtxAba, WidgetsAba } from './tipos'
  * Ficha com versões, pessoas, acessos, certificados, contrato, processos e
  * ciclo de vida. Em carteira: certificados a vencer e clientes por estado.
  */
-export function widgetsSocietario({ cliente }: CtxAba): WidgetsAba {
+export function widgetsSocietario(ctx: CtxAba): WidgetsAba {
+  const { cliente } = ctx
   d = societarioDe(cliente?.id)
   if (!cliente)
     return {
-      catalogo: [certificadosCarteira, estadosCarteira],
+      catalogo: [certificadosCarteira, estadosCarteira, widgetObrigacoesDoSetor('societario', ctx)],
     }
   return {
-    catalogo: [ficha, pessoas, acessos, certificados, contrato, processos, ciclo],
+    catalogo: [ficha, pessoas, acessos, certificados, contrato, processos, ciclo, widgetObrigacoesDoSetor('societario', ctx)],
   }
 }
 

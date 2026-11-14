@@ -10,6 +10,7 @@ import { avisoParaModelo, clienteParaModelo, contaParaModelo, conversaParaModelo
 import { montador, type EscritorioDeExemplo } from './comum'
 import { canaisInternos, obrigacoesPadrao } from './padrao'
 import { sementeComunicacaoInterna } from './s05' // S05
+import { sementeS02 } from './s02'
 
 export const ID_ANDRADE = 'esc-andrade'
 
@@ -109,6 +110,7 @@ export function sementeAndrade(): Fotografia {
     { canal: 'ci-fiscal', autor: 'u2', corpo: 'Vi: a filial ainda não tem inscrição municipal. Abri tarefa no Societário.' },
   ])
   sementeComunicacaoInterna(foto, add) // S05
+  sementeS02(foto, add) // S02: regras com setor dono e o calendário de 10/2026
   return foto
 }
 

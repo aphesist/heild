@@ -8,11 +8,13 @@ import * as exemplo from '@/dados/exemplo'
 import { catalogoServicos, rotuloEstadoServico, type EstadoServico } from '@/dados/servicos-extras'
 import { faturas } from '@/dados/financeiro'
 import { sessoesDia } from '@/dados/timesheet'
-import type { Tarefa } from '@/dados/tipos'
+import type { PedidoNovaTarefa, Tarefa } from '@/dados/tipos'
+import { rotuloStatusLongo as rotuloStatus } from '@/components/compostos/rotulos'
 import { useAparencia } from '@/hooks/useAparencia'
 import type { SetorIntegrante } from '@/theme/tipos'
 import type { ContatoCliente } from './clientes'
 import { usePedirIntegrante } from './pedir'
+import { GavetaTrilha } from '@/telas/painel/trilha'
 import { NavegacaoProvider, useContas, useLoja, useNavegacao, type Destino } from './loja'
 import { rotuloSetorCurto, useSessao } from './sessao'
 
@@ -20,7 +22,6 @@ import { rotuloSetorCurto, useSessao } from './sessao'
 export const clientePorNome = (nome?: string) => exemplo.clientes.find((c) => c.nome === nome)
 /** Integrante padrão de um setor. */
 export const integranteDoSetor = (s: SetorIntegrante) => exemplo.integrantes.find((i) => i.setor === s && i.tipo !== 'criado_pelo_usuario')?.id ?? 'i-geral'
-const rotuloStatus: Record<Tarefa['status'], string> = { a_fazer: 'a fazer', em_andamento: 'em andamento', aguardando_cliente: 'aguardando cliente', concluida: 'concluída' }
 /** Quem recebe o assunto: o contato com ele; sem ninguém, o sócio ou titular (04 A1). */
 const contatoPorAssunto = (contatos: ContatoCliente[], assunto: string) => contatos.find((x) => x.assuntos.includes(assunto)) ?? contatos.find((x) => x.papel.startsWith('sóci') || x.papel === 'titular')
 const assuntoDoSetor = (s: SetorIntegrante) => (s === 'dp' ? 'folha' : s === 'societario' ? 'societario' : s === 'fiscal' ? 'guias' : 'documentos_pendentes')
@@ -56,8 +57,11 @@ interface Fluxos {
   preparar: (p: PedidoPreparar) => void
   transmitir: (p: PedidoTransmitir) => void
   baixar: (nome: string) => void
-  novaTarefa: (p: { cliente?: string; setor: SetorIntegrante }) => void
+  /** Gaveta de nova tarefa (contrato C4): atividade, título e origem chegam preenchidos quando vêm de outra tela. */
+  novaTarefa: (p: PedidoNovaTarefa) => void
   fichaCliente: (clienteId: string) => void
+  /** Trilha de implantação ou de saída do cliente por cima (S04, C6). */
+  abrirTrilha: (clienteId: string) => void
   /** Ação feita direto, sem gaveta: registra, avisa e devolve o link. */
   feito: (texto: string, destino?: Destino, rotulo?: string) => void
 }
@@ -66,8 +70,9 @@ const Ctx = createContext<Fluxos | null>(null)
 
 type Aberto =
   | { tipo: 'ficha'; clienteId: string }
-  | { tipo: 'nova'; cliente?: string; setor: SetorIntegrante }
+  | ({ tipo: 'nova' } & PedidoNovaTarefa)
   | { tipo: 'tarefa'; id: string }
+  | { tipo: 'trilha'; clienteId: string }
   | { tipo: 'cobrar'; p: PedidoCobrar }
   | { tipo: 'preparar'; p: PedidoPreparar }
   | { tipo: 'transmitir'; p: PedidoTransmitir }
@@ -88,6 +93,7 @@ function SincronizarRota() {
       primeira.current = false
       if (d?.tarefa) nav.irPara({ modulo: d.modulo, tarefa: d.tarefa })
       else if (d?.ficha) nav.irPara({ modulo: d.modulo, ficha: d.ficha })
+      else if (d?.trilha) nav.irPara({ modulo: d.modulo, trilha: d.trilha })
       return
     }
     // Lê o endereço de agora (no modo estrito o efeito roda de novo com o valor antigo da renderização).
@@ -114,6 +120,7 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
       baixar: (nome) => loja.toast(`${nome} baixado.`),
       novaTarefa: (p) => setAberto({ tipo: 'nova', ...p }),
       fichaCliente: (clienteId) => setAberto({ tipo: 'ficha', clienteId }),
+      abrirTrilha: (clienteId) => setAberto({ tipo: 'trilha', clienteId }),
       feito: (texto, destino, rotulo) => loja.toast(texto, destino, rotulo),
     }),
     [loja],
@@ -125,7 +132,8 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
       irPara: (d: Destino) => {
         if (d.tarefa) setAberto({ tipo: 'tarefa', id: d.tarefa })
         else if (d.ficha) setAberto({ tipo: 'ficha', clienteId: d.ficha })
-        if ((d.tarefa || d.ficha) && !d.aba) return
+        else if (d.trilha) setAberto({ tipo: 'trilha', clienteId: d.trilha })
+        if ((d.tarefa || d.ficha || d.trilha) && !d.aba) return
         nav.irPara(d)
       },
       // A vitrine (o site) passa adiante: os cartões lá dentro continuam sem os botões que levariam para fora.
@@ -135,7 +143,10 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
   )
 
   // O item aberto entra no endereço (#/...?tarefa=t18): o link abre a mesma ficha.
-  useEffect(() => definirItemDaRota({ tarefa: aberto?.tipo === 'tarefa' ? aberto.id : undefined, ficha: aberto?.tipo === 'ficha' ? aberto.clienteId : undefined }), [aberto])
+  useEffect(
+    () => definirItemDaRota({ tarefa: aberto?.tipo === 'tarefa' ? aberto.id : undefined, ficha: aberto?.tipo === 'ficha' ? aberto.clienteId : undefined, trilha: aberto?.tipo === 'trilha' ? aberto.clienteId : undefined }),
+    [aberto],
+  )
 
   return (
     <NavegacaoProvider value={navInterna}>
@@ -143,8 +154,9 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
         <SincronizarRota />
         {children}
         {aberto?.tipo === 'tarefa' && <FichaTarefa id={aberto.id} onFechar={() => setAberto(null)} onFluxo={setAberto} />}
+        {aberto?.tipo === 'trilha' && <GavetaTrilha clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'ficha' && <GavetaFichaCliente clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
-        {aberto?.tipo === 'nova' && <NovaTarefa cliente={aberto.cliente} setor={aberto.setor} onFechar={() => setAberto(null)} onCriada={(id) => setAberto({ tipo: 'tarefa', id })} />}
+        {aberto?.tipo === 'nova' && <NovaTarefa p={aberto} onFechar={() => setAberto(null)} onCriada={(id) => setAberto({ tipo: 'tarefa', id })} />}
         {aberto?.tipo === 'cobrar' && <GavetaCobrar p={aberto.p} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'preparar' && <GavetaPreparar p={aberto.p} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'transmitir' && <GavetaTransmitir p={aberto.p} onFechar={() => setAberto(null)} />}
@@ -158,7 +170,7 @@ export function useFluxos(): Fluxos {
   const f = useContext(Ctx)
   if (f) return f
   const nada = () => {}
-  return { abrirTarefa: nada, cobrar: nada, enviar: nada, preparar: nada, transmitir: nada, baixar: nada, novaTarefa: nada, fichaCliente: nada, feito: nada }
+  return { abrirTarefa: nada, cobrar: nada, enviar: nada, preparar: nada, transmitir: nada, baixar: nada, novaTarefa: nada, fichaCliente: nada, abrirTrilha: nada, feito: nada }
 }
 
 /** Acha (ou abre) a conversa do cliente naquele setor e devolve o id. */
@@ -516,11 +528,12 @@ function GavetaTransmitir({ p, onFechar }: { p: PedidoTransmitir; onFechar: () =
 }
 
 /** Nova tarefa à mão (03, 7): código do catálogo, cliente, prazo interno e responsável. */
-function NovaTarefa({ cliente, setor, onFechar, onCriada }: { cliente?: string; setor: SetorIntegrante; onFechar: () => void; onCriada: (id: string) => void }) {
+function NovaTarefa({ p, onFechar, onCriada }: { p: PedidoNovaTarefa; onFechar: () => void; onCriada: (id: string) => void }) {
+  const { cliente, setor } = p
   const loja = useLoja()
   const { usuario } = useSessao()
   const aparencia = useAparencia()
-  const [titulo, setTitulo] = useState('')
+  const [titulo, setTitulo] = useState(p.titulo ?? '')
   const [cli, setCli] = useState(cliente ?? exemplo.clientes[0].nome)
   const [prazo, setPrazo] = useState('20/11')
   const [resp, setResp] = useState<'eu' | 'integrante'>('eu')
@@ -535,7 +548,7 @@ function NovaTarefa({ cliente, setor, onFechar, onCriada }: { cliente?: string; 
       acaoDesabilitada={!titulo.trim()}
       onAcao={() => {
         const id = loja.criarTarefa({
-          codigo: `${prefixo[setor] ?? 'GES'}-0${Math.floor(Math.random() * 90 + 10)}`,
+          codigo: p.atividade ?? `${prefixo[setor] ?? 'GES'}-0${Math.floor(Math.random() * 90 + 10)}`,
           titulo: titulo.trim(),
           cliente: cli,
           setor,

@@ -10,6 +10,7 @@ import type { Destino, IdModulo } from '@/ambiente/loja'
  *   #/painel/fiscal?cliente=c1            com o cliente selecionado (todos = carteira)
  *   #/painel/societario?tarefa=t18        abre a ficha da tarefa por cima
  *   #/painel/societario?ficha=c1          abre a ficha do cliente
+ *   #/painel/societario?trilha=c3         abre a trilha do cliente (S04, C6)
  *   #/crm/conversas?conversa=cv1          a conversa aberta
  *   #/inicio/time?integrante=i-fiscal     o chat de um integrante
  *   #/financeiro/cobranca?fatura=f3       a fatura aberta
@@ -31,9 +32,12 @@ export function destinoParaHash(d: Destino): string {
   if (d.integrante) q.set('integrante', d.integrante)
   if (d.tarefa) q.set('tarefa', d.tarefa)
   if (d.ficha) q.set('ficha', d.ficha)
+  if (d.trilha) q.set('trilha', d.trilha)
   if (d.fatura) q.set('fatura', d.fatura)
   if (d.conversaInterna) q.set('conversaInterna', d.conversaInterna)
   if (d.pasta) q.set('pasta', `${d.pasta.clienteId ?? '_escritorio'}:${d.pasta.caminho.join('/')}`)
+  // S02 (C1): aba Obrigações filtrada pelo setor dono.
+  if (d.filtroSetor) q.set('setor', d.filtroSetor)
   const busca = q.toString()
   return `#/${d.modulo}${d.aba ? `/${d.aba}` : ''}${busca ? `?${busca}` : ''}`
 }
@@ -46,7 +50,7 @@ export function hashParaDestino(hash: string): Destino | null {
   if (m[2]) d.aba = decodeURIComponent(m[2])
   const cliente = q.get('cliente')
   if (cliente) d.cliente = cliente === 'todos' ? null : cliente
-  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'conversaInterna'] as const) {
+  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'trilha', 'conversaInterna'] as const) {
     const v = q.get(k)
     if (v) d[k] = v
   }
@@ -55,6 +59,9 @@ export function hashParaDestino(hash: string): Destino | null {
     const [c, caminho = ''] = pasta.split(':')
     d.pasta = { ...(c && c !== '_escritorio' ? { clienteId: c } : {}), caminho: caminho ? caminho.split('/') : [] }
   }
+  // S02 (C1): #/painel/obrigacoes?setor=fiscal
+  const setor = q.get('setor')
+  if (setor) d.filtroSetor = setor as Destino['filtroSetor']
   return d
 }
 
@@ -68,7 +75,7 @@ export function paginaDoHash(hash = typeof window === 'undefined' ? '' : window.
 
 let base: Destino | null = null
 let sub: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna'> = {}
-let item: Pick<Destino, 'tarefa' | 'ficha'> = {}
+let item: Pick<Destino, 'tarefa' | 'ficha' | 'trilha'> = {}
 const composta = (): Destino | null => (base ? { ...base, ...sub, ...item } : null)
 
 function escrever() {
@@ -104,7 +111,7 @@ export function definirRotaBase(d: Destino) {
 }
 
 /** As gavetas informam o item aberto (ou `undefined` ao fechar). */
-export function definirItemDaRota(i: Pick<Destino, 'tarefa' | 'ficha'>) {
+export function definirItemDaRota(i: Pick<Destino, 'tarefa' | 'ficha' | 'trilha'>) {
   item = i
   escrever()
 }
