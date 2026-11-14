@@ -9,6 +9,7 @@ import { DocumentosProvider } from '@/ambiente/documentos'
 import { integranteAoVivo } from '@/ambiente/integrante-vivo'
 import { abrirSuporte, SuporteProvider } from '@/ambiente/suporte'
 import { ModoEspera, SeloTempo, useRegistroTempo } from '@/ambiente/espera'
+import { falarComIntegrante } from '@/ambiente/chat-moldura'
 import { papelExibido, setoresContabeis, useSessao, useSessaoBruta } from '@/ambiente/sessao'
 import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
 import { BarraLateral } from '@/components/compostos/barra-lateral'
@@ -347,7 +348,7 @@ function PlataformaInterna(props: Props) {
                 clientesNaCarteira={loja.clientes.length}
                 tarefas={loja.tarefas.filter((t) => usuario.papel === 'administrador' || permissoes.setores.includes(t.setor))}
                 integrantes={integrantes}
-                onFalar={abrirIntegrante}
+                onFalar={(s) => falarComIntegrante(s)}
               />
               <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} />
             </div>

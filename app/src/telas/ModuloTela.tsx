@@ -1,18 +1,30 @@
-import { FileTextIcon, ListChecksIcon, ChatCircleIcon, TableIcon } from '@phosphor-icons/react'
-import type { ReactNode } from 'react'
+import { ArrowLeftIcon, FileTextIcon, ListChecksIcon, ChatCircleIcon, TableIcon } from '@phosphor-icons/react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useFalarComIntegrante } from '@/ambiente/chat-moldura'
+import { useContadorChat } from '@/ambiente/contadores-s01'
+import { useClienteDaRota } from '@/ambiente/contexto-cliente'
+import { useLoja, usePersistente } from '@/ambiente/loja'
+import { NovoIntegrante } from '@/components/compostos/novo-integrante'
+import { ProgressoTrabalho } from '@/components/compostos/progresso-trabalho'
+import { Orb } from '@/components/ui/orb'
+import { useAparencia } from '@/hooks/useAparencia'
+import { useEnviarAoIntegrante } from './inicio/chat-integrante'
+import { useEnviarAoGeral } from './inicio/roteador'
+import { mensagensComTime } from './pedidoAoTime'
+import { useHistorico } from './useHistorico'
+import { historicoAssistente } from '@/dados/exemplo'
 import { BlocoTarefas } from '@/components/compostos/bloco-tarefas'
 import { CampoChat } from '@/components/compostos/campo-chat'
 import { ListaIntegrantes } from '@/components/compostos/lista-integrantes'
 import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
 import { Contador } from '@/components/ui/badge'
-import { useEstadoChat, useNaoLidasInternas, type AbaChat } from '@/ambiente/interna'
+import { useEstadoChat, type AbaChat } from '@/ambiente/interna'
 import { AbaEquipe } from './interna/AbaEquipe'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Integrante, Mensagem, Tarefa } from '@/dados/tipos'
 import { useTema } from '@/theme/ThemeProvider'
 import { ListaMensagens } from './ListaMensagens'
-import { useConversa } from './useConversa'
 
 interface Props {
   /** Módulo (Painel, CRM...). */
@@ -69,27 +81,44 @@ function Lugar({ icone, titulo, texto }: { icone: ReactNode; titulo: string; tex
   )
 }
 
-const AUTOR_GERAL = { setor: 'geral' as const }
-
 /**
- * Gaveta do chat: abre sempre no Geral; integrantes em ícones à direita (03, 2.5).
- * S05 (contrato C8 revisto, DECISOES.md): duas abas no topo, Equipe (comunicação
- * interna, subplano 11) e Integrantes (o chat com o time); o botão soma as não
- * lidas das duas; `abrirChat()` abre de qualquer lugar.
+ * Gaveta do chat (S01-T06; 03, 2.5), em qualquer módulo. Duas abas no topo
+ * (DECISOES.md, Coordenação; contrato C8 revisto pela S05): **Equipe**
+ * (comunicação interna, preenchida pela S05) e **Integrantes** (o Geral e o
+ * time). No lado dos integrantes:
+ * - abre no Geral, com a mesma conversa do Início › Assistente para o cliente
+ *   da tela (trocar de cliente troca a conversa e avisa "agora falando de...");
+ * - ícones à direita trocam para um integrante, sem sair da tela; "+" cria um;
+ * - `falarComIntegrante(setor)` abre direto no chat dele (S01-A54).
+ * O botão soma as não lidas da Equipe e os cartões dos integrantes. No celular
+ * o botão some: o destino "Chat" do menu inferior abre a mesma gaveta.
  */
-export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirIntegrante, contexto }: NonNullable<Props['chat']> & { contexto: string }) {
-  const { integrante } = useTema()
-  const geral = integrante('geral')
-  const { mensagens, enviar, pensando } = useConversa(AUTOR_GERAL, conversaGeral, nomeUsuario)
+export function GavetaChat({ nomeUsuario, integrantes: iniciais, onAbrirIntegrante, contexto }: NonNullable<Props['chat']> & { contexto: string }) {
   const chat = useEstadoChat()
-  const equipe = useNaoLidasInternas().total
-  const doTime = integrantes.reduce((s, i) => s + (i.pendentes ?? 0), 0)
+  const contador = useContadorChat()
+  const clienteRota = useClienteDaRota()
+  const [novos] = usePersistente<Integrante[]>('time.novos', [])
+  const [pausados] = usePersistente<string[]>('time.pausados', [])
+  const integrantes = useMemo(() => [...iniciais, ...novos].map((i) => (pausados.includes(i.id) ? { ...i, situacao: 'pausado' as const } : i)), [iniciais, novos, pausados])
+  const [alvoId, setAlvoId] = useState<string | null>(null)
+  const [criando, setCriando] = useState(false)
+  const alvo = integrantes.find((i) => i.id === alvoId && i.setor !== 'geral')
+  useFalarComIntegrante(
+    useCallback(
+      (pedido) => {
+        const i = typeof pedido === 'string' ? integrantes.find((x) => x.setor === pedido && x.tipo !== 'criado_pelo_usuario') : integrantes.find((x) => x.id === pedido.id)
+        setAlvoId(i && i.setor !== 'geral' ? i.id : null)
+      },
+      [integrantes],
+    ),
+  )
+
   return (
     <Sheet open={chat.aberto} onOpenChange={chat.setAberto}>
       <SheetTrigger asChild>
-        <Button className="absolute right-4 bottom-4 z-10 rounded-full shadow-lg sm:right-6 sm:bottom-6" size="lg" aria-label={`Chat${equipe + doTime ? `, ${equipe + doTime} não lidas` : ''}`}>
+        <Button className="absolute right-4 bottom-4 z-10 rounded-full shadow-lg max-md:hidden sm:right-6 sm:bottom-6" size="lg" aria-label={`Chat${contador.total ? `, ${contador.total} não lidas` : ''}`}>
           <ChatCircleIcon /> Chat
-          <Contador valor={equipe + doTime} />
+          <Contador valor={contador.total} />
         </Button>
       </SheetTrigger>
       <SheetContent className="gap-0 sm:max-w-xl">
@@ -99,30 +128,134 @@ export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirInt
             rotulo="Abas do chat"
             className="self-start"
             abas={[
-              { id: 'equipe', rotulo: 'Equipe', contador: equipe },
-              { id: 'integrantes', rotulo: 'Integrantes', contador: doTime },
+              { id: 'equipe', rotulo: 'Equipe', contador: contador.equipe },
+              { id: 'integrantes', rotulo: 'Integrantes', contador: contador.doTime },
             ]}
             ativa={chat.aba}
             onTrocar={(id) => chat.setAba(id as AbaChat)}
           />
-          <SheetDescription>{chat.aba === 'equipe' ? 'Conversas da equipe do escritório. Mensagens não se apagam.' : `${geral.nome} · contexto: ${contexto}`}</SheetDescription>
+          <SheetDescription>{chat.aba === 'equipe' ? 'Conversas da equipe do escritório. Mensagens não se apagam.' : `contexto: ${contexto}`}</SheetDescription>
         </SheetHeader>
         {chat.aba === 'equipe' ? (
           <AbaEquipe conversa={chat.conversa} onConversa={chat.setConversa} onFechar={() => chat.setAberto(false)} />
         ) : (
           <div className="flex min-h-0 flex-1">
-            <div className="flex min-w-0 flex-1 flex-col">
-              <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
-                <ListaMensagens mensagens={mensagens} acoes={{ onAbrirIntegrante }} />
-              </div>
-              <CampoChat className="p-3" onEnviar={enviar} desabilitado={pensando} />
-            </div>
+            {alvo ? (
+              <ChatIntegranteGaveta key={alvo.id} integrante={alvo} nomeUsuario={nomeUsuario} onVoltar={() => setAlvoId(null)} onAbrirIntegrante={onAbrirIntegrante} onTelaCheia={() => (chat.setAberto(false), onAbrirIntegrante?.(alvo.setor))} />
+            ) : (
+              <ChatGeralGaveta key={clienteRota ?? 'todos'} chave={clienteRota ?? 'todos'} nomeUsuario={nomeUsuario} contexto={contexto} onAbrirIntegrante={(s) => setAlvoId(integrantes.find((i) => i.setor === s && i.tipo !== 'criado_pelo_usuario')?.id ?? null)} />
+            )}
             <div className="border-l px-2 py-4">
-              <ListaIntegrantes variante="icones" integrantes={integrantes} selecionado={integrantes[0]?.id} onSelecionar={(i) => i.setor !== 'geral' && onAbrirIntegrante?.(i.setor)} />
+              <ListaIntegrantes
+                variante="icones"
+                integrantes={integrantes}
+                selecionado={alvo?.id ?? integrantes.find((i) => i.setor === 'geral')?.id}
+                onSelecionar={(i) => setAlvoId(i.setor === 'geral' ? null : i.id)}
+                onCriar={() => setCriando(true)}
+              />
             </div>
           </div>
         )}
       </SheetContent>
+      <NovoIntegranteGaveta aberto={criando} onFechar={() => setCriando(false)} onAtivar={(id) => setAlvoId(id)} />
     </Sheet>
+  )
+}
+
+/** O Geral dentro da gaveta: a mesma conversa do Início para o cliente da tela. */
+function ChatGeralGaveta({ chave, nomeUsuario, contexto, onAbrirIntegrante }: { chave: string; nomeUsuario: string; contexto: string; onAbrirIntegrante: (s: Integrante['setor']) => void }) {
+  const loja = useLoja()
+  const conversa = useHistorico(chave, nomeUsuario, historicoAssistente, true)
+  const enviar = useEnviarAoGeral(conversa)
+  const mensagens = mensagensComTime(conversa.atual.mensagens, loja.estado.assistente[conversa.atual.id])
+  const { integrante } = useTema()
+  const geral = integrante('geral')
+  // Trocou de cliente com a gaveta aberta: a conversa troca sozinha e avisa (02, ad. 22).
+  const [aviso, setAviso] = useState(true)
+  useEffect(() => {
+    const t = window.setTimeout(() => setAviso(false), 4000)
+    return () => window.clearTimeout(t)
+  }, [])
+  return (
+    <div className="flex min-w-0 flex-1 flex-col">
+      {aviso && (
+        <p role="status" className="bg-sunken text-muted-foreground mx-4 mt-3 rounded-full px-3 py-1.5 text-center text-xs">
+          Agora falando {contexto === 'Carteira' ? 'da carteira' : `de ${contexto}`}
+        </p>
+      )}
+      <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
+        {mensagens.length === 0 ? (
+          <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 text-center text-sm">
+            <Orb cor={geral.cor} corOlhos={geral.corOlhos} tamanho={48} animado vivo />
+            <p>Pergunte ao {geral.nome} sem sair da tela.</p>
+          </div>
+        ) : (
+          <ListaMensagens mensagens={mensagens} acoes={{ onAbrirIntegrante }} />
+        )}
+      </div>
+      <CampoChat className="p-3" onEnviar={enviar} desabilitado={conversa.pensando} placeholder={`Pergunte ao ${geral.nome}`} />
+    </div>
+  )
+}
+
+/** Um integrante dentro da gaveta: o mesmo chat do Time, em tamanho de gaveta. */
+function ChatIntegranteGaveta({ integrante, nomeUsuario, onVoltar, onAbrirIntegrante, onTelaCheia }: { integrante: Integrante; nomeUsuario: string; onVoltar: () => void; onAbrirIntegrante?: (s: Integrante['setor']) => void; onTelaCheia: () => void }) {
+  const loja = useLoja()
+  const aparencia = useAparencia()
+  const t = aparencia(integrante)
+  const mensagens = loja.conversasTime[integrante.id] ?? []
+  const { enviar, pensando } = useEnviarAoIntegrante(integrante, nomeUsuario)
+  const trabalhos = loja.estado.trabalhos.filter((x) => x.situacao === 'rodando' && x.integrante === integrante.id)
+  return (
+    <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex items-center gap-2 border-b px-3 py-2">
+        <Button variant="ghost" size="icon-sm" className="rounded-full" aria-label="Voltar ao Geral" onClick={onVoltar}>
+          <ArrowLeftIcon />
+        </Button>
+        <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={28} estado={pensando ? 'pensando' : integrante.estado} extras={false} cutucavel={false} />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium">{t.nome}</span>
+          <span className="text-muted-foreground block truncate text-xs">{integrante.situacao === 'pausado' ? 'pausado' : integrante.resumo ?? integrante.funcao}</span>
+        </span>
+        <Button variant="ghost" size="sm" className="rounded-full" onClick={onTelaCheia}>
+          Abrir no Time
+        </Button>
+      </div>
+      <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
+        {mensagens.length === 0 ? (
+          <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 text-center text-sm">
+            <p>{integrante.funcao}.</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {integrante.sugestoes?.map((s) => (
+                <button key={s} type="button" onClick={() => enviar(s, [])} className="bg-raised hover:bg-sunken shadow-contorno cursor-pointer rounded-full px-3 py-1 text-xs">
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <ListaMensagens mensagens={mensagens} acoes={{ onAbrirIntegrante }} />
+        )}
+        {trabalhos.map((x) => (
+          <ProgressoTrabalho key={x.uid} trabalho={x} className="mt-4" />
+        ))}
+      </div>
+      <CampoChat className="p-3" onEnviar={enviar} desabilitado={pensando} placeholder={`Escreva para ${t.nome}`} />
+    </div>
+  )
+}
+
+/** "+" da gaveta: o mesmo fluxo de novo integrante do Time; o criado entra na lista e abre o chat dele. */
+function NovoIntegranteGaveta({ aberto, onFechar, onAtivar }: { aberto: boolean; onFechar: () => void; onAtivar: (id: string) => void }) {
+  const [, setNovos] = usePersistente<Integrante[]>('time.novos', [])
+  return (
+    <NovoIntegrante
+      aberto={aberto}
+      onFechar={onFechar}
+      onAtivar={(novo) => {
+        setNovos((xs) => [...xs, novo])
+        onAtivar(novo.id)
+      }}
+    />
   )
 }
