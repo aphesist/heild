@@ -92,7 +92,9 @@ export class Banco {
     const marcas: [NomeTabela, Registro | null, Id | null][] = []
     const tabela = <T extends NomeTabela>(t: T) => (novas.get(t) ?? this.foto[t]) as Registro[]
     const tx: Transacao = {
-      gravar: (t, linha) => {
+      gravar: (t, linhaRecebida) => {
+        // Toda linha é do escritório aberto (o evento nasce sem ele no registrarEvento).
+        const linha = linhaRecebida.escritorio_id ? linhaRecebida : { ...linhaRecebida, escritorio_id: this.escritorioId ?? '' }
         const atual = tabela(t)
         const i = atual.findIndex((r) => r.id === linha.id)
         const nova = i >= 0 ? atual.map((r, j) => (j === i ? linha : r)) : [...atual, linha]
@@ -147,6 +149,7 @@ export class Banco {
       await this.adaptador.persistir(this.escritorioId, alteracoes, this.foto)
     } catch (e) {
       const mensagem = e instanceof Error ? e.message : String(e)
+      console.error('[heild] falha ao gravar:', mensagem)
       this.ouvintesErro.forEach((o) => o(mensagem))
     }
   }
