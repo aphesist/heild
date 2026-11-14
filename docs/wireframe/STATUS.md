@@ -38,7 +38,7 @@ Comparação visual com o `wireframe` (mesmas telas, mesmo relógio): Painel, CR
 
 ### Testes antigos (`app/scripts/*.cjs`)
 
-Rodados contra o branch novo e contra o `wireframe` original. Os resultados estão na seção "Regressão" abaixo.
+Rodados contra o branch novo e contra o `wireframe` original; resultado na seção "Regressão".
 
 ### Falta (para as sessões e para a coordenação)
 
@@ -51,7 +51,17 @@ Rodados contra o branch novo e contra o `wireframe` original. Os resultados est�
 
 ### Regressão
 
-_Preenchido ao fim da S00 com o resultado dos scripts antigos._
+Todos os scripts de `app/scripts` rodados no branch (já com o `wireframe` de 14/11 mesclado) e comparados com o `wireframe` original:
+
+| Script | Resultado |
+| --- | --- |
+| app-cliente, arquivos, bpo-admin, bpo-aprovacao-reforcada, bpo-cenarios, bpo-modulo, decisoes-8-11, decisoes-8-11-b, demonstracao-dinamica, escrita-simulada, espelho-orbs, financeiro-sete-abas, servicos-app, suporte, trabalho-simulado-assistente-crm, trabalho-simulado-ctb016, temas-escritorios | Todas as verificações passam |
+| assistente-orquestra | 18 de 19; a que falha ("LC 123/2006, art. 18, § 5º-J") falha igual no `wireframe` original |
+| espera | Passa; o erro no fim é da gravação de captura do próprio script, igual no original |
+| estouro-horizontal, geometria-abas, orb-troca-de-aba, orbs-nivel-qualidade, padrao-visual, varrer, vaos | Medições sem verificação ok/falha ou que pedem o Storybook (porta 6099); não comparadas |
+| fundacao-fumaca (novo) | 26 de 26 |
+
+Durante a S00, cinco desses testes pegaram regressões reais da migração (chaves `bpo.*` do `usePersistente`, cenário trocado por Gestor, entrega registrada pelo app, rótulo "Resetar o ambiente", endereço antigo reaberto no modo estrito); todas corrigidas.
 
 ### Pull request
 

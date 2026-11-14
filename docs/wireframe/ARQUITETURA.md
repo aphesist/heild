@@ -194,7 +194,7 @@ Quem não está logado vê a entrada e, depois de entrar, cai no endereço pedid
 
 - Dois escritórios: **Contábil Andrade & Lima** (completo, os dados de exemplo de sempre) e **Horizonte Contabilidade** (pequeno, em implantação, sem BPO). Cada um tem os dados guardados à parte (`heild:banco:<escritorio>:<tabela>` no localStorage). Troca no painel Demonstração.
 - As telas que ainda leem dados fixos de `src/dados` (Financeiro, Timesheet, BPO, Leads/Comunicados/Números, Visão geral, parte de Configurações) mostram, no Horizonte, um aviso em vez de misturar dados de outro escritório. Ao migrar uma tela para o banco, tire-a da condição `telaAindaFixa` em `Plataforma.tsx`.
-- **Restaurar demonstração** (painel Demonstração) volta o escritório ativo aos dados de exemplo, sai das contas e volta ao tema.
+- **Resetar o ambiente (restaurar demonstração)** (painel Demonstração) volta o escritório ativo aos dados de exemplo, sai das contas e volta ao tema.
 - Onde os dados ficam: `VITE_HEILD_BANCO=local|indexeddb|supabase|memoria` (`app/.env.exemplo`; Supabase em `app/supabase/README.md`).
 
 ## 10. Como não conflitar com outra sessão

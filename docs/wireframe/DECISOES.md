@@ -73,3 +73,42 @@ Formato de cada registro:
 ### S10 · App do cliente
 
 ### S11 · Pacote Jurídico
+
+### S00 · Fundação (base comum)
+
+#### 2026-11-14 · S00 · Dados nas entidades das Fundações, com a loja como fachada
+
+- **Decisão:** os dados do wireframe passam a morar nas entidades do subplano 01 (`app/src/nucleo`), com repositórios que conferem permissão, aplicam a regra e gravam evento. A `loja.tsx` deixa de ter redutor de dados e vira fachada com a mesma API para as telas antigas. `usePersistente` passa a persistir ao recarregar (tabela `registro_tela`). O "não alterar o redutor da loja" do `SESSOES.md` continua valendo na prática: estado novo por `usePersistente` ou por entidade e repositório.
+- **Por quê:** pedido do Enzo (base para o backend futuro, persistência local, Supabase pronto); decidido pela S00.
+- **Telas e ações:** todas (visual igual).
+- **Impacto no plano:** nenhum (implementa 01, 2 a 6 no wireframe).
+- **Arquivos compartilhados:** `loja.tsx`, `sessao.tsx`, `App.tsx`, `PainelLab.tsx`, `Plataforma.tsx` (rotas e aviso de tela com dados fixos), `fluxos.tsx` (item da tarefa no endereço).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S00 · "Membro" nas telas, `colaborador` no código
+
+- **Decisão:** o papel aparece como **Membro** nas telas da sessão e do painel Demonstração (o mapa, 1.1, já usa Membro); no código e no SQL continua `colaborador`, como no subplano 01. Some o "Colaborador/Colaboradora" deduzido do nome.
+- **Por quê:** o Enzo chama de Membro; não adivinhar gênero pelo nome.
+- **Telas e ações:** entrada (S09), menu do usuário (S01). `UsuariosTela` ainda mostra "Colaborador" no rótulo próprio: S09 troca.
+- **Impacto no plano:** nenhum (rótulo).
+- **Arquivos compartilhados:** `sessao.tsx` (`papelExibido`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S00 · Notificação com lista de destinatários
+
+- **Decisão:** no wireframe, uma `notificacao` tem `destinatario_ids` (lista; vazia = todos) e `lida_por`, em vez de uma linha por destinatário (01, 8).
+- **Por quê:** mantém o sino atual sem multiplicar avisos; o backend pode abrir em linhas.
+- **Impacto no plano:** nenhum para o produto (simplificação do wireframe).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S00 · Telas com dados fixos no segundo escritório de exemplo
+
+- **Decisão:** no escritório de exemplo Horizonte, as telas que ainda leem `src/dados` (Financeiro, Timesheet, BPO, Leads/Comunicados/Números, Visão geral, Armazenamento, Integrantes, Tema e Assinatura) mostram um aviso em vez dos dados do Andrade. Cada sessão, ao migrar a tela para o banco, tira a tela da condição `telaAindaFixa` em `Plataforma.tsx`.
+- **Por quê:** não misturar dados de dois escritórios (isolamento do DA-01).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S00 · Permissão escondida por padrão
+
+- **Decisão:** o kit esconde o que a conta não pode (`SePode`); o botão cinza com "por que não posso?" (`mostrarMotivo`) fica para onde o plano pede (03, 9.1) e para a vitrine `#/kit`.
+- **Por quê:** o mapa (1.1) manda esconder; o 03, 9.1 admite o cinza explicado.
+- **Situação:** proposta.
