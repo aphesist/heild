@@ -22,6 +22,7 @@ import { rotuloSetorCurto } from '@/nucleo/permissoes'
 import { useTabela, useBanco } from '@/nucleo/react'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { ordemPrazo } from './minha-fila'
+import { useImplantacao } from '@/dados/implantacao'
 import { ListaPendencias } from './pendencias'
 
 /*
@@ -96,6 +97,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
   const gere = permissoes.gere
   const eventos = useTabela('evento')
   const { escritorio } = useBanco()
+  const implantacao = useImplantacao()
 
   // Tarefas no escopo: setores da pessoa e o cliente do seletor.
   const tarefas = useMemo(() => loja.tarefas.filter((t) => (papel === 'administrador' || setores.includes(t.setor)) && t.status !== 'cancelada' && (!clienteNome || t.cliente === clienteNome)), [loja.tarefas, papel, setores, clienteNome])
@@ -437,7 +439,8 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
           </ul>
         ),
     })
-    if (faltam.length > 0 || !escritorio.completo)
+    // S09: com a implantação do escritório concluída, a faixa some de vez.
+    if (!implantacao.concluida && (faltam.length > 0 || !escritorio.completo))
       catalogo.push({
         id: 'primeiros',
         titulo: 'Primeiros passos',
