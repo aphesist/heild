@@ -1,3 +1,4 @@
+import { DemonstracaoS01 } from './demo-s01'
 import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SquaresFourIcon, SunIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { usePreferencia } from '@/hooks/usePreferencia'
@@ -19,6 +20,7 @@ import { useLoja } from './loja'
 import { LabS05 } from './lab-s05'
 import { LabS07 } from '@/telas/financeiro/lab'
 import { papelExibido, useSessaoBruta } from './sessao'
+import { SecaoLabS09 } from '@/telas/config/lab-s09'
 
 export type Visao = 'escritorio' | 'cliente'
 
@@ -229,6 +231,8 @@ export function PainelLab({
                 <PauseCircleIcon className="size-4 shrink-0" /> Simular {escritorio.inatividadeMin} min parado (só no Painel com cliente e no CRM)
               </button>
             )}
+            {/* S01: limite e plano de IA, resumo diário, promoção de integrante. */}
+            {sessao?.usuario && <DemonstracaoS01 onFechar={() => setAberto(false)} />}
             {/* S05 */}
             <LabS05 onFeito={() => setAberto(false)} />
             {/* S07 */}
@@ -285,6 +289,7 @@ export function PainelLab({
         >
           <WarningCircleIcon className="size-4 shrink-0" /> Serviços externos: {instavel ? 'falhando metade das vezes' : 'respondendo'} (alternar)
         </button>
+        {sessao?.usuario && <SecaoLabS09 />}
         <a href="#/kit" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
           <SquaresFourIcon className="size-4 shrink-0" /> Kit de interação e serviços simulados
         </a>

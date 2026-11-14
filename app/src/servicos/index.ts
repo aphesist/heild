@@ -6,6 +6,8 @@ import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
 import type { InfoServico } from './tipos'
 import { cobrancaDemonstracao, importacaoFinanceiroDemonstracao, indicesDemonstracao, type ServicoCobranca, type ServicoImportacaoFinanceiro, type ServicoIndices } from './cobranca'
+import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores } from './conectores'
+import { cadastrosDemonstracao, type ServicoCadastros } from './cadastros'
 
 export * from './tipos'
 export { definirEscalaLatencia, definirInstabilidade } from './simular'
@@ -16,6 +18,8 @@ export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
 export type * from './cobranca'
+export type * from './conectores'
+export type * from './cadastros'
 
 /**
  * Os serviços externos do sistema. Hoje todos são de demonstração. Para ligar
@@ -45,6 +49,12 @@ export interface Servicos {
   cobranca: ServicoCobranca
   indices: ServicoIndices
   importacaoFinanceiro: ServicoImportacaoFinanceiro
+  // S09: conectores, cofre e leitura da árvore do Drive (Raio-X).
+  conectores: ServicoConectores
+  cofre: ServicoCofre
+  arvore: ServicoArvore
+  /** S02: consulta CNPJ, procurações e Domicílio Judicial. */
+  cadastros: ServicoCadastros
 }
 
 export const servicos: Servicos = {
@@ -66,6 +76,10 @@ export const servicos: Servicos = {
   cobranca: cobrancaDemonstracao,
   indices: indicesDemonstracao,
   importacaoFinanceiro: importacaoFinanceiroDemonstracao,
+  conectores: conectoresDemonstracao,
+  cofre: cofreDemonstracao,
+  arvore: arvoreDemonstracao,
+  cadastros: cadastrosDemonstracao,
 }
 
 const reais = new Set<keyof Servicos>()
@@ -93,11 +107,15 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'openFinance', api: 'API-19', nome: 'Open Finance', descricao: 'Contas do cliente com o consentimento dele.', modo: 'demonstracao', requisito: 'Participante ou agregador autorizado' },
   { id: 'assinatura', api: 'API-22', nome: 'Assinatura eletrônica', descricao: 'Contratos, procurações e termos com validade.', modo: 'demonstracao', requisito: 'Provedor de assinatura (pago por envelope)' },
   { id: 'armazenamento', api: 'API-24', nome: 'Armazenamento em nuvem', descricao: 'Drive, OneDrive, Dropbox ou o da Heild.', modo: 'demonstracao', requisito: 'Conector OAuth da nuvem do escritório' },
+  { id: 'cadastros', api: 'API-12, API-06', nome: 'Cadastros (CNPJ, procurações, Domicílio Judicial)', descricao: 'Cadastra o cliente pelo CNPJ, confere procurações e lista comunicações sem dar ciência.', modo: 'demonstracao', requisito: 'Contrato SERPRO (ou dados abertos) e certificado do escritório' },
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
   // S07
   { id: 'cobranca', api: 'API-20', nome: 'Cobrança do escritório', descricao: 'Boleto, Pix e Pix Automático direto no banco do escritório (ou Asaas/Efí).', modo: 'demonstracao', requisito: 'Convênio de cobrança com API no banco do escritório' },
   { id: 'indices', api: 'API-16', nome: 'Índices do Banco Central', descricao: 'IPCA, INPC e IGP-M acumulados para o reajuste.', modo: 'demonstracao', requisito: 'Série SGS pública (sem custo)' },
   { id: 'importacaoFinanceiro', api: 'API-30', nome: 'Importação do financeiro antigo', descricao: 'Contratos, cobranças e recebimentos de Conexa, Omie, Conta Azul, Nibo, Domínio Honorários ou planilha.', modo: 'demonstracao', requisito: 'Arquivo exportado da ferramenta antiga' },
+  { id: 'conectores', api: 'API-06 a API-25', nome: 'Conectores (teste e conexão)', descricao: 'Conectar, testar e reprocessar cada integração.', modo: 'demonstracao', requisito: 'Backend dos conectores (08)' },
+  { id: 'cofre', api: 'API-29', nome: 'Cofre de credenciais', descricao: 'Certificados, procurações e tokens guardados fora do banco.', modo: 'demonstracao', requisito: 'Cofre e KMS no backend' },
+  { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore do Drive', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo.', modo: 'demonstracao', requisito: 'Conector OAuth do Drive em leitura' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 
 /** Os serviços (para componentes; o mesmo objeto de `servicos`). */

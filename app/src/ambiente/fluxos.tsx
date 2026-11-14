@@ -1,22 +1,19 @@
-import { ArrowSquareOutIcon, ChatCircleDotsIcon, CheckCircleIcon, ClockIcon, FileTextIcon, PaperPlaneTiltIcon, ShieldCheckIcon, SparkleIcon, TimerIcon, UserIcon } from '@phosphor-icons/react'
+import { CheckCircleIcon, FileTextIcon, ShieldCheckIcon, SparkleIcon } from '@phosphor-icons/react'
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { definirItemDaRota, hashParaDestino, rotaAtual, useHash } from '@/nucleo/rotas'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
+import { Campo, CampoArea, CampoEscolha, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
 import * as exemplo from '@/dados/exemplo'
-import { catalogoServicos, rotuloEstadoServico, type EstadoServico } from '@/dados/servicos-extras'
-import { faturas } from '@/dados/financeiro'
-import { sessoesDia } from '@/dados/timesheet'
-import type { PedidoNovaTarefa, Tarefa } from '@/dados/tipos'
-import { rotuloStatusLongo as rotuloStatus } from '@/components/compostos/rotulos'
+import type { PedidoNovaTarefa } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import type { SetorIntegrante } from '@/theme/tipos'
 import type { ContatoCliente } from './clientes'
-import { usePedirIntegrante } from './pedir'
 import { GavetaTrilha } from '@/telas/painel/trilha'
-import { NavegacaoProvider, useContas, useLoja, useNavegacao, type Destino } from './loja'
-import { rotuloSetorCurto, useSessao } from './sessao'
+import { FichaClienteGaveta } from '@/telas/painel/ficha-cliente'
+import { FichaTarefa } from '@/telas/tarefas/FichaTarefa'
+import { NovaTarefa } from '@/telas/tarefas/NovaTarefa'
+import { GavetaTarefas } from '@/telas/tarefas/GavetaTarefas'
+import { NavegacaoProvider, useLoja, useNavegacao, type Destino } from './loja'
+import { useSessao } from './sessao'
 
 /** Cliente pelo nome (os dados de exemplo guardam o nome). */
 export const clientePorNome = (nome?: string) => exemplo.clientes.find((c) => c.nome === nome)
@@ -62,6 +59,8 @@ interface Fluxos {
   fichaCliente: (clienteId: string) => void
   /** Trilha de implantação ou de saída do cliente por cima (S04, C6). */
   abrirTrilha: (clienteId: string) => void
+  /** Todas as tarefas (S04-T03, "ver todas"), com lista, por responsável, calendário e revisão. */
+  verTarefas: (p?: { setor?: SetorIntegrante; cliente?: string }) => void
   /** Ação feita direto, sem gaveta: registra, avisa e devolve o link. */
   feito: (texto: string, destino?: Destino, rotulo?: string) => void
 }
@@ -73,6 +72,7 @@ type Aberto =
   | ({ tipo: 'nova' } & PedidoNovaTarefa)
   | { tipo: 'tarefa'; id: string }
   | { tipo: 'trilha'; clienteId: string }
+  | { tipo: 'lista'; setor?: SetorIntegrante; cliente?: string }
   | { tipo: 'cobrar'; p: PedidoCobrar }
   | { tipo: 'preparar'; p: PedidoPreparar }
   | { tipo: 'transmitir'; p: PedidoTransmitir }
@@ -121,6 +121,7 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
       novaTarefa: (p) => setAberto({ tipo: 'nova', ...p }),
       fichaCliente: (clienteId) => setAberto({ tipo: 'ficha', clienteId }),
       abrirTrilha: (clienteId) => setAberto({ tipo: 'trilha', clienteId }),
+      verTarefas: (p) => setAberto({ tipo: 'lista', ...p }),
       feito: (texto, destino, rotulo) => loja.toast(texto, destino, rotulo),
     }),
     [loja],
@@ -153,7 +154,18 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
       <Ctx.Provider value={fluxos}>
         <SincronizarRota />
         {children}
-        {aberto?.tipo === 'tarefa' && <FichaTarefa id={aberto.id} onFechar={() => setAberto(null)} onFluxo={setAberto} />}
+        {aberto?.tipo === 'tarefa' && (
+          <FichaTarefa
+            key={aberto.id}
+            id={aberto.id}
+            onFechar={() => setAberto(null)}
+            onCobrar={(p) => setAberto({ tipo: 'cobrar', p })}
+            onFicha={(clienteId) => setAberto({ tipo: 'ficha', clienteId })}
+            onTrilha={(clienteId) => setAberto({ tipo: 'trilha', clienteId })}
+            onAbrirTarefa={(id) => setAberto({ tipo: 'tarefa', id })}
+          />
+        )}
+        {aberto?.tipo === 'lista' && <GavetaTarefas setor={aberto.setor} cliente={aberto.cliente} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'trilha' && <GavetaTrilha clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'ficha' && <GavetaFichaCliente clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
         {aberto?.tipo === 'nova' && <NovaTarefa p={aberto} onFechar={() => setAberto(null)} onCriada={(id) => setAberto({ tipo: 'tarefa', id })} />}
@@ -170,7 +182,7 @@ export function useFluxos(): Fluxos {
   const f = useContext(Ctx)
   if (f) return f
   const nada = () => {}
-  return { abrirTarefa: nada, cobrar: nada, enviar: nada, preparar: nada, transmitir: nada, baixar: nada, novaTarefa: nada, fichaCliente: nada, abrirTrilha: nada, feito: nada }
+  return { abrirTarefa: nada, cobrar: nada, enviar: nada, preparar: nada, transmitir: nada, baixar: nada, novaTarefa: nada, fichaCliente: nada, abrirTrilha: nada, verTarefas: nada, feito: nada }
 }
 
 /** Acha (ou abre) a conversa do cliente naquele setor e devolve o id. */
@@ -201,159 +213,6 @@ export function useConversaDe() {
     })
     return id
   }
-}
-
-/** Ficha da tarefa: o mesmo fato visto de todos os lados (conversa, integrante, tempo, fatura). */
-function FichaTarefa({ id, onFechar, onFluxo }: { id: string; onFechar: () => void; onFluxo: (a: Aberto) => void }) {
-  const loja = useLoja()
-  const nav = useNavegacao()
-  const { usuario } = useSessao()
-  const aparencia = useAparencia()
-  const pedirIntegrante = usePedirIntegrante()
-  const t = loja.tarefas.find((x) => x.id === id)
-  if (!t) return null
-  const c = clientePorNome(t.cliente)
-  const ficha = loja.fichaDe(c?.id)
-  const conversa = ficha?.conversas[t.setor] ?? loja.conversas.find((x) => x.cliente === t.cliente && x.setor === t.setor)?.id
-  const sessoes = sessoesDia.filter((s) => s.cliente === t.cliente && s.atividade === t.codigo)
-  const fatura = faturas.find((f) => f.cliente === t.cliente && f.situacao !== 'paga')
-  const integrante = integranteDoSetor(t.setor)
-  const eventos = loja.estado.eventos.filter((e) => e.texto.includes(t.codigo) && e.texto.includes(t.cliente))
-  const ir = (d: Destino) => {
-    onFechar()
-    nav.irPara(d)
-  }
-  const mudar = (status: Tarefa['status'], texto: string) => {
-    loja.atualizarTarefa(t.id, { status, atrasada: status === 'concluida' ? false : t.atrasada })
-    loja.registrar(usuario.nome, `${texto}: ${t.codigo} · ${t.cliente}`)
-    loja.toast(`${t.codigo} · ${t.cliente}: ${texto.toLowerCase()}.`)
-  }
-  const tom = aparencia({ setor: t.setor })
-  const pedido = pedirIntegrante(t)
-  return (
-    <GavetaFormulario
-      aberta
-      largura="lg"
-      onFechar={onFechar}
-      titulo={`${t.codigo} · ${t.titulo}`}
-      descricao={`${t.cliente} · ${tom.nome} · prazo ${t.prazo}`}
-      acao={t.status === 'concluida' ? 'Fechar' : 'Concluir tarefa'}
-      onAcao={() => (t.status === 'concluida' ? onFechar() : (mudar('concluida', 'Concluída'), onFechar()))}
-      secundaria={
-        pedido && !pedido.fazendo ? (
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full"
-            onClick={() => {
-              pedido.pedir()
-              onFechar()
-            }}
-          >
-            {t.status === 'aguardando_cliente' ? `${pedido.nome} cobra o cliente` : `Pedir ao ${pedido.nome}`}
-          </Button>
-        ) : t.status === 'a_fazer' ? (
-          <Button type="button" variant="ghost" className="rounded-full" onClick={() => mudar('em_andamento', 'Iniciada')}>
-            Iniciar
-          </Button>
-        ) : t.status === 'em_andamento' ? (
-          <Button type="button" variant="ghost" className="rounded-full" onClick={() => mudar('aguardando_cliente', 'Aguardando cliente')}>
-            Aguardar cliente
-          </Button>
-        ) : undefined
-      }
-    >
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Badge variant={t.status === 'concluida' ? 'sucesso' : t.atrasada ? 'erro' : 'outline'}>{t.atrasada && t.status !== 'concluida' ? 'atrasada' : rotuloStatus[t.status]}</Badge>
-        <span className="text-muted-foreground flex items-center gap-1">
-          <UserIcon className="size-4" /> {t.responsavel ? (t.responsavel.tipo === 'integrante' ? `integrante ${t.responsavel.nome}` : t.responsavel.nome) : 'sem responsável'}
-        </span>
-        {t.cartaoPendente && <Badge variant="destaque">cartão aguardando aprovação</Badge>}
-      </div>
-
-      <section className="flex flex-col gap-1.5">
-        <h3 className="text-sm font-medium">Ligado a esta tarefa</h3>
-        <ul className="divide-border/70 flex flex-col divide-y text-sm">
-          <Ligacao
-            icone={<ChatCircleDotsIcon />}
-            titulo="Conversa com o cliente"
-            detalhe={conversa ? `${loja.conversas.find((x) => x.id === conversa)?.pessoa.nome ?? ''} · CRM` : 'nenhuma ainda'}
-            rotulo={conversa ? 'Abrir no CRM' : 'Escrever ao cliente'}
-            onClick={() => (conversa ? ir({ modulo: 'crm', aba: 'conversas', conversa }) : onFluxo({ tipo: 'cobrar', p: { cliente: t.cliente, setor: t.setor, texto: '', tarefa: t.id, assunto: t.titulo } }))}
-          />
-          <Ligacao
-            icone={<SparkleIcon />}
-            titulo={`Integrante ${tom.nome}`}
-            detalhe={t.responsavel?.tipo === 'integrante' ? 'é o responsável; o histórico está no chat dele' : 'pode preparar o documento desta tarefa'}
-            rotulo="Abrir no Time"
-            onClick={() => ir({ modulo: 'inicio', aba: 'time', integrante, cliente: c?.id })}
-          />
-          <Ligacao
-            icone={<TimerIcon />}
-            titulo="Tempo registrado"
-            detalhe={sessoes.length ? sessoes.map((s) => `${s.inicio}–${s.fim} (${s.confianca})`).join(' · ') : 'nenhuma sessão hoje'}
-            rotulo="Ver no Timesheet"
-            onClick={() => ir({ modulo: 'timesheet', aba: 'meu', cliente: c?.id })}
-          />
-          <Ligacao
-            icone={<FileTextIcon />}
-            titulo={`Aba ${tom.nome} do cliente`}
-            detalhe={`${t.cliente}: o que está aberto no setor`}
-            rotulo="Abrir no Painel"
-            onClick={() => ir({ modulo: 'painel', aba: t.setor === 'consultor' ? 'consultoria' : t.setor === 'gestao_atendimento' ? 'gestao' : t.setor, cliente: c?.id })}
-          />
-          {c && (
-            <Ligacao
-              icone={<UserIcon />}
-              titulo="Ficha do cliente"
-              detalhe={ficha?.contatos.map((x) => `${x.nome} (${x.papel})`).join(', ') || 'sem contatos'}
-              rotulo="Abrir ficha"
-              onClick={() => onFluxo({ tipo: 'ficha', clienteId: c.id })}
-            />
-          )}
-          {fatura && (
-            <Ligacao icone={<ClockIcon />} titulo="Honorário em aberto" detalhe={`${fatura.competencia} · vence ${fatura.vencimento}`} rotulo="Ver fatura" onClick={() => ir({ modulo: 'financeiro', aba: 'cobranca', fatura: fatura.id })} />
-          )}
-        </ul>
-      </section>
-
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={() => onFluxo({ tipo: 'cobrar', p: { cliente: t.cliente, setor: t.setor, texto: '', tarefa: t.id, assunto: t.titulo } })}>
-          <PaperPlaneTiltIcon /> Cobrar o cliente
-        </Button>
-        <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={() => onFluxo({ tipo: 'preparar', p: { cliente: t.cliente, setor: t.setor, documento: t.titulo, tarefa: t.id } })}>
-          <SparkleIcon /> Pedir ao integrante
-        </Button>
-      </div>
-
-      {(eventos.length > 0 || ficha?.observacao) && (
-        <section className="flex flex-col gap-1.5 text-sm">
-          <h3 className="font-medium">Histórico</h3>
-          {eventos.map((e) => (
-            <p key={e.id} className="text-muted-foreground text-xs">
-              {e.quando} · {e.ator}: {e.texto}
-            </p>
-          ))}
-          {ficha?.observacao && <p className="text-muted-foreground text-xs">Sobre o cliente: {ficha.observacao}</p>}
-        </section>
-      )}
-    </GavetaFormulario>
-  )
-}
-
-function Ligacao({ icone, titulo, detalhe, rotulo, onClick }: { icone: ReactNode; titulo: string; detalhe: string; rotulo: string; onClick: () => void }) {
-  return (
-    <li className="flex items-center gap-3 py-2">
-      <span className="text-muted-foreground [&_svg]:size-4">{icone}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block">{titulo}</span>
-        <span className="text-muted-foreground block truncate text-xs">{detalhe}</span>
-      </span>
-      <Button type="button" size="sm" variant="ghost" className="shrink-0 rounded-full" onClick={onClick}>
-        {rotulo} <ArrowSquareOutIcon />
-      </Button>
-    </li>
-  )
 }
 
 /** Cobrar ou enviar ao cliente: vai para a conversa do CRM do setor, pelo contato com o assunto. */
@@ -527,168 +386,12 @@ function GavetaTransmitir({ p, onFechar }: { p: PedidoTransmitir; onFechar: () =
   )
 }
 
-/** Nova tarefa à mão (03, 7): código do catálogo, cliente, prazo interno e responsável. */
-function NovaTarefa({ p, onFechar, onCriada }: { p: PedidoNovaTarefa; onFechar: () => void; onCriada: (id: string) => void }) {
-  const { cliente, setor } = p
-  const loja = useLoja()
-  const { usuario } = useSessao()
-  const aparencia = useAparencia()
-  const [titulo, setTitulo] = useState(p.titulo ?? '')
-  const [cli, setCli] = useState(cliente ?? exemplo.clientes[0].nome)
-  const [prazo, setPrazo] = useState('20/11')
-  const [resp, setResp] = useState<'eu' | 'integrante'>('eu')
-  const prefixo: Partial<Record<SetorIntegrante, string>> = { fiscal: 'FIS', notas: 'NFE', dp: 'DP', contabil: 'CTB', societario: 'SOC', consultor: 'CON', gestao_atendimento: 'GES' }
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo={`Nova tarefa · ${aparencia({ setor }).nome}`}
-      descricao="Aparece na aba do setor, na lista do responsável e na ficha do cliente."
-      acao="Criar"
-      acaoDesabilitada={!titulo.trim()}
-      onAcao={() => {
-        const id = loja.criarTarefa({
-          codigo: p.atividade ?? `${prefixo[setor] ?? 'GES'}-0${Math.floor(Math.random() * 90 + 10)}`,
-          titulo: titulo.trim(),
-          cliente: cli,
-          setor,
-          prazo,
-          status: 'a_fazer',
-          responsavel: resp === 'eu' ? { tipo: 'pessoa', nome: usuario.nome } : { tipo: 'integrante', nome: aparencia({ setor }).nome, setor },
-        })
-        loja.registrar(usuario.nome, `Criou a tarefa “${titulo.trim()}” (${cli})`)
-        onCriada(id)
-      }}
-    >
-      <Campo rotulo="O que fazer">{(id) => <CampoArea id={id} linhas={2} valor={titulo} onMudar={setTitulo} placeholder="Ex.: Conferir retenções de novembro" />}</Campo>
-      <Campo rotulo="Cliente">{(id) => <CampoEscolha id={id} valor={cli} onMudar={setCli} opcoes={exemplo.clientes.map((c) => ({ valor: c.nome, rotulo: c.nome }))} />}</Campo>
-      <Campo rotulo="Prazo interno" ajuda="O prazo legal vem do calendário; este é o combinado da equipe.">
-        {(id) => <CampoEscolha id={id} valor={prazo} onMudar={setPrazo} opcoes={['19/11', '20/11', '23/11', '25/11', '27/11', '30/11'].map((x) => ({ valor: x, rotulo: x }))} />}
-      </Campo>
-      <Campo rotulo="Responsável">
-        {() => (
-          <Segmentado
-            rotulo="Responsável"
-            valor={resp}
-            onMudar={setResp}
-            opcoes={[
-              { valor: 'eu', rotulo: usuario.nome },
-              { valor: 'integrante', rotulo: `Integrante ${aparencia({ setor }).nome}` },
-            ]}
-          />
-        )}
-      </Campo>
-    </GavetaFormulario>
-  )
-}
-
-const papeis: ContatoCliente['papel'][] = ['sócio', 'sócia', 'titular', 'financeiro', 'RH', 'fiscal da empresa', 'diretor financeiro']
-const assuntos = [
-  { valor: 'guias', rotulo: 'guias' },
-  { valor: 'folha', rotulo: 'folha' },
-  { valor: 'documentos_pendentes', rotulo: 'documentos' },
-  { valor: 'honorarios', rotulo: 'honorários' },
-  { valor: 'societario', rotulo: 'societário' },
-  { valor: 'comunicados', rotulo: 'comunicados' },
-]
 
 /**
- * Ficha do cliente (03, 6.1 e 04 A1): quem recebe cada assunto, quem usa o app
- * e quem responde por cada setor no escritório. É daqui que a cobrança, a
- * entrega de guias e a lateral do CRM tiram o contato e o responsável.
+ * Ficha do cliente (S02-T05): contatos com papel por serviço e assuntos,
+ * alçada (proposta), responsáveis, serviços extras, entrega e malote, resumo
+ * da relação e histórico. A gaveta mora em `telas/painel/ficha-cliente.tsx`.
  */
 function GavetaFichaCliente({ clienteId, onFechar }: { clienteId: string; onFechar: () => void }) {
-  const loja = useLoja()
-  const { usuario } = useSessao()
-  const cliente = exemplo.clientes.find((c) => c.id === clienteId)
-  const base = loja.fichaDe(clienteId) ?? { id: clienteId, contatos: [], responsaveis: {}, conversas: {} }
-  const [contatos, setContatos] = useState(base.contatos)
-  const [resp, setResp] = useState(base.responsaveis)
-  const [servicos, setServicos] = useState(base.servicos ?? {})
-  const pode = usuario.papel !== 'colaborador'
-  // Responsáveis pelos pacotes que o cliente contratou (o BPO só onde há BPO).
-  const pacotes = cliente?.servicos ?? ['contabil']
-  const setoresEquipe: SetorIntegrante[] = [...(pacotes.includes('contabil') && loja.estado.cenario !== 'bpo_puro' ? (['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor'] as const) : []), ...(pacotes.includes('bpo') ? (['bpo_financeiro'] as const) : [])]
-  const contas = useContas()
-  const pessoasDo = (s: SetorIntegrante) => contas.filter((u) => u.situacao === 'ativo' && (u.papel === 'administrador' || u.vinculos.some((v) => v.setor === s))).map((u) => u.nome)
-  const muda = (i: number, p: Partial<ContatoCliente>) => setContatos((xs) => xs.map((x, k) => (k === i ? { ...x, ...p } : x)))
-  const semAssunto = assuntos.filter((a) => !contatos.some((c) => c.assuntos.includes(a.valor)))
-  return (
-    <GavetaFormulario
-      aberta
-      largura="lg"
-      onFechar={onFechar}
-      titulo={`Ficha · ${cliente?.nome ?? ''}`}
-      descricao={`${cliente?.codigo ?? ''} · ${cliente?.regime ?? ''} · ${cliente?.documento ?? ''}. Contatos por assunto e responsáveis por setor.`}
-      acao={pode ? 'Salvar' : 'Fechar'}
-      acaoDesabilitada={pode && contatos.some((c) => !c.nome.trim())}
-      onAcao={() => {
-        if (pode) {
-          loja.salvarFicha({ ...base, contatos, responsaveis: resp, servicos })
-          loja.registrar(usuario.nome, `Atualizou a ficha de ${cliente?.nome}`)
-          loja.toast(`Ficha de ${cliente?.nome} salva. Cobranças e entregas já usam os contatos novos.`)
-        }
-        onFechar()
-      }}
-    >
-      <fieldset disabled={!pode} className="contents">
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Contatos e o que cada um recebe</h3>
-          {contatos.map((c, i) => (
-            <div key={i} className="bg-sunken/50 flex flex-col gap-2 rounded-[14px] p-3">
-              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem]">
-                <CampoTexto valor={c.nome} onMudar={(v) => muda(i, { nome: v })} placeholder="Nome" aria-label={`Nome do contato ${i + 1}`} />
-                <CampoEscolha rotulo={`Papel de ${c.nome || 'contato'}`} valor={c.papel} onMudar={(v) => muda(i, { papel: v })} opcoes={papeis.map((x) => ({ valor: x, rotulo: x }))} />
-                <CampoTexto valor={c.whatsapp ?? ''} onMudar={(v) => muda(i, { whatsapp: v || undefined })} placeholder="WhatsApp" aria-label={`WhatsApp de ${c.nome || 'contato'}`} />
-                <CampoTexto valor={c.email ?? ''} onMudar={(v) => muda(i, { email: v || undefined })} placeholder="E-mail" aria-label={`E-mail de ${c.nome || 'contato'}`} />
-              </div>
-              <Fichas rotulo={`Assuntos de ${c.nome || 'contato'}`} valores={c.assuntos} onMudar={(v) => muda(i, { assuntos: v })} opcoes={assuntos} />
-              <div className="flex items-center gap-2">
-                <Interruptor ligado={!!c.app} onMudar={(v) => muda(i, { app: v })} rotulo="Usa o app do cliente" />
-                <Button type="button" size="sm" variant="ghost" className="text-destructive ml-auto rounded-full" onClick={() => setContatos((xs) => xs.filter((_, k) => k !== i))}>
-                  Tirar
-                </Button>
-              </div>
-            </div>
-          ))}
-          <Button type="button" size="sm" variant="outline" className="w-fit rounded-full" onClick={() => setContatos((xs) => [...xs, { nome: '', papel: 'financeiro', assuntos: [] }])}>
-            Adicionar contato
-          </Button>
-          {semAssunto.length > 0 && <p className="text-muted-foreground text-xs">Sem ninguém: {semAssunto.map((a) => a.rotulo).join(', ')}. Esses assuntos vão para o sócio.</p>}
-        </section>
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Responsáveis no escritório</h3>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {setoresEquipe.map((s) => (
-              <Campo key={s} rotulo={rotuloSetorCurto[s]}>
-                {(id) => <CampoEscolha id={id} valor={resp[s] ?? ''} onMudar={(v) => setResp({ ...resp, [s]: v || undefined })} opcoes={[{ valor: '', rotulo: 'padrão do setor' }, ...pessoasDo(s).map((n) => ({ valor: n, rotulo: n }))]} />}
-              </Campo>
-            ))}
-          </div>
-        </section>
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Serviços extras no app do cliente</h3>
-          <p className="text-muted-foreground text-xs">Ativo: o cliente usa. Disponível: aparece com “tenho interesse”. Oculto: não aparece. O cliente nunca ativa sozinho (06, 8).</p>
-          <div className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
-            {catalogoServicos.map((sv) => (
-              <div key={sv.id} className="flex items-center gap-2">
-                <span className="min-w-0 flex-1 text-sm">
-                  {sv.nome} <span className="text-muted-foreground text-[11px]">· fase {sv.fase}</span>
-                </span>
-                <div className="w-32 shrink-0">
-                  <CampoEscolha
-                    rotulo={`Estado de ${sv.nome}`}
-                    valor={servicos[sv.id] ?? 'disponivel'}
-                    onMudar={(v) => setServicos({ ...servicos, [sv.id]: v as EstadoServico })}
-                    opcoes={(['ativo', 'disponivel', 'oculto'] as const).map((e) => ({ valor: e, rotulo: rotuloEstadoServico[e] }))}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </fieldset>
-      {!pode && <p className="text-muted-foreground text-xs">Só Gestor e Administrador mudam a ficha; você vê.</p>}
-    </GavetaFormulario>
-  )
+  return <FichaClienteGaveta clienteId={clienteId} onFechar={onFechar} />
 }

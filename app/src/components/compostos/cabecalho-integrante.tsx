@@ -1,4 +1,4 @@
-import { BrainIcon, ClockCounterClockwiseIcon, DotsThreeIcon, EyeIcon, GearSixIcon, PauseIcon, PlayIcon, SpinnerGapIcon } from '@phosphor-icons/react'
+import { LightningIcon, BrainIcon, ClockCounterClockwiseIcon, DotsThreeIcon, EyeIcon, GearSixIcon, PauseIcon, PlayIcon, SpinnerGapIcon } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,8 @@ interface Props {
   onVerMemoria?: () => void
   onConfigurar?: () => void
   onHistorico?: () => void
+  /** S01: jobs e gatilhos do integrante (02, 7.1). */
+  onJobs?: () => void
   /** Nível do título (h2 no chat; h3 quando o cabeçalho vive dentro de outra seção, como na landing). */
   nivel?: 'h2' | 'h3'
   className?: string
@@ -30,7 +32,7 @@ interface Props {
  * nome, setor, estado, fila, cartões pendentes, limite de IA e menu.
  * No celular encolhe para orb, nome e estado.
  */
-export function CabecalhoIntegrante({ integrante: it, contexto, limite, onPausar, onVerMemoria, onConfigurar, onHistorico, nivel = 'h2', className }: Props) {
+export function CabecalhoIntegrante({ integrante: it, contexto, limite, onPausar, onVerMemoria, onConfigurar, onHistorico, onJobs, nivel = 'h2', className }: Props) {
   const Titulo = nivel
   const aparencia = useAparencia()
   const t = aparencia(it)
@@ -108,6 +110,12 @@ export function CabecalhoIntegrante({ integrante: it, contexto, limite, onPausar
           <ItemMenu icone={<GearSixIcon />} onClick={escolher(onConfigurar)}>
             Configurar
           </ItemMenu>
+          {onJobs && (
+            <ItemMenu icone={<LightningIcon />} onClick={escolher(onJobs)}>
+              Jobs e gatilhos
+              <span className="text-muted-foreground block text-xs">o que ele faz sozinho e os últimos resultados</span>
+            </ItemMenu>
+          )}
           <ItemMenu icone={<ClockCounterClockwiseIcon />} onClick={escolher(onHistorico)}>
             Histórico do mês passado
           </ItemMenu>

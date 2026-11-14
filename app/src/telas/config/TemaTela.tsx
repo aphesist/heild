@@ -14,6 +14,8 @@ import { useTema } from '@/theme/ThemeProvider'
 import type { ModoCor, SetorIntegrante, Tema, TokensTema } from '@/theme/tipos'
 import { textoSobre, tokensDoModo, variaveisCss } from '@/theme/variaveis'
 import { CabecalhoConfig } from './EscritorioTela'
+import { EstadoComplemento, ModelosDocumento, NomeWhatsapp, SeletorTema } from './tema-s09'
+import { useMarcaBranca } from './marca-branca'
 
 /** Contraste WCAG entre duas cores hex. */
 function contraste(a: string, b: string) {
@@ -132,6 +134,7 @@ export function TemaTela() {
     ok: true,
   })
   const alterado = JSON.stringify(r) !== JSON.stringify(tema)
+  const marca = useMarcaBranca()
   const t = tokensDoModo(r, modo)
 
   const setToken = (k: keyof TokensTema, v: string) => setR((x) => (modo === 'claro' ? { ...x, tokens: { ...x.tokens, [k]: v } } : { ...x, modo_escuro: { ...x.modo_escuro, [k]: v } }))
@@ -147,12 +150,14 @@ export function TemaTela() {
           titulo="Tema"
           sub={`Versão ${versoes[0].versao} publicada · o tema de fábrica é só o ponto de partida e nunca aparece para o cliente`}
           acao={
-            <Button size="sm" className="rounded-full" disabled={!alterado} onClick={() => setModal('publicar')}>
+            <Button size="sm" className="rounded-full" disabled={!alterado || !marca.contratada} title={!marca.contratada ? 'Publicar depende do complemento de marca branca' : undefined} onClick={() => setModal('publicar')}>
               Publicar versão {versoes[0].versao + 1}
             </Button>
           }
         />
 
+        <EstadoComplemento />
+        <SeletorTema />
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
           <div className="flex min-w-0 flex-col gap-4">
             <Caixa>
@@ -260,7 +265,7 @@ export function TemaTela() {
                 <Propriedade rotulo="E-mail">
                   {remetente.nome} &lt;{remetente.email}&gt; {remetente.ok && <Badge variant="sucesso">domínio verificado</Badge>}
                 </Propriedade>
-                <Propriedade rotulo="Nome no WhatsApp">por número, em CRM › Números</Propriedade>
+                <Propriedade rotulo="Nome no WhatsApp">por número, no bloco abaixo</Propriedade>
               </dl>
             </Caixa>
             <Caixa>
@@ -281,6 +286,7 @@ export function TemaTela() {
                 ))}
               </ul>
             </Caixa>
+            <NomeWhatsapp />
           </div>
 
           <div className="flex min-w-0 flex-col gap-4">
@@ -340,6 +346,7 @@ export function TemaTela() {
                 )}
               </Campo>
             </Caixa>
+            <ModelosDocumento />
             <Caixa className="flex-1">
               <TituloBloco descricao="Textos com variáveis entre chaves. Os do atendimento ficam em CRM › Números › Mensagens automáticas.">Modelos de texto</TituloBloco>
               <ul className="divide-border/70 flex flex-col divide-y">

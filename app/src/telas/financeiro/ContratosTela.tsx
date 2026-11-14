@@ -182,7 +182,7 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
                               texto: `Preparei o aditivo de faixa da ${c.cliente}: a minuta vai para assinatura eletrônica do sócio quando você aprovar.`,
                               aba: 'contratos',
                               alcada: 'gestor',
-                              ferramenta: 'contrato.enviar_assinatura',
+                              ferramenta: 'contrato.enviar_aditivo',
                               cliente_id: c.cliente_id,
                             })
                           }
@@ -644,10 +644,11 @@ function ExtrasAFaturar({ fin, podeEditar, onRegistrar }: { fin: Fin; podeEditar
   const clientesEscolhidos = [...new Set(escolhidos.map((i) => i.cliente_id))]
   const rotuloOrigem: Record<string, string> = { tarefa: 'tarefa', comanda: 'comanda (C2-25)', pedido_app: 'pedido no app', conversa: 'conversa', manual: 'registrado à mão', faixa: 'acima da faixa', certificado: 'certificado digital (C2-23)' }
   const faturarComanda = (t: (typeof fin.comandas)[number]) => {
-    const extra = t.extras?.servico_extra as { descricao: string; quantidade?: number }
     const preco = fin.tabelaAvulsos.find((x) => x.atividade_id === t.atividade_id)
-    const valor = (preco?.valor_padrao ?? 300) * (extra.quantidade ?? 1)
-    const av = executar(() => repos.servicosAvulsos.criar({ cliente_id: t.cliente_id ?? '', atividade_id: t.atividade_id, descricao: extra.descricao, valor, origem: 'comanda', tarefa_id: t.id, situacao: 'proposto' }, { texto: `Comanda de serviço extra virou avulso a aceitar: ${extra.descricao}` }))
+    // Marca da S04 na ficha da tarefa: `servico_extra: true` e, se a pessoa informou, `extra_valor` ("R$ 360,00").
+    const informado = Number(String(t.extras?.extra_valor ?? '').replace(/[^\d,]/g, '').replace(',', '.')) || 0
+    const valor = informado || preco?.valor_padrao || 300
+    const av = executar(() => repos.servicosAvulsos.criar({ cliente_id: t.cliente_id ?? '', atividade_id: t.atividade_id, descricao: t.titulo, valor, origem: 'comanda', tarefa_id: t.id, situacao: 'proposto' }, { texto: `Comanda de serviço extra virou avulso a aceitar: ${t.titulo}` }))
     if (!av) return
     integrante.pedirCartao({
       id: `avulso-${av.id}`,
@@ -686,10 +687,10 @@ function ExtrasAFaturar({ fin, podeEditar, onRegistrar }: { fin: Fin; podeEditar
               <ClipboardTextIcon className="text-muted-foreground size-4 shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block">
-                  Comanda de serviço extra: {String((t.extras?.servico_extra as { descricao?: string })?.descricao ?? t.titulo)} <span className="text-muted-foreground">· {fin.nomeCliente(t.cliente_id)}</span>
+                  Comanda de serviço extra: {t.titulo} <span className="text-muted-foreground">· {fin.nomeCliente(t.cliente_id)}</span>
                 </span>
                 <span className="text-muted-foreground block text-xs">
-                  marcada na tarefa por {String((t.extras?.servico_extra as { marcada_por?: string })?.marcada_por ?? 'a equipe')} · C2-25
+                  marcada como extra na tarefa{t.extras?.extra_valor ? ` · valor informado ${String(t.extras.extra_valor)}` : ''}{t.extras?.responsavel_nome ? ` · ${String(t.extras.responsavel_nome)}` : ''} · C2-25
                 </span>
               </span>
               <Button size="sm" variant="ghost" className="rounded-full" onClick={() => nav.irPara({ modulo: 'painel', aba: t.setor_id === 'dp' ? 'dp' : 'societario', tarefa: t.id })}>

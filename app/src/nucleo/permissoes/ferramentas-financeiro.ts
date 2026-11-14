@@ -23,7 +23,7 @@ export const ferramentasFinanceiro: Ferramenta[] = [
   // Contratos (09, 4)
   f('contrato.criar', 'rascunhar', 'aba.financeiro.contratos'),
   f('contrato.aditar', 'executar', 'aba.financeiro.contratos', { exige_aprovacao: 'se_integrante' }),
-  f('contrato.enviar_assinatura', 'executar', 'aba.financeiro.contratos', { irreversivel: true }),
+  f('contrato.enviar_aditivo', 'executar', 'aba.financeiro.contratos', { irreversivel: true }),
   f('contrato.encerrar', 'executar', 'aba.financeiro.contratos', { irreversivel: true, papel_minimo: 'gestor' }),
   f('reajuste.aplicar', 'executar', 'aba.financeiro.contratos', { ...adm, irreversivel: true, exige_aprovacao: 'sempre' }),
   f('avulso.registrar', 'executar', 'aba.financeiro.contratos'),

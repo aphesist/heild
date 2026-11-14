@@ -62,7 +62,7 @@ function Escritorios({ modo, setModo }: { modo: ModoCor; setModo: (m: ModoCor | 
   const contextoApp = useMemo<Contexto | null>(() => (visao === 'cliente' ? { ator: { tipo: 'pessoa_cliente', nome: pessoaApp ?? 'Cliente' }, origem: 'tela' } : null), [visao, pessoaApp])
 
   return (
-    <ThemeProvider tema={tema} modo={modo}>
+    <ThemeProvider tema={tema} modo={modo} onTema={setTemaId}>
       <SessaoProvider key={`${escritorio.id}-${geracao}`} contextoExterno={contextoApp}>
         <LojaProvider>
           <ConfirmarProvider>

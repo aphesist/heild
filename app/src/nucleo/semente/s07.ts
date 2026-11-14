@@ -222,7 +222,7 @@ export function sementeS07Andrade(_foto: Fotografia, add: Add) {
     prioridade: 'normal',
     checklist: [],
     risco: false,
-    extras: { responsavel_nome: 'Ana Souza', servico_extra: { descricao: 'Rescisão de 2 empregados fora da folha (comanda)', quantidade: 2, marcada_por: 'Ana Souza', marcada_em: '2026-11-17' } },
+    extras: { responsavel_nome: 'Ana Souza', servico_extra: true, extra_valor: 'R$ 360,00' },
   })
   add('tarefa', {
     id: 's07-tk-capacidade',
@@ -240,7 +240,7 @@ export function sementeS07Andrade(_foto: Fotografia, add: Add) {
     prioridade: 'normal',
     checklist: [],
     risco: false,
-    extras: { responsavel_nome: 'Bruno Costa', servico_extra: { descricao: 'Declaração de capacidade financeira', marcada_por: 'Bruno Costa', marcada_em: '2026-11-18', avulso_id: 'sa-capacidade' } },
+    extras: { responsavel_nome: 'Bruno Costa', servico_extra: true, extra_valor: 'R$ 350,00' },
   })
 
   // Lote de dezembro preparado pelo integrante (o cartão fik1 do chat do Financeiro).

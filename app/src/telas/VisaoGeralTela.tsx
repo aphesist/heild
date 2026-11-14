@@ -8,6 +8,11 @@ import { cabe } from '@/components/widgets/widget'
 import type { Aviso, EventoLinhaDoTempo, Indicador, Integrante, ItemAgenda, Pendencia } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import { rotuloDoEstado } from '@/lib/integrante'
+import { useClienteDaRota } from '@/ambiente/contexto-cliente'
+import { useSessao } from '@/ambiente/sessao'
+import { HOJE_DEMO } from '@/components/compostos/calendario'
+import { useBanco } from '@/nucleo/react'
+import { padraoDoPapel, useCatalogoVivo } from './inicio/widgets-inicio'
 
 export interface DadosVisaoGeral {
   indicadores: Indicador[]
@@ -24,7 +29,7 @@ export interface DadosVisaoGeral {
 const iconeIndicador: Record<string, Icon> = { i1: WarningIcon, i2: CalendarBlankIcon, i3: ChartBarIcon, i4: PaperPlaneTiltIcon }
 
 /** Arranjo padrão (Colaborador/Gestor, 03 4.2): indicadores, calendário e avisos em cima. */
-const padrao: ItemGrade[] = [
+export const padraoVisaoGeral: ItemGrade[] = [
   { id: 'i1', tamanho: 'P' },
   { id: 'i2', tamanho: 'P' },
   { id: 'i3', tamanho: 'P' },
@@ -127,22 +132,40 @@ export function catalogoVisaoGeral(dados: DadosVisaoGeral, contexto: string, onA
 }
 
 /**
- * Visão geral: a Home do subplano 03, seção 4, numa grade de widgets
- * personalizável (ordem, tamanho, quais aparecem; 03 4.3).
+ * Visão geral: a Home do subplano 03, seção 4 (S01-T05), numa grade de
+ * widgets personalizável (ordem, tamanho, quais aparecem, galeria, restaurar o
+ * padrão do papel; 03 4.3). Os números saem do banco, no escopo da pessoa e do
+ * cliente do seletor; o arranjo é por pessoa e separado para cliente e carteira.
  */
 export function VisaoGeralTela({ dados, contexto, onAbrirIntegrante }: { dados: DadosVisaoGeral; contexto: string; onAbrirIntegrante?: (s: Aviso['setor']) => void }) {
-  const catalogo = catalogoVisaoGeral(dados, contexto, onAbrirIntegrante)
+  const { usuario } = useSessao()
+  const clienteId = useClienteDaRota() ?? null
+  const { escritorio } = useBanco()
+  // Avisos de exemplo são do escritório completo; nos outros, a lista começa vazia (sem misturar escritórios).
+  const avisos = escritorio.completo ? dados.avisos : []
+  const catalogo = useCatalogoVivo({
+    linhaExemplo: escritorio.completo ? dados.linhaDoTempo : [],
+    clienteNome: clienteId ? contexto : undefined,
+    clienteId,
+    avisos,
+    onAbrirIntegrante,
+    timeAgora: <TimeAgora integrantes={dados.integrantes ?? []} compacto={false} onAbrir={onAbrirIntegrante} />,
+  })
+  const hoje = new Date(`${HOJE_DEMO}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
   return (
     <div className="area-rolagem h-full overflow-y-auto px-3 pb-8 sm:px-5">
       <GradeWidgets
-        chave="visao-geral"
+        key={`${usuario.id}:${clienteId ? 'cliente' : 'carteira'}`}
+        chave={`visao-geral:${usuario.id}:${clienteId ? 'cliente' : 'carteira'}`}
         catalogo={catalogo}
-        padrao={padrao}
+        padrao={padraoDoPapel(usuario.papel)}
         className="mx-auto max-w-6xl pt-1 ultra:max-w-[1600px]"
         titulo={
           <div>
             <h1 className="text-2xl font-light tracking-tight sm:text-3xl">Hoje</h1>
-            <p className="text-muted-foreground text-sm">{contexto} · quarta, 18 de novembro</p>
+            <p className="text-muted-foreground text-sm">
+              {contexto} · {hoje}
+            </p>
           </div>
         }
       />

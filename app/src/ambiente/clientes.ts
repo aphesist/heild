@@ -20,6 +20,23 @@ export interface ContatoCliente {
   /** BPO (10, 3.9): até quanto aprova um pagamento, e se entra na aprovação reforçada (2 pessoas). */
   alcadaPagamento?: number
   reforcada?: boolean
+  /** S02 (A67): papel no app por serviço contratado (06, 2.4); sem o campo, sai do `papel`. */
+  papeis?: Partial<Record<ServicoFicha, string>>
+  /** S02 (A67): contato principal do cliente (o primeiro a quem se fala quando ninguém tem o assunto). */
+  principal?: boolean
+}
+
+/** S02: serviços com papel próprio no app (linhas lado a lado na ficha). */
+export type ServicoFicha = 'contabil' | 'bpo_financeiro'
+
+/** S02 (A72, C2-09): como o cliente recebe o que é físico (livros, contratos assinados, guias em papel). */
+export interface PreferenciaEntrega {
+  modo: 'digital' | 'malote' | 'motoboy' | 'retirada'
+  /** Entrega física com protocolo de devolução assinado. */
+  protocolo?: boolean
+  /** Dia ou rotina do malote ("às sextas"). */
+  rotina?: string
+  observacao?: string
 }
 
 export interface FichaCliente {
@@ -32,6 +49,8 @@ export interface FichaCliente {
   observacao?: string
   /** Serviços extras ligados pelo escritório (06, 8); o que não está aqui fica disponível. */
   servicos?: Partial<Record<string, EstadoServico>>
+  /** S02 (A72, C2-09): preferência de entrega e malote. */
+  entrega?: PreferenciaEntrega
 }
 
 export const fichas: Record<string, FichaCliente> = {
@@ -155,3 +174,7 @@ export function contatoPara(clienteId: string, assunto: string): ContatoCliente 
 
 // Serviços extras já ligados em cada cliente.
 for (const [id, sv] of Object.entries(servicosIniciais)) if (fichas[id]) fichas[id].servicos = sv
+
+// S02: preferências de entrega de exemplo (C2-09).
+fichas.c5.entrega = { modo: 'malote', protocolo: true, rotina: 'às sextas, pela manhã', observacao: 'Livros e contratos assinados vão no malote da transportadora; volta com o protocolo.' }
+fichas.c4.entrega = { modo: 'motoboy', protocolo: true, observacao: 'Documentos originais da implantação: motoboy com protocolo de devolução.' }

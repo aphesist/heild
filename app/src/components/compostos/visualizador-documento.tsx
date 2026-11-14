@@ -1,4 +1,4 @@
-import { CaretRightIcon, CopyIcon, DownloadSimpleIcon, EyeIcon, EyeSlashIcon, FolderOpenIcon, LockSimpleIcon, PaperPlaneTiltIcon, XIcon } from '@phosphor-icons/react'
+import { ArrowsLeftRightIcon, CaretRightIcon, CloudSlashIcon, CopyIcon, DownloadSimpleIcon, EyeIcon, EyeSlashIcon, FolderOpenIcon, LockSimpleIcon, PaperPlaneTiltIcon, PencilSimpleIcon, PrinterIcon, ReceiptIcon, SealCheckIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import type { ReactNode } from 'react'
 import { SiglaMarca } from '@/components/compostos/barra-lateral'
@@ -152,6 +152,11 @@ export function PaginaDocumento({ d, className }: { d: Documento; className?: st
 export interface AcoesVisualizador {
   onBaixar: () => void
   onEnviar?: () => void
+  /** S09: ações do índice (mover, versões, origem, conflito, comprovante). */
+  onAcao?: (tipo: 'mover' | 'versoes' | 'origem' | 'conflito' | 'comprovante') => void
+  onImprimir?: () => void
+  onConferirAssinatura?: () => void
+  onAvisarSemBytes?: () => void
   onAbrirPasta: (caminho: string[]) => void
   onForcarVisivel?: (v: boolean | undefined) => void
   onCopiarLink: () => void
@@ -186,7 +191,12 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
             <Button size="sm" variant="ghost" className="hidden rounded-full sm:inline-flex" onClick={acoes.onCopiarLink}>
               <CopyIcon /> Copiar link
             </Button>
-            <Button size="sm" variant="outline" className="rounded-full" onClick={acoes.onBaixar}>
+            {acoes.onImprimir && (
+              <Button size="sm" variant="ghost" className="hidden rounded-full md:inline-flex" onClick={acoes.onImprimir} disabled={!!d.s09?.indisponivelDesde}>
+                <PrinterIcon /> Imprimir
+              </Button>
+            )}
+            <Button size="sm" variant="outline" className="rounded-full" onClick={acoes.onBaixar} disabled={!!d.s09?.indisponivelDesde}>
               <DownloadSimpleIcon /> Baixar
             </Button>
             {acoes.onEnviar && d.clienteId && (
@@ -213,9 +223,51 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
           </nav>
           <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="bg-sunken/60 area-rolagem-dupla min-h-0 overflow-y-auto p-4 sm:p-8">
-              <PaginaDocumento d={d} />
+              {d.s09?.indisponivelDesde ? (
+                <div className="bg-surface shadow-cartao mx-auto flex max-w-md flex-col items-center gap-3 rounded-[24px] p-6 text-center">
+                  <CloudSlashIcon className="text-muted-foreground size-10" weight="duotone" />
+                  <p className="text-sm font-medium">Indisponível desde {d.s09.indisponivelDesde}</p>
+                  <p className="text-muted-foreground text-sm">O índice tem o registro e a impressão digital, mas os bytes sumiram do conector (apagado na nuvem ou fora da pasta). O histórico e o registro de entrega continuam.</p>
+                  {acoes.onAvisarSemBytes && (
+                    <Button size="sm" variant="outline" className="rounded-full" onClick={acoes.onAvisarSemBytes}>
+                      Avisar o Administrador
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <PaginaDocumento d={d} />
+              )}
             </div>
             <aside className="area-rolagem-dupla flex min-h-0 flex-col gap-4 overflow-y-auto border-t p-4 lg:border-t-0 lg:border-l">
+              {d.s09?.semOrigem && (
+                <div className="bg-warning/15 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+                  <span className="flex items-start gap-1.5">
+                    <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" /> Origem a confirmar: o arquivo caiu direto na nuvem, sem dizer quem mandou.
+                  </span>
+                  {acoes.onAcao && (
+                    <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={() => acoes.onAcao?.('origem')}>
+                      Confirmar origem
+                    </Button>
+                  )}
+                </div>
+              )}
+              {d.s09?.conflito && !d.s09.conflito.resolvido && (
+                <div className="bg-warning/15 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+                  <span className="flex items-start gap-1.5">
+                    <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" /> Cópia de conflito de “{d.s09.conflito.original}” ({d.s09.conflito.quando}).
+                  </span>
+                  {acoes.onAcao && (
+                    <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={() => acoes.onAcao?.('conflito')}>
+                      Resolver conflito
+                    </Button>
+                  )}
+                </div>
+              )}
+              {d.s09?.conferencia && (
+                <p className="bg-sunken flex items-start gap-1.5 rounded-[14px] p-3 text-sm">
+                  <WarningIcon className="mt-0.5 size-4 shrink-0" /> Mudança de cliente pedida por {d.s09.conferencia.por} ({d.s09.conferencia.quando}): aguarda a conferência de um Gestor em Arquivos.
+                </p>
+              )}
               <dl className="flex flex-col gap-2">
                 <Linha rotulo="Tipo">{rotuloTipoDoc[d.tipo]}</Linha>
                 {d.competencia && <Linha rotulo="Competência">{d.competencia}</Linha>}
@@ -232,18 +284,48 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                     </span>
                   )}
                 </Linha>
-                <Linha rotulo="Versão">v{d.versao}</Linha>
+                <Linha rotulo="Versão">
+                  v{d.versao}
+                  {acoes.onAcao && (d.s09?.versoes?.length ?? 0) > 0 && (
+                    <button type="button" className="text-muted-foreground hover:text-foreground ml-2 inline-flex cursor-pointer items-center gap-1 text-xs underline-offset-2 hover:underline" onClick={() => acoes.onAcao?.('versoes')}>
+                      <ArrowsLeftRightIcon className="size-3.5" /> comparar {d.s09!.versoes!.length + 1} versões
+                    </button>
+                  )}
+                </Linha>
                 <Linha rotulo="Impressão digital">
                   <code className="text-xs">{d.hash}</code>
                 </Linha>
               </dl>
+              {acoes.onAcao && conector?.situacao !== 'somente_leitura' && (
+                <Button size="sm" variant="ghost" className="w-fit rounded-full" onClick={() => acoes.onAcao?.('mover')}>
+                  <PencilSimpleIcon /> Mover ou renomear
+                </Button>
+              )}
+              {acoes.onConferirAssinatura && (d.tipo === 'balancete' || d.tipo === 'relatorio' || d.tipo === 'parecer') && (
+                <section className="flex flex-col gap-2">
+                  <h3 className="text-sm font-medium">Assinatura do contador</h3>
+                  {d.s09?.assinatura ? (
+                    <p className={d.s09.assinatura.resultado === 'valida' ? 'flex items-start gap-1.5 text-sm' : 'text-destructive flex items-start gap-1.5 text-sm'}>
+                      {d.s09.assinatura.resultado === 'valida' ? <SealCheckIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" /> : <WarningIcon className="mt-0.5 size-4 shrink-0" />}
+                      <span>
+                        {d.s09.assinatura.detalhe} <span className="text-muted-foreground text-xs">· conferido {d.s09.assinatura.quando}</span>
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">Confere a assinatura digital dentro do PDF antes de ir ao cliente (D-16).</p>
+                  )}
+                  <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={acoes.onConferirAssinatura} disabled={!!d.s09?.indisponivelDesde}>
+                    <SealCheckIcon /> {d.s09?.assinatura ? 'Conferir de novo' : 'Conferir assinatura'}
+                  </Button>
+                </section>
+              )}
               {d.clienteId && (
                 <section className="flex flex-col gap-2">
                   <h3 className="text-sm font-medium">No app do cliente</h3>
                   <p className="flex items-center gap-2 text-sm">
                     {visivel ? <EyeIcon className="text-success size-4" /> : <EyeSlashIcon className="text-muted-foreground size-4" />}
                     {visivel ? 'Visível' : 'Oculto'}
-                    <span className="text-muted-foreground text-xs">{d.forcarVisivel !== undefined ? '· forçado neste arquivo' : '· pela pasta'}</span>
+                    <span className="text-muted-foreground text-xs">{d.forcarVisivel !== undefined ? `· forçado neste arquivo${d.s09?.forcadoPor ? ` por ${d.s09.forcadoPor}` : ''}` : '· pela pasta'}</span>
                   </p>
                   {acoes.onForcarVisivel && conector?.situacao !== 'somente_leitura' && (
                     <div className="flex flex-wrap gap-1.5">
@@ -260,7 +342,14 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                 </section>
               )}
               <section className="flex flex-col gap-2">
-                <h3 className="text-sm font-medium">Registro de entrega</h3>
+                <h3 className="flex items-center justify-between gap-2 text-sm font-medium">
+                  Registro de entrega
+                  {acoes.onAcao && (
+                    <button type="button" className="text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1 text-xs font-normal" onClick={() => acoes.onAcao?.('comprovante')}>
+                      <ReceiptIcon className="size-3.5" /> Comprovante (PDF)
+                    </button>
+                  )}
+                </h3>
                 {(d.entregas ?? []).length === 0 && <p className="text-muted-foreground text-sm">Ainda não foi entregue nem aberto pelo cliente.</p>}
                 <ol className="flex flex-col gap-1.5">
                   {(d.entregas ?? []).map((e, i) => (
