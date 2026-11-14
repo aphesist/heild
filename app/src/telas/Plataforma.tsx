@@ -35,6 +35,7 @@ import { EscritorioTela } from './config/EscritorioTela'
 import { IntegrantesTela } from './config/IntegrantesTela'
 import { TemaTela } from './config/TemaTela'
 import { UsuariosTela } from './config/UsuariosTela'
+import { ConectoresTela } from './config/ConectoresTela'
 import { CaixaTela } from './financeiro/CaixaTela'
 import { CobrancaTela } from './financeiro/CobrancaTela'
 import { ContratosTela } from './financeiro/ContratosTela'
@@ -374,6 +375,7 @@ function PlataformaInterna(props: Props) {
           {modulo === 'config' && aba === 'tema' && <TemaTela />}
           {modulo === 'config' && aba === 'integrantes' && <IntegrantesTela />}
           {modulo === 'config' && aba === 'assinatura' && <AssinaturaTela />}
+          {modulo === 'config' && aba === 'conectores' && <ConectoresTela />}
           {modulo === 'financeiro' && aba === 'contratos' && <ContratosTela somenteLeitura={permissoes.financeiroSoLeitura} />}
           {modulo === 'financeiro' && aba === 'cobranca' && <CobrancaTela key={`${faturaAberta ?? 'lista'}-${nonce}`} faturaInicial={faturaAberta} />}
           {modulo === 'financeiro' && aba === 'visao' && <VisaoFinTela />}
