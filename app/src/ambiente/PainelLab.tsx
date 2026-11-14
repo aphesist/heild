@@ -16,6 +16,7 @@ import { definirInstabilidade } from '@/servicos'
 import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
+import { LabS05 } from './lab-s05'
 import { papelExibido, useSessaoBruta } from './sessao'
 import { SecaoS03 } from '@/telas/painel/s03/gatilhos' // S03
 
@@ -229,6 +230,8 @@ export function PainelLab({
               </button>
             )}
             {sessao?.usuario && <SecaoS03 onFeito={() => setAberto(false)} />}
+            {/* S05 */}
+            <LabS05 onFeito={() => setAberto(false)} />
           </div>
         )}
         {visao === 'cliente' && (

@@ -9,6 +9,7 @@ import type { CodigoSetor, Fotografia, Integrante } from '../modelo/entidades'
 import { avisoParaModelo, clienteParaModelo, contaParaModelo, conversaParaModelo, documentoParaModelo, itemParaMensagem, mensagemTelaParaModelo, tarefaParaModelo, trabalhoParaModelo, type Consulta } from '../mapeadores'
 import { montador, type EscritorioDeExemplo } from './comum'
 import { canaisInternos, obrigacoesPadrao } from './padrao'
+import { sementeComunicacaoInterna } from './s05' // S05
 import { sementeS02 } from './s02'
 import { sementeS03 } from './s03'
 
@@ -110,6 +111,7 @@ export function sementeAndrade(): Fotografia {
     { canal: 'ci-fiscal', autor: 'u2', corpo: 'Vi: a filial ainda não tem inscrição municipal. Abri tarefa no Societário.' },
   ])
   sementeS03(foto, add) // S03: cliente MEI (variante MEI da aba Fiscal)
+  sementeComunicacaoInterna(foto, add) // S05
   sementeS02(foto, add) // S02: regras com setor dono e o calendário de 10/2026
   return foto
 }
