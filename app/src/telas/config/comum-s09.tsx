@@ -47,3 +47,6 @@ export function Ficha({ ativo, onClick, children }: { ativo: boolean; onClick: (
     </button>
   )
 }
+
+/** Espera de demonstração (respeita a escala de latência dos testes). */
+export { esperar as esperarDemonstracao } from '@/servicos/simular'

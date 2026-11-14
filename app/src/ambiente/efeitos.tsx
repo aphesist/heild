@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { efeitoS09 } from './efeitos-s09'
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -15,6 +16,8 @@ export function useEfeitosCartao() {
 
   return (cartao: string, decisao: string) => {
     loja.decidir(cartao, decisao)
+    // S09: cartões do Raio-X, da implantação e do envio de documentos (chaves s09-*).
+    if (efeitoS09(loja, usuario.nome, cartao, decisao)) return
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
     if (!aprovou) {
