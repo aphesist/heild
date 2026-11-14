@@ -116,7 +116,6 @@ export function sementeS07Andrade(_foto: Fotografia, add: Add) {
     )
     if (m.versao > 1) add('aditivo', { id: `${m.id}-ad${m.versao}`, contrato_id: m.id, tipo: 'reajuste', situacao: 'vigente', vigente_de: m.desde, resumo: `Reajuste anual pelo ${m.indice}`, diff: [{ campo: 'total', antes: 'versão anterior', depois: `R$ ${m.itens.reduce((s, i) => s + i[2], 0).toLocaleString('pt-BR')}` }], versao_para: m.versao, comunicado_em: '2025-12-01T09:00:00.000Z' })
   }
-  add('aditivo', { id: 'ch-c1-ad-jan', contrato_id: 'ch-c1', tipo: 'reajuste', situacao: 'comunicado', vigente_de: '2027-01', resumo: 'Reajuste de janeiro pelo INPC (4,3%): carta enviada em 01/11', diff: [{ campo: 'total', antes: 'R$ 7.500', depois: 'R$ 7.822,50' }], versao_para: 4, comunicado_em: '2026-11-01T09:00:00.000Z' })
 
   // Contas bancárias do escritório (titular: escritório).
   add('conta_bancaria', { id: 'bc-inter', titular_tipo: 'escritorio', nome: 'Inter PJ (cobrança)', banco: 'Banco Inter', tipo: 'conta_cobranca', conta_mascarada: 'ag 0001 · cc •••567-8', origem: 'api_banco', saldo: 96_420, saldo_em: '2026-11-18T07:56:00.000Z', situacao: 'ativa' })

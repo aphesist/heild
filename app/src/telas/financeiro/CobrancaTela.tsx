@@ -91,7 +91,7 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string }) {
         status={vencidas.length ? `${vencidas.length} fatura(s) fora do prazo; a régua segue sozinha até D+3 e me pede você a partir do D+10` : 'Tudo em dia; a régua roda sozinha'}
         sub={`${rotuloCompetencia(COMPETENCIA_ATUAL)} · uma cobrança por cliente, serviços em linhas, uma NFS-e por serviço · ${fin.politica?.provedor.nome ?? ''}`}
       >
-        {podeLote && (!lote || lote.situacao !== 'preparado') && (
+        {podeLote && !lote && (
           <Button size="sm" className="rounded-full" disabled={preparando} onClick={prepararLote}>
             <CalendarCheckIcon /> {preparando ? 'O Financeiro está preparando…' : `Preparar o lote de ${rotuloCompetencia(PROXIMA_COMPETENCIA)}`}
           </Button>
@@ -288,6 +288,51 @@ function DetalheFatura({ fin, c, pode, onFechar }: { fin: Fin; c: Cobranca; pode
       },
     },
   ]
+  const subFatura = () => {
+    return (
+      <>
+      {modal === 'segunda' && <SegundaVia fin={fin} c={c} onFechar={() => setModal(null)} />}
+      {modal === 'pagamento' && (
+        <PagamentoFora
+          c={c}
+          onFechar={() => setModal(null)}
+          onSalvar={(valor, data, comprovante) => {
+            const ok = executar(() => {
+              repos.recebimentos.criar({ cobranca_id: c.id, valor, pago_em: data, meio: 'fora do provedor', tarifa: 0, pagador: fin.nomeCliente(c.cliente_id), origem: 'manual', situacao: 'confirmado', comprovante })
+              for (const p of parcelas.filter((x) => x.situacao === 'aberta')) repos.parcelas.atualizar(p.id, { situacao: 'paga' })
+              return repos.cobrancas.anotar(c.id, `Pagamento fora do provedor registrado por ${usuario.nome}: ${brl(valor, true)} em ${dataCurta(data)} (comprovante anexado)`, { situacao: valor + 0.01 >= c.valor ? 'paga' : 'paga_parcial', paga_em: data, regua_pausada_ate: null, regua_pausa_motivo: null }, { ferramenta: 'recebimento.baixar' })
+            }, { sucesso: 'Baixa manual registrada; a régua parou e o recibo foi ao cliente.' })
+            if (ok) setModal(null)
+          }}
+        />
+      )}
+      {modal === 'substituir' && (
+        <Substituir
+          c={c}
+          onFechar={() => setModal(null)}
+          onPreparar={(valor, venc, motivo) => {
+            cartao('substituir', { tipo: 'substituir_cobranca', cobranca_id: c.id, motivo, valor, vencimento: venc }, `Substituir a ${c.numero}`, [{ rotulo: 'De', valor: `${brl(c.valor, true)} · ${dataCurta(c.vencimento)}` }, { rotulo: 'Para', valor: `${brl(valor, true)} · ${dataCurta(venc)}` }, { rotulo: 'Motivo', valor: motivo }], 'Preparei a substituição: a fatura atual e as notas saem como substituídas e a nova sai com boleto, Pix e NFS-e.', 'gestor', 'cobranca.substituir')
+            setModal(null)
+          }}
+        />
+      )}
+      {modal === 'acordo' && fin.politica && (
+        <Acordo
+          c={c}
+          max={{ parcelas: fin.politica.acordo_parcelas_max, desconto: fin.politica.acordo_desconto_max }}
+          onFechar={() => setModal(null)}
+          onPreparar={(parcelas, desconto, primeira, fora) => {
+            cartao('acordo', { tipo: 'acordo', cobranca_id: c.id, parcelas, desconto, primeira }, `Acordo de ${parcelas}×${desconto ? ` com ${desconto}% de desconto` : ''}`, [{ rotulo: 'Total', valor: brl(c.valor * (1 - desconto / 100), true) }, { rotulo: 'Parcelas', valor: `${parcelas} a partir de ${dataCurta(primeira)}` }, { rotulo: 'Política', valor: fora ? 'fora (pede o Administrador)' : 'dentro' }], `Montei a proposta de acordo (FIN-009). ${fora ? 'Ela passa da política, então o cartão é do Administrador.' : 'Está dentro da política.'}`, fora ? 'administrador' : 'gestor', 'cobranca.propor_acordo')
+            setModal(null)
+            loja.toast('Proposta de acordo pronta para aprovar (topo da aba).')
+          }}
+        />
+      )}
+      </>
+    )
+  }
+  // Uma gaveta por vez: o passo (2ª via, baixa, substituir, acordo) toma o lugar da fatura e volta para ela.
+  if (modal) return subFatura()
   return (
     <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo={`${c.numero} · ${fin.nomeCliente(c.cliente_id)}`} descricao={`${rotuloCompetencia(c.competencia)} · vence ${dataCurta(c.vencimento)} · ${rotuloMeio[c.meio]}`} acao="Fechar" onAcao={onFechar}>
       <div className="flex flex-wrap items-center gap-2">
@@ -377,43 +422,6 @@ function DetalheFatura({ fin, c, pode, onFechar }: { fin: Fin; c: Cobranca; pode
           ))}
         </ol>
       </section>
-      {modal === 'segunda' && <SegundaVia fin={fin} c={c} onFechar={() => setModal(null)} />}
-      {modal === 'pagamento' && (
-        <PagamentoFora
-          c={c}
-          onFechar={() => setModal(null)}
-          onSalvar={(valor, data, comprovante) => {
-            const ok = executar(() => {
-              repos.recebimentos.criar({ cobranca_id: c.id, valor, pago_em: data, meio: 'fora do provedor', tarifa: 0, pagador: fin.nomeCliente(c.cliente_id), origem: 'manual', situacao: 'confirmado', comprovante })
-              for (const p of parcelas.filter((x) => x.situacao === 'aberta')) repos.parcelas.atualizar(p.id, { situacao: 'paga' })
-              return repos.cobrancas.anotar(c.id, `Pagamento fora do provedor registrado por ${usuario.nome}: ${brl(valor, true)} em ${dataCurta(data)} (comprovante anexado)`, { situacao: valor + 0.01 >= c.valor ? 'paga' : 'paga_parcial', paga_em: data, regua_pausada_ate: null, regua_pausa_motivo: null }, { ferramenta: 'recebimento.baixar' })
-            }, { sucesso: 'Baixa manual registrada; a régua parou e o recibo foi ao cliente.' })
-            if (ok) setModal(null)
-          }}
-        />
-      )}
-      {modal === 'substituir' && (
-        <Substituir
-          c={c}
-          onFechar={() => setModal(null)}
-          onPreparar={(valor, venc, motivo) => {
-            cartao('substituir', { tipo: 'substituir_cobranca', cobranca_id: c.id, motivo, valor, vencimento: venc }, `Substituir a ${c.numero}`, [{ rotulo: 'De', valor: `${brl(c.valor, true)} · ${dataCurta(c.vencimento)}` }, { rotulo: 'Para', valor: `${brl(valor, true)} · ${dataCurta(venc)}` }, { rotulo: 'Motivo', valor: motivo }], 'Preparei a substituição: a fatura atual e as notas saem como substituídas e a nova sai com boleto, Pix e NFS-e.', 'gestor', 'cobranca.substituir')
-            setModal(null)
-          }}
-        />
-      )}
-      {modal === 'acordo' && fin.politica && (
-        <Acordo
-          c={c}
-          max={{ parcelas: fin.politica.acordo_parcelas_max, desconto: fin.politica.acordo_desconto_max }}
-          onFechar={() => setModal(null)}
-          onPreparar={(parcelas, desconto, primeira, fora) => {
-            cartao('acordo', { tipo: 'acordo', cobranca_id: c.id, parcelas, desconto, primeira }, `Acordo de ${parcelas}×${desconto ? ` com ${desconto}% de desconto` : ''}`, [{ rotulo: 'Total', valor: brl(c.valor * (1 - desconto / 100), true) }, { rotulo: 'Parcelas', valor: `${parcelas} a partir de ${dataCurta(primeira)}` }, { rotulo: 'Política', valor: fora ? 'fora (pede o Administrador)' : 'dentro' }], `Montei a proposta de acordo (FIN-009). ${fora ? 'Ela passa da política, então o cartão é do Administrador.' : 'Está dentro da política.'}`, fora ? 'administrador' : 'gestor', 'cobranca.propor_acordo')
-            setModal(null)
-            loja.toast('Proposta de acordo pronta para aprovar (topo da aba).')
-          }}
-        />
-      )}
     </GavetaFormulario>
   )
 }

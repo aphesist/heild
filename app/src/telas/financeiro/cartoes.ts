@@ -188,6 +188,11 @@ function executar(a: AcaoCartao, quem: string, loja: Loja): Saida {
       for (const id of a.ids) {
         const c = repos.contasPagar.obter(id)
         if (!c || c.situacao === 'agendada' || c.situacao === 'paga') continue
+        const pol = banco.ler('politica_financeira')[0]
+        if (pol && c.valor > pol.limite_dois_aprovadores && !c.extras?.segundo_aprovador) {
+          repos.contasPagar.atualizar(id, { aprovador_nome: quem, alerta: `1 de 2 aprovações (${quem}); falta o segundo sócio`, extras: { ...c.extras, primeiro_aprovador: quem } }, { ferramenta: 'conta_pagar.aprovar', texto: `${quem} aprovou ${c.fornecedor} (${brl(c.valor)}); acima de ${brl(pol.limite_dois_aprovadores)}, falta o segundo sócio` })
+          continue
+        }
         repos.contasPagar.atualizar(id, { situacao: 'agendada', aprovador_nome: quem, alerta: null }, { ferramenta: 'conta_pagar.aprovar', texto: `${quem} aprovou e agendou ${c.fornecedor} (${brl(c.valor)}); liberação final no banco` })
         total += c.valor
       }
@@ -216,7 +221,7 @@ function executar(a: AcaoCartao, quem: string, loja: Loja): Saida {
     case 'reajuste': {
       for (const x of a.contratos) {
         const c = repos.contratosHonorarios.obter(x.id)
-        if (!c) continue
+        if (!c || banco.ler('aditivo').some((d) => d.contrato_id === c.id && d.tipo === 'reajuste' && d.situacao === 'comunicado' && d.vigente_de === a.competencia)) continue
         const itens = banco.ler('item_contrato').filter((i) => i.contrato_id === c.id && !i.vigente_ate)
         const antes = itens.reduce((s, i) => s + i.valor, 0)
         repos.aditivos.criar({ contrato_id: c.id, tipo: 'reajuste', situacao: 'comunicado', vigente_de: a.competencia, resumo: `Reajuste de ${rotuloCompetencia(a.competencia)} pelo ${a.indice} (${x.percentual.toLocaleString('pt-BR')}%): carta pelo ${a.canal}`, diff: [{ campo: 'total', antes: brl(antes), depois: brl(centavos(antes * (1 + x.percentual / 100))) }], versao_para: c.versao + 1, comunicado_em: quando() })

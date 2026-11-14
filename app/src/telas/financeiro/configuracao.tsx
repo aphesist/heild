@@ -313,6 +313,18 @@ export function PoliticaInadimplencia({ onFechar }: Fechar) {
   const formal = d.regua.find((p) => p.tom === 'formal')
   const pausa = d.regua.find((p) => p.tom === 'pausa')
   const ajustar = (tom: 'formal' | 'pausa', dias: number) => setD({ ...d, regua: d.regua.map((p) => (p.tom === tom ? { ...p, dias } : p)) })
+  if (passo)
+    return (
+<EditarPassoRegua
+          p={passo === 'novo' ? undefined : passo}
+          onFechar={() => setPasso(null)}
+          onSalvar={(p) => {
+            setD({ ...d, regua: d.regua.some((x) => x.id === p.id) ? d.regua.map((x) => (x.id === p.id ? p : x)) : [...d.regua, p] })
+            setPasso(null)
+          }}
+          onExcluir={passo === 'novo' ? undefined : () => (setD({ ...d, regua: d.regua.filter((x) => x.id !== passo.id) }), setPasso(null))}
+        />
+    )
   return (
     <GavetaFormulario
       aberta
@@ -351,17 +363,6 @@ export function PoliticaInadimplencia({ onFechar }: Fechar) {
         </span>
         <ListaRegua politica={d} editavel onEditar={(p) => setPasso(p ?? 'novo')} />
       </section>
-      {passo && (
-        <EditarPassoRegua
-          p={passo === 'novo' ? undefined : passo}
-          onFechar={() => setPasso(null)}
-          onSalvar={(p) => {
-            setD({ ...d, regua: d.regua.some((x) => x.id === p.id) ? d.regua.map((x) => (x.id === p.id ? p : x)) : [...d.regua, p] })
-            setPasso(null)
-          }}
-          onExcluir={passo === 'novo' ? undefined : () => (setD({ ...d, regua: d.regua.filter((x) => x.id !== passo.id) }), setPasso(null))}
-        />
-      )}
     </GavetaFormulario>
   )
 }

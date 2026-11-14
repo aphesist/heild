@@ -14,7 +14,7 @@ import { useItemNaRota } from '@/nucleo/rotas'
 import { repos } from '@/nucleo/repositorios'
 import { carteiraAgregada } from '@/nucleo/semente/s07'
 import { servicos as apis } from '@/servicos'
-import { BarrasReais, brl, CabecalhoFin, Caixa, CartoesDaAba, Nota, Numero, PaginaFin, Pergunta } from './comum'
+import { BarrasReais, brl, CabecalhoFin, Caixa, CartoesDaAba, ModaisConfig, Nota, Numero, PaginaFin, Pergunta } from './comum'
 import { useFin, useIntegranteFin, usePodeFin, type ContratoTela, type Fin } from './dados'
 import { COMPETENCIA_ATUAL, dataCurta, HOJE, indiceAcumulado, mesesExtenso, proximaCompetencia, PROXIMA_COMPETENCIA, rotuloCompetencia, rotuloMeio, servicos, somarDias } from './dominio'
 
@@ -41,6 +41,8 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
   const [aberto, setAberto] = useState<string | undefined>(contratoInicial)
   const [ed, setEd] = useState<{ contrato?: ContratoTela; clienteId?: string } | null>(null)
   const [modal, setModal] = useState<'extra' | 'reajuste' | null>(null)
+  const [importar, setImportar] = useState(false)
+  const admin = useSessao().usuario.papel === 'administrador'
   useItemNaRota({ contrato: aberto })
   const andrade = fin.contratos.length > 0 && fin.clientes.some((c) => c.id === 'c1')
   const agregado = andrade ? carteiraAgregada : { clientes: 0, receita: 0, semContrato: 0 }
@@ -74,16 +76,22 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
             acao={
               podeEditar && (
                 <span className="flex flex-wrap justify-center gap-2">
-                  <Button className="rounded-full" onClick={() => setEd({})}>
+                  {admin && (
+                    <Button className="rounded-full" onClick={() => setImportar(true)}>
+                      <FileArrowUpIcon /> Trazer o financeiro atual
+                    </Button>
+                  )}
+                  <Button variant={admin ? 'outline' : 'default'} className="rounded-full" onClick={() => setEd({})}>
                     <PlusIcon /> Novo contrato
                   </Button>
                 </span>
               )
             }
           />
-          <p className="text-muted-foreground text-center text-xs">Para importar: Configurar › Trazer o financeiro atual (Administrador).</p>
+          <p className="text-muted-foreground text-center text-xs">Importar também fica em Configurar › Trazer o financeiro atual (Administrador).</p>
         </Caixa>
         {ed && <EditarContrato fin={fin} {...ed} onFechar={() => setEd(null)} />}
+        <ModaisConfig aberto={importar ? 'importar' : null} onFechar={() => setImportar(false)} />
       </PaginaFin>
     )
 
@@ -92,7 +100,7 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
       <CabecalhoFin
         titulo="Contratos"
         exportar="contratos"
-        status={estouradas.length ? `${estouradas.length} clientes passaram da faixa; proponho aditivo ou cobrança do excedente, você escolhe` : 'Contratos em dia; o próximo reajuste eu preparo 60 dias antes'}
+        status={estouradas.length ? `${estouradas.length === 1 ? '1 cliente passou' : `${estouradas.length} clientes passaram`} da faixa; proponho aditivo ou cobrança do excedente, você escolhe` : 'Contratos em dia; o próximo reajuste eu preparo 60 dias antes'}
         sub={`Honorários de ${fin.contratos.length + agregado.clientes} clientes · cada mudança vira uma versão nova, a partir de uma competência`}
       >
         {somenteLeitura ? (
@@ -337,7 +345,10 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
 
       <ExtrasAFaturar fin={fin} podeEditar={podeExtra} onRegistrar={() => setModal('extra')} />
 
-      {contrato && <DetalheContrato fin={fin} c={contrato} podeEditar={podeEditar} onFechar={() => setAberto(undefined)} onEditar={() => setEd({ contrato })} />}
+      {contrato && <DetalheContrato fin={fin} c={contrato} podeEditar={podeEditar} onFechar={() => setAberto(undefined)} onEditar={() => {
+            setAberto(undefined)
+            setEd({ contrato })
+          }} />}
       {ed && <EditarContrato fin={fin} {...ed} onFechar={() => setEd(null)} />}
       {modal === 'extra' && <NovoExtra fin={fin} onFechar={() => setModal(null)} />}
       {modal === 'reajuste' && <CampanhaReajuste fin={fin} onFechar={() => setModal(null)} onEnviado={() => loja.toast('Campanha preparada: o cartão está no topo da aba e no chat do Financeiro.')} />}
@@ -936,8 +947,9 @@ function CampanhaReajuste({ fin, onFechar, onEnviado }: { fin: Fin; onFechar: ()
   useEffect(() => {
     void consultar(indice)
   }, [indice])
-  const daData = fin.contratos.filter((c) => c.data_base === mes && c.situacao === 'ativo')
-  const alvo = (daData.length ? daData : fin.contratos.filter((c) => c.situacao === 'ativo')).map((c) => {
+  const jaComunicado = (id: string) => fin.aditivos.some((a) => a.contrato_id === id && a.tipo === 'reajuste' && a.situacao === 'comunicado' && a.vigente_de === competencia)
+  const daData = fin.contratos.filter((c) => c.data_base === mes && c.situacao === 'ativo' && !jaComunicado(c.id))
+  const alvo = daData.map((c) => {
     const m = margemDe(c.cliente)
     const deficit = acima && m !== undefined && m < 5
     const renegociar = !!c.faixa_estourada
@@ -953,7 +965,7 @@ function CampanhaReajuste({ fin, onFechar, onEnviado }: { fin: Fin; onFechar: ()
       titulo={`Campanha de reajuste: ${mesesExtenso[mes - 1]}`}
       descricao={`${daData.length || alvo.length} contrato(s) de exemplo com data-base em ${mesesExtenso[mes - 1]} (+ 23 da carteira). O integrante Financeiro prepara; o envio e a aplicação são sempre cartão do Administrador.`}
       acao={ultimo ? `Preparar o cartão (${cartas.length} cartas)` : 'Continuar'}
-      acaoDesabilitada={passo === 0 && !pct}
+      acaoDesabilitada={(passo === 0 && !pct) || (ultimo && !cartas.length)}
       onAcao={() => {
         if (!ultimo) return setPasso((p) => p + 1)
         integrante.pedirCartao({

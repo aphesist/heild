@@ -17,6 +17,7 @@ import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
 import { LabS05 } from './lab-s05'
+import { LabS07 } from '@/telas/financeiro/lab'
 import { papelExibido, useSessaoBruta } from './sessao'
 
 export type Visao = 'escritorio' | 'cliente'
@@ -230,6 +231,8 @@ export function PainelLab({
             )}
             {/* S05 */}
             <LabS05 onFeito={() => setAberto(false)} />
+            {/* S07 */}
+            <LabS07 onFeito={() => setAberto(false)} />
           </div>
         )}
         {visao === 'cliente' && (
