@@ -1,4 +1,4 @@
-import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SunIcon, XIcon } from '@phosphor-icons/react'
+import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SquaresFourIcon, SunIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { usePreferencia } from '@/hooks/usePreferencia'
 import { Avatar } from '@/components/ui/avatar'
@@ -264,6 +264,9 @@ export function PainelLab({
             {modo === 'claro' ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
           </button>
         </div>
+        <a href="#/kit" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
+          <SquaresFourIcon className="size-4 shrink-0" /> Kit de interação e serviços simulados
+        </a>
         <p className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
           <DatabaseIcon className="size-3.5 shrink-0" /> Dados guardados: {banco.armazenamento.descricao}. Recarregar a página não perde nada.
         </p>

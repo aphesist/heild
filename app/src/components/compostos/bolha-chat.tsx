@@ -1,4 +1,5 @@
 import { ArrowBendDownRightIcon, FileTextIcon } from '@phosphor-icons/react'
+import { SeloDemonstracao } from '@/components/kit/selo-demonstracao'
 import type { Mensagem } from '@/dados/tipos'
 import { duracaoEscrita, useEscritaTexto } from '@/lib/escrita'
 import { cn } from '@/lib/utils'
@@ -75,6 +76,8 @@ function BolhaIntegrante({ mensagem, acoes, className, nome, cor, corOlhos }: { 
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-semibold">{i.nome}</span>
           <span className="text-muted-foreground text-[11px]">{mensagem.hora}</span>
+          {/* Resposta gerada ao vivo pela simulação: marcada (o serviço de IA ainda não está ligado). */}
+          {mensagem.demonstracao && <SeloDemonstracao fonte="integrante (IA)" className="self-center" />}
         </div>
         {mensagem.pendente && (
           <p className="text-muted-foreground flex items-center gap-1 text-sm" aria-live="polite">

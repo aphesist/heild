@@ -68,6 +68,8 @@ export interface Destino {
   fatura?: string
   /** Abre a ficha da tarefa por cima de onde estiver. */
   tarefa?: string
+  /** Abre a ficha do cliente por cima de onde estiver. */
+  ficha?: string
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */
@@ -647,7 +649,7 @@ function LojaInterna({ children, semRotinas }: { children: ReactNode; semRotinas
     const id = novoId('mt')
     despachar({ t: 'timeMsg', integrante, msg: { id, autor: { tipo: 'integrante', setor }, hora: hora(), pendente: true } })
     depois(ms, () => {
-      despachar({ t: 'timeMsgPatch', integrante, id, patch: { pendente: false, escrever: true, escreverDesde: Date.now(), hora: hora(), texto, cartoes } })
+      despachar({ t: 'timeMsgPatch', integrante, id, patch: { pendente: false, escrever: true, escreverDesde: Date.now(), hora: hora(), texto, cartoes, demonstracao: true } })
       // Os efeitos (aviso, CRM, passagem) só vêm quando ele termina de escrever.
       if (aoTerminar) depois(duracaoEscrita(texto) + 250, aoTerminar)
     })
@@ -663,7 +665,7 @@ function LojaInterna({ children, semRotinas }: { children: ReactNode; semRotinas
     const id = noAssistente(conversa, { autor: { tipo: 'integrante', setor: 'geral' }, pendente: true })
     depois(PENSA, () => {
       const cartoesProntos = cartoes?.(Date.now() + duracaoEscrita(texto) + 200)
-      despachar({ t: 'assistMsgPatch', conversa, id, patch: { pendente: false, escrever: true, escreverDesde: Date.now(), hora: hora(), texto, cartoes: cartoesProntos } })
+      despachar({ t: 'assistMsgPatch', conversa, id, patch: { pendente: false, escrever: true, escreverDesde: Date.now(), hora: hora(), texto, cartoes: cartoesProntos, demonstracao: true } })
       if (aoTerminar) depois(duracaoEscrita(texto) + 250, aoTerminar)
     })
   }

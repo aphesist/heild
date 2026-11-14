@@ -1,5 +1,6 @@
 import { AddressBook, Briefcase, ChatsCircle, FolderSimple, GearSix, House, SquaresFour, Timer, Wallet, type Icon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
+import { definirRotaBase, hashParaDestino } from '@/nucleo/rotas'
 import { MinhaConta } from '@/ambiente/conta'
 import { FluxosProvider } from '@/ambiente/fluxos'
 import { CentralAvisos, Toasts } from '@/ambiente/interface'
@@ -52,6 +53,9 @@ import { FilaBpoTela, RotinasBpoTela } from './bpo/OperacaoBpo'
 import { CarteiraBpoTela, VisaoBpoTela } from './bpo/VisaoBpo'
 import { empresaBpo } from '@/dados/bpo'
 import { Moldura } from './Moldura'
+import { EstadoVazio } from '@/components/kit/estados'
+import { useBanco } from '@/nucleo/react'
+import { DatabaseIcon } from '@phosphor-icons/react'
 import { TimeTela } from './TimeTela'
 import { useHistorico } from './useHistorico'
 import { VisaoGeralTela } from './VisaoGeralTela'
@@ -90,7 +94,10 @@ export function Plataforma(props: Props) {
   )
 }
 
-function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteInicial = 'i-fiscal', clienteInicial = 'c1', comConversa = false, onAlternarModo }: Props) {
+function PlataformaInterna(props: Props) {
+  // Quem abre um link (#/painel/fiscal?cliente=c1) já nasce lá: o endereço vence o padrão.
+  const [doEndereco] = useState(() => (typeof window === 'undefined' ? null : hashParaDestino(window.location.hash)))
+  const { moduloInicial = 'inicio', abaInicial, integranteInicial = 'i-fiscal', clienteInicial = 'c1', comConversa = false, onAlternarModo } = { ...props, ...(doEndereco ? { moduloInicial: doEndereco.modulo, abaInicial: doEndereco.aba, ...(doEndereco.integrante ? { integranteInicial: doEndereco.integrante } : {}), ...(doEndereco.cliente !== undefined ? { clienteInicial: doEndereco.cliente } : {}) } : {}) }
   const { integrante: doTema } = useTema()
   const { usuario, permissoes } = useSessao()
   const sessaoBruta = useSessaoBruta()
@@ -109,11 +116,11 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
   const [abaPorModulo, setAbaPorModulo] = useState<Partial<Record<IdModulo, string>>>(() => ({ painel: permissoes.abas.painel?.[0] ?? 'fiscal', ...(abaInicial ? { [moduloInicial]: abaInicial } : {}) }))
   const [clienteId, setClienteId] = useState<SelecaoCliente>(clienteInicial)
   useEffect(() => {
-    if (bpoPuro && clienteId && !exemplo.clientes.find((c) => c.id === clienteId)?.servicos?.includes('bpo')) setClienteId(null)
-  }, [bpoPuro, clienteId])
-  const [conversaCrm, setConversaCrm] = useState<string | undefined>(undefined)
-  const [faturaAberta, setFaturaAberta] = useState<string | undefined>(undefined)
-  const [pastaAberta, setPastaAberta] = useState<Destino['pasta']>(undefined)
+    if (bpoPuro && clienteId && !loja.clientes.find((c) => c.id === clienteId)?.servicos?.includes('bpo')) setClienteId(null)
+  }, [bpoPuro, clienteId, loja.clientes])
+  const [conversaCrm, setConversaCrm] = useState<string | undefined>(doEndereco?.conversa)
+  const [faturaAberta, setFaturaAberta] = useState<string | undefined>(doEndereco?.fatura)
+  const [pastaAberta, setPastaAberta] = useState<Destino['pasta']>(doEndereco?.pasta)
   const [integrante, setIntegrante] = useState<string>(integranteInicial)
   const [minhaConta, setMinhaConta] = useState(false)
   // Cada navegação por link reabre o item, mesmo que seja o mesmo de antes.
@@ -129,7 +136,7 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
     [permissoes, usuario.id, bpoPuro, loja.estado.trabalhos, loja.conversasTime, loja.estado.decisoes, loja.tarefas],
   )
   const conversa = useHistorico(clienteId ?? 'todos', usuario.nome, exemplo.historicoAssistente, !comConversa)
-  const cliente = exemplo.clientes.find((c) => c.id === clienteId)
+  const cliente = loja.clientes.find((c) => c.id === clienteId)
   const contexto = cliente?.nome ?? 'Carteira'
   const pendentes = integrantes.reduce((s, i) => s + i.pendentes, 0)
   // Aviso cuja decisão já foi tomada no chat sai da Home e do Assistente (03, 4.1: decidido some).
@@ -143,6 +150,17 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
   // O motor do trabalho simulado precisa saber o que a pessoa está vendo: aviso do que ela já vê não vira toast.
   const definirVista = loja.definirVista
   useEffect(() => definirVista({ modulo, aba, integrante, conversa: conversaCrm, usuario: usuario.id }), [definirVista, modulo, aba, integrante, conversaCrm, usuario.id])
+  // O endereço acompanha a tela: módulo, aba, cliente e o item aberto de cada módulo (src/nucleo/rotas.ts).
+  useEffect(
+    () =>
+      definirRotaBase({
+        modulo,
+        aba,
+        ...(clienteId ? { cliente: clienteId } : {}),
+        ...(modulo === 'inicio' && aba === 'time' ? { integrante } : {}),
+      }),
+    [modulo, aba, clienteId, integrante],
+  )
   const irPara = (m: IdModulo, a?: string) => {
     if (!modulosVisiveis.includes(m)) {
       loja.toast('Sua conta não tem acesso a essa parte do sistema.')
@@ -189,7 +207,7 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
   const tempo = useRegistroTempo(contaTempo, ondeTempo)
   // O seletor mostra os clientes do pacote: no BPO, as empresas de BPO; no Painel, só as da contabilidade.
   // Quem não tem Painel (só BPO) vê no cadastro só os clientes do pacote dele.
-  const clientesDoModulo = modulo === 'bpo' || bpoPuro || (modulo === 'clientes' && !permissoes.modulos.includes('painel')) ? exemplo.clientes.filter((c) => c.servicos?.includes('bpo')) : modulo === 'painel' ? exemplo.clientes.filter((c) => !c.servicos || c.servicos.includes('contabil')) : exemplo.clientes
+  const clientesDoModulo = modulo === 'bpo' || bpoPuro || (modulo === 'clientes' && !permissoes.modulos.includes('painel')) ? loja.clientes.filter((c) => c.servicos?.includes('bpo')) : modulo === 'painel' ? loja.clientes.filter((c) => !c.servicos || c.servicos.includes('contabil')) : loja.clientes
   const empresa = modulo === 'bpo' ? empresaBpo(clienteId ?? undefined) : undefined
   const propsBpo = {
     empresa,
@@ -199,6 +217,10 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
     },
   }
   const usuarioLateral = { nome: usuario.nome, papel: papelExibido(usuario), setores: [permissoes.resumo] }
+  // Telas que ainda leem os dados fixos de src/dados mostram os do escritório completo; nos outros
+  // escritórios de exemplo, avisam em vez de misturar dados de outro escritório (ver docs/wireframe/STATUS.md).
+  const { escritorio: deExemplo } = useBanco()
+  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
 
   return (
     <NavegacaoProvider value={{ irPara: navegar }}>
@@ -253,6 +275,16 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
             />
           )}
         >
+          {telaAindaFixa && (
+            <EstadoVazio
+              icone={DatabaseIcon}
+              className="h-full"
+              titulo={`${rotuloAba ?? rotuloModulo} ainda usa os dados fixos do escritório completo`}
+              descricao={`Esta tela ainda não lê do banco, então não tem dados de ${deExemplo.nome}. Troque para o escritório completo no painel da demonstração para vê-la funcionando.`}
+            />
+          )}
+          {!telaAindaFixa && (
+            <>
           {modulo === 'inicio' && aba === 'assistente' && (
             <AssistenteTela
               contexto={contexto}
@@ -302,7 +334,7 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
                 key={aba}
                 abaId={aba}
                 cliente={cliente && clientesDoModulo.includes(cliente) ? cliente : undefined}
-                clientesNaCarteira={exemplo.clientes.length}
+                clientesNaCarteira={loja.clientes.length}
                 tarefas={loja.tarefas.filter((t) => usuario.papel === 'administrador' || permissoes.setores.includes(t.setor))}
                 integrantes={integrantes}
                 onFalar={abrirIntegrante}
@@ -314,7 +346,7 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
             <ConversasTela
               key={chaveCrm}
               conversas={loja.conversas.filter((c) => permissoes.setores.includes(c.setor) || c.id === conversaCrm)}
-              clientes={exemplo.clientes}
+              clientes={loja.clientes}
               clienteInicial={clienteId}
               tarefas={loja.tarefas}
               conversaInicial={conversaCrm}
@@ -330,7 +362,7 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
               }}
             />
           )}
-          {modulo === 'crm' && aba === 'comunicados' && <ComunicadosTela clientes={exemplo.clientes} />}
+          {modulo === 'crm' && aba === 'comunicados' && <ComunicadosTela clientes={loja.clientes} />}
           {modulo === 'crm' && aba === 'numeros' && <NumerosTela />}
           {modulo === 'timesheet' && aba === 'meu' && <MeuTempoTela key={clienteId ?? 'todos'} papel={papel} clienteNome={cliente?.nome} />}
           {modulo === 'timesheet' && aba === 'equipe' && papel !== 'colaborador' && <EquipeTela papel={papel} clienteNome={cliente?.nome} />}
@@ -362,6 +394,8 @@ function PlataformaInterna({ moduloInicial = 'inicio', abaInicial, integranteIni
           {modulo === 'bpo' && aba === 'configuracao' && <ConfigBpoTela {...propsBpo} />}
           {modulo !== 'inicio' && modulo !== 'painel' && modulo !== 'crm' && modulo !== 'timesheet' && modulo !== 'config' && modulo !== 'financeiro' && modulo !== 'arquivos' && modulo !== 'bpo' && modulo !== 'clientes' && (
             <ModuloTela key={`${modulo}-${aba}`} titulo={rotuloModulo} aba={rotuloAba} cliente={cliente?.nome} chat={{ nomeUsuario: usuario.nome, conversaGeral: [], integrantes, onAbrirIntegrante: abrirIntegrante }} />
+          )}
+            </>
           )}
           {tempo.espera && <ModoEspera desde={tempo.espera.desde} onde={tempo.espera.onde} onRetomar={tempo.retomar} />}
         </Moldura>

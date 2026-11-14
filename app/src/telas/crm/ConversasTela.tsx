@@ -26,6 +26,7 @@ import {
   XIcon,
 } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useItemNaRota } from '@/nucleo/rotas'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -113,6 +114,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
   const [busca, setBusca] = useState('')
   const largo = useMedia('(min-width: 768px)')
   const [abertaId, setAbertaId] = useState<string | null>(conversaInicial ?? null)
+  useItemNaRota({ conversa: abertaId ?? undefined })
   const [lateral, setLateral] = useState(false)
   const lateralFixa = useMedia('(min-width: 1536px)')
 

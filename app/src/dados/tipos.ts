@@ -165,6 +165,8 @@ export interface Mensagem {
   escreverDesde?: number
   /** Momento em que entrou na conversa (ordena o que o time escreve no chat do Assistente). */
   em?: number
+  /** Gerada ao vivo por um serviço simulado (src/servicos): a bolha mostra o selo "demonstração". */
+  demonstracao?: boolean
 }
 
 /** Widgets da Visão geral (Home do subplano 03, seção 4). */

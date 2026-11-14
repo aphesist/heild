@@ -1,5 +1,6 @@
 import { CaretDownIcon, CaretRightIcon, CloudIcon, EyeIcon, FileTextIcon, FolderIcon, FolderOpenIcon, FolderPlusIcon, GearSixIcon, LockSimpleIcon, MagnifyingGlassIcon, UploadSimpleIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
+import { useItemNaRota } from '@/nucleo/rotas'
 import { useDocumentos } from '@/ambiente/documentos'
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
@@ -48,6 +49,7 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
   const admin = usuario.papel === 'administrador'
   const [raiz, setRaiz] = useState<string | undefined>(inicial ? (inicial.clienteId ?? '_escritorio') : 'c1')
   const [caminho, setCaminho] = useState<string[]>(inicial?.caminho ?? [])
+  useItemNaRota({ pasta: raiz ? { ...(raiz === '_escritorio' ? {} : { clienteId: raiz }), caminho } : undefined })
   const [abertos, setAbertos] = useState<string[]>([inicial?.clienteId ?? 'c1'])
   const [busca, setBusca] = useState('')
   const [extras, setExtras] = usePersistente<Record<string, string[][]>>('arq.extras', {})

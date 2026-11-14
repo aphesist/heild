@@ -1,6 +1,7 @@
 import { ArrowsLeftRightIcon, CalendarCheckIcon, CheckCircleIcon, HandshakeIcon, PencilSimpleIcon, PlusIcon, ReceiptIcon, WarningIcon } from '@phosphor-icons/react'
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useState } from 'react'
+import { useItemNaRota } from '@/nucleo/rotas'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -39,6 +40,7 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string } = {})
   const [faturas, setFaturas] = usePersistente(`fin.faturas.${loja.estado.cenario}`, faturasIniciais)
   const [filtro, setFiltro] = useState<'todas' | 'abertas' | 'vencidas' | 'pagas' | 'problemas'>('todas')
   const [aberta, setAberta] = useState<Fatura | null>(() => faturasIniciais.find((f) => f.id === faturaInicial) ?? null)
+  useItemNaRota({ fatura: aberta?.id })
   const [acordo, setAcordo] = useState<Fatura | null>(null)
   const [gerar, setGerar] = useState(false)
   const [gerado, setGerado] = useState(false)

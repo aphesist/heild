@@ -1,4 +1,4 @@
-import { BellIcon, CalendarCheckIcon, ChatCircleDotsIcon, CheckIcon, DeviceMobileIcon, EnvelopeSimpleIcon, GearSixIcon, InfoIcon, UserCircleIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
+import { BellIcon, CalendarCheckIcon, ChatCircleDotsIcon, CheckIcon, DeviceMobileIcon, EnvelopeSimpleIcon, GearSixIcon, InfoIcon, UserCircleIcon, WarningCircleIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Avatar } from '@/components/ui/avatar'
 import { useState, type ReactNode } from 'react'
@@ -87,6 +87,12 @@ function Notificacao({ t, onAbrir, onFechar }: { t: Toast; onAbrir: () => void; 
     )
     nome = q.nome
     meta = [q.cliente, rotuloCanal[q.canal]].filter(Boolean).join(' · ')
+  } else if (t.erro) {
+    visual = (
+      <span className="bg-destructive/15 text-destructive flex size-10 shrink-0 items-center justify-center rounded-full">
+        <WarningCircleIcon className="size-5" weight="duotone" />
+      </span>
+    )
   } else {
     visual = (
       <span className="bg-sunken flex size-10 shrink-0 items-center justify-center rounded-full">
@@ -114,6 +120,19 @@ function Notificacao({ t, onAbrir, onFechar }: { t: Toast; onAbrir: () => void; 
         )}
         <p className={cn('line-clamp-2 leading-snug', nome ? 'text-muted-foreground' : 'text-foreground pt-0.5')}>{semNome(t.texto, q?.tipo === 'integrante' ? nome : null)}</p>
         {t.destino && <span className="mt-1 text-xs font-medium">{t.rotuloDestino ?? 'Abrir'}</span>}
+        {t.acao && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              t.acao!.executar()
+              onFechar()
+            }}
+            className="hover:bg-sunken -ml-1.5 mt-1 w-fit cursor-pointer rounded-full px-1.5 py-0.5 text-xs font-medium underline-offset-2 hover:underline"
+          >
+            {t.acao.rotulo}
+          </button>
+        )}
       </div>
       <button
         type="button"

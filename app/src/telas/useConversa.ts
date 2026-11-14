@@ -35,7 +35,7 @@ export function useEnvioSimulado(autor: Omit<AutorIntegrante, 'tipo'>, nomeUsuar
       window.clearTimeout(timer.current)
       timer.current = window.setTimeout(() => {
         setPensando(false)
-        atualizar((ms) => ms.map((m) => (m.id === idResposta ? { ...m, pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: resposta?.texto ?? respostaDeExemplo(anexos), cartoes: resposta?.cartoes } : m)))
+        atualizar((ms) => ms.map((m) => (m.id === idResposta ? { ...m, pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: resposta?.texto ?? respostaDeExemplo(anexos), cartoes: resposta?.cartoes, demonstracao: true } : m)))
       }, 2200)
     },
     [autor, nomeUsuario, atualizar],

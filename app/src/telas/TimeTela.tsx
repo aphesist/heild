@@ -125,7 +125,7 @@ function ChatIntegrante({
     const pronta = respostasProntas.find((r) => r.re.test(texto))
     window.setTimeout(() => {
       setPensando(false)
-      loja.ajustarMensagemTime(integrante.id, id, { pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: !anexos.length && pronta ? pronta.texto : respostaDeExemplo(anexos) })
+      loja.ajustarMensagemTime(integrante.id, id, { pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: !anexos.length && pronta ? pronta.texto : respostaDeExemplo(anexos), demonstracao: true })
     }, 2200)
   }
   const pausado = integrante.situacao === 'pausado'

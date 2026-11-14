@@ -1,3 +1,4 @@
+import { EyeIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Fichas, Segmentado } from '@/components/ui/formulario'
@@ -33,6 +34,25 @@ export function VerComoSeletor() {
           </Button>
         )}
       </div>
+    </div>
+  )
+}
+
+/** Faixa no topo enquanto o "ver como" está ligado: ninguém esquece que está vendo outro papel. */
+export function FaixaVerComo() {
+  const sessao = useSessaoBruta()
+  const v = sessao?.verComo
+  if (!v || !sessao.usuario) return null
+  return (
+    <div role="status" className="bg-foreground text-background shadow-lg fixed top-2 left-1/2 z-[70] flex -translate-x-1/2 items-center gap-2 rounded-full py-1 pr-1 pl-3 text-xs">
+      <EyeIcon className="size-3.5" />
+      <span>
+        Vendo como {rotuloPapel[v.papel]}
+        {v.vinculos.length ? ` · ${v.vinculos.map((x) => rotuloSetorCurto[x.setor]).join(', ')}` : ''} (demonstração)
+      </span>
+      <button type="button" onClick={() => sessao.definirVerComo(null)} className="bg-background/15 hover:bg-background/25 cursor-pointer rounded-full px-2.5 py-1 font-medium">
+        Voltar
+      </button>
     </div>
   )
 }

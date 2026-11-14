@@ -11,6 +11,10 @@ import { ThemeProvider } from '@/theme/ThemeProvider'
 import { temas } from '@/theme/temas'
 import type { ModoCor } from '@/theme/tipos'
 import { usePreferencia } from '@/hooks/usePreferencia'
+import { ConfirmarProvider } from '@/components/kit/confirmar'
+import { irParaPagina, paginaDoHash, useHash } from '@/nucleo/rotas'
+import { VitrineKit } from '@/telas/VitrineKit'
+import { FaixaVerComo } from '@/ambiente/ver-como'
 
 /**
  * `npm run app` e a página publicada: o escritório de demonstração inteiro.
@@ -31,7 +35,10 @@ function Escritorios({ modo, setModo }: { modo: ModoCor; setModo: (m: ModoCor | 
   // Cada escritório de exemplo tem o próprio tema (marca branca); o painel da demonstração troca.
   const [temaEscolhido, setTemaId] = usePreferencia<string | null>(`ui-lab:tema:${escritorio.id}`, null)
   const temaId = temaEscolhido ?? (escritorio.id === 'esc-horizonte' ? 'horizonte' : temas[0].id)
-  const [visao, setVisao] = useState<Visao>('escritorio')
+  // A página sai do endereço: #/app é o app do cliente, #/kit a vitrine do kit, o resto é o sistema.
+  const pagina = paginaDoHash(useHash())
+  const visao: Visao = pagina === 'app' ? 'cliente' : 'escritorio'
+  const setVisao = (v: Visao) => irParaPagina(v === 'cliente' ? 'app' : 'sistema')
   const [pessoaApp, setPessoaApp] = useState<string | null>(null)
   const [geracao, setGeracao] = useState(0)
   /** Volta o ambiente inteiro à configuração original: dados, conta, app, tema e preferências guardadas. */
@@ -58,8 +65,11 @@ function Escritorios({ modo, setModo }: { modo: ModoCor; setModo: (m: ModoCor | 
     <ThemeProvider tema={tema} modo={modo}>
       <SessaoProvider key={`${escritorio.id}-${geracao}`} contextoExterno={contextoApp}>
         <LojaProvider>
-          {visao === 'escritorio' ? <Escritorio onAlternarModo={() => setModo((m) => (m === 'claro' ? 'escuro' : 'claro'))} /> : <MolduraCliente pessoa={pessoaApp} onPessoa={setPessoaApp} onEscritorio={() => setVisao('escritorio')} />}
-          <PainelLab temaId={temaId} onTema={setTemaId} modo={modo} onModo={setModo} visao={visao} onVisao={setVisao} pessoaApp={pessoaApp} onPessoaApp={setPessoaApp} onReiniciar={reiniciarTudo} />
+          <ConfirmarProvider>
+            {pagina === 'kit' ? <VitrineKit /> : visao === 'escritorio' ? <Escritorio onAlternarModo={() => setModo((m) => (m === 'claro' ? 'escuro' : 'claro'))} /> : <MolduraCliente pessoa={pessoaApp} onPessoa={setPessoaApp} onEscritorio={() => setVisao('escritorio')} />}
+            <FaixaVerComo />
+            <PainelLab temaId={temaId} onTema={setTemaId} modo={modo} onModo={setModo} visao={visao} onVisao={setVisao} pessoaApp={pessoaApp} onPessoaApp={setPessoaApp} onReiniciar={reiniciarTudo} />
+          </ConfirmarProvider>
         </LojaProvider>
       </SessaoProvider>
     </ThemeProvider>

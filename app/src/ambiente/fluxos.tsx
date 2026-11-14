@@ -1,5 +1,6 @@
 import { ArrowSquareOutIcon, ChatCircleDotsIcon, CheckCircleIcon, ClockIcon, FileTextIcon, PaperPlaneTiltIcon, ShieldCheckIcon, SparkleIcon, TimerIcon, UserIcon } from '@phosphor-icons/react'
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { definirItemDaRota, hashParaDestino, rotaAtual, useHash } from '@/nucleo/rotas'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
@@ -72,6 +73,29 @@ type Aberto =
   | { tipo: 'transmitir'; p: PedidoTransmitir }
   | null
 
+/**
+ * Quem chega por link (ou pelo Voltar do navegador) vai para onde o endereço
+ * diz. Na primeira vez só abre o item (tarefa, ficha): o módulo e a aba já
+ * nasceram do endereço na Plataforma.
+ */
+function SincronizarRota() {
+  const hash = useHash()
+  const nav = useNavegacao()
+  const primeira = useRef(true)
+  useEffect(() => {
+    const d = hashParaDestino(hash)
+    if (primeira.current) {
+      primeira.current = false
+      if (d?.tarefa) nav.irPara({ modulo: d.modulo, tarefa: d.tarefa })
+      else if (d?.ficha) nav.irPara({ modulo: d.modulo, ficha: d.ficha })
+      return
+    }
+    if (d && hash !== rotaAtual()) nav.irPara(d)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hash])
+  return null
+}
+
 export function FluxosProvider({ children }: { children: ReactNode }) {
   const loja = useLoja()
   const nav = useNavegacao()
@@ -97,7 +121,8 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
     () => ({
       irPara: (d: Destino) => {
         if (d.tarefa) setAberto({ tipo: 'tarefa', id: d.tarefa })
-        if (d.tarefa && !d.aba) return
+        else if (d.ficha) setAberto({ tipo: 'ficha', clienteId: d.ficha })
+        if ((d.tarefa || d.ficha) && !d.aba) return
         nav.irPara(d)
       },
       // A vitrine (o site) passa adiante: os cartões lá dentro continuam sem os botões que levariam para fora.
@@ -106,9 +131,13 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
     [nav],
   )
 
+  // O item aberto entra no endereço (#/...?tarefa=t18): o link abre a mesma ficha.
+  useEffect(() => definirItemDaRota({ tarefa: aberto?.tipo === 'tarefa' ? aberto.id : undefined, ficha: aberto?.tipo === 'ficha' ? aberto.clienteId : undefined }), [aberto])
+
   return (
     <NavegacaoProvider value={navInterna}>
       <Ctx.Provider value={fluxos}>
+        <SincronizarRota />
         {children}
         {aberto?.tipo === 'tarefa' && <FichaTarefa id={aberto.id} onFechar={() => setAberto(null)} onFluxo={setAberto} />}
         {aberto?.tipo === 'ficha' && <GavetaFichaCliente clienteId={aberto.clienteId} onFechar={() => setAberto(null)} />}
