@@ -1,4 +1,4 @@
-import { AddressBook, Briefcase, ChatsCircle, FolderSimple, GearSix, House, SquaresFour, Timer, Wallet, type Icon } from '@phosphor-icons/react'
+import { AddressBook, Briefcase, ChatsCircle, ChatsTeardrop, FolderSimple, GearSix, House, SquaresFour, Timer, Wallet, type Icon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { definirRotaBase, destinoInicial } from '@/nucleo/rotas'
 import { MinhaConta } from '@/ambiente/conta'
@@ -43,6 +43,7 @@ import { CobrancaTela } from './financeiro/CobrancaTela'
 import { ContratosTela } from './financeiro/ContratosTela'
 import { ResultadoTela } from './financeiro/ResultadoTela'
 import { PainelTela } from './PainelTela'
+import { pedirFiltroSetor } from '@/dados/obrigacoes-setor'
 import { abasInternas, moduloConfig, modulosLaterais, nomeCompleto, type IdModulo } from './modulos'
 import { ArquivosTela } from './ArquivosTela'
 import { ClientesTela } from './ClientesTela'
@@ -62,6 +63,7 @@ import { DatabaseIcon } from '@phosphor-icons/react'
 import { TimeTela } from './TimeTela'
 import { useHistorico } from './useHistorico'
 import { VisaoGeralTela } from './VisaoGeralTela'
+import { ConversasInternasTela } from './interna/ConversasInternasTela'
 
 /** Ícones dos módulos (Phosphor): duotone inativo, preenchido ativo. */
 const icones: Record<IdModulo, Icon> = {
@@ -74,6 +76,7 @@ const icones: Record<IdModulo, Icon> = {
   bpo: Briefcase,
   clientes: AddressBook,
   config: GearSix,
+  interna: ChatsTeardrop,
 }
 
 interface Props {
@@ -100,6 +103,8 @@ export function Plataforma(props: Props) {
 function PlataformaInterna(props: Props) {
   // Quem abre um link (#/painel/fiscal?cliente=c1) já nasce lá: o endereço vence o padrão.
   const [doEndereco] = useState(destinoInicial)
+  // S02 (C1): link direto para a aba Obrigações filtrada (#/painel/obrigacoes?setor=dp).
+  useState(() => doEndereco?.filtroSetor && pedirFiltroSetor(doEndereco.filtroSetor))
   const { moduloInicial = 'inicio', abaInicial, integranteInicial = 'i-fiscal', clienteInicial = 'c1', comConversa = false, onAlternarModo } = { ...props, ...(doEndereco ? { moduloInicial: doEndereco.modulo, abaInicial: doEndereco.aba, ...(doEndereco.integrante ? { integranteInicial: doEndereco.integrante } : {}), ...(doEndereco.cliente !== undefined ? { clienteInicial: doEndereco.cliente } : {}) } : {}) }
   const { integrante: doTema } = useTema()
   const { usuario, permissoes } = useSessao()
@@ -124,6 +129,7 @@ function PlataformaInterna(props: Props) {
   const [conversaCrm, setConversaCrm] = useState<string | undefined>(doEndereco?.conversa)
   const [faturaAberta, setFaturaAberta] = useState<string | undefined>(doEndereco?.fatura)
   const [pastaAberta, setPastaAberta] = useState<Destino['pasta']>(doEndereco?.pasta)
+  const [conversaInterna, setConversaInterna] = useState<string | undefined>(doEndereco?.conversaInterna)
   const [integrante, setIntegrante] = useState<string>(integranteInicial)
   const [minhaConta, setMinhaConta] = useState(false)
   // Cada navegação por link reabre o item, mesmo que seja o mesmo de antes.
@@ -178,6 +184,9 @@ function PlataformaInterna(props: Props) {
     if (d.integrante) setIntegrante(d.integrante)
     setFaturaAberta(d.fatura)
     setPastaAberta(d.pasta)
+    // S02 (C1): "ver todas" e o link #/painel/obrigacoes?setor= abrem a aba Obrigações filtrada.
+    if (d.filtroSetor) pedirFiltroSetor(d.filtroSetor)
+    setConversaInterna(d.conversaInterna)
     setNonce((n) => n + 1)
     irPara(d.modulo, d.aba)
   }
@@ -397,7 +406,9 @@ function PlataformaInterna(props: Props) {
           {modulo === 'bpo' && aba === 'volume' && <VolumeBpoTela {...propsBpo} />}
           {modulo === 'bpo' && aba === 'rentabilidade' && <RentabilidadeBpoTela {...propsBpo} />}
           {modulo === 'bpo' && aba === 'configuracao' && <ConfigBpoTela {...propsBpo} />}
-          {modulo !== 'inicio' && modulo !== 'painel' && modulo !== 'crm' && modulo !== 'timesheet' && modulo !== 'config' && modulo !== 'financeiro' && modulo !== 'arquivos' && modulo !== 'bpo' && modulo !== 'clientes' && (
+          {modulo === 'interna' && <ConversasInternasTela key={`${aba}-${nonce}`} conversaInicial={conversaInterna} />}
+          {modulo !== 'painel' && modulo !== 'interna' && <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} />}
+          {modulo !== 'inicio' && modulo !== 'painel' && modulo !== 'crm' && modulo !== 'timesheet' && modulo !== 'config' && modulo !== 'financeiro' && modulo !== 'arquivos' && modulo !== 'bpo' && modulo !== 'clientes' && modulo !== 'interna' && (
             <ModuloTela key={`${modulo}-${aba}`} titulo={rotuloModulo} aba={rotuloAba} cliente={cliente?.nome} chat={{ nomeUsuario: usuario.nome, conversaGeral: [], integrantes, onAbrirIntegrante: abrirIntegrante }} />
           )}
             </>

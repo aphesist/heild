@@ -102,6 +102,7 @@ export function tarefaParaModelo(t: TarefaTela, q: Consulta, base?: Tarefa): Sem
     responsavel_id: responsavelId,
     status: t.status,
     prazo_interno: dataDeDiaMes(t.prazo),
+    ...(t.prazoLegal ? { prazo_legal: dataDeDiaMes(t.prazoLegal) } : {}),
     conversa_id: t.conversa ?? null,
     extras,
   }
@@ -117,14 +118,15 @@ export function tarefaParaTela(t: Tarefa, q: Pick<Consulta, 'clientes'>): Tarefa
     cliente: cliente ?? String(e.cliente_nome ?? ''),
     setor: t.setor_id as SetorIntegrante,
     prazo: diaMesDeData(t.prazo_interno ?? t.prazo_legal),
-    // A tela só conhece quatro estados: os outros aparecem como "em andamento" (revisão, terceiro) ou concluída (cancelada sai da fila).
-    status: t.status === 'aguardando_terceiro' || t.status === 'em_revisao' ? 'em_andamento' : t.status === 'cancelada' ? 'concluida' : t.status,
+    // Os sete estados chegam à tela (contrato C3); a loja deixa a cancelada fora das filas.
+    status: t.status,
   }
   if (e.responsavel_nome) tela.responsavel = { tipo: e.responsavel_tipo_tela === 'integrante' || t.responsavel_tipo === 'integrante' ? 'integrante' : 'pessoa', nome: String(e.responsavel_nome), ...(e.responsavel_setor ? { setor: e.responsavel_setor as SetorIntegrante } : {}) }
   if (e.atrasada !== undefined) tela.atrasada = e.atrasada as boolean
   if (e.dias_aguardando !== undefined) tela.diasAguardando = e.dias_aguardando as number
   if (e.cartao_pendente !== undefined) tela.cartaoPendente = e.cartao_pendente as boolean
   if (t.conversa_id) tela.conversa = t.conversa_id
+  if (t.prazo_legal && t.prazo_legal !== t.prazo_interno) tela.prazoLegal = diaMesDeData(t.prazo_legal)
   if (t.origem === 'pedido_cliente') tela.origem = 'pedido_cliente'
   return tela
 }
@@ -154,9 +156,15 @@ export function conversaParaModelo(c: ConversaCrm, q: Consulta, pessoaId?: Id): 
   }
 }
 
+/**
+ * Id da Mensagem: o id do item na conversa, prefixado pela conversa (os dados de
+ * exemplo repetem "m1", "m2" em conversas diferentes; no banco o id é único no escritório).
+ */
+export const idDaMensagem = (conversaId: Id, item: ItemConversa | { id: string }, ordem = 0) => ('id' in item ? `${conversaId}:${item.id}` : `${conversaId}-dia-${ordem}`)
+
 /** Uma linha de conversa (mensagem, nota, dia, marco, cartão) vira uma Mensagem; o item original fica em `extras.item`. */
 export function itemParaMensagem(conversaId: Id, item: ItemConversa, ordem: number): SemRegistro<Mensagem> {
-  const id = 'id' in item ? item.id : `${conversaId}-dia-${ordem}`
+  const id = idDaMensagem(conversaId, item, ordem)
   const base = { id, conversa_id: conversaId, ordem, extras: { item } }
   if (item.tipo === 'mensagem')
     return {

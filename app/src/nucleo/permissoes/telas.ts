@@ -8,7 +8,7 @@ import { integrantesBpo, rotuloSetorCurto, setoresContabeis, todosSetores } from
  * função `autorizar` usa, então esconder o botão e recusar a escrita concordam.
  */
 
-export type IdModuloSessao = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config'
+export type IdModuloSessao = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config' | 'interna'
 
 export interface Permissoes {
   modulos: IdModuloSessao[]
@@ -76,6 +76,8 @@ export function permissoesDoPerfil(p: Perfil): Permissoes {
     ...(financeiro.length ? (['financeiro'] as const) : []),
     ...(bpo.length ? (['bpo'] as const) : []),
     ...(admin ? (['config'] as const) : []),
+    // S05: comunicação interna, para toda a equipe (11, 1); não tem item na barra (abre pelo botão Chat).
+    'interna',
   ]
   const nomes = setores.map((s) => rotuloSetorCurto[s])
   // S09: Configurações é do Administrador; exceção por tela "config.<aba>" libera a aba para outra conta (01, 2.2).
