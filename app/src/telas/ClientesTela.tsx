@@ -8,7 +8,9 @@ import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, Fichas, GavetaFormulario } from '@/components/ui/formulario'
-import { empresaBpo } from '@/dados/bpo'
+import { useAcao } from '@/components/kit'
+import { repos } from '@/nucleo/repositorios'
+import { useBpo } from './bpo/dados'
 import type { Cliente } from '@/dados/tipos'
 
 type Pacote = 'contabil' | 'bpo'
@@ -27,10 +29,13 @@ export function ClientesTela({ aba, clientes }: { aba: string; clientes: Cliente
   const fluxos = useFluxos()
   const { usuario } = useSessao()
   const [busca, setBusca] = useState('')
-  const [novos, setNovos] = usePersistente<Cliente[]>('clientes.novos', [])
+  // Clientes antigos guardados só na tela (antes do cadastro único no banco) continuam aparecendo.
+  const [novos] = usePersistente<Cliente[]>('clientes.novos', [])
+  const { empresas } = useBpo()
+  const executar = useAcao()
   const [gaveta, setGaveta] = useState(false)
   const [rascunho, setRascunho] = useState({ nome: '', documento: '', regime: 'Simples Nacional' as Cliente['regime'], pacotes: ['bpo'] as Pacote[] })
-  const todos = [...novos, ...clientes]
+  const todos = [...novos.filter((n) => !clientes.some((c) => c.id === n.id)), ...clientes]
   const q = busca.trim().toLowerCase()
   const lista = todos.filter((c) => !q || c.nome.toLowerCase().includes(q) || c.codigo.includes(q) || c.documento.includes(q))
   const pode = usuario.papel !== 'colaborador'
@@ -70,7 +75,7 @@ export function ClientesTela({ aba, clientes }: { aba: string; clientes: Cliente
               <ul className="divide-border/70 flex flex-col divide-y">
                 {lista.map((c) => {
                   const ficha = loja.fichaDe(c.id)
-                  const e = empresaBpo(c.id)
+                  const e = empresas.find((x) => x.clienteId === c.id)
                   const resp = [ficha?.responsaveis.contabil && `Contábil: ${ficha.responsaveis.contabil}`, ficha?.responsaveis.bpo_financeiro && `BPO: ${ficha.responsaveis.bpo_financeiro}`].filter(Boolean).join(' · ')
                   return (
                     <li key={c.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-5">
@@ -93,7 +98,7 @@ export function ClientesTela({ aba, clientes }: { aba: string; clientes: Cliente
                       </span>
                       <span className="text-muted-foreground w-36 text-xs">
                         {ficha?.contatos.length ?? 0} contato{(ficha?.contatos.length ?? 0) === 1 ? '' : 's'} · {ficha?.contatos.filter((x) => x.app).length ?? 0} no app
-                        {e && <span className="block">ERP: {e.erp.provedor}</span>}
+                        {e && <span className="block">ERP: {e.erp.provedor} · BPO {e.perfil.situacao === 'ativo' ? 'ativo' : e.perfil.situacao === 'paralelo' ? 'em paralelo' : e.perfil.situacao === 'onboarding' ? 'em implantação' : e.perfil.situacao}</span>}
                       </span>
                       <Button size="sm" variant="outline" className="rounded-full" onClick={() => fluxos.fichaCliente(c.id)}>
                         Ficha
@@ -139,20 +144,29 @@ export function ClientesTela({ aba, clientes }: { aba: string; clientes: Cliente
         acao="Cadastrar"
         acaoDesabilitada={!rascunho.nome.trim() || rascunho.pacotes.length === 0}
         onAcao={() => {
-          const c: Cliente = {
-            id: `cn${Date.now()}`,
-            codigo: String(800 + novos.length),
-            nome: rascunho.nome.trim(),
-            documento: rascunho.documento || 'CNPJ a confirmar',
-            regime: rascunho.regime,
-            situacao: 'implantacao',
-            servicos: rascunho.pacotes,
-          }
-          setNovos((xs) => [c, ...xs])
+          // S08-A42: o mesmo cadastro do Painel › Societário (um cliente existe uma vez só), agora no banco.
+          const regimes = { 'Simples Nacional': 'simples', 'Lucro Presumido': 'presumido', 'Lucro Real': 'real', MEI: 'mei', 'Pessoa física': 'pf' } as const
+          const criado = executar(
+            () =>
+              repos.clientes.criar(
+                {
+                  tipo: rascunho.regime === 'Pessoa física' ? 'pf' : rascunho.regime === 'MEI' ? 'mei' : 'pj',
+                  codigo: String(800 + todos.length),
+                  nome: rascunho.nome.trim(),
+                  documento: rascunho.documento.trim() || 'CNPJ a confirmar',
+                  estado_ciclo: 'em_implantacao',
+                  estado_ciclo_desde: new Date().toISOString().slice(0, 10),
+                  regime: regimes[rascunho.regime] ?? 'simples',
+                  servicos_contratados: rascunho.pacotes,
+                  extras: { servicos_definidos: true },
+                },
+                { texto: `${usuario.nome} cadastrou o cliente ${rascunho.nome.trim()} (${rascunho.pacotes.map((p) => rotuloPacote[p]).join(' e ')})` },
+              ),
+            { sucesso: `${rascunho.nome.trim()} cadastrado em implantação. No BPO, ponha a empresa na Carteira para começar os oito passos.` },
+          )
+          if (!criado) return
           setGaveta(false)
           setRascunho({ nome: '', documento: '', regime: 'Simples Nacional', pacotes: ['bpo'] })
-          loja.registrar(usuario.nome, `Cadastrou o cliente ${c.nome} (${c.servicos?.map((p) => rotuloPacote[p]).join(' e ')})`)
-          loja.toast(`${c.nome} cadastrado em implantação. A ficha pede contatos e, no BPO, o ERP e as alçadas.`)
         }}
       >
         <Campo rotulo="Razão social">{(id) => <CampoTexto id={id} valor={rascunho.nome} onMudar={(v) => setRascunho((r) => ({ ...r, nome: v }))} />}</Campo>

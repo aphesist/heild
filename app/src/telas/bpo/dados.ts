@@ -150,7 +150,7 @@ export function calcularAudit(e: Omit<EmpresaVista, 'audit'>, cfg?: BpoConfigura
   for (const c of e.contas.filter((x) => contaAberta(x) && diasAte(x.vencimento) < 0)) add('vencido_sem_aprovacao', `vencido sem aprovação: ${c.contraparte} (${brl(c.valor)}); o sistema avisa, nunca paga`)
   if (e.erp.efetiva === 'credencial_vencida') add('credencial_vencida', `credencial do ${e.erp.provedor} vencida: o cliente precisa autorizar de novo`)
   if (e.erp.efetiva === 'atrasada') add('sincronizacao_atrasada', `sincronização com o ${e.erp.provedor} parada desde ${dataHora(e.erp.ultima_sincronizacao)}`)
-  if (e.caixa < e.perfil.caixa_minimo) add('caixa_abaixo_minimo', `caixa abaixo do mínimo (${brl(e.caixa)} de ${brl(e.perfil.caixa_minimo)})`)
+  if (e.bancos.length && e.caixa < e.perfil.caixa_minimo) add('caixa_abaixo_minimo', `caixa abaixo do mínimo (${brl(e.caixa)} de ${brl(e.perfil.caixa_minimo)})`)
   // Atraso: extrato com mais de dois dias sem conciliar (o do dia e o de ontem são a rotina).
   const velhas = e.transacoes.filter((t) => diasAte(t.data) < -2)
   if (velhas.length) add('conciliacao_atrasada', `${velhas.length} lançamento${velhas.length > 1 ? 's' : ''} do extrato sem conciliar desde ${dataCurta(velhas[0].data)}`)
@@ -163,7 +163,8 @@ export function calcularAudit(e: Omit<EmpresaVista, 'audit'>, cfg?: BpoConfigura
   for (const b of e.bancos.filter((x) => x.consentimento_ate && diasAte(x.consentimento_ate) <= 30)) add('consentimento_vencendo', `consentimento do ${b.nome} vence ${quando(b.consentimento_ate)}`)
   if (e.perfil.situacao === 'paralelo') add('em_paralelo', `em paralelo até ${dataCurta(e.perfil.paralelo_ate)}: o BPO prepara, o cliente ainda paga`)
   const contam = motivos.filter((m) => m.peso > 0).sort((a, b) => b.peso - a.peso)
-  const pontos = contam.reduce((s, m) => s + m.peso, 0)
+  // Cada critério pesa uma vez (três fornecedores novos não valem três vezes); os motivos aparecem todos.
+  const pontos = [...new Set(contam.map((m) => m.criterio))].reduce((s, c) => s + (pesos[c] ?? 0), 0)
   const cor: CorAudit = pontos >= (cfg?.limiar_vermelho ?? 8) ? 'vermelho' : pontos >= (cfg?.limiar_amarelo ?? 3) ? 'amarelo' : 'verde'
   return { cor, pontos, motivos: contam }
 }

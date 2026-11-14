@@ -64,6 +64,11 @@ export function useAcoesErp(e: EmpresaVista | undefined) {
     if (!e) return
     setEstado({ carregando: `Lendo o ${e.erp.provedor}…` })
     try {
+      // Conector do provedor fora do ar (Configurações › Conectores, C9): a leitura falha e a tela mostra o erro.
+      if (e.erp.saude && ['fora_do_ar', 'timeout', 'erro_credencial'].includes(e.erp.saude.estado)) {
+        await new Promise((r) => setTimeout(r, 700))
+        throw new ErroServico(e.erp.provedor, e.erp.saude.estado, e.erp.saude.frase)
+      }
       const r = e.erp.modo === 'E2' ? null : await servicos.erp.sincronizar(e.erp.provedor, e.nome)
       const arquivo = e.erp.modo === 'E2' ? await servicos.erp.importarArquivo(e.erp.provedor, `${e.nome}.ofx`) : null
       repos.bpo.conexoes.atualizar(e.erp.id, { ultima_sincronizacao: agoraBpo(), situacao: e.erp.situacao === 'atrasada' ? 'ok' : e.erp.situacao }, { ferramenta: 'erp.sincronizar', texto: `Sincronizou o espelho do ${e.erp.provedor} de ${e.nome}` })
@@ -407,7 +412,7 @@ export function ConectarGaveta({ tipo, perfil, nome, onFechar }: { tipo: 'erp' |
         else repos.bpo.conexoes.criar({ cliente_id: perfil.cliente_id, ...linha }, { texto: `Conectou o ${provedor} de ${nome}` })
       }
       executar(() => repos.bpo.perfis.atualizar(perfil.id, { onboarding: { ...perfil.onboarding, [tipo === 'banco' ? 'bancos' : 'erp']: true } }, { ferramenta: 'bpo.onboarding' }))
-      loja.toast(tipo === 'banco' ? `${instituicao} conectado por Open Finance (demonstração)` : `${provedor} conectado (demonstração)`)
+      loja.toast(tipo === 'banco' ? `${instituicao} conectado por Open Finance (demonstração)` : provedor === 'sem ERP' ? 'Livro próprio ligado: a empresa não tem ERP' : `${provedor} conectado (demonstração)`)
       onFechar()
     } catch (err) {
       setEstado({ erro: err instanceof Error ? err.message : String(err) })

@@ -148,8 +148,9 @@ export function sementeS08(foto: Fotografia, add: Add, completo = true) {
       faixa2: e.alcadas.faixa2,
       janela: e.alcadas.janela,
       pessoas,
-      proposta_por_id: 'u8',
-      proposta_por_nome: 'Marina Teixeira (implantação)',
+      // Alçada da implantação: veio assinada no contrato (ninguém da equipe a alterou depois).
+      proposta_por_id: null,
+      proposta_por_nome: 'contrato de implantação',
       aceito_por: e.alcadas.aceitoPor,
       aceito_em: iso('2026-03-02', '10:00'),
       vigencia_ate: mm ? `${aaaa}-${mm}-01` : null,
