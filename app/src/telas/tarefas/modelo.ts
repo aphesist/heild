@@ -55,7 +55,7 @@ export const diaMes = (iso?: string | null) => (iso ? `${iso.slice(8, 10)}/${iso
 export const atrasadaE = (t: TarefaE) => !['concluida', 'cancelada'].includes(t.status) && (!!t.extras?.atrasada || (!!prazoE(t) && prazoE(t)! < HOJE_ISO))
 export const diasEntre = (de: string, ate: string) => Math.round((new Date(`${ate.slice(0, 10)}T12:00:00`).getTime() - new Date(`${de.slice(0, 10)}T12:00:00`).getTime()) / 86400000)
 /** Dias no status atual (a semente começa no "hoje" da demonstração). */
-export const diasNoStatus = (t: TarefaE) => Math.max(0, Number(t.extras?.dias_aguardando ?? 0) || diasEntre(t.status_desde ?? HOJE_ISO, new Date().toISOString() < HOJE_ISO ? HOJE_ISO : new Date().toISOString()))
+export const diasNoStatus = (t: TarefaE) => Math.max(0, Number(t.extras?.dias_aguardando ?? 0) || diasEntre(t.status_desde ?? HOJE_ISO, new Date().toISOString()))
 export const cartaoPendenteE = (t: TarefaE) => !!t.extras?.cartao_pendente || repos.cartoes.listar((c) => c.status === 'pendente' && c.extras?.tarefa_id === t.id).length > 0
 
 export const rotuloOrigem: Record<TarefaE['origem'], string> = {
