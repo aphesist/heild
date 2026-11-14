@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
+import { useContadoresModulo } from '@/ambiente/contadores-s01'
 import { ehHeild, logosDoModo, Marca, MarcaHeild } from './marca'
 
 export interface ItemLateral {
@@ -47,6 +48,9 @@ const mola = { type: 'spring', stiffness: 420, damping: 40 } as const
  */
 export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, aberta, onAlternar, onAlternarModo, onMinhaConta, onSair, onSuporte, className }: Props) {
   const { modo } = useTema()
+  // Contadores reais por item (S01-T01): cartões, atrasadas, conversas, confirmações. O que vier no item vence.
+  const contadores = useContadoresModulo()
+  const comContador = (it: ItemLateral): ItemLateral => ({ ...it, contador: it.contador ?? contadores[it.id as keyof typeof contadores] })
   const Alternar = aberta ? CaretDoubleLeft : CaretDoubleRight
 
   return (
@@ -70,7 +74,7 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
       <ul className="mt-6 flex flex-col gap-1 px-[16px]">
         {itens.map((it) => (
           <li key={it.id}>
-            <ItemModulo item={it} ativo={it.id === ativo} aberta={aberta} onClick={() => onTrocar(it.id)} />
+            <ItemModulo item={comContador(it)} ativo={it.id === ativo} aberta={aberta} onClick={() => onTrocar(it.id)} />
           </li>
         ))}
       </ul>
@@ -101,6 +105,7 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
               <div className="text-muted-foreground text-xs">
                 {usuario.papel} · {usuario.setores.join(', ')}
               </div>
+              <div className="text-muted-foreground mt-1 text-[11px]">Papel e setores são editados pelo Administrador.</div>
             </div>
             {onAlternarModo && (
               <ItemMenu onClick={onAlternarModo} icone={modo === 'escuro' ? <Sun /> : <Moon />}>
@@ -110,6 +115,11 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
             {onMinhaConta && (
               <ItemMenu onClick={onMinhaConta} icone={<UserGear />}>
                 Minha conta
+              </ItemMenu>
+            )}
+            {onSuporte && (
+              <ItemMenu onClick={onSuporte} icone={<LifebuoyIcon />}>
+                Suporte
               </ItemMenu>
             )}
             <ItemMenu onClick={onSair} icone={<SignOut />}>
@@ -147,7 +157,8 @@ function ItemModulo({ item, ativo, aberta, onClick }: { item: ItemLateral; ativo
     <button
       type="button"
       onClick={onClick}
-      aria-label={aberta ? undefined : item.rotulo}
+      aria-label={item.rotulo}
+      aria-description={item.contador ? `${item.contador} pedindo atenção` : undefined}
       aria-current={ativo ? 'page' : undefined}
       className={cn(
         'group relative flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-[14px] text-left transition-colors',
@@ -160,7 +171,9 @@ function ItemModulo({ item, ativo, aberta, onClick }: { item: ItemLateral; ativo
       {ativo && aberta && <motion.span layoutId="lateral-fundo" transition={mola} className="bg-raised absolute inset-0 rounded-[14px] shadow-cartao" />}
       <span className="relative flex size-11 shrink-0 items-center justify-center">
         <Icone weight={ativo ? 'fill' : 'duotone'} className="size-[26px] transition-transform group-hover:scale-105" />
-        <Contador valor={item.contador ?? 0} className="absolute top-0.5 right-0.5" />
+        <span aria-hidden>
+          <Contador valor={item.contador ?? 0} className="absolute top-0.5 right-0.5" />
+        </span>
       </span>
       <Rotulo aberta={aberta} className={cn('relative text-[15px]', ativo && 'font-medium')}>
         {item.rotulo}
