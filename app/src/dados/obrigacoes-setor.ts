@@ -66,7 +66,7 @@ export const diasEntre = (a: string, b: string) => Math.round((Date.parse(b) - D
 export function statusDaOcorrencia(t: TarefaModelo, hoje = HOJE_DEMO): StatusObrigacao {
   const e = t.extras ?? {}
   if (t.status === 'cancelada') return e.dispensada ? 'dispensada' : 'cancelada'
-  if (t.status === 'concluida') return 'entregue'
+  if (t.status === 'concluida') return e.dispensada ? 'dispensada' : 'entregue'
   const legal = t.prazo_legal ?? t.prazo_interno
   if (legal && legal < hoje) return 'atrasada'
   if (legal && legal === hoje) return 'vence hoje'
@@ -171,6 +171,8 @@ export interface PerfilParaObrigacoes {
   mesTaxaLicenca?: number
   /** Conselho de classe com renovação anual (C2-20). */
   conselho?: string
+  /** Regras desligadas para o cliente na versão do perfil (FIS-024: declarações estaduais que não entrega). */
+  desligadas?: string[]
 }
 
 /** Mês das obrigações anuais (o mês do prazo legal). */
@@ -236,6 +238,7 @@ export function planejarCalendario(competencia: string, perfis: PerfilParaObriga
   const plano: OcorrenciaPlanejada[] = []
   for (const p of perfis)
     for (const r of regras) {
+      if (p.desligadas?.includes(r.id)) continue
       if (!regraSeAplica(r, p, mesDoPrazo(competencia, r.regra_prazo.mes_relativo))) continue
       if (existentes.some((t) => t.origem === 'obrigacao' && t.origem_ref === r.id && t.cliente_id === p.clienteId && t.competencia === competencia)) continue
       const legal = prazoLegal(r, competencia)

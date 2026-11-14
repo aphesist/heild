@@ -32,8 +32,6 @@ export function obrigacoesS02(): Sem<Obrigacao>[] {
     o('ob-das-mei', 'FIS-016', 'DAS-MEI', 20, 'fiscal', { regime: ['mei'] }),
     o('ob-defis', 'FIS-013', 'DEFIS', 31, 'fiscal', { regime: ['simples'] }, 'anual', 5),
     o('ob-dmed', 'C2-16', 'DMED', 28, 'fiscal', { saude: true }, 'anual', 4),
-    o('ob-s1299', 'DP-016', 'eSocial S-1299 (fechamento)', 15, 'dp', { tem_folha: true }),
-    o('ob-gfd', 'DP-018', 'GFD (FGTS Digital)', 20, 'dp', { tem_folha: true }),
     o('ob-ecf', 'CTB-042', 'ECF', 31, 'contabil', { regime: ['presumido', 'real'] }, 'anual', 9),
     o('ob-ibge', 'C2-15', 'Pesquisa do IBGE (PAC/PAS)', 30, 'contabil', { chamada_ibge: true }, 'por_evento'),
     o('ob-taxa-licenca', 'C2-22', 'Taxa anual de licença municipal', 30, 'societario', { taxa_licenca: true }),
@@ -60,7 +58,8 @@ export function perfisDaFoto(foto: Pick<Fotografia, 'cliente' | 'versao_perfil'>
     .filter((c) => c.servicos_contratados.includes('contabil') && !['prospect', 'proposta', 'encerrado', 'arquivado', 'eliminado', 'inativo'].includes(c.estado_ciclo))
     .map((c) => {
       const vp = foto.versao_perfil.filter((v) => v.cliente_id === c.id && !v.vigente_ate).at(-1)
-      return { clienteId: c.id, regime: vp?.regime ?? c.regime, uf: vp?.uf ?? 'SP', servicos: vp?.servicos_contratados ?? c.servicos_contratados, temFolha: c.tipo !== 'pf', ...extras[c.id] }
+      const desligadas = (vp?.extras?.declaracoes_off as string[] | undefined) ?? []
+      return { clienteId: c.id, regime: vp?.regime ?? c.regime, uf: vp?.uf ?? 'SP', servicos: vp?.servicos_contratados ?? c.servicos_contratados, temFolha: c.tipo !== 'pf', ...extras[c.id], desligadas }
     })
 }
 
@@ -69,16 +68,16 @@ const situacao: Record<string, Partial<Pick<Tarefa, 'status' | 'risco'>> & { rec
   'c1:ob-dctfweb': { status: 'concluida', recibo: 'b7e1c04' },
   'c1:ob-reinf': { status: 'concluida', recibo: '91fa2d3' },
   'c1:ob-gia-sp': { status: 'em_andamento', risco: true, falta: '3 compras sem XML' },
-  'c1:ob-s1299': { status: 'a_fazer', multa: 380 },
+  'c1:ob-esocial': { status: 'a_fazer', multa: 380 },
   'c1:ob-efd-contrib': { status: 'em_andamento', multa: 500 },
   'c1:ob-taxa-licenca': { status: 'a_fazer', falta: 'guia da prefeitura de Sorocaba' },
-  'c2:ob-s1299': { status: 'concluida', recibo: '3c0a9e1' },
-  'c3:ob-gfd': { status: 'aguardando_cliente', risco: true, falta: 'ponto de outubro' },
-  'c4:ob-s1299': { status: 'a_fazer', multa: 200 },
+  'c2:ob-esocial': { status: 'concluida', recibo: '3c0a9e1' },
+  'c3:ob-fgts': { status: 'aguardando_cliente', risco: true, falta: 'ponto de outubro' },
+  'c4:ob-esocial': { status: 'a_fazer', multa: 200 },
   'c4:ob-efd-contrib': { status: 'em_andamento', risco: true, falta: 'certificado A1 (vence em 3 dias)' },
-  'c4:ob-pis-cofins': { status: 'cancelada', dispensada: true, motivo: 'Sem PIS/COFINS a recolher em 10/2026 (sem arquivo não é falta, D-23).' },
+  'c4:ob-pis-cofins': { status: 'concluida', dispensada: true, motivo: 'Sem PIS/COFINS a recolher em 10/2026 (sem arquivo não é falta, D-23).' },
   'c5:ob-gia-sp': { status: 'concluida', recibo: '5d17b20' },
-  'c7:ob-gfd': { status: 'concluida', recibo: 'e2f9a41' },
+  'c7:ob-fgts': { status: 'concluida', recibo: 'e2f9a41' },
 }
 
 /** Responsável padrão: o integrante do setor (que faz ou prepara) ou a pessoa do setor. */
@@ -133,7 +132,7 @@ export function sementeS02(foto: Fotografia, add: Add) {
       risco: !!s.risco,
       ordem: 1000 + i,
       ...(status === 'concluida' ? { concluida_por_tipo: 'integrante' as const, concluida_por_id: r?.id ?? null, concluida_em: `${p.interno}T15:00:00.000Z` } : {}),
-      ...(s.motivo ? { cancelada_motivo: s.motivo } : {}),
+      ...(s.motivo ? { descricao: s.motivo } : {}),
       extras: {
         obrigacao_nome: p.regra.nome,
         responsavel_nome: r?.nome,

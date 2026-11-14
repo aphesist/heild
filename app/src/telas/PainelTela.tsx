@@ -12,7 +12,7 @@ import { widgetsDP } from './painel/dp'
 import { widgetsFiscal } from './painel/fiscal'
 import { widgetsGestao } from './painel/gestao'
 import { widgetsNotas } from './painel/notas'
-import { widgetsObrigacoes } from './painel/obrigacoes'
+import { SeletorSetores, widgetsObrigacoes } from './painel/obrigacoes'
 import { chavePadrao, padroes } from './painel/padroes'
 import { widgetsSocietario } from './painel/societario'
 import type { CtxAba, WidgetsAba } from './painel/tipos'
@@ -84,6 +84,7 @@ export function PainelTela({ abaId, cliente, clientesNaCarteira, tarefas, integr
           onFicha={cliente ? () => fluxos.fichaCliente(cliente.id) : undefined}
         />
         <AbaCtx.Provider value={{ cliente: cliente?.nome, setor: aba.setor }}>
+          {aba.id === 'obrigacoes' && <SeletorSetores />}
           <GradeWidgets key={chave} chave={chave} catalogo={catalogo} padrao={padrao} />
         </AbaCtx.Provider>
       </div>
