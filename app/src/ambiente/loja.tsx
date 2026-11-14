@@ -70,6 +70,8 @@ export interface Destino {
   tarefa?: string
   /** Abre a ficha do cliente por cima de onde estiver. */
   ficha?: string
+  /** S02 (C1): a aba Obrigações abre filtrada por este setor dono ("ver todas" do bloco Obrigações do setor). */
+  filtroSetor?: SetorIntegrante
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */

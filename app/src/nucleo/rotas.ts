@@ -33,6 +33,8 @@ export function destinoParaHash(d: Destino): string {
   if (d.ficha) q.set('ficha', d.ficha)
   if (d.fatura) q.set('fatura', d.fatura)
   if (d.pasta) q.set('pasta', `${d.pasta.clienteId ?? '_escritorio'}:${d.pasta.caminho.join('/')}`)
+  // S02 (C1): aba Obrigações filtrada pelo setor dono.
+  if (d.filtroSetor) q.set('setor', d.filtroSetor)
   const busca = q.toString()
   return `#/${d.modulo}${d.aba ? `/${d.aba}` : ''}${busca ? `?${busca}` : ''}`
 }
@@ -54,6 +56,9 @@ export function hashParaDestino(hash: string): Destino | null {
     const [c, caminho = ''] = pasta.split(':')
     d.pasta = { ...(c && c !== '_escritorio' ? { clienteId: c } : {}), caminho: caminho ? caminho.split('/') : [] }
   }
+  // S02 (C1): #/painel/obrigacoes?setor=fiscal
+  const setor = q.get('setor')
+  if (setor) d.filtroSetor = setor as Destino['filtroSetor']
   return d
 }
 
