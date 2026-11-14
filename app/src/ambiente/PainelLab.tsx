@@ -1,4 +1,4 @@
-import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SquaresFourIcon, SunIcon, XIcon } from '@phosphor-icons/react'
+import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SquaresFourIcon, SunIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { usePreferencia } from '@/hooks/usePreferencia'
 import { Avatar } from '@/components/ui/avatar'
@@ -12,6 +12,7 @@ import { pessoasDoApp } from '@/cliente/ClienteApp'
 import { useBanco, useEscritorio } from '@/nucleo/react'
 import { escritoriosDeExemplo } from '@/nucleo/semente'
 import { VerComoSeletor } from './ver-como'
+import { definirInstabilidade } from '@/servicos'
 import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
@@ -50,6 +51,8 @@ export function PainelLab({
   const [aberto, setAberto] = useState(false)
   const [confirmar, setConfirmar] = useState(false)
   const [foraHorario, setForaHorario] = useState(false)
+  // Falhas simuladas nos serviços externos (src/servicos): para ver os estados de erro das telas.
+  const [instavel, setInstavel] = useState(false)
   const ativas = (sessao?.contas ?? []).filter((u) => u.situacao === 'ativo')
   const banco = useBanco()
   const escritorio = { inatividadeMin: useEscritorio()?.inatividade_min ?? 3 }
@@ -264,6 +267,18 @@ export function PainelLab({
             {modo === 'claro' ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
           </button>
         </div>
+        <button
+          type="button"
+          aria-pressed={instavel}
+          onClick={() => {
+            const v = !instavel
+            setInstavel(v)
+            definirInstabilidade(v ? 0.5 : 0)
+          }}
+          className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+        >
+          <WarningCircleIcon className="size-4 shrink-0" /> Serviços externos: {instavel ? 'falhando metade das vezes' : 'respondendo'} (alternar)
+        </button>
         <a href="#/kit" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
           <SquaresFourIcon className="size-4 shrink-0" /> Kit de interação e serviços simulados
         </a>
@@ -272,7 +287,7 @@ export function PainelLab({
         </p>
         {!confirmar ? (
           <Button variant="outline" className="rounded-full" onClick={() => setConfirmar(true)}>
-            <ArrowCounterClockwiseIcon /> Restaurar demonstração
+            <ArrowCounterClockwiseIcon /> Resetar o ambiente (restaurar demonstração)
           </Button>
         ) : (
           <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3 text-sm">
@@ -288,7 +303,7 @@ export function PainelLab({
                   onReiniciar()
                 }}
               >
-                Restaurar agora
+                Resetar agora
               </Button>
               <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setConfirmar(false)}>
                 Cancelar

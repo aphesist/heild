@@ -90,7 +90,10 @@ function SincronizarRota() {
       else if (d?.ficha) nav.irPara({ modulo: d.modulo, ficha: d.ficha })
       return
     }
-    if (d && hash !== rotaAtual()) nav.irPara(d)
+    // Lê o endereço de agora (no modo estrito o efeito roda de novo com o valor antigo da renderização).
+    const atual = window.location.hash
+    if (atual !== hash) return
+    if (d && atual !== rotaAtual()) nav.irPara(d)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash])
   return null

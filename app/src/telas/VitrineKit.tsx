@@ -471,7 +471,9 @@ function ServicosSimulados() {
                   Testar
                 </Button>
               </div>
-              <p className="text-muted-foreground text-[11px]">Para ligar: {s.requisito}</p>
+              <p className="text-muted-foreground text-[11px]">
+                <span className="font-mono">{s.api}</span> · Para ligar: {s.requisito}
+              </p>
               {r?.carregando && <Carregando rotulo="Chamando" className="py-2" />}
               {r?.erro && <p className="text-destructive text-xs">{r.erro}</p>}
               {r?.r && (

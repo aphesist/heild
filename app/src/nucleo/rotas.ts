@@ -81,6 +81,18 @@ function escrever() {
   avisar()
 }
 
+/**
+ * Destino pedido pelo endereço ao abrir a Plataforma, ou `null` se o endereço é
+ * só o que a própria tela escreveu (trocar de conta não reabre onde a outra
+ * pessoa estava; recarregar e abrir um link, sim).
+ */
+export function destinoInicial(): Destino | null {
+  if (typeof window === 'undefined') return null
+  const h = window.location.hash
+  if (base && h === rotaAtual()) return null
+  return hashParaDestino(h)
+}
+
 /** O endereço que corresponde ao que está na tela agora. */
 export const rotaAtual = () => (base ? destinoParaHash(composta()!) : '')
 

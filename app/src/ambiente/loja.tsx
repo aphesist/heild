@@ -247,7 +247,8 @@ function reduzirVolatil(s: Volatil, a: Acao): Volatil {
 
 /* ---------- O que persiste: cada ação vira escrita no banco ---------- */
 
-const CHAVES_BPO = { alcadaProposta: 'bpo.alcadaProposta', alcadas: 'bpo.alcadas', lotes: 'bpo.lotes', contas: 'bpo.contas' } as const
+// Prefixo próprio (as telas usam chaves livres no usePersistente, inclusive "bpo.*").
+const CHAVES_BPO = { alcadaProposta: 'loja:bpo.alcadaProposta', alcadas: 'loja:bpo.alcadas', lotes: 'loja:bpo.lotes', contas: 'loja:bpo.contas' } as const
 const valorTela = <T,>(chave: string, padrao: T): T => (banco.obter('registro_tela', chave)?.valor as T | undefined) ?? padrao
 const consulta = (): Consulta => ({ clientes: banco.ler('cliente'), usuarios: banco.ler('usuario'), integrantes: banco.ler('integrante') })
 const menorOrdem = (t: 'tarefa' | 'conversa' | 'documento') => banco.ler(t).reduce((m, r) => Math.min(m, r.ordem ?? 0), 0) - 1
@@ -256,7 +257,7 @@ const statusDaDecisao = (d: string) => (d === 'recusar' ? 'recusado' : d === 'ed
 
 function atualizarEscritorio(patch: (e: Escritorio) => Partial<Escritorio>) {
   const e = banco.ler('escritorio')[0]
-  if (e) repos.escritorios.atualizar(e.id, patch(e), { ctx: contextoAtual().ator.tipo === 'pessoa' ? undefined : contextoSistema })
+  if (e) repos.escritorios.atualizar(e.id, patch(e))
 }
 
 function ajustarMensagemIntegrante(sessao: string, id: string, patch: Partial<Mensagem>) {
@@ -398,7 +399,9 @@ function aplicar(a: Acao): void {
       const antes = banco.obter('documento', a.id)
       if (!antes) return
       const tela = { ...documentoParaTela(antes), ...a.patch }
-      repos.documentos.atualizar(a.id, { ...documentoParaModelo(tela, visivelAoCliente(tela)), ordem: antes.ordem })
+      // Só o registro de entrega (visto, baixado): ferramenta própria, que o app do cliente pode usar (4.11).
+      const soEntrega = Object.keys(a.patch).every((k) => k === 'entregas')
+      repos.documentos.atualizar(a.id, { ...documentoParaModelo(tela, visivelAoCliente(tela)), ordem: antes.ordem }, soEntrega ? { ferramenta: 'documento.registrar_entrega', texto: `Entrega registrada: ${antes.nome_arquivo}` } : {})
       return
     }
     case 'bpoModulo': {
@@ -407,7 +410,8 @@ function aplicar(a: Acao): void {
       return
     }
     case 'cenario':
-      return atualizarEscritorio((e) => ({ configuracao: { ...e.configuracao, cenario: a.cenario } }))
+      // Controle do painel da demonstração (não é ação de produto): grava como sistema.
+      return comoAtor(contextoSistema, () => atualizarEscritorio((e) => ({ configuracao: { ...e.configuracao, cenario: a.cenario } })))
     case 'custoPorPacote':
       return atualizarEscritorio((e) => ({ configuracao: { ...e.configuracao, custo_por_pacote: a.ligado } }))
     case 'memoria': {
@@ -611,7 +615,7 @@ function LojaInterna({ children, semRotinas }: { children: ReactNode; semRotinas
       bpoModulo: tAssinatura[0]?.modulos.includes('bpo') ?? false,
       cenario: escritorio?.configuracao.cenario ?? 'contabil_bpo',
       custoPorPacote: !!escritorio?.configuracao.custo_por_pacote,
-      memoria: Object.fromEntries(Object.entries(tela).filter(([k]) => !k.startsWith('bpo.'))),
+      memoria: Object.fromEntries(Object.entries(tela).filter(([k]) => !k.startsWith('loja:'))),
       trabalhos,
       assistente,
       bpoAlcadaProposta: (tela[CHAVES_BPO.alcadaProposta] as Estado['bpoAlcadaProposta']) ?? {},

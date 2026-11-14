@@ -1,6 +1,6 @@
 import { AddressBook, Briefcase, ChatsCircle, FolderSimple, GearSix, House, SquaresFour, Timer, Wallet, type Icon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
-import { definirRotaBase, hashParaDestino } from '@/nucleo/rotas'
+import { definirRotaBase, destinoInicial } from '@/nucleo/rotas'
 import { MinhaConta } from '@/ambiente/conta'
 import { FluxosProvider } from '@/ambiente/fluxos'
 import { CentralAvisos, Toasts } from '@/ambiente/interface'
@@ -96,7 +96,7 @@ export function Plataforma(props: Props) {
 
 function PlataformaInterna(props: Props) {
   // Quem abre um link (#/painel/fiscal?cliente=c1) já nasce lá: o endereço vence o padrão.
-  const [doEndereco] = useState(() => (typeof window === 'undefined' ? null : hashParaDestino(window.location.hash)))
+  const [doEndereco] = useState(destinoInicial)
   const { moduloInicial = 'inicio', abaInicial, integranteInicial = 'i-fiscal', clienteInicial = 'c1', comConversa = false, onAlternarModo } = { ...props, ...(doEndereco ? { moduloInicial: doEndereco.modulo, abaInicial: doEndereco.aba, ...(doEndereco.integrante ? { integranteInicial: doEndereco.integrante } : {}), ...(doEndereco.cliente !== undefined ? { clienteInicial: doEndereco.cliente } : {}) } : {}) }
   const { integrante: doTema } = useTema()
   const { usuario, permissoes } = useSessao()
