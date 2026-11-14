@@ -1,8 +1,8 @@
 import type { Tema } from '../tipos'
-import logoCompleta from '@/assets/marcas/condesp/logo-completa.png'
-import logoCompletaBranca from '@/assets/marcas/condesp/logo-completa-branca.png'
-import logotipo from '@/assets/marcas/condesp/logotipo.png'
-import logotipoBranco from '@/assets/marcas/condesp/logotipo-branco.png'
+import logoCompleta from '@/assets/marcas/condesp/logo-completa.svg'
+import logoCompletaBranca from '@/assets/marcas/condesp/logo-completa-branca.svg'
+import logotipo from '@/assets/marcas/condesp/logotipo.svg'
+import logotipoBranco from '@/assets/marcas/condesp/logotipo-branco.svg'
 
 /**
  * Condesp Contabilidade: marca real de um escritório parceiro, usada com a

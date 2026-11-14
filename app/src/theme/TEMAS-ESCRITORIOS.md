@@ -57,14 +57,69 @@ gratuitas (SIL OFL 1.1); foram copiadas para `src/assets/fontes/parceiros/`
 Raio: `.btn { border-radius: 3px }`, `.btn-form { border-radius: 0 }`, e 10 px em
 caixas (mbr-additional.css).
 
-Logos (só PNG; o site não publica SVG):
+Logos: o site só publica PNG; os SVGs do app são **vetorizações** feitas aqui
+(seção "Vetorização da logo da Condesp", abaixo). Todos têm `viewBox` justo, só
+caminhos e degradês, sem imagem embutida nem script.
 
-| Arquivo no app | Origem | Uso |
+| Arquivo no app | Origem (vetorizada de) | Uso |
 | --- | --- | --- |
-| `logo-completa.png` (557×153) | `assets/images/logo-consultiva-557x153.png` | barra aberta e login, claro |
-| `logo-completa-branca.png` (465×128) | `assets/images/logo-consultiva-white-465x128.png` | barra aberta e login, escuro |
-| `logotipo.png` (128×106) | `assets/images/logo-favicon-128x106.png` (o favicon) | barra fechada, claro |
-| `logotipo-branco.png` (132×107) | recorte do símbolo de logo-consultiva-white-465x128.png | barra fechada, escuro |
+| `logo-completa.svg` (552×125) | desenho: a logo da `assets/images/nova-marca-condesp-2021-1776x1452.jpg` (≈ 903 px de largura); cores: `assets/images/logo-consultiva-557x153.png` | barra aberta e login, claro |
+| `logo-completa-branca.svg` | os mesmos caminhos em branco; conferida com `assets/images/logo-consultiva-white-465x128.png` | barra aberta e login, escuro |
+| `logotipo.svg` (125×100) | desenho: o símbolo grande da mesma página da marca (≈ 473 px); cores: `assets/images/logo-favicon-128x106.png` (o favicon) | barra fechada, claro |
+| `logotipo-branco.svg` | os mesmos caminhos em branco; conferido com o recorte do símbolo da logo branca | barra fechada, escuro |
+
+Os PNGs que o app usava antes (`logo-completa.png` 557×153, `logo-completa-branca.png`
+465×128, `logotipo.png` 128×106 e `logotipo-branco.png` 132×107, recorte do símbolo da
+logo branca) saíram do app: ficam só como origem documentada, nos endereços acima.
+
+#### Vetorização da logo da Condesp
+
+Baixado de novo com `curl -sSL` em 14/11/2026. Não há versão maior das logos no site
+(`logo-consultiva.png` e variações sem o tamanho dão 404); a maior fonte é a imagem da
+página da marca, `nova-marca-condesp-2021-1776x1452.jpg`, que traz a logo completa com
+cerca de 1,6 vez o tamanho do PNG e o símbolo sozinho com 3,7 vezes o do favicon.
+
+1. **Camadas por cor.** Na imagem da marca, a cobertura de tinta de cada pixel
+   (255 menos o menor canal, sobre o branco) separada em componentes conexos e cada
+   componente classificado pela cor média e pela posição: azul-marinho do "CONDESP",
+   laranja do "contabilidade consultiva", braço esquerdo e braço direito (azul em
+   degradê), o V laranja (degradê) e a esfera dourada (degradê). A borda
+   antisserrilhada vai com a camada mais próxima.
+2. **Traço.** Cada camada ampliada 4× (bicúbico), limiar de 50% e vetorizada com o
+   **potrace 1.16** (`-t 2 -a 1.0 -O 0.2`; na logo completa, um desfoque de 0,5 px
+   antes do limiar tira o ruído da compressão JPEG das letras). Coordenadas com duas
+   casas e comandos relativos.
+3. **Encaixe.** Escala e posição da imagem da marca para o PNG de referência por
+   mínimos quadrados sobre o alfa (logo completa: escala 0,6115; símbolo: 0,2634).
+4. **Cores, medidas no PNG de referência**, só nos pixels opacos de cada camada:
+   - "CONDESP" `#00304f` e "contabilidade consultiva" `#ff6a13`, cores lisas;
+   - braços: um degradê linear por braço (ângulo e paradas ajustados aos pixels, com
+     4 a 8 paradas, erro de 1,4 a 2,0 níveis em 255);
+   - V: degradê vertical (o PNG é exatamente isso: erro 0);
+   - esfera: degradê horizontal com 8 a 10 paradas (erro de 4 a 5 níveis: são poucos
+     pixels).
+   Na logo completa os braços são um azul-aço mais claro; no favicon, o azul vivo
+   `#0090ff` com o marinho nas pontas. Cada SVG segue o seu PNG.
+5. **Texto.** A fonte das letras é a **Montserrat** (OFL), e ela foi testada: com
+   peso, corpo, espaçamento e posição de cada letra ajustados ao PNG, as letras da
+   logo ainda diferem (o D e o P são uns 7% mais estreitos, provavelmente uma versão
+   antiga da fonte), e a diferença ficou 3 vezes maior que a do traço (15,1 contra
+   4,8). Ficou o traço da própria logo.
+
+**Fidelidade medida**: cada SVG rasterizado no Chromium no tamanho do PNG e comparado
+pixel a pixel. "Diferença" é a média da diferença de cor sobre o branco (0 a 255) na
+área da logo; "IoU" é a sobreposição das formas (alfa acima de 50%).
+
+| SVG | Comparado com | Diferença (sobre branco) | Pixels com diferença > 32 | Diferença do alfa | IoU |
+| --- | --- | --- | --- | --- | --- |
+| `logo-completa.svg` | `logo-consultiva-557x153.png` | 4,8 | 3,4% | 2,7% | 0,976 |
+| `logotipo.svg` | `logo-favicon-128x106.png` | 3,1 | 0,4% | 1,1% | 0,989 |
+| `logotipo-branco.svg` | `logotipo-branco.png` (o recorte antigo) | — | — | 2,7% | 0,979 |
+| `logo-completa-branca.svg` | `logo-consultiva-white-465x128.png` | — | — | 7,6% | 0,911 |
+
+A diferença que sobra fica na borda de um pixel (o antisserrilhado do PNG). A logo
+branca do site é um export menor e mais macio, uns 4% mais "gordo" na borda; o desenho
+é o mesmo (a branca usa os caminhos da colorida).
 
 ### Requinte Contábil
 
@@ -113,6 +168,24 @@ Logos (SVG, só caminhos, sem script):
   `logo_completa_ref_escuro` (`tipos.ts`), e a marca da barra e do login usa a versão
   em negativo no escuro (`logosDoModo` em `components/compostos/marca.tsx`). Os dois
   escritórios publicam a versão branca; os outros temas não mudam.
+- **Troca animada da marca na barra lateral.** Antes, ao recolher a barra, a logo
+  completa do escritório trocava de uma vez pelo logotipo. Agora `MarcaBranca`
+  (`components/compostos/marca.tsx`) empilha as duas imagens, presas à esquerda, e o
+  CSS `.marca-branca` (`index.css`) anima a troca no ritmo da marca da Heild: o
+  movimento principal com a mesma duração e curva do wordmark (0,5 s,
+  `cubic-bezier(0.22, 1, 0.36, 1)`), o salto de volta do I no logotipo
+  (`cubic-bezier(0.34, 1.56, 0.64, 1)`) e as saídas rápidas.
+  - Fechar: a logo completa é cortada da direita até a coluna de 44 px
+    (`clip-path`, 0,5 s), junto com a barra, e some (0,2 s a partir de 80 ms); o
+    logotipo cresce de 60% a 100% no centro da coluna (0,5 s com salto, a partir de
+    120 ms) e aparece (0,2 s a partir de 160 ms).
+  - Abrir: a logo completa aparece (0,16 s) e se revela da esquerda para a direita
+    (0,5 s); o logotipo encolhe e some logo depois (a partir de 40–80 ms), quando a
+    logo completa já está por baixo, para o símbolo não piscar.
+  - Com `prefers-reduced-motion`, a troca é imediata.
+  - Vale para qualquer tema com `logo_completa_ref` (e as versões escuras, por
+    `logosDoModo`); sem `logotipo_ref`, entra a sigla. A marca da Heild não mudou.
+
 - **Neutros no matiz da marca**, como a `areia` do tema de fábrica: uma escala de
   50 a 950 por escritório, gerada em OKLCH com as mesmas luminosidades e croma baixo.
   - Condesp, `nevoaCondesp`: matiz 244 (o azul-marinho da logo); croma 0,016 nos
@@ -190,13 +263,26 @@ Para repetir: `npm run app` e, noutro terminal,
 `node scripts/temas-escritorios.cjs <pasta> http://localhost:5173/` (precisa do
 Playwright; sai com código 1 se alguma medida cair abaixo do mínimo).
 
+A barra aberta e fechada e a animação da marca (capturas em 1440×900, escala 2, um
+vídeo por tema e modo e uma sequência de quadros do canto da marca, e a conferência
+do `prefers-reduced-motion`): `node scripts/temas-logo.cjs <pasta> http://localhost:5173/`.
+
 ## Limitações
 
-- **Logo da Condesp só em PNG.** O site não publica vetor. Na barra (36 px de
-  altura) a logo completa fica com cerca de 131 px de largura e o "contabilidade
-  consultiva" vira letra de 6 px, ilegível; o "CONDESP" e o símbolo se leem bem. O
-  símbolo branco do escuro é um recorte da logo branca (132×107). Para um uso além
-  da demonstração, pedir à Condesp o SVG ou um PNG grande.
+- **Logo da Condesp vetorizada, não original.** O site não publica vetor; os SVGs
+  são traços de imagens de 1,6× (logo completa) e 3,7× (símbolo) o tamanho do PNG,
+  uma delas em JPEG. Em tamanho grande (mais de umas 3 vezes o PNG), os cantos das
+  letras aparecem levemente arredondados e as curvas com pequenas ondulações; na
+  barra e no login não se nota. Os degradês reproduzem os PNGs, mas são ajustes
+  (lineares), não os do arquivo original. Para um uso além da demonstração, pedir à
+  Condesp o arquivo vetorial.
+- **Letra pequena na barra.** Na barra (36 px de altura) a logo completa fica com
+  cerca de 159 px de largura e o "contabilidade consultiva" com letra de uns 6 px;
+  o "CONDESP" e o símbolo se leem bem.
+- **Troca da marca por sobreposição.** A animação não sabe onde fica o símbolo dentro
+  da logo completa: as duas imagens se cruzam presas à esquerda. Na Condesp e na
+  Requinte o símbolo da logo completa fica a 1 ou 2 px do logotipo, e na troca dá
+  para ver os dois sobrepostos por um instante (uns 100 ms ao fechar).
 - **Símbolo azul da Requinte derivado.** O site publica o símbolo solto só em branco
   (`icone-branco.svg`); o azul é o mesmo desenho com o `fill` da logo (`#0098d6`).
 - **Cores ajustadas.** Para passar no AA, o azul primário da Requinte no claro e as

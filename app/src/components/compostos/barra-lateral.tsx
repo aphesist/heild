@@ -60,7 +60,8 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
       {/*
         Marca, solta, sem moldura. Heild: HEILD aberta e HE fechada, com a troca
         animada. Marca branca: a logo completa do escritório aberta e o logotipo
-        dele fechada, sem animação.
+        dele fechada, também com a troca animada (o texto é cortado e o logotipo
+        se centraliza na coluna).
       */}
       <div className="flex h-12 shrink-0 items-center px-[16px]">
         <Marca aberta={aberta} />

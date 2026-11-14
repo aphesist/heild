@@ -7,8 +7,11 @@ import type { ModoCor, Tema } from '@/theme/tipos'
  * - Heild: o wordmark HEILD (os mesmos traçados do <heild-logo> do design system).
  *   Fechado, só o HE; ao abrir, o I nasce como pílula entre as letras e o LD
  *   desliza para o lugar. Ao fechar, os dois recolhem de volta para o HE.
- * - Marca branca: a logo completa do escritório (ou logotipo e nome) aberta e o
- *   logotipo dele fechado, trocados sem animação.
+ * - Marca branca: a logo completa do escritório aberta e o logotipo dele fechado.
+ *   Com as duas imagens, a troca é animada (MarcaBranca): ao fechar, a logo completa
+ *   é cortada da direita para a esquerda até a coluna de 44 px e some, e o logotipo
+ *   cresce no centro da coluna; ao abrir, o contrário. Sem logo completa, logotipo
+ *   e nome, trocados sem animação.
  */
 
 const HE = 'M54.5 163.805H231V14.3047H483.5V61.3047H285.5V163.305H459.5V210.805H285.5V324.805H489V371.805H231V210.805H54.5V371.805H0V14.3047H54.5V163.805Z'
@@ -52,18 +55,34 @@ export function MarcaHeild({ aberta = true, altura = 26, className }: { aberta?:
   )
 }
 
-/** Logotipo da marca branca (imagem ou sigla) num quadrado de 44 px. */
-function Logotipo({ tema, modo }: { tema: Tema; modo: ModoCor }) {
+/** Logotipo da marca branca (imagem ou sigla) num quadrado de 44 px. `decorativo`: quem nomeia é o pai. */
+function Logotipo({ tema, modo, decorativo, className }: { tema: Tema; modo: ModoCor; decorativo?: boolean; className?: string }) {
   const { logotipo } = logosDoModo(tema, modo)
+  const nome = decorativo ? undefined : tema.nome_produto
   return (
-    <span className="flex h-11 w-11 shrink-0 items-center justify-center">
+    <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center', className)} aria-hidden={decorativo || undefined}>
       {logotipo ? (
-        <img src={logotipo} alt={tema.nome_produto} className="max-h-9 w-auto max-w-11 object-contain" />
+        <img src={logotipo} alt={nome ?? ''} className="max-h-9 w-auto max-w-11 object-contain" />
       ) : (
-        <span className="text-foreground text-[26px] leading-none font-semibold tracking-tighter" style={{ fontFamily: 'var(--font-heading)' }} aria-label={tema.nome_produto}>
+        <span className="text-foreground text-[26px] leading-none font-semibold tracking-tighter" style={{ fontFamily: 'var(--font-heading)' }} aria-label={nome}>
           {tema.sigla}
         </span>
       )}
+    </span>
+  )
+}
+
+/**
+ * Marca branca com logo completa: as duas imagens empilhadas, presas à esquerda,
+ * e a troca entre elas animada pelo CSS (`.marca-branca` em index.css), com a
+ * mesma duração e curva da marca da Heild. Serve para qualquer tema com
+ * `logo_completa_ref` (o logotipo pode faltar: entra a sigla).
+ */
+function MarcaBranca({ tema, modo, aberta, completa, className }: { tema: Tema; modo: ModoCor; aberta: boolean; completa: string; className?: string }) {
+  return (
+    <span role="img" aria-label={tema.nome_produto} data-aberta={aberta} className={cn('marca-branca relative flex h-11 shrink-0 items-center', className)}>
+      <img src={completa} alt="" aria-hidden className="marca-branca-completa block max-h-9 w-auto max-w-[200px] object-contain" />
+      <Logotipo tema={tema} modo={modo} decorativo className="marca-branca-logotipo absolute top-0 left-0" />
     </span>
   )
 }
@@ -83,13 +102,7 @@ export function Marca({ aberta = true, className }: { aberta?: boolean; classNam
       </span>
     )
   }
-  if (aberta && completa) {
-    return (
-      <span className={cn('flex h-11 shrink-0 items-center', className)}>
-        <img src={completa} alt={tema.nome_produto} className="max-h-9 w-auto max-w-[200px] object-contain" />
-      </span>
-    )
-  }
+  if (completa) return <MarcaBranca tema={tema} modo={modo} aberta={aberta} completa={completa} className={className} />
   return (
     <span className={cn('flex min-w-0 items-center gap-2.5', className)}>
       <Logotipo tema={tema} modo={modo} />
