@@ -54,6 +54,55 @@ Formato de cada registro:
 
 ### S01 · Início e moldura
 
+#### 2026-11-14 · S01 · Busca global: contrato C7 publicado
+
+- **Decisão:** `src/dados/busca.ts` define `FuncaoBusca = (termo: TermoBusca, escopo: EscopoBusca) => ResultadoBusca[]`. Cada sessão escreve `src/dados/busca-sNN.ts` e acrescenta **uma linha** em `fontesBusca` (`{ sessao, modulo?, buscar }`). O termo chega normalizado (sem acento), com os dígitos (CNPJ/CPF com ou sem pontuação) e os sinônimos ("legal" e "legalização" acham Societário); use `casa(termo, ...campos)` e `trechoDe`. O resultado traz `destino` (`Destino`) e `clienteId`; a S01 corta o que está fora do escopo, agrupa por tipo e troca o cliente com aviso de uma linha. A fonte da S01 já cobre clientes, tarefas, obrigações, documentos, conversas do CRM (com a transcrição dos áudios), mensagens internas (só das conversas em que a pessoa participa), integrantes e telas. Abre por Ctrl/Cmd+K, "/" ou a lupa do cabeçalho (`abrirBusca(termo?)`).
+- **Por quê:** SESSOES.md, C7; o mapa (S01-T09) pede a busca inteira.
+- **Telas e ações:** S01-A70 a A74.
+- **Impacto no plano:** nenhum (implementa 03, 2.2).
+- **Arquivos compartilhados:** nenhum (arquivos novos).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Menu inferior do celular: o que cada destino abre
+
+- **Decisão:** cumprindo o registro da Coordenação, o menu inferior (< 768px) tem Início (vai à Visão geral), **Tarefas** (gaveta "Minha fila": minhas, dos meus setores, atrasadas; iniciar e concluir num toque; abrir leva à ficha, C4), **Pendências** (gaveta com as pendências por cliente: cobrar e marcar recebida), **Chat** (`abrirChat()`, a mesma gaveta com Equipe e Integrantes) e **Mais** (a barra lateral como gaveta). O botão de menu do cabeçalho some no celular (o "Mais" faz o papel) e a marca curta entra no canto; o botão flutuante "Chat" some no celular. Configurações no celular ficam só leitura, com o aviso "edite no computador" (`SoLeituraNoCelular`, em `components/compostos/edite-no-computador.tsx`, que outras telas podem usar).
+- **Por quê:** 03, 2.6; o plano não diz o conteúdo de Tarefas e Pendências **[sem regra no plano]**: a sessão escolheu a fila da pessoa e o widget de pendências, que já são "decisão em um toque".
+- **Telas e ações:** S01-A06, S01-A07.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Seletor de cliente: favoritos, recentes, grupos e Ctrl+J
+
+- **Decisão:** favoritos por conta no escritório (`s01:seletor:favoritos:<usuário>`, até 10); recentes por aparelho no navegador (10); grupos econômicos de exemplo em `src/dados/grupos-s01.ts` até existir a entidade Grupo econômico na migração (o grupo seleciona a empresa principal e o seletor mostra "Grupo X · 2 de 4"); Ctrl/Cmd+J abre o seletor. O seletor só lista o que está no escopo (carteira, quando ligada) e, se o cliente aberto sair do escopo, volta a Todos com aviso. "Agora em X" aparece ao trocar de cliente pela busca.
+- **Por quê:** 03, 3.1 a 3.4. Atalho **[sem regra no plano]**: Ctrl+K é a busca (padrão de mercado); Ctrl+J ficou para o cliente.
+- **Telas e ações:** S01-A75 a A81.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Contadores da barra saem da sessão
+
+- **Decisão:** a barra lateral calcula os contadores por item (`useContadoresModulo`, `src/ambiente/contadores-s01.ts`): Início = cartões esperando a pessoa; Painel = atrasadas dos setores dela; CRM = conversas novas ou não lidas; Timesheet = itens de confirmação. Outra sessão acrescenta um hook no fim de `fontesContador` com o contador do módulo dela. O botão Chat soma não lidas da Equipe (S05) e cartões (`useContadorChat`).
+- **Por quê:** mapa, S01-T01 ("contadores reais por item").
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Gaveta do Chat: Geral com a conversa do Início e integrante na própria gaveta
+
+- **Decisão:** o lado Integrantes da gaveta abre no Geral com a mesma conversa do Início › Assistente para o cliente da tela (o histórico do Assistente passa a ser guardado por pessoa no escritório, `s01:assistente:<usuário>`, e sobrevive ao recarregar); trocar de cliente avisa "agora falando de...". Os ícones à direita abrem o integrante dentro da gaveta (sem ir ao Time) e o "+" cria integrante. "Falar com [integrante]" do cabeçalho da aba abre a gaveta no chat dele (`falarComIntegrante(setor)`, `src/ambiente/chat-moldura.ts`).
+- **Por quê:** 03, 2.5 e 5; 02, ad. 22.
+- **Telas e ações:** S01-A52 a A55.
+- **Arquivos compartilhados:** `Plataforma.tsx`: uma linha (`onFalar` do Painel chama `falarComIntegrante`), fora do "só acrescentar".
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Sino lê a notificação inteira
+
+- **Decisão:** a central de avisos lê a tabela `notificacao` (categoria, prioridade, cliente), não só o formato da loja: filtro por categoria, prioridade escrita ("urgente", "alta"), grupo quando há 3 ou mais da mesma categoria e cliente, descartar (por pessoa, `s01:sino:descartados:<usuário>`, com desfazer) e decisão do cartão de aprovação no próprio sino (é o mesmo cartão do chat do integrante que publicou).
+- **Por quê:** 01, 8; mapa S01-T07.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
 ### S02 · Painel A: anatomia, Societário, Obrigações, Notas
 
 ### S03 · Painel B: Fiscal, Contábil, Consultoria
