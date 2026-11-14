@@ -455,6 +455,195 @@ export interface NotaEmitida extends Registro {
   situacao: string
 }
 
+/* ---------- Timesheet (S06; subplano 05 e Fundações 5.4) ---------- */
+
+/** Origem da sessão (05, 2). Atendimento no CRM é `plataforma` com `conversa_id`. */
+export type OrigemSessao = 'plataforma' | 'core' | 'extensao' | 'artefato' | 'confirmacao'
+export type ConfiancaSessao = 'automatica' | 'estimada' | 'confirmada' | 'contestada'
+export type PacoteTimesheet = 'contabil' | 'bpo' | 'juridico'
+
+export interface ContestacaoSessao {
+  por: Id
+  em: DataHora
+  motivo: 'cliente' | 'atividade' | 'tempo' | 'nao_era_trabalho'
+  /** A correção pedida em texto curto ("Clínica Sorriso Ltda", "14:00–15:10", "descartar"). */
+  correcao: string
+  correcao_dados?: { cliente_id?: Id | null; atividade_id?: string | null; rotulo?: string; inicio?: DataHora; fim?: DataHora }
+  nota?: string
+  status: 'pendente' | 'aceita' | 'recusada'
+  /** Confiança antes da contestação (volta a ela se recusada). */
+  confianca_antes: ConfiancaSessao
+  decidido_por?: Id | null
+  decidido_por_nome?: string
+  decidido_em?: DataHora | null
+  motivo_recusa?: string
+}
+
+/** Sessão de trabalho (Fundações 5.4): pessoa ou integrante, um intervalo com cliente e atividade. Nada se apaga: correção substitui. */
+export interface SessaoTrabalho extends Registro {
+  ator_tipo: 'pessoa' | 'integrante'
+  ator_id: Id
+  usuario_dono_id: Id
+  /** Nulo = interno (reunião, treinamento, administrativo). */
+  cliente_id?: Id | null
+  setor_id: Id
+  /** Nulo só em sessão sem tarefa ainda sem atividade (decisão S06). */
+  atividade_id?: string | null
+  /** Nome curto da atividade ("DCTFWeb"). */
+  rotulo: string
+  tarefa_id?: Id | null
+  conversa_id?: Id | null
+  origem: OrigemSessao
+  inicio: DataHora
+  fim: DataHora
+  confianca: ConfiancaSessao
+  /** Frases das evidências (no produto, ids de evento). */
+  evidencias: string[]
+  pacote: PacoteTimesheet
+  fora_da_jornada?: boolean
+  cortada_por_sessao_id?: Id | null
+  substituida_por?: Id | null
+  contestacao?: ContestacaoSessao | null
+  /** Anomalia detectada (05, 11.3) e o que se fez com ela. */
+  anomalia?: { tipo: 'sessao_longa' | 'dia_longo' | 'sobreposta' | 'sem_evento'; texto: string; revisada_em?: DataHora | null; revisao?: 'corrigida' | 'descartada' | 'mantida' } | null
+  /** Integrante: série separada, nunca soma com horas humanas (05, 7). */
+  custo?: { maquina_seg: number; centavos: number; passos: number; poupadas_min: number } | null
+  /** Aberta agora pela captura (fim avança enquanto há ação). */
+  ao_vivo?: boolean
+}
+
+/** Item da confirmação assistida (05, 5.2): pré-preenchido, em um clique, válido por 7 dias. */
+export interface ItemConfirmacao extends Registro {
+  /** Nulo = arquivo sem pessoa: o Gestor atribui ("quem fez?"). */
+  usuario_id?: Id | null
+  setor_id?: Id | null
+  dia: Data
+  inicio: DataHora
+  fim?: DataHora | null
+  tipo: 'buraco' | 'portal' | 'artefato' | 'conflito' | 'sem_pista' | 'nao_era_esta' | 'sessao_longa' | 'foi_voce' | 'espera'
+  texto: string
+  pista: string
+  sugestao?: { atividade_id?: string | null; rotulo?: string; cliente_id?: Id | null; minutos: number; tarefa_id?: Id | null } | null
+  alternativa_cliente_id?: Id | null
+  /** Sessão que a confirmação substitui (estimada, conflito, não era esta). */
+  sessao_ref_id?: Id | null
+  situacao: 'pendente' | 'marcado' | 'confirmado' | 'descartado' | 'expirado' | 'atribuido'
+  resultado?: string | null
+  sessao_id?: Id | null
+  atribuido_a?: Id | null
+  expira_em: DataHora
+}
+
+/** Ausência (05, ad. 16): entra na capacidade e no substituto. Cancelar arquiva. */
+export interface Ausencia extends Registro {
+  usuario_id: Id
+  tipo: 'ferias' | 'licenca' | 'atestado' | 'folga' | 'treinamento_externo'
+  inicio: Data
+  fim: Data
+  registrada_por: Id
+  substituto_id?: Id | null
+  observacao?: string
+}
+
+/** Custo-hora do escritório (05, A7): um só, com todos os pacotes; cada definição é uma linha nova (vigência mensal). */
+export interface CustoHora extends Registro {
+  competencia: string
+  modo: 'gastos' | 'direto'
+  gastos: { nome: string; valor: number }[]
+  horas_produtivas: number
+  valor: number
+  por_cargo: boolean
+  fatores_cargo?: { cargo: string; fator: number }[]
+  /** Extra opcional, desligado por padrão (05, ad. 19). */
+  por_pacote: boolean
+  valor_bpo?: number | null
+  definido_por: Id
+  definido_por_nome?: string
+}
+
+/** Termo de ciência e extensão de cada pessoa (05, 3.6 e 10.1). */
+export interface VinculoExtensao extends Registro {
+  usuario_id: Id
+  termo_versao?: string | null
+  termo_aceito_em?: DataHora | null
+  navegador?: 'chrome' | 'edge' | null
+  vinculada_em?: DataHora | null
+  pausada_ate?: DataHora | null
+  pausa_rotulo?: string | null
+  pausas: { de: DataHora; ate?: DataHora | null; rotulo: string }[]
+}
+
+/** Pulsos da extensão agregados por pessoa, dia, portal e cliente (o bruto fica 90 dias; 05, 10.5). */
+export interface PulsoPortal extends Registro {
+  usuario_id: Id
+  dia: Data
+  portal: string
+  cliente_id?: Id | null
+  metodo: 'url' | 'titulo' | 'identificacao' | 'nenhum'
+  minutos: number
+  primeiro: DataHora
+  ultimo: DataHora
+  tarefa_id?: Id | null
+}
+
+/** Lista de portais da extensão: dado versionado, desligável por escritório (05, 3.2 e 10.2). */
+export interface PortalExtensao extends Registro {
+  portal: string
+  dominio: string
+  leitura: string
+  atividade_sugerida: string
+  situacao: 'ativo' | 'desligado' | 'pedido'
+  pedido_por?: Id | null
+  motivo?: string
+  versao: number
+}
+
+/** Conector de core (05, 4) com os mapas de equivalência (Fundações 5.6). */
+export interface ConectorCore extends Registro {
+  core: 'Alterdata' | 'Domínio' | 'Questor' | 'Contmatic'
+  modo: string
+  status: 'conectado' | 'importacao' | 'nao_conectado' | 'erro'
+  detalhe: string
+  ultima_leitura?: DataHora | null
+  mapa_departamento: { core: string; setor_id: Id | null }[]
+  mapa_responsavel: { core: string; usuario_id: Id | null }[]
+}
+
+/** Tipo de tarefa do core e a atividade do catálogo (nulo = fila "sem equivalente"). */
+export interface EquivalenciaCore extends Registro {
+  core_sistema: string
+  core_tipo_tarefa: string
+  departamento: string
+  ocorrencias: number
+  sugestoes: string[]
+  atividade_id?: string | null
+  situacao: 'sem_equivalente' | 'equivalente' | 'nao_medido'
+}
+
+/** Duração padrão por atividade (Configuração local, 4.6): catálogo × mediana medida (05, 11.2). */
+export interface DuracaoPadrao extends Registro {
+  atividade_id: string
+  rotulo: string
+  catalogo_min: number
+  mediana_min: number
+  n: number
+  adotada_min?: number | null
+  origem: 'catalogo' | 'calibracao' | 'escritorio'
+}
+
+/** Fechamento mensal por cliente (9.2, Rentabilidade da carteira): a fotografia do mês fechado. */
+export interface FechamentoTimesheet extends Registro {
+  competencia: string
+  cliente_id: Id
+  pacote: PacoteTimesheet
+  horas: number
+  horas_estimadas: number
+  honorario?: number | null
+  variaveis: number
+  custo_hora: number
+  marcos: string[]
+}
+
 /* ---------- Catálogo das tabelas ---------- */
 
 export interface Tabelas {
@@ -488,6 +677,18 @@ export interface Tabelas {
   mensagem_interna: MensagemInterna
   registro_tela: RegistroTela
   nota_emitida: NotaEmitida
+  // S06 · Timesheet
+  sessao_trabalho: SessaoTrabalho
+  item_confirmacao: ItemConfirmacao
+  ausencia: Ausencia
+  custo_hora: CustoHora
+  vinculo_extensao: VinculoExtensao
+  pulso_portal: PulsoPortal
+  portal_extensao: PortalExtensao
+  conector_core: ConectorCore
+  equivalencia_core: EquivalenciaCore
+  duracao_padrao: DuracaoPadrao
+  fechamento_timesheet: FechamentoTimesheet
 }
 
 export type NomeTabela = keyof Tabelas
@@ -523,6 +724,18 @@ export const nomesTabelas: NomeTabela[] = [
   'mensagem_interna',
   'registro_tela',
   'nota_emitida',
+  // S06 · Timesheet
+  'sessao_trabalho',
+  'item_confirmacao',
+  'ausencia',
+  'custo_hora',
+  'vinculo_extensao',
+  'pulso_portal',
+  'portal_extensao',
+  'conector_core',
+  'equivalencia_core',
+  'duracao_padrao',
+  'fechamento_timesheet',
 ]
 
 /** Dados de uma linha para criar: o banco preenche id, escritório e datas. */
