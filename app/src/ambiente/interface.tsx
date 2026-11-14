@@ -1,15 +1,23 @@
-import { BellIcon, CalendarCheckIcon, ChatCircleDotsIcon, CheckIcon, DeviceMobileIcon, EnvelopeSimpleIcon, GearSixIcon, InfoIcon, UserCircleIcon, WarningCircleIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
+import { BellIcon, CalendarCheckIcon, ChatCircleDotsIcon, CheckIcon, DeviceMobileIcon, EnvelopeSimpleIcon, FileTextIcon, GearSixIcon, InfoIcon, ListChecksIcon, ShieldCheckIcon, SparkleIcon, TrayIcon, UserCircleIcon, WarningCircleIcon, WhatsappLogoIcon, XIcon, type Icon } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Avatar } from '@/components/ui/avatar'
-import { useState, type ReactNode } from 'react'
-import { Contador } from '@/components/ui/badge'
+import { useMemo, useState, type ReactNode } from 'react'
+import { Badge, Contador } from '@/components/ui/badge'
+import { Tooltip } from '@/components/ui/tooltip'
+import { BotoesDecisao } from '@/components/compostos/botoes-decisao'
+import * as exemplo from '@/dados/exemplo'
+import type { Notificacao } from '@/nucleo/modelo/entidades'
+import { useTabela } from '@/nucleo/react'
+import { repos } from '@/nucleo/repositorios'
+import type { SetorIntegrante } from '@/theme/tipos'
+import { useEfeitosCartao } from './efeitos'
 import { Button } from '@/components/ui/button'
 import { Orb } from '@/components/ui/orb'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useAparencia } from '@/hooks/useAparencia'
 import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
-import { useLoja, useNavegacao, type AvisoSistema, type Destino, type Toast } from './loja'
+import { useLoja, useNavegacao, usePersistente, type Destino, type Toast } from './loja'
 import { useSessao } from './sessao'
 
 /**
@@ -27,7 +35,7 @@ export function Toasts() {
     loja.fecharToast(t.id)
   }
   return (
-    <div className="pointer-events-none fixed right-4 bottom-4 left-4 z-[60] flex flex-col items-end gap-2 sm:left-auto sm:w-[22.5rem]" aria-live="polite" aria-label="Notificações">
+    <div className="pointer-events-none fixed right-4 bottom-4 left-4 z-[60] max-md:bottom-20 flex flex-col items-end gap-2 sm:left-auto sm:w-[22.5rem]" aria-live="polite" aria-label="Notificações">
       <AnimatePresence initial={false}>
         {loja.estado.toasts.map((t) => (
           <motion.div
@@ -146,31 +154,147 @@ function Notificacao({ t, onAbrir, onFechar }: { t: Toast; onAbrir: () => void; 
   )
 }
 
-const iconeTipo = { conversa: ChatCircleDotsIcon, prazo: CalendarCheckIcon, sistema: InfoIcon, cliente: UserCircleIcon, cartao: BellIcon }
+const iconeCategoria: Record<Notificacao['categoria'], Icon> = {
+  aprovacao: ShieldCheckIcon,
+  tarefa: ListChecksIcon,
+  pendencia: TrayIcon,
+  conversa: ChatCircleDotsIcon,
+  documento: FileTextIcon,
+  prazo: CalendarCheckIcon,
+  agente: SparkleIcon,
+  sistema: InfoIcon,
+  cliente: UserCircleIcon,
+}
+const rotuloCategoria: Record<Notificacao['categoria'], string> = { aprovacao: 'Aprovação', tarefa: 'Tarefa', pendencia: 'Pendência', conversa: 'Conversa', documento: 'Documento', prazo: 'Prazo', agente: 'Time', sistema: 'Sistema', cliente: 'Cliente' }
+const plural: Partial<Record<Notificacao['categoria'], [string, string]>> = { documento: ['documento', 'documentos'], conversa: ['conversa', 'conversas'], tarefa: ['tarefa', 'tarefas'], pendencia: ['pendência', 'pendências'], prazo: ['prazo', 'prazos'] }
 
 /** Avisos visíveis para a conta atual. */
 export function useAvisosDaConta() {
   const loja = useLoja()
   const { usuario } = useSessao()
-  const meus = loja.estado.avisos.filter((a) => a.para.length === 0 || a.para.includes(usuario.id))
+  const [descartados] = usePersistente<string[]>(`s01:sino:descartados:${usuario.id}`, [])
+  const meus = loja.estado.avisos.filter((a) => (a.para.length === 0 || a.para.includes(usuario.id)) && !descartados.includes(a.id))
   return { meus, naoLidos: meus.filter((a) => !a.lidoPor.includes(usuario.id)).length }
 }
 
-/** Sino do cabeçalho (03, 2.2): avisos da conta, com o link para o item. */
+type Linha = { tipo: 'um'; n: Notificacao } | { tipo: 'grupo'; chave: string; itens: Notificacao[] }
+
+/**
+ * Sino do cabeçalho (S01-T07; 01, 8; 03, 2.2): a central de tudo o que o
+ * sistema avisa, com o mesmo registro da Visão geral e do chat.
+ * - filtro todos e não lidos, e por categoria;
+ * - prioridade escrita (urgente, alta), nunca só por cor;
+ * - cartão de aprovação decidido aqui mesmo (vale em todos os lugares);
+ * - três ou mais avisos da mesma categoria e cliente viram um grupo ("5 documentos da Empresa X");
+ * - abrir leva ao item exato e marca lido; descartar tira da lista (e da contagem).
+ */
 export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void }) {
   const loja = useLoja()
   const nav = useNavegacao()
   const { usuario } = useSessao()
   const aparencia = useAparencia()
-  const { meus, naoLidos } = useAvisosDaConta()
+  const efeitos = useEfeitosCartao()
+  const notificacoes = useTabela('notificacao')
+  const clientes = useTabela('cliente')
+  const [descartados, setDescartados] = usePersistente<string[]>(`s01:sino:descartados:${usuario.id}`, [])
   const [aberto, setAberto] = useState(false)
   const [filtro, setFiltro] = useState<'todos' | 'nao_lidos'>('todos')
-  const lista = filtro === 'todos' ? meus : meus.filter((a) => !a.lidoPor.includes(usuario.id))
-  const abrir = (a: AvisoSistema) => {
-    loja.ler(a.id, usuario.id)
+  const [categoria, setCategoria] = useState<Notificacao['categoria'] | 'todas'>('todas')
+  const [grupoAberto, setGrupoAberto] = useState<string | null>(null)
+  const lido = (n: Notificacao) => n.lida_por.includes(usuario.id)
+  const meus = useMemo(
+    () => [...notificacoes].filter((n) => (n.destinatario_ids.length === 0 || n.destinatario_ids.includes(usuario.id)) && !descartados.includes(n.id)).sort((a, b) => (b.ordem ?? 0) - (a.ordem ?? 0) || b.criado_em.localeCompare(a.criado_em)),
+    [notificacoes, usuario.id, descartados],
+  )
+  const naoLidos = meus.filter((n) => !lido(n)).length
+  const categorias = [...new Set(meus.map((n) => n.categoria))]
+  const lista = meus.filter((n) => (filtro === 'todos' || !lido(n)) && (categoria === 'todas' || n.categoria === categoria))
+  const linhas = useMemo<Linha[]>(() => {
+    const porChave = new Map<string, Notificacao[]>()
+    for (const n of lista) if (n.cliente_id && plural[n.categoria]) porChave.set(`${n.categoria}:${n.cliente_id}`, [...(porChave.get(`${n.categoria}:${n.cliente_id}`) ?? []), n])
+    const feitos = new Set<string>()
+    const out: Linha[] = []
+    for (const n of lista) {
+      const chave = n.cliente_id ? `${n.categoria}:${n.cliente_id}` : ''
+      const grupo = chave ? porChave.get(chave) : undefined
+      if (grupo && grupo.length >= 3) {
+        if (!feitos.has(chave)) out.push({ tipo: 'grupo', chave, itens: grupo })
+        feitos.add(chave)
+      } else out.push({ tipo: 'um', n })
+    }
+    return out
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lista.map((n) => n.id).join()])
+
+  const abrir = (n: Notificacao) => {
+    repos.notificacoes.ler(n.id, usuario.id)
     setAberto(false)
-    if (a.destino) nav.irPara(a.destino)
+    if (n.acao) nav.irPara(n.acao as unknown as Destino)
   }
+  const descartar = (ids: string[]) => {
+    ids.forEach((id) => repos.notificacoes.ler(id, usuario.id))
+    setDescartados((xs) => [...xs, ...ids.filter((id) => !xs.includes(id))])
+    loja.toastDesfazer(ids.length === 1 ? 'Aviso descartado.' : `${ids.length} avisos descartados.`, () => setDescartados((xs) => xs.filter((x) => !ids.includes(x))))
+  }
+  /** Cartão pendente no chat do integrante que publicou o aviso (o mesmo registro: decidir aqui vale lá). */
+  const cartaoDe = (n: Notificacao) => {
+    if (n.categoria !== 'aprovacao') return null
+    const destino = n.acao as { integrante?: string } | null
+    const doIntegrante = destino?.integrante ?? exemplo.integrantes.find((i) => i.setor === n.setor_id && i.tipo !== 'criado_pelo_usuario')?.id
+    const msgs = doIntegrante ? (loja.conversasTime[doIntegrante] ?? []) : []
+    for (const m of [...msgs].reverse()) for (const c of m.cartoes ?? []) if (c.tipo === 'aprovacao' && !loja.estado.decisoes[c.id]) return { cartao: c, integrante: doIntegrante! }
+    return null
+  }
+  const nomeCliente = (id?: string | null) => clientes.find((c) => c.id === id)?.nome
+
+  const item = (n: Notificacao, recuo = false) => {
+    const Icone = iconeCategoria[n.categoria]
+    const t = n.setor_id && (n.categoria === 'aprovacao' || n.categoria === 'agente') ? aparencia({ setor: n.setor_id as SetorIntegrante }) : null
+    const pendente = cartaoDe(n)
+    return (
+      <li key={n.id} className={cn('group relative', recuo && 'pl-6')}>
+        <div className="hover:bg-sunken/60 flex w-full items-start gap-3 px-3 py-2.5">
+          <button type="button" onClick={() => abrir(n)} className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 text-left">
+            <span className="mt-0.5 shrink-0">{t ? <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={22} cutucavel={false} extras={false} /> : <Icone className="text-muted-foreground size-5" />}</span>
+            <span className="min-w-0 flex-1">
+              <span className="flex flex-wrap items-center gap-1.5">
+                {n.prioridade === 'urgente' && <Badge variant="erro">urgente</Badge>}
+                {n.prioridade === 'alta' && n.categoria !== 'aprovacao' && <Badge variant="destaque">alta</Badge>}
+                <span className={cn('text-sm', !lido(n) && 'font-medium')}>{n.titulo}</span>
+              </span>
+              {n.corpo && <span className="text-muted-foreground block text-xs">{n.corpo}</span>}
+              <span className="text-muted-foreground block text-[11px]">
+                {rotuloCategoria[n.categoria]} · {n.quando}
+                {n.cliente_id && nomeCliente(n.cliente_id) ? ` · ${nomeCliente(n.cliente_id)}` : ''}
+              </span>
+            </span>
+          </button>
+          {!lido(n) && <span className="bg-destructive mt-1.5 size-2 shrink-0 rounded-full" aria-label="não lido" />}
+          <Tooltip conteudo="Descartar">
+            <button type="button" aria-label={`Descartar: ${n.titulo}`} onClick={() => descartar([n.id])} className="text-muted-foreground hover:text-foreground hover:bg-sunken flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full opacity-0 group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-100">
+              <XIcon className="size-3.5" />
+            </button>
+          </Tooltip>
+        </div>
+        {pendente && (
+          <div className="px-3 pb-3 pl-12">
+            <BotoesDecisao
+              onDecidir={(d) => {
+                if (d === 'editar_e_aprovar') {
+                  setAberto(false)
+                  nav.irPara({ modulo: 'inicio', aba: 'time', integrante: pendente.integrante })
+                  return
+                }
+                efeitos(pendente.cartao.id, d)
+                repos.notificacoes.ler(n.id, usuario.id)
+              }}
+            />
+          </div>
+        )}
+      </li>
+    )
+  }
+
   return (
     <Popover open={aberto} onOpenChange={setAberto}>
       <PopoverTrigger asChild>
@@ -179,7 +303,7 @@ export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void 
           <Contador valor={naoLidos} className="absolute top-1 right-1" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(26rem,calc(100vw-1.5rem))] p-0">
+      <PopoverContent align="end" className="w-[min(28rem,calc(100vw-1.5rem))] p-0">
         <div className="flex items-center gap-2 border-b px-3 py-2.5">
           <span className="flex-1 text-sm font-medium">Avisos</span>
           <div className="bg-sunken flex rounded-full p-0.5 text-xs">
@@ -190,29 +314,49 @@ export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void 
             ))}
           </div>
         </div>
+        {categorias.length > 1 && (
+          <div role="radiogroup" aria-label="Categoria" className="flex gap-1.5 overflow-x-auto border-b px-3 py-2 [scrollbar-width:none]">
+            {(['todas', ...categorias] as const).map((c) => (
+              <button key={c} type="button" role="radio" aria-checked={categoria === c} onClick={() => setCategoria(c)} className={cn('shrink-0 cursor-pointer rounded-full px-2.5 py-1 text-xs transition-colors', categoria === c ? 'bg-foreground text-background' : 'bg-sunken hover:bg-raised')}>
+                {c === 'todas' ? 'Todas' : rotuloCategoria[c]}
+              </button>
+            ))}
+          </div>
+        )}
         <ul className="area-rolagem-dupla max-h-[60vh] overflow-y-auto py-1">
-          {lista.length === 0 && <li className="text-muted-foreground px-4 py-8 text-center text-sm">Nada por aqui.</li>}
-          {lista.map((a) => {
-            const lido = a.lidoPor.includes(usuario.id)
-            const Icone = iconeTipo[a.tipo]
-            const t = a.setor ? aparencia({ setor: a.setor }) : null
+          {linhas.length === 0 && <li className="text-muted-foreground px-4 py-8 text-center text-sm">{filtro === 'nao_lidos' ? 'Tudo lido.' : 'Nada por aqui.'}</li>}
+          {linhas.map((l) => {
+            if (l.tipo === 'um') return item(l.n)
+            const [cat] = l.chave.split(':') as [Notificacao['categoria']]
+            const Icone = iconeCategoria[cat]
+            const aberta = grupoAberto === l.chave
+            const novos = l.itens.filter((n) => !lido(n)).length
             return (
-              <li key={a.id}>
-                <button type="button" onClick={() => abrir(a)} className="hover:bg-sunken/60 flex w-full cursor-pointer items-start gap-3 px-3 py-2.5 text-left">
-                  <span className="mt-0.5 shrink-0">{t && a.tipo === 'cartao' ? <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={22} cutucavel={false} extras={false} /> : <Icone className="text-muted-foreground size-5" />}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className={cn('block text-sm', !lido && 'font-medium')}>{a.titulo}</span>
-                    {a.detalhe && <span className="text-muted-foreground block text-xs">{a.detalhe}</span>}
-                    <span className="text-muted-foreground block text-[11px]">{a.quando}</span>
-                  </span>
-                  {!lido && <span className="bg-destructive mt-1.5 size-2 shrink-0 rounded-full" aria-label="não lido" />}
-                </button>
+              <li key={l.chave}>
+                <div className="hover:bg-sunken/60 flex w-full items-start gap-3 px-3 py-2.5">
+                  <button type="button" aria-expanded={aberta} onClick={() => setGrupoAberto(aberta ? null : l.chave)} className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 text-left">
+                    <Icone className="text-muted-foreground mt-0.5 size-5 shrink-0" />
+                    <span className="min-w-0 flex-1">
+                      <span className={cn('block text-sm', novos > 0 && 'font-medium')}>
+                        {l.itens.length} {plural[cat]![1]} de {nomeCliente(l.itens[0].cliente_id) ?? 'um cliente'}
+                      </span>
+                      <span className="text-muted-foreground block text-xs">{aberta ? 'toque para recolher' : l.itens.slice(0, 2).map((n) => n.titulo).join(' · ')}</span>
+                    </span>
+                  </button>
+                  {novos > 0 && <span className="bg-destructive mt-1.5 size-2 shrink-0 rounded-full" aria-label={`${novos} não lidos`} />}
+                  <Tooltip conteudo="Descartar o grupo">
+                    <button type="button" aria-label="Descartar o grupo" onClick={() => descartar(l.itens.map((n) => n.id))} className="text-muted-foreground hover:text-foreground hover:bg-sunken flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full">
+                      <XIcon className="size-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
+                {aberta && <ul>{l.itens.map((n) => item(n, true))}</ul>}
               </li>
             )
           })}
         </ul>
         <div className="flex items-center gap-1 border-t px-2 py-1.5">
-          <Button size="sm" variant="ghost" className="rounded-full" disabled={!naoLidos} onClick={() => loja.lerTodos(usuario.id)}>
+          <Button size="sm" variant="ghost" className="rounded-full" disabled={!naoLidos} onClick={() => repos.notificacoes.lerTodas(usuario.id, meus.map((n) => n.id))}>
             <CheckIcon /> Marcar todos como lidos
           </Button>
           {onPreferencias && (

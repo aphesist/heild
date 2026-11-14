@@ -9,6 +9,7 @@ import { DocumentosProvider } from '@/ambiente/documentos'
 import { integranteAoVivo } from '@/ambiente/integrante-vivo'
 import { abrirSuporte, SuporteProvider } from '@/ambiente/suporte'
 import { ModoEspera, SeloTempo, useRegistroTempo } from '@/ambiente/espera'
+import { falarComIntegrante } from '@/ambiente/chat-moldura'
 import { papelExibido, setoresContabeis, useSessao, useSessaoBruta } from '@/ambiente/sessao'
 import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
 import { BarraLateral } from '@/components/compostos/barra-lateral'
@@ -232,7 +233,7 @@ function PlataformaInterna(props: Props) {
   // Telas que ainda leem os dados fixos de src/dados mostram os do escritório completo; nos outros
   // escritórios de exemplo, avisam em vez de misturar dados de outro escritório (ver docs/wireframe/STATUS.md).
   const { escritorio: deExemplo } = useBanco()
-  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
+  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
 
   return (
     <NavegacaoProvider value={{ irPara: navegar }}>
@@ -349,7 +350,7 @@ function PlataformaInterna(props: Props) {
                 clientesNaCarteira={loja.clientes.length}
                 tarefas={loja.tarefas.filter((t) => usuario.papel === 'administrador' || permissoes.setores.includes(t.setor))}
                 integrantes={integrantes}
-                onFalar={abrirIntegrante}
+                onFalar={(s) => falarComIntegrante(s)}
               />
               <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} />
             </div>
@@ -416,7 +417,7 @@ function PlataformaInterna(props: Props) {
           {tempo.espera && <ModoEspera desde={tempo.espera.desde} onde={tempo.espera.onde} onRetomar={tempo.retomar} />}
         </Moldura>
         <Toasts />
-        {minhaConta && <MinhaConta onFechar={() => setMinhaConta(false)} />}
+        {minhaConta && <MinhaConta onFechar={() => setMinhaConta(false)} onAlternarModo={onAlternarModo} />}
         {/* S09: implantação do escritório e Raio-X do Drive (telas cheias). */}
         <TelasCheiasS09 />
         </SuporteProvider>
