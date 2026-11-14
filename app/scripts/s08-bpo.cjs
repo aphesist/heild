@@ -63,8 +63,10 @@ const { chromium } = require('playwright')
     await d.getByRole('button', { name: acao, exact: true }).click()
     await espera(500)
   }
+  // O app guarda a sessão da pessoa (S10): para trocar de pessoa, sai dela antes de abrir a entrada.
   const appComo = async (nome) => {
     await p.goto(`${base}#/app`)
+    await p.evaluate(() => window.localStorage.removeItem('ui-lab:s10:sessao'))
     await p.reload()
     await pronto()
     await p.getByRole('button', { name: new RegExp(`^${nome}`) }).first().click()
