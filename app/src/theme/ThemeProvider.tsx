@@ -8,6 +8,8 @@ interface ContextoTema {
   modo: ModoCor
   /** Nome e avatar do integrante de um setor, vindos do tema. */
   integrante: (setor: SetorIntegrante) => { nome: string; cor: string; corOlhos?: string }
+  /** Troca o tema do escritório sem recarregar a página (Configurações › Tema). Ausente fora do app. */
+  definirTema?: (id: string) => void
 }
 
 const Contexto = createContext<ContextoTema | null>(null)
@@ -15,6 +17,8 @@ const Contexto = createContext<ContextoTema | null>(null)
 interface Props {
   tema?: Tema
   modo?: ModoCor
+  /** Quem guarda a escolha do tema (no app, a preferência do escritório). */
+  onTema?: (id: string) => void
   children: ReactNode
 }
 
@@ -22,7 +26,7 @@ interface Props {
  * Aplica o tema em <html> (e não num contêiner) para que portais — modais,
  * gavetas, tooltips — herdem as mesmas variáveis.
  */
-export function ThemeProvider({ tema = temaFabrica, modo = 'claro', children }: Props) {
+export function ThemeProvider({ tema = temaFabrica, modo = 'claro', onTema, children }: Props) {
   const vars = useMemo(() => variaveisCss(tema, modo), [tema, modo])
 
   useLayoutEffect(() => {
@@ -37,6 +41,7 @@ export function ThemeProvider({ tema = temaFabrica, modo = 'claro', children }: 
     () => ({
       tema,
       modo,
+      definirTema: onTema,
       integrante: (setor) => {
         const i = tema.integrantes_padrao[setor]
         const a = i?.avatar
@@ -56,7 +61,7 @@ export function ThemeProvider({ tema = temaFabrica, modo = 'claro', children }: 
         }
       },
     }),
-    [tema, modo],
+    [tema, modo, onTema],
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

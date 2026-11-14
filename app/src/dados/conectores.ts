@@ -152,7 +152,7 @@ export const catalogoConectores: DefConector[] = [
   { id: 'certidoes', nome: 'Certidões', familia: 'federal', api: 'API-13', modo: 'robo', para: 'Federais, estaduais, municipais, CNDT e CRF', pago: true },
   { id: 'sefaz_sp', nome: 'SEFAZ-SP', familia: 'estadual', api: 'API-14', modo: 'certificado', para: 'GIA, ICMS, Sintegra e notas estaduais', pago: false },
   { id: 'dte_estadual', nome: 'DTE estaduais (agregador)', familia: 'estadual', api: 'API-14', modo: 'token', para: 'Caixas postais estaduais, DEC, JUCESP, Bombeiros', pago: true },
-  { id: 'prefeitura_sp', nome: 'Prefeitura de São Paulo', familia: 'municipal', api: 'API-07', modo: 'certificado', para: 'ISS, NFS-e municipal e livro fiscal', pago: false },
+  { id: 'prefeitura_sp', nome: 'Prefeitura de São Paulo', familia: 'municipal', api: 'API-07', modo: 'robo', para: 'ISS, NFS-e municipal e livro fiscal', pago: false },
   { id: 'prefeituras', nome: 'Outras prefeituras (robô)', familia: 'municipal', api: 'API-07', modo: 'robo', para: 'Guias de ISS e notas das prefeituras sem API', pago: false },
   { id: 'alterdata', nome: 'Alterdata (ePlugin)', familia: 'core', api: 'API-18', modo: 'token', para: 'Lançamentos, folha e cadastro de clientes', pago: false },
   { id: 'dominio', nome: 'Domínio / Onvio', familia: 'core', api: 'API-18', modo: 'oauth', para: 'Lançamentos, folha e cadastro de clientes', pago: false },
