@@ -130,6 +130,26 @@ export const ferramentas: Ferramenta[] = [
   f('tema.publicar', 'plataforma', 'executar', 'geral', { papel_minimo: 'administrador' }),
   f('assinatura.alterar', 'plataforma', 'executar', 'geral', { papel_minimo: 'administrador' }),
   f('implantacao.conduzir', 'plataforma', 'executar', 'geral', { papel_minimo: 'administrador' }),
+  // S02 · Painel A (anatomia, Societário, Obrigações, Notas)
+  f('obrigacao.gerar_calendario', 'painel', 'executar', 'alvo', { papel_minimo: 'gestor', gestao: true }),
+  f('obrigacao.reprogramar_interno', 'painel', 'executar', 'alvo'),
+  f('obrigacao.prorrogar', 'painel', 'executar', 'alvo', { papel_minimo: 'gestor', gestao: true }),
+  f('obrigacao.anexar_recibo', 'painel', 'executar', 'alvo'),
+  f('obrigacao.marcar_eventual', 'painel', 'executar', 'alvo'),
+  f('obrigacao.editar_regra_uf', 'painel', 'executar', 'fiscal'),
+  f('cliente.versionar_perfil', 'painel', 'executar', 'societario', { exige_aprovacao: 'sempre' }),
+  f('cliente.corrigir_perfil', 'painel', 'executar', 'societario'),
+  f('cliente.servico_extra', 'painel', 'executar', 'geral', { papel_minimo: 'gestor' }),
+  f('app.convidar', 'painel', 'executar', 'societario'),
+  f('app.revogar_acesso', 'painel', 'executar', 'geral', { papel_minimo: 'gestor' }),
+  f('documento.classificar', 'painel', 'executar', 'alvo'),
+  f('legalizacao.abrir_processo', 'painel', 'executar', 'societario'),
+  f('credencial.registrar', 'painel', 'executar', 'societario'),
+  f('contrato.enviar_assinatura', 'painel', 'executar', 'societario', { irreversivel: true, exige_aprovacao: 'sempre' }),
+  f('notas.forcar_captura', 'painel', 'executar', 'notas'),
+  f('notas.configurar_captura', 'painel', 'executar', 'notas'),
+  f('notas.manifestar', 'painel', 'executar', 'notas', { irreversivel: true, exige_aprovacao: 'se_integrante' }),
+  f('painel.acao_lote', 'painel', 'executar', 'alvo', { papel_minimo: 'gestor', gestao: true }),
 ]
 
 const indice = new Map(ferramentas.map((x) => [x.nome, x]))

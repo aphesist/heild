@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { efeitoCartaoS02 } from './agente-s02'
 import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
 import { efeitoS09 } from './efeitos-s09'
 
@@ -17,6 +18,8 @@ export function useEfeitosCartao() {
 
   return (cartao: string, decisao: string) => {
     loja.decidir(cartao, decisao)
+    // S02: cartões dos integrantes do Painel A executam a ação guardada no cartão e aprendem com a decisão.
+    if (cartao.startsWith('s02-')) return efeitoCartaoS02(cartao, decisao, { loja, quem: usuario.nome, usuarioId: usuario.id })
     // S04: cartões da S04 (id s04-...) têm o efeito registrado pela tela que os criou.
     if (cartao.startsWith('s04-') && aplicarEfeitoS04(cartao, decisao, { loja, usuario, conversaDe })) return
     // S09: cartões do Raio-X, da implantação e do envio de documentos (chaves s09-*).
