@@ -4,6 +4,7 @@ import { useFalarComIntegrante } from '@/ambiente/chat-moldura'
 import { useContadorChat } from '@/ambiente/contadores-s01'
 import { useClienteDaRota } from '@/ambiente/contexto-cliente'
 import { useLoja, usePersistente } from '@/ambiente/loja'
+import { useSessao } from '@/ambiente/sessao'
 import { NovoIntegrante } from '@/components/compostos/novo-integrante'
 import { ProgressoTrabalho } from '@/components/compostos/progresso-trabalho'
 import { Orb } from '@/components/ui/orb'
@@ -247,9 +248,12 @@ function ChatIntegranteGaveta({ integrante, nomeUsuario, onVoltar, onAbrirIntegr
 
 /** "+" da gaveta: o mesmo fluxo de novo integrante do Time; o criado entra na lista e abre o chat dele. */
 function NovoIntegranteGaveta({ aberto, onFechar, onAtivar }: { aberto: boolean; onFechar: () => void; onAtivar: (id: string) => void }) {
-  const [, setNovos] = usePersistente<Integrante[]>('time.novos', [])
+  const [novos, setNovos] = usePersistente<Integrante[]>('time.novos', [])
+  const { contas } = useSessao()
   return (
     <NovoIntegrante
+      criados={novos.length}
+      pessoas={contas.map((c) => c.nome)}
       aberto={aberto}
       onFechar={onFechar}
       onAtivar={(novo) => {
