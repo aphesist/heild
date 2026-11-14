@@ -231,7 +231,7 @@ function PlataformaInterna(props: Props) {
   // Telas que ainda leem os dados fixos de src/dados mostram os do escritório completo; nos outros
   // escritórios de exemplo, avisam em vez de misturar dados de outro escritório (ver docs/wireframe/STATUS.md).
   const { escritorio: deExemplo } = useBanco()
-  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
+  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
 
   return (
     <NavegacaoProvider value={{ irPara: navegar }}>
