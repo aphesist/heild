@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, ArrowsOutIcon, BellSlashIcon, BellIcon, InfoIcon, PictureInPictureIcon, PushPinIcon, SparkleIcon, XIcon, EyeIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
-import { resumoDoFio, useAcoesInternas, useDigitando, useLidas, useLidasDeTodos, usePreferenciasInternas, usePresenca, useRotuloConversa } from '@/ambiente/interna'
+import { resumoDoFio, useResumoDaManha, useAcoesInternas, useDigitando, useLidas, useLidasDeTodos, usePreferenciasInternas, usePresenca, useRotuloConversa } from '@/ambiente/interna'
 import { useSessao } from '@/ambiente/sessao'
 import { SeloDemonstracao, usePode } from '@/components/kit'
 import { Button } from '@/components/ui/button'
@@ -60,6 +60,14 @@ export function PainelConversa({ conversa, compacto, destaque, investigacao, onV
   useEffect(() => {
     if (ultima && !investigacao) marcarLida(conversa.id, ultima)
   }, [ultima, conversa.id, marcarLida, investigacao])
+
+  // Resumo da manhã ligado (gatilho do escritório): o primeiro a abrir o canal no dia vê o integrante postar o de hoje.
+  const [resumoManha] = useResumoDaManha()
+  const temResumoHoje = mensagens.some((m) => extrasDe(m).resumo === 'manha' && m.criado_em.slice(0, 10) === new Date().toISOString().slice(0, 10))
+  useEffect(() => {
+    if (conversa.tipo === 'canal_setor' && conversa.setor_id && resumoManha[conversa.id] && !temResumoHoje && !investigacao) acoes.resumoDaManha(conversa.id, conversa.setor_id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversa.id, resumoManha[conversa.id], temResumoHoje])
 
   // "Visto por" em grupos e canais (11, 3): na última mensagem minha, quem já leu até ela.
   const minhaUltima = [...raizes].reverse().find((m) => m.autor_id === usuario.id)

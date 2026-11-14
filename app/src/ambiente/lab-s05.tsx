@@ -43,7 +43,7 @@ export function LabS05({ onFeito }: { onFeito: () => void }) {
       <NewspaperIcon key="b" />,
       'Resumo da manhã no canal do Fiscal',
       () => {
-        acoes.resumoDaManha('ci-fiscal', 'fiscal')
+        acoes.resumoDaManha('ci-fiscal', 'fiscal', true)
         loja.toast('O integrante do Fiscal está escrevendo o resumo da manhã.', { modulo: 'interna', aba: 'conversas', conversaInterna: 'ci-fiscal' }, 'Ver')
       },
     ],

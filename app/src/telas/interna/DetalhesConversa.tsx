@@ -115,7 +115,6 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
               onMudar={(v) => {
                 setResumoManha((x) => ({ ...x, [conversa.id]: v }))
                 if (v && conversa.setor_id) {
-                  acoes.resumoDaManha(conversa.id, conversa.setor_id)
                   loja.toast('Resumo da manhã ligado: o integrante posta todo dia às 8h. O de hoje sai agora.')
                 }
               }}

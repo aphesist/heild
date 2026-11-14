@@ -244,6 +244,8 @@ export function resumoDoFio(raiz: MensagemInterna, respostas: MensagemInterna[],
 
 /* ---------- Escritas ---------- */
 
+const resumosDoDia = new Set<string>()
+
 /** Linha pelo id ou erro com frase pronta (o `exigir` do repositório é interno a ele). */
 function exigir<T>(r: { obter: (id: Id) => T | undefined }, id: Id): T {
   const l = r.obter(id)
@@ -494,7 +496,11 @@ export function useAcoesInternas() {
       },
 
       /** Resumo da manhã agora (o gatilho ligado posta sozinho uma vez por dia). */
-      resumoDaManha(conversaId: Id, setor: string) {
+      resumoDaManha(conversaId: Id, setor: string, forcar = false) {
+        // Um resumo por canal e por dia (o gatilho dispara uma vez); o painel Demonstração força.
+        const chave = `${conversaId}:${new Date().toISOString().slice(0, 10)}`
+        if (!forcar && resumosDoDia.has(chave)) return
+        resumosDoDia.add(chave)
         integranteResponde(conversaId, setor, () => ({ corpo: resumoDaManha(setor), extras: { resumo: 'manha' } }), null, 1200)
       },
 

@@ -355,7 +355,7 @@ function Conversa({
   const [dialogo, setDialogo] = useState<'agendar' | 'mover' | 'autorizacao' | 'ligar' | null>(null)
   const [cfgAtend] = useCfgAtendimento()
   const tDocs = useTabela('documento')
-  const { usuario: usuarioConv, permissoes: permConv } = useSessao()
+  const { usuario: usuarioConv, permissoes: permConv, contas: contasConv } = useSessao()
   const podeGerirConv = usuarioConv.papel === 'administrador' || permConv.gere.length > 0
   const docsDoCliente = tDocs.filter((d) => d.cliente_id === c.clienteId && !d.arquivado_em).slice(0, 5)
   const docOutraEmpresa = tDocs.find((d) => d.cliente_id && d.cliente_id !== c.clienteId)
@@ -423,6 +423,9 @@ function Conversa({
     const id = `e${Date.now()}`
     if (modo === 'nota') {
       onAtualizar((x) => ({ ...x, itens: [...x.itens, { tipo: 'nota', id, autor: eu, hora: hora(), texto: t }] }))
+      // @menção na nota (04, 10.2): avisa a pessoa com o trecho; quem é de outro setor recebe o trecho, não o acesso.
+      for (const u of contasConv.filter((u) => u.situacao === 'ativo' && u.nome !== eu && t.includes(`@${u.nome.split(' ')[0]}`)))
+        lojaConv.avisar({ para: [u.id], titulo: `${eu} mencionou você numa nota interna`, detalhe: `${c.cliente ?? 'Lead'}: ${t.slice(0, 120)}`, tipo: 'conversa', destino: { modulo: 'crm', aba: 'conversas', conversa: c.id } })
     } else {
       onAtualizar((x) => ({
         ...x,
