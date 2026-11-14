@@ -1,6 +1,9 @@
 // S02: obrigações com setor dono (C2) e o calendário de outubro/2026 já gerado.
 import { hashCurto, planejarCalendario, type PerfilParaObrigacoes } from '@/dados/obrigacoes-setor'
+import { societarioDe } from '@/dados/painel-abas'
 import type { Fotografia, Obrigacao, Tabelas, Tarefa } from '../modelo/entidades'
+
+const isoDe = (ddmmaaaa: string) => ddmmaaaa.split('/').reverse().join('-')
 
 type Sem<T> = Omit<T, 'escritorio_id' | 'criado_em' | 'atualizado_em'>
 type Add = <K extends keyof Tabelas>(tabela: K, linha: Omit<Tabelas[K], 'escritorio_id' | 'criado_em' | 'atualizado_em'> & { criado_em?: string }) => Tabelas[K]
@@ -99,6 +102,20 @@ const jaEram: Record<string, { regra: string; legal: string }> = {
 /** Acrescenta as regras, liga as tarefas antigas e gera o calendário de 10/2026 do Andrade. */
 export function sementeS02(foto: Fotografia, add: Add) {
   obrigacoesS02().forEach((o) => add('obrigacao', o))
+  // Linha de versões do perfil (SOC-034) com o histórico dos dados de exemplo: a vigente ganha a data e o motivo dela.
+  for (const c of foto.cliente) {
+    const hist = societarioDe(c.id).versoes
+    const vigente = foto.versao_perfil.find((v) => v.id === `vp-${c.id}`)
+    if (!vigente || !perfisAndrade[c.id]) continue
+    const atual = hist.find((h) => h.atual)
+    if (atual) Object.assign(vigente, { vigente_de: isoDe(atual.desde), motivo_versao: atual.motivo })
+    hist
+      .filter((h) => !h.atual)
+      .forEach((h, i, xs) => {
+        const ate = i === 0 ? (atual ? isoDe(atual.desde) : '2026-01-01') : isoDe(xs[i - 1].desde)
+        add('versao_perfil', { ...vigente, id: `vp-${c.id}-h${i}`, vigente_de: isoDe(h.desde), vigente_ate: ate, motivo_versao: h.motivo, fonte: i === xs.length - 1 ? 'receita_federal' : 'manual' })
+      })
+  }
   for (const t of foto.tarefa) {
     const j = jaEram[t.id]
     if (!j) continue

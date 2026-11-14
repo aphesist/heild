@@ -16,7 +16,7 @@ const a = (lista: string): ItemGrade[] =>
     })
 
 export const padroes: Record<string, ItemGrade[]> = {
-  societario: a('ciclo:L pendencias:M certificados:M ficha:G pessoas:G acoes:G contrato:M acessos:M processos:G obrigacoes-setor:G documentos:M tarefas:G relatorios:M'),
+  societario: a('ciclo:L pendencias:M certificados:M ficha:G pessoas:G acoes:G contrato:G processos:G comunicacoes:G acessos:XL entrega:M app:G obrigacoes-setor:G repetidos:M documentos:M tarefas:G relatorios:M'),
   obrigacoes: a('faixas:L pendencias:M calendario:XL riscos:M prerequisitos:G eventuais:G comprovacao:M prorrogacoes:G acoes:G tarefas:G documentos:M relatorios:M'),
   notas: a('fluxos:L manifestacao:G configuracao:G tributaria:G completude:G eventos:G pendencias:M acoes:G atendimento:G lotes:G entrada-saida:G obrigacoes-setor:G tarefas:G documentos:M relatorios:M'),
   'fiscal-simples': a('simples:M caixas:G pendencias:G guias:XL situacao:M certidoes:M acoes:G tarefas:G documentos:G relatorios:M'),
@@ -25,7 +25,7 @@ export const padroes: Record<string, ItemGrade[]> = {
   contabil: a('fechamento:L deve-chegar:G pendencias:M documentos:M classificacao:XL conciliacao:G acoes:G tarefas:G relatorios:G'),
   consultoria: a('perguntas:XL vigilancia:G pareceres:G acoes:G simulacoes:M tarefas:G documentos:M relatorios:M'),
   gestao: a('produtividade:G ia:G equipe:M permissoes:XL migracao:XL acoes:G tarefas:G relatorios:M'),
-  'societario-carteira': a('carteira-certificados:XL carteira-estados:G obrigacoes-setor:G acoes:G tarefas:G relatorios:G'),
+  'societario-carteira': a('carteira-certificados:XL carteira-estados:G carteira-acessos:XL carteira-licencas:G obrigacoes-setor:G acoes:G tarefas:G relatorios:G'),
   'obrigacoes-carteira': a('faixas:L riscos:M carteira-semana:XL prerequisitos:G prorrogacoes:G eventuais:G acoes:G tarefas:G relatorios:M'),
   'notas-carteira': a('carteira-captura:XL manifestacao:M carteira-eventos:G obrigacoes-setor:G acoes:G tarefas:XL relatorios:M'),
   'fiscal-carteira': a('guias:M caixas:G situacao:M certidoes:M acoes:G tarefas:XL relatorios:M'),
