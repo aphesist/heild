@@ -54,7 +54,187 @@ Formato de cada registro:
 
 ### S01 · Início e moldura
 
+#### 2026-11-14 · S01 · Busca global: contrato C7 publicado
+
+- **Decisão:** `src/dados/busca.ts` define `FuncaoBusca = (termo: TermoBusca, escopo: EscopoBusca) => ResultadoBusca[]`. Cada sessão escreve `src/dados/busca-sNN.ts` e acrescenta **uma linha** em `fontesBusca` (`{ sessao, modulo?, buscar }`). O termo chega normalizado (sem acento), com os dígitos (CNPJ/CPF com ou sem pontuação) e os sinônimos ("legal" e "legalização" acham Societário); use `casa(termo, ...campos)` e `trechoDe`. O resultado traz `destino` (`Destino`) e `clienteId`; a S01 corta o que está fora do escopo, agrupa por tipo e troca o cliente com aviso de uma linha. A fonte da S01 já cobre clientes, tarefas, obrigações, documentos, conversas do CRM (com a transcrição dos áudios), mensagens internas (só das conversas em que a pessoa participa), integrantes e telas. Abre por Ctrl/Cmd+K, "/" ou a lupa do cabeçalho (`abrirBusca(termo?)`).
+- **Por quê:** SESSOES.md, C7; o mapa (S01-T09) pede a busca inteira.
+- **Telas e ações:** S01-A70 a A74.
+- **Impacto no plano:** nenhum (implementa 03, 2.2).
+- **Arquivos compartilhados:** nenhum (arquivos novos).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Menu inferior do celular: o que cada destino abre
+
+- **Decisão:** cumprindo o registro da Coordenação, o menu inferior (< 768px) tem Início (vai à Visão geral), **Tarefas** (gaveta com a `TarefasTela` da S04, a pedido dela: lista, por responsável, calendário e revisão; abrir leva à ficha, C4), **Pendências** (gaveta com as pendências por cliente: cobrar e marcar recebida), **Chat** (`abrirChat()`, a mesma gaveta com Equipe e Integrantes) e **Mais** (a barra lateral como gaveta). O botão de menu do cabeçalho some no celular (o "Mais" faz o papel) e a marca curta entra no canto; o botão flutuante "Chat" some no celular. Configurações no celular ficam só leitura, com o aviso "edite no computador" (`SoLeituraNoCelular`, em `components/compostos/edite-no-computador.tsx`, que outras telas podem usar).
+- **Por quê:** 03, 2.6; o plano não diz o conteúdo de Tarefas e Pendências **[sem regra no plano]**: a sessão escolheu a fila da pessoa e o widget de pendências, que já são "decisão em um toque".
+- **Telas e ações:** S01-A06, S01-A07.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Seletor de cliente: favoritos, recentes, grupos e Ctrl+J
+
+- **Decisão:** favoritos por conta no escritório (`s01:seletor:favoritos:<usuário>`, até 10); recentes por aparelho no navegador (10); grupos econômicos de exemplo em `src/dados/grupos-s01.ts` até existir a entidade Grupo econômico na migração (o grupo seleciona a empresa principal e o seletor mostra "Grupo X · 2 de 4"); Ctrl/Cmd+J abre o seletor. O seletor só lista o que está no escopo (carteira, quando ligada) e, se o cliente aberto sair do escopo, volta a Todos com aviso. "Agora em X" aparece ao trocar de cliente pela busca.
+- **Por quê:** 03, 3.1 a 3.4. Atalho **[sem regra no plano]**: Ctrl+K é a busca (padrão de mercado); Ctrl+J ficou para o cliente.
+- **Telas e ações:** S01-A75 a A81.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Contadores da barra saem da sessão
+
+- **Decisão:** a barra lateral calcula os contadores por item (`useContadoresModulo`, `src/ambiente/contadores-s01.ts`): Início = cartões esperando a pessoa; Painel = atrasadas dos setores dela; CRM = conversas novas ou não lidas; Timesheet = itens de confirmação. Outra sessão acrescenta um hook no fim de `fontesContador` com o contador do módulo dela. O botão Chat soma não lidas da Equipe (S05) e cartões (`useContadorChat`).
+- **Por quê:** mapa, S01-T01 ("contadores reais por item").
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Gaveta do Chat: Geral com a conversa do Início e integrante na própria gaveta
+
+- **Decisão:** o lado Integrantes da gaveta abre no Geral com a mesma conversa do Início › Assistente para o cliente da tela (o histórico do Assistente passa a ser guardado por pessoa no escritório, `s01:assistente:<usuário>`, e sobrevive ao recarregar); trocar de cliente avisa "agora falando de...". Os ícones à direita abrem o integrante dentro da gaveta (sem ir ao Time) e o "+" cria integrante. "Falar com [integrante]" do cabeçalho da aba abre a gaveta no chat dele (`falarComIntegrante(setor)`, `src/ambiente/chat-moldura.ts`).
+- **Por quê:** 03, 2.5 e 5; 02, ad. 22.
+- **Telas e ações:** S01-A52 a A55.
+- **Arquivos compartilhados:** `Plataforma.tsx`: uma linha (`onFalar` do Painel chama `falarComIntegrante`), fora do "só acrescentar".
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Sino lê a notificação inteira
+
+- **Decisão:** a central de avisos lê a tabela `notificacao` (categoria, prioridade, cliente), não só o formato da loja: filtro por categoria, prioridade escrita ("urgente", "alta"), grupo quando há 3 ou mais da mesma categoria e cliente, descartar (por pessoa, `s01:sino:descartados:<usuário>`, com desfazer) e decisão do cartão de aprovação no próprio sino (é o mesmo cartão do chat do integrante que publicou).
+- **Por quê:** 01, 8; mapa S01-T07.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Roteador do Geral e cartões novos
+
+- **Decisão:** o Geral (Início e gaveta do Chat, `src/telas/inicio/roteador.ts`) decide nesta ordem: pedido ao time; pergunta sobre o sistema → assistente de ajuda (cartão `ajuda`, sem gastar limite); "me avise quando..." → cartão `regra` (sim liga um job do integrante, editar ajusta a regra, não descarta; o que não dá para vigiar volta "não consigo vigiar isso porque..."); "pauta da reunião" → tabela por setor; cálculo → cartão `calculo` com fórmula e origem; "escreva uma mensagem..." → cartão `previa_mensagem` (editar texto e canal; enviar pede aprovação e grava na conversa do setor no CRM); termo solto e ambíguo → cartão `escolha` com dois botões; anexo → Documento do cliente classificado pelo nome, na pasta do tipo (sem cliente, em "recebidos pelo chat"). Os cinco tipos entram em `Cartao` (`src/dados/tipos.ts`, S01 é dona) e `AcoesCartao` ganha `onEnviar`.
+- **Por quê:** 02, 9.1, 9.3, 7.3 e ad. 25; 07, 2. A pasta do anexo é **[sem regra no plano]**: a sessão usou a árvore-modelo pelo tipo do documento.
+- **Telas e ações:** S01-A08 a A24.
+- **Arquivos compartilhados:** `tipos.ts` (cartões novos, dona); `cartoes-chat.tsx` (S01).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Jobs, memória e configuração do integrante por pessoa
+
+- **Decisão:** enquanto não há entidades Job agendado, Memória e configuração do integrante na migração, ficam por pessoa no escritório (`s01:jobs:<usuário>`, `s01:memoria:<usuário>:<integrante>`, `s01:config-integrante:<usuário>:<integrante>`). Jobs guardam os últimos 30 resultados (vazio, ok, parcial, falhou) e o custo estimado, que só Gestor e Administrador veem. Memória do setor só leitura. Configurar mostra as camadas 1 e 2 travadas, setores, clientes, ferramentas por nível (irreversível sempre com aprovação; fora do acesso do dono, "removido"), canal de aviso e teto diário; no celular, só leitura.
+- **Por quê:** 01, 9; 02, 5, 7.1, 11.2. Sem migração nova (regra do SESSOES.md).
+- **Telas e ações:** S01-A29 a A32, A35, A36, A41, A42.
+- **Arquivos compartilhados:** `efeitos.tsx` (casos `s01-promo*` e `s01-obs*`, só acrescentando); `PainelLab.tsx` (seção da S01: limite de IA atingido, sem plano de IA, resumo diário, promoção e fim da observação).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Visão geral lê do banco
+
+- **Decisão:** os widgets da Visão geral saem das tarefas, conversas, eventos e clientes do banco, no escopo da pessoa e do cliente do seletor; o arranjo é por pessoa e separado para cliente e carteira, com o padrão do papel (Administrador com Primeiros passos, Implantações e SLA; Gestor com SLA e Carga prevista; Membro com Horas da semana). O calendário usa o `Calendario` do C5 (`semFiltros`, com os filtros da Visão geral: responsável eu, equipe, integrantes ou todos; setor; só atrasadas) e passa `onReprogramar`, que grava com evento e desfazer (quem pode mover e a confirmação da multa ficam no componente da S04). Outra sessão acrescenta widgets na galeria por `widgetsExtras` (`src/telas/inicio/widgets-inicio.tsx`; o S11 troca o de Prazos do Jurídico). Como a tela migrou, saiu da condição `telaAindaFixa` de `Plataforma.tsx`.
+- **Por quê:** 03, 4; registro da S00 sobre telas com dados fixos.
+- **Telas e ações:** S01-A43 a A51.
+- **Arquivos compartilhados:** `Plataforma.tsx` (tira `inicio/visao` de `telaAindaFixa`; `MinhaConta` recebe `onAlternarModo`), fora do "só acrescentar".
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Espera, presença e claro/escuro lembrado
+
+- **Decisão:** ao continuar da espera com uma ficha de tarefa aberta, a tela pergunta "você estava em X; continuar?"; a espera fica por cima da ficha. Enquanto a tela está em espera, `s01:presenca:<usuário>` vale `em_espera` (a S05 pode ler para a presença na comunicação interna); Suporte e conversas da equipe continuam a um clique. O claro/escuro escolhido no menu da conta ou em Minha conta fica lembrado por pessoa no aparelho e volta ao entrar.
+- **Por quê:** 01, 2.5; 03, 7.3 e ad. 23; 11, 3; 03, 2.2.
+- **Telas e ações:** S01-A68, A84 a A87.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
 ### S02 · Painel A: anatomia, Societário, Obrigações, Notas
+
+#### 2026-11-14 · S02 · Ocorrência de obrigação é tarefa; setor dono vem da regra (C2)
+
+- **Decisão:** cada ocorrência de obrigação é uma Tarefa com `origem = 'obrigacao'` e `origem_ref` = id da regra (`Obrigacao`); o setor dono é o `gera_tarefa_para_setor` da regra, copiado em `tarefa.setor_id`. As telas leem pelo formato `ItemObrigacao` (`src/dados/obrigacoes-setor.ts`, campo `setor`). A semente ganhou as regras que faltavam (EFD-Reinf, GIA-SP, DeSTDA, PIS/COFINS, ISS, DAS-MEI, DEFIS, DMED C2-16, ECF, IBGE C2-15, taxa de licença C2-22, conselho C2-20, manifestação NFE-015, entrega das guias GES-039) e o calendário de 10/2026 já gerado. As tarefas t0 e t1 (PGDAS-D 10/2026) passam a ter `origem = 'obrigacao'`.
+- **Por quê:** é o que o plano manda (03, 6.2 e ad. 14/11: "Tarefa `origem = obrigacao` por setor dono"); a S02 decidiu, como hipótese.
+- **Telas e ações:** S02-T03, S02-A40 a A53; C1 e C2.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `semente/andrade.ts` (uma linha no fim chama `semente/s02.ts`, que também ajusta t0 e t1 e as versões do perfil, ver abaixo).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Filtro de setores da aba Obrigações e "ver todas"
+
+- **Decisão:** quatro modos (`meus`, `um`, `todos`, `chips`) guardados em `usePersistente('s02:obrigacoes:setores')`. Membro com um setor não vê seletor; com vários, chips (desmarcar foca). Gestor e Administrador: "Meus setores · Um setor · Todos", padrão "meus setores". Quem tem Fiscal vê também as obrigações de Notas (E-03). "Ver todas" do bloco C1 navega com `Destino.filtroSetor` (e o link `#/painel/obrigacoes?setor=dp`) e abre em "um setor" (Gestor) ou só aquele chip (Membro). A competência e a faixa D-20 também ficam guardadas (`s02:obrigacoes:competencia`, `s02:obrigacoes:faixa`).
+- **Por quê:** 03, ad. 14/11; o modo de chegar filtrado não tinha regra.
+- **Telas e ações:** S02-A40, A53.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `loja.tsx` (`Destino.filtroSetor?`), `rotas.ts` (parâmetro `setor`), `Plataforma.tsx` (duas linhas).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Regras finas da aba Obrigações
+
+- **Decisão:** (1) "hoje" da demonstração é 18/11/2026; (2) prazo interno padrão = dois dias úteis antes do legal; (3) gerar o calendário é do Gestor e do Administrador e é idempotente (o que já existe, mesmo cancelado, não volta); o integrante Fiscal mostra o trabalho e cria as tarefas ao terminar; (4) o Membro reprograma só as suas (responsável é ele ou o integrante do setor); além do legal pede confirmação com a multa; (5) "sem imposto no mês" (D-23) encerra como concluída com `extras.dispensada`, não como cancelada, porque cancelar obrigação é só do Gestor; (6) multa estimada mostra a origem dos números com selo de demonstração (o motor M3 é simulado); (7) mudar as declarações estaduais do cliente versiona o perfil e marca as futuras não iniciadas como "regerada".
+- **Por quê:** o plano não dá esses detalhes; a S02 decidiu.
+- **Telas e ações:** S02-A41, A42, A46, A48, A50, A51.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Integrantes do Painel A agentificados: cartão com ação e aprendizado
+
+- **Decisão:** `src/ambiente/agente-s02.ts` põe o integrante para trabalhar (etapas no chat pelo motor da loja). Quando faz sozinho, a mudança acontece ao terminar; quando prepara, deixa um cartão `s02-…` gravado em `cartao_aprovacao` com a ação em `argumentos`, para que decidir no chat, no sino, na Visão geral ou no topo das Ações da aba execute a mesma coisa. Cada aba registra os executores dos seus cartões. Toda decisão entra na memória do integrante (`s02:memoria`) e ele responde o que anotou; depois de 30 cartões com 95% sem edição, diz que vai perguntar ao Administrador se pode fazer sozinho (02, 3.3), menos transmitir, enviar, pagar e assinar. Gatilhos com efeito na tela: certificado a 30 dias (pede a renovação pelo app uma vez), conferência da Receita (SOC-003, com cartão de regularização quando inapta), captura com lacuna (abre NFE-020).
+- **Por quê:** item 7 do mapa (seção 0) e o pedido do dono ("parecer trabalhar de verdade").
+- **Telas e ações:** todas as da S02.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `efeitos.tsx` (uma linha no início: cartões `s02-` vão para `efeitoCartaoS02`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Dados sem entidade ficam em coleções `s02:*` no `registro_tela`
+
+- **Decisão:** acesso a órgão e procuração, credencial (certificado: nunca o arquivo nem a senha), processo de legalização, licença, comunicação oficial (Domicílio Judicial), acesso ao app, contrato, prorrogação, arquivos repetidos e o estado de Notas por cliente ficam em listas no `registro_tela` (`s02:<colecao>`), com campos no formato das entidades do plano e evento em toda escrita (`src/dados/s02/colecao.ts`). Não criei tabela nova nem migração.
+- **Por quê:** o "não altere o esquema Supabase sem migração nova" e o tempo da sessão; o backend vira cada coleção em tabela (Credencial do 08, Processo, Conta de cliente...) sem mudar a tela.
+- **Telas e ações:** S02-T02, S02-T04.
+- **Impacto no plano:** nenhum para o produto (simplificação do wireframe).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Linha de versões do perfil na semente e histórico real
+
+- **Decisão:** a versão vigente de cada cliente do Andrade passa a ter a data e o motivo da linha de versões dos dados de exemplo, e as versões antigas entram fechadas. O histórico do cabeçalho (S02-A01) lê `versao_perfil`, com "perfil em" uma data; corrigir digitação marca "corrigido por" sem criar versão (01, P2).
+- **Por quê:** o histórico era desenhado à mão e igual para todos.
+- **Telas e ações:** S02-A01, A20, A21, A22.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** semente existente (`vp-c*`), ajustada por `semente/s02.ts`.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Estado do cliente na anatomia
+
+- **Decisão:** além da faixa de ciclo de vida da S04 (C6), a aba mostra uma faixa própria para proposta, aceito, em baixa, inativo e encerrado ("encerrado em DD/MM; retenção até AAAA", cinco anos). Inativo, encerrado e arquivado deixam a aba só leitura (as Ações somem). Prospect e proposta: no Societário só ficha, pessoas e contrato; nas outras abas, um estado vazio explicando.
+- **Por quê:** 03, 6.1 e 8.1; a retenção de cinco anos é hipótese da S02.
+- **Telas e ações:** S02-T01 (estados), S02-A34.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Serviço simulado de cadastros
+
+- **Decisão:** arquivo novo `src/servicos/cadastros.ts` com consulta de CNPJ (API-12), procurações (API-06) e Domicílio Judicial, com dados fictícios e marcados; uma linha em `Servicos`, `servicos` e `catalogoServicos`.
+- **Por quê:** o catálogo da S00 ainda não tinha consulta de CNPJ.
+- **Telas e ações:** S02-A19, A26, A33.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/servicos/index.ts` (acréscimo).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Notas: captura, emissão e divergência
+
+- **Decisão:** a captura parada da demonstração é a Loja Bela Vista (c3: A1 vencido em 15/11 e autXML faltando); "forçar captura" e "rodar a rotina das 3h" usam o mesmo motor e, a cada duas rodadas, o integrante acha um buraco de sequência e abre a NFE-020 sozinho. Emitir a pedido do cliente: o cartão aprova mandar o rascunho ao cliente, o "pode emitir" dele fica guardado como prova (GES-036) e a emissão é sempre de uma pessoa. Aceitar ou corrigir divergência tributária é decisão da pessoa na gaveta (sem cartão) e o integrante registra o que anotou. A saúde da captura no cabeçalho lê o estado de Notas enquanto o C9 (S09) não chega.
+- **Por quê:** o plano não fixa os exemplos nem a forma do aceite do cliente.
+- **Telas e ações:** S02-T04, A54 a A66.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Ficha do cliente: papéis por serviço, edição por papel, entrega
+
+- **Decisão:** papel no app por serviço (Contábil: sócio, financeiro, RH, contador interno, leitura, sem acesso; BPO: aprovador, financeiro, leitura, sem acesso), em `ContatoCliente.papeis`. O contato "principal" recebe o assunto sem dono; sem principal, vai ao sócio ou titular. O Membro com setor edita contatos e entrega; Gestor e Administrador também responsáveis e serviços extras; a alçada só o Gestor do BPO e o Administrador, e só como proposta até o aceite no app. O que a conta não edita aparece só leitura, com aviso: a ficha é de consulta. Na Relação, setores que a conta não tem aparecem só como número; valores de honorário só para quem tem o Financeiro. Preferência de entrega em `FichaCliente.entrega` (padrão "só digital"). Cada salvar grava o evento `ficha.atualizar` com o diff, e a aba Histórico lê dele.
+- **Por quê:** 04, 5.4; 06, 2.4; 01, ad. 22 e 25; C2-09. Os detalhes de papel e edição são hipótese da S02.
+- **Telas e ações:** S02-T05, A67 a A72.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `fluxos.tsx` (só `GavetaFichaCliente`, que delega), `clientes.ts` (campos opcionais).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S02 · Faixa de ciclo de vida da S04 no lugar da faixa própria (revê "Estado do cliente na anatomia")
+
+- **Decisão:** a `FaixaCicloDeVida` da S04 (C6) fica acima do cabeçalho de toda aba, como pede a S04. Como ela já cobre implantação, saída, baixa, inativo e encerrado, a faixa própria da S02 passa a aparecer só em prospect, proposta e aceito. A regra de só leitura (inativo, encerrado, arquivado) continua. O painel de ciclo de vida da S04 (`widgetCicloDeVida`, por serviço) entra na galeria do Societário; o bloco "Ciclo de vida" da S02 (S02-A34) continua no arranjo padrão.
+- **Por quê:** pedido da S04 repassado pela coordenação; evita duas faixas para o mesmo estado.
+- **Telas e ações:** S02-T01 (estados), S02-A34; S04-T09.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
 
 ### S03 · Painel B: Fiscal, Contábil, Consultoria
 

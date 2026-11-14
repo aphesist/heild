@@ -149,6 +149,16 @@ export type Cartao =
       assunto: string
       cliente: string
     }
+  /** S01: resposta do assistente de ajuda (pergunta sobre o sistema; não gasta limite de IA, 02 ad. 25). */
+  | { tipo: 'ajuda'; id: string; pergunta: string; passos: string[]; destino?: { rotulo: string; modulo: string; aba?: string } }
+  /** S01: condição em linguagem natural devolvida como regra (02, 7.3): sim vira job do integrante. */
+  | { tipo: 'regra'; id: string; pedido: string; regra: string; integrante: SetorIntegrante; linhas: { rotulo: string; valor: string }[]; compilavel: boolean; motivo?: string }
+  /** S01: cálculo com origem (02, 9.3). */
+  | { tipo: 'calculo'; id: string; titulo: string; resultado: string; formula: string; linhas: [string, string][]; origem: string }
+  /** S01: pré-visualização de mensagem ao cliente (02, 9.3): editar texto e canal; enviar vira aprovação. */
+  | { tipo: 'previa_mensagem'; id: string; cliente: string; para: string; setor: SetorIntegrante; canal: 'whatsapp' | 'email' | 'app'; texto: string }
+  /** S01: confiança baixa no roteamento (07, 2): pergunta com botões. */
+  | { tipo: 'escolha'; id: string; pergunta: string; opcoes: { rotulo: string; texto: string }[] }
 
 /** Saída do `legal.consultar` mostrada ao usuário (07, 3.2 e 02, 9.3: cartão de citação e de cálculo). */
 export interface RespostaLegal {

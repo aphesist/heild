@@ -1,3 +1,4 @@
+import { DemonstracaoS01 } from './demo-s01'
 import { ArrowCounterClockwiseIcon, BuildingsIcon, ClockIcon, DatabaseIcon, DeviceMobileIcon, EyeIcon, FlaskIcon, MonitorIcon, MoonIcon, PauseCircleIcon, SignOutIcon, SquaresFourIcon, SunIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { usePreferencia } from '@/hooks/usePreferencia'
@@ -230,6 +231,8 @@ export function PainelLab({
                 <PauseCircleIcon className="size-4 shrink-0" /> Simular {escritorio.inatividadeMin} min parado (só no Painel com cliente e no CRM)
               </button>
             )}
+            {/* S01: limite e plano de IA, resumo diário, promoção de integrante. */}
+            {sessao?.usuario && <DemonstracaoS01 onFechar={() => setAberto(false)} />}
             {/* S05 */}
             <LabS05 onFeito={() => setAberto(false)} />
           </div>
