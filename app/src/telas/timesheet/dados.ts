@@ -145,6 +145,8 @@ export function useTimesheet() {
   const vinculosSetor = useTabela('vinculo_setor')
   const integrantes = useTabela('integrante')
   const assinatura = useTabela('assinatura')[0]
+  // S04: férias com substituto registradas na Gestão (s04:gestao) também entram na capacidade.
+  const telas = useTabela('registro_tela')
   const papel: PapelTs = permissoes.papelTimesheet
   return useMemo(() => {
     const nomeCliente = (id?: string | null) => (id ? (clientes.find((c) => c.id === id)?.nome ?? id) : 'interno')
@@ -159,6 +161,12 @@ export function useTimesheet() {
     const vinculoDe = (u: string) => vinculos.find((v) => v.usuario_id === u)
     /** Pessoas que trabalham num setor (vínculo; o Administrador aparece onde tem sessão). */
     const pessoasDoSetor = (setores: string[]) => usuarios.filter((u) => u.situacao === 'ativo' && (vinculosSetor.some((v) => v.usuario_id === u.id && setores.includes(v.setor_id) && !v.vigente_ate) || sessoes.some((s) => s.usuario_dono_id === u.id && setores.includes(s.setor_id) && humana(s))))
+    const gestaoS04 = telas.find((t) => t.id === 's04:gestao')?.valor as { ausencias?: { id: string; pessoa: string; de: string; ate: string; substituto: string }[] } | undefined
+    const idPorNome = (n?: string) => usuarios.find((u) => u.nome === n)?.id
+    const ausenciasS04: Ausencia[] = (gestaoS04?.ausencias ?? [])
+      .filter((a) => idPorNome(a.pessoa) && /^\d{4}-\d{2}-\d{2}$/.test(a.de) && /^\d{4}-\d{2}-\d{2}$/.test(a.ate))
+      .map((a) => ({ id: `s04-${a.id}`, escritorio_id: '', criado_em: a.de, atualizado_em: a.de, usuario_id: idPorNome(a.pessoa)!, tipo: 'ferias', inicio: a.de, fim: a.ate, registrada_por: '', substituto_id: idPorNome(a.substituto) ?? null, extras: { origem: 's04', pessoa_nome: a.pessoa } }))
+    const todasAusencias = [...ausencias, ...ausenciasS04.filter((x) => !ausencias.some((a) => a.usuario_id === x.usuario_id && a.inicio === x.inicio))]
     const temJuridico = (assinatura?.modulos as string[] | undefined)?.includes('juridico') ?? false
     const temBpo = (assinatura?.modulos as string[] | undefined)?.includes('bpo') ?? false
     return {
@@ -169,7 +177,7 @@ export function useTimesheet() {
       cfg,
       sessoes,
       itens,
-      ausencias,
+      ausencias: todasAusencias,
       custos,
       custoAtual,
       vinculos,
@@ -194,7 +202,7 @@ export function useTimesheet() {
       rotuloAtividade,
       vazio: sessoes.length === 0 && itens.length === 0,
     }
-  }, [usuario, papel, permissoes, escritorio, cfg, sessoes, itens, ausencias, custos, vinculos, pulsos, portais, conectores, equivalencias, duracoes, fechamentos, clientes, usuarios, tarefas, vinculosSetor, integrantes, assinatura])
+  }, [usuario, papel, permissoes, escritorio, cfg, sessoes, itens, ausencias, custos, vinculos, pulsos, portais, conectores, equivalencias, duracoes, fechamentos, clientes, usuarios, tarefas, vinculosSetor, integrantes, assinatura, telas])
 }
 export type Ts = ReturnType<typeof useTimesheet>
 

@@ -47,11 +47,13 @@ export const abasInternas: Record<IdModulo, AbaSegmentada[]> = {
     { id: 'comunicados', rotulo: 'Comunicados' },
     { id: 'numeros', rotulo: 'Números' },
   ],
+  // Ordem decidida pela Coordenação (DECISOES.md, 14/11): Meu tempo · Confirmações · Equipe · Rentabilidade.
+  // O contador de Confirmações sai dos itens pendentes da pessoa (S06, Plataforma).
   timesheet: [
     { id: 'meu', rotulo: 'Meu tempo' },
+    { id: 'confirmacoes', rotulo: 'Confirmações' },
     { id: 'equipe', rotulo: 'Equipe' },
     { id: 'rentabilidade', rotulo: 'Rentabilidade' },
-    { id: 'confirmacoes', rotulo: 'Confirmações', contador: 6 },
   ],
   // Estrutura do subplano 09 (decisão do usuário, 8/11/2026): sete abas.
   financeiro: [

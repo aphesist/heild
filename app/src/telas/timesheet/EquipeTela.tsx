@@ -400,6 +400,9 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                         {ts.nomeUsuario(a.usuario_id)} · {rotuloAusencia(a.tipo)} · {ddmm(a.inicio)} a {ddmm(a.fim)}
                         {a.substituto_id && <span className="text-muted-foreground"> · substituto: {ts.nomeUsuario(a.substituto_id)}</span>}
                       </span>
+                      {a.extras?.origem === 's04' ? (
+                        <span className="text-muted-foreground text-xs">pela Gestão</span>
+                      ) : (
                       <Button
                         size="icon-sm"
                         variant="ghost"
@@ -412,6 +415,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                       >
                         <XIcon />
                       </Button>
+                      )}
                     </li>
                   ))}
                 </ul>

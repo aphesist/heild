@@ -6,7 +6,7 @@ import { useSessao } from '@/ambiente/sessao'
 import { rotuloAtividade, setorDaAtividade } from '@/dados/timesheet-catalogo'
 import { agoraDemo, diaDe, HOJE_TS, hm } from '@/dados/timesheet-tempo'
 import { banco } from '@/nucleo/banco'
-import { useEscritorio } from '@/nucleo/react'
+import { useEscritorio, useRegistro } from '@/nucleo/react'
 import { configTimesheet, foraDaJornada, itemNaoEraEsta, repos } from '@/nucleo/repositorios'
 import { hashParaDestino, useHash } from '@/nucleo/rotas'
 import { OuvinteExtensaoLab } from './lab'
@@ -146,6 +146,28 @@ export function CapturaTempo({ conta, espera, modulo, aba, clienteId }: { conta:
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario.id])
+
+  // S04 (contrato em DECISOES.md): o "Não era esta" da ficha da tarefa grava em s04:timesheet:nao-era-esta;
+  // aqui cada pedido vira item de correção em Confirmações, com a tarefa certa como sugestão.
+  const pedidosS04 = useRegistro('registro_tela', 's04:timesheet:nao-era-esta')?.valor as { de: string; para: { tarefaId?: string; clienteNome?: string }; quando: string; por: string }[] | undefined
+  useEffect(() => {
+    for (const p of pedidosS04 ?? []) {
+      if (p.por !== usuario.nome) continue
+      const chaveS04 = `${p.de}|${p.quando}`
+      if (repos.itensConfirmacao.listar((i) => i.extras?.s04 === chaveS04, { arquivados: true }).length) continue
+      try {
+        if (atual.current?.ctx.tarefa_id === p.de) fechar('"não era esta"')
+        const s = repos.sessoes.listar((x) => x.tarefa_id === p.de && x.usuario_dono_id === usuario.id && !x.substituida_por && diaDe(x.inicio) === HOJE_TS).at(-1)
+        const certa = p.para.tarefaId ? banco.obter('tarefa', p.para.tarefaId) : undefined
+        const cliente = certa?.cliente_id ?? banco.ler('cliente').find((c) => c.nome === p.para.clienteNome)?.id ?? null
+        const base = s ? itemNaoEraEsta(s) : { usuario_id: usuario.id, setor_id: banco.obter('tarefa', p.de)?.setor_id ?? null, dia: HOJE_TS, inicio: agoraDemo(Date.parse(p.quando) - 5 * 60000), fim: agoraDemo(Date.parse(p.quando)), tipo: 'nao_era_esta' as const, texto: `"Não era esta": ${banco.obter('tarefa', p.de)?.atividade_id ?? ''} aberta por engano`, pista: 'marcado na ficha da tarefa', sugestao: null, sessao_ref_id: null, situacao: 'pendente' as const, expira_em: new Date(Date.now() + 7 * 86400000).toISOString() }
+        repos.itensConfirmacao.criar({ ...base, sugestao: certa || cliente ? { atividade_id: certa?.atividade_id ?? base.sugestao?.atividade_id ?? null, rotulo: certa ? rotuloAtividade(certa.atividade_id) : 'corrigido', cliente_id: cliente, minutos: 5, tarefa_id: certa?.id ?? null } : null, situacao: certa || cliente ? 'marcado' : 'pendente', extras: { s04: chaveS04 } }, { ferramenta: 'timesheet.registrar', texto: `"Não era esta" virou item de correção no Timesheet` })
+      } catch {
+        /* sem permissão: ignora */
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedidosS04, usuario.id])
 
   // Ao sair (trocar de conta, fechar o app), fecha a sessão aberta.
   useEffect(() => () => fechar('saiu'), []) // eslint-disable-line react-hooks/exhaustive-deps
