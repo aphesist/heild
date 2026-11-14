@@ -66,3 +66,13 @@ Durante a S00, cinco desses testes pegaram regressões reais da migração (chav
 ### Pull request
 
 Aberto: https://github.com/aphesist/heild/pull/1 (de `wf-s00-fundacao` para `wireframe`; sem merge).
+
+## S00b · Supabase ligado (branch `wf-s00b-supabase`) · 14/11/2026
+
+Com autorização do dono, o modo Supabase passou a funcionar de ponta a ponta no projeto `rgptcikkxucyysfwarxb` (migração aplicada pela coordenação; nenhuma migração nova foi necessária).
+
+- **Adaptador** (`app/src/nucleo/banco/supabase.ts`): fila local que garante a gravação ao recarregar; uma operação por vez; evento e registro de entrega por "inserir se não existir"; leitura paginada e ordenada; uma conta de demonstração por escritório, com troca automática ao trocar de escritório.
+- **Correções que valem também no modo local:** o evento nascia sem `escritorio_id` (o banco agora preenche toda linha com o escritório aberto); ids de mensagem do CRM repetidos entre conversas (`m1`, `m2`...) passaram a ser prefixados pela conversa (`cv1:m1`). Bancos locais antigos: use "Resetar o ambiente" para pegar a semente nova.
+- **Contas de demonstração:** senhas novas definidas para `demo-andrade@heild.app` e `demo-horizonte@heild.app`; estão só no `app/.env.local` da sessão S00b (fora do git). `app/.env.exemplo` traz a URL e a chave publicável.
+- **Testes:** `scripts/fundacao-fumaca.cjs` passa no modo Supabase (26 de 26) e no local (26 de 26); no local também passam trabalho-simulado-assistente-crm, app-cliente, bpo-modulo e decisoes-8-11. Conferido no Postgres real com as duas contas: cada uma só vê o próprio escritório, inserir no outro é recusado pela RLS, evento não muda nem se apaga, mensagem interna não se apaga.
+- **Como ligar, desligar e restaurar:** `docs/wireframe/ARQUITETURA.md`, seção 9.

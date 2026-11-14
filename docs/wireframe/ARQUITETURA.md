@@ -197,6 +197,32 @@ Quem não está logado vê a entrada e, depois de entrar, cai no endereço pedid
 - **Resetar o ambiente (restaurar demonstração)** (painel Demonstração) volta o escritório ativo aos dados de exemplo, sai das contas e volta ao tema.
 - Onde os dados ficam: `VITE_HEILD_BANCO=local|indexeddb|supabase|memoria` (`app/.env.exemplo`; Supabase em `app/supabase/README.md`).
 
+### Supabase: ligar, desligar e restaurar
+
+Existe um projeto Supabase da Heild para o wireframe (`rgptcikkxucyysfwarxb`, região us-east-1) com a migração `app/supabase/migrations/20261114120000_fundacoes.sql` aplicada: 30 tabelas, todas com RLS forçada pelo escritório do JWT. Duas contas de demonstração em Auth, uma por escritório de exemplo: `demo-andrade@heild.app` (`esc-andrade`) e `demo-horizonte@heild.app` (`esc-horizonte`). As senhas não estão no repositório: pergunte à coordenação ou defina outras (passo 3 abaixo).
+
+**Ligar** (o modo local continua o padrão e roda sem rede):
+
+1. `cp app/.env.exemplo app/.env.local` (o `.env.local` fica fora do git).
+2. No `.env.local`: `VITE_HEILD_BANCO=supabase` e as duas senhas (`VITE_SUPABASE_SENHA_ESC_ANDRADE`, `VITE_SUPABASE_SENHA_ESC_HORIZONTE`). A URL e a chave publicável já vêm no exemplo.
+3. Senha esquecida: troque no painel do Supabase (Authentication › Users) ou pela API admin do Auth com a service_role, que nunca vai para o repositório nem para o `.env`.
+4. `npm run app`. O app entra sozinho com a conta do escritório ativo; trocar de escritório no painel Demonstração troca a conta. Na primeira abertura de um escritório vazio, a semente entra sozinha.
+
+**Desligar:** `VITE_HEILD_BANCO=local` no `.env.local` (ou apague a linha), ou rode com a variável na frente: `VITE_HEILD_BANCO=local npm run app` (variável do terminal vence o arquivo).
+
+**Restaurar os dados de demonstração:** painel Demonstração › "Resetar o ambiente (restaurar demonstração)". No Supabase, isso chama `restaurar_demonstracao()` (apaga só o escritório do JWT, inclusive eventos e mensagens internas, que de outro jeito não se apagam) e semeia de novo. Os dois escritórios se restauram separados (troque de escritório e restaure o outro).
+
+**Como o adaptador grava** (`src/nucleo/banco/supabase.ts`):
+
+- Toda alteração vai antes para uma fila no localStorage (`heild:fila-supabase:<escritorio>`), de forma síncrona, e só sai de lá quando o Supabase confirma. Recarregar no meio da gravação não perde nada: a fila é enviada antes da próxima leitura, e o que ainda está nela vence a cópia do servidor.
+- Uma operação por vez (a fila de um escritório nunca sai com a conta do outro durante a troca); tabelas em paralelo dentro da operação.
+- Evento e registro de entrega usam "inserir se não existir" (não têm política de update, de propósito). Leitura paginada (1000 por vez) e na ordem de criação.
+- Erro de gravação aparece no console (`[heild] falha ao gravar`) e a alteração continua na fila para a próxima tentativa.
+
+**Testar no Supabase:** `VITE_HEILD_BANCO=supabase npx vite --port 6100` e `node scripts/fundacao-fumaca.cjs <pasta>` (o mesmo teste do modo local; termina restaurando o escritório Andrade).
+
+**Esquema novo:** migração nova em `app/supabase/migrations/` (nunca edite a aplicada); aplicar no projeto pede autorização do dono.
+
 ## 10. Como não conflitar com outra sessão
 
 - Siga o `SESSOES.md` (dono de cada arquivo, "só acrescentar" nos compartilhados). Os arquivos de `src/nucleo`, `src/servicos` e `src/components/kit` são da coordenação: acrescente no fim (entidade, repositório, ferramenta, serviço, parâmetro de rota), nunca reordene nem reformate.

@@ -7,7 +7,7 @@ import { Orb } from '@/components/ui/orb'
 import type { StatusTarefa, Tarefa } from '@/dados/tipos'
 import { cn } from '@/lib/utils'
 import { ResponsavelTarefa, StatusTarefaBadge } from './cartao-tarefa'
-import { rotuloStatus } from './rotulos'
+import { rotuloStatus, statusFinal } from './rotulos'
 
 type FiltroStatus = 'abertas' | StatusTarefa | 'todas'
 
@@ -28,7 +28,10 @@ const opcoesStatus: { valor: FiltroStatus; rotulo: string }[] = [
   { valor: 'a_fazer', rotulo: rotuloStatus.a_fazer },
   { valor: 'em_andamento', rotulo: rotuloStatus.em_andamento },
   { valor: 'aguardando_cliente', rotulo: rotuloStatus.aguardando_cliente },
+  { valor: 'aguardando_terceiro', rotulo: rotuloStatus.aguardando_terceiro },
+  { valor: 'em_revisao', rotulo: rotuloStatus.em_revisao },
   { valor: 'concluida', rotulo: rotuloStatus.concluida },
+  { valor: 'cancelada', rotulo: rotuloStatus.cancelada },
   { valor: 'todas', rotulo: 'todas' },
 ]
 
@@ -44,7 +47,7 @@ export function BlocoTarefas({ setor, cliente, tarefas, onAbrir: abrirFora, onNo
   const responsaveis = useMemo(() => Array.from(new Set(tarefas.map((t) => t.responsavel?.nome).filter(Boolean))) as string[], [tarefas])
 
   const visiveis = tarefas.filter((t) => {
-    if (status === 'abertas' && t.status === 'concluida') return false
+    if (status === 'abertas' && statusFinal(t.status)) return false
     if (status !== 'abertas' && status !== 'todas' && t.status !== status) return false
     if (responsavel !== 'todos' && t.responsavel?.nome !== responsavel) return false
     return true

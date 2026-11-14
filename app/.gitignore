@@ -25,3 +25,6 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# capturas do teste de fumaça (scripts/fundacao-fumaca.cjs)
+fumaca-*.png

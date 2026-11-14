@@ -23,6 +23,7 @@ import {
   documentoParaModelo,
   documentoParaTela,
   horaCurta,
+  idDaMensagem,
   itemParaMensagem,
   mensagemModeloParaTela,
   mensagemTelaParaModelo,
@@ -51,7 +52,7 @@ import { BancoOpcional, useBanco, useTabela } from '@/nucleo/react'
  * docs/wireframe/ARQUITETURA.md.
  */
 
-export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config'
+export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config' | 'interna'
 /** Cenário da demonstração (10, 2): contabilidade com o BPO como módulo, ou escritório só de BPO. */
 export type Cenario = 'contabil_bpo' | 'bpo_puro'
 
@@ -70,8 +71,12 @@ export interface Destino {
   tarefa?: string
   /** Abre a ficha do cliente por cima de onde estiver. */
   ficha?: string
+  /** S04 (C6): abre a trilha de implantação ou de saída do cliente (id do cliente) por cima do Painel. */
+  trilha?: string
   /** S02 (C1): a aba Obrigações abre filtrada por este setor dono ("ver todas" do bloco Obrigações do setor). */
   filtroSetor?: SetorIntegrante
+  /** S05: conversa interna aberta (tela cheia `#/interna` ou gaveta do Chat, aba Equipe). */
+  conversaInterna?: string
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */
@@ -315,7 +320,7 @@ function aplicar(a: Acao): void {
       return
     }
     case 'crmItemPatch': {
-      const m = banco.obter('mensagem', a.id)
+      const m = banco.obter('mensagem', idDaMensagem(a.conversa, { id: a.id }))
       if (!m || m.conversa_id !== a.conversa) return
       const item = { ...(m.extras?.item as object), ...a.patch } as ItemConversa
       const espelho = item.tipo === 'mensagem' ? { status_entrega: item.entrega ?? m.status_entrega, corpo: item.texto ?? m.corpo } : {}
