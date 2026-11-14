@@ -199,16 +199,22 @@ export function CartoesPendentes({ setor, clienteId }: { setor: SetorIntegrante;
 }
 
 /** S02-A18: "feito por Fiscal, de Fernanda" com o evento do item que o integrante criou ou tocou. */
-export function FeitoPor({ refId, className }: { refId: string; className?: string }) {
+export function FeitoPor({ refId, quem, className }: { refId: string; /** Nome do integrante quando o item diz quem fez (ex.: tarefa concluída por integrante). */ quem?: string; className?: string }) {
   const eventos = useTabela('evento')
   const [aberto, setAberto] = useState<Evento | null>(null)
-  const ev = useMemo(() => [...eventos].reverse().find((e) => e.resultado_ref === refId && e.ator_tipo === 'integrante'), [eventos, refId])
-  if (!ev) return null
+  const ev = useMemo(() => [...eventos].reverse().find((e) => e.resultado_ref === refId && (quem || e.ator_tipo === 'integrante')), [eventos, refId, quem])
+  if (!ev && !quem) return null
+  if (!ev)
+    return (
+      <span className={cn('text-muted-foreground inline-flex items-center gap-1 text-[11px]', className)}>
+        <RobotIcon className="size-3" /> feito por {quem}
+      </span>
+    )
   return (
     <>
       <Tooltip conteudo="Ver o evento: quem fez, quando e com qual ferramenta">
         <button type="button" onClick={() => setAberto(ev)} className={cn('text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1 text-[11px] underline-offset-2 hover:underline', className)}>
-          <RobotIcon className="size-3" /> feito por {ev.ator_nome ?? 'integrante'}
+          <RobotIcon className="size-3" /> feito por {quem ?? ev.ator_nome ?? 'integrante'}
         </button>
       </Tooltip>
       {aberto && <GavetaEvento evento={aberto} onFechar={() => setAberto(null)} />}

@@ -54,6 +54,8 @@ export interface ItemObrigacao {
   /** Multa estimada se atrasar (M3), em reais. */
   multa?: number
   tarefaStatus: TarefaModelo['status']
+  /** Integrante que concluiu ("feito por Fiscal", S02-A18). */
+  feitoPor?: string
 }
 
 /** Data ISO → "dd/mm". */
@@ -99,6 +101,7 @@ export function itensDeObrigacao(tarefas: TarefaModelo[], clientes: Pick<Cliente
         falta: e.falta ? String(e.falta) : undefined,
         multa: typeof e.multa === 'number' ? e.multa : undefined,
         tarefaStatus: t.status,
+        feitoPor: t.status === 'concluida' && t.concluida_por_tipo === 'integrante' ? String(e.responsavel_nome ?? 'integrante') : undefined,
       }
     })
     .sort((a, b) => (a.legal ?? '9').localeCompare(b.legal ?? '9') || a.cliente.localeCompare(b.cliente))

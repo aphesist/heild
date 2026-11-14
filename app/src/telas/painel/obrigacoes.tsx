@@ -39,6 +39,7 @@ import { repos } from '@/nucleo/repositorios'
 import { perfisDaFoto } from '@/nucleo/semente/s02'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { SeloStatusObrigacao } from './obrigacoes-setor'
+import { FeitoPor } from './anatomia'
 import { Numero, Tabela } from './Tabela'
 import type { CtxAba, WidgetsAba } from './tipos'
 
@@ -562,6 +563,7 @@ function Calendario({ tamanho }: { tamanho: TamanhoWidget }) {
               )}
               {o.eventual && <span className="text-muted-foreground ml-1.5 text-[11px]">eventual</span>}
               {o.falta && <span className="text-warning block text-[11px]">falta {o.falta}</span>}
+              {o.feitoPor && <FeitoPor refId={o.id} quem={o.feitoPor} className="block" />}
             </td>
             <td className="py-1.5 pr-2">
               <OrbDoSetor setor={o.setor} />
