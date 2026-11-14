@@ -1,7 +1,11 @@
-import { BellIcon, ListIcon } from '@phosphor-icons/react'
+import { BellIcon, ListIcon, MagnifyingGlassIcon } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { Contador } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
+import { abrirBusca } from '@/ambiente/busca-global'
+import { useModoLateral } from '@/hooks/useMedia'
+import { SiglaMarca } from './barra-lateral'
 import { cn } from '@/lib/utils'
 
 /**
@@ -26,6 +30,8 @@ export function CabecalhoModulo({
   onAbrirMenu?: () => void
   className?: string
 }) {
+  // No celular a barra lateral some (o menu inferior tem o "Mais"): a marca curta fica no canto.
+  const celular = useModoLateral() === 'gaveta'
   return (
     <header
       className={cn(
@@ -35,6 +41,7 @@ export function CabecalhoModulo({
       )}
     >
       <div className="flex items-center">
+        {celular && !onAbrirMenu && <SiglaMarca />}
         {onAbrirMenu && (
           <Button variant="ghost" size="icon" className="rounded-full" aria-label="Abrir menu" onClick={onAbrirMenu}>
             <ListIcon weight="bold" className="size-5" />
@@ -43,6 +50,11 @@ export function CabecalhoModulo({
       </div>
       <div className="col-span-2 row-start-2 flex min-w-0 justify-center md:col-span-1 md:col-start-2 md:row-start-1">{abas}</div>
       <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-1 md:col-start-3">
+        <Tooltip conteudo="Buscar (Ctrl+K)">
+          <Button variant="ghost" size="icon" className="shrink-0 rounded-full" aria-label="Buscar" onClick={() => abrirBusca()}>
+            <MagnifyingGlassIcon weight="duotone" className="size-5" />
+          </Button>
+        </Tooltip>
         {sino ?? (
           <Button variant="ghost" size="icon" className="relative shrink-0 rounded-full" aria-label={`Notificações (${naoLidas})`}>
             <BellIcon weight="duotone" className="size-5" />
