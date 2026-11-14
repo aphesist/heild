@@ -17,6 +17,11 @@ export function useEfeitosCartao() {
     loja.decidir(cartao, decisao)
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
+    if (!aprovou && cartao.startsWith('s01-promo')) {
+      loja.registrar(quem, 'Recusou a promoção do Fiscal: não pergunta de novo por 90 dias')
+      loja.toast('Certo: o Fiscal continua pedindo aprovação e não pergunta de novo por 90 dias.')
+      return
+    }
     if (!aprovou) {
       loja.registrar(quem, `Recusou o cartão ${cartao}`)
       loja.toast('Recusado. O integrante não executa; a tarefa volta para uma pessoa decidir.')
@@ -83,6 +88,17 @@ export function useEfeitosCartao() {
         loja.registrar(quem, `Aprovou${editado} as cobranças de dezembro: 142 clientes, R$ 203.120 (FIN-005)`)
         loja.avisar({ para: [usuario.id], tipo: 'sistema', setor: 'financeiro_escritorio', titulo: 'Cobranças de dezembro aprovadas', detalhe: 'saem em 01/12 às 06:00, com NFS-e; a régua acompanha cada uma', destino: { modulo: 'financeiro', aba: 'cobranca' } })
         loja.toast('Cobranças de dezembro aprovadas: saem em 01/12 às 06:00.', { modulo: 'financeiro', aba: 'cobranca' }, 'Ver na Cobrança')
+        return
+      }
+      // S01: promoção e fim da observação do integrante (02, 3.3 e 11.1).
+      case cartao.startsWith('s01-promo') ? cartao : '': {
+        loja.registrar(quem, `Aprovou${editado}: o Fiscal passa a pedir XML ao cliente sozinho (vale para sempre)`)
+        loja.toast('Feito: o Fiscal passa a fazer isso sozinho e continua avisando o que fez.')
+        return
+      }
+      case cartao.startsWith('s01-obs') ? cartao : '': {
+        loja.registrar(quem, `Aprovou${editado} o fim da observação do integrante (${cartao.replace('s01-obs-', '')})`)
+        loja.toast('Observação encerrada: ele faz sozinho o que é reversível; o resto continua com cartão.')
         return
       }
       default:

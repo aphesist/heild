@@ -1,6 +1,6 @@
-import { CaretDownIcon, LifebuoyIcon, QuestionIcon, ScalesIcon, SparkleIcon } from '@phosphor-icons/react'
+import { CaretDownIcon, HourglassMediumIcon, LifebuoyIcon, PlugsIcon, QuestionIcon, ScalesIcon, SparkleIcon } from '@phosphor-icons/react'
 import { useLoja } from '@/ambiente/loja'
-import { pedidosAssistente, respostasProntas } from '@/dados/simulacao'
+import { pedidosAssistente } from '@/dados/simulacao'
 import type { Anexo } from '@/dados/tipos'
 import { abrirSuporte } from '@/ambiente/suporte'
 import { useState } from 'react'
@@ -18,8 +18,13 @@ import { useMedia } from '@/hooks/useMedia'
 import { useTema } from '@/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
 import { ListaMensagens } from './ListaMensagens'
-import { mensagensComTime, pedirAoTime } from './pedidoAoTime'
+import { mensagensComTime } from './pedidoAoTime'
+import { useEnviarAoGeral } from './inicio/roteador'
+import { useDemoS01 } from '@/ambiente/demo-s01'
 import type { useHistorico } from './useHistorico'
+
+/** Sugestões da S01: vigiar, pauta, rascunho, cálculo e ajuda do sistema. */
+const sugestoesS01 = ['Me avise quando uma certidão estiver para vencer', 'Monte a pauta da reunião semanal', 'Escreva uma mensagem pedindo o extrato', 'Calcule multa e juros de um DAS atrasado', 'Como convido alguém para a equipe?']
 
 interface Props {
   contexto: string
@@ -55,22 +60,28 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
   // O que o time escreve aqui enquanto faz o pedido (trabalho, retorno, passagens, fechamento) mora na loja.
   const doTime = loja.estado.assistente[atual.id]
   const mensagens = mensagensComTime(atual.mensagens, doTime)
-  // Pedido ao time (demonstração): o Assistente divide, passa aos integrantes, acompanha cada parte aqui e fecha com o resultado.
+  // A mesma decisão do Geral no Início e na gaveta do Chat (roteador da S01).
+  const enviarRoteado = useEnviarAoGeral(conversa)
+  const { limite: limiteAtingido, semIa } = useDemoS01()
   const enviar = (texto: string, anexos: Anexo[]) => {
-    const pedido = pedidosAssistente.find((p) => p.texto.toLowerCase() === texto.trim().toLowerCase())
-    const pronta = respostasProntas.find((r) => r.re.test(texto))
-    if (pedido) {
-      pedirAoTime(pedido, atual.id, enviarBase, loja)
-      return
-    }
-    enviarBase(texto, anexos, !anexos.length && pronta ? { texto: pronta.texto } : undefined)
+    // Sem plano de IA (02, ad. 25): só a ajuda do sistema e as pessoas do suporte.
+    if (semIa) return enviarBase(texto, anexos, { texto: 'Este escritório não tem plano de IA: posso responder sobre o sistema (a ajuda não gasta limite) e chamar o Suporte. Os integrantes ficam parados até o Administrador contratar.' })
+    enviarRoteado(texto, anexos)
   }
+  // Limpar não apaga cartões que ainda esperam decisão (02, ad. 22).
+  const temPendente = (m: (typeof atual.mensagens)[number]) => (m.cartoes ?? []).some((c) => (c.tipo === 'aprovacao' || c.tipo === 'regra' || c.tipo === 'previa_mensagem') && !loja.estado.decisoes[c.id])
+  const limparMantendo = () => {
+    const ficam = atual.mensagens.filter(temPendente).length
+    limpar(temPendente)
+    if (ficam) loja.toast(`Conversa limpa. ${ficam === 1 ? 'Um cartão pendente ficou' : `${ficam} cartões pendentes ficaram`} até você decidir.`)
+  }
+  const limitesVivos = limiteAtingido ? limites.map((l, i) => (i === 0 ? { ...l, usado: 100 } : l)) : limites
   const vazia = mensagens.length === 0
-  const acoes: AcoesCartao = { onAbrirIntegrante, onVerNaAba }
+  const acoes: AcoesCartao = { onAbrirIntegrante, onVerNaAba, onEnviar: (t) => enviar(t, []) }
 
   return (
     <div className="flex h-full flex-col">
-      <BarraConversa className="mx-auto w-full max-w-3xl px-3 pb-1 sm:px-5 ultra:max-w-4xl" atual={atual} historico={historico} contexto={contexto} onAbrir={abrir} onNova={criar} onLimpar={limpar} />
+      <BarraConversa className="mx-auto w-full max-w-3xl px-3 pb-1 sm:px-5 ultra:max-w-4xl" atual={atual} historico={historico} contexto={contexto} onAbrir={abrir} onNova={criar} onLimpar={limparMantendo} />
       <div className="area-rolagem-dupla flex-1 overflow-y-auto px-3 sm:px-5">
         {vazia ? (
           <div className="mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center gap-6 py-8 sm:gap-8 baixa:gap-4 baixa:py-4">
@@ -80,7 +91,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
               <Orb cor={geral.cor} corOlhos={geral.corOlhos} reacao="idle" tamanho={largo ? 64 : 48} modo="follow" animado vivo />
             </h1>
             <div className="flex flex-wrap justify-center gap-2">
-              {sugestoes.map((s, i) => (
+              {[...sugestoes, ...sugestoesS01].map((s, i) => (
                 <button
                   key={s}
                   type="button"
@@ -160,6 +171,25 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
         )}
       </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-3 pb-3 sm:px-5 sm:pb-5 ultra:max-w-4xl">
+        {limiteAtingido && !semIa && (
+          <p role="status" className="bg-sunken flex items-center gap-2 rounded-[16px] px-4 py-2.5 text-sm">
+            <HourglassMediumIcon weight="duotone" className="text-destructive size-5 shrink-0" />
+            <span>
+              <strong className="font-medium">Cheguei ao limite desta janela.</strong> O chat continua; os trabalhos automáticos esperam e voltam {limites[0]?.renova ?? 'na próxima janela'}.
+            </span>
+          </p>
+        )}
+        {semIa && (
+          <p role="status" className="bg-sunken flex items-center gap-2 rounded-[16px] px-4 py-2.5 text-sm">
+            <PlugsIcon weight="duotone" className="text-muted-foreground size-5 shrink-0" />
+            <span className="flex-1">
+              <strong className="font-medium">Sem plano de IA.</strong> A ajuda do sistema e o Suporte continuam.
+            </span>
+            <Button size="sm" variant="outline" className="rounded-full" onClick={() => abrirSuporte()}>
+              Suporte
+            </Button>
+          </p>
+        )}
         <div className="relative">
           <CampoChat
             onEnviar={enviar}
@@ -168,7 +198,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
             // Abaixo de 1024px não há margem: limite e ajuda entram na barra do campo.
             acessorio={
               <span className="flex items-center gap-1.5 lg:hidden">
-                <BotaoLimiteUso limites={limites} plano={plano} />
+                <BotaoLimiteUso limites={limitesVivos} plano={plano} />
                 <Button type="button" variant="ghost" size="icon-sm" className="rounded-full" aria-label="Ajuda" onClick={() => setAjuda(true)}>
                   <QuestionIcon />
                 </Button>
@@ -177,7 +207,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
           />
           {/* Na margem, centrados na altura do campo, os dois no mesmo tamanho e peso. */}
           <div className="absolute inset-y-0 left-full ml-3 hidden flex-col items-center justify-center gap-2 lg:flex">
-            <BotaoLimiteUso limites={limites} plano={plano} className="bg-card shadow-campo hover:bg-raised size-10" tamanhoAnel={22} />
+            <BotaoLimiteUso limites={limitesVivos} plano={plano} className="bg-card shadow-campo hover:bg-raised size-10" tamanhoAnel={22} />
             <Tooltip conteudo="Ajuda" lado="left">
               <Button type="button" variant="ghost" size="icon" className="bg-card shadow-campo hover:bg-raised size-10 rounded-full" aria-label="Ajuda" onClick={() => setAjuda(true)}>
                 <QuestionIcon className="size-6" />
@@ -214,7 +244,10 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
             <li>Peça uma ação: o pedido vai ao integrante do setor, que prepara e devolve um cartão para você aprovar.</li>
             <li>Transmitir, pagar e assinar sempre passam por uma pessoa.</li>
             <li>Cada cliente tem a própria conversa; “Nova conversa” começa do zero, “Limpar” apaga esta.</li>
-            <li>Atalhos: Ctrl+B abre e fecha a barra lateral; Enter envia; Shift+Enter quebra a linha.</li>
+            <li>Peça vigilância em português: “me avise quando uma certidão estiver para vencer”. Ele devolve a regra para você confirmar.</li>
+            <li>Peça um rascunho: “escreva uma mensagem pedindo o extrato”. Nada sai sem a sua aprovação.</li>
+            <li>Perguntas sobre o sistema (“como convido alguém?”) vão à ajuda, que não gasta o seu limite.</li>
+            <li>Atalhos: Ctrl+K busca; Ctrl+J troca o cliente; Ctrl+B abre e fecha a barra lateral; Enter envia; Shift+Enter quebra a linha.</li>
           </ul>
         </GavetaFormulario>
       )}

@@ -18,6 +18,7 @@ import { CartaoRespostaLegal } from './cartoes-legal'
 import { ProgressoTrabalho } from './progresso-trabalho'
 import { BotoesDecisao, ResultadoDecisao, type Decisao } from './botoes-decisao'
 import { CartaoTarefa } from './cartao-tarefa'
+import { CartaoAjuda, CartaoCalculo, CartaoEscolha, CartaoPreviaMensagem, CartaoRegra } from './cartoes-s01'
 
 type Por<T extends Cartao['tipo']> = Extract<Cartao, { tipo: T }>
 
@@ -317,6 +318,8 @@ export interface AcoesCartao {
   onDecidir?: (cartaoId: string, d: Decisao) => void
   onAbrirIntegrante?: (setor: Por<'encaminhamento'>['para']) => void
   onVerNaAba?: (cartaoId: string) => void
+  /** S01: reenviar um texto na mesma conversa (cartão de escolha). */
+  onEnviar?: (texto: string) => void
 }
 
 /** Escolhe o cartão certo pelo tipo. Sem ações de fora, usa os fluxos do escritório (abrir tarefa, CRM, enviar, aprovar com efeito). */
@@ -392,6 +395,16 @@ export function CartaoChat({ cartao, acoes }: { cartao: Cartao; acoes?: AcoesCar
       return <CartaoRetorno cartao={cartao} />
     case 'resposta_legal':
       return <CartaoRespostaLegal resposta={cartao.resposta} />
+    case 'ajuda':
+      return <CartaoAjuda cartao={cartao} />
+    case 'regra':
+      return <CartaoRegra cartao={cartao} />
+    case 'calculo':
+      return <CartaoCalculo cartao={cartao} />
+    case 'previa_mensagem':
+      return <CartaoPreviaMensagem cartao={cartao} />
+    case 'escolha':
+      return <CartaoEscolha cartao={cartao} onEscolher={acoes?.onEnviar} />
     case 'passagem':
       return <CartaoPassagem cartao={cartao} onAbrir={vitrine ? undefined : () => nav.irPara({ modulo: 'inicio', aba: 'time', integrante: integranteDoSetor(cartao.para.setor) })} />
   }
