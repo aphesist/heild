@@ -52,7 +52,7 @@ import { BancoOpcional, useBanco, useTabela } from '@/nucleo/react'
  * docs/wireframe/ARQUITETURA.md.
  */
 
-export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config'
+export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config' | 'interna'
 /** Cenário da demonstração (10, 2): contabilidade com o BPO como módulo, ou escritório só de BPO. */
 export type Cenario = 'contabil_bpo' | 'bpo_puro'
 
@@ -75,6 +75,8 @@ export interface Destino {
   trilha?: string
   /** S02 (C1): a aba Obrigações abre filtrada por este setor dono ("ver todas" do bloco Obrigações do setor). */
   filtroSetor?: SetorIntegrante
+  /** S05: conversa interna aberta (tela cheia `#/interna` ou gaveta do Chat, aba Equipe). */
+  conversaInterna?: string
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */

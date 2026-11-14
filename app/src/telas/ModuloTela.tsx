@@ -3,6 +3,10 @@ import type { ReactNode } from 'react'
 import { BlocoTarefas } from '@/components/compostos/bloco-tarefas'
 import { CampoChat } from '@/components/compostos/campo-chat'
 import { ListaIntegrantes } from '@/components/compostos/lista-integrantes'
+import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
+import { Contador } from '@/components/ui/badge'
+import { useEstadoChat, useNaoLidasInternas, type AbaChat } from '@/ambiente/interna'
+import { AbaEquipe } from './interna/AbaEquipe'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Integrante, Mensagem, Tarefa } from '@/dados/tipos'
@@ -67,34 +71,57 @@ function Lugar({ icone, titulo, texto }: { icone: ReactNode; titulo: string; tex
 
 const AUTOR_GERAL = { setor: 'geral' as const }
 
-/** Gaveta do chat: abre sempre no Geral; integrantes em ícones à direita (03, 2.5). */
+/**
+ * Gaveta do chat: abre sempre no Geral; integrantes em ícones à direita (03, 2.5).
+ * S05 (contrato C8 revisto, DECISOES.md): duas abas no topo, Equipe (comunicação
+ * interna, subplano 11) e Integrantes (o chat com o time); o botão soma as não
+ * lidas das duas; `abrirChat()` abre de qualquer lugar.
+ */
 export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirIntegrante, contexto }: NonNullable<Props['chat']> & { contexto: string }) {
   const { integrante } = useTema()
   const geral = integrante('geral')
   const { mensagens, enviar, pensando } = useConversa(AUTOR_GERAL, conversaGeral, nomeUsuario)
+  const chat = useEstadoChat()
+  const equipe = useNaoLidasInternas().total
+  const doTime = integrantes.reduce((s, i) => s + (i.pendentes ?? 0), 0)
   return (
-    <Sheet>
+    <Sheet open={chat.aberto} onOpenChange={chat.setAberto}>
       <SheetTrigger asChild>
-        <Button className="absolute right-4 bottom-4 rounded-full shadow-lg sm:right-6 sm:bottom-6" size="lg">
+        <Button className="absolute right-4 bottom-4 z-10 rounded-full shadow-lg sm:right-6 sm:bottom-6" size="lg" aria-label={`Chat${equipe + doTime ? `, ${equipe + doTime} não lidas` : ''}`}>
           <ChatCircleIcon /> Chat
+          <Contador valor={equipe + doTime} />
         </Button>
       </SheetTrigger>
       <SheetContent className="gap-0 sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>{geral.nome}</SheetTitle>
-          <SheetDescription>contexto: {contexto}</SheetDescription>
+        <SheetHeader className="gap-3">
+          <SheetTitle className="sr-only">Chat</SheetTitle>
+          <AbasSegmentadas
+            rotulo="Abas do chat"
+            className="self-start"
+            abas={[
+              { id: 'equipe', rotulo: 'Equipe', contador: equipe },
+              { id: 'integrantes', rotulo: 'Integrantes', contador: doTime },
+            ]}
+            ativa={chat.aba}
+            onTrocar={(id) => chat.setAba(id as AbaChat)}
+          />
+          <SheetDescription>{chat.aba === 'equipe' ? 'Conversas da equipe do escritório. Mensagens não se apagam.' : `${geral.nome} · contexto: ${contexto}`}</SheetDescription>
         </SheetHeader>
-        <div className="flex min-h-0 flex-1">
-          <div className="flex min-w-0 flex-1 flex-col">
-            <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
-              <ListaMensagens mensagens={mensagens} acoes={{ onAbrirIntegrante }} />
+        {chat.aba === 'equipe' ? (
+          <AbaEquipe conversa={chat.conversa} onConversa={chat.setConversa} onFechar={() => chat.setAberto(false)} />
+        ) : (
+          <div className="flex min-h-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
+                <ListaMensagens mensagens={mensagens} acoes={{ onAbrirIntegrante }} />
+              </div>
+              <CampoChat className="p-3" onEnviar={enviar} desabilitado={pensando} />
             </div>
-            <CampoChat className="p-3" onEnviar={enviar} desabilitado={pensando} />
+            <div className="border-l px-2 py-4">
+              <ListaIntegrantes variante="icones" integrantes={integrantes} selecionado={integrantes[0]?.id} onSelecionar={(i) => i.setor !== 'geral' && onAbrirIntegrante?.(i.setor)} />
+            </div>
           </div>
-          <div className="border-l px-2 py-4">
-            <ListaIntegrantes variante="icones" integrantes={integrantes} selecionado={integrantes[0]?.id} onSelecionar={(i) => i.setor !== 'geral' && onAbrirIntegrante?.(i.setor)} />
-          </div>
-        </div>
+        )}
       </SheetContent>
     </Sheet>
   )
