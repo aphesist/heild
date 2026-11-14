@@ -16,6 +16,7 @@ import { definirInstabilidade } from '@/servicos'
 import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
+import { LabS05 } from './lab-s05'
 import { papelExibido, useSessaoBruta } from './sessao'
 // S08: controles do BPO (cenário 3, cartão que expira, ERP fora do ar).
 import { SecaoDemonstracaoBpo } from '@/telas/bpo/DemonstracaoBpo'
@@ -230,6 +231,8 @@ export function PainelLab({
                 <PauseCircleIcon className="size-4 shrink-0" /> Simular {escritorio.inatividadeMin} min parado (só no Painel com cliente e no CRM)
               </button>
             )}
+            {/* S05 */}
+            <LabS05 onFeito={() => setAberto(false)} />
           </div>
         )}
         {visao === 'cliente' && (
