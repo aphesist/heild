@@ -45,7 +45,12 @@ export interface Integrante {
   sugestoes?: string[]
 }
 
-export type StatusTarefa = 'a_fazer' | 'em_andamento' | 'aguardando_cliente' | 'concluida'
+/**
+ * Estados da tarefa (01, 4.8; contrato C3 da S04). `aguardando_terceiro` é o
+ * "aguardar órgão" (órgão e protocolo); `em_revisao` espera a segunda pessoa;
+ * `cancelada` sai das filas, com motivo. Rótulos em `rotuloStatus` (rotulos.ts).
+ */
+export type StatusTarefa = 'a_fazer' | 'em_andamento' | 'aguardando_cliente' | 'aguardando_terceiro' | 'em_revisao' | 'concluida' | 'cancelada'
 
 export interface Responsavel {
   tipo: 'pessoa' | 'integrante'
@@ -60,8 +65,10 @@ export interface Tarefa {
   titulo: string
   cliente: string
   setor: SetorIntegrante
-  /** dd/mm */
+  /** dd/mm (prazo interno; sem ele, o legal) */
   prazo: string
+  /** dd/mm do prazo legal, quando difere do interno (S04, C5: o calendário mostra os dois). */
+  prazoLegal?: string
   responsavel?: Responsavel
   status: StatusTarefa
   atrasada?: boolean
@@ -72,6 +79,21 @@ export interface Tarefa {
   conversa?: string
   /** Nasceu de um pedido do cliente pelo app (06, 4.3). */
   origem?: 'pedido_cliente'
+}
+
+/** Origem de uma tarefa criada pela tela (01, 4.8): manual, conversa do CRM, conversa interna, pedido, trilha... (contrato C4). */
+export type OrigemTarefa = 'pessoa' | 'conversa' | 'conversa_interna' | 'pedido_cliente' | 'integrante' | 'trilha' | 'obrigacao' | 'processo'
+
+/** O que `useFluxos().novaTarefa` aceita (contrato C4). Tudo opcional, menos o setor. */
+export interface PedidoNovaTarefa {
+  cliente?: string
+  setor: SetorIntegrante
+  /** Código da atividade do catálogo (DP-005, FIS-009); a gaveta pede se faltar. */
+  atividade?: string
+  titulo?: string
+  origem?: OrigemTarefa
+  /** Id do que originou (conversa, mensagem interna, pedido, processo). */
+  origemRef?: string
 }
 
 /** Aviso do integrante com os três blocos (subplano 02, 3.2; subplano 03, 4.1). */

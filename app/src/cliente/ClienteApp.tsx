@@ -800,7 +800,7 @@ const tiposPedido: { tipo: string; codigo: string; setor: SetorIntegrante; area:
   { tipo: 'Alteração da empresa', codigo: 'SOC-002', setor: 'societario', area: 'societario', campo: 'O que muda' },
   { tipo: 'Dúvida', codigo: 'CON-001', setor: 'consultor', area: 'todos', campo: 'Sua pergunta' },
 ]
-const statusPedido: Record<Tarefa['status'], string> = { a_fazer: 'em andamento no escritório', em_andamento: 'em andamento no escritório', aguardando_cliente: 'aguardando você', concluida: 'concluído' }
+const statusPedido: Record<Tarefa['status'], string> = { a_fazer: 'em andamento no escritório', em_andamento: 'em andamento no escritório', aguardando_cliente: 'aguardando você', aguardando_terceiro: 'em andamento no escritório', em_revisao: 'em andamento no escritório', concluida: 'concluído', cancelada: 'cancelado' }
 
 function Pedidos({ ctx }: { ctx: Ctx }) {
   const loja = useLoja()

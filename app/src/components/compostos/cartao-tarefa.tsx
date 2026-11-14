@@ -1,4 +1,4 @@
-import { WarningIcon, CheckIcon, ClockIcon, PlayIcon, SparkleIcon } from '@phosphor-icons/react'
+import { WarningIcon, CheckIcon, ClockIcon, PlayIcon, SparkleIcon, ProhibitIcon, BuildingsIcon, EyeIcon } from '@phosphor-icons/react'
 import { Avatar } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,13 @@ import { useTema } from '@/theme/ThemeProvider'
 import { rotuloStatus } from './rotulos'
 
 export function StatusTarefaBadge({ tarefa }: { tarefa: Tarefa }) {
-  if (tarefa.atrasada)
+  if (tarefa.status === 'cancelada')
+    return (
+      <Badge variant="outline" className="text-muted-foreground line-through decoration-1">
+        <ProhibitIcon /> {rotuloStatus.cancelada}
+      </Badge>
+    )
+  if (tarefa.atrasada && tarefa.status !== 'concluida')
     return (
       <Badge variant="erro">
         <WarningIcon /> atrasada
@@ -20,6 +26,18 @@ export function StatusTarefaBadge({ tarefa }: { tarefa: Tarefa }) {
       <Badge variant="destaque">
         <ClockIcon /> {rotuloStatus.aguardando_cliente}
         {tarefa.diasAguardando ? ` (${tarefa.diasAguardando} d)` : ''}
+      </Badge>
+    )
+  if (tarefa.status === 'aguardando_terceiro')
+    return (
+      <Badge variant="destaque">
+        <BuildingsIcon /> {rotuloStatus.aguardando_terceiro}
+      </Badge>
+    )
+  if (tarefa.status === 'em_revisao')
+    return (
+      <Badge variant="default">
+        <EyeIcon /> {rotuloStatus.em_revisao}
       </Badge>
     )
   if (tarefa.status === 'concluida')

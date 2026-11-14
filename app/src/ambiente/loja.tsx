@@ -70,6 +70,8 @@ export interface Destino {
   tarefa?: string
   /** Abre a ficha do cliente por cima de onde estiver. */
   ficha?: string
+  /** S04 (C6): abre a trilha de implantação ou de saída do cliente (id do cliente) por cima do Painel. */
+  trilha?: string
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */
