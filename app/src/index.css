@@ -345,6 +345,51 @@
   }
 }
 
+/*
+ * Marca branca na barra lateral (logo completa aberta, logotipo fechada), no ritmo
+ * da marca da Heild: a mesma duração e curva (0,5 s, cubic-bezier(0.22, 1, 0.36, 1))
+ * no movimento principal, o salto de volta (back-out) no logotipo, como na pílula
+ * do I, e a saída rápida com aceleração.
+ * Fechar: a logo completa é cortada da direita até a coluna de 44 px do logotipo e
+ * some; o logotipo cresce no centro da coluna. Abrir: a logo completa aparece e se
+ * revela da esquerda para a direita, acompanhando a barra, e o logotipo encolhe e some.
+ */
+.marca-branca .marca-branca-completa {
+  clip-path: inset(0 0 0 0);
+  transition:
+    clip-path 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.16s ease;
+}
+/* Ao abrir, o logotipo só some depois que a logo completa já apareceu por baixo: o símbolo não pisca. */
+.marca-branca .marca-branca-logotipo {
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+  transition:
+    transform 0.22s cubic-bezier(0.4, 0, 1, 1) 0.04s,
+    opacity 0.14s ease 0.08s;
+}
+.marca-branca[data-aberta='false'] .marca-branca-completa {
+  clip-path: inset(0 calc(100% - 44px) 0 0);
+  opacity: 0;
+  transition:
+    clip-path 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease-out 0.08s;
+}
+.marca-branca[data-aberta='false'] .marca-branca-logotipo {
+  opacity: 1;
+  transform: none;
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s,
+    opacity 0.2s ease 0.16s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marca-branca .marca-branca-completa,
+  .marca-branca .marca-branca-logotipo {
+    transition: none !important;
+  }
+}
+
 /* O check de uma etapa de trabalho entra com um pequeno salto (cartão de trabalho, etapa concluída). */
 .entra-check {
   animation: entra-check 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
