@@ -23,6 +23,7 @@ import {
   documentoParaModelo,
   documentoParaTela,
   horaCurta,
+  idDaMensagem,
   itemParaMensagem,
   mensagemModeloParaTela,
   mensagemTelaParaModelo,
@@ -313,7 +314,7 @@ function aplicar(a: Acao): void {
       return
     }
     case 'crmItemPatch': {
-      const m = banco.obter('mensagem', a.id)
+      const m = banco.obter('mensagem', idDaMensagem(a.conversa, { id: a.id }))
       if (!m || m.conversa_id !== a.conversa) return
       const item = { ...(m.extras?.item as object), ...a.patch } as ItemConversa
       const espelho = item.tipo === 'mensagem' ? { status_entrega: item.entrega ?? m.status_entrega, corpo: item.texto ?? m.corpo } : {}

@@ -154,9 +154,15 @@ export function conversaParaModelo(c: ConversaCrm, q: Consulta, pessoaId?: Id): 
   }
 }
 
+/**
+ * Id da Mensagem: o id do item na conversa, prefixado pela conversa (os dados de
+ * exemplo repetem "m1", "m2" em conversas diferentes; no banco o id é único no escritório).
+ */
+export const idDaMensagem = (conversaId: Id, item: ItemConversa | { id: string }, ordem = 0) => ('id' in item ? `${conversaId}:${item.id}` : `${conversaId}-dia-${ordem}`)
+
 /** Uma linha de conversa (mensagem, nota, dia, marco, cartão) vira uma Mensagem; o item original fica em `extras.item`. */
 export function itemParaMensagem(conversaId: Id, item: ItemConversa, ordem: number): SemRegistro<Mensagem> {
-  const id = 'id' in item ? item.id : `${conversaId}-dia-${ordem}`
+  const id = idDaMensagem(conversaId, item, ordem)
   const base = { id, conversa_id: conversaId, ordem, extras: { item } }
   if (item.tipo === 'mensagem')
     return {
