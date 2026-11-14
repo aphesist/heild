@@ -48,12 +48,8 @@ import { ClientesTela } from './ClientesTela'
 import { ConciliacaoTela } from './financeiro/ConciliacaoTela'
 import { ContasPagarTela } from './financeiro/ContasPagarTela'
 import { VisaoFinTela } from './financeiro/VisaoFinTela'
-import { AprovacoesBpoTela } from './bpo/AprovacoesBpo'
-import { ConfigBpoTela } from './bpo/ConfigBpo'
-import { EntregasBpoTela, RentabilidadeBpoTela, VolumeBpoTela } from './bpo/GestaoBpo'
-import { FilaBpoTela, RotinasBpoTela } from './bpo/OperacaoBpo'
-import { CarteiraBpoTela, VisaoBpoTela } from './bpo/VisaoBpo'
-import { empresaBpo } from '@/dados/bpo'
+// S08: o módulo BPO inteiro (frentes Empresas e Contratantes) sobre as entidades do banco.
+import { ModuloBpo } from './bpo/ModuloBpo'
 import { Moldura } from './Moldura'
 import { EstadoVazio } from '@/components/kit/estados'
 import { useBanco } from '@/nucleo/react'
@@ -218,19 +214,15 @@ function PlataformaInterna(props: Props) {
   // O seletor mostra os clientes do pacote: no BPO, as empresas de BPO; no Painel, só as da contabilidade.
   // Quem não tem Painel (só BPO) vê no cadastro só os clientes do pacote dele.
   const clientesDoModulo = modulo === 'bpo' || bpoPuro || (modulo === 'clientes' && !permissoes.modulos.includes('painel')) ? loja.clientes.filter((c) => c.servicos?.includes('bpo')) : modulo === 'painel' ? loja.clientes.filter((c) => !c.servicos || c.servicos.includes('contabil')) : loja.clientes
-  const empresa = modulo === 'bpo' ? empresaBpo(clienteId ?? undefined) : undefined
-  const propsBpo = {
-    empresa,
-    onEscolher: (id: string | null, a?: string) => {
-      setClienteId(id)
-      if (a) irPara('bpo', a)
-    },
+  const escolherNoBpo = (id: string | null, a?: string) => {
+    setClienteId(id)
+    if (a) irPara('bpo', a)
   }
   const usuarioLateral = { nome: usuario.nome, papel: papelExibido(usuario), setores: [permissoes.resumo] }
   // Telas que ainda leem os dados fixos de src/dados mostram os do escritório completo; nos outros
   // escritórios de exemplo, avisam em vez de misturar dados de outro escritório (ver docs/wireframe/STATUS.md).
   const { escritorio: deExemplo } = useBanco()
-  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
+  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
 
   return (
     <NavegacaoProvider value={{ irPara: navegar }}>
@@ -394,15 +386,7 @@ function PlataformaInterna(props: Props) {
           {modulo === 'financeiro' && aba === 'resultado' && <ResultadoTela />}
           {modulo === 'arquivos' && <ArquivosTela key={`${aba}-${nonce}-${clienteId ?? ''}`} aba={aba === 'recentes' ? 'recentes' : 'pastas'} inicial={pastaAberta ?? (clienteId ? { clienteId, caminho: [] } : undefined)} onConfigurar={() => irPara('config', 'armazenamento')} />}
           {modulo === 'clientes' && <ClientesTela key={aba} aba={aba} clientes={clientesDoModulo} />}
-          {modulo === 'bpo' && aba === 'visao' && <VisaoBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'carteira' && <CarteiraBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'fila' && <FilaBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'rotinas' && <RotinasBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'aprovacoes' && <AprovacoesBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'entregas' && <EntregasBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'volume' && <VolumeBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'rentabilidade' && <RentabilidadeBpoTela {...propsBpo} />}
-          {modulo === 'bpo' && aba === 'configuracao' && <ConfigBpoTela {...propsBpo} />}
+          {modulo === 'bpo' && <ModuloBpo aba={aba} clienteId={clientesDoModulo.some((c) => c.id === clienteId) ? clienteId : null} onEscolher={escolherNoBpo} />}
           {modulo === 'interna' && <ConversasInternasTela key={`${aba}-${nonce}`} conversaInicial={conversaInterna} />}
           {modulo !== 'painel' && modulo !== 'interna' && <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} />}
           {modulo !== 'inicio' && modulo !== 'painel' && modulo !== 'crm' && modulo !== 'timesheet' && modulo !== 'config' && modulo !== 'financeiro' && modulo !== 'arquivos' && modulo !== 'bpo' && modulo !== 'clientes' && modulo !== 'interna' && (

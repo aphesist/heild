@@ -455,6 +455,242 @@ export interface NotaEmitida extends Registro {
   situacao: string
 }
 
+/* ---------- BPO (subplano 10, 3.12 e 4.1) · S08 ---------- */
+
+/** Etapas da conta a pagar do BPO (10, 3.5); a receber usa as suas. */
+export type EtapaContaBpo = 'capturada' | 'conferida' | 'em_lote' | 'aguardando_cliente' | 'aprovada' | 'liberada' | 'paga' | 'recusada' | 'cancelada' | 'aberta' | 'recebida' | 'atrasada'
+export type SituacaoErp = 'ok' | 'atrasada' | 'credencial_vencida' | 'arquivo' | 'livro_proprio' | 'desconectada'
+export type BolaBpo = 'bpo' | 'cliente' | 'contratante' | 'cliente_final' | 'terceiro'
+
+/** Perfil BPO da empresa (10, 3.12): o serviço BPO de um cliente, com estado próprio (F5). */
+export interface BpoPerfil extends Registro {
+  cliente_id: Id
+  situacao: 'onboarding' | 'paralelo' | 'ativo' | 'encerrando' | 'encerrado'
+  escopo: ('pagar' | 'receber' | 'conciliacao' | 'gerencial')[]
+  modo_pagamento: 'M1' | 'M2' | 'M3'
+  /** M2: teto por pagamento agendado por API depois do cartão. */
+  teto_m2?: number | null
+  responsavel_nome: string
+  analista_nome: string
+  caixa_minimo: number
+  paralelo_ate?: Data | null
+  termo_aceito_em?: Data | null
+  /** Passos do onboarding (10, 3.3) já feitos. */
+  onboarding: Record<string, boolean>
+  janela: { abertura: string; dias: string }
+  escalonamento: { aprovador: string; substituto?: string | null; socio: string; lembrete_h: number; substituto_h: number }
+  sla: { meta: number; mes: number; desvios: { texto: string; de: 'bpo' | 'cliente' }[] }
+  volume: { lancamentos: number; conciliacoes: number; pagamentos: number; contas: number; faixa: string; limite: number }
+  honorario: number
+  horas_mes: number
+  fluxo: { entradas: number[]; saidas: number[] }
+  encerramento?: { motivo: string; pedido_em: DataHora; passos: Record<string, boolean> } | null
+}
+
+/** Conexão de ERP da empresa (10, 3.12): o espelho do ERP que o cliente já usa. */
+export interface BpoConexaoErp extends Registro {
+  cliente_id: Id
+  provedor: string
+  /** E1 API, E2 arquivo, E3 livro próprio (10, 3.0). */
+  modo: 'E1' | 'E2' | 'E3'
+  escopo: string
+  situacao: SituacaoErp
+  ultima_sincronizacao?: DataHora | null
+  /** Conector do C9 (saúde do provedor). */
+  conector_id?: string | null
+}
+
+export interface BpoContaBancaria extends Registro {
+  cliente_id: Id
+  nome: string
+  saldo: number
+  /** Quando o saldo foi lido do banco. */
+  saldo_em: DataHora
+  via: 'open_finance' | 'api_banco' | 'ofx' | 'manual'
+  consentimento_ate?: Data | null
+}
+
+/** Fornecedor da empresa (10, 3.12): dados bancários só valem confirmados por segundo canal. */
+export interface BpoFornecedor extends Registro {
+  cliente_id: Id
+  nome: string
+  documento?: string
+  banco?: string
+  risco: 'recorrente' | 'novo' | 'alterado'
+  dados_bancarios_confirmados_em?: Data | null
+  confirmado_por?: string | null
+  canal_confirmacao?: string | null
+}
+
+/** Conta a pagar ou a receber com titular empresa (09, 3.1 com 10, 3.5): espelho do ERP ou livro próprio. */
+export interface BpoConta extends Registro {
+  cliente_id: Id
+  tipo: 'pagar' | 'receber'
+  contraparte: string
+  fornecedor_id?: Id | null
+  categoria: string
+  valor: number
+  vencimento: Data
+  origem: string
+  etapa: EtapaContaBpo
+  digitado_por_id?: Id | null
+  digitado_por_nome: string
+  /** Conferências (10, 3.7 e 3.8): faixa 1, uma pessoa; acima, analista e gestor. Quem digitou não confere. */
+  conferencias: { id?: Id | null; nome: string; gestor: boolean; em: DataHora }[]
+  lote_id?: Id | null
+  alerta?: string | null
+  /** Modo arquivo (E2): a baixa precisa ser lançada no ERP à mão. */
+  lancar_no_erp?: boolean
+  motivo?: string | null
+}
+
+/** Lote de pagamento (10, 3.6): vira cartão no app do cliente. */
+export interface BpoLote extends Registro {
+  cliente_id: Id
+  titulo: string
+  conta_ids: Id[]
+  total: number
+  saldo: number
+  expira_em: DataHora
+  situacao: 'aguardando' | 'parcial' | 'aprovado' | 'recusado' | 'liberado' | 'expirado'
+  aprovacoes: { nome: string; quando: DataHora; canal: 'app' | 'whatsapp' }[]
+  removidos: Id[]
+  motivo?: string | null
+  preparado_por: string
+  conferido_por: string
+  aprovadores_necessarios: number
+  modo_pagamento: 'M1' | 'M2' | 'M3'
+  cartao_id?: Id | null
+}
+
+/** Alçada da empresa (10, 3.9), versionada: proposta pelo escritório, vale só com o aceite do sócio no app. */
+export interface BpoAlcada extends Registro {
+  cliente_id: Id
+  situacao: 'proposta' | 'vigente' | 'recusada' | 'substituida' | 'retirada'
+  faixa1: number
+  faixa2: number
+  janela: string
+  pessoas: Record<string, number>
+  proposta_por_id?: Id | null
+  proposta_por_nome: string
+  aceito_por?: string | null
+  aceito_em?: DataHora | null
+  vigencia_ate?: Data | null
+}
+
+/** Item da fila (10, 4.3 e 5.3): pedido, pagamento ou pendência, com a bola e o SLA. */
+export interface BpoItemFila extends Registro {
+  cliente_id?: Id | null
+  subinquilino_id?: Id | null
+  cliente_final?: string | null
+  departamento?: string | null
+  tipo: 'pedido' | 'pagamento' | 'pendencia' | 'revisao'
+  texto: string
+  codigo: string
+  canal: 'app' | 'whatsapp' | 'email' | 'portal' | 'interno'
+  prazo: Data
+  prazo_legal?: Data | null
+  bola: BolaBpo
+  responsavel_nome?: string | null
+  situacao: 'aberto' | 'resolvido'
+  /** BPO-009: o SLA só começa com o pedido completo. */
+  faltando: string[]
+  sla_inicio?: DataHora | null
+  sla_meta_h: number
+  detalhe?: string
+  valor?: number | null
+  /** Itens compartilhados aparecem no portal do convidado (10, 4.2). */
+  visibilidade: 'interna_bpo' | 'compartilhada'
+}
+
+/** Rotina do BPO por empresa (10, 3.1): itens e periodicidade configuráveis. */
+export interface BpoRotina extends Registro {
+  cliente_id: Id
+  cadencia: 'diária' | 'semanal' | 'mensal'
+  nome: string
+  quando: string
+  codigo: string
+  ativa: boolean
+  feita_em?: DataHora | null
+  feita_por?: string | null
+}
+
+/** Transação do extrato à espera da conciliação (10, 3.10). */
+export interface BpoTransacao extends Registro {
+  cliente_id: Id
+  conta: string
+  data: Data
+  descricao: string
+  valor: number
+  sugestao: string
+  confianca: 'alta' | 'baixa'
+  situacao: 'pendente' | 'conciliada'
+  categoria?: string | null
+  conciliada_por?: string | null
+}
+
+/** Entrega do mês: relatório ao cliente ou ao contratante, fechamento (10, 3.10 e 7.4). */
+export interface BpoEntrega extends Registro {
+  cliente_id?: Id | null
+  subinquilino_id?: Id | null
+  competencia: string
+  tipo: 'relatorio' | 'fechamento' | 'relatorio_contratante'
+  situacao: 'pendente' | 'enviado'
+  documento_id?: Id | null
+  enviado_em?: DataHora | null
+  enviado_por?: string | null
+}
+
+/** Extrato de volume do mês (10, 7.2 e 7.3), com contestação e glosa antes da fatura. */
+export interface BpoVolume extends Registro {
+  cliente_id?: Id | null
+  subinquilino_id?: Id | null
+  competencia: string
+  itens: { unidade: string; quantidade: number; preco: number }[]
+  contestacoes: { id: string; unidade: string; quantidade: number; motivo: string; por: string; situacao: 'aberta' | 'aceita' | 'recusada' }[]
+  situacao: 'aberto' | 'contestado' | 'faturado'
+  extra_valor: number
+  faturado_por?: string | null
+}
+
+/** Subinquilino (01, 2; 10, 4.1): o escritório contratante do BPO entre escritórios. Sem assinatura própria. */
+export interface Subinquilino extends Registro {
+  nome: string
+  cnpj: string
+  tema_id: string
+  /** Departamentos contratados: a mãe só vê estes (BPO-002). */
+  escopo_mae: string[]
+  modo_contato: 'invisivel' | 'marca' | 'direto'
+  convidados_max: number
+  transferencia: 'parcial' | 'total'
+  contrato: { sla_h: number; inicio: Data; preco_empresa: number; aviso_previo_dias: number }
+  suboperadores: string[]
+  procuracoes: { empresa: string; situacao: 'outorgada' | 'certificado_no_cofre' | 'contratante_transmite' }[]
+  clientes_finais: { id: string; nome: string; cnpj: string; regime: string; departamentos: string[] }[]
+  situacao: 'ativo' | 'entrada' | 'saida'
+  sla_mes: number
+  margem: number
+  horas_mes: number
+  honorario_mes: number
+}
+
+/** Convidado do contratante (10, 4.1.1): sem preço por usuário; teto editável. */
+export interface BpoConvidado extends Registro {
+  subinquilino_id: Id
+  nome: string
+  email: string
+  papel: 'responsavel_tecnico' | 'socio' | 'equipe'
+  situacao: 'convidado' | 'ativo' | 'desativado'
+}
+
+/** Parâmetros do BPO do escritório: pesos do audit score (Gestor ajusta), teto do WhatsApp. */
+export interface BpoConfiguracao extends Registro {
+  pesos: Record<string, number>
+  limiar_amarelo: number
+  limiar_vermelho: number
+  teto_whatsapp: number
+}
+
 /* ---------- Catálogo das tabelas ---------- */
 
 export interface Tabelas {
@@ -488,6 +724,22 @@ export interface Tabelas {
   mensagem_interna: MensagemInterna
   registro_tela: RegistroTela
   nota_emitida: NotaEmitida
+  // S08: BPO
+  subinquilino: Subinquilino
+  bpo_configuracao: BpoConfiguracao
+  bpo_perfil: BpoPerfil
+  bpo_conexao_erp: BpoConexaoErp
+  bpo_conta_bancaria: BpoContaBancaria
+  bpo_fornecedor: BpoFornecedor
+  bpo_conta: BpoConta
+  bpo_lote: BpoLote
+  bpo_alcada: BpoAlcada
+  bpo_item_fila: BpoItemFila
+  bpo_rotina: BpoRotina
+  bpo_transacao: BpoTransacao
+  bpo_entrega: BpoEntrega
+  bpo_volume: BpoVolume
+  bpo_convidado: BpoConvidado
 }
 
 export type NomeTabela = keyof Tabelas
@@ -523,6 +775,22 @@ export const nomesTabelas: NomeTabela[] = [
   'mensagem_interna',
   'registro_tela',
   'nota_emitida',
+  // S08: BPO
+  'subinquilino',
+  'bpo_configuracao',
+  'bpo_perfil',
+  'bpo_conexao_erp',
+  'bpo_conta_bancaria',
+  'bpo_fornecedor',
+  'bpo_conta',
+  'bpo_lote',
+  'bpo_alcada',
+  'bpo_item_fila',
+  'bpo_rotina',
+  'bpo_transacao',
+  'bpo_entrega',
+  'bpo_volume',
+  'bpo_convidado',
 ]
 
 /** Dados de uma linha para criar: o banco preenche id, escritório e datas. */

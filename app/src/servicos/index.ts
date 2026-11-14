@@ -4,6 +4,7 @@ import { bancosDemonstracao, nfseDemonstracao, openFinanceDemonstracao, pixDemon
 import { certidoesDemonstracao, consultasLocaisDemonstracao, djenDemonstracao, integraContadorDemonstracao, type ServicoCertidoes, type ServicoConsultasLocais, type ServicoDjen, type ServicoIntegraContador } from './governo'
 import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
+import { erpDemonstracao, type ServicoErp } from './erp'
 import type { InfoServico } from './tipos'
 
 export * from './tipos'
@@ -14,6 +15,7 @@ export type * from './financeiro'
 export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
+export type * from './erp'
 
 /**
  * Os serviços externos do sistema. Hoje todos são de demonstração. Para ligar
@@ -39,6 +41,8 @@ export interface Servicos {
   assinatura: ServicoAssinatura
   armazenamento: ServicoArmazenamento
   djen: ServicoDjen
+  /** S08: ERPs financeiros dos clientes do BPO (API-25). */
+  erp: ServicoErp
 }
 
 export const servicos: Servicos = {
@@ -57,6 +61,7 @@ export const servicos: Servicos = {
   assinatura: assinaturaDemonstracao,
   armazenamento: armazenamentoDemonstracao,
   djen: djenDemonstracao,
+  erp: erpDemonstracao,
 }
 
 const reais = new Set<keyof Servicos>()
@@ -84,6 +89,7 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'openFinance', api: 'API-19', nome: 'Open Finance', descricao: 'Contas do cliente com o consentimento dele.', modo: 'demonstracao', requisito: 'Participante ou agregador autorizado' },
   { id: 'assinatura', api: 'API-22', nome: 'Assinatura eletrônica', descricao: 'Contratos, procurações e termos com validade.', modo: 'demonstracao', requisito: 'Provedor de assinatura (pago por envelope)' },
   { id: 'armazenamento', api: 'API-24', nome: 'Armazenamento em nuvem', descricao: 'Drive, OneDrive, Dropbox ou o da Heild.', modo: 'demonstracao', requisito: 'Conector OAuth da nuvem do escritório' },
+  { id: 'erp', api: 'API-25', nome: 'ERPs dos clientes (BPO)', descricao: 'Espelho do ERP que o cliente já usa: contas, lançamentos e baixas.', modo: 'demonstracao', requisito: 'Conta Azul, Omie e Bling por API com a credencial do cliente; Nibo e Granatum por arquivo' },
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 

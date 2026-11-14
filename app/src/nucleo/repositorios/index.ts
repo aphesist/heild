@@ -3,11 +3,13 @@ import type { Banco } from '../banco/banco'
 import type { CartaoAprovacao, Id, MensagemInterna, NomeTabela, Notificacao, StatusTarefa, Tabelas, Tarefa } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
 import { idDoAtor, nomeDoAtor } from '../permissoes/perfil'
+import { criarReposBpo } from './bpo'
 import { contextoAtual } from './contexto'
 import { agora, novoId, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
 
 export * from './contexto'
 export * from './repositorio'
+export { ehGestorBpo, eventoBpo } from './bpo'
 
 const b = (): Banco => banco
 
@@ -184,6 +186,8 @@ export const repos = {
   ),
   telas: new RepositorioTela(b, regras({ tabela: 'registro_tela', prefixo: 'rt', artigo: 'o estado de tela', ferramentas: { criar: 'tela.lembrar', atualizar: 'tela.lembrar', excluir: 'tela.lembrar' }, exclusao: 'definitiva', rotulo: (r) => r.id, semEvento: true })),
   notas: new Repositorio(b, regras({ tabela: 'nota_emitida', prefixo: 'nf', artigo: 'a nota', ferramentas: { criar: 'nfse.emitir', atualizar: 'nfse.cancelar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Nota emitida não se apaga: cancele.', rotulo: (r) => `NFS-e ${r.numero}`, alvo: (r) => ({ cliente_id: r.cliente_id ?? null }) })),
+  // S08: BPO (subplano 10), regras em ./bpo.ts
+  bpo: criarReposBpo(b),
 }
 
 export type Repos = typeof repos
