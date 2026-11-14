@@ -10,6 +10,7 @@ import { avisoParaModelo, clienteParaModelo, contaParaModelo, conversaParaModelo
 import { montador, type EscritorioDeExemplo } from './comum'
 import { canaisInternos, obrigacoesPadrao } from './padrao'
 import { sementeS02 } from './s02'
+import { sementeS03 } from './s03'
 
 export const ID_ANDRADE = 'esc-andrade'
 
@@ -108,6 +109,7 @@ export function sementeAndrade(): Fotografia {
     { canal: 'ci-fiscal', autor: 'u7', corpo: 'Rita, da Metalúrgica, perguntou do ISS de Sorocaba. Alguém já viu isso?' },
     { canal: 'ci-fiscal', autor: 'u2', corpo: 'Vi: a filial ainda não tem inscrição municipal. Abri tarefa no Societário.' },
   ])
+  sementeS03(foto, add) // S03: cliente MEI (variante MEI da aba Fiscal)
   sementeS02(foto, add) // S02: regras com setor dono e o calendário de 10/2026
   return foto
 }

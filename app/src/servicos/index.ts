@@ -5,6 +5,7 @@ import { certidoesDemonstracao, consultasLocaisDemonstracao, djenDemonstracao, i
 import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
 import type { InfoServico } from './tipos'
+import { calculadoraReformaDemonstracao, conferenciaAssinaturaDemonstracao, coreContabilDemonstracao, leitorExtratosDemonstracao, reinfDemonstracao, sicalcDemonstracao, type ServicoCalculadoraReforma, type ServicoConferenciaAssinatura, type ServicoCoreContabil, type ServicoLeitorExtratos, type ServicoReinf, type ServicoSicalc } from './s03'
 
 export * from './tipos'
 export { definirEscalaLatencia, definirInstabilidade } from './simular'
@@ -14,6 +15,7 @@ export type * from './financeiro'
 export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
+export type * from './s03'
 
 /**
  * Os serviços externos do sistema. Hoje todos são de demonstração. Para ligar
@@ -39,6 +41,13 @@ export interface Servicos {
   assinatura: ServicoAssinatura
   armazenamento: ServicoArmazenamento
   djen: ServicoDjen
+  // S03
+  reinf: ServicoReinf
+  sicalc: ServicoSicalc
+  calculadoraReforma: ServicoCalculadoraReforma
+  coreContabil: ServicoCoreContabil
+  leitorExtratos: ServicoLeitorExtratos
+  conferenciaAssinatura: ServicoConferenciaAssinatura
 }
 
 export const servicos: Servicos = {
@@ -57,6 +66,13 @@ export const servicos: Servicos = {
   assinatura: assinaturaDemonstracao,
   armazenamento: armazenamentoDemonstracao,
   djen: djenDemonstracao,
+  // S03
+  reinf: reinfDemonstracao,
+  sicalc: sicalcDemonstracao,
+  calculadoraReforma: calculadoraReformaDemonstracao,
+  coreContabil: coreContabilDemonstracao,
+  leitorExtratos: leitorExtratosDemonstracao,
+  conferenciaAssinatura: conferenciaAssinaturaDemonstracao,
 }
 
 const reais = new Set<keyof Servicos>()
@@ -85,6 +101,13 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'assinatura', api: 'API-22', nome: 'Assinatura eletrônica', descricao: 'Contratos, procurações e termos com validade.', modo: 'demonstracao', requisito: 'Provedor de assinatura (pago por envelope)' },
   { id: 'armazenamento', api: 'API-24', nome: 'Armazenamento em nuvem', descricao: 'Drive, OneDrive, Dropbox ou o da Heild.', modo: 'demonstracao', requisito: 'Conector OAuth da nuvem do escritório' },
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
+  // S03
+  { id: 'reinf', api: 'API-09', nome: 'EFD-Reinf', descricao: 'Fechamento das retenções e a trava do trimestre.', modo: 'demonstracao', requisito: 'Certificado do cliente ou procuração' },
+  { id: 'sicalc', api: 'API-06', nome: 'Sicalc', descricao: 'DARF avulso e recálculo de guia vencida.', modo: 'demonstracao', requisito: 'Contrato do Integra Contador' },
+  { id: 'calculadoraReforma', api: 'API-15', nome: 'Calculadora de Tributos RFB', descricao: 'Carga de CBS, IBS e IS por ano da transição.', modo: 'demonstracao', requisito: 'API pública da RFB' },
+  { id: 'coreContabil', api: 'API-18', nome: 'Core contábil', descricao: 'Lote de lançamentos ao sistema contábil.', modo: 'demonstracao', requisito: 'Conector do core (ePlugin, Onvio, arquivo)' },
+  { id: 'leitorExtratos', api: 'API-19', nome: 'Leitor de extratos', descricao: 'OFX, CSV, planilha e PDF com deduplicação e sócio reconhecido.', modo: 'demonstracao', requisito: 'Leitura de documentos (OCR) para PDF' },
+  { id: 'conferenciaAssinatura', api: 'API-22', nome: 'Validador de assinatura', descricao: 'Confere a assinatura digital dentro do PDF devolvido.', modo: 'demonstracao', requisito: 'Validador ICP-Brasil' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 
 /** Os serviços (para componentes; o mesmo objeto de `servicos`). */

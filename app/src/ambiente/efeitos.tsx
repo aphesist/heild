@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { useEfeitosS03 } from '@/telas/painel/s03/cartoes'
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -12,9 +13,11 @@ export function useEfeitosCartao() {
   const loja = useLoja()
   const { usuario } = useSessao()
   const conversaDe = useConversaDe()
+  const efeitosS03 = useEfeitosS03() // S03: cartões `s03-...` do Painel B
 
   return (cartao: string, decisao: string) => {
     loja.decidir(cartao, decisao)
+    if (efeitosS03(cartao, decisao)) return // S03
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
     if (!aprovou) {
