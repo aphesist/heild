@@ -63,7 +63,7 @@ function Miniatura({ t, modo }: { t: Tema; modo: ModoCor }) {
 
 /** Seletor único: o tema de fábrica, os exemplos e os temas dos escritórios parceiros, cada um em claro e escuro. */
 export function SeletorTema() {
-  const { tema } = useTema()
+  const { tema, definirTema } = useTema()
   const { escritorio } = useBanco()
   const confirmar = useConfirmar()
   const [c] = useComplementos()
@@ -83,7 +83,11 @@ export function SeletorTema() {
                 title={bloqueado ? 'Precisa do complemento de marca branca' : undefined}
                 onClick={async () => {
                   if (atual) return
-                  if (!(await confirmar({ titulo: `Usar o tema ${t.nome_produto}?`, descricao: 'A página recarrega com o tema novo para toda a equipe e para o app dos clientes. O tema anterior continua no seletor.', acao: 'Usar este tema' }))) return
+                  if (!(await confirmar({ titulo: `Usar o tema ${t.nome_produto}?`, descricao: 'O tema novo vale na hora para toda a equipe e para o app dos clientes. O tema anterior continua no seletor.', acao: 'Usar este tema' }))) return
+                  if (definirTema) {
+                    definirTema(t.id)
+                    return
+                  }
                   try {
                     window.localStorage.setItem(`ui-lab:tema:${escritorio.id}`, JSON.stringify(t.id))
                   } catch {
