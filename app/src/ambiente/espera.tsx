@@ -115,7 +115,7 @@ export function ModoEspera({ desde, onde, onRetomar }: { desde: number; onde: st
     return () => window.removeEventListener('keydown', tecla)
   })
   return (
-    <div role="dialog" aria-modal="false" aria-label="Modo de espera" onPointerDown={(e) => e.target === e.currentTarget && !perguntando && continuar()} className="bg-background/70 absolute inset-0 z-20 flex cursor-pointer items-center justify-center p-4 backdrop-blur-sm">
+    <div role="dialog" aria-modal="false" aria-label="Modo de espera" onPointerDown={(e) => e.target === e.currentTarget && !perguntando && continuar()} className="bg-background/70 pointer-events-auto absolute inset-0 z-[55] flex cursor-pointer items-center justify-center p-4 backdrop-blur-sm">
       <div className="bg-surface shadow-painel flex max-w-sm cursor-default flex-col items-center gap-3 rounded-[24px] p-6 text-center">
         <PauseCircleIcon className="text-muted-foreground size-10" weight="duotone" />
         <p className="text-2xl font-light tracking-tight">Em espera</p>

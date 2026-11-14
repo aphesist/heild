@@ -60,6 +60,7 @@ export function Moldura({ lateral, cabecalho, children, className, semMenuInferi
   }
 
   const aberta = modo === 'fixa' ? preferida : temporaria
+  const celular = modo === 'gaveta' && !semMenuInferior
   const porCima = modo !== 'fixa' && aberta
   const alternar = () => (modo === 'fixa' ? setPreferida((v) => !v) : setTemporaria((v) => !v))
   const fechar = () => setTemporaria(false)
@@ -77,7 +78,6 @@ export function Moldura({ lateral, cabecalho, children, className, semMenuInferi
     return () => window.removeEventListener('keydown', tecla)
   }, [modo, setPreferida])
 
-  const celular = modo === 'gaveta' && !semMenuInferior
   const reservado = modo === 'fixa' ? (aberta ? LARGURA_ABERTA : LARGURA_FECHADA) : modo === 'sobreposta' ? LARGURA_FECHADA : 0
   const estado: EstadoLateral = { aberta, onAlternar: alternar, aoNavegar: () => modo !== 'fixa' && fechar(), modo }
 
@@ -94,6 +94,8 @@ export function Moldura({ lateral, cabecalho, children, className, semMenuInferi
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', stiffness: 420, damping: 40 }}
                 className="absolute inset-y-0 left-0 shadow-2xl"
+                // No celular a gaveta para em cima do menu inferior (o "Mais" continua à vista).
+                style={celular ? { bottom: ALTURA_MENU_INFERIOR } : undefined}
               >
                 {lateral(estado)}
               </motion.div>
