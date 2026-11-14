@@ -103,6 +103,38 @@ Formato de cada registro:
 - **Arquivos compartilhados:** nenhum.
 - **Situação:** proposta.
 
+#### 2026-11-14 · S01 · Roteador do Geral e cartões novos
+
+- **Decisão:** o Geral (Início e gaveta do Chat, `src/telas/inicio/roteador.ts`) decide nesta ordem: pedido ao time; pergunta sobre o sistema → assistente de ajuda (cartão `ajuda`, sem gastar limite); "me avise quando..." → cartão `regra` (sim liga um job do integrante, editar ajusta a regra, não descarta; o que não dá para vigiar volta "não consigo vigiar isso porque..."); "pauta da reunião" → tabela por setor; cálculo → cartão `calculo` com fórmula e origem; "escreva uma mensagem..." → cartão `previa_mensagem` (editar texto e canal; enviar pede aprovação e grava na conversa do setor no CRM); termo solto e ambíguo → cartão `escolha` com dois botões; anexo → Documento do cliente classificado pelo nome, na pasta do tipo (sem cliente, em "recebidos pelo chat"). Os cinco tipos entram em `Cartao` (`src/dados/tipos.ts`, S01 é dona) e `AcoesCartao` ganha `onEnviar`.
+- **Por quê:** 02, 9.1, 9.3, 7.3 e ad. 25; 07, 2. A pasta do anexo é **[sem regra no plano]**: a sessão usou a árvore-modelo pelo tipo do documento.
+- **Telas e ações:** S01-A08 a A24.
+- **Arquivos compartilhados:** `tipos.ts` (cartões novos, dona); `cartoes-chat.tsx` (S01).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Jobs, memória e configuração do integrante por pessoa
+
+- **Decisão:** enquanto não há entidades Job agendado, Memória e configuração do integrante na migração, ficam por pessoa no escritório (`s01:jobs:<usuário>`, `s01:memoria:<usuário>:<integrante>`, `s01:config-integrante:<usuário>:<integrante>`). Jobs guardam os últimos 30 resultados (vazio, ok, parcial, falhou) e o custo estimado, que só Gestor e Administrador veem. Memória do setor só leitura. Configurar mostra as camadas 1 e 2 travadas, setores, clientes, ferramentas por nível (irreversível sempre com aprovação; fora do acesso do dono, "removido"), canal de aviso e teto diário; no celular, só leitura.
+- **Por quê:** 01, 9; 02, 5, 7.1, 11.2. Sem migração nova (regra do SESSOES.md).
+- **Telas e ações:** S01-A29 a A32, A35, A36, A41, A42.
+- **Arquivos compartilhados:** `efeitos.tsx` (casos `s01-promo*` e `s01-obs*`, só acrescentando); `PainelLab.tsx` (seção da S01: limite de IA atingido, sem plano de IA, resumo diário, promoção e fim da observação).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Visão geral lê do banco
+
+- **Decisão:** os widgets da Visão geral saem das tarefas, conversas, eventos e clientes do banco, no escopo da pessoa e do cliente do seletor; o arranjo é por pessoa e separado para cliente e carteira, com o padrão do papel (Administrador com Primeiros passos, Implantações e SLA; Gestor com SLA e Carga prevista; Membro com Horas da semana). O calendário usa o `Calendario` do C5 com filtros (responsável, setor, só atrasadas) e passa `onReprogramar` (passar do prazo legal pede confirmação com a multa estimada; Membro só reprograma as próprias). Outra sessão acrescenta widgets na galeria por `widgetsExtras` (`src/telas/inicio/widgets-inicio.tsx`; o S11 troca o de Prazos do Jurídico). Como a tela migrou, saiu da condição `telaAindaFixa` de `Plataforma.tsx`.
+- **Por quê:** 03, 4; registro da S00 sobre telas com dados fixos.
+- **Telas e ações:** S01-A43 a A51.
+- **Arquivos compartilhados:** `Plataforma.tsx` (tira `inicio/visao` de `telaAindaFixa`; `MinhaConta` recebe `onAlternarModo`), fora do "só acrescentar".
+- **Situação:** proposta.
+
+#### 2026-11-14 · S01 · Espera, presença e claro/escuro lembrado
+
+- **Decisão:** ao continuar da espera com uma ficha de tarefa aberta, a tela pergunta "você estava em X; continuar?"; a espera fica por cima da ficha. Enquanto a tela está em espera, `s01:presenca:<usuário>` vale `em_espera` (a S05 pode ler para a presença na comunicação interna); Suporte e conversas da equipe continuam a um clique. O claro/escuro escolhido no menu da conta ou em Minha conta fica lembrado por pessoa no aparelho e volta ao entrar.
+- **Por quê:** 01, 2.5; 03, 7.3 e ad. 23; 11, 3; 03, 2.2.
+- **Telas e ações:** S01-A68, A84 a A87.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
 ### S02 · Painel A: anatomia, Societário, Obrigações, Notas
 
 ### S03 · Painel B: Fiscal, Contábil, Consultoria
