@@ -79,6 +79,102 @@ Formato de cada registro:
 
 ### S09 · Arquivos, Configurações, entrada e implantação
 
+#### 2026-11-14 · S09 · Contrato C9: estado dos conectores no `registro_tela`
+
+- **Decisão:** `src/dados/conectores.ts` publica o catálogo (27 conectores em oito famílias, com o código da API do mapa), os estados (ativo, somente leitura, erro de credencial, certificado vencido, fora do ar, limite, CAPTCHA, sem resposta, pausado pelo teto, não conectado) e a leitura `estadoConector(id)` / `useEstadoConector(id)` / `useConectores()`, com `frase`, `tom`, `funcionando`, `precisaDePessoa` e `destino` prontos. O estado vivo fica no `registro_tela` (chave `s09:conectores:estado`) por cima do padrão de cada escritório de exemplo; cofre, rotinas, teto e custos ficam em chaves `s09:*` com os nomes de campo do 08. Sem entidade nova nem migração.
+- **Por quê:** S02, S03 e S08 precisavam ler já; o formato dos objetos segue o 08 e vira tabela `conector`/`credencial` no backend sem mudar quem lê.
+- **Telas e ações:** S09-T09, S09-A64 a A70; quem consome: S02 (Notas), S03, S08.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `PainelLab.tsx` (uma seção "Simular conector com problema"), `servicos/index.ts` (serviços `conectores`, `cofre`, `arvore`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Abas novas Conectores e Permissões; exceção por tela libera aba de Configurações
+
+- **Decisão:** Configurações ganha as abas **Conectores** (S09-T09) e **Permissões** (S09-T05, a sugestão do mapa adotada, com a mesma matriz calculada e o "Simular" do Ver como). Configurações continua só do Administrador; uma exceção por tela `config.<aba>` (Conectores, Armazenamento, Integrantes, Permissões) libera aquela aba para outra conta. As ferramentas da S09 usam o setor fictício `configuracoes` para que só Administrador ou a exceção passem na função única.
+- **Por quê:** o pedido diz "Configurações são do Administrador, com exceções"; a ordem do 3.2 confere papel mínimo antes da exceção, então o setor fictício foi o jeito de a exceção valer sem mudar `autorizar`.
+- **Telas e ações:** S09-T05, S09-T09, S09-A32 a A34.
+- **Impacto no plano:** 03, 9 (aba Permissões em Configurações, além da matriz em Gestão).
+- **Arquivos compartilhados:** `modulos.ts` (duas abas), `Plataforma.tsx` (duas linhas de rota e a montagem das telas cheias), `permissoes/telas.ts` (regra acrescentada: `config` aparece com as abas liberadas), `permissoes/ferramentas.ts` (ferramentas novas no fim).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Implantação e Raio-X como telas cheias
+
+- **Decisão:** o assistente de implantação (S09-T13) e o Raio-X do Drive (S09-T14) abrem em tela cheia por cima de qualquer módulo (Escritório › "Continuar implantação"; Armazenamento › "Rodar o Raio-X"; passo 5 da implantação), sem aba própria. O que está aberto fica guardado (recarregar volta) e fecha ao trocar de módulo ou aba. Para a faixa "primeiros passos" da Visão geral (S01), `useImplantacao()` em `src/dados/implantacao.ts` devolve `concluida`.
+- **Por quê:** são fluxos de começo e fim definidos; uma aba a mais em Configurações confundiria o uso diário.
+- **Telas e ações:** S09-T13, S09-T14, S09-A63, S09-A92 a A99.
+- **Impacto no plano:** nenhum (o plano não desenha a tela, "desenho a fazer").
+- **Arquivos compartilhados:** `Plataforma.tsx` (`<TelasCheiasS09 />`).
+- **Situação:** proposta; pedido à S01: esconder a faixa com `useImplantacao().concluida`.
+
+#### 2026-11-14 · S09 · Marca branca é complemento pago; o que fica sem ele
+
+- **Decisão:** a Assinatura mostra o App do cliente **incluído** e dois complementos pagos: marca branca (R$ 290/mês na demonstração) e app na loja (exige marca branca). Sem marca branca, o Tema avisa que o escritório usa a identidade da plataforma, deixa ver e editar o rascunho com a prévia, mas bloqueia publicar, domínio e remetente próprios, e o seletor só deixa o tema de fábrica. Os dois exemplos têm o complemento ligado por padrão.
+- **Por quê:** decisão 6 do mapa; o plano não diz o que fica editável sem o complemento **[sem regra no plano]**.
+- **Telas e ações:** S09-A44, S09-A71, S09-A72.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (`dados/configuracoes.ts` é da S09: App do cliente passou a contratado).
+- **Situação:** proposta (preços são de demonstração).
+
+#### 2026-11-14 · S09 · Seletor único de tema troca recarregando a página
+
+- **Decisão:** o bloco "Tema em uso" lista o tema de fábrica, os exemplos e os temas Condesp e Requinte, cada um com a miniatura do claro e do escuro, no mesmo seletor. Escolher grava a preferência do escritório e recarrega a página.
+- **Por quê:** o tema ativo mora em `App.tsx` (`usePreferencia`), que é da coordenação, e o `ThemeProvider` não expõe troca.
+- **Telas e ações:** S09-T07.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum. **Pedido à coordenação:** expor `definirTema` no contexto do tema para trocar sem recarregar.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Campo `s09` no documento de tela e cartões `s09-*`
+
+- **Decisão:** o tipo `Documento` de tela (dono: S09) ganhou `s09` com origem a confirmar, versões, conflito, sem bytes, conferência de mudança de cliente, quem forçou a visibilidade e a conferência de assinatura; o mapeador de documento leva e traz esse campo em `extras`. Os cartões da S09 (Raio-X em lote, importação de clientes, campanha de acessos, envio de documento) têm chave `s09-*` e o efeito mora em `src/ambiente/efeitos-s09.ts`, chamado por uma linha em `efeitos.tsx`.
+- **Por quê:** guardar o estado do índice sem coluna nova; um efeito só para os cartões da sessão.
+- **Telas e ações:** S09-A04 a A10, A12, A16, A17, A93, A94, A97.
+- **Impacto no plano:** nenhum (o backend vira colunas de `documento` e versões em `versao_de`).
+- **Arquivos compartilhados:** `nucleo/mapeadores/index.ts` (documento), `efeitos.tsx` (uma linha).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Entrada: esqueci a senha, convite e contexto
+
+- **Decisão:** esqueci a senha manda um código de 6 números por e-mail (vale 30 min) e pede senha nova com pelo menos 8 caracteres e um número; as outras sessões caem. O convite abre pelo link (`?convite=<e-mail>`) ou, na demonstração, tocando na conta convidada: nome, senha, segundo fator (obrigatório para Administrador) e o termo da equipe (mensagens internas não se apagam, tempo por cliente, integrantes agem em nome da pessoa, LGPD). Convite vencido mostra o motivo. Quem tem vínculo no BPO Financeiro escolhe o contexto (escritório ou subinquilino) quando há subinquilino.
+- **Por quê:** S09-A89 é **[sem regra detalhada no plano]**; o resto segue 01, 2.4 e 2.5 e 11, 5.
+- **Telas e ações:** S09-A86 a A91.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Perfil de apoio e modelos de papel
+
+- **Decisão:** o perfil de apoio (Recepção, C2-26) é um modelo de exceções que libera até "rascunhar" as abas Societário, Fiscal, DP e Contábil para um Membro de Gestão e Atendimento (separa, consulta, cobra e digitaliza; nunca transmite nem aprova). Recepção, Supervisão e Direção aparecem como modelos no convite e no passo 3 da implantação. "Colaborador" virou "Membro" em Usuários.
+- **Por quê:** E-05 e C2-26; nível "rascunhar" impede o que sai do escritório.
+- **Telas e ações:** S09-A26, S09-A31.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Teto de custo dos conectores pausa na hora
+
+- **Decisão:** salvar um teto abaixo do que já se gastou no mês pausa na hora os conectores pagos (estado "pausado pelo teto") e avisa o Administrador; subir o teto retoma. O teto de IA do escritório é outro (Integrantes), e ao chegar nele a conversa do cliente cai para uma pessoa (D-32).
+- **Por quê:** 08, 10 diz "ao atingir, pausa o que é pago e avisa"; o momento da pausa ao editar é **[sem regra no plano]**.
+- **Telas e ações:** S09-A69, S09-A38.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Gavetas abertas do visualizador fecham o visualizador
+
+- **Decisão:** mover, confirmar origem, resolver conflito e enviar ao cliente, quando pedidos dentro do visualizador, fecham o visualizador e abrem a gaveta; versões e comprovante abrem por cima dele.
+- **Por quê:** a gaveta do formulário fica numa camada abaixo do visualizador (`ui/` é da coordenação).
+- **Telas e ações:** S09-T02.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S09 · Telas de Configurações que continuam com dados fixos no Horizonte
+
+- **Decisão:** Armazenamento, Integrantes, Tema e Assinatura continuam na condição `telaAindaFixa` do escritório Horizonte (a base delas é `dados/configuracoes.ts`, do Andrade). As abas novas (Conectores, Permissões), Escritório, Usuários, Arquivos, Raio-X e implantação usam os dados do escritório aberto.
+- **Por quê:** migrar essas quatro abas para entidades é trabalho do backend (tema, assinatura e integrantes têm entidade própria nas Fundações); o Horizonte serve para ver a implantação em andamento.
+- **Situação:** proposta.
+
 ### S10 · App do cliente
 
 ### S11 · Pacote Jurídico
