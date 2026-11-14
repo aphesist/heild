@@ -41,6 +41,7 @@ import { CobrancaTela } from './financeiro/CobrancaTela'
 import { ContratosTela } from './financeiro/ContratosTela'
 import { ResultadoTela } from './financeiro/ResultadoTela'
 import { PainelTela } from './PainelTela'
+import { pedirFiltroSetor } from '@/dados/obrigacoes-setor'
 import { abasInternas, moduloConfig, modulosLaterais, nomeCompleto, type IdModulo } from './modulos'
 import { ArquivosTela } from './ArquivosTela'
 import { ClientesTela } from './ClientesTela'
@@ -98,6 +99,8 @@ export function Plataforma(props: Props) {
 function PlataformaInterna(props: Props) {
   // Quem abre um link (#/painel/fiscal?cliente=c1) já nasce lá: o endereço vence o padrão.
   const [doEndereco] = useState(destinoInicial)
+  // S02 (C1): link direto para a aba Obrigações filtrada (#/painel/obrigacoes?setor=dp).
+  useState(() => doEndereco?.filtroSetor && pedirFiltroSetor(doEndereco.filtroSetor))
   const { moduloInicial = 'inicio', abaInicial, integranteInicial = 'i-fiscal', clienteInicial = 'c1', comConversa = false, onAlternarModo } = { ...props, ...(doEndereco ? { moduloInicial: doEndereco.modulo, abaInicial: doEndereco.aba, ...(doEndereco.integrante ? { integranteInicial: doEndereco.integrante } : {}), ...(doEndereco.cliente !== undefined ? { clienteInicial: doEndereco.cliente } : {}) } : {}) }
   const { integrante: doTema } = useTema()
   const { usuario, permissoes } = useSessao()
@@ -176,6 +179,8 @@ function PlataformaInterna(props: Props) {
     if (d.integrante) setIntegrante(d.integrante)
     setFaturaAberta(d.fatura)
     setPastaAberta(d.pasta)
+    // S02 (C1): "ver todas" e o link #/painel/obrigacoes?setor= abrem a aba Obrigações filtrada.
+    if (d.filtroSetor) pedirFiltroSetor(d.filtroSetor)
     setNonce((n) => n + 1)
     irPara(d.modulo, d.aba)
   }

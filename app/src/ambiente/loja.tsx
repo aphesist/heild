@@ -73,6 +73,8 @@ export interface Destino {
   ficha?: string
   /** S04 (C6): abre a trilha de implantação ou de saída do cliente (id do cliente) por cima do Painel. */
   trilha?: string
+  /** S02 (C1): a aba Obrigações abre filtrada por este setor dono ("ver todas" do bloco Obrigações do setor). */
+  filtroSetor?: SetorIntegrante
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */
