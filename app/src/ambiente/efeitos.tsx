@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
 import { efeitoCartaoS10 } from '@/cliente/motor' // S10
 
 /**
@@ -16,6 +17,8 @@ export function useEfeitosCartao() {
 
   return (cartao: string, decisao: string) => {
     loja.decidir(cartao, decisao)
+    // S04: cartões da S04 (id s04-...) têm o efeito registrado pela tela que os criou.
+    if (cartao.startsWith('s04-') && aplicarEfeitoS04(cartao, decisao, { loja, usuario, conversaDe })) return
     if (cartao.startsWith('s10-')) return efeitoCartaoS10(loja, cartao, decisao, usuario.nome, conversaDe) // S10: cartões do app do cliente
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
