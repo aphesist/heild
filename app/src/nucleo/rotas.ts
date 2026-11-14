@@ -21,7 +21,7 @@ import type { Destino, IdModulo } from '@/ambiente/loja'
  * escrevem o item aberto (tarefa, ficha); quem navega por link lê daqui.
  */
 
-const modulos: IdModulo[] = ['inicio', 'painel', 'clientes', 'crm', 'timesheet', 'financeiro', 'arquivos', 'bpo', 'config']
+const modulos: IdModulo[] = ['inicio', 'painel', 'clientes', 'crm', 'timesheet', 'financeiro', 'arquivos', 'bpo', 'config', 'interna']
 export type Pagina = 'sistema' | 'app' | 'kit'
 
 export function destinoParaHash(d: Destino): string {
@@ -32,6 +32,7 @@ export function destinoParaHash(d: Destino): string {
   if (d.tarefa) q.set('tarefa', d.tarefa)
   if (d.ficha) q.set('ficha', d.ficha)
   if (d.fatura) q.set('fatura', d.fatura)
+  if (d.conversaInterna) q.set('conversaInterna', d.conversaInterna)
   if (d.pasta) q.set('pasta', `${d.pasta.clienteId ?? '_escritorio'}:${d.pasta.caminho.join('/')}`)
   const busca = q.toString()
   return `#/${d.modulo}${d.aba ? `/${d.aba}` : ''}${busca ? `?${busca}` : ''}`
@@ -45,7 +46,7 @@ export function hashParaDestino(hash: string): Destino | null {
   if (m[2]) d.aba = decodeURIComponent(m[2])
   const cliente = q.get('cliente')
   if (cliente) d.cliente = cliente === 'todos' ? null : cliente
-  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura'] as const) {
+  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'conversaInterna'] as const) {
     const v = q.get(k)
     if (v) d[k] = v
   }
@@ -66,7 +67,7 @@ export function paginaDoHash(hash = typeof window === 'undefined' ? '' : window.
 /* ---------- Estado da rota: a base vem da Plataforma; o item, das gavetas ---------- */
 
 let base: Destino | null = null
-let sub: Pick<Destino, 'conversa' | 'fatura' | 'pasta'> = {}
+let sub: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna'> = {}
 let item: Pick<Destino, 'tarefa' | 'ficha'> = {}
 const composta = (): Destino | null => (base ? { ...base, ...sub, ...item } : null)
 
@@ -112,7 +113,7 @@ export function definirItemDaRota(i: Pick<Destino, 'tarefa' | 'ficha'>) {
  * A tela informa o item aberto dentro dela (a conversa do CRM, a fatura, a
  * pasta): entra no endereço enquanto a tela está montada.
  */
-export function useItemNaRota(parte: Pick<Destino, 'conversa' | 'fatura' | 'pasta'>) {
+export function useItemNaRota(parte: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna'>) {
   const chave = JSON.stringify(parte)
   useEffect(() => {
     sub = JSON.parse(chave)

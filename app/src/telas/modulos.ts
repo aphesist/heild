@@ -5,7 +5,7 @@ import type { AbaSegmentada } from '@/components/compostos/abas-segmentadas'
  * design do usuário). No Início, o Figma tem Assistente e Time; a Visão geral
  * (a Home do 03, seção 4) entrou como terceira aba.
  */
-export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config'
+export type IdModulo = 'inicio' | 'painel' | 'clientes' | 'crm' | 'timesheet' | 'financeiro' | 'arquivos' | 'bpo' | 'config' | 'interna'
 
 export const modulosLaterais: { id: IdModulo; rotulo: string }[] = [
   { id: 'inicio', rotulo: 'Início' },
@@ -86,6 +86,11 @@ export const abasInternas: Record<IdModulo, AbaSegmentada[]> = {
     { id: 'tema', rotulo: 'Tema' },
     { id: 'integrantes', rotulo: 'Integrantes' },
     { id: 'assinatura', rotulo: 'Assinatura' },
+  ],
+  // S05: comunicação interna em tela cheia (subplano 11). Sem item na barra: abre pelo botão Chat (DECISOES.md).
+  interna: [
+    { id: 'conversas', rotulo: 'Conversas' },
+    { id: 'arquivos', rotulo: 'Arquivos' },
   ],
 }
 
