@@ -191,6 +191,11 @@ export const telasSistema = [
   { id: 'aba.financeiro.conciliacao', rotulo: 'Financeiro › Conciliação' },
   { id: 'crm.comunicados', rotulo: 'CRM › Comunicados' },
   { id: 'timesheet.equipe', rotulo: 'Timesheet › Equipe' },
+  // S09: exceções que liberam abas de Configurações para quem não é Administrador.
+  { id: 'config.conectores', rotulo: 'Configurações › Conectores e cofre' },
+  { id: 'config.armazenamento', rotulo: 'Configurações › Armazenamento' },
+  { id: 'config.integrantes', rotulo: 'Configurações › Integrantes' },
+  { id: 'config.permissoes', rotulo: 'Configurações › Permissões' },
 ]
 
 export const convitesPendentes = [{ email: 'carla@contabilandrade.com.br', papel: 'colaborador', setores: 'Fiscal', enviado: 'há 2 dias', expira: 'em 5 dias' }]
@@ -335,7 +340,8 @@ export const modulosAssinatura = [
   { id: 'crm', nome: 'CRM e multiatendimento', descricao: 'WhatsApp, e-mail, leads, comunicados', contratado: true },
   { id: 'timesheet', nome: 'Timesheet', descricao: 'captura de tempo e rentabilidade', contratado: true },
   { id: 'consultor', nome: 'Consultor', descricao: 'base legal, pareceres com citação', contratado: true },
-  { id: 'app_cliente', nome: 'App do cliente', descricao: 'documentos, guias, pedidos, chat', contratado: false },
+  // App do cliente incluído em todo plano (decisão 6 do mapa); a marca branca é complemento (S09).
+  { id: 'app_cliente', nome: 'App do cliente', descricao: 'documentos, guias, pedidos, chat · incluído em todo plano', contratado: true },
 ]
 
 export const planos = [
