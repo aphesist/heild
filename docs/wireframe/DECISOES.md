@@ -257,6 +257,78 @@ Formato de cada registro:
 
 ### S08 · BPO
 
+#### 2026-11-14 · S08 · BPO nas entidades, com as regras nos repositórios
+
+- **Decisão:** o BPO deixa de ler `src/dados/bpo.ts` e de guardar estado em `registro_tela` e passa a morar em quinze tabelas novas (subplano 10, 3.12 e 4.1): `subinquilino`, `bpo_configuracao`, `bpo_perfil`, `bpo_conexao_erp`, `bpo_conta_bancaria`, `bpo_fornecedor`, `bpo_conta`, `bpo_lote`, `bpo_alcada`, `bpo_item_fila`, `bpo_rotina`, `bpo_transacao`, `bpo_entrega`, `bpo_volume`, `bpo_convidado`, com repositórios em `src/nucleo/repositorios/bpo.ts` (acessados por `repos.bpo.*`) e 35 ferramentas `bpo.*`, `conta_pagar.*`, `pagamento_lote.*`, `pagamento.liberar`, `alcada.*`, `fila.*`, `rotina.*`, `erp.*`. As regras B2 e B3 ficam no repositório, não na tela: quem digitou não confere; acima da faixa 1, analista e gestor; quem propôs a alçada não confere; aprovar, recusar e liberar só pela pessoa do cliente; lote expirado nunca paga. Migração nova `20261114180000_s08_bpo.sql` (não aplicada: pede autorização do dono). `src/dados/bpo.ts` fica como fonte da semente (`src/nucleo/semente/s08.ts`). Banco guardado antes recebe só a semente do BPO na primeira abertura do módulo (`garantirSementeBpo`).
+- **Por quê:** o mapa pede os dois modos de dados e o backend em cima sem muita alteração; a sessão decidiu.
+- **Telas e ações:** S08-T01 a T10.
+- **Impacto no plano:** nenhum (implementa 10, 3.12 no wireframe).
+- **Arquivos compartilhados:** `entidades.ts`, `ferramentas.ts`, `repositorios/index.ts` (uma linha `bpo:`), `semente/andrade.ts` (uma linha), `servicos/index.ts` (serviço `erp`), só acrescentando. `Plataforma.tsx`: as nove linhas do BPO viraram uma (`ModuloBpo`) e o BPO saiu de `telaAindaFixa`. `PainelLab.tsx`: uma linha com a seção do BPO. A `loja.tsx` não mudou: `bpoLotes`, `decidirLote` e afins ficam sem uso pelo BPO (a coordenação pode tirar).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · Audit score: critérios fixos, pesos do Gestor, limiares 3 e 8
+
+- **Decisão:** treze critérios fixos (vencido sem aprovação 10, credencial do ERP vencida 8, sincronização atrasada 8, caixa abaixo do mínimo 8, conciliação atrasada há mais de dois dias 5, SLA abaixo da meta 5, lote recusado 5, cartão que vence hoje 3, fornecedor novo ou dados alterados 3, ERP em modo arquivo com baixas para lançar 3, conector do ERP com aviso no C9 3, consentimento do Open Finance a vencer em 30 dias 2, em paralelo 2). Cada critério pesa uma vez por empresa (três fornecedores novos não valem três); a soma 3 ou mais é "atenção", 8 ou mais é "agir hoje". O Gestor ajusta os pesos em Configuração (`bpo_configuracao`, ferramenta `bpo.audit_pesos`); a cor recalcula na hora.
+- **Por quê:** 10, 5.2 manda critérios fixos e pesos do Gestor, com os pesos de partida como premissa a validar; os números são hipótese da sessão.
+- **Telas e ações:** S08-A03, S08-A38; Visão geral, Carteira, cartão do integrante.
+- **Impacto no plano:** 10, 5.2 (pesos de partida a validar no piloto).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · Saúde do ERP vem do conector (C9) por cima da conexão da empresa
+
+- **Decisão:** a situação do ERP de cada empresa é a da conexão dela (credencial, atraso) e, se estiver boa, a do conector do provedor em Configurações › Conectores: fora do ar vira "sincronização atrasada", erro de credencial vira "credencial vencida", limite, CAPTCHA ou lentidão viram aviso (critério "conector com aviso"). Sincronizar com o conector fora do ar mostra o erro e o "Tentar de novo". O painel Demonstração liga "Conta Azul fora do ar".
+- **Por quê:** o C9 é a fonte da saúde dos conectores; a credencial por empresa é do BPO (10, 3.12).
+- **Telas e ações:** S08-A06, A08, A33.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (só leitura de `src/dados/conectores.ts`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · "Hoje" do BPO é 18/11/2026
+
+- **Decisão:** vencimentos, "vence hoje", "vencido sem aprovação" e expiração dos cartões usam o dia da demonstração (18/11/2026, o mesmo do calendário dos dados de exemplo), não o relógio da máquina; registros novos levam o dia 18 com a hora do relógio.
+- **Por quê:** sem isso a demonstração envelhece (tudo vira vencido) e fica diferente em cada máquina.
+- **Telas e ações:** todas do BPO.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · Modo de pagamento vai ao aceite junto com a alçada
+
+- **Decisão:** trocar o modo de pagamento (M1 ou M2 com teto) cria uma proposta de alçada com o modo; o modo só muda no perfil quando o sócio aceita no app, como a alçada (10, 3.8). M3 aparece descrito e desligado.
+- **Por quê:** 10, 3.8 e 5.4 dizem que alçada e modo só valem com o aceite do sócio; o plano não diz como o modo chega ao app.
+- **Telas e ações:** S08-A35, A36, A51.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · Lote com teto do WhatsApp em R$ 3.000 e "Editar e aprovar" refaz a faixa
+
+- **Decisão:** aprovar pelo WhatsApp (código de uso único de seis dígitos) só para lote de até R$ 3.000 (`teto_whatsapp` em `bpo_configuracao`); acima, a mensagem leva ao app com segundo fator. Ao tirar contas do lote, a faixa é recalculada pelo total que ficou (pode deixar de ser reforçada); as contas tiradas voltam para "conferida" com a marca de quem tirou. Recusa volta as contas com o motivo e vira "Refazer" para a equipe; lote expirado devolve as contas para um lote novo.
+- **Por quê:** 04, ad. 19 fala em "teto baixo" sem valor; a sessão decidiu o valor como hipótese.
+- **Telas e ações:** S08-A25, A48, A50.
+- **Impacto no plano:** 04, ad. 19 (valor do teto a validar).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · Frente entre escritórios no mesmo item, com contratantes de exemplo
+
+- **Decisão:** o escritório de exemplo Andrade mostra as duas frentes (seletor "Empresas · Contratantes") porque tem dois contratantes de exemplo (Escritório Alfa Contabilidade e Contábil Beta, nomes fictícios como os do wireframe do plano). O contexto mãe e o contexto do contratante são estado de tela (`s08:contexto`); no contratante, a área do BPO usa o tema dele (variáveis do tema só naquele bloco). Os clientes finais ficam numa lista dentro do subinquilino (simplificação do wireframe: no produto são clientes do subinquilino, DA-01 em dois níveis). O portal do convidado abre por cima do sistema, com o tema do contratante e "entrar como" um convidado; o convidado age como pessoa externa (ferramentas expostas: pedido, revisão, contestação).
+- **Por quê:** a ordem de venda põe o C2 depois, mas o mapa pede todas as fases visíveis; um B que atende escritórios tem as duas frentes (10, 5.2).
+- **Telas e ações:** S08-A05, A12, A39, A43 a A46.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08 · Três cenários na demonstração
+
+- **Decisão:** "contabilidade com BPO" e "só BPO" seguem o seletor de cenário do painel Demonstração; "BPO adicionado" é o interruptor "Pacote BPO ligado neste escritório" (liga o módulo na assinatura e ativa o setor `bpo_financeiro`): no Horizonte, o item BPO aparece vazio, com "Pôr uma empresa no BPO" e os oito passos da implantação.
+- **Por quê:** 10, 2.2 descreve os cenários de venda; contratar o pacote depois é nova linha de assinatura (2.5).
+- **Telas e ações:** S08-A10, S08-T08.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `PainelLab.tsx` (uma linha).
+- **Situação:** proposta.
+
 ### S09 · Arquivos, Configurações, entrada e implantação
 
 ### S10 · App do cliente
