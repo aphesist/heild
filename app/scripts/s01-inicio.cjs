@@ -165,7 +165,7 @@ const { chromium } = require('playwright')
 
   // 8. Visão geral (S01-T05)
   await ir('#/inicio/visao')
-  ok((await texto()).includes('Primeiros passos'), 'Administradora vê Primeiros passos')
+  ok(!(await texto()).includes('Primeiros passos'), 'implantação concluída (S09): sem a faixa Primeiros passos')
   await p.getByRole('radio', { name: 'Todos' }).first().click()
   await espera(400)
   ok((await texto()).includes('Pendências por cliente'), 'pendências por cliente na Visão geral')
