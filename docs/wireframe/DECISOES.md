@@ -121,7 +121,7 @@ Formato de cada registro:
 
 #### 2026-11-14 · S01 · Visão geral lê do banco
 
-- **Decisão:** os widgets da Visão geral saem das tarefas, conversas, eventos e clientes do banco, no escopo da pessoa e do cliente do seletor; o arranjo é por pessoa e separado para cliente e carteira, com o padrão do papel (Administrador com Primeiros passos, Implantações e SLA; Gestor com SLA e Carga prevista; Membro com Horas da semana). O calendário usa o `Calendario` do C5 com filtros (responsável, setor, só atrasadas) e passa `onReprogramar` (passar do prazo legal pede confirmação com a multa estimada; Membro só reprograma as próprias). Outra sessão acrescenta widgets na galeria por `widgetsExtras` (`src/telas/inicio/widgets-inicio.tsx`; o S11 troca o de Prazos do Jurídico). Como a tela migrou, saiu da condição `telaAindaFixa` de `Plataforma.tsx`.
+- **Decisão:** os widgets da Visão geral saem das tarefas, conversas, eventos e clientes do banco, no escopo da pessoa e do cliente do seletor; o arranjo é por pessoa e separado para cliente e carteira, com o padrão do papel (Administrador com Primeiros passos, Implantações e SLA; Gestor com SLA e Carga prevista; Membro com Horas da semana). O calendário usa o `Calendario` do C5 (`semFiltros`, com os filtros da Visão geral: responsável eu, equipe, integrantes ou todos; setor; só atrasadas) e passa `onReprogramar`, que grava com evento e desfazer (quem pode mover e a confirmação da multa ficam no componente da S04). Outra sessão acrescenta widgets na galeria por `widgetsExtras` (`src/telas/inicio/widgets-inicio.tsx`; o S11 troca o de Prazos do Jurídico). Como a tela migrou, saiu da condição `telaAindaFixa` de `Plataforma.tsx`.
 - **Por quê:** 03, 4; registro da S00 sobre telas com dados fixos.
 - **Telas e ações:** S01-A43 a A51.
 - **Arquivos compartilhados:** `Plataforma.tsx` (tira `inicio/visao` de `telaAindaFixa`; `MinhaConta` recebe `onAlternarModo`), fora do "só acrescentar".
@@ -141,6 +141,105 @@ Formato de cada registro:
 
 ### S04 · Painel C: DP, Gestão, tarefas, trilhas, ciclo de vida
 
+#### 2026-11-14 · S04 · Telas da S04 leem a entidade Tarefa; a loja segue sem a cancelada
+
+- **Decisão:** as telas da S04 (bloco de tarefas, ficha, calendário, trilha, Gestão) leem a entidade `tarefa` direto do banco (`src/telas/tarefas/modelo.ts`) e escrevem pelas transições do repositório (`acoesTarefa`), com as regras do 03, 7. O `StatusTarefa` de tela ganhou os três estados (C3) e o mapeador parou de achatar; `loja.tarefas` continua deixando a cancelada fora das filas, para não mudar as contagens das telas de outras sessões. O bloco de tarefas inclui as canceladas do mesmo escopo quando o filtro pede.
+- **Por quê:** a ficha precisa de checklist, prazos legal e interno, origem, `tarefa_pai_id` e motivo, que o formato de tela não tem; decidido pela S04.
+- **Telas e ações:** S04-T03 a T06.
+- **Impacto no plano:** nenhum (implementa 01, 4.8 e 03, 7).
+- **Arquivos compartilhados:** `dados/tipos.ts` (dona de `Tarefa`), `nucleo/mapeadores` (bloco de Tarefa), `ClienteApp.tsx` (só as três chaves novas em `statusPedido`, para compilar).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · Fila de revisão no próprio bloco de tarefas
+
+- **Decisão:** a fila de revisão (01, 4.8) é uma visão do bloco de tarefas ("Revisão · N"), ao lado de Lista, Por responsável e Calendário, em toda aba e na tela "Tarefas"; agrupa por atividade, com aprovar em lote (evento com o nome de quem aprovou) e devolver com comentário obrigatório.
+- **Por quê:** fecha o **[sem regra no plano]** do mapa (S04-A66) sem widget novo em cada aba; quem revisa vê no mesmo lugar onde trabalha. Decidido pela S04.
+- **Telas e ações:** S04-A66 a A68.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · Tela "Tarefas" como gaveta e componente para o celular
+
+- **Decisão:** a tela "Tarefas" (03, 7.1) é o componente `TarefasTela` (`src/telas/tarefas/GavetaTarefas.tsx`), aberto por `useFluxos().verTarefas({ setor?, cliente? })` ("ver todas" do bloco, carteira com as 50 mais urgentes) numa gaveta larga. O destino "Tarefas" do menu inferior do celular (S01) monta o mesmo `TarefasTela`.
+- **Por quê:** não cria aba nem módulo novo (o Painel tem oito abas); S01 é dona da moldura do celular.
+- **Telas e ações:** S04-T03, S04-A39; S01-A06.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `ambiente/fluxos.tsx` (dona; `verTarefas` acrescentado).
+- **Situação:** proposta; S01 liga o destino do celular.
+
+#### 2026-11-14 · S04 · Cartões da S04 num registro só, com efeito por tela
+
+- **Decisão:** os cartões que os integrantes da S04 deixam são linhas de `cartao_aprovacao` com id `s04-…` e `extras.acao` (ex.: `dp.kit`, `ciclo.mudar`); cada tela registra o efeito (`registrarEfeitoS04`). Decidir na ficha, no chat ou no sino vale em todos: `efeitos.tsx` ganhou uma linha que entrega os `s04-…` ao efeito registrado. Recusar devolve a uma pessoa e guarda o comentário como aprendizado do integrante (`s04:integrantes:aprendizados`), mostrado na ficha e na Governança da IA; editar e aprovar grava os argumentos editados.
+- **Por quê:** 03, 7.5 (o cartão é o mesmo registro em toda tela) e 02, 7.2 (o comentário vira aprendizado).
+- **Telas e ações:** S04-A56, S04-A07, A08, A09, A12, A13, A17, A21, A78, A83, A88.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `ambiente/efeitos.tsx` (uma linha acrescentada no começo da função, para os `s04-…`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · Moldes das trilhas com as atividades reais de Entrada e Desligamento
+
+- **Decisão:** o plano dá os códigos dos moldes (a1 a a12, b1 a b11, c1 a c8, e1 a e13, f1 a f11) e só desenha os nomes da transição (03, 8.2). A S04 montou cada marco com uma atividade real das etapas Entrada e Desligamento do `atividades.json` (ex.: b3 acervo = CIC-002; e9 dossiê único = CIC-003; f6 distrato e baixa = SOC-031), com prazo relativo e dependência; acrescentou o molde "reentrada" para reativar ex-cliente (C2-24, CIC-010). Os moldes se editam (prazo relativo, versão nova) em Gestão › Processos.
+- **Por quê:** "nada inventado": usar as atividades do catálogo em vez de criar passos; a tela de editar moldes não tem lugar no plano e o mapa sugere Gestão › Processos.
+- **Telas e ações:** S04-T07, T08, S04-A72, A80, A89.
+- **Impacto no plano:** 03, 8.2 e 8.3 ganham a lista dos marcos (levar ao plano).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · A trilha abre por cima do Painel, não dentro do Societário
+
+- **Decisão:** a trilha (entrada e saída, em abas) é uma gaveta larga aberta por `?trilha=<cliente>` (C6), por `useFluxos().abrirTrilha` e pela faixa de ciclo de vida, com o Painel no Societário por baixo. O estado que não é tarefa (o que o cliente e o contador anterior precisam enviar, revogações, dossiê, dados da saída) fica em `s04:trilha:<entrada|saida>:<cliente>`.
+- **Por quê:** o 03, 8.1 diz que a trilha "mora em Clientes e Societário"; a aba Societário é da S02 e a gaveta chega de qualquer aba sem mexer nela.
+- **Telas e ações:** S04-T07, T08, T09.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `loja.tsx` (`Destino.trilha`) e `nucleo/rotas.ts` (parâmetro `trilha`), só acrescentando.
+- **Situação:** proposta. Pedido à S02: pôr `FaixaCicloDeVida` acima do cabeçalho da aba e, se quiser, `widgetCicloDeVida(ctx)` no catálogo do Societário.
+
+#### 2026-11-14 · S04 · Mudar estado do ciclo é cartão; reativar gera a trilha de reentrada
+
+- **Decisão:** mudar o estado do cliente (por serviço: contábil e BPO, com o do BPO em `cliente.extras.ciclo_bpo`) cria um cartão para o Gestor com os bloqueios; aprovar executa `cliente.mudar_estado`. Encerrar fica bloqueado com tarefas remanescentes ou revogações abertas. Reativar ex-cliente (inativo ou encerrado → em implantação) reabre com o histórico e gera a trilha de reentrada. Iniciar a saída (Gestor) muda direto para em saída ou em baixa, porque o próprio ato é do Gestor (CIC-003). Evento de exceção (falecimento, inapto, falência) vira faixa e tarefa crítica.
+- **Por quê:** 01, ad. 23 (ciclo por serviço); CIC-001 (executar com aprovação do Gestor); 01, 4.2.
+- **Telas e ações:** S04-A81, A85, A87 a A90.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · Visão do DP pelo widget "Visão do DP"
+
+- **Decisão:** as duas visões internas do DP (E-04) trocam no widget "Visão do DP", primeiro da aba; a escolha fica em `s04:dp:visao` e o catálogo da aba muda (Rescisão: simulados, rescisões e kit; Admissão e rotina: quadro, admissões, folha, eSocial, guias e boletos, férias e SST, convenções, recálculo, fases 4 e 5; nas duas: Obrigações do setor, DET e termos). Na carteira, a visão troca entre a folha da carteira e as rescisões e simulados da carteira.
+- **Por quê:** a anatomia da aba (cabeçalho, grade) é da S02; um widget troca a visão sem mexer nela, e a grade já guarda o arranjo.
+- **Telas e ações:** S04-A01.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `padroes.ts` (chaves `dp`, `dp-carteira` e `gestao`, que são da S04).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · Dados do DP e da Gestão em estado de tela até haver entidade
+
+- **Decisão:** admissões, folha, eSocial, guias, boletos, simulados, rescisões e kit, CCT, termos e DET do DP (`s04:dp:<cliente>`) e catálogo local, processos, migração, LGPD, rotinas, ausências e moldes da Gestão (`s04:gestao`) ficam em `registro_tela`, partindo dos dados de exemplo da aba. Sem migração SQL nova.
+- **Por quê:** as Fundações não têm essas entidades; o brief pede não mexer no esquema sem migração. O backend do DP e da Gestão vira tabela própria depois.
+- **Telas e ações:** S04-T01, T02.
+- **Impacto no plano:** nenhum; lista do que vira entidade na entrega da S04.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S04 · "Não era esta", ausências e serviço extra para o Timesheet e o Financeiro
+
+- **Decisão:** "não era esta" grava a correção em `s04:timesheet:nao-era-esta` e o evento; férias com substituto grava em `s04:gestao` (`ausencias`) e repassa as tarefas; serviço extra fica em `tarefa.extras.servico_extra` e `extra_valor`. A S06 lê os dois primeiros para os itens de confirmação e a ausência; a S07 lê o terceiro para faturar (C2-25).
+- **Por quê:** S06 e S07 são donas das telas que consomem; a S04 só marca na tarefa.
+- **Telas e ações:** S04-A22, A52, A62.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta; S06 e S07 consomem.
+
+#### 2026-11-14 · S04 · Multa estimada ao passar do prazo legal é demonstração
+
+- **Decisão:** ao arrastar o prazo interno para depois do legal, o calendário pede confirmação com uma multa estimada por setor, marcada com o selo de demonstração; o valor real vem da regra da obrigação quando ela existir.
+- **Por quê:** 03, 4.1 pede "a multa estimada"; não há regra de multa por obrigação no wireframe.
+- **Telas e ações:** S04-A41.
+- **Impacto no plano:** pede a regra de multa na Obrigação (01, 4.7).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
 ### S05 · CRM e Comunicação interna
 
 #### 2026-11-14 · S05 · Contrato C8 revisto: botão Chat com abas Equipe e Integrantes
@@ -150,6 +249,87 @@ Formato de cada registro:
 - **Telas e ações:** S05-T05, S05-A87; S01-T06 (gaveta do chat), S01-A06 (Chat no celular).
 - **Impacto no plano:** 11, 6 (já registrado pela Coordenação).
 - **Arquivos compartilhados:** `ModuloTela.tsx` (`GavetaChat`, de S01: abas no topo, contador no botão, abertura controlada por `useEstadoChat`); `Plataforma.tsx` (rota `interna`, ícone, parâmetro `conversaInterna`, a gaveta do Chat passa a aparecer em todos os módulos, não só no Painel, e a condição do `ModuloTela` genérico exclui `interna`); `modulos.ts`, `loja.tsx` (`IdModulo` e `Destino.conversaInterna`), `nucleo/rotas.ts` e `nucleo/permissoes/telas.ts` (módulo `interna` para toda a equipe), só acrescentando.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Comunicação interna nas entidades do 01, com o que falta em `extras`
+
+- **Decisão:** conversas, participações e mensagens usam as entidades que a S00 criou (`conversa_interna`, `participacao`, `mensagem_interna`). O que o 11 pede e o modelo ainda não tem fica em `mensagem_interna.extras` (menções, citações com cliente e setor, anexos com o documento criado, áudio e transcrição, autoria do integrante, proposta de tarefa, tarefa criada, resumo, linha do sistema, quem fixou). O "lido até" de cada pessoa por conversa fica em `registro_tela` (`s05:interna:lidas:<usuário>`) e dá as não lidas e o "visto por". Preferências da pessoa (silenciadas, horário de silêncio, presença, aceite do primeiro uso) e as aberturas em investigação também ficam em `registro_tela` com o prefixo `s05:interna:`. Nenhuma migração nova.
+- **Por quê:** a sessão; o backend transforma `extras` em colunas (ou numa tabela de leitura) sem mudar as telas.
+- **Telas e ações:** S05-T05, S05-A65 a A87.
+- **Impacto no plano:** 01, ad. do 11 (Conversa interna, Mensagem com versões, Participação): sugere as colunas `mencoes`, `citacoes`, `anexos`, `audio` e a tabela `leitura_conversa_interna (usuario_id, conversa_id, lido_ate)`.
+- **Arquivos compartilhados:** nenhum além dos já registrados.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Menção a integrante, a setor e a pessoa
+
+- **Decisão:** `@Fiscal` (o nome do integrante no tema) chama o integrante, que responde no fio marcado como IA e com o selo de demonstração; `@equipe Fiscal` avisa todas as pessoas do setor (o mesmo nome curto não serve para os dois); `@Nome` avisa a pessoa com o trecho e, se ela não participa da conversa, leva só o trecho, não o acesso. `#` cita cliente, tarefa, obrigação ou documento, que viram cartões clicáveis; quem não pode ver o cliente (carteira ligada, cliente restrito) ou o setor da tarefa vê "sem acesso".
+- **Por quê:** a sessão; o 11, 3 pede as três menções e não diz como diferenciar setor de integrante.
+- **Telas e ações:** S05-A72, A73, A74.
+- **Impacto no plano:** 11, 3 (forma da menção a setor).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Quando o integrante entra sem ser chamado
+
+- **Decisão:** o integrante só posta sem menção em dois casos: a proposta de tarefa ("parece um pedido: quer que eu crie a tarefa?"), em grupo ou canal, quando a mensagem tem verbo de pedido ou prazo e ninguém chamou outro integrante; e o resumo da manhã, se o Gestor do setor (ou o Administrador) ligar o gatilho no canal: o primeiro a abrir o canal no dia vê o integrante postar o de hoje (no produto, job das 8h). Em conversa pessoal, nunca, salvo chamado. O resumo do fio é pedido pela pessoa e aparece só para ela (não vira mensagem).
+- **Por quê:** 11, 4 e P6; "integrantes não leem conversa pessoal".
+- **Telas e ações:** S05-A76, A77, A78.
+- **Impacto no plano:** nenhum (detalha 11, 4).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Investigação de conversa pessoal pelo Administrador
+
+- **Decisão:** em Preferências › Auditoria, o Administrador vê só os nomes das conversas pessoais de outras pessoas (nunca o conteúdo antes de abrir); abrir exige motivo escrito (`useConfirmar` com motivo), grava evento, posta uma linha do sistema na conversa e avisa os dois pelo sino. A conversa abre só para leitura, com a faixa do motivo, e o Administrador não marca nada como lido.
+- **Por quê:** 11, 5 e P2.
+- **Telas e ações:** S05-A85.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Semente da comunicação interna com horários do dia
+
+- **Decisão:** a semente da S05 (`src/nucleo/semente/s05.ts`, chamada no fim de `andrade.ts` com `// S05`) cria uma conversa pessoal, um grupo com uma saída registrada, um fio com resposta do integrante, citações, uma mensagem editada com a versão e um aviso fixado no Geral, com horários relativos à abertura (como as rotinas do time). Ela também passa as quatro mensagens da semente comum dos canais (`mn-semente-*`) para a manhã do mesmo dia: com a data fixa de 18/11, toda mensagem nova ficava "antes" delas e as não lidas se perdiam.
+- **Por quê:** a sessão; não muda o texto nem o autor da semente comum, só o horário.
+- **Telas e ações:** S05-T05.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/semente/andrade.ts` (uma linha no fim, como pede a ARQUITETURA, seção 4); horário das mensagens `mn-semente-*` da semente comum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Ids únicos das mensagens do CRM e mover mensagem sem apagar
+
+- **Decisão:** os itens de exemplo das conversas do CRM repetiam ids ("m1", "m2") entre conversas; no banco a mensagem tem id único e uma conversa sobrescrevia a outra (salvar a conversa da Padaria tirava mensagens da Metalúrgica). Em `src/dados/crm.ts` os ids passam a levar o id da conversa (`cv2-m1`). "Mover mensagem" (S05-A16) deixa na origem o registro "mensagem movida para…" e copia o item para a conversa certa: nada some.
+- **Por quê:** correção encontrada pela S05 (dona de `Conversa` e de `crm.ts`); quem tinha o banco guardado precisa de "Restaurar demonstração" para ver os ids novos.
+- **Telas e ações:** S05-T01, S05-A16.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (`crm.ts` é da S05).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Itens aprovados do CRM agentificados
+
+- **Decisão:** C2-07: o nome de quem atende entra em toda mensagem de pessoa ao cliente (começo em negrito do WhatsApp, rodapé ou desligado; primeiro nome, completo ou com o setor), configurado em Números › Nome de quem atende, com prévia no campo. C2-08: cada setor conecta a caixa de e-mail (OAuth simulado); o integrante de Atendimento lê entrada, enviados (inclusive o que a equipe mandou pelo Outlook ou Gmail) e anexos, põe o e-mail no fio certo e arquiva o anexo na pasta do cliente com o mês (na conversa, "Ler a caixa de e-mail agora" mostra um caso). D-17: farol do documento enviado (verde abriu, amarelo no prazo, vermelho 3 dias úteis sem abrir) com reenvio por outro canal em cartão. D-18: e-mail devolvido marca a falha e prepara o reenvio por WhatsApp. D-34: o anexo guarda o cliente do documento e o envio é bloqueado com o motivo se o CNPJ não for o da conversa. D-30: modo simulação local (nada grava). D-31 e D-33: categorias que o integrante responde sozinho começam todas desligadas e valem primeiro nos clientes-piloto. C2-13: aniversário da empresa e fim de ano por modelo, marcados como ideia. D-19: opção de PDF de pendências por cliente no comunicado, marcada como "depois".
+- **Por quê:** princípio 7 do mapa (tudo do Leandro e do 2º escritório entra agentificado).
+- **Telas e ações:** S05-A22 a A25, A29, A50, A51, A61, A64.
+- **Impacto no plano:** nenhum (implementa os itens).
+- **Arquivos compartilhados:** nenhum. Configurações novas em `registro_tela` com o prefixo `s05:crm:`.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Ajustes na moldura para o Chat
+
+- **Decisão:** além do registrado no C8 revisto, a `GavetaChat` ganha a prop `acima` (o botão sobe no CRM › Conversas para não cobrir o Enviar) e passa a montar a janela flutuante da comunicação interna (S05-A87), que fica por cima de qualquer módulo no computador; no celular a gaveta faz esse papel. No painel Demonstração entra a seção da S05 (colega menciona você, resumo da manhã, cliente apaga ou edita, e-mail devolvido, documento sem abrir).
+- **Por quê:** a sessão; a S01, ao assumir a moldura, pode mover o botão e a janela para onde preferir mantendo `abrirChat` e `useNaoLidasInternas`.
+- **Telas e ações:** S05-A87; S01-T06.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `ModuloTela.tsx` (`GavetaChat`), `Plataforma.tsx` (uma prop na linha da gaveta), `PainelLab.tsx` (uma linha com `<LabS05>`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · O que ficou guardado mas ainda não age
+
+- **Decisão:** o horário de silêncio da pessoa fica guardado e aparece nas preferências, mas os avisos do sino ainda saem nesse horário (quem publica o aviso é a loja, da coordenação; basta a loja consultar `s05:interna:silencio:<usuário>`). A conversa silenciada já não soma no contador do Chat. A presença dos colegas é de demonstração (a própria pessoa escolhe disponível ou ausente).
+- **Por quê:** não mexer no redutor da loja.
+- **Telas e ações:** S05-A86.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (pedido à coordenação).
 - **Situação:** proposta.
 
 ### S06 · Timesheet

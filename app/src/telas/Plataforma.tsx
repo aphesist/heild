@@ -272,7 +272,7 @@ function PlataformaInterna(props: Props) {
               // Configurações e Financeiro valem para o escritório inteiro (o
               // Financeiro filtra por cliente nas próprias listas).
               cliente={
-                modulo === 'crm' || modulo === 'config' || modulo === 'financeiro' || modulo === 'clientes' ? undefined : (
+                modulo === 'crm' || modulo === 'config' || modulo === 'financeiro' || modulo === 'clientes' || modulo === 'interna' ? undefined : (
                   <SeletorCliente
                     clientes={clientesDoModulo}
                     selecionado={clientesDoModulo.some((c) => c.id === clienteId) ? clienteId : null}
@@ -404,8 +404,8 @@ function PlataformaInterna(props: Props) {
           {modulo === 'bpo' && aba === 'volume' && <VolumeBpoTela {...propsBpo} />}
           {modulo === 'bpo' && aba === 'rentabilidade' && <RentabilidadeBpoTela {...propsBpo} />}
           {modulo === 'bpo' && aba === 'configuracao' && <ConfigBpoTela {...propsBpo} />}
-          {modulo === 'interna' && <ConversasInternasTela key={`${aba}-${nonce}`} conversaInicial={conversaInterna} />}
-          {modulo !== 'painel' && modulo !== 'interna' && <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} />}
+          {modulo === 'interna' && <ConversasInternasTela key={`${aba}-${nonce}`} aba={aba} conversaInicial={conversaInterna} />}
+          {modulo !== 'painel' && modulo !== 'interna' && <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} acima={modulo === 'crm' && aba === 'conversas'} />}
           {modulo !== 'inicio' && modulo !== 'painel' && modulo !== 'crm' && modulo !== 'timesheet' && modulo !== 'config' && modulo !== 'financeiro' && modulo !== 'arquivos' && modulo !== 'bpo' && modulo !== 'clientes' && modulo !== 'interna' && (
             <ModuloTela key={`${modulo}-${aba}`} titulo={rotuloModulo} aba={rotuloAba} cliente={cliente?.nome} chat={{ nomeUsuario: usuario.nome, conversaGeral: [], integrantes, onAbrirIntegrante: abrirIntegrante }} />
           )}

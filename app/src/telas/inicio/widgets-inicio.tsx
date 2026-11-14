@@ -129,13 +129,8 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
   )
   const filtros: FiltrosCalendario = { ...(setorCal !== 'todos' ? { setores: [setorCal] } : {}), soAtrasadas }
   const confirmar = useConfirmar()
-  const reprogramar = async (t: Tarefa, novo: string) => {
-    if (papel === 'colaborador' && t.responsavel?.nome !== usuario.nome) return loja.toast('Você só reprograma as suas tarefas. Peça ao Gestor do setor.')
-    const legal = t.prazoLegal ?? t.prazo
-    if (ordemPrazo(novo) > ordemPrazo(legal)) {
-      const ok = await confirmar({ titulo: `Passar do prazo legal (${legal})?`, descricao: `${t.codigo} · ${t.cliente}: o novo prazo interno (${novo}) fica depois do legal. Multa estimada: 2% do valor mais 0,33% ao dia (Lei 9.430/1996, art. 61). O prazo legal não muda.`, acao: 'Reprogramar mesmo assim', perigo: true })
-      if (!ok) return
-    }
+  // O Calendario (S04, C5) confere quem pode mover e pede confirmação ao passar do prazo legal; aqui só grava.
+  const reprogramar = (t: Tarefa, novo: string) => {
     const antes = t.prazo
     loja.atualizarTarefa(t.id, { prazo: novo })
     loja.registrar(usuario.nome, `tarefa.reprogramar: ${t.codigo} · ${t.cliente} de ${antes} para ${novo} (prazo interno)`)
@@ -236,7 +231,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
             {doCalendario.length === 0 ? (
               <EstadoVazio compacto icone={CalendarBlankIcon} titulo="Nenhuma tarefa nesta semana" descricao="Gere o calendário de dezembro em Painel › Obrigações." />
             ) : (
-              <Calendario tarefas={doCalendario} filtros={filtros} visao={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} onReprogramar={reprogramar} />
+              <Calendario tarefas={doCalendario} filtros={filtros} semFiltros visao={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} onReprogramar={reprogramar} />
             )}
           </div>
         </div>

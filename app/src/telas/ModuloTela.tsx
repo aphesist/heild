@@ -21,10 +21,12 @@ import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
 import { Contador } from '@/components/ui/badge'
 import { useEstadoChat, type AbaChat } from '@/ambiente/interna'
 import { AbaEquipe } from './interna/AbaEquipe'
+import { JanelaFlutuante } from './interna/JanelaFlutuante'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Integrante, Mensagem, Tarefa } from '@/dados/tipos'
 import { useTema } from '@/theme/ThemeProvider'
+import { cn } from '@/lib/utils'
 import { ListaMensagens } from './ListaMensagens'
 
 interface Props {
@@ -94,7 +96,7 @@ function Lugar({ icone, titulo, texto }: { icone: ReactNode; titulo: string; tex
  * O botão soma as não lidas da Equipe e os cartões dos integrantes. No celular
  * o botão some: o destino "Chat" do menu inferior abre a mesma gaveta.
  */
-export function GavetaChat({ nomeUsuario, integrantes: iniciais, onAbrirIntegrante, contexto }: NonNullable<Props['chat']> & { contexto: string }) {
+export function GavetaChat({ nomeUsuario, integrantes: iniciais, onAbrirIntegrante, contexto, acima }: NonNullable<Props['chat']> & { contexto: string; /** S05: sobe o botão onde há campo de escrever no canto (CRM › Conversas). */ acima?: boolean }) {
   const chat = useEstadoChat()
   const contador = useContadorChat()
   const clienteRota = useClienteDaRota()
@@ -115,9 +117,11 @@ export function GavetaChat({ nomeUsuario, integrantes: iniciais, onAbrirIntegran
   )
 
   return (
+    <>
+    <JanelaFlutuante />
     <Sheet open={chat.aberto} onOpenChange={chat.setAberto}>
       <SheetTrigger asChild>
-        <Button className="absolute right-4 bottom-4 z-10 rounded-full shadow-lg max-md:hidden sm:right-6 sm:bottom-6" size="lg" aria-label={`Chat${contador.total ? `, ${contador.total} não lidas` : ''}`}>
+        <Button className={cn('absolute right-4 bottom-4 z-10 rounded-full shadow-lg max-md:hidden sm:right-6 sm:bottom-6', acima && 'bottom-36 sm:bottom-40')} size="lg" aria-label={`Chat${contador.total ? `, ${contador.total} não lidas` : ''}`}>
           <ChatCircleIcon /> Chat
           <Contador valor={contador.total} />
         </Button>
@@ -160,6 +164,7 @@ export function GavetaChat({ nomeUsuario, integrantes: iniciais, onAbrirIntegran
       </SheetContent>
       <NovoIntegranteGaveta aberto={criando} onFechar={() => setCriando(false)} onAtivar={(id) => setAlvoId(id)} />
     </Sheet>
+    </>
   )
 }
 

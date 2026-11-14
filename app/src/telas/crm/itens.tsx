@@ -36,7 +36,7 @@ function StatusEntrega({ entrega }: { entrega?: Entrega }) {
  * cliente à esquerda; do escritório à direita), mensagem automática, resposta
  * do integrante, nota interna, marco, cartão. Orbs sempre parados aqui.
  */
-export function ItemHistorico({ item, onDecidir, onAbrirAnexo }: { item: ItemConversa; onDecidir?: (id: string, acao: string) => void; /** Abre o anexo no visualizador (o mesmo arquivo que está em Arquivos). */ onAbrirAnexo?: (nome: string) => void }) {
+export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { item: ItemConversa; onDecidir?: (id: string, acao: string) => void; /** Abre o anexo no visualizador (o mesmo arquivo que está em Arquivos). */ onAbrirAnexo?: (nome: string) => void; /** S05: farol vermelho ou e-mail devolvido prepara o reenvio por outro canal (D-17, D-18). */ onReenviar?: (id: string) => void }) {
   const aparencia = useAparencia()
 
   if (item.tipo === 'dia')
@@ -101,6 +101,14 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo }: { item: ItemCon
     )
   }
 
+  // Mensagem movida para outra conversa (S05-A16): fica o registro, sem o conteúdo repetido.
+  if (item.movidaPara)
+    return (
+      <div className="text-muted-foreground flex items-center gap-2 self-start text-[11px]">
+        <IconeCanal canal={item.canal} /> mensagem de {item.autor ?? 'cliente'} ({item.hora}) movida para {item.movidaPara}
+      </div>
+    )
+
   // Mensagem
   const doCliente = item.de === 'cliente'
   const t = item.de === 'integrante' && item.setor ? aparencia({ setor: item.setor }) : undefined
@@ -140,7 +148,18 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo }: { item: ItemCon
             </p>
           </div>
         )}
-        {item.texto && <p className={cn('whitespace-pre-wrap', item.apagada && 'line-through opacity-60')}>{item.texto}</p>}
+        {item.daCaixa && (
+          <div className="text-muted-foreground -mt-1 flex items-center gap-1 text-[11px]">
+            <EnvelopeSimpleIcon className="size-3" /> {item.daCaixa === 'enviado' ? 'enviado pela caixa do setor, fora do sistema · registrado pelo integrante' : 'lido da caixa do setor pelo integrante'}
+          </div>
+        )}
+        {item.texto && <p className={cn('whitespace-pre-wrap', item.apagada && 'line-through opacity-60')}>{negritoWhatsApp(item.texto)}</p>}
+        {item.apagada && <p className="text-muted-foreground text-[11px]">apagada pelo cliente no WhatsApp · o texto original fica guardado</p>}
+        {item.editadaDe && (
+          <p className="text-muted-foreground border-foreground/10 border-t pt-1.5 text-[11px]">
+            editada pelo cliente · antes: <span className="line-through">{item.editadaDe}</span>
+          </p>
+        )}
         {item.botoes && (
           <div className="flex flex-wrap gap-1.5">
             {item.botoes.map((b) => (
@@ -159,10 +178,43 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo }: { item: ItemCon
         ))}
       </div>
       {!doCliente && item.de !== 'auto' && (
-        <div className="text-muted-foreground flex items-center gap-1 text-[11px]">
+        <div className="text-muted-foreground flex flex-wrap items-center justify-end gap-1 text-[11px]">
           por {rotuloCanal[item.canal]} <StatusEntrega entrega={item.entrega} />
+          {item.anexos?.length ? <Farol item={item} onReenviar={onReenviar} /> : null}
+        </div>
+      )}
+      {item.devolvido && (
+        <div className="text-destructive flex items-center gap-1.5 text-[11px]">
+          <WarningCircleIcon className="size-3.5" /> e-mail voltou: {item.devolvido}
+          {onReenviar && (
+            <button type="button" className="text-primary cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>
+              preparar reenvio por WhatsApp
+            </button>
+          )}
         </div>
       )}
     </div>
   )
+}
+
+/** Farol de entrega do documento (D-17): verde abriu, amarelo no prazo (3 dias úteis), vermelho passou sem abrir. */
+function Farol({ item, onReenviar }: { item: Extract<ItemConversa, { tipo: 'mensagem' }>; onReenviar?: (id: string) => void }) {
+  const cor = item.farol ?? (item.entrega === 'lida' ? 'verde' : 'amarelo')
+  const rotulo = { verde: 'documento aberto', amarelo: 'no prazo, ainda sem abrir', vermelho: 'passou 3 dias úteis sem abrir' }[cor]
+  return (
+    <span className="flex items-center gap-1">
+      <span aria-hidden className={cn('size-2 rounded-full', cor === 'verde' ? 'bg-success' : cor === 'amarelo' ? 'bg-warning' : 'bg-destructive')} />
+      {rotulo}
+      {cor === 'vermelho' && onReenviar && (
+        <button type="button" className="text-primary cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>
+          preparar reenvio por e-mail
+        </button>
+      )}
+    </span>
+  )
+}
+
+/** *texto* do WhatsApp em negrito (o nome de quem atende sai assim, C2-07). */
+function negritoWhatsApp(texto: string) {
+  return texto.split(/(\*[^*\n]+\*)/g).map((p, i) => (/^\*[^*\n]+\*$/.test(p) ? <strong key={i} className="font-semibold">{p.slice(1, -1)}</strong> : p))
 }

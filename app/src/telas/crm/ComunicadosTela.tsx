@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario, Interruptor } from '@/components/ui/formulario'
 import { comunicados as iniciais, reguas as reguasIniciais, segmentoExemplo as seg, type Comunicado, type Regua } from '@/dados/crm'
 import { cn } from '@/lib/utils'
+import { BoletimMensal, ComunicadosDeData, OpcaoPdfPendencias, ReguasPorCliente, ResultadoComunicado, SegmentoPorTexto } from './s05/comunicados'
+import { FilePdfIcon } from '@phosphor-icons/react'
 
 /**
  * CRM › Comunicados (04, 7): comunicados segmentados pelo perfil, com opt-in,
@@ -20,6 +22,18 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
   const [novo, setNovo] = useState(false)
   const [reguas, setReguas] = usePersistente('crm.reguas', reguasIniciais)
   const [editando, setEditando] = useState<Regua | null>(null)
+  const [resultado, setResultado] = useState<Comunicado | null>(null)
+  // Enviado agora: os números chegam do provedor aos poucos (entregues, lidas, respostas).
+  const acompanhar = (c: Comunicado) => {
+    if (c.status !== 'enviado') return
+    let passo = 0
+    const t = window.setInterval(() => {
+      passo += 1
+      const f = Math.min(1, passo / 6)
+      setLista((xs) => xs.map((x) => (x.id === c.id ? { ...x, entregues: Math.round(c.destinatarios * 0.97 * f), lidas: Math.round(c.destinatarios * 0.71 * f), respostas: Math.round(c.destinatarios * 0.06 * f), falhas: Math.round(c.destinatarios * 0.03 * f) } : x)))
+      if (passo >= 6) window.clearInterval(t)
+    }, 900)
+  }
 
   return (
     <AreaRolagem className="h-full px-3 pb-8 sm:px-5">
@@ -44,15 +58,21 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
               onEnviar={(c) => {
                 setLista((xs) => [c, ...xs])
                 setNovo(false)
+                acompanhar(c)
               }}
             />
           )}
 
           <div className="grid gap-3 md:grid-cols-2">
             {lista.map((c) => (
-              <CartaoComunicado key={c.id} c={c} />
+              <CartaoComunicado key={c.id} c={c} onResultado={() => setResultado(c)} />
             ))}
           </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <BoletimMensal onAgendar={(c) => setLista((xs) => [c, ...xs])} />
+            <ComunicadosDeData />
+          </div>
+          <ResultadoComunicado c={resultado ? (lista.find((x) => x.id === resultado.id) ?? resultado) : null} onFechar={() => setResultado(null)} />
         </section>
 
         <section className="flex flex-col gap-3">
@@ -108,6 +128,9 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
                 </div>
               </li>
             ))}
+            <li className="lg:col-span-2">
+              <ReguasPorCliente reguas={reguas} />
+            </li>
           </ul>
         </section>
       </div>
@@ -204,7 +227,7 @@ function EditorRegua({ inicial, onFechar, onSalvar }: { inicial: Regua; onFechar
 
 const corStatus: Record<Comunicado['status'], 'sucesso' | 'outline' | 'destaque' | 'secondary'> = { enviado: 'sucesso', agendado: 'outline', 'em aprovação': 'destaque', rascunho: 'secondary' }
 
-function CartaoComunicado({ c }: { c: Comunicado }) {
+function CartaoComunicado({ c, onResultado }: { c: Comunicado; onResultado: () => void }) {
   const pct = (n?: number) => (n != null ? Math.round((n / c.destinatarios) * 100) : 0)
   return (
     <article className="bg-surface shadow-cartao flex flex-col gap-3 rounded-[24px] p-4">
@@ -242,6 +265,11 @@ function CartaoComunicado({ c }: { c: Comunicado }) {
       <div className="text-muted-foreground flex items-center gap-2 text-xs">
         <code className="text-[11px]">{c.modelo}</code>
         <span className="ml-auto">{c.quando}</span>
+        {c.status === 'enviado' && (
+          <Button size="sm" variant="ghost" className="h-6 rounded-full px-2 text-xs" onClick={onResultado}>
+            Ver por destinatário
+          </Button>
+        )}
         {c.status === 'enviado' && (c.falhas ?? 0) > 0 && (
           <BotaoFeito size="sm" variant="ghost" className="h-6 rounded-full px-2 text-xs" texto={`Reenviado por e-mail aos ${c.falhas} contatos em que o WhatsApp falhou.`}>
             Reenviar por e-mail aos {c.falhas}
@@ -268,16 +296,19 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
   const [quando, setQuando] = useState<'agora' | 'agendar'>('agendar')
   const [exemplos, setExemplos] = useState(false)
   const [aprovando, setAprovando] = useState(false)
+  const [porTexto, setPorTexto] = useState(false)
+  const [segTexto, setSegTexto] = useState<{ descricao: string; clientes: number } | null>(null)
+  const [pdf, setPdf] = useState(false)
   const preencher = (e: (typeof seg.exemplos)[number]) => seg.texto.replace('{nome}', e.nome).replace('{competencia}', e.competencia).replace('{data}', e.data)
   // Quem recebe, pelo alcance escolhido: todos os clientes, um segmento do perfil ou clientes a dedo.
   const soma = (ids: string[]) => ids.reduce((a, id) => [a[0] + (pessoasPorCliente[id]?.[0] ?? 1), a[1] + (pessoasPorCliente[id]?.[1] ?? 0)], [0, 0])
   const [pessoas, optIn] = alcance === 'todos' ? [168, 151] : alcance === 'segmento' ? [seg.pessoas, seg.optIn] : soma(escolhidos)
-  const nClientes = alcance === 'todos' ? 142 : alcance === 'segmento' ? seg.clientes : escolhidos.length
+  const nClientes = alcance === 'todos' ? 142 : alcance === 'segmento' ? (segTexto?.clientes ?? seg.clientes) : escolhidos.length
   const descricao =
     alcance === 'todos'
       ? 'Todos os clientes ativos'
       : alcance === 'segmento'
-        ? 'Simples · SP · setor Fiscal'
+        ? (segTexto?.descricao ?? 'Simples · SP · setor Fiscal')
         : clientes
             .filter((c) => escolhidos.includes(c.id))
             .map((c) => c.nome)
@@ -313,11 +344,20 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
                 {f}
               </Badge>
             ))}
-            <BotaoFeito type="button" variant="ghost" size="sm" className="text-muted-foreground h-6 rounded-full px-2 text-xs" texto={`Segmento em texto: clientes com ${seg.filtros.join(', ').toLowerCase()}.`}>
+            <Button type="button" variant="ghost" size="sm" className="text-muted-foreground h-6 rounded-full px-2 text-xs" onClick={() => setPorTexto((v) => !v)}>
               <SparkleIcon className="size-3.5" /> descrever em texto
-            </BotaoFeito>
+            </Button>
           </div>
         )}
+        {alcance === 'segmento' && porTexto && (
+          <SegmentoPorTexto
+            onUsar={(d, _p, n) => {
+              setSegTexto({ descricao: d, clientes: n })
+              setPorTexto(false)
+            }}
+          />
+        )}
+        {alcance === 'segmento' && segTexto && <p className="text-xs">Segmento escolhido: <span className="font-medium">{segTexto.descricao}</span></p>}
         {alcance === 'clientes' && (
           <ul className="grid max-w-2xl gap-1 sm:grid-cols-2">
             {clientes.map((c) => (
@@ -354,6 +394,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
             <input type="checkbox" checked={emailSemOptIn} onChange={(e) => setEmailSemOptIn(e.target.checked)} className="accent-foreground size-4" />
             <EnvelopeSimpleIcon className="size-4" /> e-mail para {pessoas - optIn === 1 ? 'quem está' : `os ${pessoas - optIn}`} sem opt-in
           </label>
+          <OpcaoPdfPendencias ligado={pdf} onMudar={setPdf} />
         </div>
       </Linha>
       <Linha rotulo="Quando">
@@ -380,6 +421,11 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
             <div key={e.nome} className="bg-raised shadow-contorno rounded-[14px] px-3 py-2 text-sm">
               <div className="text-muted-foreground text-[11px]">para {e.nome}</div>
               {preencher(e)}
+              {pdf && (
+                <span className="text-muted-foreground mt-1.5 flex items-center gap-1 text-[11px]">
+                  <FilePdfIcon className="size-3.5" /> pendencias-{e.nome.split(' ')[0].toLowerCase()}.pdf
+                </span>
+              )}
             </div>
           ))}
         </div>
