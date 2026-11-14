@@ -11,8 +11,10 @@ import { Horario, MensagensAutomaticas, Sla } from './config/Atendimento'
 import { Etiquetas, RespostasRapidas } from './config/Listas'
 import { Modelos } from './config/Modelos'
 import { ConectarNumero, DetalhesNumero, LigarExperimental } from './config/Numero'
+import { AtendimentoAutomatico, Bloqueados, CaixasEmail, NomeQuemAtende, Privacidade, Provedores } from './s05/ConfigS05'
+import { PlugsConnectedIcon, ProhibitIcon, ShieldCheckIcon, SignatureIcon, SparkleIcon } from '@phosphor-icons/react'
 
-type Secao = 'modelos' | 'automaticas' | 'horario' | 'sla' | 'etiquetas' | 'respostas'
+type Secao = 'modelos' | 'automaticas' | 'horario' | 'sla' | 'etiquetas' | 'respostas' | 'quem' | 'auto' | 'emails' | 'provedores' | 'bloqueados' | 'privacidade'
 
 const secoes: [Secao, string, ReactNode][] = [
   ['modelos', 'Modelos', <ChatTextIcon key="m" />],
@@ -21,6 +23,13 @@ const secoes: [Secao, string, ReactNode][] = [
   ['sla', 'Prazos de resposta', <TimerIcon key="s" />],
   ['etiquetas', 'Etiquetas', <TagIcon key="e" />],
   ['respostas', 'Respostas rápidas', <LightningIcon key="r" />],
+  // S05: o que faltava do 04 e dos itens aprovados (C2-07, C2-08, D-31, D-33).
+  ['quem', 'Nome de quem atende', <SignatureIcon key="q" />],
+  ['auto', 'Respostas do integrante', <SparkleIcon key="i" />],
+  ['emails', 'Caixas de e-mail', <EnvelopeSimpleIcon key="c" />],
+  ['provedores', 'Provedor e saúde', <PlugsConnectedIcon key="p" />],
+  ['bloqueados', 'Bloqueados', <ProhibitIcon key="b" />],
+  ['privacidade', 'Privacidade', <ShieldCheckIcon key="v" />],
 ]
 
 /**
@@ -147,6 +156,12 @@ export function NumerosTela() {
             {secao === 'sla' && <Sla />}
             {secao === 'etiquetas' && <Etiquetas />}
             {secao === 'respostas' && <RespostasRapidas />}
+            {secao === 'quem' && <NomeQuemAtende />}
+            {secao === 'auto' && <AtendimentoAutomatico />}
+            {secao === 'emails' && <CaixasEmail />}
+            {secao === 'provedores' && <Provedores />}
+            {secao === 'bloqueados' && <Bloqueados />}
+            {secao === 'privacidade' && <Privacidade />}
           </div>
         </section>
 

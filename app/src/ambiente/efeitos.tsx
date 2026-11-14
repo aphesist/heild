@@ -2,6 +2,7 @@ import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
 import { efeitoCartaoS02 } from './agente-s02'
+import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -18,6 +19,8 @@ export function useEfeitosCartao() {
     loja.decidir(cartao, decisao)
     // S02: cartões dos integrantes do Painel A executam a ação guardada no cartão e aprendem com a decisão.
     if (cartao.startsWith('s02-')) return efeitoCartaoS02(cartao, decisao, { loja, quem: usuario.nome, usuarioId: usuario.id })
+    // S04: cartões da S04 (id s04-...) têm o efeito registrado pela tela que os criou.
+    if (cartao.startsWith('s04-') && aplicarEfeitoS04(cartao, decisao, { loja, usuario, conversaDe })) return
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
     if (!aprovou) {

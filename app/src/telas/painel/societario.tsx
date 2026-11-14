@@ -21,6 +21,7 @@ import { useTabela } from '@/nucleo/react'
 import { servicos } from '@/servicos'
 import { rotuloEstado, useClienteEntidade } from './anatomia'
 import { widgetObrigacoesDoSetor } from './obrigacoes-setor'
+import { widgetCicloDeVida } from './trilha/faixa'
 import {
   acessosSemente,
   appSemente,
@@ -62,7 +63,9 @@ import type { CtxAba, WidgetsAba } from './tipos'
 export function widgetsSocietario(ctx: CtxAba): WidgetsAba {
   const { cliente } = ctx
   if (!cliente) return { catalogo: [certificadosCarteira, estadosCarteira, acessosCarteira, licencasCarteira, widgetObrigacoesDoSetor('societario', ctx)] }
-  return { catalogo: [ficha, pessoas, acessos, certificados, contrato, processos, comunicacoes, ciclo, app, entrega, repetidos, widgetObrigacoesDoSetor('societario', ctx)] }
+  // O painel de ciclo de vida da S04 (por serviço, reativar, exceções) entra na galeria, ao lado do bloco da S02.
+  const cicloS04 = widgetCicloDeVida(ctx)
+  return { catalogo: [ficha, pessoas, acessos, certificados, contrato, processos, comunicacoes, ciclo, app, entrega, repetidos, widgetObrigacoesDoSetor('societario', ctx), ...(cicloS04 ? [cicloS04] : [])] }
 }
 
 /* ---------- Contexto ---------- */

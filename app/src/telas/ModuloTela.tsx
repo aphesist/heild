@@ -7,10 +7,12 @@ import { AbasSegmentadas } from '@/components/compostos/abas-segmentadas'
 import { Contador } from '@/components/ui/badge'
 import { useEstadoChat, useNaoLidasInternas, type AbaChat } from '@/ambiente/interna'
 import { AbaEquipe } from './interna/AbaEquipe'
+import { JanelaFlutuante } from './interna/JanelaFlutuante'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Integrante, Mensagem, Tarefa } from '@/dados/tipos'
 import { useTema } from '@/theme/ThemeProvider'
+import { cn } from '@/lib/utils'
 import { ListaMensagens } from './ListaMensagens'
 import { useConversa } from './useConversa'
 
@@ -77,7 +79,7 @@ const AUTOR_GERAL = { setor: 'geral' as const }
  * interna, subplano 11) e Integrantes (o chat com o time); o botão soma as não
  * lidas das duas; `abrirChat()` abre de qualquer lugar.
  */
-export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirIntegrante, contexto }: NonNullable<Props['chat']> & { contexto: string }) {
+export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirIntegrante, contexto, acima }: NonNullable<Props['chat']> & { contexto: string; /** S05: sobe o botão onde há campo de escrever no canto (CRM › Conversas). */ acima?: boolean }) {
   const { integrante } = useTema()
   const geral = integrante('geral')
   const { mensagens, enviar, pensando } = useConversa(AUTOR_GERAL, conversaGeral, nomeUsuario)
@@ -85,9 +87,11 @@ export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirInt
   const equipe = useNaoLidasInternas().total
   const doTime = integrantes.reduce((s, i) => s + (i.pendentes ?? 0), 0)
   return (
+    <>
+    <JanelaFlutuante />
     <Sheet open={chat.aberto} onOpenChange={chat.setAberto}>
       <SheetTrigger asChild>
-        <Button className="absolute right-4 bottom-4 z-10 rounded-full shadow-lg sm:right-6 sm:bottom-6" size="lg" aria-label={`Chat${equipe + doTime ? `, ${equipe + doTime} não lidas` : ''}`}>
+        <Button className={cn('absolute right-4 bottom-4 z-10 rounded-full shadow-lg sm:right-6 sm:bottom-6', acima && 'bottom-36 sm:bottom-40')} size="lg" aria-label={`Chat${equipe + doTime ? `, ${equipe + doTime} não lidas` : ''}`}>
           <ChatCircleIcon /> Chat
           <Contador valor={equipe + doTime} />
         </Button>
@@ -124,5 +128,6 @@ export function GavetaChat({ nomeUsuario, conversaGeral, integrantes, onAbrirInt
         )}
       </SheetContent>
     </Sheet>
+    </>
   )
 }

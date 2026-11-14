@@ -168,7 +168,9 @@ const { chromium } = require('playwright')
   await aprovarNaAcoes(p, 'Mudar para')
   await espera(p, 800)
   await p.evaluate(() => document.querySelector('.area-rolagem')?.scrollTo(0, 0))
-  ok(await p.getByText(/A aba fica só para leitura/).first().isVisible(), 'cliente inativo deixa a aba só leitura, com a retenção')
+  ok(await p.getByRole('status', { name: 'Ciclo de vida do cliente' }).first().isVisible(), 'cliente inativo ganha a faixa de ciclo de vida (C6, S04) acima do cabeçalho')
+  await rolar(p, 'Cliente só para leitura')
+  ok(await p.getByText(/Cliente só para leitura/).first().isVisible(), 'e a aba fica só leitura (Ações somem)')
   await shot(p, 'societario-inativo')
 
   /* ---------- Ficha do cliente ---------- */

@@ -53,16 +53,15 @@ export function useClienteEntidade(clienteId?: string): Cliente | undefined {
 export function FaixaEstado({ cliente }: { cliente?: Cliente }) {
   if (!cliente) return null
   const e = cliente.estado_ciclo
-  if (!preContrato(e) && !soLeitura(e) && e !== 'em_baixa' && e !== 'aceito') return null
+  // Implantação, saída, baixa, inativo e encerrado ficam com a faixa de ciclo de vida da S04 (C6), logo acima.
+  if (!preContrato(e) && e !== 'aceito' && e !== 'arquivado') return null
   const desde = ddmm(cliente.estado_ciclo_desde)
   const retencao = Number((cliente.estado_ciclo_desde ?? HOJE_DEMO).slice(0, 4)) + 5
   const texto = preContrato(e)
     ? `Cliente ${rotuloEstado[e]} desde ${desde}: por enquanto só ficha, pessoas e contrato (as outras abas abrem no aceite).`
     : e === 'aceito'
       ? `Contrato aceito em ${desde}: a trilha de implantação começa quando o Gestor mudar para "em implantação".`
-      : e === 'em_baixa'
-        ? `Em baixa desde ${desde}: só as obrigações remanescentes seguem; o resto fica só para leitura.`
-        : `Cliente ${rotuloEstado[e]} em ${desde}; retenção dos documentos até ${retencao}. A aba fica só para leitura.`
+      : `Cliente ${rotuloEstado[e]} em ${desde}; retenção dos documentos até ${retencao}. A aba fica só para leitura.`
   return (
     <div role="status" className={cn('flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm', soLeitura(e) ? 'bg-sunken' : 'bg-warning/10')}>
       {soLeitura(e) ? <LockSimpleIcon className="text-muted-foreground size-4 shrink-0" /> : <ArchiveIcon className="text-warning size-4 shrink-0" />}
