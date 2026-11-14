@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { useEfeitosS03 } from '@/telas/painel/s03/cartoes'
 import { efeitoCartaoS02 } from './agente-s02'
 import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
 import { efeitoS09 } from './efeitos-s09'
@@ -16,9 +17,11 @@ export function useEfeitosCartao() {
   const loja = useLoja()
   const { usuario } = useSessao()
   const conversaDe = useConversaDe()
+  const efeitosS03 = useEfeitosS03() // S03: cartões `s03-...` do Painel B
 
   return (cartao: string, decisao: string) => {
     loja.decidir(cartao, decisao)
+    if (efeitosS03(cartao, decisao)) return // S03
     // S02: cartões dos integrantes do Painel A executam a ação guardada no cartão e aprendem com a decisão.
     if (cartao.startsWith('s02-')) return efeitoCartaoS02(cartao, decisao, { loja, quem: usuario.nome, usuarioId: usuario.id })
     // S04: cartões da S04 (id s04-...) têm o efeito registrado pela tela que os criou.

@@ -6,6 +6,7 @@ import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
 import type { InfoServico } from './tipos'
 import { coresDemonstracao, extensaoDemonstracao, type ServicoCores, type ServicoExtensao } from './timesheet'
+import { calculadoraReformaDemonstracao, conferenciaAssinaturaDemonstracao, coreContabilDemonstracao, leitorExtratosDemonstracao, reinfDemonstracao, sicalcDemonstracao, type ServicoCalculadoraReforma, type ServicoConferenciaAssinatura, type ServicoCoreContabil, type ServicoLeitorExtratos, type ServicoReinf, type ServicoSicalc } from './s03'
 import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores } from './conectores'
 import { cadastrosDemonstracao, type ServicoCadastros } from './cadastros'
 
@@ -18,6 +19,7 @@ export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
 export type * from './timesheet'
+export type * from './s03'
 export type * from './conectores'
 export type * from './cadastros'
 
@@ -47,6 +49,13 @@ export interface Servicos {
   djen: ServicoDjen
   extensao: ServicoExtensao // S06
   cores: ServicoCores // S06
+  // S03
+  reinf: ServicoReinf
+  sicalc: ServicoSicalc
+  calculadoraReforma: ServicoCalculadoraReforma
+  coreContabil: ServicoCoreContabil
+  leitorExtratos: ServicoLeitorExtratos
+  conferenciaAssinatura: ServicoConferenciaAssinatura
   // S09: conectores, cofre e leitura da árvore do Drive (Raio-X).
   conectores: ServicoConectores
   cofre: ServicoCofre
@@ -73,6 +82,13 @@ export const servicos: Servicos = {
   djen: djenDemonstracao,
   extensao: extensaoDemonstracao, // S06
   cores: coresDemonstracao, // S06
+  // S03
+  reinf: reinfDemonstracao,
+  sicalc: sicalcDemonstracao,
+  calculadoraReforma: calculadoraReformaDemonstracao,
+  coreContabil: coreContabilDemonstracao,
+  leitorExtratos: leitorExtratosDemonstracao,
+  conferenciaAssinatura: conferenciaAssinaturaDemonstracao,
   conectores: conectoresDemonstracao,
   cofre: cofreDemonstracao,
   arvore: arvoreDemonstracao,
@@ -108,6 +124,13 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
   { id: 'extensao', api: 'API-26', nome: 'Extensão de navegador (Timesheet)', descricao: 'Mantém o tempo contando nos portais e confirma o cliente pelo CNPJ; envia só o pulso.', modo: 'demonstracao', requisito: 'Extensão Manifest V3 publicada nas lojas do Chrome e do Edge' },
   { id: 'cores', api: 'API-18', nome: 'Cores contábeis (Timesheet)', descricao: 'Tarefas do Alterdata por API; Domínio, Questor e Contmatic por relatório e pasta.', modo: 'demonstracao', requisito: 'Token do ePlugin (Alterdata) e o adaptador de arquivo no backend' },
+  // S03
+  { id: 'reinf', api: 'API-09', nome: 'EFD-Reinf', descricao: 'Fechamento das retenções e a trava do trimestre.', modo: 'demonstracao', requisito: 'Certificado do cliente ou procuração' },
+  { id: 'sicalc', api: 'API-06', nome: 'Sicalc', descricao: 'DARF avulso e recálculo de guia vencida.', modo: 'demonstracao', requisito: 'Contrato do Integra Contador' },
+  { id: 'calculadoraReforma', api: 'API-15', nome: 'Calculadora de Tributos RFB', descricao: 'Carga de CBS, IBS e IS por ano da transição.', modo: 'demonstracao', requisito: 'API pública da RFB' },
+  { id: 'coreContabil', api: 'API-18', nome: 'Core contábil', descricao: 'Lote de lançamentos ao sistema contábil.', modo: 'demonstracao', requisito: 'Conector do core (ePlugin, Onvio, arquivo)' },
+  { id: 'leitorExtratos', api: 'API-19', nome: 'Leitor de extratos', descricao: 'OFX, CSV, planilha e PDF com deduplicação e sócio reconhecido.', modo: 'demonstracao', requisito: 'Leitura de documentos (OCR) para PDF' },
+  { id: 'conferenciaAssinatura', api: 'API-22', nome: 'Validador de assinatura', descricao: 'Confere a assinatura digital dentro do PDF devolvido.', modo: 'demonstracao', requisito: 'Validador ICP-Brasil' },
   { id: 'conectores', api: 'API-06 a API-25', nome: 'Conectores (teste e conexão)', descricao: 'Conectar, testar e reprocessar cada integração.', modo: 'demonstracao', requisito: 'Backend dos conectores (08)' },
   { id: 'cofre', api: 'API-29', nome: 'Cofre de credenciais', descricao: 'Certificados, procurações e tokens guardados fora do banco.', modo: 'demonstracao', requisito: 'Cofre e KMS no backend' },
   { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore do Drive', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo.', modo: 'demonstracao', requisito: 'Conector OAuth do Drive em leitura' },

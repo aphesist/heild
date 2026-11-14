@@ -15,7 +15,8 @@ const fixos: Record<string, { uf: string; municipio: string; sindicato: string; 
 /** Troca, no perfil de exemplo da aba, os campos que dependem do cliente selecionado. */
 export function perfilDoCliente(perfil: CampoPerfil[], clienteId: string, regime: string): CampoPerfil[] {
   if (clienteId === 'c1') return perfil.map((c) => (c.rotulo === 'Regime' ? { ...c, valor: regime } : c))
-  const f = fixos[clienteId]
+  // S03: cliente fora da lista (MEI de exemplo, escritório Horizonte) não quebra o cabeçalho.
+  const f = fixos[clienteId] ?? { uf: 'SP', municipio: '—', sindicato: '—', dataBase: '—', ponto: '—', natureza: regime === 'Pessoa física' ? 'Pessoa física' : regime === 'MEI' ? 'MEI' : 'Sociedade limitada', contas: '—' }
   const fis = fiscalDe(clienteId)
   const dp = dpDe(clienteId)
   const soc = societarioDe(clienteId)

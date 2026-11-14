@@ -238,6 +238,96 @@ Formato de cada registro:
 
 ### S03 · Painel B: Fiscal, Contábil, Consultoria
 
+#### 2026-11-14 · S03 · Estado do Painel B em `usePersistente`, sem entidade nova
+
+- **Decisão:** o que muda com o uso nas abas Fiscal, Contábil e Consultoria (mensagem aberta, conferência, recibo, guia enviada e paga, regras por favorecido e de-para, Kanban, fila de assinatura, rascunhos de parecer) fica em `usePersistente` com chaves `s03:fiscal:<cliente>`, `s03:contabil:<cliente>`, `s03:consultoria:<cliente>`, `s03:contabil:kanban`, `s03:aprendizado` e `s03:avulsos` (tabela `registro_tela`). Tarefas, documentos, conversas, avisos, eventos e cartões usam a loja e os repositórios de sempre. Nenhuma migração nova: funciona igual no modo local e no Supabase.
+- **Por quê:** o mapa (1.6) pede estado novo por `usePersistente`; as entidades próprias (declaração, guia, lançamento, regra) ficam para o backend. Decidido pela S03.
+- **Telas e ações:** S03-T01 a T03.
+- **Impacto no plano:** nenhum (simplificação do wireframe; o backend modela Guia, Declaração, Lançamento e Regra do subplano 01).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Cartões `s03-*` com efeito pelo `useEfeitosS03`
+
+- **Decisão:** todo cartão da S03 tem id `s03-<ação>-<sufixo>` e guarda em `s03:cartao:<id>` o que faz ao ser aprovado. `efeitos.tsx` chama `useEfeitosS03()` logo depois de `loja.decidir` (uma linha); decidir no chat, no sino ou dentro do widget dá no mesmo. Cada decisão conta em `s03:aprendizado` (aprovado, editado, recusado) e o widget mostra "N de 30 decisões" para a promoção do 02, 3.3; transmitir, abrir caixa postal e reabrir competência aparecem como nunca promovíveis.
+- **Por quê:** "acrescentar os efeitos dos seus cartões, com chave prefixada pela sessão" (SESSOES, 2) sem tocar no `switch` existente.
+- **Telas e ações:** S03-A02, A06, A07, A08, A11, A15, A17, A28, A33, A34, A37, A38, A44, A50.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/ambiente/efeitos.tsx` (duas linhas acrescentadas).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Números por cliente: perfil escrito à mão ou gerado estável
+
+- **Decisão:** cada cliente tem um perfil fiscal e contábil (`src/dados/painel-s03.ts`): os do escritório Andrade escritos à mão, coerentes com o resto da demonstração; qualquer outro (Horizonte, cliente novo) gerado de forma estável a partir do id. Simples com as tabelas dos anexos da LC 123/2006 (alíquota efetiva calculada), fator R pela folha, DCTFWeb e Reinf pela folha e receita, guias pelo regime, carteira somando os clientes. Nenhum número repete a Metalúrgica Andrade.
+- **Por quê:** pedido do dono ("os números devem variar por cliente"); lacuna 7 do mapa.
+- **Telas e ações:** S03-T01 a T03.
+- **Impacto no plano:** nenhum (dados fictícios).
+- **Arquivos compartilhados:** nenhum (os blocos `fiscalDetalhe`, `contabilDetalhe` e `consultoriaDetalhe` ficaram como estavam e não são mais lidos pelas abas da S03).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Um cliente MEI no escritório de exemplo
+
+- **Decisão:** a semente do Andrade ganha "Ateliê Linha Fina MEI" (`c-s03-mei`, fictício) em `src/nucleo/semente/s03.ts`, chamado antes da linha da S02 em `andrade.ts` para o calendário de 10/2026 gerar o DAS-MEI. Bancos já guardados precisam de "Resetar o ambiente" para ver o cliente.
+- **Por quê:** a variante MEI da aba Fiscal (FIS-016 a 018) não tinha cliente para aparecer.
+- **Telas e ações:** S03-T01 (MEI).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/semente/andrade.ts` (uma linha e um import, com `// S03`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Pedido à S02: cabeçalho do perfil para cliente fora da lista fixa
+
+- **Decisão:** `perfilDoCliente` (`src/dados/perfil-cliente.ts`, da S02) quebrava a aba inteira para qualquer cliente fora da lista `fixos` (o MEI e os clientes do Horizonte). A S03 pôs um valor padrão de uma linha para não quebrar; a S02 pode trocar pelo perfil real.
+- **Por quê:** a tela caía com erro; correção mínima.
+- **Telas e ações:** S02-T01 (cabeçalho), todas as abas com cliente.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/dados/perfil-cliente.ts` (uma linha, fora da regra "só acrescentar").
+- **Situação:** proposta (pede revisão da S02).
+
+#### 2026-11-14 · S03 · Selo de fase sempre visível nos blocos das fases 4 e 5
+
+- **Decisão:** blocos e itens das fases 4 e 5 (créditos, planejamento, reforma, recuperação, entrada e saída, auditoria, consolidação, renda variável, cripto, espólio) funcionam e levam um selo discreto "fase N", sem depender da opção "Mostrar fases" do mapa (1.4).
+- **Por quê:** o dono pediu todas as fases funcionando; o selo diz o que vem depois sem esconder. Se a coordenação adotar a opção do painel Demonstração, o `SeloFase` (`telas/painel/s03/pecas.tsx`) passa a ler dela.
+- **Telas e ações:** S03-T01 (créditos), T02 (fase 4), T03 (fases 4 e 5).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Regras de negócio que o plano não fixa
+
+- **Decisão:** (1) ciência tácita da caixa postal em 10 dias do recebimento; o cartão de abrir expira na véspera; (2) retenção de 10% sobre lucro acima de R$ 50 mil no mês por sócio (Lei 15.270/2025), com DARF até o dia 20 do mês seguinte **[sem regra no plano: vencimento]**, aviso uma vez por sócio e mês; (3) trava do REINF por trimestre: no Presumido e no Real os meses de trimestre já enviado não aceitam resposta de dúvida (vira complementar); sem REINF (Simples), o trimestre fica aberto; (4) travas do relatório (D-26): faturamento zerado, lucro maior que o faturamento, "outras receitas" acima de 20% do faturamento **[sem regra no plano: limite]** e balancete com débito ≠ crédito; corrigir ou justificar libera; (5) a conferência da assinatura (D-16) exige assinatura digital dentro do PDF, e "devolver sem assinatura digital" mostra a recusa; (6) FIS-010 (enviar DAS e DAS-MEI) é "executar" porque está promovida em Configurações › Integrantes; as outras guias saem por cartão; (7) IRPF, ECD e ECF são "só pessoa": botão com confirmação, nunca cartão do integrante.
+- **Por quê:** o mapa marca essas regras sem detalhe; decididas pela S03 como hipótese para os contadores validarem.
+- **Telas e ações:** S03-A02, A08, A19, A31, A32, A35 a A39.
+- **Impacto no plano:** 03, 6.4 e 6.6; lista do Leandro (D-14, D-15, D-16, D-26), a confirmar.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · "Fora do escopo" para o Financeiro e serviços novos
+
+- **Decisão:** marcar uma pergunta fora do escopo grava em `usePersistente('s03:avulsos')` a lista `{ id, cliente, clienteId, assunto, quando, por }` e leva ao Financeiro › Contratos; a S07 pode ler essa chave para propor o avulso. Serviços simulados novos em `src/servicos/s03.ts` (EFD-Reinf, Sicalc, Calculadora RFB, core contábil, leitor de extratos, validador de assinatura), com uma linha cada em `servicos` e em `catalogoServicos`. Ferramentas novas `fiscal.*`, `contabil.*` e `consultoria.*` no fim de `ferramentas.ts`.
+- **Por quê:** S03-A48 (entrega para S07) e catálogo de APIs do mapa (1.7).
+- **Telas e ações:** S03-A48; APIs 09, 06, 15, 18, 19, 22.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/servicos/index.ts`, `src/nucleo/permissoes/ferramentas.ts` (só acrescentando).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Arranjo padrão das variantes MEI e pessoa física
+
+- **Decisão:** como `chavePadrao` (S02) só separa o Simples, Presumido, Real, MEI e pessoa física dividem a chave `fiscal` em `padroes.ts`; a grade descarta os ids que a variante não tem. Pedido à S02: se quiser arranjo próprio, acrescentar `fiscal-mei` e `fiscal-pf` em `chavePadrao`.
+- **Por quê:** não mudar a estrutura da S02.
+- **Telas e ações:** S03-T01.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/telas/painel/padroes.ts` (só as chaves das abas da S03).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S03 · Gatilhos do Painel B no painel Demonstração
+
+- **Decisão:** seção própria no painel Demonstração (`telas/painel/s03/gatilhos.tsx`, uma linha em `PainelLab.tsx`): mensagem nova no e-CAC, extrato chega pelo WhatsApp, guia vence sem pagamento, sócio passa de R$ 50 mil, job do dia 8 (PGDAS-D da carteira) e derrubar/religar o Integra Contador (C9). Cada gatilho põe o integrante para trabalhar com etapas e termina no que o produto faria (cartão, baixa de pendência, aviso).
+- **Por quê:** mostrar aos contadores o integrante agindo por gatilho (mapa, 0, item 7).
+- **Telas e ações:** S03-T01, T02.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/ambiente/PainelLab.tsx` (uma linha e um import).
+- **Situação:** proposta.
+
 ### S04 · Painel C: DP, Gestão, tarefas, trilhas, ciclo de vida
 
 #### 2026-11-14 · S04 · Telas da S04 leem a entidade Tarefa; a loja segue sem a cancelada

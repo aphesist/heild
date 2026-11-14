@@ -20,6 +20,7 @@ import { useLoja } from './loja'
 import { LabS05 } from './lab-s05'
 import { papelExibido, useSessaoBruta } from './sessao'
 import { SecaoTimesheetLab } from '@/telas/timesheet/lab' // S06
+import { SecaoS03 } from '@/telas/painel/s03/gatilhos' // S03
 import { SecaoLabS09 } from '@/telas/config/lab-s09'
 
 export type Visao = 'escritorio' | 'cliente'
@@ -231,6 +232,7 @@ export function PainelLab({
                 <PauseCircleIcon className="size-4 shrink-0" /> Simular {escritorio.inatividadeMin} min parado (só no Painel com cliente e no CRM)
               </button>
             )}
+            {sessao?.usuario && <SecaoS03 onFeito={() => setAberto(false)} />}
             {/* S01: limite e plano de IA, resumo diário, promoção de integrante. */}
             {sessao?.usuario && <DemonstracaoS01 onFechar={() => setAberto(false)} />}
             {/* S05 */}
