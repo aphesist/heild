@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { efeitoCartaoS10 } from '@/cliente/motor' // S10
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -15,6 +16,7 @@ export function useEfeitosCartao() {
 
   return (cartao: string, decisao: string) => {
     loja.decidir(cartao, decisao)
+    if (cartao.startsWith('s10-')) return efeitoCartaoS10(loja, cartao, decisao, usuario.nome, conversaDe) // S10: cartões do app do cliente
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
     if (!aprovou) {

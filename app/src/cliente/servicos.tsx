@@ -1,5 +1,5 @@
-import { CheckCircleIcon, LockSimpleIcon, PaperPlaneTiltIcon, SparkleIcon, WarningIcon } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { BookOpenTextIcon, ChartLineUpIcon, CheckCircleIcon, LockSimpleIcon, PaperPlaneTiltIcon, SparkleIcon, WarningIcon } from '@phosphor-icons/react'
+import { useEffect, useRef, useState } from 'react'
 import { fichas } from '@/ambiente/clientes'
 import { useConversaDe } from '@/ambiente/fluxos'
 import { useLoja, usePersistente } from '@/ambiente/loja'
@@ -8,7 +8,12 @@ import { CampoEscolha } from '@/components/ui/formulario'
 import { dpDe, fiscalDe } from '@/dados/painel'
 import { catalogoServicos, certidoesDe, emissorDe, painelSocioDe, rotuloEstadoServico, type EstadoServico, type ServicoExtra } from '@/dados/servicos-extras'
 import { cn } from '@/lib/utils'
-import { Bloco, idDoUsuario, primeiroNome, TituloTela, type Ctx } from './ClienteApp'
+import { idDoUsuario, primeiroNome, type Ctx } from './contexto'
+import { Bloco, Faixa, Folha, Progresso, TituloTela } from './pecas'
+import { useConsultorApp, type MsgConsultor } from './estado'
+import { EstadoErro, SeloDemonstracao } from '@/components/kit'
+import { P } from '@/dados/arquivos'
+import { servicos } from '@/servicos'
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const campo = 'bg-raised shadow-contorno h-10 rounded-[12px] px-3 text-sm outline-none'
@@ -65,6 +70,10 @@ export function Servicos({ ctx }: { ctx: Ctx }) {
     <div className="flex flex-col gap-3">
       <TituloTela voltar={() => ctx.ir('mais')}>Serviços</TituloTela>
       <p className="text-muted-foreground text-xs">O escritório liga cada serviço para a sua empresa. Pedir aqui não contrata nada: vem uma proposta na conversa.</p>
+      {ehSocio && <PainelPorPedido ctx={ctx} />}
+      <button type="button" onClick={() => ctx.ir('passos')} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+        <BookOpenTextIcon className="size-5" /> <span className="flex-1">Passo a passo do escritório</span>
+      </button>
       {grupos.map(
         ([titulo, lista]) =>
           lista.length > 0 && (
@@ -97,6 +106,7 @@ export function Servicos({ ctx }: { ctx: Ctx }) {
                       ))}
                     {e === 'disponivel' &&
                       !ped &&
+                      !ctx.leitura &&
                       (ehSocio || podeUsar(s) ? (
                         <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={() => interesse(s)}>
                           <SparkleIcon /> Tenho interesse
@@ -159,29 +169,64 @@ function Emissor({ ctx }: { ctx: Ctx }) {
   const [valor, setValor] = useState('')
   const [descricao, setDescricao] = useState('')
   const [conferir, setConferir] = useState(false)
+  const [substitui, setSubstitui] = useState<number | null>(null)
   const [cancelar, setCancelar] = useState<number | null>(null)
   const [motivo, setMotivo] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [ultima, setUltima] = useState<{ numero: number; chave: string; fonte: string } | null>(null)
   const sv = cad.servicos.find((x) => x.id === servico)!
   const v = Number(valor.replace(/\./g, '').replace(',', '.')) || 0
   const cert = fichas[ctx.clienteId] ? 'certificado A1 no cofre' : 'certificado'
   const resp = idDoUsuario(fichas[ctx.clienteId]?.responsaveis.notas) ?? 'u7'
   const emitir = () => {
-    const numero = (notas[0]?.numero ?? 0) + 1
-    loja.emitirNota({ numero, tomador, servico: sv.descricao, valor: v, data: '18/11', situacao: 'emitida', clienteId: ctx.clienteId })
-    loja.mensagemTime('i-notas', {
-      autor: { tipo: 'integrante', setor: 'notas' },
-      texto: `${ctx.contato.nome} emitiu pelo app a NFS-e ${numero} da ${ctx.clienteNome}: ${brl(v)} para ${tomador} (${sv.codigo}, ISS ${sv.iss}%). Já entrou na apuração de 11/2026.`,
-    })
-    loja.avisar({ para: [resp], tipo: 'cliente', setor: 'notas', titulo: `NFS-e ${numero} emitida pelo app`, detalhe: `${ctx.clienteNome} · ${brl(v)} · ${tomador}`, destino: { modulo: 'inicio', aba: 'time', integrante: 'i-notas' } })
-    registrar(`Emitiu a NFS-e ${numero} de ${brl(v)} para ${tomador}`)
-    ctx.avisarApp(`NFS-e ${numero} autorizada. PDF e XML enviados ao tomador.`)
-    setConferir(false)
-    setValor('')
-    setDescricao('')
+    setEnviando(true)
+    setErro(null)
+    const cnpj = loja.clientes.find((c) => c.id === ctx.clienteId)?.documento ?? ''
+    servicos.nfse
+      .emitir({ prestador_cnpj: cnpj, tomador, servico: sv.descricao, codigo: sv.codigo, valor: v, aliquota_iss: sv.iss })
+      .then((r) => {
+        const numero = (notas[0]?.numero ?? 0) + 1
+        loja.emitirNota({ numero, tomador, servico: sv.descricao, valor: v, data: '18/11', situacao: 'emitida', clienteId: ctx.clienteId })
+        if (substitui) {
+          loja.cancelarNota(ctx.clienteId, substitui)
+          registrar(`Substituiu a NFS-e ${substitui} pela ${numero}`)
+        }
+        loja.mensagemTime('i-notas', {
+          autor: { tipo: 'integrante', setor: 'notas' },
+          texto: `${ctx.contato.nome} emitiu pelo app a NFS-e ${numero} da ${ctx.clienteNome}: ${brl(v)} para ${tomador} (${sv.codigo}, ISS ${sv.iss}%)${substitui ? `, substituindo a ${substitui}` : ''}. Já entrou na apuração de 11/2026.`,
+        })
+        loja.avisar({ para: [resp], tipo: 'cliente', setor: 'notas', titulo: `NFS-e ${numero} emitida pelo app`, detalhe: `${ctx.clienteNome} · ${brl(v)} · ${tomador}`, destino: { modulo: 'inicio', aba: 'time', integrante: 'i-notas' } })
+        registrar(`Emitiu a NFS-e ${numero} de ${brl(v)} para ${tomador}`)
+        ctx.avisarApp(`NFS-e ${numero} autorizada. PDF e XML enviados ao tomador.`)
+        setUltima({ numero, chave: r.dados.chave, fonte: r.fonte })
+        setConferir(false)
+        setSubstitui(null)
+        setValor('')
+        setDescricao('')
+      })
+      .catch((e: Error) => setErro(e.message))
+      .finally(() => setEnviando(false))
+  }
+  const confirmarCancelamento = (numero: number) => {
+    setEnviando(true)
+    setErro(null)
+    servicos.nfse
+      .cancelar(String(numero), motivo.trim())
+      .then(() => {
+        loja.cancelarNota(ctx.clienteId, numero)
+        loja.avisar({ para: [resp], tipo: 'cliente', setor: 'notas', titulo: `NFS-e ${numero} cancelada pelo app`, detalhe: `${ctx.clienteNome} · motivo: ${motivo.trim()}`, destino: { modulo: 'inicio', aba: 'time', integrante: 'i-notas' } })
+        registrar(`Cancelou a NFS-e ${numero} (${motivo.trim()})`)
+        ctx.avisarApp(`NFS-e ${numero} cancelada. A apuração já foi refeita.`)
+        setCancelar(null)
+        setMotivo('')
+      })
+      .catch((e: Error) => setErro(e.message))
+      .finally(() => setEnviando(false))
   }
   return (
     <>
-      <Bloco titulo="Nova nota">
+      <Bloco titulo={substitui ? `Substituir a NFS-e ${substitui}` : 'Nova nota'} acao={substitui ? <button type="button" className="text-muted-foreground cursor-pointer text-xs" onClick={() => setSubstitui(null)}>desistir</button> : undefined}>
         <CampoEscolha rotulo="Tomador" valor={tomador} onMudar={setTomador} opcoes={cad.tomadores.map((t) => ({ valor: t.nome, rotulo: t.nome }))} />
         <CampoEscolha rotulo="Serviço" valor={servico} onMudar={setServico} opcoes={cad.servicos.map((x) => ({ valor: x.id, rotulo: x.descricao }))} />
         <input aria-label="Valor" inputMode="decimal" value={valor} onChange={(e) => setValor(e.target.value)} placeholder="Valor (R$)" className={campo} />
@@ -189,24 +234,30 @@ function Emissor({ ctx }: { ctx: Ctx }) {
         <p className="text-muted-foreground flex items-start gap-1 text-[11px]">
           <LockSimpleIcon className="mt-0.5 size-3 shrink-0" /> Travado pelo escritório: {sv.codigo}, ISS {sv.iss}%{v ? ` (${brl((v * sv.iss) / 100)})` : ''}, retenções e IBS/CBS pela regra do cadastro. Emite com o {cert}.
         </p>
+        {erro && <EstadoErro titulo="O emissor não respondeu" descricao={erro} onTentar={() => setErro(null)} />}
         {!conferir ? (
-          <Button className="rounded-full" disabled={!v} onClick={() => setConferir(true)}>
+          <Button className="rounded-full" disabled={!v || ctx.leitura !== null} onClick={() => setConferir(true)}>
             Conferir e emitir
           </Button>
         ) : (
           <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
             <p>
-              {brl(v)} para {tomador}, {sv.descricao.toLowerCase()}. Depois de emitida, só cancela ou substitui.
+              {brl(v)} para {tomador}, {sv.descricao.toLowerCase()}. {substitui ? `A NFS-e ${substitui} será cancelada e substituída por esta.` : 'Depois de emitida, só cancela ou substitui.'}
             </p>
             <div className="flex gap-2">
-              <Button size="sm" className="rounded-full" onClick={emitir}>
-                Emitir agora
+              <Button size="sm" className="rounded-full" disabled={enviando} onClick={emitir}>
+                {enviando ? 'Transmitindo ao emissor…' : 'Emitir agora'}
               </Button>
               <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setConferir(false)}>
                 Corrigir
               </Button>
             </div>
           </div>
+        )}
+        {ultima && (
+          <p className="flex flex-wrap items-center gap-2 text-xs">
+            <CheckCircleIcon className="text-success size-4" weight="fill" /> NFS-e {ultima.numero} autorizada · chave {ultima.chave.slice(0, 12)}… <SeloDemonstracao fonte={ultima.fonte} />
+          </p>
         )}
       </Bloco>
       <Bloco titulo="Notas de novembro">
@@ -222,37 +273,33 @@ function Emissor({ ctx }: { ctx: Ctx }) {
                   {n.tomador} · {n.data} · {n.situacao}
                 </span>
               </span>
-              {n.situacao === 'emitida' && cancelar !== n.numero && (
-                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setCancelar(n.numero)}>
-                  Cancelar
-                </Button>
+              {n.situacao === 'emitida' && cancelar !== n.numero && !ctx.leitura && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="rounded-full"
+                    onClick={() => {
+                      setSubstitui(n.numero)
+                      setTomador(cad.tomadores.find((t) => t.nome === n.tomador)?.nome ?? cad.tomadores[0].nome)
+                      setValor(String(n.valor).replace('.', ','))
+                      setConferir(false)
+                    }}
+                  >
+                    Substituir
+                  </Button>
+                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setCancelar(n.numero)}>
+                    Cancelar
+                  </Button>
+                </>
               )}
             </div>
             {cancelar === n.numero && (
               <div className="bg-sunken/60 flex flex-col gap-2 rounded-[12px] p-2.5">
                 <input aria-label="Motivo do cancelamento" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo (vai para a prefeitura)" className={campo} />
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="rounded-full"
-                    disabled={motivo.trim().length < 5}
-                    onClick={() => {
-                      loja.cancelarNota(ctx.clienteId, n.numero)
-                      loja.avisar({
-                        para: [resp],
-                        tipo: 'cliente',
-                        setor: 'notas',
-                        titulo: `NFS-e ${n.numero} cancelada pelo app`,
-                        detalhe: `${ctx.clienteNome} · motivo: ${motivo.trim()}`,
-                        destino: { modulo: 'inicio', aba: 'time', integrante: 'i-notas' },
-                      })
-                      registrar(`Cancelou a NFS-e ${n.numero} (${motivo.trim()})`)
-                      ctx.avisarApp(`NFS-e ${n.numero} cancelada. A apuração já foi refeita.`)
-                      setCancelar(null)
-                      setMotivo('')
-                    }}
-                  >
-                    Confirmar cancelamento
+                  <Button size="sm" className="rounded-full" disabled={motivo.trim().length < 5 || enviando} onClick={() => confirmarCancelamento(n.numero)}>
+                    {enviando ? 'Cancelando…' : 'Confirmar cancelamento'}
                   </Button>
                   <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setCancelar(null)}>
                     Voltar
@@ -268,140 +315,200 @@ function Emissor({ ctx }: { ctx: Ctx }) {
   )
 }
 
-type MsgConsultor = { de: 'eu' | 'consultor'; texto: string; fonte?: string; tarefa?: boolean }
+/** Resposta factual do Consultor da empresa (06, 9): direto com a origem; opinião vira CON-001 ao contador. */
+type RespostaConsultor = { texto: string; fonte?: string; cartao?: MsgConsultor['cartao']; opiniao?: boolean }
+
+function responderConsultor(p: string, ctx: Ctx, estadoServico: (id: string) => string): RespostaConsultor {
+  const q = p.toLowerCase()
+  const fis = fiscalDe(ctx.clienteId)
+  const ps = painelSocioDe[ctx.clienteId]
+  const aberta = fis.guias.find((g) => !g.paga && g.valor !== '—')
+  if (/regime|pagar menos|demitir|devo|vale a pena|planejamento|compensa/.test(q)) return { texto: '', opiniao: true }
+  if (/como est[aá] minha empresa|como vai a empresa|resumo da empresa/.test(q)) {
+    if (!ps) return { texto: 'Ainda não tenho números fechados desta empresa para montar o resumo.' }
+    return {
+      texto: 'Montei o resumo da empresa com os números de outubro. Cada caixa diz o período e de onde veio; o link vale 7 dias.',
+      fonte: 'notas (XML), guias e folha de 10/2026',
+      cartao: { titulo: 'Como está a empresa · 10/2026', linhas: [['Faturamento', `${brl(ps.faturamento)} (notas, 10/2026)`], ['Impostos', `${brl(ps.impostos)} (guias, 10/2026)`], ['Folha', `${brl(ps.folha)} (DP, 10/2026)`], ['Resultado', `${brl(ps.resultado)} (antes do pró-labore)`]] },
+    }
+  }
+  if (!ctx.areas.includes('guias') && /guia|das|imposto|fgts|fatur/.test(q)) return { texto: 'Isso fica fora do que o seu papel vê no app. Quem cuida das guias e dos números da empresa é o sócio ou o financeiro.' }
+  if (/fgts/.test(q)) {
+    const g = fis.guias.find((x) => /FGTS/.test(x.tributo))
+    return g ? { texto: `O FGTS Digital de ${g.competencia} é ${g.valor} e vence em ${g.vencimento}.${g.paga ? ' Já consta pago.' : ''}`, fonte: 'da guia emitida pelo escritório em 03/11', cartao: { titulo: `FGTS ${g.competencia}`, linhas: [['Valor', g.valor], ['Vencimento', g.vencimento], ['Situação', g.paga ? 'paga' : 'a pagar']] } } : { texto: 'Não há guia de FGTS em aberto para a empresa neste mês.', fonte: 'do calendário da empresa' }
+  }
+  if (/guia|das|imposto|pagar/.test(q))
+    return aberta
+      ? { texto: `O ${aberta.tributo} de ${aberta.competencia} é ${aberta.valor}, vence em ${aberta.vencimento}. ${aberta.enviada ? 'Já está em Documentos.' : 'Está em preparo no escritório; aviso quando sair.'}`, fonte: 'da guia emitida em 02/11', cartao: { titulo: `${aberta.tributo} ${aberta.competencia}`, linhas: [['Valor', aberta.valor], ['Vencimento', aberta.vencimento], ['Situação', aberta.enviada ? 'em Documentos' : 'em preparo']] } }
+      : { texto: 'Nenhuma guia em aberto agora.', fonte: 'da central de guias' }
+  if (/fatur|vend|receita/.test(q)) {
+    if (!ps || (estadoServico('painel_socio') !== 'ativo' && !ctx.areas.includes('financeiro'))) return { texto: 'Esse número fica no Painel do sócio, que não está ligado para a sua empresa. Posso pedir ao escritório.' }
+    return { texto: `Em 10/2026 a empresa faturou ${brl(ps.faturamento)}, ${ps.faturamento >= ps.anterior ? 'acima' : 'abaixo'} de setembro (${brl(ps.anterior)}).`, fonte: 'das notas emitidas (XML)' }
+  }
+  if (/dctf|o que é|o que e/.test(q)) return { texto: 'A DCTFWeb é a declaração mensal que informa à Receita as contribuições sobre a folha (INSS). O escritório entrega até o dia 15; dela sai a guia DARF que você paga.', fonte: 'explicação geral (sem citar norma)' }
+  if (/balancete|banco|contrato social/.test(q)) return { texto: 'O balancete de setembro, assinado pelo contador, está em Documentos › Relatórios. Se o banco pedir outro documento, abra um pedido de "Documento vigente".', fonte: 'do arquivo da empresa' }
+  return { texto: 'Não achei isso nos dados da empresa. Quer que eu passe para o escritório? Toque em "Pedidos" ou escreva na Conversa.' }
+}
 
 function Consultor({ ctx }: { ctx: Ctx }) {
   const loja = useLoja()
   const { estado } = useServicos(ctx)
-  const fis = fiscalDe(ctx.clienteId)
-  const ps = painelSocioDe[ctx.clienteId]
-  const [msgs, setMsgs] = useState<MsgConsultor[]>([
-    {
-      de: 'consultor',
-      texto: `Oi, ${primeiroNome(ctx.contato.nome)}. Sou o assistente da ${ctx.clienteNome} aqui no app: respondo sobre guias, prazos, documentos e números da empresa. Opinião (regime, demissão, planejamento) eu passo para o contador.`,
-    },
-  ])
+  const [dados, setDados] = useConsultorApp(ctx.clienteId)
   const [texto, setTexto] = useState('')
-  const sugestoes = ['Minha guia de outubro saiu?', 'Quando vence o FGTS?', 'Quanto faturei este mês?', 'O que é DCTFWeb?', 'Posso pagar menos imposto mudando de regime?']
-  const responder = (p: string): MsgConsultor => {
-    const q = p.toLowerCase()
-    const aberta = fis.guias.find((g) => !g.paga && g.valor !== '—')
-    if (/regime|pagar menos|demitir|devo|vale a pena|planejamento/.test(q)) {
-      const resp = fichas[ctx.clienteId]?.responsaveis.consultor ?? 'Fernanda Lima'
-      loja.criarTarefa({ codigo: 'CON-001', titulo: `Pergunta pelo Consultor: ${p}`, cliente: ctx.clienteNome, setor: 'consultor', prazo: '23/11', status: 'a_fazer', origem: 'pedido_cliente', responsavel: { tipo: 'pessoa', nome: resp } })
-      loja.avisar({
-        para: [idDoUsuario(resp) ?? 'u1'],
-        tipo: 'cliente',
-        setor: 'consultor',
-        titulo: `${ctx.contato.nome} perguntou ao Consultor: precisa do contador`,
-        detalhe: `${ctx.clienteNome} · “${p}”`,
-        destino: { modulo: 'painel', aba: 'consultoria' },
-      })
-      return { de: 'consultor', texto: `Isso é planejamento, então não opino. Passei a pergunta para ${resp}, que cuida da consultoria da empresa; a resposta chega em Pedidos e na conversa.`, tarefa: true }
-    }
-    if (/fgts/.test(q)) {
-      const g = fis.guias.find((x) => /FGTS/.test(x.tributo))
-      return g
-        ? { de: 'consultor', texto: `O FGTS Digital de ${g.competencia} é ${g.valor} e vence em ${g.vencimento}.${g.paga ? ' Já consta pago.' : ''}`, fonte: 'da guia emitida pelo escritório' }
-        : { de: 'consultor', texto: 'Não há guia de FGTS em aberto para a empresa neste mês.', fonte: 'do calendário da empresa' }
-    }
-    if (/guia|das|imposto|pagar/.test(q))
-      return aberta
-        ? {
-            de: 'consultor',
-            texto: `O ${aberta.tributo} de ${aberta.competencia} é ${aberta.valor}, vence em ${aberta.vencimento}. ${aberta.enviada ? 'Já está em Documentos.' : 'Está em preparo no escritório; aviso quando sair.'}`,
-            fonte: 'da central de guias',
-          }
-        : { de: 'consultor', texto: 'Nenhuma guia em aberto agora.', fonte: 'da central de guias' }
-    if (/fatur|vend|receita/.test(q)) {
-      if (!ps || (estado('painel_socio') !== 'ativo' && !ctx.areas.includes('financeiro'))) return { de: 'consultor', texto: 'Esse número fica no Painel do sócio, que não está ligado para a sua empresa. Posso pedir ao escritório.' }
-      return { de: 'consultor', texto: `Em 10/2026 a empresa faturou ${brl(ps.faturamento)}, ${ps.faturamento >= ps.anterior ? 'acima' : 'abaixo'} de setembro (${brl(ps.anterior)}).`, fonte: 'das notas emitidas (XML)' }
-    }
-    if (/dctf|o que é|o que e/.test(q))
-      return { de: 'consultor', texto: 'A DCTFWeb é a declaração mensal que informa à Receita as contribuições sobre a folha (INSS). O escritório entrega até o dia 15; dela sai a guia DARF que você paga.', fonte: 'explicação geral' }
-    return { de: 'consultor', texto: 'Não achei isso nos dados da empresa. Quer que eu passe para o escritório? Toque em "Pedidos" ou escreva na Conversa.' }
+  const [pensando, setPensando] = useState(false)
+  const [escrevendo, setEscrevendo] = useState<{ id: string; ate: number } | null>(null)
+  const fim = useRef<HTMLDivElement>(null)
+  const nome = 'Consultor'
+  const intro: MsgConsultor = {
+    id: 'intro',
+    de: 'consultor',
+    texto: `Oi, ${primeiroNome(ctx.contato.nome)}. Sou o ${nome}, assistente da ${ctx.clienteNome} aqui no app: respondo sobre guias, prazos, documentos e números da empresa. Opinião (regime, demissão, planejamento) eu passo para o contador.`,
   }
+  const msgs = [intro, ...dados.msgs]
+  const esgotou = dados.usadas >= dados.franquia
+  const sugestoes = ['Minha guia de outubro saiu?', 'Quando vence o FGTS?', 'Quanto faturei este mês?', 'Como está minha empresa?', 'O que é DCTFWeb?', 'Posso pagar menos imposto mudando de regime?']
+  useEffect(() => {
+    fim.current?.scrollIntoView({ block: 'end' })
+  }, [msgs.length, pensando, escrevendo?.ate])
+  useEffect(() => {
+    if (!escrevendo) return
+    const alvo = dados.msgs.find((m) => m.id === escrevendo.id)
+    if (!alvo || escrevendo.ate >= alvo.texto.length) return setEscrevendo(null)
+    const t = setTimeout(() => setEscrevendo((e) => (e ? { ...e, ate: e.ate + 6 } : e)), 18)
+    return () => clearTimeout(t)
+  }, [escrevendo, dados.msgs])
   const enviar = (p: string) => {
-    if (!p.trim()) return
-    setMsgs((m) => [...m, { de: 'eu', texto: p }, responder(p)])
-    loja.registrar(`${ctx.contato.nome} (cliente, app)`, `Perguntou ao Consultor: “${p}” (${ctx.clienteNome})`)
+    if (!p.trim() || pensando || esgotou) return
+    const minha: MsgConsultor = { id: `m${Date.now()}`, de: 'eu', texto: p }
+    setDados((d) => ({ ...d, msgs: [...d.msgs, minha] }))
     setTexto('')
+    setPensando(true)
+    loja.registrar(`${ctx.contato.nome} (cliente, app)`, `Perguntou ao Consultor: “${p}” (${ctx.clienteNome})`)
+    setTimeout(() => {
+      const r = responderConsultor(p, ctx, estado)
+      let resposta: MsgConsultor
+      if (r.opiniao) {
+        // Factual direto, opinião ao contador (Decisão 15): vira CON-001 com a pergunta.
+        const resp = fichas[ctx.clienteId]?.responsaveis.consultor ?? 'Fernanda Lima'
+        const id = loja.criarTarefa({ codigo: 'CON-001', titulo: `Pergunta pelo Consultor: ${p}`, cliente: ctx.clienteNome, setor: 'consultor', prazo: '23/11', status: 'a_fazer', origem: 'pedido_cliente', responsavel: { tipo: 'pessoa', nome: resp } })
+        loja.avisar({ para: [idDoUsuario(resp) ?? 'u1'], tipo: 'cliente', setor: 'consultor', titulo: `${ctx.contato.nome} perguntou ao Consultor: precisa do contador`, detalhe: `${ctx.clienteNome} · “${p}”`, destino: { modulo: 'painel', tarefa: id } })
+        resposta = { id: `r${Date.now()}`, de: 'consultor', texto: `Isso é planejamento, então não opino. Passei a pergunta para ${resp}, que cuida da consultoria da empresa; a resposta chega em Pedidos e na conversa.`, tarefa: id, demonstracao: true }
+      } else resposta = { id: `r${Date.now()}`, de: 'consultor', texto: r.texto, fonte: r.fonte, cartao: r.cartao, demonstracao: true }
+      setDados((d) => ({ ...d, usadas: d.usadas + 1, msgs: [...d.msgs, resposta] }))
+      setPensando(false)
+      setEscrevendo({ id: resposta.id, ate: 0 })
+    }, 900)
   }
   return (
     <>
+      <div className="flex items-center gap-2">
+        <span className="text-muted-foreground flex-1 text-[11px]">
+          Perguntas do mês: {dados.usadas} de {dados.franquia} (franquia da empresa)
+        </span>
+        <SeloDemonstracao fonte="Consultor da empresa (IA)" />
+      </div>
+      <Progresso valor={dados.usadas} total={dados.franquia} rotulo="Franquia de perguntas do Consultor" />
       <div className="flex flex-1 flex-col gap-2">
-        {msgs.map((m, i) => (
-          <div key={i} className={cn('max-w-[88%] rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
-            {m.texto}
-            {m.fonte && <span className="text-muted-foreground mt-1 block text-[11px]">Fonte: {m.fonte}</span>}
-            {m.tarefa && (
-              <button type="button" className="mt-1 block cursor-pointer text-xs underline underline-offset-2" onClick={() => ctx.ir('pedidos')}>
-                Acompanhar em Pedidos
+        {msgs.map((m) => {
+          const parcial = escrevendo?.id === m.id ? m.texto.slice(0, escrevendo.ate) : m.texto
+          return (
+            <div key={m.id} className={cn('max-w-[88%] rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
+              {m.de === 'consultor' && <span className="text-muted-foreground block text-[11px]">{nome} (assistente)</span>}
+              {parcial}
+              {escrevendo?.id !== m.id && m.cartao && (
+                <span className="bg-sunken mt-2 flex flex-col gap-0.5 rounded-[12px] px-2.5 py-2 text-xs">
+                  <span className="font-medium">{m.cartao.titulo}</span>
+                  {m.cartao.linhas.map(([r, v]) => (
+                    <span key={r} className="flex gap-2">
+                      <span className="text-muted-foreground min-w-0 flex-1">{r}</span>
+                      <span className="tabular-nums">{v}</span>
+                    </span>
+                  ))}
+                </span>
+              )}
+              {escrevendo?.id !== m.id && m.fonte && <span className="text-muted-foreground mt-1 block text-[11px]">Fonte: {m.fonte}</span>}
+              {escrevendo?.id !== m.id && m.tarefa && (
+                <button type="button" className="mt-1 block cursor-pointer text-xs underline underline-offset-2" onClick={() => ctx.ir('pedidos', m.tarefa)}>
+                  Acompanhar em Pedidos
+                </button>
+              )}
+            </div>
+          )
+        })}
+        {pensando && <div className="bg-surface shadow-cartao text-muted-foreground self-start rounded-[18px] px-3.5 py-2.5 text-sm">Procurando nos dados da empresa…</div>}
+        <div ref={fim} />
+      </div>
+      {esgotou ? (
+        <Faixa tom="atencao" icone={<WarningIcon weight="fill" />}>
+          Limite do mês atingido. Até 01/12, as perguntas seguem pela conversa com o escritório.
+        </Faixa>
+      ) : (
+        <>
+          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
+            {sugestoes.map((x) => (
+              <button key={x} type="button" onClick={() => enviar(x)} className="bg-sunken shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
+                {x}
               </button>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {sugestoes.map((s) => (
-          <button key={s} type="button" onClick={() => enviar(s)} className="bg-sunken cursor-pointer rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className="bg-surface shadow-cartao sticky bottom-0 flex items-center gap-2 rounded-full py-1 pr-1 pl-4">
-        <input
-          aria-label="Pergunta ao Consultor"
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && enviar(texto)}
-          placeholder="Pergunte sobre a sua empresa"
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none"
-        />
-        <Button size="icon-sm" className="rounded-full" aria-label="Perguntar" onClick={() => enviar(texto)} disabled={!texto.trim()}>
-          <PaperPlaneTiltIcon />
-        </Button>
-      </div>
-      <p className="text-muted-foreground text-center text-[11px]">Uso do mês: 18% do limite da empresa</p>
+          <div className="bg-surface shadow-cartao sticky bottom-0 flex items-center gap-2 rounded-full py-1 pr-1 pl-4">
+            <input aria-label="Pergunta ao Consultor" value={texto} onChange={(e) => setTexto(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && enviar(texto)} placeholder="Pergunte sobre a sua empresa" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+            <Button size="icon-sm" className="rounded-full" aria-label="Perguntar" onClick={() => enviar(texto)} disabled={!texto.trim() || pensando}>
+              <PaperPlaneTiltIcon />
+            </Button>
+          </div>
+        </>
+      )}
     </>
   )
 }
 
+const tipoCertidao = (nome: string): 'federal' | 'fgts' | 'trabalhista' | 'estadual' | 'municipal' => (/fgts|crf/i.test(nome) ? 'fgts' : /trabalh|cndt/i.test(nome) ? 'trabalhista' : /estad|sefaz/i.test(nome) ? 'estadual' : /munic|prefeit/i.test(nome) ? 'municipal' : 'federal')
+
 function Certidoes({ ctx }: { ctx: Ctx }) {
+  const loja = useLoja()
   const registrar = useRegistro(ctx)
-  const [emitidas, setEmitidas] = usePersistente<string[]>(`app.emitidas.${ctx.clienteId}`, [])
+  const [emitidas, setEmitidas] = usePersistente<Record<string, { situacao: string; numero: string; valida: string; fonte: string }>>(`s10:certidoes:${ctx.clienteId}`, {})
+  const [emitindo, setEmitindo] = useState<string | null>(null)
+  const [erro, setErro] = useState<{ id: string; msg: string } | null>(null)
   const lista = certidoesDe(ctx.clienteId)
+  const emitir = (c: (typeof lista)[number]) => {
+    setEmitindo(c.id)
+    setErro(null)
+    servicos.certidoes
+      .emitir(tipoCertidao(c.nome), loja.clientes.find((x) => x.id === ctx.clienteId)?.documento ?? '')
+      .then((r) => {
+        setEmitidas((x) => ({ ...x, [c.id]: { situacao: r.dados.situacao, numero: r.dados.numero, valida: r.dados.valida_ate, fonte: r.fonte } }))
+        loja.adicionarDocumento({ nome: `${c.nome} ${r.dados.numero.slice(-6)}.pdf`, clienteId: ctx.clienteId, pasta: P.procuracoes, tipo: 'certidao', origem: 'captura_governo', conector: 'a1', tamanho: '84 KB', quando: '18/11/2026', por: 'Fiscal (integrante)', dados: { situacao: r.dados.situacao.replace(/_/g, ' '), valida_ate: r.dados.valida_ate }, forcarVisivel: true })
+        registrar(`Emitiu ${c.nome} (${r.dados.situacao.replace(/_/g, ' ')})`)
+        if (r.dados.situacao !== 'negativa') {
+          loja.avisar({ para: [idDoUsuario(fichas[ctx.clienteId]?.responsaveis.fiscal) ?? 'u1'], tipo: 'cliente', setor: 'fiscal', titulo: `${c.nome} saiu ${r.dados.situacao.replace(/_/g, ' ')}`, detalhe: `${ctx.clienteNome} · emitida pelo app; explique ao cliente o que falta`, destino: { modulo: 'painel', aba: 'fiscal', cliente: ctx.clienteId } })
+          ctx.avisarApp(`${c.nome} saiu ${r.dados.situacao.replace(/_/g, ' ')}. O Fiscal foi avisado e explica.`)
+        } else ctx.avisarApp(`${c.nome} emitida e salva em Documentos.`)
+      })
+      .catch((e: Error) => setErro({ id: c.id, msg: e.message }))
+      .finally(() => setEmitindo(null))
+  }
   return (
     <>
       <Bloco titulo="Certidões da empresa">
         {lista.map((c) => {
-          const nova = emitidas.includes(c.id)
+          const nova = emitidas[c.id]
           const dias = nova ? 180 : c.dias
           return (
-            <div key={c.id} className="flex items-center gap-2 text-sm">
-              {dias < 0 ? (
-                <WarningIcon className="text-destructive size-4 shrink-0" weight="fill" />
-              ) : dias < 15 ? (
-                <WarningIcon className="text-warning size-4 shrink-0" />
-              ) : (
-                <CheckCircleIcon className="text-success size-4 shrink-0" weight="fill" />
-              )}
-              <span className="min-w-0 flex-1">
-                <span className="block">{c.nome}</span>
-                <span className="text-muted-foreground block text-xs">{dias < 0 ? `vencida há ${-dias} dias` : `vale por mais ${dias} dias`}</span>
-              </span>
-              <Button
-                size="sm"
-                variant={dias < 15 ? 'default' : 'ghost'}
-                className="rounded-full"
-                onClick={() => {
-                  setEmitidas((x) => [...x, c.id])
-                  registrar(`Emitiu ${c.nome}`)
-                  ctx.avisarApp(`${c.nome} emitida e salva em Documentos.`)
-                }}
-              >
-                {nova ? 'Baixar' : 'Emitir'}
-              </Button>
+            <div key={c.id} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-sm">
+                {dias < 0 ? <WarningIcon className="text-destructive size-4 shrink-0" weight="fill" /> : dias < 15 ? <WarningIcon className="text-warning size-4 shrink-0" /> : <CheckCircleIcon className="text-success size-4 shrink-0" weight="fill" />}
+                <span className="min-w-0 flex-1">
+                  <span className="block">{c.nome}</span>
+                  <span className="text-muted-foreground block text-xs">{nova ? `${nova.situacao.replace(/_/g, ' ')} · nº ${nova.numero} · vale até ${nova.valida}` : dias < 0 ? `vencida há ${-dias} dias` : `vale por mais ${dias} dias`}</span>
+                </span>
+                <Button size="sm" variant={dias < 15 ? 'default' : 'ghost'} className="rounded-full" disabled={emitindo === c.id || ctx.leitura !== null} onClick={() => emitir(c)}>
+                  {emitindo === c.id ? 'Emitindo…' : nova ? 'Emitir de novo' : 'Emitir'}
+                </Button>
+              </div>
+              {nova && <SeloDemonstracao fonte={nova.fonte} className="ml-6" />}
+              {erro?.id === c.id && <EstadoErro titulo="O órgão não respondeu" descricao={erro.msg} onTentar={() => emitir(c)} />}
             </div>
           )
         })}
@@ -817,5 +924,68 @@ function ContaDigital({ ctx }: { ctx: Ctx }) {
         Abrir conta
       </Button>
     </Bloco>
+  )
+}
+
+/** Painel da empresa por pedido (D-28, depois): "Como está minha empresa?" vira um link com caixas, cada número com período e fonte. */
+function PainelPorPedido({ ctx }: { ctx: Ctx }) {
+  const loja = useLoja()
+  const [aberto, setAberto] = useState(false)
+  const [gerado, setGerado] = useState<string | null>(null)
+  const ps = painelSocioDe[ctx.clienteId]
+  const fis = fiscalDe(ctx.clienteId)
+  const caixas: [string, string, string][] = ps
+    ? [
+        ['Faturamento', brl(ps.faturamento), '10/2026 · notas emitidas (XML)'],
+        ['Impostos', brl(ps.impostos), '10/2026 · guias do Fiscal'],
+        ['Folha', brl(ps.folha), '10/2026 · folha do DP'],
+        ['Resultado', brl(ps.resultado), '10/2026 · balancete, antes do pró-labore'],
+        ['Guias em aberto', String(fis.guias.filter((g) => !g.paga && g.valor !== '—').length), 'hoje · central de guias'],
+        ['Pendências com você', String(loja.tarefas.filter((t) => t.cliente === ctx.clienteNome && t.status === 'aguardando_cliente').length), 'hoje · pendências do app'],
+      ]
+    : []
+  return (
+    <>
+      <button type="button" onClick={() => setAberto(true)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+        <ChartLineUpIcon className="size-5" /> <span className="flex-1">Como está minha empresa?</span>
+      </button>
+      {aberto && (
+        <Folha titulo="Como está minha empresa?" onFechar={() => setAberto(false)}>
+          {!ps ? (
+            <p className="text-muted-foreground text-sm">Ainda sem números fechados desta empresa.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                {caixas.map(([r, v, f]) => (
+                  <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-[16px] p-3">
+                    <span className="text-muted-foreground text-[11px]">{r}</span>
+                    <span className="text-lg font-light tabular-nums">{v}</span>
+                    <span className="text-muted-foreground text-[10px]">{f}</span>
+                  </div>
+                ))}
+              </div>
+              {gerado ? (
+                <p className="flex flex-wrap items-center gap-2 text-xs">
+                  Link do painel (vale 7 dias, pede login): <code className="bg-sunken rounded px-1.5 py-0.5">{gerado}</code>
+                </p>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-fit rounded-full"
+                  onClick={() => {
+                    setGerado(`https://app.heild.app/p/${ctx.clienteId}-${Date.now().toString(36)}`)
+                    loja.registrar(`${ctx.contato.nome} (cliente, app)`, `Gerou o painel da empresa por pedido (D-28) · ${ctx.clienteNome}`)
+                  }}
+                >
+                  Gerar link para guardar
+                </Button>
+              )}
+              <p className="text-muted-foreground text-[11px]">Números da plataforma, sem opinião; para análise, peça ao contador em Pedidos › Dúvida.</p>
+            </>
+          )}
+        </Folha>
+      )}
+    </>
   )
 }
