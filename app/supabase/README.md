@@ -1,8 +1,11 @@
-# Supabase (pronto, desligado)
+# Supabase
 
 O wireframe guarda os dados no navegador por padrão. A mesma camada de dados
-(`src/nucleo`) roda sobre o Supabase trocando só o adaptador. **Nenhum projeto
-foi criado**: isto aqui é o que precisa existir quando houver um.
+(`src/nucleo`) roda sobre o Supabase trocando só o adaptador. O projeto da
+Heild para o wireframe já existe (`rgptcikkxucyysfwarxb`) com a migração
+aplicada e duas contas de demonstração; **como ligar, desligar e restaurar está
+em `docs/wireframe/ARQUITETURA.md`, seção 9**. O passo a passo abaixo serve
+para montar outro projeto do zero.
 
 ## O que tem
 
@@ -44,9 +47,11 @@ foi criado**: isto aqui é o que precisa existir quando houver um.
    ```
    VITE_HEILD_BANCO=supabase
    VITE_SUPABASE_URL=https://<ref>.supabase.co
-   VITE_SUPABASE_ANON_KEY=<chave anon>
-   VITE_SUPABASE_EMAIL=<conta do passo 2>
-   VITE_SUPABASE_SENHA=<senha>
+   VITE_SUPABASE_ANON_KEY=<chave publicável>
+   VITE_SUPABASE_EMAIL_ESC_ANDRADE=<conta do esc-andrade>
+   VITE_SUPABASE_SENHA_ESC_ANDRADE=<senha>
+   VITE_SUPABASE_EMAIL_ESC_HORIZONTE=<conta do esc-horizonte>
+   VITE_SUPABASE_SENHA_ESC_HORIZONTE=<senha>
    ```
 4. `npm run app`. Na primeira abertura, o escritório é semeado com os dados de
    exemplo; depois tudo lê e grava no Postgres. "Restaurar demonstração" chama

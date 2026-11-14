@@ -1,3 +1,4 @@
+import { widgetObrigacoesDoSetor } from './obrigacoes-setor'
 import { BotaoAba } from '@/components/compostos/painel-aba'
 import { CloudArrowDownIcon, GearSixIcon, HandPointingIcon, MagnifyingGlassIcon, PackageIcon, PercentIcon } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
@@ -14,14 +15,15 @@ import type { CtxAba, WidgetsAba } from './tipos'
  * Notas fiscais (03, 6.3): captura, manifestação, completude, conferência
  * tributária e envio ao core. Em carteira: a captura de cada cliente.
  */
-export function widgetsNotas({ cliente }: CtxAba): WidgetsAba {
+export function widgetsNotas(ctx: CtxAba): WidgetsAba {
+  const { cliente } = ctx
   d = notasDe(cliente?.id)
   if (!cliente)
     return {
-      catalogo: [capturaCarteira, manifestacao],
+      catalogo: [capturaCarteira, manifestacao, widgetObrigacoesDoSetor('notas', ctx)],
     }
   return {
-    catalogo: [fluxos, configuracao, manifestacao, completude, tributaria, lotes],
+    catalogo: [fluxos, configuracao, manifestacao, completude, tributaria, lotes, widgetObrigacoesDoSetor('notas', ctx)],
   }
 }
 
