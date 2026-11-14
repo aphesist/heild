@@ -17,6 +17,7 @@ import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
 import { papelExibido, useSessaoBruta } from './sessao'
+import { SecaoTimesheetLab } from '@/telas/timesheet/lab' // S06
 
 export type Visao = 'escritorio' | 'cliente'
 
@@ -267,6 +268,7 @@ export function PainelLab({
             {modo === 'claro' ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
           </button>
         </div>
+        <SecaoTimesheetLab onFechar={() => setAberto(false)} /> {/* S06: extensão simulada e captura rápida */}
         <button
           type="button"
           aria-pressed={instavel}

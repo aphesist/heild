@@ -29,6 +29,8 @@ import { ConfirmacoesTela } from './timesheet/ConfirmacoesTela'
 import { EquipeTela } from './timesheet/EquipeTela'
 import { MeuTempoTela } from './timesheet/MeuTempoTela'
 import { RentabilidadeTela } from './timesheet/RentabilidadeTela'
+import { CapturaTempo } from './timesheet/captura' // S06
+import { useContadorConfirmacoes } from './timesheet/dados' // S06
 import { ArmazenamentoTela } from './config/ArmazenamentoTela'
 import { AssinaturaTela } from './config/AssinaturaTela'
 import { EscritorioTela } from './config/EscritorioTela'
@@ -198,11 +200,14 @@ function PlataformaInterna(props: Props) {
 
   // No Figma, a aba Time leva um orb pequeno com o estado do time.
   const estadoTime = integrantes.some((i) => i.estado === 'precisa_de_voce') ? 'precisa_de_voce' : 'trabalhando'
+  const pendentesTs = useContadorConfirmacoes() // S06: contador de Confirmações (05, 8.5)
   const abas = abasPermitidas(modulo).map((a) =>
     modulo === 'inicio' && a.id === 'time'
       ? { ...a, adorno: <Orb estado={estadoTime} cor={doTema('contabil').cor} tamanho={16} extras={false} cutucavel={false} rotulo="Estado do time" />, contador: pendentes }
       : modulo === 'crm' && a.id === 'conversas'
         ? { ...a, contador: loja.conversas.filter((c) => permissoes.setores.includes(c.setor) && (c.status === 'nova' || (c.naoLidas ?? 0) > 0)).length }
+        : modulo === 'timesheet' && a.id === 'confirmacoes'
+          ? { ...a, contador: pendentesTs || undefined }
         : modulo === 'painel'
           ? { ...a, contador: loja.tarefas.filter((t) => t.atrasada && t.status !== 'concluida' && (a.id === t.setor || (a.id === 'consultoria' && t.setor === 'consultor'))).length || undefined }
           : a,
@@ -230,7 +235,7 @@ function PlataformaInterna(props: Props) {
   // Telas que ainda leem os dados fixos de src/dados mostram os do escritório completo; nos outros
   // escritórios de exemplo, avisam em vez de misturar dados de outro escritório (ver docs/wireframe/STATUS.md).
   const { escritorio: deExemplo } = useBanco()
-  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
+  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
 
   return (
     <NavegacaoProvider value={{ irPara: navegar }}>
@@ -374,10 +379,10 @@ function PlataformaInterna(props: Props) {
           )}
           {modulo === 'crm' && aba === 'comunicados' && <ComunicadosTela clientes={loja.clientes} />}
           {modulo === 'crm' && aba === 'numeros' && <NumerosTela />}
-          {modulo === 'timesheet' && aba === 'meu' && <MeuTempoTela key={clienteId ?? 'todos'} papel={papel} clienteNome={cliente?.nome} />}
-          {modulo === 'timesheet' && aba === 'equipe' && papel !== 'colaborador' && <EquipeTela papel={papel} clienteNome={cliente?.nome} />}
-          {modulo === 'timesheet' && aba === 'rentabilidade' && papel !== 'colaborador' && <RentabilidadeTela key={clienteId ?? 'todos'} papel={papel} clienteNome={cliente?.nome} />}
-          {modulo === 'timesheet' && aba === 'confirmacoes' && <ConfirmacoesTela papel={papel} clienteNome={cliente?.nome} />}
+          {modulo === 'timesheet' && aba === 'meu' && <MeuTempoTela key={clienteId ?? 'todos'} papel={papel} clienteNome={cliente?.nome} clienteId={clienteId} />}
+          {modulo === 'timesheet' && aba === 'equipe' && papel !== 'colaborador' && <EquipeTela papel={papel} clienteNome={cliente?.nome} clienteId={clienteId} />}
+          {modulo === 'timesheet' && aba === 'rentabilidade' && papel !== 'colaborador' && <RentabilidadeTela key={clienteId ?? 'todos'} papel={papel} clienteNome={cliente?.nome} clienteId={clienteId} />}
+          {modulo === 'timesheet' && aba === 'confirmacoes' && <ConfirmacoesTela papel={papel} clienteNome={cliente?.nome} clienteId={clienteId} />}
           {modulo === 'config' && aba === 'escritorio' && <EscritorioTela />}
           {modulo === 'config' && aba === 'usuarios' && <UsuariosTela />}
           {modulo === 'config' && aba === 'armazenamento' && <ArmazenamentoTela />}
@@ -411,6 +416,7 @@ function PlataformaInterna(props: Props) {
             </>
           )}
           {tempo.espera && <ModoEspera desde={tempo.espera.desde} onde={tempo.espera.onde} onRetomar={tempo.retomar} />}
+          <CapturaTempo conta={contaTempo} espera={tempo.espera} modulo={modulo} aba={aba} clienteId={clienteId ?? null} /> {/* S06: sessões ao vivo pela tarefa aberta */}
         </Moldura>
         <Toasts />
         {minhaConta && <MinhaConta onFechar={() => setMinhaConta(false)} />}
