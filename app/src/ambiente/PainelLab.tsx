@@ -17,6 +17,7 @@ import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
 import { papelExibido, useSessaoBruta } from './sessao'
+import { SecaoLabS09 } from '@/telas/config/lab-s09'
 
 export type Visao = 'escritorio' | 'cliente'
 
@@ -279,6 +280,7 @@ export function PainelLab({
         >
           <WarningCircleIcon className="size-4 shrink-0" /> Serviços externos: {instavel ? 'falhando metade das vezes' : 'respondendo'} (alternar)
         </button>
+        {sessao?.usuario && <SecaoLabS09 />}
         <a href="#/kit" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
           <SquaresFourIcon className="size-4 shrink-0" /> Kit de interação e serviços simulados
         </a>

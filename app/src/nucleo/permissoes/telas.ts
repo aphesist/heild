@@ -78,9 +78,12 @@ export function permissoesDoPerfil(p: Perfil): Permissoes {
     ...(admin ? (['config'] as const) : []),
   ]
   const nomes = setores.map((s) => rotuloSetorCurto[s])
+  // S09: Configurações é do Administrador; exceção por tela "config.<aba>" libera a aba para outra conta (01, 2.2).
+  const configLiberadas = admin ? [] : [...new Set(liberadas.filter((t) => t.startsWith('config.')).map((t) => t.slice('config.'.length)))]
+  if (configLiberadas.length) modulos.push('config')
   return {
     modulos,
-    abas: { painel: painel.filter((a) => !bloqueadas.has(`aba.${a}`)), crm, timesheet, financeiro, bpo },
+    abas: { painel: painel.filter((a) => !bloqueadas.has(`aba.${a}`)), crm, timesheet, financeiro, bpo, ...(configLiberadas.length ? { config: configLiberadas } : {}) },
     bpoMargem: admin,
     bpoEditaConfig: gereBpo,
     // O setor do escritório (bpo_financeiro) abre os integrantes das funções do BPO.
