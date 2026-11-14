@@ -1,4 +1,5 @@
 import type { Modulo, Nivel, Papel } from '../modelo/entidades'
+import { ferramentasFinanceiro } from './ferramentas-financeiro'
 
 /**
  * Catálogo das ferramentas tipadas (Fundações 6.1), no que a autorização usa.
@@ -105,6 +106,8 @@ export const ferramentas: Ferramenta[] = [
   f('nfse.cancelar', 'painel', 'executar', 'geral', { irreversivel: true, exposta_ao_cliente: true }),
   // Estado de tela (preferências e o que a tela guarda entre abas)
   f('tela.lembrar', 'plataforma', 'executar', 'geral', { exposta_ao_cliente: true }),
+  // S07: Financeiro do escritório
+  ...ferramentasFinanceiro,
 ]
 
 const indice = new Map(ferramentas.map((x) => [x.nome, x]))

@@ -77,6 +77,8 @@ export interface Destino {
   filtroSetor?: SetorIntegrante
   /** S05: conversa interna aberta (tela cheia `#/interna` ou gaveta do Chat, aba Equipe). */
   conversaInterna?: string
+  /** S07: contrato de honorários aberto (Financeiro › Contratos). */
+  contrato?: string
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */

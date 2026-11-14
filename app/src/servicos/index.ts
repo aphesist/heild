@@ -5,6 +5,7 @@ import { certidoesDemonstracao, consultasLocaisDemonstracao, djenDemonstracao, i
 import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
 import type { InfoServico } from './tipos'
+import { cobrancaDemonstracao, importacaoFinanceiroDemonstracao, indicesDemonstracao, type ServicoCobranca, type ServicoImportacaoFinanceiro, type ServicoIndices } from './cobranca'
 
 export * from './tipos'
 export { definirEscalaLatencia, definirInstabilidade } from './simular'
@@ -14,6 +15,7 @@ export type * from './financeiro'
 export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
+export type * from './cobranca'
 
 /**
  * Os serviços externos do sistema. Hoje todos são de demonstração. Para ligar
@@ -39,6 +41,10 @@ export interface Servicos {
   assinatura: ServicoAssinatura
   armazenamento: ServicoArmazenamento
   djen: ServicoDjen
+  // S07: cobrança pelo banco do escritório, índices do BCB e importação do financeiro antigo
+  cobranca: ServicoCobranca
+  indices: ServicoIndices
+  importacaoFinanceiro: ServicoImportacaoFinanceiro
 }
 
 export const servicos: Servicos = {
@@ -57,6 +63,9 @@ export const servicos: Servicos = {
   assinatura: assinaturaDemonstracao,
   armazenamento: armazenamentoDemonstracao,
   djen: djenDemonstracao,
+  cobranca: cobrancaDemonstracao,
+  indices: indicesDemonstracao,
+  importacaoFinanceiro: importacaoFinanceiroDemonstracao,
 }
 
 const reais = new Set<keyof Servicos>()
@@ -85,6 +94,10 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'assinatura', api: 'API-22', nome: 'Assinatura eletrônica', descricao: 'Contratos, procurações e termos com validade.', modo: 'demonstracao', requisito: 'Provedor de assinatura (pago por envelope)' },
   { id: 'armazenamento', api: 'API-24', nome: 'Armazenamento em nuvem', descricao: 'Drive, OneDrive, Dropbox ou o da Heild.', modo: 'demonstracao', requisito: 'Conector OAuth da nuvem do escritório' },
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
+  // S07
+  { id: 'cobranca', api: 'API-20', nome: 'Cobrança do escritório', descricao: 'Boleto, Pix e Pix Automático direto no banco do escritório (ou Asaas/Efí).', modo: 'demonstracao', requisito: 'Convênio de cobrança com API no banco do escritório' },
+  { id: 'indices', api: 'API-16', nome: 'Índices do Banco Central', descricao: 'IPCA, INPC e IGP-M acumulados para o reajuste.', modo: 'demonstracao', requisito: 'Série SGS pública (sem custo)' },
+  { id: 'importacaoFinanceiro', api: 'API-30', nome: 'Importação do financeiro antigo', descricao: 'Contratos, cobranças e recebimentos de Conexa, Omie, Conta Azul, Nibo, Domínio Honorários ou planilha.', modo: 'demonstracao', requisito: 'Arquivo exportado da ferramenta antiga' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 
 /** Os serviços (para componentes; o mesmo objeto de `servicos`). */

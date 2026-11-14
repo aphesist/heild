@@ -1,6 +1,7 @@
 import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
+import { decidirCartaoFin } from '@/telas/financeiro/cartoes'
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -10,10 +11,12 @@ import { useSessao } from './sessao'
  */
 export function useEfeitosCartao() {
   const loja = useLoja()
-  const { usuario } = useSessao()
+  const { usuario, permissoes } = useSessao()
   const conversaDe = useConversaDe()
 
   return (cartao: string, decisao: string) => {
+    // S07: cartões do Financeiro (s07-* e o lote fik1) conferem a alçada e executam pelas entidades.
+    if (decidirCartaoFin(cartao, decisao, { loja, usuario, permissoes })) return
     loja.decidir(cartao, decisao)
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome

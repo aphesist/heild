@@ -4,10 +4,12 @@ import type { CartaoAprovacao, Id, MensagemInterna, NomeTabela, Notificacao, Sta
 import { ErroRegra } from '../permissoes/autorizar'
 import { idDoAtor, nomeDoAtor } from '../permissoes/perfil'
 import { contextoAtual } from './contexto'
+import { reposFinanceiro } from './financeiro'
 import { agora, novoId, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
 
 export * from './contexto'
 export * from './repositorio'
+export { competenciaDe } from './financeiro'
 
 const b = (): Banco => banco
 
@@ -184,6 +186,8 @@ export const repos = {
   ),
   telas: new RepositorioTela(b, regras({ tabela: 'registro_tela', prefixo: 'rt', artigo: 'o estado de tela', ferramentas: { criar: 'tela.lembrar', atualizar: 'tela.lembrar', excluir: 'tela.lembrar' }, exclusao: 'definitiva', rotulo: (r) => r.id, semEvento: true })),
   notas: new Repositorio(b, regras({ tabela: 'nota_emitida', prefixo: 'nf', artigo: 'a nota', ferramentas: { criar: 'nfse.emitir', atualizar: 'nfse.cancelar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Nota emitida não se apaga: cancele.', rotulo: (r) => `NFS-e ${r.numero}`, alvo: (r) => ({ cliente_id: r.cliente_id ?? null }) })),
+  // S07: Financeiro do escritório (09, 3.1)
+  ...reposFinanceiro(b),
 }
 
 export type Repos = typeof repos

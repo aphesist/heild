@@ -126,6 +126,7 @@ function PlataformaInterna(props: Props) {
   }, [bpoPuro, clienteId, loja.clientes])
   const [conversaCrm, setConversaCrm] = useState<string | undefined>(doEndereco?.conversa)
   const [faturaAberta, setFaturaAberta] = useState<string | undefined>(doEndereco?.fatura)
+  const [contratoAberto, setContratoAberto] = useState<string | undefined>(doEndereco?.contrato) // S07
   const [pastaAberta, setPastaAberta] = useState<Destino['pasta']>(doEndereco?.pasta)
   const [conversaInterna, setConversaInterna] = useState<string | undefined>(doEndereco?.conversaInterna)
   const [integrante, setIntegrante] = useState<string>(integranteInicial)
@@ -181,6 +182,7 @@ function PlataformaInterna(props: Props) {
     if (d.conversa) setConversaCrm(d.conversa)
     if (d.integrante) setIntegrante(d.integrante)
     setFaturaAberta(d.fatura)
+    setContratoAberto(d.contrato)
     setPastaAberta(d.pasta)
     // S02 (C1): "ver todas" e o link #/painel/obrigacoes?setor= abrem a aba Obrigações filtrada.
     if (d.filtroSetor) pedirFiltroSetor(d.filtroSetor)
@@ -230,7 +232,7 @@ function PlataformaInterna(props: Props) {
   // Telas que ainda leem os dados fixos de src/dados mostram os do escritório completo; nos outros
   // escritórios de exemplo, avisam em vez de misturar dados de outro escritório (ver docs/wireframe/STATUS.md).
   const { escritorio: deExemplo } = useBanco()
-  const telaAindaFixa = !deExemplo.completo && (modulo === 'financeiro' || modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
+  const telaAindaFixa = !deExemplo.completo && (modulo === 'timesheet' || modulo === 'bpo' || (modulo === 'crm' && aba !== 'conversas') || (modulo === 'inicio' && aba === 'visao') || (modulo === 'config' && (aba === 'armazenamento' || aba === 'integrantes' || aba === 'assinatura' || aba === 'tema')))
 
   return (
     <NavegacaoProvider value={{ irPara: navegar }}>
@@ -385,7 +387,7 @@ function PlataformaInterna(props: Props) {
           {modulo === 'config' && aba === 'integrantes' && <IntegrantesTela />}
           {modulo === 'config' && aba === 'assinatura' && <AssinaturaTela />}
           {modulo === 'config' && aba === 'conectores' && <ConectoresTela />}
-          {modulo === 'financeiro' && aba === 'contratos' && <ContratosTela somenteLeitura={permissoes.financeiroSoLeitura} />}
+          {modulo === 'financeiro' && aba === 'contratos' && <ContratosTela key={`${contratoAberto ?? 'lista'}-${nonce}`} somenteLeitura={permissoes.financeiroSoLeitura} contratoInicial={contratoAberto} />}
           {modulo === 'financeiro' && aba === 'cobranca' && <CobrancaTela key={`${faturaAberta ?? 'lista'}-${nonce}`} faturaInicial={faturaAberta} />}
           {modulo === 'financeiro' && aba === 'visao' && <VisaoFinTela />}
           {modulo === 'financeiro' && aba === 'pagar' && <ContasPagarTela />}

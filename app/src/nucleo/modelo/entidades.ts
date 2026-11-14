@@ -455,6 +455,11 @@ export interface NotaEmitida extends Registro {
   situacao: string
 }
 
+/* ---------- S07: Financeiro do escritório (tipos em ./financeiro.ts) ---------- */
+
+import type { ContratoHonorarios, ItemContrato, Aditivo, ItemTabelaAvulsos, ServicoAvulso, DespesaAdiantada, LoteFaturamento, Cobranca, Parcela, Recebimento, NotaServicoEscritorio, ContaBancaria, Lancamento, ContaPagarFin, CentroCusto, CategoriaGerencial, RegraCategorizacao, FechamentoFinanceiro, PoliticaFinanceira, CenarioCaixa } from './financeiro'
+export type * from './financeiro'
+
 /* ---------- Catálogo das tabelas ---------- */
 
 export interface Tabelas {
@@ -488,6 +493,27 @@ export interface Tabelas {
   mensagem_interna: MensagemInterna
   registro_tela: RegistroTela
   nota_emitida: NotaEmitida
+  // S07: Financeiro do escritório (09, 3.1)
+  contrato_honorarios: ContratoHonorarios
+  item_contrato: ItemContrato
+  aditivo: Aditivo
+  item_tabela_avulsos: ItemTabelaAvulsos
+  servico_avulso: ServicoAvulso
+  despesa_adiantada: DespesaAdiantada
+  lote_faturamento: LoteFaturamento
+  cobranca: Cobranca
+  parcela: Parcela
+  recebimento: Recebimento
+  nota_servico_escritorio: NotaServicoEscritorio
+  conta_bancaria: ContaBancaria
+  lancamento: Lancamento
+  conta_pagar: ContaPagarFin
+  centro_custo: CentroCusto
+  categoria_gerencial: CategoriaGerencial
+  regra_categorizacao: RegraCategorizacao
+  fechamento_financeiro: FechamentoFinanceiro
+  politica_financeira: PoliticaFinanceira
+  cenario_caixa: CenarioCaixa
 }
 
 export type NomeTabela = keyof Tabelas
@@ -523,6 +549,27 @@ export const nomesTabelas: NomeTabela[] = [
   'mensagem_interna',
   'registro_tela',
   'nota_emitida',
+  // S07
+  'contrato_honorarios',
+  'item_contrato',
+  'aditivo',
+  'item_tabela_avulsos',
+  'servico_avulso',
+  'despesa_adiantada',
+  'lote_faturamento',
+  'cobranca',
+  'parcela',
+  'recebimento',
+  'nota_servico_escritorio',
+  'conta_bancaria',
+  'lancamento',
+  'conta_pagar',
+  'centro_custo',
+  'categoria_gerencial',
+  'regra_categorizacao',
+  'fechamento_financeiro',
+  'politica_financeira',
+  'cenario_caixa',
 ]
 
 /** Dados de uma linha para criar: o banco preenche id, escritório e datas. */
