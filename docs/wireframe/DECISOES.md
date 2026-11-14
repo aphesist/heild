@@ -490,6 +490,14 @@ Formato de cada registro:
 - **Arquivos compartilhados:** `ambiente/loja.tsx` (`Destino.contrato`), `nucleo/rotas.ts` (parâmetro `contrato`), `ambiente/PainelLab.tsx` (uma linha: seção S07), só acrescentando.
 - **Situação:** proposta.
 
+#### 2026-11-14 · S07 · Ausências e "não era esta" não mexem na cobrança
+
+- **Decisão:** a cobrança do escritório não é por hora: o contrato é fixo, por faixa ou por unidade (09, 4.2), e o avulso por hora (consultoria) leva a quantidade combinada na proposta, com aceite. Por isso as ausências e o "não era esta" da S04 não alteram fatura, lote nem avulso; eles entram no custo-hora e na Rentabilidade (S06), que o Financeiro lê pelo `fechamento_financeiro.custo_hora`. O serviço extra marcado na tarefa (C2-25) já é lido (registro "Comanda de serviço extra").
+- **Por quê:** pedido da S04 repassado pela coordenação; o plano não cobra honorário por hora apontada.
+- **Telas e ações:** S07-A09, S07-A44.
+- **Impacto no plano:** nenhum.
+- **Situação:** proposta.
+
 ### S08 · BPO
 
 ### S09 · Arquivos, Configurações, entrada e implantação
