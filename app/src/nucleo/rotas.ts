@@ -35,6 +35,7 @@ export function destinoParaHash(d: Destino): string {
   if (d.trilha) q.set('trilha', d.trilha)
   if (d.fatura) q.set('fatura', d.fatura)
   if (d.conversaInterna) q.set('conversaInterna', d.conversaInterna)
+  if (d.contrato) q.set('contrato', d.contrato)
   if (d.pasta) q.set('pasta', `${d.pasta.clienteId ?? '_escritorio'}:${d.pasta.caminho.join('/')}`)
   // S02 (C1): aba Obrigações filtrada pelo setor dono.
   if (d.filtroSetor) q.set('setor', d.filtroSetor)
@@ -50,7 +51,7 @@ export function hashParaDestino(hash: string): Destino | null {
   if (m[2]) d.aba = decodeURIComponent(m[2])
   const cliente = q.get('cliente')
   if (cliente) d.cliente = cliente === 'todos' ? null : cliente
-  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'trilha', 'conversaInterna'] as const) {
+  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'trilha', 'conversaInterna', 'contrato'] as const) {
     const v = q.get(k)
     if (v) d[k] = v
   }
@@ -74,7 +75,7 @@ export function paginaDoHash(hash = typeof window === 'undefined' ? '' : window.
 /* ---------- Estado da rota: a base vem da Plataforma; o item, das gavetas ---------- */
 
 let base: Destino | null = null
-let sub: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna'> = {}
+let sub: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna' | 'contrato'> = {}
 let item: Pick<Destino, 'tarefa' | 'ficha' | 'trilha'> = {}
 const composta = (): Destino | null => (base ? { ...base, ...sub, ...item } : null)
 
@@ -120,7 +121,7 @@ export function definirItemDaRota(i: Pick<Destino, 'tarefa' | 'ficha' | 'trilha'
  * A tela informa o item aberto dentro dela (a conversa do CRM, a fatura, a
  * pasta): entra no endereço enquanto a tela está montada.
  */
-export function useItemNaRota(parte: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna'>) {
+export function useItemNaRota(parte: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna' | 'contrato'>) {
   const chave = JSON.stringify(parte)
   useEffect(() => {
     sub = JSON.parse(chave)

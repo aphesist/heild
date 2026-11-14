@@ -615,6 +615,69 @@ Formato de cada registro:
 
 ### S07 · Financeiro do escritório
 
+#### 2026-11-14 · S07 · Financeiro sobre as entidades do 09, com migração nova
+
+- **Decisão:** o Financeiro deixa de ler `src/dados/financeiro.ts` e passa a morar em 20 tabelas novas com os nomes do 09, 3.1 (`contrato_honorarios`, `item_contrato`, `aditivo`, `item_tabela_avulsos`, `servico_avulso`, `despesa_adiantada`, `lote_faturamento`, `cobranca`, `parcela`, `recebimento`, `nota_servico_escritorio`, `conta_bancaria`, `lancamento`, `conta_pagar`, `centro_custo`, `categoria_gerencial`, `regra_categorizacao`, `fechamento_financeiro`, `politica_financeira`, `cenario_caixa`), com repositórios que não apagam dinheiro (cancelar e substituir com motivo; lançamento só por ajuste; item de contrato se fecha). A migração `20261114180000_s07_financeiro.sql` segue o padrão da de fundações (RLS por escritório, gatilho que recusa apagar o dinheiro fora do `restaurar_demonstracao()`). O arquivo `src/dados/financeiro.ts` continua (o app do cliente, o BPO e a Rentabilidade ainda o leem) e é a fonte da semente.
+- **Por quê:** o pedido é o frontend pronto para o backend real; e o Horizonte não podia continuar com o aviso de "tela com dados fixos".
+- **Telas e ações:** S07-T01 a T08.
+- **Impacto no plano:** nenhum (implementa 09, 3.1 no wireframe). **A migração não foi aplicada no projeto Supabase** (pede autorização do dono): até aplicar, o modo Supabase não carrega (o adaptador lê todas as tabelas de `nomesTabelas`).
+- **Arquivos compartilhados:** `nucleo/modelo/entidades.ts` (import dos tipos de `modelo/financeiro.ts`, entradas no fim de `Tabelas` e `nomesTabelas`), `nucleo/permissoes/ferramentas.ts` (espalha `ferramentas-financeiro.ts` no fim), `nucleo/repositorios/index.ts` (espalha `reposFinanceiro` no fim), `nucleo/semente/andrade.ts` e `horizonte.ts` (uma linha cada), `servicos/index.ts` (cobrança, índices e importação), `telas/Plataforma.tsx` (tira o Financeiro de `telaAindaFixa`; estado `contratoAberto`), só acrescentando.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · Cartões do Financeiro: `s07-*`, um registro só, alçada conferida
+
+- **Decisão:** o que o integrante Financeiro prepara vira um `cartao_aprovacao` com a ação em `argumentos` (id `s07-<assunto>-<registro>`), mostrado no chat dele, no topo da aba (`extras.aba`), na Visão geral e no sino. Decidir em qualquer lugar passa por `useEfeitosCartao`, que chama `decidirCartaoFin` (`telas/financeiro/cartoes.ts`) antes de tudo: confere a alçada gravada (`gestor` = Gestor do Financeiro ou Administrador; `administrador` = só ele), registra a decisão e executa com o nome de quem aprovou. O cartão antigo `fik1` (lote de dezembro do chat) passou a aprovar o `lote_faturamento` de dez/26 de verdade. Também vira cartão o que a própria pessoa pede e o plano manda ser sempre cartão (cancelar, substituir, corrigir nota, acordo, aviso formal, pausa, ajuste, fechar o mês, reajuste): quem pediu e tem alçada aprova em seguida.
+- **Por quê:** 01, 6.4 (um registro só) e 09, 8 (o que nunca sai sem pessoa); decisão da sessão.
+- **Telas e ações:** S07-A01, A06, A07, A09, A10, A13, A17, A18, A19, A23, A27, A31, A43.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `ambiente/efeitos.tsx` (uma linha no começo da função devolvida, chamando `decidirCartaoFin`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · Dois aprovadores acima de R$ 10 mil
+
+- **Decisão:** a alçada das contas a pagar tem três degraus na política (`limite_gestor` R$ 5 mil, `limite_dois_aprovadores` R$ 10 mil): acima do segundo, a primeira aprovação fica registrada ("1 de 2") e a conta só agenda com o segundo sócio. No wireframe, o segundo sócio aprova pelo painel Demonstração (S07).
+- **Por quê:** a alçada "Administrador + segundo sócio" já estava no protótipo; o 09, 10.6 pede alçada por valor e papel. **[sem regra no plano: o terceiro degrau]**.
+- **Telas e ações:** S07-A27, S07-A50.
+- **Impacto no plano:** 09, 6.1 (alçadas) ganha o terceiro degrau, se aceito.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · Reajuste em dois cartões: as cartas e a aplicação
+
+- **Decisão:** a campanha de reajuste termina num cartão do Administrador que envia as cartas (cada contrato ganha um aditivo `comunicado`); aplicar os valores é outro cartão, na data-base ("Aplicar na data-base"), que grava a versão nova do contrato a partir da competência. O lote de dezembro usa os itens que valem em dezembro (`itensNaCompetencia`), nunca o reajuste de janeiro.
+- **Por quê:** 09, 4.3 (aviso com antecedência, nunca retroativo, sempre cartão).
+- **Telas e ações:** S07-A10.
+- **Impacto no plano:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · Comanda de serviço extra (C2-25) e certificado como serviço (C2-23)
+
+- **Decisão:** o Financeiro lê a marca que a S04 grava na ficha da tarefa (`acoesTarefa.marcarExtra`: `extras.servico_extra: true` e `extras.extra_valor`, texto opcional como "R$ 360,00"). Ele lista essas comandas em Contratos › "O que entra na próxima fatura"; "Faturar comanda" cria o `servico_avulso` (`origem: 'comanda'`, `tarefa_id`, o valor informado ou o da tabela de avulsos) e o cartão que manda a proposta ao cliente; com o aceite, fica a faturar. O certificado digital vendido como serviço é o item `C2-23` da tabela de avulsos e um avulso de `origem: 'certificado'`, `fase: 3`, visível com o selo "fase 3 · depois" e sem ação.
+- **Por quê:** C2-25 e C2-23 entram agentificados; 09, 4.7 (sem aceite não fatura).
+- **Telas e ações:** S07-A09, S07-T02 (extras), S07-A52.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (a semente S07 acrescenta duas tarefas de exemplo com a marca).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · O que as outras sessões leem do Financeiro
+
+- **Decisão:** (1) S10: as faturas do app devem passar a ler a entidade `cobranca` do cliente (com `nota_servico_escritorio` e `parcela`); o "pago" do app é um `recebimento` com `origem: 'informado_pelo_cliente'` e `situacao: 'informado'`, que só pausa a régua (`regua_pausada_ate`); a contestação pausa com `regua_pausa_motivo`. Exemplos prontos no painel Demonstração (S07). (2) S06: o custo-hora proposto e o fechado ficam em `fechamento_financeiro.custo_hora` da competência. (3) S08: `conta_bancaria`, `lancamento` e `conta_pagar` têm `titular_tipo` (`escritorio` ou `empresa`) e `titular_cliente_id`, para o BPO usar as mesmas tabelas; `pecas.tsx` não mudou de assinatura.
+- **Por quê:** contratos C10/S07 → S10 e S06 → S07 do `SESSOES.md`.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · Data da demonstração, contrato no endereço e banco antigo
+
+- **Decisão:** as contas de prazo do Financeiro usam o "hoje" fixo da demonstração, 18/11/2026 (o mesmo da semente). O contrato aberto vai para o endereço (`#/financeiro/contratos?contrato=ch-c1`, `Destino.contrato`). Banco guardado no navegador antes do S07 recebe a semente do Financeiro na primeira abertura (sem mexer no resto). Vencimento do contrato entre os dias 1 e 28 **[sem regra no plano]**.
+- **Arquivos compartilhados:** `ambiente/loja.tsx` (`Destino.contrato`), `nucleo/rotas.ts` (parâmetro `contrato`), `ambiente/PainelLab.tsx` (uma linha: seção S07), só acrescentando.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S07 · Ausências e "não era esta" não mexem na cobrança
+
+- **Decisão:** a cobrança do escritório não é por hora: o contrato é fixo, por faixa ou por unidade (09, 4.2), e o avulso por hora (consultoria) leva a quantidade combinada na proposta, com aceite. Por isso as ausências e o "não era esta" da S04 não alteram fatura, lote nem avulso; eles entram no custo-hora e na Rentabilidade (S06), que o Financeiro lê pelo `fechamento_financeiro.custo_hora`. O serviço extra marcado na tarefa (C2-25) já é lido (registro "Comanda de serviço extra").
+- **Por quê:** pedido da S04 repassado pela coordenação; o plano não cobra honorário por hora apontada.
+- **Telas e ações:** S07-A09, S07-A44.
+- **Impacto no plano:** nenhum.
+- **Situação:** proposta.
+
 ### S08 · BPO
 
 #### 2026-11-14 · S08 · BPO nas entidades, com as regras nos repositórios

@@ -3,6 +3,7 @@ import type { CodigoSetor, Fotografia } from '../modelo/entidades'
 import { montador, type EscritorioDeExemplo } from './comum'
 import { canaisInternos, obrigacoesPadrao } from './padrao'
 import { sementeS06 } from './s06'
+import { sementeS07Horizonte } from './s07'
 
 export const ID_HORIZONTE = 'esc-horizonte'
 
@@ -128,6 +129,7 @@ export function sementeHorizonte(): Fotografia {
     [{ canal: 'ci-geral', autor: 'h-u1', corpo: 'Começamos! Cadastrei os quatro primeiros clientes; a procuração do Estúdio Lume está com a Júlia.' }],
   )
   sementeS06({ clientes: foto.cliente, tarefas: foto.tarefa, usuarios: foto.usuario }, add, 'horizonte') // S06: Timesheet
+  sementeS07Horizonte(foto, add) // S07: Financeiro do escritório
   return foto
 }
 

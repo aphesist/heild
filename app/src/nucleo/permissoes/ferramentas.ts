@@ -1,4 +1,5 @@
 import type { Modulo, Nivel, Papel } from '../modelo/entidades'
+import { ferramentasFinanceiro } from './ferramentas-financeiro'
 
 /**
  * Catálogo das ferramentas tipadas (Fundações 6.1), no que a autorização usa.
@@ -200,6 +201,8 @@ export const ferramentas: Ferramenta[] = [
   f('bpo.revisao.decidir', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
   f('erp.autorizar', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
   f('fila.responder', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
+  // S07: Financeiro do escritório
+  ...ferramentasFinanceiro,
   // S09 · Arquivos (01, 7): mover, visibilidade, origem, conflito, envio ao cliente.
   f('documento.mover', 'arquivos', 'executar', 'geral', { papel_minimo: 'gestor' }),
   f('documento.forcar_visibilidade', 'arquivos', 'executar', 'geral', { papel_minimo: 'gestor' }),

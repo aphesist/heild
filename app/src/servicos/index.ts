@@ -8,6 +8,7 @@ import { erpDemonstracao, type ServicoErp } from './erp'
 import type { InfoServico } from './tipos'
 import { coresDemonstracao, extensaoDemonstracao, type ServicoCores, type ServicoExtensao } from './timesheet'
 import { calculadoraReformaDemonstracao, conferenciaAssinaturaDemonstracao, coreContabilDemonstracao, leitorExtratosDemonstracao, reinfDemonstracao, sicalcDemonstracao, type ServicoCalculadoraReforma, type ServicoConferenciaAssinatura, type ServicoCoreContabil, type ServicoLeitorExtratos, type ServicoReinf, type ServicoSicalc } from './s03'
+import { cobrancaDemonstracao, importacaoFinanceiroDemonstracao, indicesDemonstracao, type ServicoCobranca, type ServicoImportacaoFinanceiro, type ServicoIndices } from './cobranca'
 import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores } from './conectores'
 import { cadastrosDemonstracao, type ServicoCadastros } from './cadastros'
 
@@ -22,6 +23,7 @@ export type * from './mensageria'
 export type * from './timesheet'
 export type * from './s03'
 export type * from './erp'
+export type * from './cobranca'
 export type * from './conectores'
 export type * from './cadastros'
 
@@ -60,6 +62,10 @@ export interface Servicos {
   conferenciaAssinatura: ServicoConferenciaAssinatura
   /** S08: ERPs financeiros dos clientes do BPO (API-25). */
   erp: ServicoErp
+  // S07: cobrança pelo banco do escritório, índices do BCB e importação do financeiro antigo
+  cobranca: ServicoCobranca
+  indices: ServicoIndices
+  importacaoFinanceiro: ServicoImportacaoFinanceiro
   // S09: conectores, cofre e leitura da árvore do Drive (Raio-X).
   conectores: ServicoConectores
   cofre: ServicoCofre
@@ -94,6 +100,9 @@ export const servicos: Servicos = {
   leitorExtratos: leitorExtratosDemonstracao,
   conferenciaAssinatura: conferenciaAssinaturaDemonstracao,
   erp: erpDemonstracao,
+  cobranca: cobrancaDemonstracao,
+  indices: indicesDemonstracao,
+  importacaoFinanceiro: importacaoFinanceiroDemonstracao,
   conectores: conectoresDemonstracao,
   cofre: cofreDemonstracao,
   arvore: arvoreDemonstracao,
@@ -137,6 +146,10 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'coreContabil', api: 'API-18', nome: 'Core contábil', descricao: 'Lote de lançamentos ao sistema contábil.', modo: 'demonstracao', requisito: 'Conector do core (ePlugin, Onvio, arquivo)' },
   { id: 'leitorExtratos', api: 'API-19', nome: 'Leitor de extratos', descricao: 'OFX, CSV, planilha e PDF com deduplicação e sócio reconhecido.', modo: 'demonstracao', requisito: 'Leitura de documentos (OCR) para PDF' },
   { id: 'conferenciaAssinatura', api: 'API-22', nome: 'Validador de assinatura', descricao: 'Confere a assinatura digital dentro do PDF devolvido.', modo: 'demonstracao', requisito: 'Validador ICP-Brasil' },
+  // S07
+  { id: 'cobranca', api: 'API-20', nome: 'Cobrança do escritório', descricao: 'Boleto, Pix e Pix Automático direto no banco do escritório (ou Asaas/Efí).', modo: 'demonstracao', requisito: 'Convênio de cobrança com API no banco do escritório' },
+  { id: 'indices', api: 'API-16', nome: 'Índices do Banco Central', descricao: 'IPCA, INPC e IGP-M acumulados para o reajuste.', modo: 'demonstracao', requisito: 'Série SGS pública (sem custo)' },
+  { id: 'importacaoFinanceiro', api: 'API-30', nome: 'Importação do financeiro antigo', descricao: 'Contratos, cobranças e recebimentos de Conexa, Omie, Conta Azul, Nibo, Domínio Honorários ou planilha.', modo: 'demonstracao', requisito: 'Arquivo exportado da ferramenta antiga' },
   { id: 'conectores', api: 'API-06 a API-25', nome: 'Conectores (teste e conexão)', descricao: 'Conectar, testar e reprocessar cada integração.', modo: 'demonstracao', requisito: 'Backend dos conectores (08)' },
   { id: 'cofre', api: 'API-29', nome: 'Cofre de credenciais', descricao: 'Certificados, procurações e tokens guardados fora do banco.', modo: 'demonstracao', requisito: 'Cofre e KMS no backend' },
   { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore do Drive', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo.', modo: 'demonstracao', requisito: 'Conector OAuth do Drive em leitura' },

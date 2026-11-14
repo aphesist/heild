@@ -2,6 +2,7 @@ import { useLoja } from './loja'
 import { integranteDoSetor, useConversaDe } from './fluxos'
 import { useSessao } from './sessao'
 import { useEfeitosS03 } from '@/telas/painel/s03/cartoes'
+import { decidirCartaoFin } from '@/telas/financeiro/cartoes'
 import { efeitoCartaoS02 } from './agente-s02'
 import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
 import { efeitoS09 } from './efeitos-s09'
@@ -15,11 +16,13 @@ import { efeitoCartaoS10 } from '@/cliente/motor' // S10
  */
 export function useEfeitosCartao() {
   const loja = useLoja()
-  const { usuario } = useSessao()
+  const { usuario, permissoes } = useSessao()
   const conversaDe = useConversaDe()
   const efeitosS03 = useEfeitosS03() // S03: cartões `s03-...` do Painel B
 
   return (cartao: string, decisao: string) => {
+    // S07: cartões do Financeiro (s07-* e o lote fik1) conferem a alçada e executam pelas entidades.
+    if (decidirCartaoFin(cartao, decisao, { loja, usuario, permissoes })) return
     loja.decidir(cartao, decisao)
     if (efeitosS03(cartao, decisao)) return // S03
     // S02: cartões dos integrantes do Painel A executam a ação guardada no cartão e aprendem com a decisão.
