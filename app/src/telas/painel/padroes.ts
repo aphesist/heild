@@ -24,7 +24,7 @@ export const padroes: Record<string, ItemGrade[]> = {
   dp: a('dp-visao:L obrigacoes-setor:M admissoes:XL rescisoes:XL simulados:G quadro:M folha:G esocial:G guias:XL ferias:G convencoes:G det:M termos:G recalculo:M fase45:M dp-vazio:XL pendencias:M acoes:G tarefas:XL documentos:M relatorios:M'),
   contabil: a('fechamento:L deve-chegar:G pendencias:M documentos:M classificacao:XL conciliacao:G acoes:G tarefas:G relatorios:G'),
   consultoria: a('perguntas:XL vigilancia:G pareceres:G acoes:G simulacoes:M tarefas:G documentos:M relatorios:M'),
-  gestao: a('produtividade:G ia:G equipe:M permissoes:XL migracao:XL acoes:G tarefas:G relatorios:M'),
+  gestao: a('produtividade:G ia:G equipe:G permissoes:XL criticas:M rotinas:G pauta:G processos:XL catalogo:XL migracao:G compliance:G auditoria:XL atalhos:M fase3:M acoes:G tarefas:XL relatorios:M'),
   'societario-carteira': a('carteira-certificados:XL carteira-estados:G obrigacoes-setor:G acoes:G tarefas:G relatorios:G'),
   'obrigacoes-carteira': a('carteira-semana:XL riscos:M prerequisitos:M prorrogacoes:M acoes:G tarefas:G relatorios:M'),
   'notas-carteira': a('carteira-captura:XL manifestacao:M obrigacoes-setor:G acoes:G tarefas:XL relatorios:M'),
