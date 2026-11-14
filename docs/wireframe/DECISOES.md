@@ -170,6 +170,87 @@ Formato de cada registro:
 - **Arquivos compartilhados:** `ModuloTela.tsx` (`GavetaChat`, de S01: abas no topo, contador no botão, abertura controlada por `useEstadoChat`); `Plataforma.tsx` (rota `interna`, ícone, parâmetro `conversaInterna`, a gaveta do Chat passa a aparecer em todos os módulos, não só no Painel, e a condição do `ModuloTela` genérico exclui `interna`); `modulos.ts`, `loja.tsx` (`IdModulo` e `Destino.conversaInterna`), `nucleo/rotas.ts` e `nucleo/permissoes/telas.ts` (módulo `interna` para toda a equipe), só acrescentando.
 - **Situação:** proposta.
 
+#### 2026-11-14 · S05 · Comunicação interna nas entidades do 01, com o que falta em `extras`
+
+- **Decisão:** conversas, participações e mensagens usam as entidades que a S00 criou (`conversa_interna`, `participacao`, `mensagem_interna`). O que o 11 pede e o modelo ainda não tem fica em `mensagem_interna.extras` (menções, citações com cliente e setor, anexos com o documento criado, áudio e transcrição, autoria do integrante, proposta de tarefa, tarefa criada, resumo, linha do sistema, quem fixou). O "lido até" de cada pessoa por conversa fica em `registro_tela` (`s05:interna:lidas:<usuário>`) e dá as não lidas e o "visto por". Preferências da pessoa (silenciadas, horário de silêncio, presença, aceite do primeiro uso) e as aberturas em investigação também ficam em `registro_tela` com o prefixo `s05:interna:`. Nenhuma migração nova.
+- **Por quê:** a sessão; o backend transforma `extras` em colunas (ou numa tabela de leitura) sem mudar as telas.
+- **Telas e ações:** S05-T05, S05-A65 a A87.
+- **Impacto no plano:** 01, ad. do 11 (Conversa interna, Mensagem com versões, Participação): sugere as colunas `mencoes`, `citacoes`, `anexos`, `audio` e a tabela `leitura_conversa_interna (usuario_id, conversa_id, lido_ate)`.
+- **Arquivos compartilhados:** nenhum além dos já registrados.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Menção a integrante, a setor e a pessoa
+
+- **Decisão:** `@Fiscal` (o nome do integrante no tema) chama o integrante, que responde no fio marcado como IA e com o selo de demonstração; `@equipe Fiscal` avisa todas as pessoas do setor (o mesmo nome curto não serve para os dois); `@Nome` avisa a pessoa com o trecho e, se ela não participa da conversa, leva só o trecho, não o acesso. `#` cita cliente, tarefa, obrigação ou documento, que viram cartões clicáveis; quem não pode ver o cliente (carteira ligada, cliente restrito) ou o setor da tarefa vê "sem acesso".
+- **Por quê:** a sessão; o 11, 3 pede as três menções e não diz como diferenciar setor de integrante.
+- **Telas e ações:** S05-A72, A73, A74.
+- **Impacto no plano:** 11, 3 (forma da menção a setor).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Quando o integrante entra sem ser chamado
+
+- **Decisão:** o integrante só posta sem menção em dois casos: a proposta de tarefa ("parece um pedido: quer que eu crie a tarefa?"), em grupo ou canal, quando a mensagem tem verbo de pedido ou prazo e ninguém chamou outro integrante; e o resumo da manhã, se o Gestor do setor (ou o Administrador) ligar o gatilho no canal: o primeiro a abrir o canal no dia vê o integrante postar o de hoje (no produto, job das 8h). Em conversa pessoal, nunca, salvo chamado. O resumo do fio é pedido pela pessoa e aparece só para ela (não vira mensagem).
+- **Por quê:** 11, 4 e P6; "integrantes não leem conversa pessoal".
+- **Telas e ações:** S05-A76, A77, A78.
+- **Impacto no plano:** nenhum (detalha 11, 4).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Investigação de conversa pessoal pelo Administrador
+
+- **Decisão:** em Preferências › Auditoria, o Administrador vê só os nomes das conversas pessoais de outras pessoas (nunca o conteúdo antes de abrir); abrir exige motivo escrito (`useConfirmar` com motivo), grava evento, posta uma linha do sistema na conversa e avisa os dois pelo sino. A conversa abre só para leitura, com a faixa do motivo, e o Administrador não marca nada como lido.
+- **Por quê:** 11, 5 e P2.
+- **Telas e ações:** S05-A85.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Semente da comunicação interna com horários do dia
+
+- **Decisão:** a semente da S05 (`src/nucleo/semente/s05.ts`, chamada no fim de `andrade.ts` com `// S05`) cria uma conversa pessoal, um grupo com uma saída registrada, um fio com resposta do integrante, citações, uma mensagem editada com a versão e um aviso fixado no Geral, com horários relativos à abertura (como as rotinas do time). Ela também passa as quatro mensagens da semente comum dos canais (`mn-semente-*`) para a manhã do mesmo dia: com a data fixa de 18/11, toda mensagem nova ficava "antes" delas e as não lidas se perdiam.
+- **Por quê:** a sessão; não muda o texto nem o autor da semente comum, só o horário.
+- **Telas e ações:** S05-T05.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/semente/andrade.ts` (uma linha no fim, como pede a ARQUITETURA, seção 4); horário das mensagens `mn-semente-*` da semente comum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Ids únicos das mensagens do CRM e mover mensagem sem apagar
+
+- **Decisão:** os itens de exemplo das conversas do CRM repetiam ids ("m1", "m2") entre conversas; no banco a mensagem tem id único e uma conversa sobrescrevia a outra (salvar a conversa da Padaria tirava mensagens da Metalúrgica). Em `src/dados/crm.ts` os ids passam a levar o id da conversa (`cv2-m1`). "Mover mensagem" (S05-A16) deixa na origem o registro "mensagem movida para…" e copia o item para a conversa certa: nada some.
+- **Por quê:** correção encontrada pela S05 (dona de `Conversa` e de `crm.ts`); quem tinha o banco guardado precisa de "Restaurar demonstração" para ver os ids novos.
+- **Telas e ações:** S05-T01, S05-A16.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (`crm.ts` é da S05).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Itens aprovados do CRM agentificados
+
+- **Decisão:** C2-07: o nome de quem atende entra em toda mensagem de pessoa ao cliente (começo em negrito do WhatsApp, rodapé ou desligado; primeiro nome, completo ou com o setor), configurado em Números › Nome de quem atende, com prévia no campo. C2-08: cada setor conecta a caixa de e-mail (OAuth simulado); o integrante de Atendimento lê entrada, enviados (inclusive o que a equipe mandou pelo Outlook ou Gmail) e anexos, põe o e-mail no fio certo e arquiva o anexo na pasta do cliente com o mês (na conversa, "Ler a caixa de e-mail agora" mostra um caso). D-17: farol do documento enviado (verde abriu, amarelo no prazo, vermelho 3 dias úteis sem abrir) com reenvio por outro canal em cartão. D-18: e-mail devolvido marca a falha e prepara o reenvio por WhatsApp. D-34: o anexo guarda o cliente do documento e o envio é bloqueado com o motivo se o CNPJ não for o da conversa. D-30: modo simulação local (nada grava). D-31 e D-33: categorias que o integrante responde sozinho começam todas desligadas e valem primeiro nos clientes-piloto. C2-13: aniversário da empresa e fim de ano por modelo, marcados como ideia. D-19: opção de PDF de pendências por cliente no comunicado, marcada como "depois".
+- **Por quê:** princípio 7 do mapa (tudo do Leandro e do 2º escritório entra agentificado).
+- **Telas e ações:** S05-A22 a A25, A29, A50, A51, A61, A64.
+- **Impacto no plano:** nenhum (implementa os itens).
+- **Arquivos compartilhados:** nenhum. Configurações novas em `registro_tela` com o prefixo `s05:crm:`.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · Ajustes na moldura para o Chat
+
+- **Decisão:** além do registrado no C8 revisto, a `GavetaChat` ganha a prop `acima` (o botão sobe no CRM › Conversas para não cobrir o Enviar) e passa a montar a janela flutuante da comunicação interna (S05-A87), que fica por cima de qualquer módulo no computador; no celular a gaveta faz esse papel. No painel Demonstração entra a seção da S05 (colega menciona você, resumo da manhã, cliente apaga ou edita, e-mail devolvido, documento sem abrir).
+- **Por quê:** a sessão; a S01, ao assumir a moldura, pode mover o botão e a janela para onde preferir mantendo `abrirChat` e `useNaoLidasInternas`.
+- **Telas e ações:** S05-A87; S01-T06.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `ModuloTela.tsx` (`GavetaChat`), `Plataforma.tsx` (uma prop na linha da gaveta), `PainelLab.tsx` (uma linha com `<LabS05>`).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S05 · O que ficou guardado mas ainda não age
+
+- **Decisão:** o horário de silêncio da pessoa fica guardado e aparece nas preferências, mas os avisos do sino ainda saem nesse horário (quem publica o aviso é a loja, da coordenação; basta a loja consultar `s05:interna:silencio:<usuário>`). A conversa silenciada já não soma no contador do Chat. A presença dos colegas é de demonstração (a própria pessoa escolhe disponível ou ausente).
+- **Por quê:** não mexer no redutor da loja.
+- **Telas e ações:** S05-A86.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (pedido à coordenação).
+- **Situação:** proposta.
+
 ### S06 · Timesheet
 
 ### S07 · Financeiro do escritório
