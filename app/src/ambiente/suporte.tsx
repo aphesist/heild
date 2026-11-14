@@ -130,6 +130,16 @@ const faq: { modulo: string; p: string; r: string }[] = [
   { modulo: 'Configurações', p: 'Como libero uma tela para um colaborador?', r: 'Configurações › Usuários › a pessoa › Exceções: escolha a tela e o nível. Fica registrado com o motivo.' },
   { modulo: 'Configurações', p: 'Como mudo as cores e o logotipo?', r: 'Configurações › Tema. A prévia mostra o recorte antes de publicar; o app do cliente usa o mesmo tema.' },
   { modulo: 'Minha conta', p: 'Como troco a senha ou o segundo fator?', r: 'No menu do seu nome, no pé da barra lateral › Minha conta.' },
+  // S09: módulos e telas novas.
+  { modulo: 'Configurações', p: 'Um conector mostra “erro de credencial”. O que faço?', r: 'Configurações › Conectores e cofre: toque em Reconectar. Se a credencial venceu, renove no Cofre; as rotinas paradas voltam a andar com Reprocessar.' },
+  { modulo: 'Configurações', p: 'Onde vejo o que cada pessoa pode fazer?', r: 'Configurações › Permissões: a matriz por pessoa e aba, com a regra que decidiu cada célula. “Simular” mostra o sistema como a pessoa vê.' },
+  { modulo: 'Configurações', p: 'O que é o Raio-X do Drive?', r: 'Um diagnóstico das pastas de todos os clientes que lê só os nomes, nunca o conteúdo. Cada achado vira uma decisão sua; nada muda no Drive sem o seu sim. Fica em Armazenamento.' },
+  { modulo: 'Configurações', p: 'Preciso de marca branca para ter o app do cliente?', r: 'Não: o App do cliente vem incluído em todo plano. A marca branca é um complemento para usar o seu logotipo, cores e domínio.' },
+  { modulo: 'Arquivos', p: 'Mudei um arquivo de cliente e ele foi para conferência. Por quê?', r: 'Mover um documento para outro cliente muda quem pode vê-lo; por isso um Gestor confere antes. O registro de entrega segue a impressão digital do arquivo.' },
+  { modulo: 'Arquivos', p: 'O que é “confirmar origem”?', r: 'Arquivos que caíram direto na nuvem não dizem quem mandou. Quem é do setor confirma de onde veio e, se for o caso, abre a tarefa.' },
+  { modulo: 'Conversas internas', p: 'Posso apagar uma mensagem interna?', r: 'Não. Mensagens internas não se apagam: editar guarda a versão anterior, com autor e data.' },
+  { modulo: 'Jurídico', p: 'Como contrato o pacote Jurídico?', r: 'Configurações › Assinatura › Pacotes de área › Jurídico: o configurador calcula o preço por advogados e processos.' },
+  { modulo: 'Implantação', p: 'Como retomo a implantação do escritório?', r: 'Configurações › Escritório › Continuar implantação. Os passos marcados ficam; dá para pular e voltar.' },
 ]
 const MAX_LEITURAS = 5
 

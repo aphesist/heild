@@ -6,6 +6,7 @@ import { iaDemonstracao, type ServicoIA } from './ia'
 import { emailDemonstracao, whatsappDemonstracao, type ServicoEmail, type ServicoWhatsApp } from './mensageria'
 import type { InfoServico } from './tipos'
 import { coresDemonstracao, extensaoDemonstracao, type ServicoCores, type ServicoExtensao } from './timesheet'
+import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores } from './conectores'
 
 export * from './tipos'
 export { definirEscalaLatencia, definirInstabilidade } from './simular'
@@ -16,6 +17,7 @@ export type * from './governo'
 export type * from './ia'
 export type * from './mensageria'
 export type * from './timesheet'
+export type * from './conectores'
 
 /**
  * Os serviços externos do sistema. Hoje todos são de demonstração. Para ligar
@@ -43,6 +45,10 @@ export interface Servicos {
   djen: ServicoDjen
   extensao: ServicoExtensao // S06
   cores: ServicoCores // S06
+  // S09: conectores, cofre e leitura da árvore do Drive (Raio-X).
+  conectores: ServicoConectores
+  cofre: ServicoCofre
+  arvore: ServicoArvore
 }
 
 export const servicos: Servicos = {
@@ -63,6 +69,9 @@ export const servicos: Servicos = {
   djen: djenDemonstracao,
   extensao: extensaoDemonstracao, // S06
   cores: coresDemonstracao, // S06
+  conectores: conectoresDemonstracao,
+  cofre: cofreDemonstracao,
+  arvore: arvoreDemonstracao,
 }
 
 const reais = new Set<keyof Servicos>()
@@ -93,6 +102,9 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'djen', api: 'JU (Jurídico)', nome: 'DJEN (Jurídico)', descricao: 'Intimações do Diário de Justiça Eletrônico Nacional.', modo: 'demonstracao', requisito: 'Consulta à API pública e cadastro das OABs' },
   { id: 'extensao', api: 'API-26', nome: 'Extensão de navegador (Timesheet)', descricao: 'Mantém o tempo contando nos portais e confirma o cliente pelo CNPJ; envia só o pulso.', modo: 'demonstracao', requisito: 'Extensão Manifest V3 publicada nas lojas do Chrome e do Edge' },
   { id: 'cores', api: 'API-18', nome: 'Cores contábeis (Timesheet)', descricao: 'Tarefas do Alterdata por API; Domínio, Questor e Contmatic por relatório e pasta.', modo: 'demonstracao', requisito: 'Token do ePlugin (Alterdata) e o adaptador de arquivo no backend' },
+  { id: 'conectores', api: 'API-06 a API-25', nome: 'Conectores (teste e conexão)', descricao: 'Conectar, testar e reprocessar cada integração.', modo: 'demonstracao', requisito: 'Backend dos conectores (08)' },
+  { id: 'cofre', api: 'API-29', nome: 'Cofre de credenciais', descricao: 'Certificados, procurações e tokens guardados fora do banco.', modo: 'demonstracao', requisito: 'Cofre e KMS no backend' },
+  { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore do Drive', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo.', modo: 'demonstracao', requisito: 'Conector OAuth do Drive em leitura' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 
 /** Os serviços (para componentes; o mesmo objeto de `servicos`). */

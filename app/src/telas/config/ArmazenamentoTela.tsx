@@ -10,6 +10,7 @@ import { arvoreModelo, conectoresArmazenamento, destinoPorTipo as destinosInicia
 import { clientes } from '@/dados/exemplo'
 import { cn } from '@/lib/utils'
 import { CabecalhoConfig } from './EscritorioTela'
+import { BlocoManutencao, BlocoRaioX } from './armazenamento-s09'
 
 /**
  * Configurações › Armazenamento (Fundações 7): onde ficam os documentos
@@ -163,6 +164,10 @@ export function ArmazenamentoTela() {
               ))}
             </ul>
           </Caixa>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <BlocoRaioX />
+          <BlocoManutencao />
         </div>
       </div>
 
