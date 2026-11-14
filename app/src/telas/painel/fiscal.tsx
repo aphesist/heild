@@ -239,9 +239,7 @@ function CaixasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
                       <span className="text-muted-foreground block">Teor completo</span>
                       {m.teor}
                     </p>
-                  ) : pend ? (
-                    <CartaoPendente id={pend} />
-                  ) : (
+                  ) : pend ? null : (
                     <div className="flex flex-wrap items-center gap-2">
                       <BotaoNivel
                         nivel="executar com aprovação"
@@ -272,6 +270,7 @@ function CaixasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
                   )}
                 </div>
               )}
+              {pend && !ciencia && <CartaoPendente id={pend} className="pl-8" />}
             </li>
           )
         })}

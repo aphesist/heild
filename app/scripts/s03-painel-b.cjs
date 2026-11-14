@@ -195,6 +195,16 @@ const { chromium } = require('playwright')
   await ref.getByText(/divergência/).waitFor({ timeout: 6000 }).catch(() => {})
   ok((await ref.innerText()).includes('divergência'), 'S03-A49: simulação da reforma contra a calculadora oficial')
 
+  // 5b. Gatilho do painel Demonstração: o Fiscal acorda com mensagem nova e deixa o cartão
+  await ir('#/painel/fiscal?cliente=c1')
+  await p.getByRole('button', { name: /^Demonstração/ }).click()
+  await espera(400)
+  await p.getByRole('button', { name: /Mensagem nova no e-CAC/ }).click()
+  await p.waitForTimeout(8000)
+  const cx = widget('Caixas postais')
+  ok((await cx.innerText()).includes('retenções de IRRF de agosto'), 'Gatilho ecac.mensagem.receber: o Fiscal lê sem abrir e deixa o cartão')
+  ok(await cx.locator('[data-cartao-pendente]').count(), 'Gatilho: cartão “abrir” aparece na aba (o mesmo do chat)')
+
   // 6. Persistência
   await p.reload()
   await espera(1800)
