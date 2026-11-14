@@ -65,4 +65,4 @@ Durante a S00, cinco desses testes pegaram regressões reais da migração (chav
 
 ### Pull request
 
-_Preenchido ao abrir o PR._
+Aberto: https://github.com/aphesist/heild/pull/1 (de `wf-s00-fundacao` para `wireframe`; sem merge).
