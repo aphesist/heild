@@ -3,7 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
 import { escritorio } from '@/dados/configuracoes'
-import { useLoja } from './loja'
+import { useLoja, usePersistente } from './loja'
+import { abrirChat } from './interna'
+import { abrirSuporte } from './suporte'
+import { useFluxos } from './fluxos'
+import { hashParaDestino } from '@/nucleo/rotas'
 import { useSessao } from './sessao'
 
 /** Evento do painel da demonstração para não esperar 3 minutos de verdade. */
@@ -54,6 +58,13 @@ export function useRegistroTempo(conta: boolean, onde: string) {
     }
   }, [conta, onde, espera])
 
+  // Presença na comunicação interna (11, 3; S01-A87): "em espera" enquanto a tela está coberta.
+  const [, setPresenca] = usePersistente<'ativo' | 'em_espera'>(`s01:presenca:${usuario.id}`, 'ativo')
+  useEffect(() => {
+    setPresenca(espera ? 'em_espera' : 'ativo')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!espera])
+
   useEffect(() => {
     if (espera) loja.registrar(usuario.nome, `Modo de espera em ${espera.onde}: tempo registrado até ${hora(espera.desde)} (último evento)`)
     // só no instante em que entra em espera
@@ -84,25 +95,69 @@ export function SeloTempo({ conta, espera, onde }: { conta: boolean; espera: boo
   )
 }
 
-/** Cobre só a área de trabalho (a barra lateral e o cabeçalho seguem usáveis). */
+/**
+ * Cobre só a área de trabalho (a barra lateral e o cabeçalho seguem usáveis).
+ * Ao continuar, se havia uma tarefa aberta, pergunta se volta a ela (03, 7.3).
+ * Suporte e conversas da equipe continuam a um clique (03, ad. 23; 11, 3).
+ */
 export function ModoEspera({ desde, onde, onRetomar }: { desde: number; onde: string; onRetomar: () => void }) {
+  const loja = useLoja()
+  const fluxos = useFluxos()
+  // A tarefa aberta no momento em que entrou em espera (o endereço guarda a ficha aberta).
+  const [tarefaId] = useState(() => hashParaDestino(window.location.hash)?.tarefa)
+  const tarefa = tarefaId ? loja.tarefas.find((t) => t.id === tarefaId) : undefined
+  const [perguntando, setPerguntando] = useState(false)
+  const continuar = () => (tarefa ? setPerguntando(true) : onRetomar())
   useEffect(() => {
-    const tecla = () => onRetomar()
+    if (perguntando) return
+    const tecla = () => continuar()
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
-  }, [onRetomar])
+  })
   return (
-    <div role="dialog" aria-modal="false" aria-label="Modo de espera" onPointerDown={onRetomar} className="bg-background/70 absolute inset-0 z-20 flex cursor-pointer items-center justify-center p-4 backdrop-blur-sm">
-      <div className="bg-surface shadow-painel flex max-w-sm flex-col items-center gap-3 rounded-[24px] p-6 text-center">
+    <div role="dialog" aria-modal="false" aria-label="Modo de espera" onPointerDown={(e) => e.target === e.currentTarget && !perguntando && continuar()} className="bg-background/70 absolute inset-0 z-20 flex cursor-pointer items-center justify-center p-4 backdrop-blur-sm">
+      <div className="bg-surface shadow-painel flex max-w-sm cursor-default flex-col items-center gap-3 rounded-[24px] p-6 text-center">
         <PauseCircleIcon className="text-muted-foreground size-10" weight="duotone" />
         <p className="text-2xl font-light tracking-tight">Em espera</p>
-        <p className="text-muted-foreground text-sm">
-          {escritorio.inatividadeMin} min sem ação em {onde}. O tempo foi registrado até {hora(desde)}, a última ação, e parou. Sua sessão continua aberta: nada foi fechado.
-        </p>
-        <Button className="rounded-full" onClick={onRetomar}>
-          Continuar
-        </Button>
-        <p className="text-muted-foreground text-xs">Se trabalhou fora do sistema nesse intervalo (telefone, portal sem a extensão), confirme em Timesheet › Confirmações.</p>
+        {perguntando && tarefa ? (
+          <>
+            <p className="text-sm">
+              Você estava em <strong className="font-medium">{tarefa.codigo}</strong> · {tarefa.titulo} ({tarefa.cliente}). Continuar nela?
+            </p>
+            <div className="flex gap-2">
+              <Button
+                className="rounded-full"
+                onClick={() => {
+                  onRetomar()
+                  fluxos.abrirTarefa(tarefa.id)
+                }}
+              >
+                Continuar em {tarefa.codigo}
+              </Button>
+              <Button variant="ghost" className="rounded-full" onClick={onRetomar}>
+                Não
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-sm">
+              {escritorio.inatividadeMin} min sem ação em {onde}. O tempo foi registrado até {hora(desde)}, a última ação, e parou. Sua sessão continua aberta: nada foi fechado.
+            </p>
+            <Button className="rounded-full" onClick={continuar}>
+              Continuar
+            </Button>
+          </>
+        )}
+        <div className="flex gap-2">
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => abrirSuporte()}>
+            Suporte
+          </Button>
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => abrirChat({ aba: 'equipe' })}>
+            Conversas da equipe
+          </Button>
+        </div>
+        <p className="text-muted-foreground text-xs">Se trabalhou fora do sistema nesse intervalo (telefone, portal sem a extensão), confirme em Timesheet › Confirmações. Na comunicação interna você aparece como “em espera”.</p>
       </div>
     </div>
   )

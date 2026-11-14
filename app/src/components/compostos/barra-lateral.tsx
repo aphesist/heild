@@ -8,6 +8,8 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
 import { useContadoresModulo } from '@/ambiente/contadores-s01'
+import { lembrarModo, useReaplicarModo } from '@/ambiente/modo-s01'
+import { useSessao } from '@/ambiente/sessao'
 import { ehHeild, logosDoModo, Marca, MarcaHeild } from './marca'
 
 export interface ItemLateral {
@@ -48,6 +50,9 @@ const mola = { type: 'spring', stiffness: 420, damping: 40 } as const
  */
 export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, aberta, onAlternar, onAlternarModo, onMinhaConta, onSair, onSuporte, className }: Props) {
   const { modo } = useTema()
+  const { usuario: conta } = useSessao()
+  useReaplicarModo(conta.id, modo, onAlternarModo)
+  const alternarModo = onAlternarModo && (() => (lembrarModo(conta.id, modo === 'escuro' ? 'claro' : 'escuro'), onAlternarModo()))
   // Contadores reais por item (S01-T01): cartões, atrasadas, conversas, confirmações. O que vier no item vence.
   const contadores = useContadoresModulo()
   const comContador = (it: ItemLateral): ItemLateral => ({ ...it, contador: it.contador ?? contadores[it.id as keyof typeof contadores] })
@@ -107,8 +112,8 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
               </div>
               <div className="text-muted-foreground mt-1 text-[11px]">Papel e setores são editados pelo Administrador.</div>
             </div>
-            {onAlternarModo && (
-              <ItemMenu onClick={onAlternarModo} icone={modo === 'escuro' ? <Sun /> : <Moon />}>
+            {alternarModo && (
+              <ItemMenu onClick={alternarModo} icone={modo === 'escuro' ? <Sun /> : <Moon />}>
                 {modo === 'escuro' ? 'Modo claro' : 'Modo escuro'}
               </ItemMenu>
             )}

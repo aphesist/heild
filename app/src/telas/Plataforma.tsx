@@ -414,7 +414,7 @@ function PlataformaInterna(props: Props) {
           {tempo.espera && <ModoEspera desde={tempo.espera.desde} onde={tempo.espera.onde} onRetomar={tempo.retomar} />}
         </Moldura>
         <Toasts />
-        {minhaConta && <MinhaConta onFechar={() => setMinhaConta(false)} />}
+        {minhaConta && <MinhaConta onFechar={() => setMinhaConta(false)} onAlternarModo={onAlternarModo} />}
         </SuporteProvider>
         </DocumentosProvider>
       </FluxosProvider>
