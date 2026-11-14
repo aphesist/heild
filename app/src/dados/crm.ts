@@ -62,6 +62,8 @@ export type ItemConversa =
       daCaixa?: 'entrada' | 'enviado'
       /** S05: e-mail que voltou (D-18). */
       devolvido?: string
+      /** S05: movida para a conversa certa da mesma pessoa (S05-A16); fica aqui o registro. */
+      movidaPara?: string
     }
   | { tipo: 'nota'; id: string; autor: string; hora: string; texto: string }
   | { tipo: 'marco'; id: string; hora: string; texto: string }
@@ -387,6 +389,10 @@ export const conversasCrm: ConversaCrm[] = [
     ],
   },
 ]
+
+// S05: os itens de exemplo repetiam ids ("m1", "m2") entre conversas; no banco, a mensagem
+// tem id próprio por escritório, então uma conversa sobrescrevia a outra. Prefixo com a conversa.
+for (const c of conversasCrm) for (const i of c.itens) if ('id' in i && /^[a-z]\d+$/.test(i.id)) i.id = `${c.id}-${i.id}`
 
 /** Cadastro projetado na lateral da conversa (04, 4.2). */
 export const lateralCliente: Record<string, { perfil: string; responsavel: Partial<Record<SetorIntegrante, string>>; outrasEmpresas?: string[]; pendencias: string[]; historico: number; outrosSetores: number }> = {

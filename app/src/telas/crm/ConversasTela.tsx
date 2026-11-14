@@ -299,7 +299,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
             onMover={(ids, destino) => {
               const itens = aberta.itens.filter((i) => 'id' in i && ids.includes(i.id))
               const nomeDestino = conversas.find((x) => x.id === destino)
-              atualizar(aberta.id, (x) => ({ ...x, itens: [...x.itens.filter((i) => !('id' in i && ids.includes(i.id))), marco(`${ids.length} ${ids.length === 1 ? 'mensagem movida' : 'mensagens movidas'} para ${nomeDestino?.cliente ?? 'outra conversa'} · ${rotuloSetor[nomeDestino?.setor ?? aberta.setor]} por ${usuario.nome}`)] }))
+              atualizar(aberta.id, (x) => ({ ...x, itens: [...x.itens.map((i) => (i.tipo === 'mensagem' && ids.includes(i.id) ? { ...i, movidaPara: `${nomeDestino?.cliente ?? 'outra conversa'} · ${rotuloSetor[nomeDestino?.setor ?? aberta.setor]}` } : i)), marco(`${ids.length} ${ids.length === 1 ? 'mensagem movida' : 'mensagens movidas'} para ${nomeDestino?.cliente ?? 'outra conversa'} · ${rotuloSetor[nomeDestino?.setor ?? aberta.setor]} por ${usuario.nome}`)] }))
               atualizar(destino, (x) => ({ ...x, itens: [...x.itens, marco(`chegou de outra conversa da mesma pessoa, movida por ${usuario.nome}`), ...itens.map((i) => ({ ...i, id: `${'id' in i ? i.id : 'm'}-mv` }) as ItemConversa)] }))
               loja.toast('Mensagem movida para a conversa certa.', { modulo: 'crm', aba: 'conversas', conversa: destino }, 'Abrir')
             }}

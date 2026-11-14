@@ -101,6 +101,14 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
     )
   }
 
+  // Mensagem movida para outra conversa (S05-A16): fica o registro, sem o conteúdo repetido.
+  if (item.movidaPara)
+    return (
+      <div className="text-muted-foreground flex items-center gap-2 self-start text-[11px]">
+        <IconeCanal canal={item.canal} /> mensagem de {item.autor ?? 'cliente'} ({item.hora}) movida para {item.movidaPara}
+      </div>
+    )
+
   // Mensagem
   const doCliente = item.de === 'cliente'
   const t = item.de === 'integrante' && item.setor ? aparencia({ setor: item.setor }) : undefined
