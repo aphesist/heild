@@ -17,6 +17,7 @@ import { EVENTO_SIMULAR_ESPERA } from './espera'
 import { EVENTO_SUPORTE_HORARIO } from './suporte'
 import { useLoja } from './loja'
 import { papelExibido, useSessaoBruta } from './sessao'
+import { SecaoS03 } from '@/telas/painel/s03/gatilhos' // S03
 
 export type Visao = 'escritorio' | 'cliente'
 
@@ -227,6 +228,7 @@ export function PainelLab({
                 <PauseCircleIcon className="size-4 shrink-0" /> Simular {escritorio.inatividadeMin} min parado (só no Painel com cliente e no CRM)
               </button>
             )}
+            {sessao?.usuario && <SecaoS03 onFeito={() => setAberto(false)} />}
           </div>
         )}
         {visao === 'cliente' && (

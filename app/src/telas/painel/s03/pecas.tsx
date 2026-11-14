@@ -5,7 +5,7 @@ import { useNavegacao } from '@/ambiente/loja'
 import { usePermissao } from '@/components/kit'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
-import { useEstadoConector, type IdConector } from '@/dados/conectores'
+import { useConectores, useEstadoConector, type IdConector } from '@/dados/conectores'
 import { cn } from '@/lib/utils'
 
 export type Nivel = 'preparar' | 'executar com aprovação' | 'executar' | 'só pessoa'
@@ -91,26 +91,30 @@ export function Rotulo({ tom, children, className }: { tom: 'ok' | 'atencao' | '
  * não mostra nada; parado, diz o porquê e leva a Configurações › Conectores.
  */
 export function SaudeConectores({ ids, className }: { ids: IdConector[]; className?: string }) {
-  return (
-    <>
-      {ids.map((id) => (
-        <UmConector key={id} id={id} className={className} />
-      ))}
-    </>
-  )
-}
-
-function UmConector({ id, className }: { id: IdConector; className?: string }) {
-  const c = useEstadoConector(id)
+  const todos = useConectores()
   const nav = useNavegacao()
-  if (c.funcionando) return null
+  const parados = todos.filter((c) => ids.includes(c.id) && !c.funcionando)
+  if (!parados.length) return null
+  const erro = parados.some((c) => c.tom === 'erro')
+  const um = parados.length === 1 ? parados[0] : undefined
   return (
-    <div role="status" className={cn('flex items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-xs', c.tom === 'erro' ? 'bg-destructive/10' : 'bg-warning/10', className)}>
-      <PlugsIcon className={cn('size-4 shrink-0', c.tom === 'erro' ? 'text-destructive' : 'text-warning')} />
+    <div role="status" className={cn('flex items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-xs', erro ? 'bg-destructive/10' : 'bg-warning/10', className)}>
+      <PlugsIcon className={cn('size-4 shrink-0', erro ? 'text-destructive' : 'text-warning')} />
       <span className="min-w-0 flex-1">
-        <strong className="font-medium">{c.nome}: {c.rotulo.toLowerCase()}.</strong> {c.frase}
+        {um ? (
+          <>
+            <strong className="font-medium">
+              {um.nome}: {um.rotulo.toLowerCase()}.
+            </strong>{' '}
+            {um.frase}
+          </>
+        ) : (
+          <>
+            <strong className="font-medium">{parados.length} conectores parados:</strong> {parados.map((c) => `${c.nome} (${c.rotulo.toLowerCase()})`).join(', ')}. O integrante faz o resto e espera estes.
+          </>
+        )}
       </span>
-      <button type="button" onClick={() => nav.irPara(c.destino)} className="hover:text-foreground text-muted-foreground flex shrink-0 cursor-pointer items-center gap-0.5 underline-offset-2 hover:underline">
+      <button type="button" onClick={() => nav.irPara(parados[0].destino)} className="hover:text-foreground text-muted-foreground flex shrink-0 cursor-pointer items-center gap-0.5 underline-offset-2 hover:underline">
         Conectores <ArrowRightIcon className="size-3" />
       </button>
     </div>

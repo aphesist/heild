@@ -397,6 +397,8 @@ export function fiscalS03(p: PerfilS03): FiscalS03 {
   const cruzamentos =
     p.tipo === 'pf'
       ? [{ id: id('x1'), rotulo: 'Carnê-leão × recibos', a: p.receitaMensal, b: p.receitaMensal }]
+      : p.tipo === 'mei'
+        ? [{ id: id('x1'), rotulo: 'Notas emitidas × faturamento declarado', a: rec, b: rec }, { id: id('x2'), rotulo: 'DAS-MEI pagos × extrato', a: 80.9 * 9, b: 80.9 * 9 }]
       : [
           { id: id('x1'), rotulo: 'Notas de saída × apuração', a: rec, b: p.id === 'c2' ? rec - 3_120 : rec },
           { id: id('x2'), rotulo: 'Folha × DCTFWeb', a: p.folhaMensal, b: p.id === 'c1' ? p.folhaMensal - 4_531 : p.folhaMensal },

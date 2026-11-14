@@ -2,7 +2,7 @@
 import { useMemo } from 'react'
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import type { Cliente } from '@/dados/tipos'
-import { consultoriaS03, contabilS03, fiscalS03, perfilS03, type EtapaFechamento, type GuiaS03, type PerguntaS03, type SaidaSocio } from '@/dados/painel-s03'
+import { consultoriaS03, contabilS03, fiscalS03, perfilS03, type EtapaFechamento, type GuiaS03, type MensagemCaixa, type PerguntaS03, type SaidaSocio } from '@/dados/painel-s03'
 
 /**
  * Estado de tela da S03, guardado com `usePersistente` (tabela `registro_tela`,
@@ -34,6 +34,8 @@ export interface EstadoFiscal {
   pendentes: Record<string, string>
   irpf: { etapa?: number; coletados?: number; transmitido?: string }
   regularizacao: Record<string, string>
+  /** Mensagens que chegaram durante a demonstração (gatilho `ecac.mensagem.receber`). */
+  caixasExtras: MensagemCaixa[]
 }
 
 export interface EstadoRelatorio {
@@ -99,7 +101,7 @@ export interface ParagrafoParecer {
   fonte?: string
 }
 
-export const fiscalVazio = (): EstadoFiscal => ({ abertas: {}, transmitidas: {}, falhas: {}, guias: {}, guiasNovas: [], certidoes: {}, intimacoes: {}, pendentes: {}, irpf: {}, regularizacao: {} })
+export const fiscalVazio = (): EstadoFiscal => ({ abertas: {}, transmitidas: {}, falhas: {}, guias: {}, guiasNovas: [], certidoes: {}, intimacoes: {}, pendentes: {}, irpf: {}, regularizacao: {}, caixasExtras: [] })
 export const contabilVazio = (): EstadoContabil => ({ chegou: {}, cobrancas: {}, triagem: {}, extratos: [], linhas: {}, diferencas: {}, saidas: {}, alertas50k: {}, exportados: [], relatorios: {}, justificativas: {}, declaracoes: {}, regras: [], depara: [], pendentes: {} })
 export const consultoriaVazio = (): EstadoConsultoria => ({ perguntas: {}, novas: [], pareceres: [], vigilancia: {}, estudos: {}, pendentes: {} })
 

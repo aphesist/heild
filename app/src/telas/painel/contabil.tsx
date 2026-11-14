@@ -170,7 +170,7 @@ function FechamentoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
   return (
     <div className="flex h-full flex-col gap-2">
       {estado.reaberta && <p className="bg-warning/10 rounded-[10px] px-2 py-1 text-xs">Reaberta por {estado.reaberta.por} ({estado.reaberta.quando}): {estado.reaberta.motivo}</p>}
-      <ol className="grid flex-1 grid-cols-5 gap-2">
+      <ol className="grid flex-1 grid-cols-2 gap-2 @lg:grid-cols-5">
         {etapasFechamento.map((e, i) => {
           const s = situacao(i)
           const trava = b[e.id]
@@ -987,8 +987,8 @@ function FilaAssinaturaBloco({ cliente }: { cliente: Cliente }) {
   const [erro, setErro] = useState<string | null>(null)
   const [fonte, setFonte] = useState<string | null>(null)
   const itens = [
-    ...r.d.relatorios.filter((x) => ['na fila', 'assinado', 'conferido', 'recusado'].includes(r.estado.relatorios[x.id]?.situacao ?? '')).map((x) => ({ id: x.id, nome: x.nome, campo: 'relatorios' as const, e: r.estado.relatorios[x.id] })),
-    ...r.d.pedidosDeclaracao.filter((x) => ['na fila', 'assinado', 'conferido', 'recusado'].includes(r.estado.declaracoes[x.id]?.situacao ?? '')).map((x) => ({ id: x.id, nome: `Declaração de faturamento (${x.meses} meses)`, campo: 'declaracoes' as const, e: r.estado.declaracoes[x.id] })),
+    ...r.d.relatorios.filter((x) => ['na fila', 'assinado', 'conferido', 'recusado', 'aguardando envio'].includes(r.estado.relatorios[x.id]?.situacao ?? '')).map((x) => ({ id: x.id, nome: x.nome, campo: 'relatorios' as const, e: r.estado.relatorios[x.id] })),
+    ...r.d.pedidosDeclaracao.filter((x) => ['na fila', 'assinado', 'conferido', 'recusado', 'aguardando envio'].includes(r.estado.declaracoes[x.id]?.situacao ?? '')).map((x) => ({ id: x.id, nome: `Declaração de faturamento (${x.meses} meses)`, campo: 'declaracoes' as const, e: r.estado.declaracoes[x.id] })),
   ]
   const assinarFora = (id: string, nome: string, campo: 'relatorios' | 'declaracoes') => {
     servicos.assinatura.enviar({ documento: nome, signatarios: [{ nome: 'Fernanda Lima (contadora responsável)', email: 'contadora@escritorio' }] }).then((res) => {

@@ -121,7 +121,7 @@ function SimplesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
     <div className="flex h-full flex-col gap-3">
       <MedidorSublimite rotulo="Receita 12 meses × sublimite" usado={s.rbt12} teto={3_600_000} semAviso={tamanho === 'M'} />
       {tamanho !== 'M' && (
-        <dl className="grid grid-cols-3 gap-2 text-sm">
+        <dl className="grid grid-cols-2 gap-2 text-sm @md:grid-cols-3">
           <Dado rotulo="Fator R" valor={pct(s.fatorR)} detalhe={s.anexo === 'III' || s.anexo === 'V' ? `Anexo ${s.anexo}${s.fatorR >= 0.28 ? ' (≥ 28%)' : ' (< 28%)'}` : 'não se aplica'} />
           <Dado rotulo="Alíquota efetiva" valor={pct(s.aliquota.efetiva, 2)} detalhe={`${s.aliquota.faixa}ª faixa · Anexo ${s.anexo}`} />
           <Dado rotulo={`DAS ${COMPETENCIA}`} valor={brl(s.das)} detalhe="vence 20/11" />
@@ -192,7 +192,8 @@ function MeiBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWidg
 /* ---------- Caixas postais (S03-A01, A02) ---------- */
 
 function CaixasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWidget }) {
-  const { f, estado } = useFiscal(cliente)
+  const { f: f0, estado } = useFiscal(cliente)
+  const f = { ...f0, caixas: [...estado.caixasExtras, ...f0.caixas] }
   const postar = usePostarS03()
   const [aberta, setAberta] = useState<string | null>(null)
   const parado = useConectorParado('integra_contador')
@@ -1109,7 +1110,7 @@ function CarteiraFiscal() {
     const guias = f.guias.filter((g) => g.valor > 0).map((g) => guiaAtual(g, e))
     const tx = principal ? e.transmitidas[principal.id] : undefined
     const fora = principal && !tx ? principal.falta : undefined
-    return { c, p, f, e, principal, tx, fora, guias, novas: f.caixas.filter((m) => !e.abertas[m.id]).length }
+    return { c, p, f, e, principal, tx, fora, guias, novas: [...e.caixasExtras, ...f.caixas].filter((m) => !e.abertas[m.id]).length }
   })
   const pgdas = linhas.filter((l) => l.principal?.nome === 'PGDAS-D' && !l.tx)
   const prontos = pgdas.filter((l) => !l.fora)
@@ -1221,7 +1222,7 @@ function CaixasCarteira({ tamanho }: { tamanho: TamanhoWidget }) {
   const clientes = useClientesFiscal()
   const itens = clientes.flatMap((c) => {
     const e = lerEstado(loja, chaveFiscal(c.id), fiscalVazio)
-    return fiscalS03(perfilS03(c)).caixas.filter((m) => !e.abertas[m.id]).map((m) => ({ c, m }))
+    return [...e.caixasExtras, ...fiscalS03(perfilS03(c)).caixas].filter((m) => !e.abertas[m.id]).map((m) => ({ c, m }))
   })
   if (tamanho === 'P')
     return (
