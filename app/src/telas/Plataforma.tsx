@@ -397,7 +397,7 @@ function PlataformaInterna(props: Props) {
           {modulo === 'bpo' && aba === 'rentabilidade' && <RentabilidadeBpoTela {...propsBpo} />}
           {modulo === 'bpo' && aba === 'configuracao' && <ConfigBpoTela {...propsBpo} />}
           {modulo === 'interna' && <ConversasInternasTela key={`${aba}-${nonce}`} aba={aba} conversaInicial={conversaInterna} />}
-          {modulo !== 'painel' && modulo !== 'interna' && <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} />}
+          {modulo !== 'painel' && modulo !== 'interna' && <GavetaChat nomeUsuario={usuario.nome} conversaGeral={[]} integrantes={integrantes} onAbrirIntegrante={abrirIntegrante} contexto={contexto} acima={modulo === 'crm' && aba === 'conversas'} />}
           {modulo !== 'inicio' && modulo !== 'painel' && modulo !== 'crm' && modulo !== 'timesheet' && modulo !== 'config' && modulo !== 'financeiro' && modulo !== 'arquivos' && modulo !== 'bpo' && modulo !== 'clientes' && modulo !== 'interna' && (
             <ModuloTela key={`${modulo}-${aba}`} titulo={rotuloModulo} aba={rotuloAba} cliente={cliente?.nome} chat={{ nomeUsuario: usuario.nome, conversaGeral: [], integrantes, onAbrirIntegrante: abrirIntegrante }} />
           )}

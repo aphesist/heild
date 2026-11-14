@@ -821,7 +821,7 @@ function Conversa({
       </AreaRolagem>
 
       {/* Campo (deixa o canto livre para o botão Chat) */}
-      <div className={cn('px-3 pb-3 sm:px-5 sm:pb-4', !lateralFixa && 'md:pr-28')}>
+      <div className="px-3 pb-3 sm:px-5 sm:pb-4">
         <div className="mx-auto max-w-3xl">
           {somenteLeitura ? (
             <div className="bg-sunken flex items-start gap-2.5 rounded-[16px] px-4 py-3 text-sm">
@@ -887,7 +887,7 @@ function Conversa({
                 </div>
               )}
               {modo === 'responder' && cfgAtend.assinatura.modo !== 'desligado' && (
-                <span className="text-muted-foreground px-1.5 text-[11px]">sai assinada: {assinar('…', eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura).replace(/\n/g, ' ')}</span>
+                <span className="text-muted-foreground px-1.5 text-[11px]">sai assinada: {assinar('…', eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura).replace(/\n/g, ' ').replace(/\*/g, '')}</span>
               )}
               <textarea
                 value={texto}
