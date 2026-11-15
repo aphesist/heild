@@ -1,6 +1,6 @@
 // S06b · Lançamento manual de tempo, ao lado da captura automática: formulário, cronômetro,
 // duplicar, repetir o de ontem e o tempo padrão do que é feito por fora.
-import { ClockCounterClockwiseIcon, CopyIcon, PlayIcon, StopIcon, TimerIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react'
+import { ClockCounterClockwiseIcon, CopyIcon, PlayIcon, StopIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAcao, useConfirmar } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
@@ -216,8 +216,11 @@ export function LancarTempo({ inicial = {}, editar, onFechar }: { inicial?: Cont
   )
 }
 
-/** Cronômetro: iniciar e parar; vira lançamento manual com o tempo medido. */
-export function Cronometro({ clienteId, onLancar }: { clienteId?: string | null; onLancar: () => void }) {
+/**
+ * Cronômetro: iniciar e parar; vira lançamento manual com o tempo medido. O lançamento
+ * de um tempo que já passou fica num lugar só, o botão "Lançar tempo" do cabeçalho (T-4).
+ */
+export function Cronometro({ clienteId }: { clienteId?: string | null }) {
   const ts = useTimesheet()
   const executar = useAcao()
   const rodando = ts.sessoes.find((s) => s.usuario_dono_id === ts.usuario.id && s.extras?.cronometro && s.ao_vivo)
@@ -235,8 +238,8 @@ export function Cronometro({ clienteId, onLancar }: { clienteId?: string | null;
   const relogio = `${String(Math.floor(decorrido / 3600)).padStart(2, '0')}:${String(Math.floor((decorrido % 3600) / 60)).padStart(2, '0')}:${String(decorrido % 60).padStart(2, '0')}`
   return (
     <Caixa>
-      <Pergunta acao={rodando ? <Badge variant="sucesso">rodando</Badge> : undefined}>Lançar tempo à mão</Pergunta>
-      <p className="text-muted-foreground -mt-1 text-xs">A captura automática continua sendo o principal. Use para o que foi feito fora do sistema.</p>
+      <Pergunta acao={rodando ? <Badge variant="sucesso">rodando</Badge> : undefined}>Cronômetro</Pergunta>
+      <p className="text-muted-foreground -mt-1 text-xs">Para o que você vai fazer fora do sistema. Ao parar, vira lançamento manual; a captura automática continua sendo o principal.</p>
       {rodando ? (
         <div className="flex flex-col gap-2" data-testid="ts-cronometro">
           <span className="font-heading text-3xl font-light tabular-nums">{relogio}</span>
@@ -254,7 +257,6 @@ export function Cronometro({ clienteId, onLancar }: { clienteId?: string | null;
           <div className="flex flex-wrap gap-1.5">
             <Button
               size="sm"
-              variant="outline"
               className="rounded-full"
               onClick={() => {
                 const ini = agoraDemo()
@@ -262,9 +264,6 @@ export function Cronometro({ clienteId, onLancar }: { clienteId?: string | null;
               }}
             >
               <PlayIcon /> Iniciar cronômetro
-            </Button>
-            <Button size="sm" className="rounded-full" onClick={onLancar}>
-              <TimerIcon /> Lançar tempo
             </Button>
           </div>
         </div>
@@ -292,15 +291,8 @@ export function SemanaManual({ dias, onLancar, onAbrir }: { dias: string[]; onLa
   const total = (xs: SessaoTrabalho[]) => xs.reduce((t, s) => t + duracaoMin(s), 0)
   return (
     <Caixa>
-      <Pergunta
-        acao={
-          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => onLancar({ dia: dias.includes(HOJE_TS) ? HOJE_TS : dias[0] })}>
-            <TimerIcon /> Lançar
-          </Button>
-        }
-      >
-        O que lancei à mão nesta semana?
-      </Pergunta>
+      <Pergunta>O que lancei à mão nesta semana?</Pergunta>
+      <p className="text-muted-foreground -mt-1 text-xs">Clique num + para lançar naquele dia; num total, para editar.</p>
       <div className="-mx-1 overflow-x-auto px-1">
         <table className="w-full min-w-[560px] text-sm" data-testid="ts-semana-manual">
           <thead>

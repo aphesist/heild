@@ -163,7 +163,8 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
                         </div>
                       )}
                     </Caixa>
-                    <div className="flex flex-col gap-4">
+                    {/* T-3: de lg a xl, custo e setores lado a lado sob a margem; no xl, em pilha ao lado dela. */}
+                    <div className="grid gap-4 lg:grid-cols-2 lg:items-start xl:flex xl:flex-col">
                       <Caixa>
                         <Pergunta
                           acao={
