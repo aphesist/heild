@@ -411,7 +411,13 @@ function detectar(opcoes) {
     if (sg.display !== 'grid' || g.style.gridAutoRows || !visivel(g) || /^(LI|TR)$/.test(g.tagName) || g.getAttribute('role') === 'row' || g.hasAttribute('data-vitrine')) continue
     const colsG = sg.gridTemplateColumns.split(' ').filter((x) => /px$/.test(x))
     if (colsG.length < 2) continue
-    const filhosG = [...g.children].filter((k) => visivel(k) && cs(k).position !== 'absolute')
+    // Presença, não visibilidade na janela de rolagem: o card abaixo da dobra (cortado pela área que rola) existe.
+    const existe = (k) => {
+      const sk = cs(k)
+      const b = k.getBoundingClientRect()
+      return sk.display !== 'none' && sk.visibility !== 'hidden' && b.width > 0 && b.height > 0 && sk.position !== 'absolute'
+    }
+    const filhosG = [...g.children].filter(existe)
     if (filhosG.length < 2) continue
     const gbG = g.getBoundingClientRect()
     if (gbG.height < 150) continue
@@ -428,7 +434,7 @@ function detectar(opcoes) {
         if (vao > 96) add('vao', `${Math.round(vao)}px vazios sob ${desc(k)}`, k)
       }
       if (kb.height >= 200 && k.tagName !== 'ARTICLE' && g.getAttribute('role') !== 'grid') {
-        const netos = [...k.children].filter((n) => visivel(n) && cs(n).position !== 'absolute')
+        const netos = [...k.children].filter(existe)
         if (netos.length) {
           const fimConteudo = Math.max(...netos.map((n) => n.getBoundingClientRect().bottom))
           const vao = kb.bottom - px(cs(k).paddingBottom) - fimConteudo

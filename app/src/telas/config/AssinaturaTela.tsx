@@ -40,7 +40,7 @@ export function AssinaturaTela() {
           }
         />
 
-        <div className="grid items-start gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <Caixa>
             <TituloBloco descricao="Módulo fora do plano some do menu; as ferramentas dele respondem “módulo não contratado”.">Módulos</TituloBloco>
             <ul className="divide-border/70 flex flex-col divide-y">
@@ -114,7 +114,7 @@ export function AssinaturaTela() {
           </div>
         </div>
 
-        <div className="grid items-start gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <Complementos />
           <Pacotes />
         </div>

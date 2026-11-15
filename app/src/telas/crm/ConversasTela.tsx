@@ -925,7 +925,7 @@ function Conversa({
                   ))}
                 </ul>
               )}
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 {anexo ? (
                   <Tooltip conteudo={`Tirar ${anexo}`}>
                     <Button size="icon-sm" variant="secondary" className="rounded-full" aria-label={`Tirar anexo ${anexo}`} onClick={() => setAnexoDoc(null)}>

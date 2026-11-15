@@ -165,7 +165,7 @@ export function ConciliacaoTela() {
             </ul>
           )}
         </Caixa>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 lg:sticky lg:top-0">
           <Caixa>
             <Pergunta descricao="O que pede uma pessoa: pagador desconhecido, valor diferente.">Divergências</Pergunta>
             {!divergencias.length && <p className="text-muted-foreground text-sm">Nenhuma divergência.</p>}

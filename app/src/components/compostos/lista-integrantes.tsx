@@ -72,7 +72,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
           {f.length + o.length === 0 && <p className="text-muted-foreground px-2 py-6 text-center text-sm">Nenhum integrante encontrado</p>}
         </AreaRolagem>
         {onCriar && (
-          <button type="button" onClick={onCriar} className="text-muted-foreground hover:text-foreground hover:bg-raised/50 flex shrink-0 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-sm transition-colors">
+          <button type="button" onClick={onCriar} className="hover:bg-raised/50 flex shrink-0 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-sm transition-colors">
             <span className="border-foreground/30 flex size-12 shrink-0 items-center justify-center rounded-full border border-dashed">
               <PlusIcon className="size-5" />
             </span>
@@ -168,7 +168,7 @@ function ItemColuna({ it, ativo, onClick }: { it: Integrante; ativo: boolean; on
       onClick={onClick}
       className={cn('flex shrink-0 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors', ativo ? 'bg-raised shadow-sm' : 'hover:bg-raised/50')}
     >
-      <span className={cn('relative', pausado && 'text-muted-foreground grayscale grayscale')}>
+      <span className={cn('relative', pausado && 'text-muted-foreground grayscale')}>
         <Orb cor={t.cor} corOlhos={t.corOlhos} estado={pausado ? 'dormindo' : it.estado} tamanho={48} cutucavel={false} animado modo="wander" espelho={{ id: it.id, papel: 'lateral' }} />
         <Contador valor={it.pendentes} className="absolute -top-0.5 -right-0.5" />
       </span>
@@ -178,8 +178,9 @@ function ItemColuna({ it, ativo, onClick }: { it: Integrante; ativo: boolean; on
           {pausado && <PauseIcon weight="fill" className="text-muted-foreground size-3.5 shrink-0" aria-label="pausado" />}
           {it.emObservacao && <EyeIcon className="text-muted-foreground size-3.5 shrink-0" aria-label="em observação" />}
         </span>
-        <span className="text-muted-foreground block truncate text-xs">{it.setorRotulo}</span>
-        <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' && !pausado ? 'text-foreground font-medium' : ativo ? 'text-foreground' : 'text-muted-foreground')}>
+        {/* A coluna fica sobre o fundo rebaixado: texto secundário em texto (o suave fica abaixo de 4,5:1 ali; proposta 6). */}
+        <span className="block truncate text-xs">{it.setorRotulo}</span>
+        <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' && !pausado && 'font-medium')}>
           {pausado ? 'Pausado · o chat responde' : (it.resumo ?? rotuloDoEstado[it.estado])}
         </span>
       </span>

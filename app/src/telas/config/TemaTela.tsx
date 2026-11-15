@@ -159,7 +159,7 @@ export function TemaTela() {
         <EstadoComplemento />
         <SeletorTema />
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-          <div className="flex min-w-0 flex-col gap-4">
+          <div data-pilha className="flex min-w-0 flex-col gap-4">
             <Caixa>
               <TituloBloco>Identidade</TituloBloco>
               <div className="grid gap-3 sm:grid-cols-[1fr_6rem]">
@@ -295,7 +295,7 @@ export function TemaTela() {
             <NomeWhatsapp />
           </div>
 
-          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0">
+          <div data-pilha className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0">
             <Previa tema={r} modo={modo} />
             <Caixa>
               <TituloBloco descricao="Nome e cor do orb de cada setor. Cada pessoa pode dar outro nome ao seu. O Assistente é sempre o contraste do tema.">Integrantes padrão</TituloBloco>
@@ -470,7 +470,7 @@ function Previa({ tema, modo }: { tema: Tema; modo: ModoCor }) {
           <div className="from-sidebar to-sidebar-end hidden w-28 shrink-0 flex-col gap-1 rounded-lg bg-gradient-to-b p-2 text-xs sm:flex">
             <span className="mb-1 px-1.5 text-base font-semibold">{tema.sigla}</span>
             {['Início', 'Painel', 'CRM', 'Timesheet'].map((m, i) => (
-              <span key={m} className={i === 1 ? 'bg-raised rounded-sm px-1.5 py-1 font-medium' : 'text-muted-foreground px-1.5 py-1'}>
+              <span key={m} className={i === 1 ? 'bg-raised rounded-sm px-1.5 py-1 font-medium' : 'px-1.5 py-1'}>
                 {m}
               </span>
             ))}
