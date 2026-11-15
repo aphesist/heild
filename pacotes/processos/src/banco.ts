@@ -10,7 +10,8 @@ export function conectar(url = process.env.DATABASE_URL ?? 'postgres://postgres@
     max,
     onnotice: () => {},
     // jsonb volta como objeto; bigint como número (contadores pequenos).
-    types: { bigint: postgres.BigInt },
+    // numeric (os centavos com frações, B3) volta como número: valores pequenos, seis casas.
+    types: { bigint: postgres.BigInt, numeric: { to: 1700, from: [1700], serialize: (x: unknown) => String(x), parse: (x: string) => Number(x) } },
     transform: { undefined: null },
   })
 }

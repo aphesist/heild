@@ -10,5 +10,5 @@
 | [`ARQUITETURA.md`](ARQUITETURA.md) | Diagrama dos serviços, o caminho de um pedido da tela e de um agente, a implantação, o que muda no frontend e o plano de migração em fases, com esforço |
 | [`PERGUNTAS.md`](PERGUNTAS.md) | Dez decisões para o dono, cada uma com a recomendação |
 | [`PADROES.md`](PADROES.md) | Os padrões que todo endpoint e serviço cumpre (Google AIPs, OWASP API Top 10, Node.js Best Practices, Postgres), com as fontes e um checklist |
-| [`IMPLEMENTACAO.md`](IMPLEMENTACAO.md) | O que já está implementado, sessão por sessão (B1: a API local com o executor, a cadeia, a idempotência e o adaptador `api` do app): como rodar, como testar, o encaixe com a próxima sessão e o que falta |
+| [`IMPLEMENTACAO.md`](IMPLEMENTACAO.md) | O que já está implementado, sessão por sessão (B1: a API local com o executor, a cadeia, a idempotência e o adaptador `api` do app; B2: o motor de procedimentos, a fila e o MCP; B3: os integrantes dos setores, o Assistente e a avaliação automatizada): como rodar, como testar, o encaixe com a próxima sessão e o que falta |
 | [`poc/`](poc/README.md) | A medição: o mesmo endpoint sob RLS em Node, Bun, Go e Rust |

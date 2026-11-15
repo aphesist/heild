@@ -5,10 +5,10 @@ import {
   envelopeParaHttp,
   FornecedorDemonstracao,
   ligacaoDosProcedimentos,
-  procedimentosDeReferencia,
   type ContextoExec,
   type Processos,
 } from '@heild/processos'
+import { extensaoIntegrantes, procedimentosDosIntegrantes } from '@heild/integrantes'
 import type { Sql, Tx } from './banco/pg.ts'
 import { config } from './config.ts'
 import { operacoes } from './executor/operacoes.ts'
@@ -27,7 +27,8 @@ import { ligarFila } from './executor/jobs.ts'
  *  - as ferramentas da B2 (`execucao.obter`, `execucao.retomar`, `procedimento.listar`,
  *    `validador.executar`, `memoria.propor`) e os cartões de execução passam a ser servidos.
  */
-const ligacao = ligacaoDosProcedimentos(procedimentosDeReferencia)
+// B3: os procedimentos de todos os integrantes do Contábil (os dois de referência da B2 incluídos).
+const ligacao = ligacaoDosProcedimentos(procedimentosDosIntegrantes)
 for (const f of ligacao.ferramentas) registrarFerramentaTipada(f)
 for (const o of ligacao.operacoes) {
   if (!operacoes.has(o.nome)) operacoes.set(o.nome, { nome: o.nome, metodo: o.metodo, repositorio: o.repositorio as unknown as Repositorio<NomeTabela> })
@@ -45,8 +46,11 @@ export async function ligarProcessos(sql: Sql, url = config.pgApi): Promise<Proc
     url,
     sql: sql as never,
     modo: 'api',
-    // O processo da API não chama modelo: o runner dos operários é do worker.
+    // O processo da API não chama modelo: o runner dos operários e o roteador com modelo são do worker.
     fornecedor: new FornecedorDemonstracao(),
+    procedimentos: procedimentosDosIntegrantes,
+    // B3: assistente.pedir, assistente.obter, integrante.listar e integrante.aprender na mesma rota.
+    extensoes: [extensaoIntegrantes()],
   })
   ligarFila({
     enfileirar: async (tx: Tx, j) => {

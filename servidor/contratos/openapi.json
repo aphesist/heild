@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "b80366b979eaa26a",
+    "version": "a054ec445a718065",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -1565,6 +1565,835 @@
         "x-heild-erros": [
           "CURSOR_INVALIDO"
         ]
+      }
+    },
+    "/v1/ferramentas/atendimento.faq.responder": {
+      "post": {
+        "operationId": "atendimento_faq_responder",
+        "summary": "Liga a mensagem do cliente a uma pergunta frequente e, com cartão aprovado, responde com o texto aprovado da base.",
+        "tags": [
+          "plataforma"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Obrigatório em toda escrita (sem validar_apenas). Mesmo valor com outros argumentos: 409 CHAVE_REUSADA.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "X-Heild-Tela",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "documento_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "cliente_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "validar_apenas": {
+                    "type": "boolean",
+                    "description": "Roda esquema, autorizar e regras e devolve os erros, sem efeito e sem evento."
+                  }
+                },
+                "required": [
+                  "documento_id",
+                  "cliente_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok ou validado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "ok"
+                        },
+                        "dados": {},
+                        "linhas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          }
+                        },
+                        "removidas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "eventos": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "evento_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "versao": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "cartoes": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "dados",
+                        "linhas",
+                        "removidas",
+                        "eventos",
+                        "evento_id",
+                        "versao",
+                        "cartoes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "validado"
+                        },
+                        "erros": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codigo": {
+                                "type": "string"
+                              },
+                              "campo": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "mensagem": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "codigo",
+                              "campo",
+                              "mensagem"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "previa": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "erros",
+                        "previa"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "aguardando_aprovacao (cartão criado)"
+          },
+          "400": {
+            "description": "Entrada inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem sessão ou token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Negado pela função autorizar (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Chave reusada, versão desatualizada ou id em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "x-heild-nivel": "executar",
+        "x-heild-setor": "geral",
+        "x-heild-modulo": "plataforma",
+        "x-heild-aprovacao": "nunca",
+        "x-heild-idempotencia": "por_chave",
+        "x-heild-versao": 1,
+        "x-heild-exposta-mcp": true,
+        "x-heild-erros": []
       }
     },
     "/v1/ferramentas/cliente.arquivar": {
@@ -8046,6 +8875,835 @@
         "x-heild-erros": []
       }
     },
+    "/v1/ferramentas/dp.evento.classificar_e_lancar": {
+      "post": {
+        "operationId": "dp_evento_classificar_e_lancar",
+        "summary": "Transforma o pedido do cliente num evento de folha conferido e lança na competência.",
+        "tags": [
+          "plataforma"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Obrigatório em toda escrita (sem validar_apenas). Mesmo valor com outros argumentos: 409 CHAVE_REUSADA.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "X-Heild-Tela",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "documento_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "cliente_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "validar_apenas": {
+                    "type": "boolean",
+                    "description": "Roda esquema, autorizar e regras e devolve os erros, sem efeito e sem evento."
+                  }
+                },
+                "required": [
+                  "documento_id",
+                  "cliente_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok ou validado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "ok"
+                        },
+                        "dados": {},
+                        "linhas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          }
+                        },
+                        "removidas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "eventos": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "evento_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "versao": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "cartoes": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "dados",
+                        "linhas",
+                        "removidas",
+                        "eventos",
+                        "evento_id",
+                        "versao",
+                        "cartoes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "validado"
+                        },
+                        "erros": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codigo": {
+                                "type": "string"
+                              },
+                              "campo": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "mensagem": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "codigo",
+                              "campo",
+                              "mensagem"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "previa": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "erros",
+                        "previa"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "aguardando_aprovacao (cartão criado)"
+          },
+          "400": {
+            "description": "Entrada inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem sessão ou token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Negado pela função autorizar (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Chave reusada, versão desatualizada ou id em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "x-heild-nivel": "executar",
+        "x-heild-setor": "geral",
+        "x-heild-modulo": "plataforma",
+        "x-heild-aprovacao": "nunca",
+        "x-heild-idempotencia": "por_chave",
+        "x-heild-versao": 1,
+        "x-heild-exposta-mcp": true,
+        "x-heild-erros": []
+      }
+    },
     "/v1/ferramentas/evento.listar": {
       "post": {
         "operationId": "evento_listar",
@@ -8760,6 +10418,1664 @@
         "x-heild-erros": [
           "CURSOR_INVALIDO"
         ]
+      }
+    },
+    "/v1/ferramentas/fiscal.caixa_postal.triar": {
+      "post": {
+        "operationId": "fiscal_caixa_postal_triar",
+        "summary": "Classifica a mensagem do e-CAC e registra o prazo que ela dá.",
+        "tags": [
+          "plataforma"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Obrigatório em toda escrita (sem validar_apenas). Mesmo valor com outros argumentos: 409 CHAVE_REUSADA.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "X-Heild-Tela",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "documento_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "cliente_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "validar_apenas": {
+                    "type": "boolean",
+                    "description": "Roda esquema, autorizar e regras e devolve os erros, sem efeito e sem evento."
+                  }
+                },
+                "required": [
+                  "documento_id",
+                  "cliente_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok ou validado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "ok"
+                        },
+                        "dados": {},
+                        "linhas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          }
+                        },
+                        "removidas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "eventos": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "evento_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "versao": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "cartoes": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "dados",
+                        "linhas",
+                        "removidas",
+                        "eventos",
+                        "evento_id",
+                        "versao",
+                        "cartoes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "validado"
+                        },
+                        "erros": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codigo": {
+                                "type": "string"
+                              },
+                              "campo": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "mensagem": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "codigo",
+                              "campo",
+                              "mensagem"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "previa": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "erros",
+                        "previa"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "aguardando_aprovacao (cartão criado)"
+          },
+          "400": {
+            "description": "Entrada inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem sessão ou token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Negado pela função autorizar (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Chave reusada, versão desatualizada ou id em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "x-heild-nivel": "executar",
+        "x-heild-setor": "geral",
+        "x-heild-modulo": "plataforma",
+        "x-heild-aprovacao": "nunca",
+        "x-heild-idempotencia": "por_chave",
+        "x-heild-versao": 1,
+        "x-heild-exposta-mcp": true,
+        "x-heild-erros": []
+      }
+    },
+    "/v1/ferramentas/fiscal.guia.conferir_e_enviar": {
+      "post": {
+        "operationId": "fiscal_guia_conferir_e_enviar",
+        "summary": "Confere a guia (tributo, competência e valor contra a apuração) e, com cartão aprovado, envia ao cliente.",
+        "tags": [
+          "plataforma"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Obrigatório em toda escrita (sem validar_apenas). Mesmo valor com outros argumentos: 409 CHAVE_REUSADA.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "X-Heild-Tela",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "documento_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "cliente_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "validar_apenas": {
+                    "type": "boolean",
+                    "description": "Roda esquema, autorizar e regras e devolve os erros, sem efeito e sem evento."
+                  }
+                },
+                "required": [
+                  "documento_id",
+                  "cliente_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok ou validado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "ok"
+                        },
+                        "dados": {},
+                        "linhas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          }
+                        },
+                        "removidas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "eventos": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "evento_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "versao": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "cartoes": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "dados",
+                        "linhas",
+                        "removidas",
+                        "eventos",
+                        "evento_id",
+                        "versao",
+                        "cartoes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "validado"
+                        },
+                        "erros": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codigo": {
+                                "type": "string"
+                              },
+                              "campo": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "mensagem": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "codigo",
+                              "campo",
+                              "mensagem"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "previa": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "erros",
+                        "previa"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "aguardando_aprovacao (cartão criado)"
+          },
+          "400": {
+            "description": "Entrada inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem sessão ou token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Negado pela função autorizar (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Chave reusada, versão desatualizada ou id em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "x-heild-nivel": "executar",
+        "x-heild-setor": "geral",
+        "x-heild-modulo": "plataforma",
+        "x-heild-aprovacao": "nunca",
+        "x-heild-idempotencia": "por_chave",
+        "x-heild-versao": 1,
+        "x-heild-exposta-mcp": true,
+        "x-heild-erros": []
       }
     },
     "/v1/ferramentas/mensagem_interna.editar": {
@@ -13501,6 +16817,835 @@
         "x-heild-erros": [
           "CURSOR_INVALIDO"
         ]
+      }
+    },
+    "/v1/ferramentas/societario.alteracao.triar": {
+      "post": {
+        "operationId": "societario_alteracao_triar",
+        "summary": "Classifica o pedido de alteração contratual e abre o processo de legalização quando exige Junta.",
+        "tags": [
+          "plataforma"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Obrigatório em toda escrita (sem validar_apenas). Mesmo valor com outros argumentos: 409 CHAVE_REUSADA.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "X-Heild-Tela",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "documento_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "cliente_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "validar_apenas": {
+                    "type": "boolean",
+                    "description": "Roda esquema, autorizar e regras e devolve os erros, sem efeito e sem evento."
+                  }
+                },
+                "required": [
+                  "documento_id",
+                  "cliente_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok ou validado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "ok"
+                        },
+                        "dados": {},
+                        "linhas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          }
+                        },
+                        "removidas": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "eventos": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "evento_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "versao": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "cartoes": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "dados",
+                        "linhas",
+                        "removidas",
+                        "eventos",
+                        "evento_id",
+                        "versao",
+                        "cartoes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "type": "object",
+                      "properties": {
+                        "resultado": {
+                          "type": "string",
+                          "const": "validado"
+                        },
+                        "erros": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codigo": {
+                                "type": "string"
+                              },
+                              "campo": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "mensagem": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "codigo",
+                              "campo",
+                              "mensagem"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "previa": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "resultado",
+                        "erros",
+                        "previa"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "aguardando_aprovacao (cartão criado)"
+          },
+          "400": {
+            "description": "Entrada inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem sessão ou token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Negado pela função autorizar (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Chave reusada, versão desatualizada ou id em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio (gera evento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "erro",
+                        "negado"
+                      ]
+                    },
+                    "codigo": {
+                      "type": "string",
+                      "enum": [
+                        "ENTRADA_INVALIDA",
+                        "FALTA_CHAVE_IDEMPOTENCIA",
+                        "FERRAMENTA_DESCONHECIDA",
+                        "OPERACAO_DESCONHECIDA",
+                        "NAO_ENCONTRADO",
+                        "FORA_DO_ESCRITORIO",
+                        "TABELA_SEM_REGRA",
+                        "SEM_SESSAO",
+                        "SESSAO_INVALIDA",
+                        "CONTA_INATIVA",
+                        "NEGADO",
+                        "MODULO_NAO_CONTRATADO",
+                        "PAPEL_INSUFICIENTE",
+                        "SEM_SETOR",
+                        "EXIGE_GESTAO",
+                        "SEM_CARTEIRA",
+                        "BLOQUEADO_POR_EXCECAO",
+                        "NIVEL_INSUFICIENTE",
+                        "FORA_DO_APP_CLIENTE",
+                        "EXIGE_APROVACAO",
+                        "REGRA_DE_NEGOCIO",
+                        "EXCLUSAO_PROIBIDA",
+                        "IMUTAVEL",
+                        "MOTIVO_OBRIGATORIO",
+                        "TAREFA_FINAL",
+                        "JA_DECIDIDO",
+                        "SO_PESSOA_DECIDE",
+                        "SO_AUTOR_EDITA",
+                        "COMPETENCIA_FECHADA",
+                        "CAMPO_OBRIGATORIO",
+                        "CHAVE_REUSADA",
+                        "VERSAO_DESATUALIZADA",
+                        "ID_EM_USO",
+                        "RESTRICAO_DO_BANCO",
+                        "CURSOR_INVALIDO",
+                        "LIMITE_TAXA",
+                        "DEMONSTRACAO_DESLIGADA",
+                        "ERRO_INTERNO"
+                      ]
+                    },
+                    "campo": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    },
+                    "acao_sugerida": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "ferramenta": {
+                              "type": "string"
+                            },
+                            "entrada": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {}
+                            }
+                          },
+                          "required": [
+                            "ferramenta",
+                            "entrada"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "tentar_de_novo_em": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "detalhes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "evento_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "resultado",
+                    "codigo",
+                    "campo",
+                    "mensagem",
+                    "acao_sugerida",
+                    "tentar_de_novo_em"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "x-heild-nivel": "executar",
+        "x-heild-setor": "geral",
+        "x-heild-modulo": "plataforma",
+        "x-heild-aprovacao": "nunca",
+        "x-heild-idempotencia": "por_chave",
+        "x-heild-versao": 1,
+        "x-heild-exposta-mcp": true,
+        "x-heild-erros": []
       }
     },
     "/v1/ferramentas/tarefa.aguardar_cliente": {
@@ -24902,6 +29047,11 @@
           "portaisExtensao.reverter",
           "procedimentos.CTB-COMPETENCIA-DOC.iniciar",
           "procedimentos.CTB-ECD-TRANSMITIR.iniciar",
+          "procedimentos.DP-EVENTO-FOLHA.iniciar",
+          "procedimentos.FIS-CAIXA-POSTAL-TRIAR.iniciar",
+          "procedimentos.FIS-GUIA-CONFERIR.iniciar",
+          "procedimentos.GES-FAQ-RESPONDER.iniciar",
+          "procedimentos.SOC-ALTERACAO-TRIAR.iniciar",
           "pulsos.arquivar",
           "pulsos.atualizar",
           "pulsos.criar",

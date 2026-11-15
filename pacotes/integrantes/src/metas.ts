@@ -1,0 +1,31 @@
+import { metadadosDoCatalogo, type Ferramenta } from '@heild/processos'
+
+/**
+ * Ferramentas novas da B3 que os passos citam e que ainda não estão no catálogo do wireframe
+ * (o DP não tem nenhuma ali). Seguem os mesmos campos do catálogo e passam pela mesma `autorizar`
+ * (`autorizarFerramenta` da B2). Quando o catálogo do wireframe as receber, saem daqui sem mudar nome.
+ */
+export const metasB3: Ferramenta[] = [
+  { nome: 'dp.evento.lancar', modulo: 'painel', nivel: 'executar', setor: 'dp', exige_aprovacao: 'se_fora_da_lista' },
+  { nome: 'assistente.pedir', modulo: 'agentes', nivel: 'executar', setor: 'geral' },
+  { nome: 'assistente.obter', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'integrante.listar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'integrante.aprender', modulo: 'agentes', nivel: 'rascunhar', setor: 'geral' },
+]
+
+/** As ferramentas transversais do motor (B2), com os mesmos metadados do registro dela. */
+export const metasDoMotor: Ferramenta[] = [
+  { nome: 'execucao.obter', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'execucao.retomar', modulo: 'agentes', nivel: 'executar', setor: 'geral' },
+  { nome: 'procedimento.listar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'validador.executar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'memoria.propor', modulo: 'agentes', nivel: 'rascunhar', setor: 'geral' },
+]
+
+const porNome = new Map([...metasB3, ...metasDoMotor].map((m) => [m.nome, m]))
+
+/** Resolve metadados: B3, operações de processo dadas, depois o catálogo do wireframe. */
+export function resolverCom(extras: Ferramenta[] = []) {
+  const mapa = new Map(extras.map((m) => [m.nome, m]))
+  return (nome: string): Ferramenta | undefined => mapa.get(nome) ?? porNome.get(nome) ?? metadadosDoCatalogo(nome)
+}

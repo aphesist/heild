@@ -1,0 +1,2458 @@
+{
+  "data": "2026-11-15T04:44:32.570Z",
+  "modo": "anthropic",
+  "gabarito": "22ae1cbb61ed0952",
+  "configuracao": {
+    "modelos": {
+      "operario": "claude-sonnet-5-5",
+      "escritor": "claude-sonnet-5-5",
+      "revisor": "claude-opus-5-5"
+    },
+    "esforco": {
+      "operario": "low",
+      "escritor": "medium",
+      "revisor": "high"
+    },
+    "dolar": 5.4,
+    "repeticoes": 3,
+    "casos_por_setor": "todos",
+    "setores": [
+      "contabil",
+      "fiscal",
+      "dp",
+      "societario",
+      "gestao_atendimento"
+    ]
+  },
+  "duracao_s": 288,
+  "gasto_centavos": 174.1364,
+  "gasto_usd": 0.3225,
+  "parou": null,
+  "resumo": {
+    "porSetor": [
+      {
+        "setor": "contabil",
+        "execucoes": 33,
+        "acerto_pct": 93.9,
+        "erro_critico": 0,
+        "cartao_desnecessario": 2,
+        "falha": 0,
+        "chamadas_por_execucao": 1.36,
+        "centavos_total": 49.7416,
+        "centavos_por_execucao": 1.5073,
+        "latencia_p50_ms": 5391,
+        "latencia_p90_ms": 7457,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      },
+      {
+        "setor": "dp",
+        "execucoes": 15,
+        "acerto_pct": 100,
+        "erro_critico": 0,
+        "cartao_desnecessario": 0,
+        "falha": 0,
+        "chamadas_por_execucao": 1.2,
+        "centavos_total": 24.8465,
+        "centavos_por_execucao": 1.6564,
+        "latencia_p50_ms": 5315,
+        "latencia_p90_ms": 8435,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      },
+      {
+        "setor": "fiscal",
+        "execucoes": 30,
+        "acerto_pct": 100,
+        "erro_critico": 0,
+        "cartao_desnecessario": 0,
+        "falha": 0,
+        "chamadas_por_execucao": 0.9,
+        "centavos_total": 33.318,
+        "centavos_por_execucao": 1.1106,
+        "latencia_p50_ms": 4868,
+        "latencia_p90_ms": 4975,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      },
+      {
+        "setor": "gestao_atendimento",
+        "execucoes": 15,
+        "acerto_pct": 100,
+        "erro_critico": 0,
+        "cartao_desnecessario": 0,
+        "falha": 0,
+        "chamadas_por_execucao": 1,
+        "centavos_total": 15.8911,
+        "centavos_por_execucao": 1.0594,
+        "latencia_p50_ms": 4382,
+        "latencia_p90_ms": 4993,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      },
+      {
+        "setor": "societario",
+        "execucoes": 15,
+        "acerto_pct": 100,
+        "erro_critico": 0,
+        "cartao_desnecessario": 0,
+        "falha": 0,
+        "chamadas_por_execucao": 1,
+        "centavos_total": 15.6492,
+        "centavos_por_execucao": 1.0433,
+        "latencia_p50_ms": 4859,
+        "latencia_p90_ms": 4937,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      }
+    ],
+    "porPapel": [
+      {
+        "papel": "escritor",
+        "modelos": "claude-sonnet-5-5",
+        "chamadas": 15,
+        "centavos_total": 17.8243,
+        "latencia_p50_ms": 1771,
+        "latencia_p90_ms": 4687
+      },
+      {
+        "papel": "operario",
+        "modelos": "claude-sonnet-5-5",
+        "chamadas": 105,
+        "centavos_total": 121.622,
+        "latencia_p50_ms": 1543,
+        "latencia_p90_ms": 2094
+      }
+    ],
+    "total": {
+      "execucoes": 108,
+      "acerto_pct": 98.1,
+      "erro_critico": 0,
+      "centavos_total": 139.4464
+    }
+  },
+  "roteamento": {
+    "execucoes": 11,
+    "acerto_pct": 100,
+    "erro_critico": 0,
+    "pergunta_desnecessaria": 0,
+    "centavos_total": 1.643,
+    "por_camada": [
+      {
+        "camada": "modelo_barato",
+        "decisoes": 3
+      },
+      {
+        "camada": "nenhuma",
+        "decisoes": 1
+      },
+      {
+        "camada": "regra",
+        "decisoes": 7
+      }
+    ],
+    "latencia_p50_ms": 1,
+    "latencia_p90_ms": 2554
+  },
+  "portoes": [
+    {
+      "contrato": "ctb.competencia.escolher",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 30 casos, sem erro crítico.",
+      "acerto_sonnet": 28,
+      "acerto_haiku": 30,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "ctb.competencia.escolher": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "ctb.ecd.apontar_atencao",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 3 casos, sem erro crítico.",
+      "acerto_sonnet": 3,
+      "acerto_haiku": 3,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "ctb.ecd.apontar_atencao": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "fis.guia.identificar",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 15 casos, sem erro crítico.",
+      "acerto_sonnet": 15,
+      "acerto_haiku": 15,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "fis.guia.identificar": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "fis.caixa_postal.classificar",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 15 casos, sem erro crítico.",
+      "acerto_sonnet": 15,
+      "acerto_haiku": 15,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "fis.caixa_postal.classificar": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "dp.evento.classificar",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 15 casos, sem erro crítico.",
+      "acerto_sonnet": 15,
+      "acerto_haiku": 15,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "dp.evento.classificar": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "soc.alteracao.classificar",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 15 casos, sem erro crítico.",
+      "acerto_sonnet": 15,
+      "acerto_haiku": 15,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "soc.alteracao.classificar": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "ges.faq.escolher",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 15 casos, sem erro crítico.",
+      "acerto_sonnet": 15,
+      "acerto_haiku": 15,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "ges.faq.escolher": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    },
+    {
+      "contrato": "assistente.rotear (barato)",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 11 casos, sem erro crítico.",
+      "acerto_sonnet": 11,
+      "acerto_haiku": 11,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "configuracao": {
+        "assistente.rotear (barato)": {
+          "operario": "claude-haiku-5-5"
+        }
+      }
+    }
+  ],
+  "linhas": [
+    {
+      "caso": "ctb-aluguel-ref",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-08",
+      "obtido": "2026-08",
+      "resultado": "acerto",
+      "pessoa": "2026-08",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex100398dbc61445d49fa898f93bb21bd2",
+      "estado": "concluida",
+      "centavos": 0.99144,
+      "latencia_ms": 5397,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-aluguel-ref",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-08",
+      "obtido": "2026-08",
+      "resultado": "acerto",
+      "pessoa": "2026-08",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdf7ac500d15143edb54742f1a7a7c2dd",
+      "estado": "concluida",
+      "centavos": 1.02384,
+      "latencia_ms": 3844,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-aluguel-ref",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-08",
+      "obtido": "2026-08",
+      "resultado": "acerto",
+      "pessoa": "2026-08",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbc150dad02d647d1b38b7149abbf3561",
+      "estado": "concluida",
+      "centavos": 0.98604,
+      "latencia_ms": 4479,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-condominio",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9456b1e4d14246beb87d8835724bf7d1",
+      "estado": "concluida",
+      "centavos": 1.00548,
+      "latencia_ms": 5366,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-condominio",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex31e1ee7cbbce4121935b74abc40835bd",
+      "estado": "concluida",
+      "centavos": 1.02168,
+      "latencia_ms": 4436,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-condominio",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exab93f3be3ea84ede9e326d687dd261ee",
+      "estado": "concluida",
+      "centavos": 0.97848,
+      "latencia_ms": 4452,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-duas-datas",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex712e35e64db24572a99cd01ba4ee7fb6",
+      "estado": "cancelada",
+      "centavos": 2.2064399999999997,
+      "latencia_ms": 5906,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-duas-datas",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2ac46d1c42ab4673b2022cde6b4d54f3",
+      "estado": "cancelada",
+      "centavos": 2.18484,
+      "latencia_ms": 6354,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-duas-datas",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex6d44ca1bdfdc4f2c98624316e2b625c4",
+      "estado": "cancelada",
+      "centavos": 2.22804,
+      "latencia_ms": 8410,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-energia",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-08",
+      "obtido": "2026-08",
+      "resultado": "acerto",
+      "pessoa": "2026-08",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exfa8f621a6e60422fa5ac25b246efc4ca",
+      "estado": "concluida",
+      "centavos": 1.07784,
+      "latencia_ms": 5362,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-energia",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-08",
+      "obtido": "2026-08",
+      "resultado": "acerto",
+      "pessoa": "2026-08",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex5d586a271efb456f940ff5da7bc6e4ca",
+      "estado": "concluida",
+      "centavos": 1.06164,
+      "latencia_ms": 4478,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-energia",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-08",
+      "obtido": "2026-08",
+      "resultado": "acerto",
+      "pessoa": "2026-08",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe9efa6e2a5954215acede047cfc0f044",
+      "estado": "concluida",
+      "centavos": 1.05084,
+      "latencia_ms": 4891,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-honorarios",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-10",
+      "obtido": "2026-10",
+      "resultado": "acerto",
+      "pessoa": "2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdc20ea4f64774fbb9a1c06d0dee80d91",
+      "estado": "concluida",
+      "centavos": 0.99576,
+      "latencia_ms": 4337,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-honorarios",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-10",
+      "obtido": "2026-10",
+      "resultado": "acerto",
+      "pessoa": "2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excceee2b5a9784e499a435ccd52f09176",
+      "estado": "concluida",
+      "centavos": 1.00656,
+      "latencia_ms": 4869,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-honorarios",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-10",
+      "obtido": "2026-10",
+      "resultado": "acerto",
+      "pessoa": "2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex37664aa2b3334f4ea63e611b2c28bd5a",
+      "estado": "concluida",
+      "centavos": 1.00656,
+      "latencia_ms": 5385,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-internet",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-07",
+      "obtido": "2026-07",
+      "resultado": "acerto",
+      "pessoa": "2026-07",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex794d0f4536624a31ad36c56a9d446a16",
+      "estado": "concluida",
+      "centavos": 1.02492,
+      "latencia_ms": 4837,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-internet",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-07",
+      "obtido": "2026-07",
+      "resultado": "acerto",
+      "pessoa": "2026-07",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exec036fe134fb46b691eef925e5f00cf1",
+      "estado": "concluida",
+      "centavos": 1.01412,
+      "latencia_ms": 5391,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-internet",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-07",
+      "obtido": "2026-07",
+      "resultado": "acerto",
+      "pessoa": "2026-07",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8be0cc9f9bde460798f41385102c7413",
+      "estado": "concluida",
+      "centavos": 1.04652,
+      "latencia_ms": 4915,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-pro-labore",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-10",
+      "obtido": "2026-10",
+      "resultado": "acerto",
+      "pessoa": "2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex87e19bf9bc0e482e9341936287a5a188",
+      "estado": "concluida",
+      "centavos": 1.01844,
+      "latencia_ms": 5382,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-pro-labore",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-10",
+      "obtido": "2026-10",
+      "resultado": "acerto",
+      "pessoa": "2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exca4ba329d4a94697b66f690aa46ba6ba",
+      "estado": "concluida",
+      "centavos": 1.00764,
+      "latencia_ms": 4473,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-pro-labore",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-10",
+      "obtido": "2026-10",
+      "resultado": "acerto",
+      "pessoa": "2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex205bac14fe9243668cbe0c1829aa0dbf",
+      "estado": "concluida",
+      "centavos": 1.00764,
+      "latencia_ms": 3975,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-reembolso",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex890870ad0ba04edeb7291ca675cce94d",
+      "estado": "concluida",
+      "centavos": 2.1751199999999997,
+      "latencia_ms": 7339,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-reembolso",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex7d2cadc7754b4012b28c24a06198218c",
+      "estado": "concluida",
+      "centavos": 2.1859200000000003,
+      "latencia_ms": 6827,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-reembolso",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex95bdf43c4d1c46708a8f72d845a62359",
+      "estado": "concluida",
+      "centavos": 2.14272,
+      "latencia_ms": 10904,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-seguro",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "2026-09",
+      "obtido": "2026-09",
+      "resultado": "acerto",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc67aff50d35348a292053ca85297afd9",
+      "estado": "concluida",
+      "centavos": 2.1222000000000003,
+      "latencia_ms": 7337,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-seguro",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "2026-09",
+      "obtido": "cartao",
+      "resultado": "cartao_desnecessario",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb5a45bb7daec4135948757233589529c",
+      "estado": "cancelada",
+      "centavos": 2.1438,
+      "latencia_ms": 5868,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-seguro",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "2026-09",
+      "obtido": "cartao",
+      "resultado": "cartao_desnecessario",
+      "pessoa": "2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex73b26f0685ae49278eee1dec6bb6b834",
+      "estado": "cancelada",
+      "centavos": 2.2302,
+      "latencia_ms": 6385,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-sem-referencia",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex7a742d94ffb849baac1d85bbcfc1ea02",
+      "estado": "cancelada",
+      "centavos": 1.9828799999999998,
+      "latencia_ms": 6459,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-sem-referencia",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex48c59030cfdb45899ac5483f88247766",
+      "estado": "cancelada",
+      "centavos": 2.00448,
+      "latencia_ms": 9980,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ctb-sem-referencia",
+      "setor": "contabil",
+      "procedimento": "CTB-COMPETENCIA-DOC",
+      "rodada": 3,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9acf3c394cb24b949edfbeffc10c20f9",
+      "estado": "cancelada",
+      "centavos": 1.9828799999999998,
+      "latencia_ms": 7386,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ecd-adiantamento-socios",
+      "setor": "contabil",
+      "procedimento": "CTB-ECD-TRANSMITIR",
+      "rodada": 1,
+      "esperado": "contem:1.1.05",
+      "obtido": "1.1.01,1.1.05,3.1.01,4.1.01",
+      "resultado": "acerto",
+      "pessoa": null,
+      "resultado_pessoa": null,
+      "execucao_id": "excaf5e374e414416c8624f4a72be4c4dd",
+      "estado": "concluida",
+      "centavos": 1.9494,
+      "latencia_ms": 6876,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ecd-adiantamento-socios",
+      "setor": "contabil",
+      "procedimento": "CTB-ECD-TRANSMITIR",
+      "rodada": 2,
+      "esperado": "contem:1.1.05",
+      "obtido": "1.1.01,1.1.05,3.1.01,4.1.01",
+      "resultado": "acerto",
+      "pessoa": null,
+      "resultado_pessoa": null,
+      "execucao_id": "ex49d236e176a04b7d867d348286c612fb",
+      "estado": "concluida",
+      "centavos": 1.9548,
+      "latencia_ms": 6914,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "ecd-adiantamento-socios",
+      "setor": "contabil",
+      "procedimento": "CTB-ECD-TRANSMITIR",
+      "rodada": 3,
+      "esperado": "contem:1.1.05",
+      "obtido": "1.1.01,1.1.05,3.1.01,4.1.01",
+      "resultado": "acerto",
+      "pessoa": null,
+      "resultado_pessoa": null,
+      "execucao_id": "ex4adbf9dc72d84294baaf2748fc7dede8",
+      "estado": "concluida",
+      "centavos": 1.9224,
+      "latencia_ms": 7457,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-adiantamento",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex40e41e679a92470cb55d051bfe791a72",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 4938,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-adiantamento",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd83926e676834c5d93ea39c78b81ec9b",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 4428,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-adiantamento",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 3,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0a1a35eefad149b69a8ba5597aee0d11",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 6898,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd3ccd06a519f4d36ad3cf5a21c85ccec",
+      "estado": "cancelada",
+      "centavos": 2.9192400000000003,
+      "latencia_ms": 5939,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex51e156b2479b49709166cf50137cd84d",
+      "estado": "cancelada",
+      "centavos": 2.93004,
+      "latencia_ms": 6929,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 3,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdc7a5386395b42cab6f3720c40df8c46",
+      "estado": "cancelada",
+      "centavos": 2.93004,
+      "latencia_ms": 11833,
+      "chamadas": [
+        "operario:claude-sonnet-5-5",
+        "escritor:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-falta",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex229572d9c2e146488bb7eb95f19111a7",
+      "estado": "concluida",
+      "centavos": 1.31976,
+      "latencia_ms": 6436,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-falta",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex59c68f0f67774a67b68e674c86cae11c",
+      "estado": "concluida",
+      "centavos": 1.32516,
+      "latencia_ms": 4925,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-falta",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 3,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbd2ed4755dec434ab098909fb1758796",
+      "estado": "concluida",
+      "centavos": 1.31976,
+      "latencia_ms": 5315,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-ferias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd3732c60078b4eb7b58c5e08c2a88834",
+      "estado": "concluida",
+      "centavos": 1.36296,
+      "latencia_ms": 4958,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-ferias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1be4e1abe17c4b709a19247d190a0b6a",
+      "estado": "concluida",
+      "centavos": 1.36296,
+      "latencia_ms": 4341,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-ferias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 3,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exaf7b27a8c6ae46ada6fe88e6543b973f",
+      "estado": "concluida",
+      "centavos": 1.36296,
+      "latencia_ms": 6941,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-hora-extra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0faf243208864ef9a65183ccc6b98599",
+      "estado": "concluida",
+      "centavos": 1.31976,
+      "latencia_ms": 4343,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-hora-extra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd59963e1c9ca4505a8edd24641a1ab10",
+      "estado": "concluida",
+      "centavos": 1.35756,
+      "latencia_ms": 4953,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "dp-hora-extra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 3,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex55b4cbfbb7f64fec8915c96d59094675",
+      "estado": "concluida",
+      "centavos": 1.35756,
+      "latencia_ms": 8435,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-cobranca",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 1,
+      "esperado": "cobranca:2026-11-28",
+      "obtido": "cobranca:2026-11-28",
+      "resultado": "acerto",
+      "pessoa": "cobranca:2026-11-28",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2c4bf6e7e78e49838cff7a0e50f68102",
+      "estado": "concluida",
+      "centavos": 1.2852,
+      "latencia_ms": 4975,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-cobranca",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 2,
+      "esperado": "cobranca:2026-11-28",
+      "obtido": "cobranca:2026-11-28",
+      "resultado": "acerto",
+      "pessoa": "cobranca:2026-11-28",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex5b1ddd8747a54441ab95e930356b9af1",
+      "estado": "concluida",
+      "centavos": 1.3122,
+      "latencia_ms": 4868,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-cobranca",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 3,
+      "esperado": "cobranca:2026-11-28",
+      "obtido": "cobranca:2026-11-28",
+      "resultado": "acerto",
+      "pessoa": "cobranca:2026-11-28",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex352554811127473eab2c621d367f5a3b",
+      "estado": "concluida",
+      "centavos": 1.3122,
+      "latencia_ms": 4981,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-exclusao",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 1,
+      "esperado": "exclusao_simples:2026-12-15",
+      "obtido": "exclusao_simples:2026-12-15",
+      "resultado": "acerto",
+      "pessoa": "exclusao_simples:2026-12-15",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex57ecbea9d8534ac5ac955722a142f49b",
+      "estado": "concluida",
+      "centavos": 1.29816,
+      "latencia_ms": 4868,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-exclusao",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 2,
+      "esperado": "exclusao_simples:2026-12-15",
+      "obtido": "exclusao_simples:2026-12-15",
+      "resultado": "acerto",
+      "pessoa": "exclusao_simples:2026-12-15",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf0406e3c52e647368273de9316a7149e",
+      "estado": "concluida",
+      "centavos": 1.29816,
+      "latencia_ms": 3917,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-exclusao",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 3,
+      "esperado": "exclusao_simples:2026-12-15",
+      "obtido": "exclusao_simples:2026-12-15",
+      "resultado": "acerto",
+      "pessoa": "exclusao_simples:2026-12-15",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb2d68b0e8a7142c7a4899e7ebcb31e43",
+      "estado": "concluida",
+      "centavos": 1.29816,
+      "latencia_ms": 4967,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-informativo",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 1,
+      "esperado": "informativo:-",
+      "obtido": "informativo:-",
+      "resultado": "acerto",
+      "pessoa": "informativo:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exffdd77fa76204b5eabd77fb97aca7d8c",
+      "estado": "concluida",
+      "centavos": 1.27116,
+      "latencia_ms": 4345,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-informativo",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 2,
+      "esperado": "informativo:-",
+      "obtido": "informativo:-",
+      "resultado": "acerto",
+      "pessoa": "informativo:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex6faafe2fa8fc4e68a9cd324c003634fa",
+      "estado": "concluida",
+      "centavos": 1.23876,
+      "latencia_ms": 4346,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-informativo",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 3,
+      "esperado": "informativo:-",
+      "obtido": "informativo:-",
+      "resultado": "acerto",
+      "pessoa": "informativo:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex17d89a7404c544d0a92dc7a71a47b9fc",
+      "estado": "concluida",
+      "centavos": 1.26036,
+      "latencia_ms": 4939,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-intimacao",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 1,
+      "esperado": "intimacao:2026-11-30",
+      "obtido": "intimacao:2026-11-30",
+      "resultado": "acerto",
+      "pessoa": "intimacao:2026-11-30",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exeb08aebed3a84f7cb1a89509afd354e9",
+      "estado": "concluida",
+      "centavos": 1.27548,
+      "latencia_ms": 4844,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-intimacao",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 2,
+      "esperado": "intimacao:2026-11-30",
+      "obtido": "intimacao:2026-11-30",
+      "resultado": "acerto",
+      "pessoa": "intimacao:2026-11-30",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc8826c1de3474cddae24044fab11f78a",
+      "estado": "concluida",
+      "centavos": 1.27548,
+      "latencia_ms": 4432,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-intimacao",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 3,
+      "esperado": "intimacao:2026-11-30",
+      "obtido": "intimacao:2026-11-30",
+      "resultado": "acerto",
+      "pessoa": "intimacao:2026-11-30",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex48e9dc339e5144109d248e681a0e1065",
+      "estado": "concluida",
+      "centavos": 1.27548,
+      "latencia_ms": 4865,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-malha",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 1,
+      "esperado": "malha:2026-12-10",
+      "obtido": "malha:2026-12-10",
+      "resultado": "acerto",
+      "pessoa": "malha:2026-12-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex871d4d543786475d89bbf3d1f9b715d9",
+      "estado": "concluida",
+      "centavos": 1.25496,
+      "latencia_ms": 4955,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-malha",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 2,
+      "esperado": "malha:2026-12-10",
+      "obtido": "malha:2026-12-10",
+      "resultado": "acerto",
+      "pessoa": "malha:2026-12-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex19451733fec74711b4f83d2bb9695095",
+      "estado": "concluida",
+      "centavos": 1.25496,
+      "latencia_ms": 4955,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "cp-malha",
+      "setor": "fiscal",
+      "procedimento": "FIS-CAIXA-POSTAL-TRIAR",
+      "rodada": 3,
+      "esperado": "malha:2026-12-10",
+      "obtido": "malha:2026-12-10",
+      "resultado": "acerto",
+      "pessoa": "malha:2026-12-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe803afbdc9f24ea8bf6b05847c4c142c",
+      "estado": "concluida",
+      "centavos": 1.25496,
+      "latencia_ms": 4852,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-csll",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 1,
+      "esperado": "CSLL:2026-09",
+      "obtido": "CSLL:2026-09",
+      "resultado": "acerto",
+      "pessoa": "CSLL:2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc0df2f201a7648c789989f3aeb90af3e",
+      "estado": "concluida",
+      "centavos": 1.18692,
+      "latencia_ms": 4904,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-csll",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 2,
+      "esperado": "CSLL:2026-09",
+      "obtido": "CSLL:2026-09",
+      "resultado": "acerto",
+      "pessoa": "CSLL:2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex5b8cfb3ee65548cf84891629562007af",
+      "estado": "concluida",
+      "centavos": 1.18692,
+      "latencia_ms": 4926,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-csll",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 3,
+      "esperado": "CSLL:2026-09",
+      "obtido": "CSLL:2026-09",
+      "resultado": "acerto",
+      "pessoa": "CSLL:2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex65429ff2fa89422cbc6ae90b1cc49d2f",
+      "estado": "concluida",
+      "centavos": 1.18692,
+      "latencia_ms": 4890,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-das",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 1,
+      "esperado": "DAS:2026-10",
+      "obtido": "DAS:2026-10",
+      "resultado": "acerto",
+      "pessoa": "DAS:2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc08f31c2e30e4bfab1d65bb13c4fc3be",
+      "estado": "concluida",
+      "centavos": 1.18476,
+      "latencia_ms": 4874,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-das",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 2,
+      "esperado": "DAS:2026-10",
+      "obtido": "DAS:2026-10",
+      "resultado": "acerto",
+      "pessoa": "DAS:2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd0872dc34dca49fe9b8cc6fcc91f16d2",
+      "estado": "concluida",
+      "centavos": 1.18476,
+      "latencia_ms": 4953,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-das",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 3,
+      "esperado": "DAS:2026-10",
+      "obtido": "DAS:2026-10",
+      "resultado": "acerto",
+      "pessoa": "DAS:2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa37e1aa95b984688b644cc380ac02080",
+      "estado": "concluida",
+      "centavos": 1.18476,
+      "latencia_ms": 4900,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-gps",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 1,
+      "esperado": "INSS:2026-10",
+      "obtido": "INSS:2026-10",
+      "resultado": "acerto",
+      "pessoa": "INSS:2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa5af70ff74d44e588c5d713b15f78664",
+      "estado": "concluida",
+      "centavos": 1.18692,
+      "latencia_ms": 4827,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-gps",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 2,
+      "esperado": "INSS:2026-10",
+      "obtido": "INSS:2026-10",
+      "resultado": "acerto",
+      "pessoa": "INSS:2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc62dc65f6a3d46ebb74e682b44d8865d",
+      "estado": "concluida",
+      "centavos": 1.18152,
+      "latencia_ms": 4409,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-gps",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 3,
+      "esperado": "INSS:2026-10",
+      "obtido": "INSS:2026-10",
+      "resultado": "acerto",
+      "pessoa": "INSS:2026-10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdddf0e4b872542ff92fa6568d5b6204d",
+      "estado": "concluida",
+      "centavos": 1.18152,
+      "latencia_ms": 4975,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-irpj-codigo",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 1,
+      "esperado": "IRPJ:2026-09",
+      "obtido": "IRPJ:2026-09",
+      "resultado": "acerto",
+      "pessoa": "IRPJ:2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex34773bbeb9144d84b1ccb877c250b7e5",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 3475,
+      "chamadas": []
+    },
+    {
+      "caso": "guia-irpj-codigo",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 2,
+      "esperado": "IRPJ:2026-09",
+      "obtido": "IRPJ:2026-09",
+      "resultado": "acerto",
+      "pessoa": "IRPJ:2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex03467035ee434d98975a26352c420a18",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 3448,
+      "chamadas": []
+    },
+    {
+      "caso": "guia-irpj-codigo",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 3,
+      "esperado": "IRPJ:2026-09",
+      "obtido": "IRPJ:2026-09",
+      "resultado": "acerto",
+      "pessoa": "IRPJ:2026-09",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8e9a572667aa41599d090208a2533f05",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 3487,
+      "chamadas": []
+    },
+    {
+      "caso": "guia-valor-divergente",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex26a98972e1e44c9880e77ac23b1e2705",
+      "estado": "cancelada",
+      "centavos": 1.15344,
+      "latencia_ms": 3954,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-valor-divergente",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0bb4c5036e37474cba5e9bba21312597",
+      "estado": "cancelada",
+      "centavos": 1.15344,
+      "latencia_ms": 3451,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "guia-valor-divergente",
+      "setor": "fiscal",
+      "procedimento": "FIS-GUIA-CONFERIR",
+      "rodada": 3,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex038be34f2f734a1fa1f42e98f9894cd5",
+      "estado": "cancelada",
+      "centavos": 1.18044,
+      "latencia_ms": 3472,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-boleto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 1,
+      "esperado": "segunda_via_boleto",
+      "obtido": "segunda_via_boleto",
+      "resultado": "acerto",
+      "pessoa": "segunda_via_boleto",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdf7045b8b007481a88c1d8696af625b4",
+      "estado": "concluida",
+      "centavos": 1.06812,
+      "latencia_ms": 4884,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-boleto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 2,
+      "esperado": "segunda_via_boleto",
+      "obtido": "segunda_via_boleto",
+      "resultado": "acerto",
+      "pessoa": "segunda_via_boleto",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex955110925d554d7a8a487f386021403c",
+      "estado": "concluida",
+      "centavos": 1.06812,
+      "latencia_ms": 4926,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-boleto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 3,
+      "esperado": "segunda_via_boleto",
+      "obtido": "segunda_via_boleto",
+      "resultado": "acerto",
+      "pessoa": "segunda_via_boleto",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8486603429384a31b195ff34285089d9",
+      "estado": "concluida",
+      "centavos": 1.06812,
+      "latencia_ms": 3492,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-cancelar",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex32f6fd23538247508f45a87722a68184",
+      "estado": "cancelada",
+      "centavos": 1.0368,
+      "latencia_ms": 2365,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-cancelar",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex32f9c590c6cb407daf7710e23b6e51e8",
+      "estado": "cancelada",
+      "centavos": 0.999,
+      "latencia_ms": 3395,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-cancelar",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 3,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex98d4f4fe8eff434d9a7a92d486078b5b",
+      "estado": "cancelada",
+      "centavos": 1.0368,
+      "latencia_ms": 2966,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-certidao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 1,
+      "esperado": "certidao_negativa",
+      "obtido": "certidao_negativa",
+      "resultado": "acerto",
+      "pessoa": "certidao_negativa",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb5426ef616ae49808d229abe5b4ed1a6",
+      "estado": "concluida",
+      "centavos": 1.06056,
+      "latencia_ms": 4382,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-certidao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 2,
+      "esperado": "certidao_negativa",
+      "obtido": "certidao_negativa",
+      "resultado": "acerto",
+      "pessoa": "certidao_negativa",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex660fb30f17224c4a971de58f6baadf50",
+      "estado": "concluida",
+      "centavos": 1.07676,
+      "latencia_ms": 4850,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-certidao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 3,
+      "esperado": "certidao_negativa",
+      "obtido": "certidao_negativa",
+      "resultado": "acerto",
+      "pessoa": "certidao_negativa",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex54ca0d19893c4379a02bf779a3d11692",
+      "estado": "concluida",
+      "centavos": 1.07676,
+      "latencia_ms": 3930,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-documentos",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 1,
+      "esperado": "enviar_documentos",
+      "obtido": "enviar_documentos",
+      "resultado": "acerto",
+      "pessoa": "enviar_documentos",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excd4b80cd7cf04b8e902d228ad8fa556f",
+      "estado": "concluida",
+      "centavos": 1.06164,
+      "latencia_ms": 4993,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-documentos",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 2,
+      "esperado": "enviar_documentos",
+      "obtido": "enviar_documentos",
+      "resultado": "acerto",
+      "pessoa": "enviar_documentos",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf7ff04c03cb348a4aec2813bedcfa76c",
+      "estado": "concluida",
+      "centavos": 1.06164,
+      "latencia_ms": 4980,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-documentos",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 3,
+      "esperado": "enviar_documentos",
+      "obtido": "enviar_documentos",
+      "resultado": "acerto",
+      "pessoa": "enviar_documentos",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex190f85e4dd11429bbd527fc86b26d493",
+      "estado": "concluida",
+      "centavos": 1.06164,
+      "latencia_ms": 4327,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-guias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 1,
+      "esperado": "prazo_guias",
+      "obtido": "prazo_guias",
+      "resultado": "acerto",
+      "pessoa": "prazo_guias",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex43b239132b0a4db7bba31b02f83f3535",
+      "estado": "concluida",
+      "centavos": 1.07892,
+      "latencia_ms": 5472,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-guias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 2,
+      "esperado": "prazo_guias",
+      "obtido": "prazo_guias",
+      "resultado": "acerto",
+      "pessoa": "prazo_guias",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex283c5e585e084914b98eebbf46c6aa1b",
+      "estado": "concluida",
+      "centavos": 1.07892,
+      "latencia_ms": 4867,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "faq-guias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-FAQ-RESPONDER",
+      "rodada": 3,
+      "esperado": "prazo_guias",
+      "obtido": "prazo_guias",
+      "resultado": "acerto",
+      "pessoa": "prazo_guias",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc593e14850504195b6514e0de4f5244a",
+      "estado": "concluida",
+      "centavos": 1.05732,
+      "latencia_ms": 3891,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-atividade",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 1,
+      "esperado": "atividade",
+      "obtido": "atividade",
+      "resultado": "acerto",
+      "pessoa": "atividade",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex07dcdcb38a5547b0a1b6e18a0bb4f0ad",
+      "estado": "concluida",
+      "centavos": 1.026,
+      "latencia_ms": 4859,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-atividade",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 2,
+      "esperado": "atividade",
+      "obtido": "atividade",
+      "resultado": "acerto",
+      "pessoa": "atividade",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1101470cf9f34c2e983794fa9011c165",
+      "estado": "concluida",
+      "centavos": 1.026,
+      "latencia_ms": 4844,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-atividade",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 3,
+      "esperado": "atividade",
+      "obtido": "atividade",
+      "resultado": "acerto",
+      "pessoa": "atividade",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4cbc1caa19eb41efa224acd08afcfa5f",
+      "estado": "concluida",
+      "centavos": 1.026,
+      "latencia_ms": 3847,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-capital",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 1,
+      "esperado": "capital_social",
+      "obtido": "capital_social",
+      "resultado": "acerto",
+      "pessoa": "capital_social",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe681aa20451e47c8bbf29bb35ea6bd6a",
+      "estado": "concluida",
+      "centavos": 0.999,
+      "latencia_ms": 5447,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-capital",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 2,
+      "esperado": "capital_social",
+      "obtido": "capital_social",
+      "resultado": "acerto",
+      "pessoa": "capital_social",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf502ea2b43e14f66824b5601c4074e1a",
+      "estado": "concluida",
+      "centavos": 1.0206,
+      "latencia_ms": 4426,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-capital",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 3,
+      "esperado": "capital_social",
+      "obtido": "capital_social",
+      "resultado": "acerto",
+      "pessoa": "capital_social",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex42177a4d74db49859f49736c6deb759e",
+      "estado": "concluida",
+      "centavos": 1.053,
+      "latencia_ms": 3932,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-endereco",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 1,
+      "esperado": "endereco",
+      "obtido": "endereco",
+      "resultado": "acerto",
+      "pessoa": "endereco",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exede333cde5b54ac6af6d4ffa97af0293",
+      "estado": "concluida",
+      "centavos": 1.0476,
+      "latencia_ms": 4921,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-endereco",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 2,
+      "esperado": "endereco",
+      "obtido": "endereco",
+      "resultado": "acerto",
+      "pessoa": "endereco",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex999437b980ee4a28aec45f3c6f3b01bc",
+      "estado": "concluida",
+      "centavos": 1.0476,
+      "latencia_ms": 3342,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-endereco",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 3,
+      "esperado": "endereco",
+      "obtido": "endereco",
+      "resultado": "acerto",
+      "pessoa": "endereco",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex65bd94596e7a41bdbee57e9b5570ca14",
+      "estado": "concluida",
+      "centavos": 1.026,
+      "latencia_ms": 2905,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-entrada",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 1,
+      "esperado": "entrada_socio",
+      "obtido": "entrada_socio",
+      "resultado": "acerto",
+      "pessoa": "entrada_socio",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex36898287ef8b4ffd983b096cc64c2018",
+      "estado": "concluida",
+      "centavos": 1.14912,
+      "latencia_ms": 4904,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-entrada",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 2,
+      "esperado": "entrada_socio",
+      "obtido": "entrada_socio",
+      "resultado": "acerto",
+      "pessoa": "entrada_socio",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd7325d6a9fd54e7cb6880993e1e4a73c",
+      "estado": "concluida",
+      "centavos": 1.05732,
+      "latencia_ms": 4886,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-entrada",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 3,
+      "esperado": "entrada_socio",
+      "obtido": "entrada_socio",
+      "resultado": "acerto",
+      "pessoa": "entrada_socio",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex965a4043cfa2456db55e1bb7384bb07d",
+      "estado": "concluida",
+      "centavos": 1.13832,
+      "latencia_ms": 3886,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-nao-e-alteracao",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 1,
+      "esperado": "outro",
+      "obtido": "outro",
+      "resultado": "acerto",
+      "pessoa": "outro",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4f6a12b0eb5d4e5792bc4508c2840a69",
+      "estado": "concluida",
+      "centavos": 1.00548,
+      "latencia_ms": 4909,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-nao-e-alteracao",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 2,
+      "esperado": "outro",
+      "obtido": "outro",
+      "resultado": "acerto",
+      "pessoa": "outro",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2c0bfb179f2a4704af5d389ba8a58915",
+      "estado": "concluida",
+      "centavos": 1.02168,
+      "latencia_ms": 4867,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    },
+    {
+      "caso": "soc-nao-e-alteracao",
+      "setor": "societario",
+      "procedimento": "SOC-ALTERACAO-TRIAR",
+      "rodada": 3,
+      "esperado": "outro",
+      "obtido": "outro",
+      "resultado": "acerto",
+      "pessoa": "outro",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa44f650ec6c549388a6b1d5bea1ca6e5",
+      "estado": "concluida",
+      "centavos": 1.00548,
+      "latencia_ms": 4937,
+      "chamadas": [
+        "operario:claude-sonnet-5-5"
+      ]
+    }
+  ],
+  "rotas": [
+    {
+      "caso": "rota-competencia",
+      "esperado": "CTB-COMPETENCIA-DOC",
+      "obtido": "CTB-COMPETENCIA-DOC",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 1,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-ecd",
+      "esperado": "CTB-ECD-TRANSMITIR",
+      "obtido": "CTB-ECD-TRANSMITIR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-guia",
+      "esperado": "FIS-GUIA-CONFERIR",
+      "obtido": "FIS-GUIA-CONFERIR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-ecac",
+      "esperado": "FIS-CAIXA-POSTAL-TRIAR",
+      "obtido": "FIS-CAIXA-POSTAL-TRIAR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-horas",
+      "esperado": "DP-EVENTO-FOLHA",
+      "obtido": "DP-EVENTO-FOLHA",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 1,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-socio",
+      "esperado": "SOC-ALTERACAO-TRIAR",
+      "obtido": "SOC-ALTERACAO-TRIAR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-segunda-via",
+      "esperado": "GES-FAQ-RESPONDER",
+      "obtido": "GES-FAQ-RESPONDER",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-sabado",
+      "esperado": "DP-EVENTO-FOLHA",
+      "obtido": "DP-EVENTO-FOLHA",
+      "camada": "modelo_barato",
+      "resultado": "acerto",
+      "centavos": 0.07182,
+      "latencia_ms": 2554,
+      "modelos": "claude-haiku-5-5"
+    },
+    {
+      "caso": "rota-mudou-rua",
+      "esperado": "SOC-ALTERACAO-TRIAR",
+      "obtido": "SOC-ALTERACAO-TRIAR",
+      "camada": "modelo_barato",
+      "resultado": "acerto",
+      "centavos": 0.069876,
+      "latencia_ms": 1791,
+      "modelos": "claude-haiku-5-5"
+    },
+    {
+      "caso": "rota-abertos",
+      "esperado": "GES-FAQ-RESPONDER",
+      "obtido": "GES-FAQ-RESPONDER",
+      "camada": "modelo_barato",
+      "resultado": "acerto",
+      "centavos": 0.069984,
+      "latencia_ms": 872,
+      "modelos": "claude-haiku-5-5"
+    },
+    {
+      "caso": "rota-vago",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "camada": null,
+      "resultado": "acerto",
+      "centavos": 1.43127,
+      "latencia_ms": 2620,
+      "modelos": "claude-haiku-5-5>claude-sonnet-5-5"
+    },
+    {
+      "caso": "rota-competencia",
+      "esperado": "CTB-COMPETENCIA-DOC",
+      "obtido": "CTB-COMPETENCIA-DOC",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-ecd",
+      "esperado": "CTB-ECD-TRANSMITIR",
+      "obtido": "CTB-ECD-TRANSMITIR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-guia",
+      "esperado": "FIS-GUIA-CONFERIR",
+      "obtido": "FIS-GUIA-CONFERIR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-ecac",
+      "esperado": "FIS-CAIXA-POSTAL-TRIAR",
+      "obtido": "FIS-CAIXA-POSTAL-TRIAR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-horas",
+      "esperado": "DP-EVENTO-FOLHA",
+      "obtido": "DP-EVENTO-FOLHA",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-socio",
+      "esperado": "SOC-ALTERACAO-TRIAR",
+      "obtido": "SOC-ALTERACAO-TRIAR",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-segunda-via",
+      "esperado": "GES-FAQ-RESPONDER",
+      "obtido": "GES-FAQ-RESPONDER",
+      "camada": "regra",
+      "resultado": "acerto",
+      "centavos": 0,
+      "latencia_ms": 0,
+      "modelos": ""
+    },
+    {
+      "caso": "rota-sabado",
+      "esperado": "DP-EVENTO-FOLHA",
+      "obtido": "DP-EVENTO-FOLHA",
+      "camada": "modelo_barato",
+      "resultado": "acerto",
+      "centavos": 1.4418,
+      "latencia_ms": 1833,
+      "modelos": "claude-sonnet-5-5"
+    },
+    {
+      "caso": "rota-mudou-rua",
+      "esperado": "SOC-ALTERACAO-TRIAR",
+      "obtido": "SOC-ALTERACAO-TRIAR",
+      "camada": "modelo_barato",
+      "resultado": "acerto",
+      "centavos": 1.45692,
+      "latencia_ms": 1675,
+      "modelos": "claude-sonnet-5-5"
+    },
+    {
+      "caso": "rota-abertos",
+      "esperado": "GES-FAQ-RESPONDER",
+      "obtido": "GES-FAQ-RESPONDER",
+      "camada": "modelo_barato",
+      "resultado": "acerto",
+      "centavos": 1.45368,
+      "latencia_ms": 1677,
+      "modelos": "claude-sonnet-5-5"
+    },
+    {
+      "caso": "rota-vago",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "camada": null,
+      "resultado": "acerto",
+      "centavos": 2.7702,
+      "latencia_ms": 3074,
+      "modelos": "claude-sonnet-5-5>claude-sonnet-5-5"
+    }
+  ]
+}

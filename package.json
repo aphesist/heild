@@ -13,7 +13,9 @@
     "pg": "servidor/scripts/pg-local.sh",
     "dev": "npm run dev -w @heild/servidor",
     "test": "npm test -w @heild/servidor",
-    "typecheck": "npm run typecheck -w @heild/servidor && npm run typecheck -w @heild/processos",
-    "test:b2": "npm test -w @heild/processos"
+    "typecheck": "npm run typecheck -w @heild/servidor && npm run typecheck -w @heild/processos && npm run typecheck -w @heild/integrantes",
+    "test:b2": "npm test -w @heild/processos",
+    "test:b3": "npm test -w @heild/integrantes",
+    "lint": "app/node_modules/.bin/oxlint -c app/.oxlintrc.json pacotes/integrantes/src pacotes/integrantes/testes pacotes/integrantes/scripts pacotes/processos/src"
   }
 }

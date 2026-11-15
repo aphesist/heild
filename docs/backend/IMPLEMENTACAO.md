@@ -605,3 +605,108 @@ Ainda mínimos, para trocar quando a B1 entregar o equivalente:
 - Lote por raias. Casos de gabarito por procedimento, com cartões editados virando casos.
 - Rodar o teste agêntico real com a chave e ajustar os orçamentos dos procedimentos pelo custo medido. Prompts, modelo final por classe e política de revisão (frente de IA). Conectores reais e cofre (sessão futura).
 - Medir sob carga: vazão da admissão e dos passos, e a disputa no elo da cadeia com muitos eventos por escritório.
+
+---
+
+## B3 · Integrantes dos setores
+
+**16/11/2026 · branch `be3-integrantes` → `backend`.** Os integrantes de IA de cada setor do Contábil sobre o motor da B2, com o Assistente na porta do chat e a avaliação automatizada. Implementa as oito decisões do Enzo (`docs/integrantes/DECISOES.md`, branch `wf-integrantes-pesquisa`) sem reabrir nenhuma. Tudo local, no mesmo Postgres; o simulado é o padrão de todos os testes, e o modelo real só liga por variável de ambiente.
+
+### Resumo
+
+1. **Contrato padrão de integrante** (`pacotes/integrantes/src/contrato.ts`). Um integrante é uma **configuração compartilhada** pelo setor: identidade, procedimentos, o **pacote de ferramentas** permitidas (catálogo tipado e operações de processo, resolvidos pela mesma `autorizar`), papéis de modelo, limite de execuções simultâneas (10), limite de segundo plano por pessoa (3), limiar de confiança (0,9) e se pergunta "Para quem quer rotear esta atividade?". `definirIntegrante` recusa, como o CI recusaria: ferramenta de outro setor no pacote, passo que usa ferramenta fora do pacote, irreversível sem aprovação `sempre`, operário que devolve confiança sem conferi-la com limiar ≥ o do integrante, e escalada ao escritor sem o papel.
+2. **Resposta padrão** (`src/resposta.ts`, Zod estrito, `heild.resposta@1`). Todo integrante e o roteamento respondem no mesmo formato: tipo (`concluido`, `aguardando_aprovacao`, `nao_consegui`, `na_fila`, `em_execucao`, `falhou`, `cancelado`, `pergunta`, `sem_procedimento`, `negado`), título, texto, cartões visuais, a ação que espera uma pessoa, opções, dados, origem, custo, confiança e se escalou. O texto é **do sistema**, por processo (`apresentar` de cada procedimento) e por tipo (`TEXTO_PADRAO`); nenhum modelo escreve a resposta.
+3. **Integrantes do Contábil**, um por setor (`src/integrantes.ts`), cada um com o seu pacote, as regras de roteamento e o formato do processo:
+
+   | Integrante | Setor | Procedimentos | Aprovação |
+   | --- | --- | --- | --- |
+   | Contábil | `contabil` | CTB-COMPETENCIA-DOC e CTB-ECD-TRANSMITIR (os de referência da B2) | por regra; ECD sempre |
+   | Fiscal | `fiscal` | **FIS-GUIA-CONFERIR** (tributo e competência pelo operário só sem código de receita; o código confere o valor com a apuração; enviar ao cliente é irreversível) e **FIS-CAIXA-POSTAL-TRIAR** (categoria e prazo tirado das datas do texto) | guia sempre; caixa postal por regra |
+   | DP | `dp` | **DP-EVENTO-FOLHA** (tipo, competência e quantidade, cada um entre as opções do texto) | por regra (`dp.evento.lancar`) |
+   | Societário | `societario` | **SOC-ALTERACAO-TRIAR** (tipo de alteração; a tabela do setor decide se exige Junta) | por regra (`legalizacao.abrir_processo`) |
+   | Atendimento | `gestao_atendimento` | **GES-FAQ-RESPONDER** (liga a mensagem a uma pergunta da base; vai ao cliente o **texto aprovado**, nunca um texto do modelo; a base é memória do setor) | sempre (`conversa.responder`) |
+
+   "Gestão e Atendimento" é **um setor só** no catálogo (`gestao_atendimento`), com o integrante Atendimento do wireframe.
+4. **Fábrica de procedimentos de escolha** (`src/escolha.ts`). Os cinco procedimentos novos têm o mesmo caminho em código: ler o documento do cliente → o código extrai as opções (e decide por regra quando dá) → o operário escolhe **entre** as opções → validadores (opções, confiança, regras do setor) → aprovação → efeito → concluir. Validadores novos: `escolha_nas_candidatas`, `valor_confere_apuracao`, `faq_respondivel`, `competencia_passada_ou_atual`.
+5. **Assistente e roteador** (`src/assistente.ts`, `src/roteador.ts`). Cascata: **regras** (tipo do documento anexado e expressões de cada procedimento) → **modelo barato** (Haiku, decisão 4) → **modelo caro** (Sonnet) só quando o barato fica abaixo do limiar ou marca "ambíguo" → se ainda houver dúvida, **pergunta à pessoa** com as opções. O modelo só escolhe entre procedimentos que a pessoa pode iniciar (a mesma `autorizar`); escolha fora das opções nunca é aceita. O Assistente **encaminha sem reescrever**: a resposta que ele devolve é o objeto do integrante (o teste compara o hash). Cada decisão vai para `pedido_assistente` e para a **cadeia de eventos** (`assistente.rotear`, com camada, procedimento, confiança e as camadas que rodaram; o texto do pedido não vai à cadeia, só hash e tamanho). Roteamento com modelo vai para a fila `assistente.rotear`: o pedido HTTP nunca espera modelo.
+6. **Execução** (`src/execucao.ts`). `instalarIntegrantes` grava o integrante compartilhado por setor, o limite de simultâneas do setor em `limite_execucao` e as bolsas. Prioridade chat > evento > job e isolamento por execução são do motor da B2 (provados de novo aqui com os integrantes). `iniciarPeloIntegrante` só aceita procedimento do pacote (decisão 2) e pergunta "Para quem quer rotear esta atividade?" no evento e no job quando o integrante está configurado assim (o Fiscal está). `aprenderComCartao` transforma a correção de uma pessoa num cartão "não consegui" em **proposta** de memória do setor (decisão 6); só quem gere o setor ou o Administrador aprova.
+7. **Modo sombra no motor da B2** (`OpcoesInicio.sombra`, coluna `execucao.sombra`). O procedimento roda inteiro, mas o **efeito roda num savepoint sempre desfeito**, o passo externo nunca chama o órgão, nenhum cartão é criado e o integrante não é acordado. A sombra nunca se junta a uma execução de verdade (o hash da entrada leva a marca). Só código liga a sombra; nenhuma entrada de API a aceita.
+8. **Avaliação automatizada** (`src/avaliacao/`). Gabarito por setor (36 casos, com casos em que o certo é **não** decidir) rodado em sombra; relatório com acerto, erro crítico, cartão desnecessário, falha, custo e latência **por setor e por papel**; comparação com o que a pessoa fez (`comparacao_sombra`, `iniciarSombra`, `registrarDecisaoDaPessoa`, `resumoSombra`); **margem de −3 pontos** na taxa de erro contra a pessoa (AVALIAÇÃO 11.4); **portão do Haiku**: o Haiku só fica num contrato se, no mesmo gabarito, tiver zero erro crítico e acertar todo caso em que o Sonnet acertou. O mesmo portão vale para o roteador barato.
+9. **Débito em frações de centavo.** As colunas de centavos viraram `numeric(18,6)` e `centavosDe` deixou de arredondar cada chamada para o centavo de cima. A reserva antes da chamada e o acerto depois continuam iguais, agora exatos. O teste real de 15/11 debitava cerca de 60% a mais por causa do arredondamento.
+10. **Na API da B1**: as operações de processo dos cinco setores entram no catálogo tipado, no OpenAPI e em `/v1/ferramentas`; `assistente.pedir`, `assistente.obter`, `integrante.listar` e `integrante.aprender` são servidas pela mesma rota `/v1/ferramentas/{nome}` (extensão do `criarProcessos`, sem porta nova). O worker que roda com a API passa a ser o dos integrantes (`npm run worker -w @heild/integrantes`).
+
+### Como rodar e testar
+
+```bash
+npm run typecheck        # servidor + B2 + B3
+npm run lint             # oxlint (a mesma configuração do app) na B2 e na B3
+npm run test:b3          # B3: 46 testes contra Postgres real (banco heild_b3_teste, recriado)
+npm run test:b2          # B2: os 38 de antes, verdes com a sombra e as frações de centavo
+npm test                 # B1: 68 testes, com o ponta a ponta da B3 pela API
+
+cd pacotes/integrantes
+npm run banco            # banco heild_b3 com todas as migrações (--recriar zera)
+npm run avaliar -- --simulado
+# real (gasta dinheiro; a chave fica só no ambiente do processo):
+HEILD_IA_FORNECEDOR=anthropic HEILD_DOLAR_REAIS=5.40 HEILD_TETO_USD=3 HEILD_AVALIACAO_CASOS=1 ANTHROPIC_API_KEY=... npm run avaliar
+```
+
+| Variável do roteiro `scripts/avaliar.ts` | Para quê |
+| --- | --- |
+| `HEILD_TETO_USD` | Teto da rodada; o roteiro para assim que o gasto medido passa |
+| `HEILD_AVALIACAO_CASOS` | Casos por setor (rodada pequena para estimar); padrão, todos |
+| `HEILD_AVALIACAO_REPETICOES` | Repetições de cada caso |
+| `HEILD_AVALIACAO_SETORES` | Só estes setores |
+| `HEILD_AVALIACAO_PORTAO=1` | Roda o portão do Haiku em cada contrato de operário |
+| `HEILD_AVALIACAO_ROTEAMENTO=1` | Roda o gabarito de roteamento e o portão do roteador barato |
+
+| Arquivo em `pacotes/integrantes/testes/` | O que prova |
+| --- | --- |
+| `contrato.test.ts` (15) | Os cinco setores com integrante; pacote em ordem fixa e só do setor; o que `definirIntegrante` recusa; resposta padrão estrita e texto do sistema; regras de roteamento contra o gabarito (quais decidem por regra e quais sobem ao modelo); débito sem arredondar; extração por código; classificação de erro, margem e portão do Haiku |
+| `setores.test.ts` (10) | Cada procedimento novo de ponta a ponta. Guia: cartão **sempre**, mesmo com "executa sozinho", saída com os argumentos aprovados e o evento apontando o cartão; código de receita decide sem modelo; valor divergente da apuração para no cartão "não consegui" sem escalar. Caixa postal por regra do escritório. DP: quantidade inventada é barrada, escala uma vez e termina no cartão. Societário e a tabela da Junta. FAQ: vai ao cliente o texto aprovado da base, e a base vem da memória do setor. Pessoa sem o setor é negada e a negação fica na trilha |
+| `assistente.test.ts` (9) | **Ponta a ponta**: chat → regra → integrante do Fiscal → procedimento → cartão → aprovação → resposta padrão → Assistente, com o objeto idêntico ao do integrante e a decisão na cadeia (sem o texto). Modelo barato decidindo pela fila, com o custo do roteamento em frações de centavo na bolsa `assistente`. Barato em dúvida sobe ao caro; os dois em dúvida viram pergunta. Escolha fora das opções nunca é aceita. Sem saldo, nenhum modelo é chamado. Falta de anexo vira pergunta; pedido de outra pessoa não se lê; integrante não conversa com o Assistente; idempotência por chave; a mesma porta do registro de ferramentas |
+| `execucao.test.ts` (6) | Limite de 10 por setor vindo do contrato do integrante, com a posição na fila; prioridade chat > evento > job; vinte execuções paralelas isoladas; o integrante só inicia procedimento do pacote; "Para quem quer rotear esta atividade?" no evento do Fiscal, com o cartão para a pessoa escolhida e o custo na bolsa do setor; correção no cartão "não consegui" vira proposta de memória que só quem gere aprova |
+| `avaliacao.test.ts` (6) | O gabarito inteiro em sombra sem nenhum efeito (nenhum cartão, documento, envio ao órgão nem evento de efeito); um operário que erra aparece como erro crítico e fora da margem; a sombra do dia a dia contra a decisão da pessoa; o portão do Haiku bloqueando e liberando, e devolvendo a configuração ao estado anterior |
+| `servidor/test/b3-assistente.test.ts` (3) | O mesmo ponta a ponta **pela API da B1**, com o worker dos integrantes ao lado e a cadeia conferindo no fim |
+
+### Avaliação real (15/11/2026, autorizada pelo dono)
+
+108 execuções em sombra com o Claude (`claude-sonnet-5-5` como operário e escritor), mais o portão do Haiku e o roteamento:
+
+- **98,1% de acerto e zero erro crítico** nos cinco setores; os casos em que o certo é não decidir pararam no cartão todas as vezes;
+- roteamento: 11 de 11, com 7 decididos por regra, 3 pelo Haiku e 1 virando pergunta à pessoa;
+- portão do Haiku: os oito contratos liberados neste gabarito (a configuração **não** foi trocada; ver o relatório);
+- custo da sessão: R$ 1,80 (≈ US$ 0,33), com débito em frações de centavo;
+- resumo e as decisões para a frente de IA em [`relatorios/integrantes-2026-11-15-real.md`](relatorios/integrantes-2026-11-15-real.md).
+
+### Onde mora cada coisa
+
+```
+pacotes/integrantes/                @heild/integrantes
+  src/contrato.ts                   definirIntegrante, Anexos, PacoteProcedimento
+  src/resposta.ts                   RespostaPadrao (Zod) e os textos fixos por tipo
+  src/escolha.ts                    a fábrica dos procedimentos "ler e escolher" e a extração por código
+  src/setores/                      fiscal.ts, dp.ts, societario.ts, atendimento.ts (contratos e procedimentos)
+  src/integrantes.ts                os cinco integrantes, com pacote, regras e formato de cada processo
+  src/validadores.ts                validadores da B3 (no registro da B2)
+  src/roteador.ts                   a cascata (regras, barato, caro) e a cobrança do roteamento
+  src/assistente.ts                 pedir, rotear (fila), obter; encaminhar sem reescrever
+  src/responder.ts                  execução → resposta padrão do integrante
+  src/execucao.ts                   instalar, iniciar pelo integrante, aprender com o cartão
+  src/extensao.ts                   a B3 como extensão do criarProcessos (ferramentas, fila, worker)
+  src/avaliacao/                    avaliar (sombra), relatorio, portao (Haiku), sombra (dia a dia), gabarito
+  scripts/avaliar.ts, scripts/worker.ts
+app/supabase/migrations/20261116090000_b3_integrantes.sql
+```
+
+### Desvios e limites
+
+| Desenho | Na B3 | Por quê / quando muda |
+| --- | --- | --- |
+| Roteador vê o pedido | Vê só o texto do pedido e o tipo do documento anexado, não o conteúdo do documento | Menos dado de cliente no modelo e menos custo. Decisão da frente de IA (perguntas abaixo) |
+| Quem paga o roteamento | Bolsa `assistente` do escritório (o setor ainda não é conhecido) | Decisão 5 fala da bolsa do setor; antes do roteamento não há setor. Pergunta abaixo |
+| Revisor Opus | O papel existe e é conferido no contrato, mas nenhum procedimento usa revisão ainda | A política de revisão é da frente de IA. O runner já escolhe o modelo pela classe |
+| Sombra paga modelo | A sombra debita da bolsa do setor | Medir custa. Uma bolsa própria do piloto é uma linha de `bolsa_setor` |
+| Correções aprendidas | A proposta de memória `correcao:*` é gravada depois de aprovada, mas nenhum procedimento a lê ainda (o GES-FAQ lê a base `faq`) | Como cada procedimento usa a correção é decisão de conteúdo da frente de IA |
+| Efeitos dos procedimentos novos | Gravam a decisão no `documento.metadados`; não há conector real de envio (WhatsApp, Junta, folha) | Os conectores são de uma sessão futura. O cartão e a trilha já são os definitivos |
+| Gabarito | 36 casos fictícios | O piloto pré-registrado pede 400 a 700 por estrato, com casos reais anonimizados (AVALIAÇÃO 11.5) |
