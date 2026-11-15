@@ -26,7 +26,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useLoja, useNavegacao, usePersistente, type Destino } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { rotuloStatusLongo } from '@/components/compostos/rotulos'
-import { useAcao, useConfirmar, usePode } from '@/components/kit'
+import { useAcao, useConfirmar, usePode, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { atividade, nomeCurtoAtividade, rotuloAutonomia } from '@/dados/atividades-s04'
@@ -716,8 +716,10 @@ export function CartaoNaTarefa({
   podeNomes: string[]
   onDecidir: (d: 'aprovar' | 'editar_e_aprovar' | 'recusar', comentario?: string, argumentos?: Record<string, string>) => void
 }) {
-  const [modo, setModo] = useState<null | 'editar' | 'recusar'>(null)
+  const [modo, setModo] = useState<null | 'recusar'>(null)
   const [args, setArgs] = useState(argumentos)
+  // Fase 6: os argumentos se corrigem no próprio cartão; com correção, aprovar vale como "editado e aprovado".
+  const corrigido = Object.keys(argumentos).some((k) => args[k] !== argumentos[k])
   const [texto, setTexto] = useState('')
   const decidido = status !== 'pendente'
   return (
@@ -727,7 +729,7 @@ export function CartaoNaTarefa({
         {Object.entries(args).map(([k, v]) => (
           <div key={k} className="contents">
             <dt className="text-muted-foreground">{k}</dt>
-            <dd>{modo === 'editar' ? <Entrada aria-label={k} className="h-7 text-xs" value={v} onChange={(e) => setArgs({ ...args, [k]: e.target.value })} /> : v}</dd>
+            <dd className="min-w-0">{pode && !decidido ? <ValorEditavel rotulo={k} valor={v} config={{ tipo: 'texto', validar: (t) => (t.trim() ? null : 'Não pode ficar vazio') }} desfazer={false} onMudar={(t) => setArgs({ ...args, [k]: t.trim() })} /> : v}</dd>
           </div>
         ))}
       </dl>
@@ -757,18 +759,15 @@ export function CartaoNaTarefa({
         </div>
       ) : (
         <div className="flex flex-wrap gap-1.5">
-          {modo === 'editar' ? (
+          {corrigido ? (
             <Button size="sm" className="rounded-full" onClick={() => onDecidir('editar_e_aprovar', 'argumentos editados', args)}>
-              Salvar e aprovar
+              Aprovar com a correção
             </Button>
           ) : (
             <Button size="sm" className="rounded-full" onClick={() => onDecidir('aprovar')}>
               Aprovar
             </Button>
           )}
-          <Button size="sm" variant="outline" className="rounded-full" onClick={() => setModo(modo === 'editar' ? null : 'editar')}>
-            {modo === 'editar' ? 'Cancelar edição' : 'Editar e aprovar'}
-          </Button>
           <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setModo('recusar')}>
             Recusar
           </Button>

@@ -912,8 +912,9 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
               ))}
             </ul>
           </Caixa>
-          <Caixa>
-            <TituloBloco descricao="Horas de BPO no mês contra o que cada pessoa tem para o pacote. Clique no total para ajustar.">Capacidade</TituloBloco>
+          {/* Esticado até a altura da margem ao lado: a linha da capacidade em linha é mais baixa que a antiga gaveta. */}
+          <Caixa className="self-stretch">
+            <TituloBloco descricao="Horas de BPO no mês contra o que cada pessoa tem para o pacote. Clique na capacidade sublinhada para ajustar.">Capacidade</TituloBloco>
             <ul className="flex flex-col gap-3" aria-label="Capacidade por pessoa">
               {pessoas.map((p) => {
                 const usado = empresas.filter((e) => e.perfil.analista_nome === p).reduce((s, e) => s + e.perfil.horas_mes, 0) + contratantes.reduce((s, c) => s + c.fila.filter((f) => f.responsavel_nome === p).length * 1.5, 0)
