@@ -206,7 +206,7 @@ function Cores() {
 function Rolagem({ p }: { p: ParamsLab }) {
   const itens = Array.from({ length: 24 }, (_, i) => i)
   return (
-    <Pagina titulo="Rolagem com esmaecido" descricao="Toda rolagem passa pela AreaRolagem: o topo e o fim (ou os lados) esmaecem só quando há conteúdo para aquele lado; parado no topo, nada é cortado. Com cabeçalho fixo, o esmaecido começa abaixo dele. A regra scripts/regra-rolagem.cjs barra overflow-auto fora da primitiva.">
+    <Pagina titulo="Rolagem com esmaecido" descricao="Toda rolagem passa pela AreaRolagem: o topo e o fim (ou os lados) esmaecem só quando há conteúdo para aquele lado; parado no topo, nada é cortado. Com cabeçalho fixo, o esmaecido começa abaixo dele. A regra scripts/regra-rolagem.cjs barra qualquer classe de rolagem solta fora da primitiva.">
       <div className="grid gap-4 md:grid-cols-2">
         <Caixa className="h-72">
           <TituloBloco>Lista que rola</TituloBloco>
