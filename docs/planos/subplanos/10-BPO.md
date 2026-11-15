@@ -986,9 +986,9 @@ Fonte: branch `wireframe`, `app/supabase/migrations/20261114180000_s08_bpo.sql`,
 
 O site promete "Fechamento à contabilidade: até o dia 7" (branch `site`, `app/src/site/SecoesBpo.tsx`). Pelo plano, o SLA é configurável por empresa ("relatório até o dia W"). Adota-se o dia 7 do mês seguinte só como **padrão sugerido**, editável por empresa; o site deve dizer "até o dia combinado". O site também mostra como certos o extrato pelo Open Finance (o plano diz "Open Finance ou OFX") e o pagamento por API no modo M2 (banco com API utilizável por terceiro **[a confirmar]**): ver D9 em [../ATUALIZACOES.md](../ATUALIZACOES.md).
 
-### Sessões S08a a S08d do wireframe (14 e 15/11/2026, ainda fora do branch `wireframe`)
+### Sessões S08a a S08d do wireframe (14 e 15/11/2026)
 
-Fontes: branches `wf-s08a-bpo-visao`, `wf-s08b-bpo-operacao`, `wf-s08c-bpo-aprovacoes` e `wf-s08d-bpo-gestao`, `docs/wireframe/DECISOES.md` e `docs/wireframe/entregas/S08a.md` a `S08d.md`. Ainda não integrados ao branch `wireframe`; todos os registros são **propostas** da sessão, nenhum decidido pelo Enzo.
+Fontes: branches `wf-s08a-bpo-visao`, `wf-s08b-bpo-operacao`, `wf-s08c-bpo-aprovacoes` e `wf-s08d-bpo-gestao`, `docs/wireframe/DECISOES.md` e `docs/wireframe/entregas/S08a.md` a `S08d.md`. S08a e S08c foram integradas ao branch `wireframe` em 15/11/2026; S08b e S08d ainda estão nos branches próprios. Todos os registros são **propostas** da sessão, nenhum decidido pelo Enzo.
 
 - **Encerramento (3.14).** Abrir o encerramento (Administrador, com motivo) marca aviso prévio de **30 dias [hipótese]**; os cinco passos têm ação, e apagar o espelho só libera depois de revogar banco e ERP; "Desistir do encerramento" volta ao ativo e fica no histórico. Concluir tira o serviço BPO; o cadastro continua ("BPO encerrado", com "Pôr no BPO").
 - **Lote com exceção (3.7).** Fornecedor novo, dados bancários alterados, valor 30% acima da média, duplicidade suspeita, fracionamento e pessoa física sobem de faixa: o lote pede duas aprovações mesmo abaixo da faixa 2. Fornecedor novo ou alterado só entra em lote com os dados confirmados por segundo canal (canal, contato e dados conferidos).
