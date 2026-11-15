@@ -4,7 +4,7 @@
 
 ## Resumo em 15 linhas
 
-1. **62 APIs, serviços e caminhos sem API** no Contábil, em 9 grupos: 22 públicos e gratuitos, 10 públicos e pagos, 18 contratuais (credencial do escritório ou do cliente) e 12 sem API oficial (assistido, agregador ou integração não oficial).
+1. **67 APIs, serviços e caminhos sem API** no Contábil, em 9 grupos: 23 públicos e gratuitos (ou próprios), 10 públicos e pagos, 20 contratuais (credencial do escritório ou do cliente) e 14 sem API oficial (assistido, agregador ou integração não oficial).
 2. **O que custa dinheiro de verdade são duas linhas: SERPRO (Integra Contador e Consulta CNPJ) e InfoSimples.** Somam ~90% do custo de API que a plataforma paga. Captura de notas (DF-e, ADN), eSocial, EFD-Reinf, Calculadora RFB e BCB custam zero.
 3. **Preços conferidos na fonte em 15/11/2026.** Correções sobre os planos: WhatsApp de serviço passou a custar R$ 0,035 em 01/10/2026 (com 1.000 grátis por número); InfoSimples começa em R$ 0,22, não R$ 0,20; o SERPRO cobra o mês inteiro pela faixa atingida (não é cascata) e **cobra também as respostas 403**.
 4. **Integra Contador é o coração e não tem substituto:** contrato online com e-CNPJ, chaves em até 10 minutos, ambiente de demonstração. Eventos de atualização (`/Monitorar`) são grátis, 1.000 requisições por dia.
@@ -18,7 +18,7 @@
 12. **Base legal (testado de novo em 15/11/2026):** a busca SRU do LexML passa por um desafio antirrobô em JavaScript, que não contornamos; a API de legislação do Senado (`legis.senado.leg.br/dadosabertos`) respondeu sem barreira e cobre a legislação federal; o INLABS do DOU está em "Manutenção Programada" e o `www.in.gov.br` devolveu resposta vazia a partir deste ambiente. Detalhe na seção 8.
 13. **Fornecedor de modelos:** Opus 5.5 US$ 4/20, Sonnet 5.5 US$ 2/10, Haiku 5.5 US$ 0,10/0,50 por milhão de tokens. Recebe o dado completo, sem máscara (decisão Q7), sob DPA, sem treino com os dados e com retenção mínima; processamento no Brasil [a confirmar]. Os agentes ficam fora deste plano.
 14. **Custo de API pago pela plataforma (provável):** no piloto completo, sem a Pluggy, ~R$ 500 por mês só de APIs, ~R$ 2,4 mil com infraestrutura e ~R$ 3,2 mil com IA ([`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md), 3). Em escala: ~R$ 3 mil com 10 escritórios, ~R$ 19 mil com 100 e ~R$ 129 mil com 1.000 (R$ 3,00, 1,88 e 1,29 por cliente), abaixo dos R$ 3,62 por cliente do estudo de precificação.
-15. **Para pedir já:** e-CNPJ da Heild, contrato SERPRO (preço normal da loja no piloto; o Enzo fala com o comercial sobre o modelo A para a escala), procurações dos clientes do piloto, InfoSimples com DPA, verificação do app Google, contas nas lojas de extensão e o número de teste da Meta. A parceria com a Thomson Reuters fica para depois do piloto. Detalhe em [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md).
+15. **Para pedir já:** e-CNPJ da Heild, contrato SERPRO (preço normal da loja no piloto; o Enzo fala com o comercial sobre o modelo A para a escala), procurações dos clientes do piloto, InfoSimples com DPA, projeto no Google Cloud com o client ID para o administrador do Workspace do escritório, certificado de assinatura de código do agente local, contas nas lojas de extensão e o número de teste da Meta. A parceria com a Thomson Reuters fica para depois do piloto. Detalhe em [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md).
 
 ---
 
@@ -116,13 +116,20 @@ No Contábil, banco serve para **conciliação** (extrato do cliente). A cobran�
 
 ## 6. Armazenamento
 
+**Decisão do dono (15/11/2026): os arquivos ficam no armazenamento de cada escritório.** A Heild guarda o índice, os metadados, o texto extraído, as miniaturas e duas cópias de vida curta (processamento, 72 h; entrega, 7 dias). Desenho, passo a passo do Google Workspace e agente local em [`ARMAZENAMENTO.md`](ARMAZENAMENTO.md). No piloto: Google Workspace num escritório, servidor local no outro.
+
 | API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **AWS S3 (sa-east-1)** com SSE-KMS por escritório | Backend `plataforma` de Arquivos (S09-T01); upload por URL pré-assinada; guarda de XML | P | Plataforma (opcional ao escritório, por GB) | Standard-IA US$ 0,0221/GB-mês; Deep Archive US$ 0,0032 (01, 4.2; HOSPEDAGEM) | — | Papel IAM | Baixo | Réplica e backup | API-24 · `armazenamento` em `documentos.ts` |
+| **AWS S3 (sa-east-1)** com SSE-KMS por escritório | Índice de texto grande, miniaturas, cópia de processamento (72 h) e cache de entrega (7 dias); backend `plataforma` só para quem não tem armazenamento próprio (opcional, por GB) | P | Plataforma | Standard-IA US$ 0,0221/GB-mês; Deep Archive US$ 0,0032 (01, 4.2; HOSPEDAGEM). No piloto, ~3 GB, < US$ 1/mês | — | Papel IAM | Baixo | Réplica e backup | API-24 · `armazenamento` em `documentos.ts` |
 | **AWS KMS** | Cofre de credenciais e chave por escritório | P | Plataforma | US$ 1 por chave por mês (STACK 9; decisão do dono: chave por escritório) | — | Papel IAM só do `cofre` | Baixo | — | API-29 · `cofre` em `conectores.ts` |
-| **Google Drive API** (Shared Drive do escritório) | Arquivos com a nuvem do escritório; Raio-X da pasta antiga (S09-A63) | K | Escritório (a nuvem é dele) | Sem custo no uso padrão; cota em unidades: 1 milhão/min por projeto, 325 mil/min por usuário (listagem = 100 unidades), 1 TB/dia de egress; **cobrança anunciada para quem exceder a cota "ainda em 2026"** (developers.google.com/workspace/drive/api/guides/limits, conferido 15/11) | Escopos `drive` e `drive.metadata.readonly` são restritos: exigem verificação do app e avaliação de segurança [prazo e custo a confirmar] | OAuth do Administrador | Médio: cota por projeto é compartilhada por todos os escritórios | Varredura diária retoma do cursor | API-24 · `armazenamento`, `arvore.ler` |
-| **Microsoft Graph (OneDrive, SharePoint)** | Idem, para escritórios Microsoft | K | Escritório | Sem custo por chamada para arquivos (learn.microsoft.com/graph/metered-api-list, conferido 15/11) | 130 mil requisições/10 s por app; limites do SharePoint [a confirmar] | OAuth (Graph) | Baixo | idem | API-24 |
-| **S3 compatível, WebDAV, SFTP** (NAS e servidor do escritório) | Pasta do core indexada (artefatos do timesheet, guias geradas pelo core) | K | Escritório | R$ 0 de API | Varredura a cada 15 min; sem notificação | `chave_nuvem` (chave SSH preferida) | Médio: a plataforma não entra na rede do escritório | Upload manual | API-24 |
+| **Google Drive API** (Meu Drive e drives compartilhados) | Arquivos na nuvem do escritório; Raio-X da pasta antiga (S09-A63); gravação na pasta "Heild/Recebidos" | K | Escritório (a nuvem é dele) | Grátis até 400 milhões de unidades/dia por projeto; cobrança acima "later in 2026" [preço a confirmar] (developers.google.com/workspace/drive/api/guides/limits, conferido 15/11) | 1 milhão de unidades/min por projeto; `drive.readonly` é **restrito**. **Piloto (Workspace):** o administrador marca o app como confiável em Controles de API, só para o domínio dele, sem verificação. **Escala:** verificação de escopo restrito (~6 semanas) e CASA anual por laboratório autorizado (preço não publicado). Conta pessoal: modo de teste, 100 usuários, autorização de 7 dias | OAuth do Administrador; escrita com `drive.file` (não sensível) | Médio: cota por projeto compartilhada por todos os escritórios; a CASA trava a venda em escala | Varredura diária retoma do cursor (`changes.list`) | API-24 · `armazenamento`, `arvore.ler` |
+| **Microsoft Graph (OneDrive, SharePoint)** | Idem, para escritórios Microsoft | K | Escritório | Sem custo por chamada para arquivos (learn.microsoft.com/graph/metered-api-list, conferido 15/11) | 1.250 RU/min por app por tenant; webhooks de até ~30 dias (no OneDrive for Business, só na raiz) + delta. **Publisher verification** (gratuita, em minutos) e **consentimento do administrador** do tenant | OAuth (Graph), `Files.Read.All`, `Sites.Read.All` | Baixo | Delta retoma do `deltaLink` | API-24 |
+| **Dropbox** | Idem, para escritórios no Dropbox | K | Escritório | Sem preço de API publicado [a confirmar] | Em desenvolvimento até 500 usuários; ao chegar a 50, 2 semanas para obter o **production approval** (prazo da revisão não publicado). Limites de taxa não publicados (429) | OAuth com PKCE; `files.metadata.read`, `files.content.read` | Médio: aprovação de produção sem prazo | Cursor e longpoll | API-24 |
+| **Box** | Idem, para escritórios no Box | K | Escritório | Sem custo para a Heild; consome a cota mensal de chamadas do plano do cliente | ~1.000 chamadas/min por usuário; JWT e Client Credentials sempre com autorização do administrador do Box; webhooks v2 não na raiz | OAuth 2.0 ou JWT; `root_readonly` | Médio: cota do cliente | Events API com long polling | API-24 |
+| **S3 compatível, WebDAV, SFTP** | NAS e servidores expostos pelo escritório; pasta do core indexada | K | Escritório | R$ 0 de API | Varredura a cada 15 min; MinIO tem notificação de bucket | `chave_nuvem` (chave SSH preferida) | Médio: exige o escritório expor o serviço, o que se desaconselha para NAS | Agente local | API-24 |
+| **NAS Synology e QNAP** | Servidor de arquivos do escritório | R | Escritório | R$ 0 | **Não expor à internet** (a QNAP manda desligar o redirecionamento de portas, aviso QSA-22-24); leitura pelo agente local na rede do escritório (SMB, WebDAV ou File Station API) | Usuário de serviço só leitura | Médio | — | API-24 |
+| **iCloud Drive** | — | R | — | — | **Não há API pública para terceiros** (o CloudKit só acessa os contêineres do próprio app); só pelo agente local num computador com a pasta sincronizada | — | — | — | — |
+| **Agente local da Heild** (servidor do escritório) | Lê as pastas do servidor por sistema de arquivos ou SMB, envia índice e o arquivo a processar, busca sob demanda, grava só em "Heild/Recebidos" | G (próprio) | Heild; roda na máquina do escritório | Certificado de assinatura de código OV: US$ 150 a 300 por ano (tabela da Microsoft); preço no Brasil [a confirmar] | Conexão só de saída; credencial por dispositivo; revogação imediata | Chave do dispositivo (gerada na máquina) | Médio: software no cliente | Sincronizar o servidor para uma nuvem (plano B do piloto) | API-24 · nenhum serviço ainda |
 
 ## 7. Cores contábeis
 
@@ -167,11 +174,11 @@ Só como fornecedor: os integrantes (orquestração, prompts, escolha de modelo 
 | Bancos e pagamentos | 2 | 0 | 5 | 0 | 7 |
 | Comunicação | 1 | 2 | 2 | 1 | 6 |
 | Assinatura | 2 | 0 | 4 | 0 | 6 |
-| Armazenamento | 0 | 2 | 3 | 0 | 5 |
+| Armazenamento | 1 | 2 | 5 | 2 | 10 |
 | Cores | 0 | 0 | 4 | 2 | 6 |
 | Base legal | 5 | 0 | 0 | 0 | 5 |
 | Modelos e OCR | 1 | 1 | 0 | 0 | 2 |
-| **Total** | **22** | **10** | **18** | **12** | **62** |
+| **Total** | **23** | **10** | **20** | **14** | **67** |
 
 Cada linha é um uso, não um fornecedor: o Integra aparece também em DCTFWeb e Simples, e a InfoSimples em certidões, DTE, Sintegra e Juntas.
 

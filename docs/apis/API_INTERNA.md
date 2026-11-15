@@ -12,7 +12,7 @@ Fontes: catálogo de ferramentas do wireframe (`app/src/nucleo/permissoes/ferram
 2. **Três camadas por setor:** operações de processo (uma por procedimento: o agente chama uma vez e o motor faz os passos), contexto e resolução (leituras feitas para o agente) e operações de entidade (as 235 de hoje, para tela e para o planejador de exceção).
 3. **O recorte de um integrante do Fiscal tem 31 ferramentas**, não 235 (seção 5.4). O maior recorte do Contábil fica em ~9 mil tokens de esquema, abaixo do limite de ~10 mil em que vale ligar busca de ferramentas.
 4. **Toda resposta para agente é compacta:** totais, até 20 linhas, `ha_mais`, cursor, ids, nenhum texto livre que o modelo precise reescrever. Teto declarado por ferramenta e medido no CI.
-5. **Erro acionável sempre:** `codigo` estável, `campo`, `mensagem` para a pessoa e `acao_sugerida` com ferramenta e entrada prontas. 44 códigos comuns na seção 2.4.
+5. **Erro acionável sempre:** `codigo` estável, `campo`, `mensagem` para a pessoa e `acao_sugerida` com ferramenta e entrada prontas. 45 códigos comuns na seção 2.4.
 6. **Idempotência obrigatória** em todo `executar` (cabeçalho `Idempotency-Key`), com chave derivada automaticamente no motor de procedimentos. Repetir é seguro; mudar os argumentos com a mesma chave é 409.
 7. **`validar_apenas: true`** em toda ferramenta `rascunhar` e `executar`: o agente sabe que vai falhar antes de tentar, sem efeito e sem custo externo.
 8. **Ids, nunca nomes:** toda ação recebe `cliente_id`; nome vira id só por `cliente.resolver`, que devolve `AMBIGUO` com candidatos quando há dúvida.
@@ -110,7 +110,7 @@ Códigos comuns (cada ferramenta declara os seus além destes):
 | Pré-requisito do processo | `FALTA_DOCUMENTO`, `FALTA_EXTRATO`, `FALTA_FOLHA`, `FALTA_RECEITA`, `FALTA_PROCURACAO`, `FALTA_CERTIFICADO`, `PERFIL_INCOMPLETO`, `DIVERGENCIA_NAO_RESOLVIDA` |
 | Validação | `VALIDADOR_FALHOU` (com `detalhes.validador`), `PARTIDAS_NAO_FECHAM`, `VALOR_NAO_CONFERE`, `SEM_ORIGEM` |
 | Idempotência e limites | `CHAVE_REUSADA` (409), `LIMITE_TAXA` (429), `TETO_CUSTO` (a conexão chegou a 100%), `ORCAMENTO_ESGOTADO` (do integrante ou da execução) |
-| Externo | `CREDENCIAL` (vencida, revogada, sem serviço autorizado), `INDISPONIVEL` (com `tentar_de_novo_em`), `LIMITE_EXTERNO` (ex.: 656 da DF-e, 10 downloads/dia do eSocial), `ESQUEMA_EXTERNO`, `CAPTCHA`, `DA_CIENCIA` (a capacidade dá ciência e precisa de cartão), `OPT_OUT` (o contato pediu para não receber), `NUMERO_RESTRITO` (sinal 463 ou 475 do WhatsApp; pausa contatos novos) |
+| Externo | `CREDENCIAL` (vencida, revogada, sem serviço autorizado), `INDISPONIVEL` (com `tentar_de_novo_em`), `LIMITE_EXTERNO` (ex.: 656 da DF-e, 10 downloads/dia do eSocial), `ESQUEMA_EXTERNO`, `CAPTCHA`, `DA_CIENCIA` (a capacidade dá ciência e precisa de cartão), `OPT_OUT` (o contato pediu para não receber), `NUMERO_RESTRITO` (sinal 463 ou 475 do WhatsApp; pausa contatos novos), `ORIGEM_INDISPONIVEL` (o armazenamento do escritório não respondeu: servidor desligado, credencial revogada) |
 
 Para o agente, a regra é simples: com `acao_sugerida`, chama a sugestão ou leva à pessoa; com `tentar_de_novo_em`, não tenta antes; com `VALIDADOR_FALHOU`, escala uma vez (AVALIAÇÃO 7.2); nos demais, cartão "não consegui, falta X".
 
@@ -338,10 +338,11 @@ Notação de exposição: **C** = app do cliente, **E** = equipe (tela e chat), 
 
 | Ferramenta | Nível | Expos. | Observação |
 | --- | --- | --- | --- |
-| `documento.preparar_envio` | executar | E, C, A | URL pré-assinada do S3 (5 min); a API nunca passa bytes |
+| `documento.preparar_envio` | executar | E, C, A | URL pré-assinada do S3 (5 min) para a cópia de processamento; a API nunca passa bytes. Depois de processado, o original é gravado na pasta designada do armazenamento do escritório ("Heild/Recebidos" ou a pasta do cliente), pelo conector ou pelo agente local, e a cópia expira em 72 h ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 1) |
 | `documento.registrar` | executar | E, C, servico | Depois do upload; o worker confere tamanho e SHA-256 |
 | `documento.registrar_leitura` | executar | servico | Só o worker Python (OCR, PDF, extrato) |
-| `documento.listar`, `documento.obter_link` | ler | E, C, A | Lista compacta sem conteúdo; link de 5 min depois de `autorizar`; abrir pelo app grava entrega |
+| `documento.listar`, `documento.obter_link` | ler | E, C, A | Lista compacta sem conteúdo. O link de 5 min sai do cache de entrega; se o arquivo não está lá, o worker busca o original no armazenamento do escritório (conector ou agente local). Origem fora do ar: `ORIGEM_INDISPONIVEL`, com miniatura e texto ainda disponíveis. Abrir pelo app grava a entrega |
+| `agente.gerar_codigo`, `agente.revogar`, `agente.saude`, `armazenamento.raizes_definir` (novas) | executar / ler | E (Administrador) | Agente local do servidor do escritório: código de instalação de uso único, revogação imediata, saúde e pastas raiz ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 3) |
 | `documento.classificar` | executar | E, A | Operário barato com contrato; confiança baixa vai para "triar" |
 | `documento.enviar_cliente` | executar, cartão | E, A | Irreversível |
 | `documento.atualizar`, `.mover`, `.arquivar`, `.forcar_visibilidade`, `.confirmar_origem`, `.resolver_conflito`, `.registrar_entrega` | executar | E, X | Já no wireframe |

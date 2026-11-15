@@ -26,6 +26,7 @@
 | SERPRO no piloto | Preço normal da loja (com até 10 clientes, faixa 1 em qualquer modelo) |
 | WhatsApp não oficial | Aprovado como desenhado (WAHA); o escritório aceita o risco e a responsabilidade pelo banimento por mau uso numa cláusula no contrato e num aceite dentro do sistema, registrado como evento ([`WHATSAPP.md`](WHATSAPP.md), 4.1) |
 | INLABS | O Enzo faz o cadastro quando a manutenção acabar |
+| Armazenamento | Os arquivos ficam no armazenamento de cada escritório; a Heild guarda índice, texto, miniaturas e cópias de vida curta. Conectores padrão do mercado (Google Drive, OneDrive e SharePoint, Dropbox, Box, S3 compatível, WebDAV, SFTP) e **agente local** para servidor próprio, que tem de funcionar no piloto. O escritório do Drive usa **Google Workspace**: liberação pelo administrador, sem CASA nem modo de teste; a CASA fica para antes da escala ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md)) |
 
 ## Pendências que ficam com o dono
 
