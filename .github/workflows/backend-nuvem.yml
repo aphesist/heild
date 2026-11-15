@@ -32,6 +32,8 @@ jobs:
       # Cada consulta tem a latência até São Paulo: tetos do banco um pouco maiores que os locais.
       HEILD_PG_TEMPO_CONSULTA_MS: '15000'
       HEILD_TEMPO_PEDIDO_MS: '60000'
+      # Ao recarregar, o app envia a fila de gravações antes de abrir; com a API longe do banco leva minutos.
+      FUMACA_ESPERA_MS: '300000'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
