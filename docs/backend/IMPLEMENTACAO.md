@@ -783,11 +783,11 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - **Regras, sem modelo, como na v2:**
       - conversa ligada a um setor nos últimos dias (conversa aberta, resposta a envio do escritório em 7 dias, um só setor ativo na carteira) pula a triagem em silêncio;
       - palavra-chave de um setor só repassa com um aviso fixo e natural ("Boa tarde! Vou passar sua mensagem para o pessoal do DP, que cuida disso. Daqui a pouco eles te respondem por aqui.");
-      - sinais de assunto delicado, irritação ou pedido de pessoa desligam a palavra-chave, para "meu sócio faleceu" não ir ao Societário com um aviso frio; o integrante lê a conversa.
+      - sinais de assunto delicado (a lista do A.10), irritação ou pedido de pessoa desligam a palavra-chave, para "meu sócio faleceu" não ir ao Societário com um aviso frio; o integrante lê a conversa.
     - **O integrante conversa** (contrato `ges.triagem.conversar`):
       - recebe as últimas 16 falas e escreve a próxima, curta, em português do dia a dia, com no máximo uma pergunta;
-      - repassa com confiança de 0,8 ou mais e avisa o cliente de forma natural ("vou passar para o pessoal do DP, que cuida disso");
-      - assunto delicado, cliente irritado ou pedido de falar com alguém vão a uma pessoa do Atendimento (etiquetas `precisa_pessoa` e, se irritado, `urgente`), com uma resposta de empatia;
+      - repassa com confiança de 0,8 ou mais e avisa o cliente de forma natural, dizendo para quem passou (04, A.10): com quem cuida do cliente no setor (carteira; senão, o responsável padrão), "vou passar para a Ana, do DP, que cuida disso"; sem, "o pessoal do DP";
+      - assunto delicado (reclamação, cobrança em atraso, rescisão, autuação, ameaça de cancelamento, luto), cliente irritado ou pedido de falar com alguém vão a uma pessoa **na hora**, sem continuar a triagem: no setor do assunto quando ele está claro (rescisão: DP), senão no setor de entrada; etiquetas `precisa_pessoa` e, se irritado, `urgente`, com uma resposta de empatia;
       - dois assuntos: pergunta qual primeiro; cliente que muda de assunto: vale o último pedido.
     - **Limite de trocas: 3 perguntas.** Na quarta mensagem sem certeza, vai a uma pessoa pelo cartão "não consegui"; ela escolhe o setor, e o cliente recebe o aviso fixo de repasse. A proposta: nas rodadas, nenhuma conversa que chegou a um setor precisou de mais de 2 perguntas.
     - **Limites de tom e de escopo, por regra** (validadores que escalam uma vez ao escritor e depois vão ao cartão; nada sai fora deles):
@@ -798,7 +798,21 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - **O roteamento** é o da v2 (`conversa.rotear`, resumo escrito pelo sistema também como nota interna, integrante de destino acordado), com a origem e as perguntas em `conversa.extras.triagem`.
     - **Motor:** os passos ganharam `enfileirar` (pg-boss na mesma transação; some com o savepoint na sombra), para o job atrasado. A mudança só acrescenta.
     - **Fora da v3:** a opção "menu e integrante" da v2 (sugestão por cartão quando o integrante discorda do menu). Com a decisão nova, a triagem pelo integrante não usa menu; se o escritório quiser menu, é o fluxo de chatbot sem IA.
+    - **Uma chamada por troca, e não duas.** O plano propõe a conversa na classe `escritor` e a classificação no `operario`. A v3 faz as duas coisas numa chamada só (o contrato devolve a ação, o setor, a confiança e a fala), porque separar dobraria a latência e o custo de cada troca. O modelo da conversa é configurável por contrato, como os outros. O Sonnet e o Haiku foram medidos no gabarito de conversas (resultado abaixo); o escritor da escalada é sempre o Sonnet.
     - A v2 continua carregada (`src/setores/triagem.ts`, mesmo hash publicado) para as execuções em andamento; a operação inicia a v3.
+
+12. **Envio ao cliente configurável por categoria** (subplano 02, adendo de 15/11/2026; 04, A.11). O padrão continua sendo a aprovação no cartão.
+    - **Onde mora:** `escritorio.configuracao.envio_ao_cliente`, um objeto `{ categoria: modo }`, sem migração. Os modos são `cartao` (padrão de toda categoria, D-33), `automatico` e `desligado`. As categorias vêm dos planos (04, 8.1 e 8.2), em `src/envio.ts`: `guia_emitida`, `resposta_factual`, `documento_faltando`, `prazo_chegando`, `tarefa_concluida` e `admissao_feita`.
+    - **Pelo catálogo:** `envio_cliente.listar` (ler) e `envio_cliente.configurar` (executar, `papel_minimo: administrador`). A mudança vai à cadeia de eventos.
+    - **Motor:** a aprovação ganhou o modo `por_categoria`, com a categoria. Em `cartao`, segue o cartão. Em `automatico` ou `desligado`, o passo é dispensado com o modo registrado. Só essa dispensa, vinda da configuração do escritório, libera uma ferramenta irreversível sem cartão; `por_regra` continua proibido nelas.
+    - **FIS-GUIA-CONFERIR v3 e GES-FAQ-RESPONDER v3** usam `guia_emitida` e `resposta_factual`, com uma mensagem padronizada escrita pelo sistema: a guia com tributo, competência e valor; a resposta com o texto aprovado da base.
+      - Em `cartao` (aprovado) ou `automatico`, a mensagem vai à conversa ligada ao documento, com o prefixo `*{integrante} (IA)*`, para o CRM enviar.
+      - Em `desligado`, a decisão fica registrada e nada vai ao cliente.
+      - O modo e se houve envio ficam nos metadados e no evento. O revisor de risco continua antes do envio.
+      - A guia ainda não tem conversa ligada no documento: o modo fica registrado, e o envio continua com o CRM.
+    - **O aviso de serviço concluído** (`tarefa_concluida`) ainda não tem procedimento: a categoria já existe para quando ele vier.
+    - As v2 continuam carregadas para as execuções em andamento. A triagem conversando não entra nessa configuração: sai sem aprovação, por ser só triagem.
+
 
 ### Resultado real (15/11/2026)
 
@@ -816,18 +830,18 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
 - `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
 - `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
 - `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.
-- `triagem.test.ts` (11):
-  - o prefixo de quem fala;
-  - palavra-chave por regra; integrante decidindo, com a nota interna e o evento `conversa.rotear`;
-  - a faixa incerta;
-  - as três regras de contexto;
-  - a pergunta ao cliente: cartão, prefixo "(IA)", opções e "2" que roteia sem modelo;
-  - duas perguntas sem acordo, que levam ao setor de entrada sem repetir o prefixo;
-  - com responsável, o cartão à pessoa;
-  - remetente desconhecido e o histórico;
-  - "menu e integrante": a escolha prevalece, a divergência é gravada, o cartão "Parece ser do Fiscal. Transferir?" é aprovado e a conversa é transferida;
-  - palavras que confirmam o menu dispensam o modelo; o menu fora da opção é recusado;
+- `triagem.test.ts` (12, triagem v3):
+  - tom e escopo por regra: menu, lista, jargão de robô, formatação, duas perguntas; valor, prazo, promessa, documento sensível, resposta técnica;
+  - quem fala; horário de atendimento (padrão, fuso, próxima abertura, saudação, configuração inválida vira o padrão);
+  - o gabarito de conversas cobre os grupos pedidos, e setor errado é crítico;
+  - assunto vago: o integrante pergunta sem cartão, com "(IA)", e repassa ao DP avisando, sem repetir o prefixo; sem mensagem nova do cliente, não faz nada;
+  - palavra-chave com aviso fixo e saudação, sem modelo; conversa aberta pula em silêncio;
+  - fora do horário: resposta fixa uma vez só, job atrasado para segunda às 8h, e a triagem roda na primeira hora;
+  - cliente irritado vai a uma pessoa, com etiqueta urgente;
+  - depois de 3 perguntas, cartão; a pessoa escolhe e o cliente recebe o aviso fixo;
+  - mensagem fora do tom escala uma vez e vai ao cartão, sem sair nada;
   - pelo Assistente.
+- `envio.test.ts` (5): todas as categorias começam em cartão e só o Administrador muda, com evento; FAQ em cartão (aprovar grava a mensagem na conversa, com prefixo), em automático (sem cartão, com o revisor) e desligado (nada sai); a guia em automático sai sem cartão, e a categoria de outra mensagem não mexe nela.
 
 ---
 
