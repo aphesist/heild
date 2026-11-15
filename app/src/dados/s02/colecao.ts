@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { banco } from '@/nucleo/banco'
 import { useTabela } from '@/nucleo/react'
 import { registrar, repos } from '@/nucleo/repositorios'
+import { comCenarioLista } from '@/nucleo/semente/cenario'
 
 /**
  * Coleções da S02 que ainda não têm entidade no banco (acessos e procurações,
@@ -24,7 +25,8 @@ const chave = (nome: string) => `s02:${nome}`
 /** Lê a coleção (com a semente, se nunca foi gravada). */
 export function lerColecao<T extends RegistroS02>(nome: string, semente: () => T[]): T[] {
   const r = banco.ler('registro_tela').find((x) => x.id === chave(nome))
-  return (r?.valor as T[] | undefined) ?? semente()
+  // A semente passa pelo cenário do UI Lab (fora do Lab, é a própria semente).
+  return (r?.valor as T[] | undefined) ?? comCenarioLista(`colecao:${nome}`, semente)
 }
 
 export function gravarColecao<T extends RegistroS02>(nome: string, itens: T[]) {

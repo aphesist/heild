@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { gestaoDetalhe } from '@/dados/painel-abas'
 import { repos } from '@/nucleo/repositorios'
 import { useTabela } from '@/nucleo/react'
+import { comCenarioPor } from '@/nucleo/semente/cenario'
 
 /**
  * Estado da aba Gestão (S04-T02) que não é entidade das Fundações: catálogo
@@ -66,7 +67,8 @@ function inicial(): EstadoGestao {
   }
 }
 
-export const lerGestao = (): EstadoGestao => ({ ...inicial(), ...((repos.telas.obter(CHAVE)?.valor as Partial<EstadoGestao>) ?? {}) })
+// O estado inicial passa pelo cenário do UI Lab (fora do Lab, é o próprio).
+export const lerGestao = (): EstadoGestao => ({ ...comCenarioPor('gestao:inicial', inicial), ...((repos.telas.obter(CHAVE)?.valor as Partial<EstadoGestao>) ?? {}) })
 export const gravarGestao = (f: (e: EstadoGestao) => Partial<EstadoGestao>) => repos.telas.lembrar(CHAVE, { ...lerGestao(), ...f(lerGestao()) })
 export function useGestao() {
   const t = useTabela('registro_tela')

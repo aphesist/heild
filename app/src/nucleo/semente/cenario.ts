@@ -99,6 +99,25 @@ export function comCenarioPor<T>(chave: string, gerar: () => T): T {
   return valor
 }
 
+/**
+ * Coleção de registros por cliente (as coleções da S02, as listas da Gestão): cada
+ * cliente fica com `itens` registros, como as tabelas do banco do cenário. Sem
+ * cliente, a lista inteira é um grupo só.
+ */
+export function comCenarioLista<T>(chave: string, gerar: () => T[]): T[] {
+  if (!ativo) return gerar()
+  const ja = porChave.get(chave)
+  if (ja && ja.geracao === geracao) return ja.valor as T[]
+  const grupos = new Map<string, T[]>()
+  for (const x of gerar()) {
+    const k = String((x as { cliente_id?: unknown } | null)?.cliente_id ?? '')
+    grupos.set(k, [...(grupos.get(k) ?? []), x])
+  }
+  const valor = [...grupos.values()].flatMap((g) => transformar(g, ativo!, ''))
+  porChave.set(chave, { geracao, valor })
+  return valor
+}
+
 /* ---------- Domínio das entidades, lido do próprio entidades.ts ---------- */
 
 /** Campos opcionais (`campo?:`) e domínios de status (`campo: 'a' | 'b'` ou um tipo assim) por interface. */
