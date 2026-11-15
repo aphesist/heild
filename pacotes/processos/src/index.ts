@@ -25,7 +25,7 @@ export * from './motor/motor.ts'
 export * from './operarios/contrato.ts'
 export * from './operarios/fornecedor.ts'
 export * from './validadores/registro.ts'
-export { Despachante } from './despachante.ts'
+export { Despachante, type EventoDespachado, type ObservadorEvento } from './despachante.ts'
 export * from './ligacao-api.ts'
 export { proporMemoria, decidirMemoria } from './memoria.ts'
 export * from './operarios/orcamento.ts'
@@ -79,6 +79,8 @@ export interface ExtensaoProcessos {
   /** Metadados de autorização de ferramentas novas que os passos citam (fora do catálogo do wireframe). */
   metas?: import('./dominio.ts').Ferramenta[]
   ferramentas?: (b: BaseExtensao) => import('./ferramentas.ts').DefinicaoFerramenta[]
+  /** Reações a eventos que não são procedimentos de setor (rodam no despachante, depois dos gatilhos). */
+  observadores?: (b: BaseExtensao) => import('./despachante.ts').ObservadorEvento[]
   /** Só no modo worker: cria as filas próprias (dono do esquema). */
   criarFilas?: (b: BaseExtensao) => Promise<void>
   iniciarWorkers?: (b: BaseExtensao, intervalo?: number) => Promise<void>
@@ -126,7 +128,7 @@ export async function criarProcessos(o: OpcoesProcessos) {
     for (const x of o.extensoes ?? []) await x.criarFilas?.(base)
     if (o.extensoes?.some((x) => x.criarFilas)) await concederFila(sql, o.papeisProdutores ?? ['api_executor', 'app_api'])
   }
-  const despachante = new Despachante(sql, boss, motor)
+  const despachante = new Despachante(sql, boss, motor, (o.extensoes ?? []).flatMap((x) => x.observadores?.(base) ?? []))
   return {
     sql,
     boss,
