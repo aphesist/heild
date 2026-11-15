@@ -20,6 +20,7 @@ import { useTema } from '@/theme/ThemeProvider'
 import { useLoja, useNavegacao, usePersistente, type Destino, type Toast } from './loja'
 import { useSessao } from './sessao'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
+import { useMedia } from '@/hooks/useMedia'
 
 /**
  * Notificações no canto inferior direito, como no WhatsApp Web ou no Discord: a
@@ -30,15 +31,17 @@ import { AreaRolagem } from '@/components/ui/area-rolagem'
  */
 export function Toasts() {
   const loja = useLoja()
+  const celular = useMedia('(max-width: 639px)')
   const nav = useNavegacao()
   const abrir = (t: Toast) => {
     if (t.destino) nav.irPara(t.destino)
     loja.fecharToast(t.id)
   }
   return (
-    <div className="pointer-events-none fixed right-4 bottom-4 left-4 z-[60] max-md:bottom-20 flex flex-col items-end gap-2 sm:left-auto sm:w-[22.5rem]" aria-live="polite" aria-label="Notificações">
+    // Acima do campo de escrever da tela (--desvio-campo) e, no celular, do menu inferior; no celular, só o aviso mais novo.
+    <div className="pointer-events-none fixed right-4 bottom-[calc(var(--desvio-campo,0px)+1rem)] left-4 z-[60] flex flex-col items-end gap-2 max-md:bottom-[calc(var(--desvio-campo,0px)+5rem)] sm:left-auto sm:w-[22.5rem]" aria-live="polite" aria-label="Notificações">
       <AnimatePresence initial={false}>
-        {loja.estado.toasts.map((t) => (
+        {(celular ? loja.estado.toasts.slice(-1) : loja.estado.toasts).map((t) => (
           <motion.div
             key={t.id}
             layout

@@ -122,7 +122,7 @@ export function GavetaChat({ nomeUsuario, integrantes: iniciais, onAbrirIntegran
     <JanelaFlutuante />
     <Sheet open={chat.aberto} onOpenChange={chat.setAberto}>
       <SheetTrigger asChild>
-        <Button className={cn('absolute right-4 bottom-4 z-10 rounded-full shadow-lg max-md:hidden sm:right-6 sm:bottom-6', acima && 'bottom-36 sm:bottom-40')} size="lg" aria-label={`Chat${contador.total ? `, ${contador.total} não lidas` : ''}`}>
+        <Button className={cn('absolute right-4 bottom-4 z-10 rounded-full shadow-lg max-md:hidden sm:right-6 sm:bottom-6', acima && 'bottom-[calc(var(--desvio-campo,0px)+1rem)] sm:bottom-[calc(var(--desvio-campo,0px)+1.5rem)]')} size="lg" aria-label={`Chat${contador.total ? `, ${contador.total} não lidas` : ''}`}>
           <ChatCircleIcon /> Chat
           <Contador valor={contador.total} />
         </Button>

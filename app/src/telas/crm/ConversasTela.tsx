@@ -49,6 +49,7 @@ import { useTabela } from '@/nucleo/react'
 import { assinar, useBloqueados, useCfgAtendimento } from './s05/config'
 import { DialogoAgendar, DialogoAutorizacao, DialogoLigarCliente, DialogoMover, exportarConversa, SimulacaoAtendimento } from './s05/acoes'
 import { CalendarPlusIcon, DownloadSimpleIcon, EnvelopeOpenIcon, FlaskIcon, ArrowsDownUpIcon, SealCheckIcon } from '@phosphor-icons/react'
+import { useDesvioCampo } from '@/lib/desvio-campo'
 
 type Visao = 'sem' | 'minhas' | 'setor' | 'todas'
 
@@ -248,7 +249,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
               )}
             </div>
           </div>
-          <AreaRolagem className="area-rolagem-dupla flex-1 px-2 pb-2">
+          <AreaRolagem className="flex-1 px-2 pb-2">
             <ul className="flex flex-col gap-0.5">
               {lista.map((c) => (
                 <li key={c.id}>
@@ -351,6 +352,8 @@ function Conversa({
   conversas: ConversaCrm[]
   onMover: (ids: string[], destino: string) => void
 }) {
+  // O campo de escrever fica no canto de baixo: o botão Chat e os avisos sobem a altura dele (--desvio-campo).
+  const refCampo = useDesvioCampo()
   const [modo, setModo] = useState<'responder' | 'nota'>('responder')
   // D-34: o anexo guarda o cliente do documento, para conferir o CNPJ antes de enviar.
   const [anexoDoc, setAnexoDoc] = useState<{ nome: string; clienteId?: string | null } | null>(null)
@@ -747,7 +750,7 @@ function Conversa({
       </header>
 
       {/* Histórico */}
-      <AreaRolagem className="area-rolagem-dupla flex-1 px-4 py-4 sm:px-5">
+      <AreaRolagem className="flex-1 px-4 pt-4 pb-16 sm:px-5">
         <div className="mx-auto flex max-w-3xl flex-col gap-3">
           {c.resumo && (
             <div className="bg-sunken/70 rounded-[14px] px-3 py-2 text-sm">
@@ -828,7 +831,7 @@ function Conversa({
       </AreaRolagem>
 
       {/* Campo (deixa o canto livre para o botão Chat) */}
-      <div className="px-4 pb-3 sm:px-5 sm:pb-4">
+      <div ref={refCampo} className="px-4 pb-3 sm:px-5 sm:pb-4">
         <div className="mx-auto max-w-3xl">
           {somenteLeitura ? (
             <div className="bg-sunken flex items-start gap-2.5 rounded-[16px] px-4 py-3 text-sm">
