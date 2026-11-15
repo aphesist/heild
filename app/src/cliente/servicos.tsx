@@ -16,7 +16,7 @@ import { P } from '@/dados/arquivos'
 import { servicos } from '@/servicos'
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-const campo = 'bg-raised shadow-contorno h-10 rounded-[12px] px-3 text-sm outline-none'
+const campo = 'bg-raised shadow-contorno h-10 rounded-md px-3 text-sm outline-none'
 
 /** Estado do serviço nesta empresa (ficha do cliente, editável pelo escritório). */
 export function useServicos(ctx: Ctx) {
@@ -71,7 +71,7 @@ export function Servicos({ ctx }: { ctx: Ctx }) {
       <TituloTela voltar={() => ctx.ir('mais')}>Serviços</TituloTela>
       <p className="text-muted-foreground text-xs">O escritório liga cada serviço para a sua empresa. Pedir aqui não contrata nada: vem uma proposta na conversa.</p>
       {ehSocio && <PainelPorPedido ctx={ctx} />}
-      <button type="button" onClick={() => ctx.ir('passos')} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+      <button type="button" onClick={() => ctx.ir('passos')} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
         <BookOpenTextIcon className="size-5" /> <span className="flex-1">Passo a passo do escritório</span>
       </button>
       {grupos.map(
@@ -240,7 +240,7 @@ function Emissor({ ctx }: { ctx: Ctx }) {
             Conferir e emitir
           </Button>
         ) : (
-          <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+          <div className="bg-sunken/60 flex flex-col gap-2 rounded-lg p-3 text-sm">
             <p>
               {brl(v)} para {tomador}, {sv.descricao.toLowerCase()}. {substitui ? `A NFS-e ${substitui} será cancelada e substituída por esta.` : 'Depois de emitida, só cancela ou substitui.'}
             </p>
@@ -295,7 +295,7 @@ function Emissor({ ctx }: { ctx: Ctx }) {
               )}
             </div>
             {cancelar === n.numero && (
-              <div className="bg-sunken/60 flex flex-col gap-2 rounded-[12px] p-2.5">
+              <div className="bg-sunken/60 flex flex-col gap-2 rounded-md p-2.5">
                 <input aria-label="Motivo do cancelamento" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo (vai para a prefeitura)" className={campo} />
                 <div className="flex gap-2">
                   <Button size="sm" className="rounded-full" disabled={motivo.trim().length < 5 || enviando} onClick={() => confirmarCancelamento(n.numero)}>
@@ -412,11 +412,11 @@ function Consultor({ ctx }: { ctx: Ctx }) {
         {msgs.map((m) => {
           const parcial = escrevendo?.id === m.id ? m.texto.slice(0, escrevendo.ate) : m.texto
           return (
-            <div key={m.id} className={cn('max-w-[88%] rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
+            <div key={m.id} className={cn('max-w-[88%] rounded-lg px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
               {m.de === 'consultor' && <span className="text-muted-foreground block text-[11px]">{nome} (assistente)</span>}
               {parcial}
               {escrevendo?.id !== m.id && m.cartao && (
-                <span className="bg-sunken mt-2 flex flex-col gap-0.5 rounded-[12px] px-2.5 py-2 text-xs">
+                <span className="bg-sunken mt-2 flex flex-col gap-0.5 rounded-md px-2.5 py-2 text-xs">
                   <span className="font-medium">{m.cartao.titulo}</span>
                   {m.cartao.linhas.map(([r, v]) => (
                     <span key={r} className="flex gap-2">
@@ -435,7 +435,7 @@ function Consultor({ ctx }: { ctx: Ctx }) {
             </div>
           )
         })}
-        {pensando && <div className="bg-surface shadow-cartao text-muted-foreground self-start rounded-[18px] px-3.5 py-2.5 text-sm">Procurando nos dados da empresa…</div>}
+        {pensando && <div className="bg-surface shadow-cartao text-muted-foreground self-start rounded-lg px-3.5 py-2.5 text-sm">Procurando nos dados da empresa…</div>}
         <div ref={fim} />
       </div>
       {esgotou ? (
@@ -533,7 +533,7 @@ function PainelSocio({ ctx }: { ctx: Ctx }) {
             ['Resultado', brl(p.resultado), 'antes do pró-labore'],
           ] as const
         ).map(([r, v, d]) => (
-          <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-[18px] p-3">
+          <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-lg p-3">
             <span className="text-muted-foreground text-[11px]">{r}</span>
             <span className="text-lg font-light tabular-nums">{v}</span>
             <span className="text-muted-foreground text-[11px]">{d}</span>
@@ -946,7 +946,7 @@ function PainelPorPedido({ ctx }: { ctx: Ctx }) {
     : []
   return (
     <>
-      <button type="button" onClick={() => setAberto(true)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+      <button type="button" onClick={() => setAberto(true)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
         <ChartLineUpIcon className="size-5" /> <span className="flex-1">Como está minha empresa?</span>
       </button>
       {aberto && (
@@ -957,7 +957,7 @@ function PainelPorPedido({ ctx }: { ctx: Ctx }) {
             <>
               <div className="grid grid-cols-2 gap-2">
                 {caixas.map(([r, v, f]) => (
-                  <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-[16px] p-3">
+                  <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-lg p-3">
                     <span className="text-muted-foreground text-[11px]">{r}</span>
                     <span className="text-lg font-light tabular-nums">{v}</span>
                     <span className="text-muted-foreground text-[10px]">{f}</span>

@@ -94,7 +94,7 @@ export function AprovacoesApp({ ctx }: { ctx: Ctx }) {
         <PedidoDoEscritorio key={f.id} ctx={ctx} id={f.id} />
       ))}
       {vencidas.length > 0 && (
-        <div role="alert" className="bg-warning/15 flex items-start gap-2 rounded-[16px] px-3 py-2.5 text-sm">
+        <div role="alert" className="bg-warning/15 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" weight="fill" />
           <span>
             {vencidas.length === 1 ? `${vencidas[0].contraparte} (${brl(vencidas[0].valor)}) venceu sem aprovação.` : `${vencidas.length} contas venceram sem aprovação (${brl(vencidas.reduce((t, c) => t + c.valor, 0))}).`} Nada foi pago: o escritório nunca paga sem a sua aprovação. Fale com eles para combinar o que fazer.
@@ -250,7 +250,7 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
         </div>
       )}
       {zap && (
-        <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm" aria-label="Aprovação pelo WhatsApp (simulada)">
+        <div className="bg-sunken/60 flex flex-col gap-2 rounded-lg p-3 text-sm" aria-label="Aprovação pelo WhatsApp (simulada)">
           <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <WhatsappLogoIcon /> WhatsApp do escritório · demonstração
           </span>
@@ -316,7 +316,7 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
         </p>
       )}
       {l.situacao === 'aprovado' && (
-        <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+        <div className="bg-sunken/60 flex flex-col gap-2 rounded-lg p-3 text-sm">
           <span>Aprovado por {l.aprovacoes.map((a) => `${primeiroNome(a.nome)} às ${new Date(a.quando).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`).join(' e ')}.</span>
           {l.modo_pagamento === 'M1' ? (
             <>
@@ -533,7 +533,7 @@ export function CaixaApp({ ctx }: { ctx: Ctx }) {
                 {novos.has(d.id) && <span className="bg-warning/20 rounded-full px-2 py-0.5 text-[11px]">novo</span>}
               </button>
               {aberto === d.id && (
-                <span className="bg-sunken/60 text-muted-foreground flex flex-col gap-1.5 rounded-[10px] px-3 py-2 text-xs">
+                <span className="bg-sunken/60 text-muted-foreground flex flex-col gap-1.5 rounded-md px-3 py-2 text-xs">
                   {d.dados?.resumo && <span className="text-foreground text-sm">{d.dados.resumo}</span>}
                   <span>Entregáveis › BPO financeiro · competência {d.competencia} · caixa no fim do mês, pagamentos feitos, DRE gerencial, atrasos e riscos.</span>
                   <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={() => ctx.ir('documentos', d.id)}>

@@ -47,7 +47,7 @@ export function LiberacaoAtendimento() {
   return (
     <>
       {simulacao && (
-        <p className="bg-warning/15 flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm" role="status">
+        <p className="bg-warning/15 flex items-center gap-2 rounded-lg px-3 py-2 text-sm" role="status">
           <FlaskIcon className="size-4 shrink-0" /> Modo simulação ligado: a equipe testa os integrantes sem gravar nada nem enviar ao cliente.
         </p>
       )}

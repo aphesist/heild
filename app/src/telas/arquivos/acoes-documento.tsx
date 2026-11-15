@@ -88,7 +88,7 @@ export function DialogoVersoes({ d, onFechar }: { d: Documento; onFechar: () => 
     <DialogPrimitive.Root open onOpenChange={(v) => !v && onFechar()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[65] bg-black/45" />
-        <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[65] flex flex-col overflow-hidden rounded-[24px] shadow-2xl outline-none sm:inset-6">
+        <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[65] flex flex-col overflow-hidden rounded-xl shadow-2xl outline-none sm:inset-6">
           <header className="flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2.5">
             <DialogPrimitive.Title className="min-w-0 flex-1 truncate text-sm font-medium sm:text-base">Versões · {d.nome}</DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
@@ -238,7 +238,7 @@ export function DialogoComprovante({ d, onFechar }: { d: Documento; onFechar: ()
     <DialogPrimitive.Root open onOpenChange={(v) => !v && onFechar()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[65] bg-black/45" />
-        <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[65] flex flex-col overflow-hidden rounded-[24px] shadow-2xl outline-none sm:inset-x-[12vw] sm:inset-y-6">
+        <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[65] flex flex-col overflow-hidden rounded-xl shadow-2xl outline-none sm:inset-x-[12vw] sm:inset-y-6">
           <header className="flex shrink-0 items-center gap-2 border-b px-4 py-2.5">
             <DialogPrimitive.Title className="min-w-0 flex-1 truncate text-sm font-medium">Comprovante de entrega</DialogPrimitive.Title>
             <Button
@@ -345,11 +345,11 @@ export function GavetaEnviarCliente({ d, onFechar, onEscrever }: { d: Documento;
       }
     >
       {confere ? (
-        <p className="bg-success/15 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-success/15 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           <CheckCircleIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" /> CNPJ do documento ({cnpjDoc}) é o de {cliente?.nome}.
         </p>
       ) : (
-        <p className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           <WarningIcon className="mt-0.5 size-4 shrink-0" /> {cliente ? `O CNPJ do documento (${cnpjDoc || 'sem CNPJ'}) não é o de ${cliente.nome} (${cliente.documento}). Envio bloqueado.` : 'Documento do escritório: não tem cliente para enviar.'}
         </p>
       )}

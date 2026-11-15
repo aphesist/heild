@@ -17,7 +17,7 @@ export function SecaoLabS09() {
   const [agentes, setAgentes] = useAgentes()
   const agente = agentes.find((a) => !a.revogado_em)
   return (
-    <div className="bg-sunken/60 flex flex-col gap-1.5 rounded-[12px] p-2" data-lab="s09">
+    <div className="bg-sunken/60 flex flex-col gap-1.5 rounded-md p-2" data-lab="s09">
       <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
         <PlugsConnectedIcon className="size-3.5" /> Simular conector com problema
       </span>

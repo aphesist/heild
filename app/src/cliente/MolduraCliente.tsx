@@ -47,7 +47,7 @@ export function MolduraCliente({ pessoa, onPessoa, onEscritorio }: { pessoa: str
             </div>
           </div>
         ) : (
-          <div className="bg-surface shadow-painel flex h-[min(760px,calc(100svh-4rem))] w-[min(1080px,100%)] shrink-0 flex-col overflow-hidden rounded-[18px]">
+          <div className="bg-surface shadow-painel flex h-[min(760px,calc(100svh-4rem))] w-[min(1080px,100%)] shrink-0 flex-col overflow-hidden rounded-lg">
             <div className="bg-sunken text-muted-foreground flex items-center gap-2 px-4 py-2 text-xs">
               <span className="flex gap-1.5" aria-hidden>
                 <span className="bg-border size-2.5 rounded-full" />
@@ -79,8 +79,8 @@ export function MolduraCliente({ pessoa, onPessoa, onEscritorio }: { pessoa: str
           <Button variant="outline" className="w-fit rounded-full" onClick={() => setInstalar(!instalar)}>
             <DownloadSimpleIcon /> Instalar no celular
           </Button>
-          {instalar && <p className="bg-sunken rounded-[14px] px-3 py-2 text-sm">No celular: abrir {dominio}, entrar com o código e tocar em “Adicionar à tela inicial”. Na demonstração, o app roda no aparelho ao lado.</p>}
-          <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4">
+          {instalar && <p className="bg-sunken rounded-lg px-3 py-2 text-sm">No celular: abrir {dominio}, entrar com o código e tocar em “Adicionar à tela inicial”. Na demonstração, o app roda no aparelho ao lado.</p>}
+          <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4">
             <p className="text-sm font-medium">Chegou ao escritório</p>
             {doApp.length === 0 && <p className="text-muted-foreground text-sm">Nada ainda. Envie uma pendência, abra um pedido ou escreva na conversa.</p>}
             {doApp.map((e) => (
@@ -136,7 +136,7 @@ function Farol() {
     prepararReenvio(loja, { clienteId: cliente.id, clienteNome: cliente.nome, docId: d.id, docNome: d.nome, canal: contato.whatsapp ? 'whatsapp' : 'email', contato: contato.nome, conversa: conversaDe(cliente.nome, 'gestao_atendimento', contato.nome) })
   }
   return (
-    <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4">
+    <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4">
       <p className="flex items-center gap-2 text-sm font-medium">
         <TrafficSignalIcon className="size-4" /> Farol de abertura (escritório)
       </p>
@@ -180,14 +180,14 @@ function Simulacoes() {
     setTimeout(() => setFeito(null), 3500)
   }
   return (
-    <section className="bg-surface shadow-cartao flex flex-col gap-1 rounded-[20px] p-4">
+    <section className="bg-surface shadow-cartao flex flex-col gap-1 rounded-cartao p-4">
       <p className="text-sm font-medium">Simular (demonstração)</p>
       {!cliente && <p className="text-muted-foreground text-xs">Entre no app como uma pessoa ({pessoas.length} com acesso) para simular o que o escritório faz.</p>}
       {cliente && contato && (
         <>
           <button
             type="button"
-            className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+            className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
             onClick={() => {
               publicarAviso(loja, cliente.id, { categoria: 'documento', prioridade: 'alta', titulo: '12 documentos de novembro', corpo: 'Guias, holerites e relatórios publicados agora', quantidade: 12, competencia: '11/2026', destino: { tela: 'documentos' } })
               aviso('Push agrupado enviado ao aparelho.')
@@ -197,7 +197,7 @@ function Simulacoes() {
           </button>
           <button
             type="button"
-            className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+            className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
             onClick={() => {
               loja.criarTarefa({ codigo: 'CTB-002', titulo: 'Cobrar extrato bancário de novembro', cliente: cliente.nome, setor: 'contabil', prazo: '25/11', status: 'aguardando_cliente', responsavel: { tipo: 'integrante', nome: 'Contábil', setor: 'contabil' } })
               publicarAviso(loja, cliente.id, { categoria: 'pendencia', prioridade: 'alta', titulo: 'O escritório precisa de: extrato de novembro', corpo: 'Envie pelo app em um toque', competencia: '11/2026', destino: { tela: 'pendencias' } })
@@ -208,7 +208,7 @@ function Simulacoes() {
           </button>
           <button
             type="button"
-            className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+            className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
             onClick={() => {
               prepararTermo(loja, { clienteId: cliente.id, clienteNome: cliente.nome, titulo: 'Termo de ciência: contratação sem registro em período de experiência', texto: 'Declaro que fui orientado pelo escritório de que manter funcionário sem registro, mesmo em experiência, gera risco trabalhista e previdenciário, e que a decisão é da empresa.', contato })
               aviso('O DP está preparando o termo; aprove no chat do DP (painel do escritório).')
@@ -221,7 +221,7 @@ function Simulacoes() {
       <button
         type="button"
         aria-pressed={!!saida}
-        className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+        className="hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
         onClick={() => {
           setSaida(saida ? null : { encerraEm: '16/02/2027', desde: '18/11/2026' })
           aviso(saida ? 'Escritório de volta: app normal.' : 'Escritório saiu da plataforma: app em modo leitura por 90 dias.')
@@ -229,7 +229,7 @@ function Simulacoes() {
       >
         <SignOutIcon className="size-4 shrink-0" /> {saida ? 'Desfazer a saída do escritório' : 'Escritório sai da plataforma (modo leitura)'}
       </button>
-      {feito && <p className="bg-sunken rounded-[10px] px-2 py-1.5 text-xs">{feito}</p>}
+      {feito && <p className="bg-sunken rounded-md px-2 py-1.5 text-xs">{feito}</p>}
     </section>
   )
 }

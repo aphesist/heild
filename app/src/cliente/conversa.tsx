@@ -75,7 +75,7 @@ export function Conversa({ ctx }: { ctx: Ctx }) {
         const st = statusSimples(c.status)
         const ultima = [...c.itens].reverse().find((i): i is Msg => i.tipo === 'mensagem' && !i.apagada)
         return (
-          <button key={c.id} type="button" onClick={() => ctx.abrirConversa(c.setor)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-[18px] px-3.5 py-3 text-left">
+          <button key={c.id} type="button" onClick={() => ctx.abrirConversa(c.setor)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-3 text-left">
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2 text-sm font-medium">{nomeSetor[c.setor] ?? c.setor}</span>
               <span className="text-muted-foreground line-clamp-1 text-xs">{ultima ? `${ultima.de === 'cliente' ? 'Você: ' : ''}${ultima.texto ?? (ultima.audio ? 'Áudio' : 'Anexo')}` : c.previa}</span>
@@ -192,7 +192,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
       <div className="flex flex-1 flex-col gap-2">
         {itens.length === 0 && <p className="text-muted-foreground text-sm">Escreva sua dúvida ou pedido. Quem cuida do seu {nomeSetor[setor]?.toLowerCase()} responde aqui. O que você mandar pelo WhatsApp também aparece aqui.</p>}
         {itens.map((m) => (
-          <div key={m.id} className={cn('max-w-[85%] rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'cliente' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
+          <div key={m.id} className={cn('max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm', m.de === 'cliente' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
             {m.de !== 'cliente' && <span className="text-muted-foreground block text-[11px]">{m.de === 'integrante' ? `${m.autor} (${textos.assinaAssistente(m.autor ?? '')})` : m.de === 'auto' ? 'Mensagem automática' : m.autor}</span>}
             {m.audio ? (
               <span className="flex items-center gap-2">
@@ -216,7 +216,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
       </div>
 
       {implicito && estado.implicitos[implicito.msgId] === undefined && (
-        <div className="bg-surface shadow-cartao flex flex-col gap-2 self-start rounded-[18px] p-3 text-sm" role="group" aria-label="Pedido sugerido">
+        <div className="bg-surface shadow-cartao flex flex-col gap-2 self-start rounded-lg p-3 text-sm" role="group" aria-label="Pedido sugerido">
           <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
             <SparkleIcon className="size-3" /> Assistente do escritório
           </span>
@@ -240,7 +240,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
       )}
 
       {fio?.status === 'resolvida' && !estado.avaliacoes[fio.id] && !ctx.leitura && (
-        <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[18px] p-3 text-sm">
+        <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3 text-sm">
           <p>Como foi o atendimento do {nomeSetor[setor]}?</p>
           <div className="flex gap-2">
             {(
@@ -306,7 +306,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
         <Folha titulo="Anexar" onFechar={() => setAnexar(false)}>
           {pend.length > 0 && <p className="text-muted-foreground text-xs">Se o arquivo for o que o escritório pediu, a pendência baixa sozinha.</p>}
           {[...pend.flatMap((t) => (defDoItem(t).amostras ?? []).filter((a) => a.legivel !== false).map((a) => ({ nome: a.nome, para: oQueMandar(t) }))), { nome: 'foto-documento.jpg', para: '' }, { nome: 'comprovante.pdf', para: '' }].map((a) => (
-            <button key={a.nome} type="button" onClick={() => anexarArquivo(a.nome)} className="bg-sunken flex cursor-pointer flex-col rounded-[12px] px-3 py-2 text-left text-sm">
+            <button key={a.nome} type="button" onClick={() => anexarArquivo(a.nome)} className="bg-sunken flex cursor-pointer flex-col rounded-md px-3 py-2 text-left text-sm">
               {a.nome}
               {a.para && <span className="text-muted-foreground text-xs">casa com: {a.para}</span>}
             </button>

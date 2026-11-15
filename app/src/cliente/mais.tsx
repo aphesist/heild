@@ -34,14 +34,14 @@ export function Mais({ ctx, onSair }: { ctx: Ctx; onSair: () => void }) {
       {itens
         .filter((i) => i[3])
         .map(([id, rotulo, I, , n]) => (
-          <button key={id} type="button" onClick={() => ctx.ir(id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+          <button key={id} type="button" onClick={() => ctx.ir(id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
             <I className="size-5" /> <span className="flex-1">{rotulo}</span>
             {!!n && <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px] tabular-nums">{n}</span>}
           </button>
         ))}
       {ativos.length > 0 && <p className="text-muted-foreground mt-2 px-1 text-xs font-medium">Seus serviços</p>}
       {ativos.map((sv) => (
-        <button key={sv.id} type="button" onClick={() => ctx.abrirServico(sv.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+        <button key={sv.id} type="button" onClick={() => ctx.abrirServico(sv.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
           <SparkleIcon className="size-5" /> {sv.atalho ?? sv.nome}
         </button>
       ))}
@@ -73,7 +73,7 @@ export function PassosEscritorio({ ctx }: { ctx: Ctx }) {
           {aberto.assunto} · {aberto.minutos} min · publicado pelo escritório em {aberto.publicadoEm}
         </p>
         {aberto.video && (
-          <div className="bg-sunken flex items-center gap-2 rounded-[14px] px-3 py-3 text-sm">
+          <div className="bg-sunken flex items-center gap-2 rounded-lg px-3 py-3 text-sm">
             <PlayCircleIcon className="size-8 shrink-0" weight="fill" /> {aberto.video}
           </div>
         )}
@@ -111,7 +111,7 @@ export function PassosEscritorio({ ctx }: { ctx: Ctx }) {
       {lista.length === 0 && <EstadoVazio compacto icone={BookOpenTextIcon} titulo="Nenhum passo a passo" />}
       <Bloco titulo={`${lista.length} ${lista.length === 1 ? 'tutorial' : 'tutoriais'}`}>
         {lista.map((p) => (
-          <button key={p.id} type="button" onClick={() => ctx.ir('passos', p.id)} className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-[12px] px-1.5 py-1.5 text-left text-sm">
+          <button key={p.id} type="button" onClick={() => ctx.ir('passos', p.id)} className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm">
             <BookOpenTextIcon className="text-muted-foreground size-5 shrink-0" />
             <span className="min-w-0 flex-1">
               <span className="block">{p.titulo}</span>

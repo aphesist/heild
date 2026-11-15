@@ -303,7 +303,7 @@ function FolhaPendencia({ t, ctx, onFechar }: { t: Tarefa; ctx: Ctx; onFechar: (
           </Button>
         }
       >
-        <p className="bg-surface shadow-cartao rounded-[16px] p-3 text-sm">{def.ciencia}</p>
+        <p className="bg-surface shadow-cartao rounded-lg p-3 text-sm">{def.ciencia}</p>
         <p className="text-muted-foreground text-xs">Fica registrado com a sua identidade ({ctx.contato.nome}), data, hora, a impressão digital do documento e o IP. É ciência eletrônica simples (06, 5.5).</p>
       </Folha>
     )
@@ -318,7 +318,7 @@ function FolhaPendencia({ t, ctx, onFechar }: { t: Tarefa; ctx: Ctx; onFechar: (
       }
     >
       {def.video && (
-        <div className="bg-sunken flex items-center gap-2 rounded-[14px] px-3 py-3 text-sm">
+        <div className="bg-sunken flex items-center gap-2 rounded-lg px-3 py-3 text-sm">
           <PlayCircleIcon className="size-8 shrink-0" weight="fill" /> {def.video}
         </div>
       )}
@@ -358,9 +358,9 @@ function FolhaEnvio({ t, def, onFechar, onEnviar }: { t: Tarefa; def: DefItem; o
         </Button>
       )}
       {foto === 'recorte' && (
-        <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[16px] p-3">
-          <div className="bg-sunken relative mx-auto flex h-36 w-full max-w-60 items-center justify-center rounded-[10px]">
-            <div className="border-primary absolute inset-4 rounded-[6px] border-2 border-dashed" aria-hidden />
+        <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3">
+          <div className="bg-sunken relative mx-auto flex h-36 w-full max-w-60 items-center justify-center rounded-md">
+            <div className="border-primary absolute inset-4 rounded-sm border-2 border-dashed" aria-hidden />
             <span className="text-muted-foreground flex items-center gap-1 text-xs">
               <CropIcon className="size-4" /> recorte automático do documento
             </span>
@@ -397,7 +397,7 @@ function FolhaEnvio({ t, def, onFechar, onEnviar }: { t: Tarefa; def: DefItem; o
               type="button"
               aria-pressed={sel}
               onClick={() => setEscolhidos((l) => (sel ? l.filter((x) => x !== a.nome) : [...l, a.nome]))}
-              className={cn('flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm', sel ? 'bg-raised shadow-contorno' : 'bg-sunken')}
+              className={cn('flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm', sel ? 'bg-raised shadow-contorno' : 'bg-sunken')}
             >
               {/\.(jpg|png)$/.test(a.nome) ? <ImageIcon className="size-5 shrink-0" /> : <FilePdfIcon className="size-5 shrink-0" />}
               <span className="min-w-0 flex-1 truncate">{a.nome}</span>
@@ -406,7 +406,7 @@ function FolhaEnvio({ t, def, onFechar, onEnviar }: { t: Tarefa; def: DefItem; o
           )
         })}
         {fotos.map((f) => (
-          <span key={f.nome} className="bg-raised shadow-contorno flex items-center gap-2 rounded-[12px] px-3 py-2 text-sm">
+          <span key={f.nome} className="bg-raised shadow-contorno flex items-center gap-2 rounded-md px-3 py-2 text-sm">
             <ImageIcon className="size-5 shrink-0" /> {f.nome}
           </span>
         ))}
@@ -446,7 +446,7 @@ export function FolhaRecibo({ r, onFechar }: { r: Recibo; onFechar: () => void }
         </Button>
       }
     >
-      <dl className="bg-surface shadow-cartao grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 rounded-[16px] p-3 text-sm">
+      <dl className="bg-surface shadow-cartao grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 rounded-lg p-3 text-sm">
         <dt className="text-muted-foreground">Protocolo</dt>
         <dd className="font-mono">{r.protocolo}</dd>
         <dt className="text-muted-foreground">Quando</dt>

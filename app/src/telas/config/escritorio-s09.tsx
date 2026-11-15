@@ -25,7 +25,7 @@ export function FaixaImplantacao() {
     )
   return (
     <Caixa className="ring-warning/40 flex-row flex-wrap items-center ring-1">
-      <RocketLaunchIcon className="size-6 shrink-0" weight="duotone" />
+      <RocketLaunchIcon className="size-6 shrink-0" />
       <span className="min-w-0 flex-1 basis-60">
         <span className="block text-sm font-medium">Implantação em andamento · {e.feitos.length} de {passosImplantacao.length} passos</span>
         <span className="text-muted-foreground block text-xs">Próximo: {passosImplantacao[e.atual]?.titulo}. O Assistente conduz; dá para pular e voltar.</span>

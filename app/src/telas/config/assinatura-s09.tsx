@@ -60,7 +60,7 @@ export function Complementos() {
           const { nome, descricao, Icone } = rotuloComplemento[k]
           return (
             <li key={k} data-complemento={k} className="flex flex-wrap items-center gap-3 py-2.5">
-              <Icone className="text-muted-foreground size-6 shrink-0" weight="duotone" />
+              <Icone className="text-muted-foreground size-6 shrink-0" />
               <span className="min-w-0 flex-1 basis-56 text-sm">
                 <span className="block">
                   {nome} <span className="text-muted-foreground text-xs">· {precoComplemento[k]}</span>

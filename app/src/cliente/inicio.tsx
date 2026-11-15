@@ -241,7 +241,7 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
                 entrega(d, 'visto')
                 ctx.ir('documentos', d.id)
               }}
-              className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-[12px] px-1.5 py-1 text-left text-sm"
+              className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm"
             >
               <FileTextIcon className="text-muted-foreground size-5 shrink-0" />
               <span className="min-w-0 flex-1 truncate">{d.nome}</span>
@@ -369,7 +369,7 @@ function Instalar({ ctx }: { ctx: Ctx }) {
       </Faixa>
       {aberto && (
         <Folha titulo="Instalar o app" onFechar={() => setAberto(false)}>
-          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[16px] p-3 text-sm">
+          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3 text-sm">
             <p className="flex items-center gap-2 font-medium">
               <AndroidLogoIcon className="size-5" /> Android
             </p>
@@ -387,7 +387,7 @@ function Instalar({ ctx }: { ctx: Ctx }) {
               Instalar
             </Button>
           </div>
-          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[16px] p-3 text-sm">
+          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3 text-sm">
             <p className="flex items-center gap-2 font-medium">
               <AppleLogoIcon className="size-5" /> iPhone
             </p>

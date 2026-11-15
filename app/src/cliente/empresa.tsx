@@ -48,7 +48,7 @@ export function Empresa({ ctx }: { ctx: Ctx }) {
       <TituloTela voltar={() => ctx.ir('mais')}>Empresa</TituloTela>
       <RevisaoAnual ctx={ctx} />
       {visiveis.map((s) => (
-        <button key={s.id} type="button" onClick={() => ctx.ir('empresa', s.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+        <button key={s.id} type="button" onClick={() => ctx.ir('empresa', s.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
           <s.icone className="size-5" /> <span className="flex-1">{s.titulo}</span>
           <CaretRightIcon className="text-muted-foreground size-4" />
         </button>
@@ -448,7 +448,7 @@ function FolhaEnvioCertificado({ ctx, onFechar, onOk }: { ctx: Ctx; onFechar: ()
         <>
           <p className="text-muted-foreground text-xs">Escolha o arquivo .pfx ou .p12 (na demonstração, um destes):</p>
           {['certificado-a1-2027.pfx', 'certificado-de-outra-empresa.pfx', 'certificado-vence-em-3-dias.pfx'].map((a) => (
-            <button key={a} type="button" aria-pressed={arquivo === a} onClick={() => setArquivo(a)} className={cn('flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm', arquivo === a ? 'bg-raised shadow-contorno' : 'bg-sunken')}>
+            <button key={a} type="button" aria-pressed={arquivo === a} onClick={() => setArquivo(a)} className={cn('flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm', arquivo === a ? 'bg-raised shadow-contorno' : 'bg-sunken')}>
               <KeyIcon className="size-4" /> {a}
             </button>
           ))}

@@ -271,7 +271,7 @@ function EditarPadrao({ p, onFechar, onSalvar }: { p: IntegrantePadraoCfg; onFec
   const [travar, setTravar] = useState(false)
   return (
     <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo={t.nome} descricao="Nome e cor ficam no Tema. Aqui: o que todos os integrantes deste setor seguem no escritório." acao="Salvar" onAcao={() => onSalvar(d)}>
-      <div className="bg-sunken/60 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-xs">
+      <div className="bg-sunken/60 flex items-start gap-2 rounded-lg px-3 py-2.5 text-xs">
         <LockSimpleIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
         <span>
           <span className="block font-medium">Parte fixa (da plataforma)</span>

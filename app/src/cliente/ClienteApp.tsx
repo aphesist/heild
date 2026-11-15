@@ -143,7 +143,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
         type="button"
         onClick={() => ir(id)}
         aria-current={ativo || undefined}
-        className={cn('flex cursor-pointer items-center rounded-[12px] text-[11px]', largo ? 'flex-row gap-2.5 px-3 py-2 text-sm' : 'flex-col gap-0.5 py-1', ativo ? 'text-foreground font-medium' : 'text-muted-foreground', largo && ativo && 'bg-sunken')}
+        className={cn('flex cursor-pointer items-center rounded-md text-[11px]', largo ? 'flex-row gap-2.5 px-3 py-2 text-sm' : 'flex-col gap-0.5 py-1', ativo ? 'text-foreground font-medium' : 'text-muted-foreground', largo && ativo && 'bg-sunken')}
       >
         <I className="size-5" weight={ativo ? 'fill' : 'regular'} /> {rotulo}
       </button>
@@ -169,7 +169,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
             {pessoa.empresas.length > 1 && <CaretDownIcon className="size-4 shrink-0" />}
           </button>
           <button type="button" aria-label={`Notificações${naoLidos ? ` (${naoLidos} não lidas)` : ''}`} onClick={() => ir('avisos')} className="hover:bg-sunken relative cursor-pointer rounded-full p-2">
-            <BellIcon className="size-5" weight={tela === 'avisos' ? 'fill' : 'duotone'} />
+            <BellIcon className="size-5" weight={tela === 'avisos' ? 'fill' : 'regular'} />
             {naoLidos > 0 && <span className="bg-destructive text-background absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] tabular-nums">{naoLidos > 9 ? '9+' : naoLidos}</span>}
           </button>
         </header>
@@ -198,7 +198,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
         </main>
 
         {aviso && (
-          <div role="status" className={cn('bg-foreground text-background absolute right-3 left-3 z-30 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm shadow-lg', largo ? 'bottom-4' : 'bottom-3')}>
+          <div role="status" className={cn('bg-foreground text-background absolute right-3 left-3 z-30 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm shadow-lg', largo ? 'bottom-4' : 'bottom-3')}>
             <CheckCircleIcon className="mt-0.5 size-4 shrink-0" weight="fill" /> <span className="min-w-0 flex-1">{aviso}</span>
           </div>
         )}
@@ -223,7 +223,7 @@ function SeletorEmpresa({ pessoa, atual, onEscolher, onFechar }: { pessoa: Pesso
   return (
     <>
       <button type="button" aria-label="Fechar seletor" tabIndex={-1} onClick={onFechar} className="absolute inset-0 z-10 cursor-default" />
-      <div className="bg-surface shadow-painel absolute top-14 right-3 left-3 z-20 flex flex-col rounded-[16px] p-1.5" role="listbox" aria-label="Empresas">
+      <div className="bg-surface shadow-painel absolute top-14 right-3 left-3 z-20 flex flex-col rounded-lg p-1.5" role="listbox" aria-label="Empresas">
         {pessoa.empresas.map((e) => {
           const n = contagem[e.clienteId]
           return (
@@ -233,7 +233,7 @@ function SeletorEmpresa({ pessoa, atual, onEscolher, onFechar }: { pessoa: Pesso
               role="option"
               aria-selected={e.clienteId === atual}
               onClick={() => onEscolher(e.clienteId)}
-              className={cn('flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm', e.clienteId === atual ? 'bg-sunken font-medium' : 'hover:bg-sunken/60')}
+              className={cn('flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm', e.clienteId === atual ? 'bg-sunken font-medium' : 'hover:bg-sunken/60')}
             >
               <span className="min-w-0 flex-1">
                 {loja.clientes.find((c) => c.id === e.clienteId)?.nome} <span className="text-muted-foreground text-xs font-normal">· {e.contato.papel}</span>
