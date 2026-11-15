@@ -61,7 +61,7 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
   const vazio = !abertas.length && !guias.length && !lotes.length && !novos.length && !paraAssinar.length && !honorarios.length && !aguardandoVoce.length
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <p className="text-lg font-light">
         Olá, {primeiroNome(pessoa.nome)}. Hoje é 18/11.
       </p>
@@ -69,7 +69,7 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
       {!ctx.leitura && <Instalar ctx={ctx} />}
 
       {servicosAtivos.length > 0 && !ctx.leitura && (
-        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5">
+        <div data-rolagem-horizontal className="esmaecer-lados sem-barra -mx-4 flex snap-x scroll-px-4 gap-1.5 overflow-x-auto px-4 pb-0.5 [&>*]:snap-start">
           {servicosAtivos.map((sv) => (
             <button key={sv.id} type="button" onClick={() => ctx.abrirServico(sv.id)} className="bg-surface shadow-cartao flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
               <SparkleIcon className="size-3.5" /> {sv.atalho ?? sv.nome}

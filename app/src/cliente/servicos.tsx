@@ -67,7 +67,7 @@ export function Servicos({ ctx }: { ctx: Ctx }) {
     ['Mais serviços do escritório', visiveis.filter((s) => estado(s.id) === 'disponivel' && s.grupo === 'ideia')],
   ]
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Serviços</TituloTela>
       <p className="text-muted-foreground text-xs">O escritório liga cada serviço para a sua empresa. Pedir aqui não contrata nada: vem uma proposta na conversa.</p>
       {ehSocio && <PainelPorPedido ctx={ctx} />}
@@ -444,7 +444,7 @@ function Consultor({ ctx }: { ctx: Ctx }) {
         </Faixa>
       ) : (
         <>
-          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
+          <div data-rolagem-horizontal className="esmaecer-lados sem-barra -mx-4 flex snap-x scroll-px-4 gap-1.5 overflow-x-auto px-4 pb-1 [&>*]:snap-start">
             {sugestoes.map((x) => (
               <button key={x} type="button" onClick={() => enviar(x)} className="bg-sunken shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
                 {x}

@@ -67,7 +67,7 @@ export function Conversa({ ctx }: { ctx: Ctx }) {
   if (setor) return <Fio ctx={ctx} setor={setor} />
   const semFio = ctx.setores.filter((s) => s !== 'gestao_atendimento' && !fios.some((f) => f.setor === s))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela>Conversa</TituloTela>
       {ctx.leitura && <Faixa>App em modo leitura até {ctx.leitura.encerraEm}: o histórico fica aqui; mensagens novas, só pelo novo escritório.</Faixa>}
       {fios.length === 0 && <EstadoVazio compacto icone={ChatCircleDotsIcon} titulo="Nenhuma conversa ainda" descricao="Escreva para o setor certo; quem cuida da sua empresa responde aqui." />}

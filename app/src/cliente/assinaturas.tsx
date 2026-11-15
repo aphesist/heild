@@ -31,7 +31,7 @@ export function Assinaturas({ ctx }: { ctx: Ctx }) {
   if (aberto) return <DetalheAssinatura a={aberto} ctx={ctx} />
   const vis = lista.filter((a) => (filtro === 'aguardando' ? a.situacao === 'aguardando' || a.situacao === 'em_conferencia' : a.situacao === 'assinado' || a.situacao === 'recusado'))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Assinaturas</TituloTela>
       <Chips rotulo="Filtrar assinaturas">
         <Chip ativo={filtro === 'aguardando'} onClick={() => setFiltro('aguardando')} contagem={lista.filter((a) => a.situacao === 'aguardando').length}>
@@ -104,7 +104,7 @@ function DetalheAssinatura({ a, ctx }: { a: DocAssinar; ctx: Ctx }) {
       .catch((e: Error) => setErro(e.message))
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('assinaturas')} acao={<SeloSituacao a={a} />}>
         {rotuloNivel[a.nivel].replace(/^./, (c) => c.toUpperCase())}
       </TituloTela>

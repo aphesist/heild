@@ -147,7 +147,7 @@ export function Pendencias({ ctx }: { ctx: Ctx }) {
     )
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela>Pendências</TituloTela>
       {completa && (
         <Faixa tom="ok" icone={<CheckCircleIcon weight="fill" />}>

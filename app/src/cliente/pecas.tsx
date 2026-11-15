@@ -13,7 +13,7 @@ import type { CampoForm } from './dados'
 
 export function Bloco({ titulo, acao, children, className, id }: { titulo: ReactNode; acao?: ReactNode; children: ReactNode; className?: string; id?: string }) {
   return (
-    <section id={id} className={cn('bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-3.5', className)}>
+    <section id={id} className={cn('bg-surface shadow-cartao rounded-cartao flex flex-col gap-3 p-4', className)}>
       <header className="flex items-center gap-2">
         <h2 className="min-w-0 flex-1 text-sm font-medium">{titulo}</h2>
         {acao}
@@ -68,7 +68,7 @@ export function Chip({ ativo, onClick, children, contagem }: { ativo?: boolean; 
 
 export function Chips({ children, rotulo }: { children: ReactNode; rotulo?: string }) {
   return (
-    <div role="group" aria-label={rotulo} className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5">
+    <div role="group" aria-label={rotulo} data-rolagem-horizontal className="esmaecer-lados sem-barra -mx-4 flex snap-x scroll-px-4 gap-1.5 overflow-x-auto px-4 pb-0.5 [&>*]:snap-start">
       {children}
     </div>
   )

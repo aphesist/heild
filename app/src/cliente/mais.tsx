@@ -95,7 +95,7 @@ export function PassosEscritorio({ ctx }: { ctx: Ctx }) {
     )
   const lista = doPapel.filter((p) => assunto === 'todos' || p.assunto === assunto)
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Passo a passo</TituloTela>
       <p className="text-muted-foreground text-xs">Tutoriais que o escritório publicou para você fazer sozinho o que é rápido.</p>
       <Chips rotulo="Assunto">

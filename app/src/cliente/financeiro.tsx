@@ -52,7 +52,7 @@ export function Financeiro({ ctx }: { ctx: Ctx }) {
   if (!ctx.areas.includes('financeiro')) return <EstadoVazio icone={WalletIcon} titulo="Esta área não é do seu papel" descricao="Honorários e boletos do escritório ficam com o sócio e o financeiro da empresa." />
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Financeiro com o escritório</TituloTela>
       {contrato && (
         <Bloco titulo="Contrato" acao={<Selo tom={contrato.situacao === 'reajuste_agendado' ? 'atencao' : 'ok'}>{contrato.situacao === 'reajuste_agendado' ? 'reajuste agendado' : 'vigente'}</Selo>}>

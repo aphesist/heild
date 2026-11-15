@@ -85,7 +85,7 @@ export function AprovacoesApp({ ctx }: { ctx: Ctx }) {
   const abertos = lotes.filter((l) => l.situacao === 'aguardando' || l.situacao === 'parcial' || l.situacao === 'aprovado')
   const decididos = lotes.filter((l) => !abertos.includes(l))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Aprovações de pagamento</TituloTela>
       <p className="text-muted-foreground flex items-start gap-2 text-xs">
         <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" /> O escritório prepara e confere; só você aprova. Nenhum pagamento sai sem a sua aprovação.
@@ -491,7 +491,7 @@ export function CaixaApp({ ctx }: { ctx: Ctx }) {
   const relatorios = loja.documentos.filter((d) => d.clienteId === ctx.clienteId && d.tipo === 'relatorio' && d.pasta.join('/').includes('BPO financeiro'))
   const novos = new Set(e.entregas.filter((x) => x.tipo === 'relatorio' && x.situacao === 'enviado').map((x) => x.documento_id))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Fluxo de caixa</TituloTela>
       <Bloco titulo="Quanto tem hoje">
         <span className="font-heading text-2xl font-light tabular-nums">{brl(e.caixa)}</span>

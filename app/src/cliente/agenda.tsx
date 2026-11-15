@@ -92,7 +92,7 @@ export function Agenda({ ctx }: { ctx: Ctx }) {
 
   const minhas = reunioes.filter((r) => r.situacao !== 'cancelada')
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Agenda</TituloTela>
       {minhas.length > 0 && (
         <Bloco titulo="Suas reuniões">

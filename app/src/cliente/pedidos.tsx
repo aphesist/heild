@@ -80,7 +80,7 @@ export function Pedidos({ ctx }: { ctx: Ctx }) {
   if (aberto) return <DetalhePedido t={aberto} ctx={ctx} />
   const lista = meus.filter((t) => (filtro === 'abertos' ? t.status !== 'concluida' && t.status !== 'cancelada' : filtro === 'concluidos' ? t.status === 'concluida' : t.status === 'cancelada'))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Pedidos</TituloTela>
       {ctx.leitura ? (
         <Faixa>App em modo leitura: não dá para abrir pedidos novos. O histórico continua aqui.</Faixa>
@@ -238,7 +238,7 @@ function DetalhePedido({ t, ctx }: { t: Tarefa; ctx: Ctx }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('pedidos')}>{def?.tipo ?? 'Pedido'}</TituloTela>
       <Bloco titulo={t.titulo} acao={<Selo tom={st.tom}>{st.rotulo}</Selo>}>
         <p className="text-muted-foreground text-xs">

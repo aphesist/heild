@@ -178,30 +178,33 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
 
         <PushSimulado ctx={ctx} />
 
-        <main className={cn('area-rolagem-dupla min-h-0 flex-1 overflow-y-auto px-4 py-4', largo && 'mx-auto w-full max-w-3xl px-6')}>
-          {tela === 'inicio' && <Inicio ctx={ctx} pessoa={pessoa} />}
-          {tela === 'documentos' && <Documentos ctx={ctx} />}
-          {tela === 'pendencias' && <Pendencias ctx={ctx} />}
-          {tela === 'conversa' && <Conversa ctx={ctx} />}
-          {tela === 'pedidos' && <Pedidos ctx={ctx} />}
-          {tela === 'financeiro' && <Financeiro ctx={ctx} />}
-          {tela === 'empresa' && <Empresa ctx={ctx} />}
-          {tela === 'agenda' && <Agenda ctx={ctx} />}
-          {tela === 'servicos' && <Servicos ctx={ctx} />}
-          {tela === 'servico' && rota.item && <TelaServico key={rota.item} ctx={ctx} id={rota.item} />}
-          {tela === 'mais' && <Mais ctx={ctx} onSair={onSair} />}
-          {tela === 'aprovacoes' && <AprovacoesApp ctx={ctx} />}
-          {tela === 'caixa' && <CaixaApp ctx={ctx} />}
-          {tela === 'avisos' && <Avisos ctx={ctx} />}
-          {tela === 'assinaturas' && <Assinaturas ctx={ctx} />}
-          {tela === 'passos' && <PassosEscritorio ctx={ctx} />}
-        </main>
+        {/* K-2: a rolagem e o aviso numa camada própria acima do menu inferior; o aviso nunca cobre o menu e o fim da lista tem respiro. */}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <main className={cn('area-rolagem-dupla min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-8', largo && 'mx-auto w-full max-w-3xl px-6')}>
+            {tela === 'inicio' && <Inicio ctx={ctx} pessoa={pessoa} />}
+            {tela === 'documentos' && <Documentos ctx={ctx} />}
+            {tela === 'pendencias' && <Pendencias ctx={ctx} />}
+            {tela === 'conversa' && <Conversa ctx={ctx} />}
+            {tela === 'pedidos' && <Pedidos ctx={ctx} />}
+            {tela === 'financeiro' && <Financeiro ctx={ctx} />}
+            {tela === 'empresa' && <Empresa ctx={ctx} />}
+            {tela === 'agenda' && <Agenda ctx={ctx} />}
+            {tela === 'servicos' && <Servicos ctx={ctx} />}
+            {tela === 'servico' && rota.item && <TelaServico key={rota.item} ctx={ctx} id={rota.item} />}
+            {tela === 'mais' && <Mais ctx={ctx} onSair={onSair} />}
+            {tela === 'aprovacoes' && <AprovacoesApp ctx={ctx} />}
+            {tela === 'caixa' && <CaixaApp ctx={ctx} />}
+            {tela === 'avisos' && <Avisos ctx={ctx} />}
+            {tela === 'assinaturas' && <Assinaturas ctx={ctx} />}
+            {tela === 'passos' && <PassosEscritorio ctx={ctx} />}
+          </main>
 
-        {aviso && (
-          <div role="status" className={cn('bg-foreground text-background absolute right-3 left-3 z-30 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm shadow-lg', largo ? 'bottom-4' : 'bottom-3')}>
-            <CheckCircleIcon className="mt-0.5 size-4 shrink-0" weight="fill" /> <span className="min-w-0 flex-1">{aviso}</span>
-          </div>
-        )}
+          {aviso && (
+            <div role="status" className={"bg-foreground text-background absolute right-3 bottom-3 left-3 z-30 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm shadow-lg"}>
+              <CheckCircleIcon className="mt-0.5 size-4 shrink-0" weight="fill" /> <span className="min-w-0 flex-1">{aviso}</span>
+            </div>
+          )}
+        </div>
 
         <div id="s10-camada" className="pointer-events-none absolute inset-0 z-40" />
         {!largo && (

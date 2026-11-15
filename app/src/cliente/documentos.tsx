@@ -92,7 +92,7 @@ export function Documentos({ ctx }: { ctx: Ctx }) {
     ctx.ir('documentos', d.id)
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela
         acao={
           <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setPacote(true)}>
@@ -246,7 +246,7 @@ function DetalheDocumento({ d, ctx }: { d: Documento; ctx: Ctx }) {
       .finally(() => setEnviando(null))
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>{d.nome.replace(/\.\w+$/, '')}</TituloTela>
       {assinadoPeloContador(d) && (
         <Faixa tom="ok" icone={<SealCheckIcon weight="fill" />}>

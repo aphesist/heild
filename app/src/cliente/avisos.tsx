@@ -128,7 +128,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
   const naoLidos = central.filter((a) => !a.lido && !a.silenciado).length
   const hoje = central.filter((a) => a.quando.startsWith('18/11') || a.quando.startsWith('hoje'))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela
         voltar={() => ctx.ir('inicio')}
         acao={
