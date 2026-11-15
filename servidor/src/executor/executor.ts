@@ -56,6 +56,12 @@ export interface Pedido {
   confiavel: boolean
   /** O que entra no hash da idempotência (a entrada original da ferramenta ou o comando). */
   entradaOriginal: unknown
+  /** Ferramentas que um cartão decidido por uma pessoa já liberou para este pedido (aprovacao.decidir). */
+  aprovadas?: string[]
+  /** O cartão decidido que liberou este pedido: vai em `aprovacao_id` de cada evento (correlação). */
+  aprovacaoId?: string
+  /** Frase do evento que a tela mandou (ferramenta tipada): o cartão guarda para rodar igual depois. */
+  texto?: string
 }
 
 export interface Resultado {
@@ -89,7 +95,7 @@ export async function executar(sql: Sql, p: Pedido): Promise<Resultado> {
       try {
         retorno = await rodar(tx, bs, p)
       } catch (e) {
-        if (e instanceof ErroAprovacao && !p.validarApenas) return pedirAprovacao(tx, p, e)
+        if (e instanceof ErroAprovacao && !p.validarApenas) return pedirAprovacao(tx, p, e, bs)
         throw e
       }
       if (p.validarApenas) {
@@ -130,7 +136,7 @@ export async function executar(sql: Sql, p: Pedido): Promise<Resultado> {
 }
 
 /** Roda a operação no banco do pedido; carrega o que ela pedir e roda de novo (sem efeito até o fim). */
-async function rodar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<unknown> {
+export async function rodar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<unknown> {
   for (let i = 0; i < MAX_TENTATIVAS; i++) {
     bs.recomecar()
     try {
@@ -161,7 +167,7 @@ function executarSincrono(bs: BancoServidor, p: Pedido): unknown {
   definirGeradorId((prefixo) => {
     return filas.get(prefixo)?.shift() ?? novoIdPadrao(prefixo)
   })
-  definirModoAprovacao(true)
+  definirModoAprovacao(true, p.aprovadas ?? [])
   try {
     return comBanco(bs, () =>
       comoAtor(p.sessao.ctx, () => {
@@ -196,7 +202,7 @@ async function carregar(tx: Tx, bs: BancoServidor, e: PrecisaCarregar) {
   }
 }
 
-interface Aplicado {
+export interface Aplicado {
   linhas: Record<string, Record<string, unknown>[]>
   removidas: Record<string, string[]>
   eventos: string[]
@@ -204,7 +210,7 @@ interface Aplicado {
 }
 
 /** Grava o que a operação fez, na ordem: linhas (inserir, atualizar com a versão lida, excluir) e depois os eventos na cadeia. */
-async function aplicar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<Aplicado> {
+export async function aplicar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<Aplicado> {
   const esc = p.sessao.claims.escritorio_id
   const colunas = await colunasDe(tx)
   // A última escrita de cada (tabela, id) vale; a ordem é a da primeira.
@@ -253,7 +259,7 @@ async function aplicar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<Aplicado> 
   // Jobs pedidos pelo efeito: na mesma transação (encaixe da B2; ver jobs.ts).
   await enfileirarNaTransacao(tx, bs.jobs)
   if (eventos.length) {
-    const gravados = await gravarEventos(tx, esc, eventos, { sessao_auth_id: p.sessao.claims.sid, idempotencia_chave: p.chave })
+    const gravados = await gravarEventos(tx, esc, eventos, { sessao_auth_id: p.sessao.claims.sid, idempotencia_chave: p.chave, aprovacao_id: p.aprovacaoId ?? null })
     for (const g of gravados) {
       anotar('evento', g)
       r.eventos.push(String(g.id))
@@ -264,8 +270,34 @@ async function aplicar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<Aplicado> 
   return r
 }
 
-/** Integrante pediu algo irreversível (ou que pede aprovação): vira cartão para o dono decidir (Fundações 3.3, 6.4). */
-async function pedirAprovacao(tx: Tx, p: Pedido, e: ErroAprovacao): Promise<Resultado> {
+/** O hash do que o cartão vai executar: aprovar confere que é exatamente o que foi pedido. */
+export const hashDoComando = (rotulo: string, comando: unknown) => sha256Hex(canonizar({ rotulo, comando }))
+
+/**
+ * As linhas que o pedido leu uma a uma, com a versão de cada uma: se alguma mudar até a
+ * decisão, aprovar recusa e pede um cartão novo (o estado em que o integrante pediu não vale mais).
+ */
+function versoesLidas(bs: BancoServidor, registro?: { tabela: string; id?: string }): Record<string, Record<string, number>> {
+  const r: Record<string, Record<string, number>> = {}
+  // A linha que a operação ia mudar entra mesmo se a tabela foi lida inteira (criar não tem versão).
+  const alvo = registro?.id ? (bs.base.get(registro.tabela as NomeTabela)?.get(registro.id) as unknown as Record<string, unknown> | undefined) : undefined
+  if (registro?.id && typeof alvo?.versao_linha === 'number') (r[registro.tabela] ??= {})[registro.id] = alvo.versao_linha
+  for (const [tabela, linhas] of bs.base) {
+    if (bs.completas.has(tabela)) continue
+    for (const [id, l] of linhas) {
+      const v = (l as unknown as Record<string, unknown> | undefined)?.versao_linha
+      if (typeof v === 'number') (r[tabela] ??= {})[id] = v
+    }
+  }
+  return r
+}
+
+/**
+ * Integrante pediu algo irreversível (ou que pede aprovação): vira cartão para o dono decidir
+ * (Fundações 3.3, 6.4). O cartão guarda o comando exato (e o hash dele), a entrada da ferramenta
+ * tipada (para editar antes de aprovar) e as versões das linhas lidas.
+ */
+export async function pedirAprovacao(tx: Tx, p: Pedido, e: ErroAprovacao, lido?: BancoServidor): Promise<Resultado> {
   const esc = p.sessao.claims.escritorio_id
   const ator = p.sessao.ctx.ator
   const dono = ator.tipo === 'integrante' ? (ator.dono?.usuario_id ?? null) : null
@@ -278,7 +310,20 @@ async function pedirAprovacao(tx: Tx, p: Pedido, e: ErroAprovacao): Promise<Resu
     try {
       cartao = comBanco(bs, () =>
         repos.cartoes.criar(
-          { ferramenta: e.ferramenta, argumentos: { rotulo: p.rotulo, comando: p.comando, alvo: e.alvo }, resumo_humano: resumo, pedido_por_tipo: 'integrante', pedido_por_id: ator.tipo === 'integrante' ? ator.id : null, usuario_dono_id: dono, pode_aprovar: dono ? [dono] : [], status: 'pendente', expira_em: expira },
+          {
+            ferramenta: e.ferramenta,
+            argumentos: {
+              rotulo: p.rotulo,
+              comando: p.comando,
+              alvo: e.alvo,
+              confiavel: p.confiavel,
+              ...(p.confiavel ? { entrada: p.entradaOriginal } : {}),
+              ...(p.texto !== undefined ? { texto: p.texto } : {}),
+              versoes: lido ? versoesLidas(lido, e.registro) : {},
+            },
+            // Coluna da B2 (o hash do que o cartão executa), fora do tipo do wireframe.
+            ...({ argumentos_hash: hashDoComando(p.rotulo, p.comando) } as object),
+            resumo_humano: resumo, pedido_por_tipo: 'integrante', pedido_por_id: ator.tipo === 'integrante' ? ator.id : null, usuario_dono_id: dono, pode_aprovar: dono ? [dono] : [], status: 'pendente', expira_em: expira },
           { ctx: p.sessao.ctx, semAutorizar: true, texto: `${nomeDoAtor(ator)} pediu aprovação para ${e.ferramenta}` },
         ),
       )
@@ -326,7 +371,7 @@ function contarPorTabela(bs: BancoServidor): Record<string, number> {
   return r
 }
 
-function resumirRetorno(v: unknown): unknown {
+export function resumirRetorno(v: unknown): unknown {
   if (v === undefined || v === null) return null
   if (typeof v === 'object' && !Array.isArray(v) && 'id' in (v as object)) return { id: (v as { id: unknown }).id }
   const texto = JSON.stringify(v)

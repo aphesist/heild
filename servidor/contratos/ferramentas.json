@@ -1,10 +1,10 @@
 {
-  "catalogo_hash": "dd49396e79d6a6f0",
+  "catalogo_hash": "e22251a47d57b79c",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
       "nome": "aprovacao.decidir",
-      "description": "Decide um cartão de aprovação. Só pessoa decide; cartão decidido não muda.",
+      "description": "Decide um cartão de aprovação. Só pessoa decide; cartão decidido não muda. Aprovar executa o que o integrante pediu, exatamente como pedido; argumentos_editados altera campos da entrada antes de aprovar (o evento registra a diferença).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -26,6 +26,13 @@
           "comentario": {
             "type": "string",
             "maxLength": 1000
+          },
+          "argumentos_editados": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
           }
         },
         "required": [
@@ -50,7 +57,11 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "JA_DECIDIDO",
-        "SO_PESSOA_DECIDE"
+        "SO_PESSOA_DECIDE",
+        "NEGADO",
+        "VERSAO_DESATUALIZADA",
+        "ENTRADA_INVALIDA",
+        "EXIGE_APROVACAO"
       ],
       "x-heild-origem": "catalogo"
     },

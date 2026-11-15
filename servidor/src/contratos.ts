@@ -1,3 +1,4 @@
+import { EntradaAcesso, EntradaConvite, EntradaPrimeiroAcesso, EntradaRevogar } from './auth/contas.ts'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { z } from 'zod'
@@ -120,6 +121,20 @@ export function gerarOpenApi() {
       'x-heild-operacoes': [...operacoes.keys()].sort(),
     },
   }
+  // Contas da equipe (decisão (b) de 15/11/2026): convite por e-mail ou criação manual com código.
+  const postJson = (operationId: string, summary: string, schema: Parameters<typeof json>[0], semSessao = false) => ({
+    post: {
+      operationId,
+      summary,
+      ...(semSessao ? { security: [] } : { parameters: cabecalhos }),
+      requestBody: { required: true, content: { 'application/json': { schema: json(schema, 'input') } } },
+      responses: { 200: { description: 'ok' }, ...respostasErro },
+    },
+  })
+  paths['/v1/equipe/convidar'] = postJson('equipe_convidar', 'Cria a conta (convidado) com setores, papel e carteira e dá o acesso: convite por e-mail (Supabase Auth) ou código de primeiro acesso de 48 h, devolvido uma vez só ao Administrador.', EntradaConvite)
+  paths['/v1/equipe/acesso'] = postJson('equipe_acesso', 'Reenvia o convite por e-mail ou gera outro código (o anterior deixa de valer). Só antes do primeiro acesso.', EntradaAcesso)
+  paths['/v1/equipe/acesso/revogar'] = postJson('equipe_acesso_revogar', 'Revoga o código de primeiro acesso ainda não usado.', EntradaRevogar)
+  paths['/v1/auth/primeiro-acesso'] = postJson('auth_primeiro_acesso', 'Primeiro acesso por código (sem sessão): e-mail, código e a senha nova. Depois, a pessoa entra pelo Supabase Auth; Administrador e Gestor configuram o MFA.', EntradaPrimeiroAcesso, true)
   for (const [p, d] of [
     ['/v1/sessao', 'Perfil materializado, permissões e catalogo_hash'],
     ['/v1/sincronizar', 'Linhas das classes 1 e 2 (classes=1,2), filtradas pela regra de leitura; com desde=versão, só o que mudou e o que saiu do escopo'],

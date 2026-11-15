@@ -8,7 +8,7 @@ import { api, banco, entrar, ferramenta } from './ajuda.ts'
  */
 
 const app = api()
-let adm: string, rafael: string, ana: string
+let adm: string, rafael: string, ana: string, joao: string
 type Foto = { tabelas: Record<string, Record<string, any>[]>; removidas: { tabela: string; id: string }[]; versao: number; classes: number[] }
 const sinc = async (t: string, q = ''): Promise<Foto> => {
   const r = await app.inject({ method: 'GET', url: `/v1/sincronizar${q}`, headers: { authorization: `Bearer ${t}` } })
@@ -20,6 +20,7 @@ beforeAll(async () => {
   adm = await entrar(app, { escritorio_id: 'esc-andrade', usuario_id: 'u1' })
   rafael = await entrar(app, { escritorio_id: 'esc-andrade', usuario_id: 'u7' })
   ana = await entrar(app, { escritorio_id: 'esc-andrade', usuario_id: 'u3' })
+  joao = await entrar(app, { escritorio_id: 'esc-andrade', usuario_id: 'u2' })
 })
 afterAll(() => app.close())
 
@@ -157,5 +158,43 @@ describe('consulta paginada (classe 3), pela mesma regra de leitura', () => {
     const r = await ferramenta(app, adm, 'evento.listar', { resultado_ref: t.resultado_ref, so_linha_do_tempo: false, visao: 'tela' }, { chave: null })
     expect(r.corpo.dados.linhas.length).toBeGreaterThan(0)
     expect(r.corpo.dados.linhas.every((e: { resultado_ref: string }) => e.resultado_ref === t.resultado_ref)).toBe(true)
+  })
+})
+
+describe('equipe: diretório para todos, custo e timesheet só para quem gere (decisão do Enzo, 15/11/2026)', () => {
+  const total = async (tabela: string) => (await banco()`select count(*)::int as n from ${banco()(tabela)} where escritorio_id = 'esc-andrade'`)[0].n as number
+
+  it('o Membro vê a equipe inteira: contas, setores de cada um, papéis e carteiras', async () => {
+    const f = await sinc(ana)
+    for (const t of ['usuario', 'vinculo_setor', 'carteira_cliente', 'setor']) expect(f.tabelas[t]?.length, t).toBe(await total(t))
+    expect(f.tabelas.usuario.map((u) => u.nome)).toEqual(expect.arrayContaining(['Fernanda Lima', 'João Pereira']))
+  })
+
+  it('o Membro não recebe custo-hora nem fechamento do timesheet, e só vê o próprio timesheet', async () => {
+    const f = await sinc(ana)
+    expect(f.tabelas.custo_hora ?? []).toEqual([])
+    expect(f.tabelas.fechamento_timesheet ?? []).toEqual([])
+    const sessoes = f.tabelas.sessao_trabalho ?? []
+    expect(sessoes.length).toBeGreaterThan(0)
+    expect(sessoes.every((x) => x.usuario_dono_id === 'u3')).toBe(true)
+    expect((f.tabelas.item_confirmacao ?? []).every((x) => x.usuario_id === 'u3' || x.usuario_id == null)).toBe(true)
+  })
+
+  it('o Administrador vê o custo e o timesheet de todos', async () => {
+    const f = await sinc(adm)
+    expect(f.tabelas.custo_hora.length).toBe(await total('custo_hora'))
+    expect(f.tabelas.fechamento_timesheet.length).toBeGreaterThan(0)
+    expect(new Set(f.tabelas.sessao_trabalho.map((x) => x.usuario_dono_id)).size).toBeGreaterThan(3)
+  })
+
+  it('o Gestor vê o custo e o timesheet do setor que gere; de outro setor, só o próprio', async () => {
+    const f = await sinc(joao)
+    expect(f.tabelas.custo_hora.length).toBe(await total('custo_hora'))
+    const sessoes = f.tabelas.sessao_trabalho
+    // João gere o Contábil: vê as sessões de outras pessoas no Contábil.
+    expect(sessoes.some((x) => x.setor_id === 'contabil' && x.usuario_dono_id !== 'u2')).toBe(true)
+    // No Fiscal ele só executa: de lá, só as próprias.
+    expect(sessoes.filter((x) => x.setor_id === 'fiscal').every((x) => x.usuario_dono_id === 'u2')).toBe(true)
+    expect(sessoes.some((x) => x.setor_id === 'dp')).toBe(false)
   })
 })

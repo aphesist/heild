@@ -13,6 +13,32 @@
 //      node scripts/s08b-operacao.cjs <pasta-das-capturas>
 const { chromium } = require('playwright')
 
+/**
+ * Modo api (URL_API definido): o pedido do integrante que exige aprovação vira cartão no
+ * servidor (bpo.relatorio_mensal é "se_integrante"). Quem pode aprovar decide pela API, como
+ * faria na central de cartões (tela do Painel), e o servidor executa o comando guardado.
+ */
+async function aprovarCartoesPelaApi(escritorio, ferramenta) {
+  const api = process.env.URL_API.replace(/\/$/, '')
+  const json = { 'content-type': 'application/json' }
+  const entrarComo = async (usuario_id) => (await (await fetch(`${api}/v1/auth/demonstracao`, { method: 'POST', headers: json, body: JSON.stringify({ escritorio_id: escritorio, ...(usuario_id ? { usuario_id } : { papel: 'administrador' }) }) })).json()).token
+  const adm = await entrarComo()
+  for (let i = 0; i < 20; i++) {
+    const r = await (await fetch(`${api}/v1/ferramentas/aprovacao.listar`, { method: 'POST', headers: { ...json, authorization: `Bearer ${adm}` }, body: JSON.stringify({ status: ['pendente'], visao: 'tela', limite: 50 }) })).json()
+    const cartoes = (r.dados?.linhas ?? []).filter((c) => c.ferramenta === ferramenta)
+    if (cartoes.length) {
+      for (const c of cartoes) {
+        const quem = await entrarComo(c.pode_aprovar?.[0])
+        const d = await fetch(`${api}/v1/ferramentas/aprovacao.decidir`, { method: 'POST', headers: { ...json, authorization: `Bearer ${quem}`, 'idempotency-key': `s08b-${c.id}` }, body: JSON.stringify({ cartao_id: c.id, decisao: 'aprovado' }) })
+        if (d.status !== 200) throw new Error(`aprovar o cartão ${c.id}: ${d.status} ${await d.text()}`)
+      }
+      return cartoes.length
+    }
+    await new Promise((res) => setTimeout(res, 1000))
+  }
+  return 0
+}
+
 ;(async () => {
   const out = process.argv[2] || '.'
   const base = process.env.URL_APP || 'http://localhost:6100/'
@@ -247,6 +273,7 @@ const { chromium } = require('playwright')
   await secao('Fechamento')
   ok(await p.getByLabel(/Fechar o mês indisponível/).count(), 'fechar o mês desligado com o motivo enquanto falta o rascunho')
   await p.getByRole('button', { name: /Pedir o rascunho ao Gerencial/ }).click()
+  if (process.env.URL_API) ok((await aprovarCartoesPelaApi('esc-andrade', 'bpo.relatorio_mensal')) > 0, 'modo api: o pedido do Gerencial vira cartão, e aprovar executa o rascunho guardado')
   ok(await visivel(p.getByRole('table', { name: 'DRE gerencial' }), 30000), 'o Gerencial rascunha o relatório (DRE gerencial, caixa, riscos)')
   await p.getByRole('button', { name: 'Revisar e aprovar' }).click()
   await espera(400)

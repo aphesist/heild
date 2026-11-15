@@ -104,6 +104,11 @@ export interface AdaptadorApi extends Adaptador {
   aoMudarConsulta(ouvinte: (tabela: NomeTabela) => void): () => void
   /** Quem lê agora (a pessoa da tela), para o token das consultas e do SSE. */
   definirLeitor(quem: () => AtorComando): void
+  /**
+   * Demonstração: aceitar o convite (tocar na conta convidada é abrir o link do e-mail). O servidor
+   * ativa a conta e devolve o token dela. Na produção, o aceite é o fluxo do Supabase Auth.
+   */
+  primeiroAcessoDemonstracao(escritorio: Id, usuarioId: Id, nome: string): Promise<void>
 }
 
 /** Ferramenta de lista de cada tabela da classe 3 (a que o useConsulta e o aquecimento usam). */
@@ -370,6 +375,12 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
   }
 
   const adaptador: AdaptadorApi = {
+    async primeiroAcessoDemonstracao(escritorio, usuarioId, nome) {
+      const r = await chamar('POST', '/v1/auth/demonstracao/primeiro-acesso', { escritorio_id: escritorio, usuario_id: usuarioId, nome })
+      if (r.status !== 200) throw new ErroAdaptador('api', `Não aceitou o convite (${r.status}): ${String(r.json?.mensagem ?? '')}`)
+      // O token já é da pessoa: as próximas chamadas em nome dela usam este.
+      tokens.set(JSON.stringify({ escritorio_id: escritorio, usuario_id: usuarioId }), Promise.resolve(String(r.json.token)))
+    },
     nome: 'api',
     descricao: `API do backend (${base})`,
 

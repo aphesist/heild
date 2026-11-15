@@ -21,6 +21,8 @@ import { sincronizar } from './executor/sincronizar.ts'
 import { lerCadeia } from './executor/cadeia.ts'
 import { ErroApi, erroDeEntrada } from './executor/erro.ts'
 import { executar, traduzir } from './executor/executor.ts'
+import { cartaoDoExecutor, decidirCartaoDoExecutor, type DecisaoExecutor } from './executor/aprovacao.ts'
+import { ativarNoPrimeiroAcesso, convidar, novoAcesso, primeiroAcesso, revogarCodigo } from './auth/contas.ts'
 import { ler } from './executor/leitura.ts'
 import { operacoes, tabelasComRepositorio } from './executor/operacoes.ts'
 import { gerarOpenApi, catalogoHash } from './contratos.ts'
@@ -237,13 +239,25 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     const { nome } = req.params as { nome: string }
     const s = await sessao(req)
     if (nome === 'auditoria.verificar_cadeia') return responder(rep, await verificar(sql, s))
+    // O cartão de quem? Do executor (integrante pediu algo que exige aprovação): aprovar executa o
+    // comando guardado. De execução ou de memória do setor: quem decide é o motor da B2.
+    let cartao: Record<string, unknown> | undefined
+    if (nome === 'aprovacao.decidir') {
+      const corpo = (req.body ?? {}) as Record<string, unknown>
+      const cartaoId = typeof corpo.cartao_id === 'string' ? corpo.cartao_id : ''
+      ;[cartao] = await noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => tx`select execucao_id, tipo, argumentos_hash, argumentos from cartao_aprovacao where id = ${cartaoId}`)
+      if (cartao && cartaoDoExecutor(cartao)) {
+        const { heild_tela: _tela, ...resto } = corpo
+        const e = ferramentaTipada('aprovacao.decidir')!.entrada.safeParse(resto)
+        if (!e.success) throw erroDeEntrada(e.error.issues)
+        return responder(rep, await decidirCartaoDoExecutor(sql, s, e.data as unknown as DecisaoExecutor, chaveDe(req)))
+      }
+    }
     if (b2) {
       const ctxB2 = contextoDaSessao(s.claims.escritorio_id, s.ctx)
-      // Cartão de execução (ou de memória do setor): quem decide é o motor da B2, que retoma a execução.
       if (nome === 'aprovacao.decidir') {
         const corpo = (req.body ?? {}) as Record<string, unknown>
-        const cartaoId = typeof corpo.cartao_id === 'string' ? corpo.cartao_id : ''
-        const [c] = await noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => tx`select execucao_id, tipo from cartao_aprovacao where id = ${cartaoId}`)
+        const c = cartao
         if (c && (c.execucao_id || c.tipo === 'memoria')) {
           const decisao = ({ aprovado: 'aprovar', recusado: 'recusar', editado_e_aprovado: 'editar' } as Record<string, string>)[String(corpo.decisao)] ?? corpo.decisao
           return responder(rep, envelopeParaHttp(await b2.registro.chamar(ctxB2, 'aprovacao.decidir', { ...corpo, decisao })))
@@ -276,7 +290,7 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     }
     const chamada = f.chamada(entrada.data as never, { texto: tela.data.texto })
     const comando: ComandoValidado = { tipo: 'operacao', operacao: chamada.operacao, argumentos: chamada.argumentos, ids: tela.data.ids }
-    const r = await executar(sql, { sessao: s, comando, chave: chaveDe(req), validarApenas: !!validarApenas, rotulo: f.nome, confiavel: true, entradaOriginal: entradaBruta })
+    const r = await executar(sql, { sessao: s, comando, chave: chaveDe(req), validarApenas: !!validarApenas, rotulo: f.nome, confiavel: true, entradaOriginal: entradaBruta, texto: tela.data.texto })
     // Operação de processo: o efeito foi pedir o job; a execução segue no worker (202, AGENTICO 8).
     if (operacoesDeProcesso.has(f.nome) && r.status === 200) {
       const c = r.corpo as { dados: { execucao_id: string; estado: string }; evento_id: string | null }
@@ -327,6 +341,28 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
       const t = await emitirToken({ sub: String(u.id), escritorio_id: b.escritorio_id, tipo: 'equipe' })
       return { ...t, tipo: 'equipe', usuario: u }
     })
+  })
+
+  /* ---------- Contas da equipe (decisão (b) do Enzo, 15/11/2026) ---------- */
+
+  app.post('/v1/equipe/convidar', async (req, rep) => responder(rep, await convidar(sql, await sessao(req), req.body ?? {}, chaveDe(req))))
+  app.post('/v1/equipe/acesso', async (req, rep) => responder(rep, await novoAcesso(sql, await sessao(req), req.body ?? {})))
+  app.post('/v1/equipe/acesso/revogar', async (req, rep) => responder(rep, await revogarCodigo(sql, await sessao(req), req.body ?? {})))
+  // Sem sessão (a pessoa ainda não tem senha): limite por endereço, como o login.
+  app.post('/v1/auth/primeiro-acesso', async (req, rep) => {
+    const espera = consumir(`primeiro-acesso:${req.ip}`, LIMITES.login)
+    if (espera) throw new ErroApi('LIMITE_TAXA', { detalhes: { tentar_de_novo_em: espera } })
+    return responder(rep, await primeiroAcesso(sql, req.body ?? {}))
+  })
+  // Demonstração: tocar na conta convidada é abrir o link do convite (o e-mail da demonstração).
+  app.post('/v1/auth/demonstracao/primeiro-acesso', async (req) => {
+    if (!config.demonstracao) throw new ErroApi('DEMONSTRACAO_DESLIGADA')
+    const b = z.object({ escritorio_id: z.string().min(1).max(80), usuario_id: z.string().min(1).max(80), nome: z.string().trim().min(1).max(120).optional() }).strict().safeParse(req.body ?? {})
+    if (!b.success) throw erroDeEntrada(b.error.issues)
+    const ativou = await noEscritorio(sql, { sub: b.data.usuario_id, escritorio_id: b.data.escritorio_id }, (tx) => ativarNoPrimeiroAcesso(tx, { ...b.data, demonstracao: true }))
+    if (!ativou) throw new ErroApi('CONTA_INATIVA', { mensagem: 'Essa conta não tem convite pendente.' })
+    const t = await emitirToken({ sub: b.data.usuario_id, escritorio_id: b.data.escritorio_id, tipo: 'equipe' })
+    return { ...t, tipo: 'equipe', usuario_id: b.data.usuario_id }
   })
 
   app.post('/v1/demonstracao/restaurar', async (req) => {

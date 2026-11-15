@@ -1,5 +1,5 @@
 import { autorizar, type Alvo } from './autorizar'
-import type { Contexto } from './perfil'
+import type { Contexto, Perfil } from './perfil'
 import type { NomeTabela, Registro } from '../modelo/entidades'
 
 /**
@@ -74,6 +74,20 @@ const LER_POR_PREFIXO: [string, string][] = [
  */
 const CADASTRO_DA_EQUIPE = new Set<NomeTabela>(['usuario', 'vinculo_setor', 'excecao_tela', 'carteira_cliente', 'convite', 'setor', 'integrante'])
 
+/**
+ * Decisão do Enzo de 15/11/2026: a lista da equipe é de toda a equipe, como o diretório do
+ * Teams (nome, foto, setor, papel e carteira: o CADASTRO_DA_EQUIPE acima). O que é custo e
+ * desempenho de cada pessoa fica com Gestor e Administrador:
+ *  - o custo do escritório (custo-hora) e o fechamento do timesheet por cliente (que leva o
+ *    custo-hora e o honorário): só Gestor e Administrador;
+ *  - o timesheet de cada pessoa (sessões e confirmações): a própria pessoa, o Administrador e o
+ *    Gestor que gere o setor da linha.
+ * Salário e avaliações ainda não têm tabela: quando tiverem, entram aqui.
+ */
+const CUSTO_DO_ESCRITORIO = new Set<NomeTabela>(['custo_hora', 'fechamento_timesheet'])
+const TIMESHEET_DA_PESSOA = new Set<NomeTabela>(['sessao_trabalho', 'item_confirmacao'])
+const gereOuAdministra = (p: Perfil) => p.papel === 'administrador' || p.papel === 'gestor'
+
 /** O alvo de autorização de uma linha: setor e cliente, quando a linha tem. */
 export function alvoDaLinha(t: NomeTabela, l: Linha): Alvo {
   if (t === 'cliente') return { cliente_id: l.id }
@@ -139,6 +153,13 @@ export function podeLerLinha(e: EscopoLeitura, t: NomeTabela, l: Linha): boolean
     if (t === 'mensagem_interna' && propria === null && !(e.canais ?? new Set()).has(String(l.conversa_interna_id))) return false
   }
   if (CADASTRO_DA_EQUIPE.has(t)) return true
+  if (CUSTO_DO_ESCRITORIO.has(t) && !(perfil && gereOuAdministra(perfil))) return false
+  if (TIMESHEET_DA_PESSOA.has(t)) {
+    if (!perfil) return false
+    if ((l.usuario_dono_id ?? l.usuario_id) === perfil.usuario_id || perfil.papel === 'administrador') return true
+    const setor = typeof l.setor_id === 'string' ? l.setor_id : null
+    return perfil.papel === 'gestor' && perfil.vinculos.some((v) => v.modo === 'gestao' && (!setor || v.setor === setor))
+  }
   // O que é da própria pessoa (a sessão de trabalho dela, o que um integrante fez em nome dela) ela sempre vê.
   if (perfil && (l.usuario_id === perfil.usuario_id || l.usuario_dono_id === perfil.usuario_id)) return true
   const alvo = alvoDaLinha(t, l)
