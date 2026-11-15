@@ -8,7 +8,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "app": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/regra-rolagem.cjs && tsc -b && vite build",
+    "regra-rolagem": "node scripts/regra-rolagem.cjs",
     "typecheck": "tsc -b",
     "lint": "oxlint src",
     "preview": "vite preview"

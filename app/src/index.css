@@ -169,12 +169,26 @@
 }
 
 /*
- * Área de rolagem sob o cabeçalho (classe .area-rolagem ou <AreaRolagem>): ao
- * rolar, o topo do conteúdo esmaece aos poucos, guiado pela própria rolagem;
- * parado no topo, nada é cortado. Máscara, não desfoque (desfoque pesa).
- * Sem suporte a animação guiada por rolagem, o conteúdo só não esmaece.
+ * Rolagem com esmaecido (regra do design system: conteúdo que rola nunca some
+ * atrás de uma borda sólida). Toda rolagem do sistema passa pela primitiva
+ * <AreaRolagem> (components/ui/area-rolagem.tsx), que põe uma destas classes:
+ *   .area-rolagem-dupla  vertical: o topo esmaece quando há conteúdo acima e o
+ *                        fim quando há conteúdo abaixo; parado, nada é cortado.
+ *   .esmaecer-lados      horizontal: as bordas esmaecem 24px quando há mais
+ *                        conteúdo daquele lado (mascara-esmaecer, gradientes.md).
+ *   .area-rolagem-ambos  as duas direções (tabela larga com cabeçalho fixo).
+ * Com cabeçalho fixo dentro da área ([data-cabecalho-fixo], o thead da Tabela),
+ * o esmaecido do topo começa abaixo dele (--esmaecer-inicio, medido pela página).
+ * O nativo (animação guiada por rolagem) e a medida da página
+ * (src/lib/esmaecer-rolagem.ts) dão o mesmo valor; vale o maior, então o
+ * esmaecido aparece mesmo onde o nativo não roda. Máscara, não desfoque.
  */
 @property --esmaecer {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --esmaecer-fim {
   syntax: '<length>';
   inherits: false;
   initial-value: 0px;
@@ -184,23 +198,6 @@
     --esmaecer: 44px;
   }
 }
-.area-rolagem {
-  mask-image: linear-gradient(to bottom, transparent 0, black max(var(--esmaecer), var(--esmaecer-js-topo, 0px)));
-  animation: esmaecer-topo linear both;
-  animation-timeline: scroll(self);
-  animation-range: 0 60px;
-}
-
-/*
- * Variante com rodapé (.area-rolagem-dupla): listas e chats cortados também
- * embaixo (pelo campo do chat ou pela borda do painel). O fim esmaece enquanto
- * há conteúdo abaixo e some ao chegar no fim; sem rolagem, nada esmaece.
- */
-@property --esmaecer-fim {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
-}
 @keyframes esmaecer-fim {
   from {
     --esmaecer-fim: 44px;
@@ -209,9 +206,18 @@
     --esmaecer-fim: 0px;
   }
 }
-.area-rolagem-dupla {
-  /* O nativo (animação guiada por rolagem) e a medida da página (src/lib/esmaecer-rolagem.ts) dão o mesmo valor; vale o maior, então o esmaecido aparece mesmo onde o nativo não roda. */
-  mask-image: linear-gradient(to bottom, transparent 0, black max(var(--esmaecer), var(--esmaecer-js-topo, 0px)), black calc(100% - max(var(--esmaecer-fim), var(--esmaecer-js-fim, 0px))), transparent 100%);
+.area-rolagem,
+.area-rolagem-dupla,
+.area-rolagem-ambos {
+  mask-image: linear-gradient(
+    to bottom,
+    black 0,
+    black var(--esmaecer-inicio, 0px),
+    transparent var(--esmaecer-inicio, 0px),
+    black calc(var(--esmaecer-inicio, 0px) + max(var(--esmaecer), var(--esmaecer-js-topo, 0px))),
+    black calc(100% - max(var(--esmaecer-fim), var(--esmaecer-js-fim, 0px))),
+    transparent 100%
+  );
   animation:
     esmaecer-topo linear both,
     esmaecer-fim linear both;
@@ -220,30 +226,30 @@
     0 60px,
     calc(100% - 60px) 100%;
 }
+.area-rolagem-ambos {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black 0,
+      black var(--esmaecer-inicio, 0px),
+      transparent var(--esmaecer-inicio, 0px),
+      black calc(var(--esmaecer-inicio, 0px) + max(var(--esmaecer), var(--esmaecer-js-topo, 0px))),
+      black calc(100% - max(var(--esmaecer-fim), var(--esmaecer-js-fim, 0px))),
+      transparent 100%
+    ),
+    linear-gradient(to right, transparent 0, black var(--esmaecer-esquerda, 0px), black calc(100% - var(--esmaecer-direita, 0px)), transparent 100%);
+  mask-composite: intersect;
+}
 
-/*
- * Sem animação guiada por rolagem (o Safari de alguns iPhones): a página mede a
- * rolagem (src/lib/esmaecer-rolagem.ts) e passa as alturas do esmaecido. O topo
- * esmaece quando há conteúdo acima e o fim quando há conteúdo abaixo, como no
- * nativo: nada some atrás de uma borda sólida.
- */
+/* Sem animação guiada por rolagem (o Safari de alguns iPhones): vale só a medida da página. */
 @supports not (animation-timeline: scroll()) {
-  .area-rolagem {
+  .area-rolagem,
+  .area-rolagem-dupla,
+  .area-rolagem-ambos {
     animation: none;
-    mask-image: linear-gradient(to bottom, transparent 0, black var(--esmaecer-js-topo, 0px));
-  }
-  .area-rolagem-dupla {
-    animation: none;
-    mask-image: linear-gradient(to bottom, transparent 0, black var(--esmaecer-js-topo, 0px), black calc(100% - var(--esmaecer-js-fim, 0px)), transparent 100%);
   }
 }
 
-/*
- * Faixa que rola de lado (.esmaecer-lados: abas segmentadas, kanban, atalhos):
- * a borda esmaece 24px quando há mais conteúdo daquele lado (mascara-esmaecer
- * do design system, gradientes.md). A página mede (src/lib/esmaecer-rolagem.ts);
- * sem medida, nada esmaece.
- */
 .esmaecer-lados {
   mask-image: linear-gradient(to right, transparent 0, black var(--esmaecer-esquerda, 0px), black calc(100% - var(--esmaecer-direita, 0px)), transparent 100%);
 }
