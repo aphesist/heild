@@ -17,7 +17,7 @@ import type { Integrante } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import { HistoricoPerfil } from '@/telas/painel/anatomia'
 import { DocumentosDaAba } from '@/telas/painel/documentos-aba'
-import { cn } from '@/lib/utils'
+import { cn, textoDoNo } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
 /** Cliente e setor da aba aberta: os botões dos widgets agem sobre eles. */
@@ -408,10 +408,11 @@ export function MedidorSublimite({ usado, teto, rotulo, semAviso }: { usado: num
 /** Selo de etapa feita ou não (enviada, lida, paga; dados, documentos, ASO...). */
 export function Selo({ feito, alerta, children }: { feito: boolean; alerta?: boolean; children: ReactNode }) {
   return (
-    <span className={cn('flex w-fit items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs whitespace-nowrap', feito ? 'bg-success/15' : alerta ? 'bg-warning/15 text-foreground' : 'bg-sunken text-muted-foreground')}>
-      {feito && <CheckIcon weight="bold" className="text-success size-3" />}
-      {!feito && alerta && <WarningIcon weight="fill" className="text-warning size-3" />}
-      {children}
+    // Nunca passa da largura de onde está: o texto trunca, com ele inteiro no título.
+    <span title={textoDoNo(children) || undefined} className={cn('flex w-fit max-w-full min-w-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs whitespace-nowrap', feito ? 'bg-success/15' : alerta ? 'bg-warning/15 text-foreground' : 'bg-sunken text-muted-foreground')}>
+      {feito && <CheckIcon weight="bold" className="text-success size-3 shrink-0" />}
+      {!feito && alerta && <WarningIcon weight="fill" className="text-warning size-3 shrink-0" />}
+      <span className="min-w-0 truncate">{children}</span>
     </span>
   )
 }

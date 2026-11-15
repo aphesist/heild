@@ -268,7 +268,7 @@ function LinhaAdmissao({ id, a }: { id: string; a: EstadoDP['admissoes'][number]
       </div>
       <div className="flex flex-wrap gap-1">
         {a.etapas.map((x) => (
-          <button key={x.rotulo} type="button" title={x.feito ? 'feito' : 'marcar como feito'} onClick={() => x.rotulo !== 'S-2200' && x.rotulo !== 'Contrato' && etapa(x.rotulo, !x.feito)} className="cursor-pointer">
+          <button key={x.rotulo} type="button" title={x.feito ? 'feito' : 'marcar como feito'} onClick={() => x.rotulo !== 'S-2200' && x.rotulo !== 'Contrato' && etapa(x.rotulo, !x.feito)} className="max-w-full min-w-0 cursor-pointer">
             <Selo feito={x.feito} alerta={x.decisao}>
               {x.rotulo}
             </Selo>

@@ -504,8 +504,8 @@ function Catalogo() {
 
 /* ---------- Processos e moldes (S04-A26, A80) ---------- */
 
-const processos: DefWidget = { id: 'processos', titulo: 'Processos e recorrências do escritório', atividades: 'GES-206', descricao: 'Rotinas sem obrigação formal, com checklist padrão; moldes das trilhas', icone: TreeStructureIcon, tamanhos: ['G', 'XL'], conteudo: (t) => <Processos t={t} /> }
-function Processos({ t }: { t: TamanhoWidget }) {
+const processos: DefWidget = { id: 'processos', titulo: 'Processos e recorrências do escritório', atividades: 'GES-206', descricao: 'Rotinas sem obrigação formal, com checklist padrão; moldes das trilhas', icone: TreeStructureIcon, tamanhos: ['G', 'XL'], conteudo: () => <Processos /> }
+function Processos() {
   const g = useGestao()
   const clientes = useClientesE()
   const executar = useAcao()
@@ -527,8 +527,8 @@ function Processos({ t }: { t: TamanhoWidget }) {
       { sucesso: `Tarefas de “${p.nome}” geradas com o checklist padrão` },
     )
   return (
-    // Duas colunas só quando o widget tem largura para o nome do processo não truncar (container, não a tela).
-    <div className={cn('flex flex-col gap-3', t === 'XL' && '@3xl:grid @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-6')}>
+    // Uma coluna: a lista de processos cresce e os moldes são um campo só; lado a lado, sobrava um vão sob os moldes.
+    <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2">
         <TetoDeFilhos classeLista="flex flex-col gap-1.5" vazio={<p className="text-muted-foreground text-sm">Nenhum processo recorrente ainda.</p>}>
           {g.processos.map((p) => (

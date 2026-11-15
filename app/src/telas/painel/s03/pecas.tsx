@@ -86,7 +86,7 @@ export function Rotulo({ tom, children, className }: { tom: 'ok' | 'atencao' | '
   // Nunca passa da largura de onde está (texto sem espaço, longo): trunca, com o texto inteiro no título.
   const texto = textoDoNo(children)
   return (
-    <span title={texto || undefined} className={cn('inline-flex w-fit max-w-full min-w-0 shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', cor, className)}>
+    <span title={texto || undefined} className={cn('inline-flex w-fit max-w-[60%] min-w-0 shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', cor, className)}>
       <span className="min-w-0 truncate [&_svg]:inline [&_svg]:align-[-2px]">{children}</span>
     </span>
   )
