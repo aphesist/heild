@@ -72,7 +72,8 @@ export const SetorEsquema = z.enum(['societario', 'fiscal', 'notas', 'dp', 'cont
 export const StatusTarefaEsquema = z.enum(['a_fazer', 'em_andamento', 'aguardando_cliente', 'aguardando_terceiro', 'em_revisao', 'concluida', 'cancelada'])
 export const PrioridadeEsquema = z.enum(['baixa', 'normal', 'alta', 'urgente'])
 export const DataEsquema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data no formato AAAA-MM-DD.')
-export const CompetenciaEsquema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Competência no formato AAAA-MM.')
+// O wireframe grava MM/AAAA (a semente e as telas); o padrão dos agentes é AAAA-MM. Os dois valem.
+export const CompetenciaEsquema = z.string().regex(/^(\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\/\d{4})$/, 'Competência no formato AAAA-MM (ou MM/AAAA).')
 export const RegimeEsquema = z.enum(['simples', 'presumido', 'real', 'mei', 'imune_isento', 'pf'])
 export const TipoClienteEsquema = z.enum(['pj', 'pf', 'mei', 'condominio', 'entidade_terceiro_setor', 'produtor_rural'])
 export const EstadoCicloEsquema = z.enum(['prospect', 'proposta', 'aceito', 'em_implantacao', 'ativo', 'inativo', 'em_saida', 'em_baixa', 'encerrado', 'arquivado', 'eliminado'])
@@ -196,7 +197,9 @@ export const ferramentasTipadas: FerramentaTipada[] = [
             prazo_legal: DataEsquema.nullable().optional(),
             prioridade: PrioridadeEsquema.optional(),
             competencia: CompetenciaEsquema.nullable().optional(),
-            // B5 (compatível): o que a ficha da tarefa edita. Status, setor, cliente e responsável ficam de fora.
+            // B5 (compatível): o que a ficha da tarefa edita. Quem conclui é a autonomia da tarefa,
+            // não estado. Status, setor, cliente e responsável ficam de fora.
+            quem_conclui: z.enum(['pessoa', 'agente_sozinho', 'agente_prepara_pessoa_conclui']).optional(),
             checklist: z.array(ItemChecklistEsquema).max(200).optional(),
             aguardando_detalhe: z.record(z.string(), z.unknown()).nullable().optional(),
             risco: z.boolean().optional(),

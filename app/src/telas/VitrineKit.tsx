@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import type { StatusTarefa, Tarefa } from '@/nucleo/modelo/entidades'
 import { rotuloPapel, rotuloSetorCurto } from '@/nucleo/permissoes'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { irParaPagina } from '@/nucleo/rotas'
 import { agora, repos } from '@/nucleo/repositorios'
 import { catalogoServicos, servicos, type Resultado } from '@/servicos'
@@ -234,7 +235,8 @@ function NovaTarefa({ setor, onFechar, onCriada }: { setor: SetorIntegrante; onF
 /* ---------- Conversa interna: enviar, editar com versões, nunca excluir ---------- */
 
 function ConversaInterna() {
-  const mensagens = useTabela('mensagem_interna')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: mensagens } = useConsulta('mensagem_interna', { conversa_interna_id: 'ci-geral' })
   const usuarios = useTabela('usuario')
   const { usuario } = useSessao()
   const executar = useAcao()
@@ -496,7 +498,8 @@ function ServicosSimulados() {
 /* ---------- Eventos (R2: todo efeito gera evento) ---------- */
 
 function Eventos() {
-  const eventos = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: eventos } = useConsulta('evento', { visivel_na_linha_do_tempo: true })
   const recentes = useMemo(() => [...eventos].filter((e) => e.visivel_na_linha_do_tempo).sort((a, b) => b.criado_em.localeCompare(a.criado_em)).slice(0, 12), [eventos])
   return (
     <Secao titulo="Eventos" descricao="Tudo o que muda gera um evento com autor, data e ferramenta (Fundações 5). É de onde saem a auditoria, a linha do tempo e o timesheet.">

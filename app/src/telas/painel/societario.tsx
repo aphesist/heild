@@ -18,6 +18,7 @@ import { resumoEntrega, usePreferenciaEntrega } from '@/dados/s02/ficha'
 import { cn } from '@/lib/utils'
 import type { Cliente, EstadoCiclo } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { servicos } from '@/servicos'
 import { rotuloEstado, useClienteEntidade } from './anatomia'
 import { widgetObrigacoesDoSetor } from './obrigacoes-setor'
@@ -669,7 +670,8 @@ const trilhaVisivel: EstadoCiclo[] = ['prospect', 'proposta', 'aceito', 'em_impl
 function Ciclo({ t }: { t: TamanhoWidget }) {
   const { cliente, gestor, leitura } = useAbaSoc()
   const nav = useNavegacao()
-  const eventos = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: eventos } = useConsulta('evento', { cliente_id: cliente?.id, ferramenta: 'cliente.mudar_estado' }, { ativo: !!cliente })
   const [mudar, setMudar] = useState(false)
   if (!cliente) return null
   const atual = trilhaVisivel.indexOf(cliente.estado_ciclo === 'inativo' ? 'ativo' : cliente.estado_ciclo)

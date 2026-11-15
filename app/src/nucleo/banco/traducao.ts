@@ -77,7 +77,10 @@ function generico(e: Entidade, metodo: string, a: Args, obter?: Obter): Traducao
     case 'criar': {
       const nome = ferramentaDaEntidade(e, 'criar')
       if (!nome) return null
-      return [{ ferramenta: nome, entrada: semServidor(objeto(a[0])), texto: textoDe(a[1]) }]
+      // Na criação, nulo e ausente são o mesmo (o banco põe o padrão): o nulo sai da entrada.
+      // A hora do status e a conclusão da tarefa nova são do servidor (quem cria não escolhe).
+      const dados = Object.fromEntries(Object.entries(semServidor(objeto(a[0]))).filter(([k, v]) => v !== null && !(e.tabela === 'tarefa' && (k === 'status_desde' || k.startsWith('concluida_')))))
+      return [{ ferramenta: nome, entrada: dados, texto: textoDe(a[1]) }]
     }
     case 'atualizar': {
       const patch = semServidor(objeto(a[1]))

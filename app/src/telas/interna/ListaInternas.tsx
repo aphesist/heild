@@ -11,6 +11,7 @@ import { extrasDe, grupos, quando } from '@/dados/interna'
 import { cn } from '@/lib/utils'
 import type { ConversaInterna, Id } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { PontoPresenca } from './pecas'
 
 const icone = { pessoal: UserIcon, grupo: UsersThreeIcon, canal_setor: HashIcon, canal_geral: MegaphoneIcon }
@@ -30,7 +31,8 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
   const prefs = usePreferenciasInternas()
   const presenca = usePresenca()
   const rotulo = useRotuloConversa()
-  const tMsg = useTabela('mensagem_interna')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tMsg } = useConsulta('mensagem_interna', {})
   const tPart = useTabela('participacao')
   const [busca, setBusca] = useState('')
   const [pessoa, setPessoa] = useState<Id | null>(null)

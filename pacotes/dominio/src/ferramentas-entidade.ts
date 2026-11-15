@@ -65,6 +65,8 @@ const TIPOS_POR_TABELA: Record<string, z.ZodType> = {
   'cartao_aprovacao.pedido_por_tipo': z.enum(['integrante', 'usuario', 'sistema']),
   'notificacao.destinatario_tipo': z.enum(['usuario', 'pessoa', 'todos']),
   'conversa_interna.tipo': z.enum(['pessoal', 'grupo', 'canal_setor', 'canal_geral']),
+  // O aviso marca a área da tela (que nem sempre é um setor do catálogo); a coluna é texto livre.
+  'notificacao.setor_id': Texto(60),
 }
 const tipoDe = (campo: string, tabela?: string): z.ZodType => (tabela ? TIPOS_POR_TABELA[`${tabela}.${campo}`] : undefined) ?? TIPOS[campo] ?? Texto()
 

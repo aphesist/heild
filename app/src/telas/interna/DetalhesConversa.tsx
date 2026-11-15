@@ -11,6 +11,7 @@ import { Interruptor } from '@/components/ui/formulario'
 import { extrasDe, quando, rotuloTipo } from '@/dados/interna'
 import type { ConversaInterna } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { EscolherPessoas } from './NovaConversa'
 import { PontoPresenca } from './pecas'
 
@@ -27,7 +28,8 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
   const [adicionando, setAdicionando] = useState(false)
   const [novos, setNovos] = useState<string[]>([])
   const tPart = useTabela('participacao')
-  const tMsg = useTabela('mensagem_interna')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tMsg } = useConsulta('mensagem_interna', { conversa_interna_id: conversa.id })
   const participacoes = useMemo(() => tPart.filter((p) => p.conversa_interna_id === conversa.id).sort((a, b) => a.entrou_em.localeCompare(b.entrou_em)), [tPart, conversa.id])
   const ativos = participacoes.filter((p) => !p.saiu_em)
   const anexos = tMsg.filter((m) => m.conversa_interna_id === conversa.id).flatMap((m) => (extrasDe(m).anexos ?? []).map((a) => ({ ...a, por: acoes.nomeDe(m.autor_id), em: m.criado_em })))

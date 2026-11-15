@@ -70,6 +70,10 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
   })
 
   app.decorate('heild', { fluxo, leituras })
+  // Toda resposta de erro deixa uma linha no log (método, rota, status; nunca o corpo nem o token).
+  app.addHook('onResponse', async (req, rep) => {
+    if (rep.statusCode >= 400) req.log.warn({ status: rep.statusCode, metodo: req.method, rota: req.routeOptions.url ?? req.url.split('?')[0] }, 'resposta de erro')
+  })
   app.addHook('onClose', async () => {
     await fluxo.parar()
     await leituras.parar()
@@ -95,8 +99,12 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     if (req.method === 'OPTIONS') return rep.code(204).send()
   })
 
-  app.setErrorHandler((e: Error & { validation?: unknown; statusCode?: number }, _req, rep) => {
-    if (e instanceof ErroApi) return rep.code(e.status).send(e.corpo())
+  app.setErrorHandler((e: Error & { validation?: unknown; statusCode?: number }, req, rep) => {
+    if (e instanceof ErroApi) {
+      // A recusa de entrada (antes do executor) também vai para o log: código e campo, sem o corpo.
+      if (e.status !== 401) app.log.warn({ recusa: e.codigo, campo: e.campo, mensagem: e.message, rota: req.routeOptions.url, ferramenta: (req.params as { nome?: string } | undefined)?.nome }, 'entrada recusada')
+      return rep.code(e.status).send(e.corpo())
+    }
     if (e.statusCode && e.statusCode < 500) return rep.code(400).send(new ErroApi('ENTRADA_INVALIDA', { mensagem: e.message }).corpo())
     app.log.error(e)
     return rep.code(500).send(new ErroApi('ERRO_INTERNO').corpo())
@@ -261,8 +269,7 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
         // Quem leu o quê (P6): as linhas que voltaram, a contagem e os filtros (sem cursor nem visão).
         const dados = (r.corpo as { dados?: { id?: string; linhas?: { id?: string }[] } }).dados
         const ids = dados?.linhas ? dados.linhas.map((l) => String(l.id)) : dados?.id ? [String(dados.id)] : []
-        const { cursor: _c, visao: _v, limite: _l, ...filtros } = entrada.data as Record<string, unknown>
-        void _c, void _v, void _l
+        const filtros = Object.fromEntries(Object.entries(entrada.data as Record<string, unknown>).filter(([k]) => k !== 'cursor' && k !== 'visao' && k !== 'limite'))
         leituras.registrar(s, { ferramenta: f.nome, tabela: f.tabela, ids, quantidade: ids.length, filtros })
       }
       return responder(rep, r)
