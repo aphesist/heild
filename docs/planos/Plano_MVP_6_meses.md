@@ -250,3 +250,9 @@ Fontes: [Plano Municipal](Plano_Base_Legislacao_Municipal.md), seções 13 e 25;
 - **OCR:** "não há OCR relevante" não vale para atos municipais antigos, digitalizados em imagem (a própria Fase de ingestão já previa OCR aberto para PDF digitalizado).
 - **Critério do M3:** em vez da auditoria humana de 100 dispositivos, acerto de pelo menos 98% contra o ouro reservado, com a cobertura do ouro publicada (revisão pela IA, decisão de 9/11/2026).
 - **DGM:** os "3 ciclos DGM enxutos" passam a ser o laço inspirado na DGM (uma rodada da DGM original custou cerca de US$ 22 mil), em dois laços fora da produção: Consultor e ingestão.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [apis/PERGUNTAS.md](apis/PERGUNTAS.md) (branch `wf-backend-apis`, commit f9451f8, 15/11/2026), que registra as respostas a Q1 a Q10 e as decisões posteriores do mesmo dia. **Revê** o que o item anterior deste adendo dizia sobre as perguntas "pendentes".
+
+O piloto é **em bloco** (todos os setores dos dois escritórios, tudo ligado menos a Pluggy), com ~80 sp e um calendário de entregas com critério de pronto, cujo prazo depende do caminho crítico externo (contratos, verificações e procurações). Substitui a estimativa de ~4,5 a 5 meses citada acima ([`apis/ORDEM_DE_IMPLEMENTACAO.md`](apis/ORDEM_DE_IMPLEMENTACAO.md), v0.2, 2.1 a 2.3).

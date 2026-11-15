@@ -1352,3 +1352,7 @@ Fontes: branch `wireframe`, `app/supabase/migrations/` (`20261114120000_fundacoe
 - **Obrigação com `regra_multa`** (JSON com tipo, base, mínimo e referência a `calculo.multa_juros`), para o calendário mostrar a multa ao arrastar o prazo; sem regra, "multa não calculada".
 - **Papéis do cliente (proposta, S02).** `leitura` entra em `papel_cliente`; "sem acesso" é a linha fechada (`vigente_ate`); "aprovador" é o rótulo de tela de `socio` na linha `bpo_financeiro`.
 - **Entrada e convite (proposta, S09).** Recuperar senha por código de 6 números (30 min), senha de 8 caracteres com um número, outras sessões caem; convite com termo da equipe (mensagens internas não se apagam, tempo por cliente, integrantes agem em nome da pessoa, LGPD); Recepção, Supervisão e Direção como modelos de convite.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [`../apis/ARMAZENAMENTO.md`](../apis/ARMAZENAMENTO.md) e [`../apis/PERGUNTAS.md`](../apis/PERGUNTAS.md) (branch `wf-backend-apis`, 15/11/2026). **Os arquivos ficam no armazenamento de cada escritório** (completa 7): a Heild guarda índice, texto, miniaturas e cópias de vida curta; conectores padrão (Google Drive, OneDrive e SharePoint, Dropbox, Box, S3 compatível, WebDAV, SFTP) e agente local em Go para servidor próprio. **Dado completo ao fornecedor de modelos**, sem máscara, sob DPA, sem treino e com retenção mínima (Q7).

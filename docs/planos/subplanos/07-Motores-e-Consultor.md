@@ -772,3 +772,10 @@ Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S02 e S03), propostas.
 - **Prazo de ciência.** O wireframe usa 10 dias do recebimento para toda caixa postal. **Vale este plano**: o prazo vem de `calculo.prazo_ciencia` por tipo de DTE (federal 15 dias, DTE-SN 45, estaduais 10, conforme o 08); o wireframe deve ser corrigido.
 - **Alerta de distribuição acima de R$ 50 mil (completa `calculo.retiradas_socio`).** Aviso uma vez por sócio e mês quando a distribuição passa de R$ 50 mil (Lei 15.270/2025), com a retenção de 10% e o DARF até o dia 20 do mês seguinte **[vencimento a confirmar na norma]**.
 - **Regras de obrigação com setor dono.** A semente do wireframe traz cada regra com `gera_tarefa_para_setor` (EFD-Reinf, GIA-SP, DeSTDA, PIS/Cofins, ISS, DAS-MEI, DEFIS, DMED, ECF, IBGE, taxa de licença, conselho, manifestação, entrega das guias); cada ocorrência é uma Tarefa `origem = obrigacao`. Serve de lista inicial para a base de regras.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [../apis/PERGUNTAS.md](../apis/PERGUNTAS.md) (branch `wf-backend-apis`, commit f9451f8, 15/11/2026), que registra as respostas a Q1 a Q10 e as decisões posteriores do mesmo dia. **Revê** o que o item anterior deste adendo dizia sobre as perguntas "pendentes".
+
+- **Dado completo ao fornecedor de modelos (Q7, revê o item "Dado de cliente no fornecedor de modelos" acima):** o dado vai **sem máscara**, porque a máscara atrapalharia a parte agêntica. Ficam o DPA, a configuração sem treino com os dados e a retenção mínima.
+- **Fontes da vigilância (Q8):** a API de legislação do Senado funcionou sem cadastro e serve à legislação federal; o LexML continua bloqueado; o INLABS pede cadastro (o Enzo faz).

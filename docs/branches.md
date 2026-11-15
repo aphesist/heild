@@ -15,7 +15,7 @@ O ponto de partida: o README animado, esta documentação e as ferramentas que g
 |---|---|
 | `README.md` | O hub: o que é a Heild, os branches, o time, a marca em uma tela |
 | `docs/branches.md` | Este mapa |
-| `docs/planos/` | **Os planos do produto** (fonte da verdade desde 15/11/2026): desenho do sistema, subplanos, Jurídico, precificação, base legal, backend, integrantes, levantamentos e decisões. Índice em `docs/planos/README.md` |
+| `docs/planos/` | **Os planos do produto** (fonte da verdade desde 15/11/2026): desenho do sistema, subplanos, Jurídico, precificação, base legal, raciocínio do Consultor, backend, APIs do Contábil, integrantes, levantamentos e decisões. Índice em `docs/planos/README.md`; toda mudança de plano entra com adendo datado e uma linha em `docs/planos/ATUALIZACOES.md` |
 | `docs/pesquisa/` | As pesquisas que embasam os planos (mercado, infraestrutura, custos, atividades, jurídico, relatórios) |
 | `docs/legado/` | A apresentação para os contadores e o site antigo do repositório de trabalho |
 | `docs/fluxo-de-trabalho.md` | Como rodar, publicar e mudar cada parte |
@@ -54,4 +54,4 @@ O site da Heild e as landing pages, em `app/src/site/` (entrada `app/site.html`)
 
 ## Origem
 
-Tudo veio do repositório de trabalho `DGM-RAG-Contabil` (branch `claude/ui-lab`, pasta `ui-lab/`), onde o produto foi planejado. Em 15/11/2026 os planos e as pesquisas também foram trazidos para `docs/planos/` e `docs/pesquisa/` neste branch, e o `DGM-RAG-Contabil` ficou só como histórico. Há ainda o branch `wireframe` (o wireframe interativo completo, com o mapa de telas e as entregas das sessões) e os branches de trabalho `wf-*`.
+Tudo veio do repositório de trabalho `DGM-RAG-Contabil` (branch `claude/ui-lab`, pasta `ui-lab/`), onde o produto foi planejado. Em 15/11/2026 os planos e as pesquisas também foram trazidos para `docs/planos/` e `docs/pesquisa/` neste branch, e o `DGM-RAG-Contabil` ficou só como histórico. Há ainda o branch `wireframe` (o wireframe interativo completo, com o mapa de telas e as entregas das sessões) e os branches de trabalho `wf-*` (sessões do wireframe, backend, APIs, integrantes). Os documentos de trabalho desses branches citam os planos de `docs/planos/` e não os substituem: quando trazem decisão nova, ela é levada ao `main` com adendo datado.

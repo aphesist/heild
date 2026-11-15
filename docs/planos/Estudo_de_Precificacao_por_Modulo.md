@@ -1449,3 +1449,13 @@ Decisões e desenhos mais novos que este documento, achados nos branches do Heil
 ### Wireframe: tela Assinatura (14/11/2026)
 
 A tela Assinatura do wireframe (branch `wireframe`, `docs/wireframe/DECISOES.md`, S09) mostra o App do cliente incluído e dois complementos pagos, marca branca e app na loja (exige marca branca), o que confere com a v0.9. O valor da marca branca na tela (R$ 290 por mês) é de demonstração e diverge dos R$ 150 deste estudo: vale o estudo, e o wireframe deve ler `parametros.json`. Sem o complemento, o escritório monta e vê o rascunho do tema, mas não publica, não usa domínio nem remetente próprios.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [apis/PERGUNTAS.md](apis/PERGUNTAS.md) (branch `wf-backend-apis`, commit f9451f8, 15/11/2026), que registra as respostas a Q1 a Q10 e as decisões posteriores do mesmo dia. **Revê** o que o item anterior deste adendo dizia sobre as perguntas "pendentes".
+
+- **WhatsApp:** com a integração não oficial (WAHA) como caminho padrão, o custo por mensagem do dia a dia sai da conta do escritório; a API oficial fica só para envio em massa grande, contratada e paga pelo escritório. O repasse de 6.5 vale só nesse caso.
+- **Open Finance (Pluggy):** fora do piloto; volta como módulo à parte (3.7).
+- **SERPRO:** preço normal da loja no piloto; a queda do custo por cliente com o modelo A continua hipótese de escala.
+- **Custo do piloto:** ~R$ 500 por mês só de APIs, ~R$ 2,4 mil com infraestrutura e ~R$ 3,2 mil com IA ([`apis/ORDEM_DE_IMPLEMENTACAO.md`](apis/ORDEM_DE_IMPLEMENTACAO.md), v0.2).
+- **Armazenamento:** os arquivos ficam no armazenamento do escritório ([`apis/ARMAZENAMENTO.md`](apis/ARMAZENAMENTO.md)); a linha de GB de nuvem da plataforma passa a cobrir índice, texto, miniaturas e cópias de vida curta. Refazer a premissa de 5 GB por cliente.

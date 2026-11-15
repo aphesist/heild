@@ -685,3 +685,7 @@ Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S10) e `entregas/S10.md
 
 - Depois de 5 códigos errados, bloqueio de 15 minutos com aviso ao escritório; pedido de permissão de push só depois do primeiro toque; o sócio pede ao escritório para convidar outra pessoa (GES-104); contestar um serviço deixa só aquela linha da fatura em espera; revisão anual de acessos aparece ao sócio até ele responder; franquia de exemplo do Consultor da empresa de 40 perguntas por mês **[premissa]**.
 - **Conferência no envio (completa 4).** O envio de pendência aceita foto com recorte e vários arquivos; o integrante confere na hora e devolve com o motivo quando não serve ("o arquivo é de setembro; precisamos de outubro"); só então vem o "recebido", com recibo (protocolo, hora, hash). "Não tenho isso" pede justificativa. O pedido tem formulário por tipo, com campos obrigatórios, para 14 tipos limitados ao papel.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+- **App do cliente como webapp no piloto, com as lojas depois:** comunicada pela coordenação do wireframe em 15/11/2026 como decisão do Enzo; **ainda sem registro em documento de branch** (a confirmar no próximo documento que tratar do tema). O catálogo de APIs já prevê o push web (PWA, VAPID), que no iOS só funciona com o app instalado na tela ([`../apis/CATALOGO_CONTABIL.md`](../apis/CATALOGO_CONTABIL.md)).

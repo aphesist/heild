@@ -1,189 +1,272 @@
 # Ordem de implementação das APIs do Contábil
 
-**Versão 0.1 · 15/11/2026 · desenho.** Em que ordem construir a API interna ([`API_INTERNA.md`](API_INTERNA.md)) e ligar as APIs externas ([`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md)), em sincronia com as fases do backend ([`../backend/ARQUITETURA.md`](../backend/ARQUITETURA.md), seção 7). Começa pelo piloto: **2 escritórios com 5 clientes cada**. O stack é o que o dono aceitou em 15/11/2026 (`docs/backend/PERGUNTAS.md`, P1 a P10): TypeScript no Node 24 com Fastify, AWS sa-east-1 com Fargate, Supabase em São Paulo, só a API grava, KMS por escritório e A3 por certificado em nuvem.
+**Versão 0.2 · 15/11/2026 · desenho.** Em que ordem construir a API interna ([`API_INTERNA.md`](API_INTERNA.md)) e ligar as APIs externas ([`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md)), em sincronia com as fases do backend ([`../backend/ARQUITETURA.md`](../backend/ARQUITETURA.md), seção 7).
+
+O stack é o que o dono aceitou em 15/11/2026 (`docs/backend/PERGUNTAS.md`, P1 a P10): TypeScript no Node 24 com Fastify, AWS sa-east-1 com Fargate, Supabase em São Paulo, só a API grava, KMS por escritório, A3 por certificado em nuvem.
+
+**O que mudou na versão 0.2 (respostas do dono, [`PERGUNTAS.md`](PERGUNTAS.md)):**
+
+- **Pluggy fora do piloto** (decisão posterior do mesmo dia): o Open Finance volta depois do piloto, como módulo à parte (2.4).
+
+- **Q6:** o piloto (2 escritórios, 5 clientes cada) liga **tudo o que der para ligar, pago**, para os escritórios testarem o sistema inteiro.
+- **Q5:** o WhatsApp do dia a dia vai pela integração não oficial ([`WHATSAPP.md`](WHATSAPP.md)).
+- **Q9:** a parceria com a Thomson Reuters fica para depois do piloto.
+- **Q10:** o MCP abre para assistentes de IA e para o Microsoft 365 e o Google Workspace.
+- **Extensão de navegador** ([`EXTENSAO.md`](EXTENSAO.md)): entra no piloto.
+- **Armazenamento** ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md)): os arquivos ficam no armazenamento de cada escritório (Google Workspace num, servidor local no outro); a Heild guarda índice, texto, miniaturas e cópias de vida curta. Entram os conectores padrão do mercado e o **agente local** para servidor próprio. Google no piloto pelo administrador do Workspace, sem CASA.
+- **Últimas decisões do mesmo dia:** piloto **em bloco**, com todos os setores dos dois escritórios testando tudo de uma vez; o Enzo desenvolve sozinho com agentes de IA, então a medida de calendário é uma **sequência de entregas com critério de pronto** (seção 2.1) e o que manda no prazo é o **caminho crítico externo** (2.2); SERPRO pelo **preço normal da loja** no piloto; WhatsApp não oficial aprovado como desenhado, com **cláusula de aceite** ([`WHATSAPP.md`](WHATSAPP.md), 4).
 
 ## Resumo
 
-1. **Pedir já, antes de escrever código:** e-CNPJ da Heild (pré-requisito do SERPRO), contrato SERPRO (Integra Contador e Consulta CNPJ, chaves em até 10 minutos), verificação Meta Business (até 14 dias úteis), conta InfoSimples e DPA, cadastro de parceira na Thomson Reuters (Domínio), acesso à produção restrita do ADN e pedido das procurações dos 10 clientes do piloto (o escritório tem até 30 dias para aceitar).
-2. **O piloto liga cinco APIs externas:** distribuição de DF-e, ADN (NFS-e), Consulta CNPJ (dados abertos e SERPRO), Integra Contador (caixa postal, situação fiscal, PGDAS-D e DAS) e SES. Todas, menos o Integra, já estão nas fases F2 a F4 do backend; o Integra acrescenta ~3 semanas-pessoa (sp).
-3. **Com o Integra, o piloto vai de ~37 para ~40 sp (≈ 5 meses com 2 pessoas).** Sem ele, fica nos 4,5 meses do backend, mas o Fiscal do piloto não vê a caixa postal nem gera DAS. A recomendação é incluir (pergunta Q1).
-4. **Tudo do piloto pode ser testado de graça antes de ir à produção:** demonstração do SERPRO, produção restrita do ADN, do eSocial e do Reinf, crédito de R$ 100 da InfoSimples, número de teste da Meta, sandbox do Inter e da Pluggy.
-5. **Custo mensal de API pago pela plataforma, provável:** ~R$ 25 no piloto (R$ 125 se as certidões da InfoSimples entrarem) · ~R$ 3,0 mil com 10 escritórios · ~R$ 18,8 mil com 100 · ~R$ 129 mil com 1.000 escritórios (escritório médio de 100 clientes). Por cliente: R$ 3,00, R$ 1,88 e R$ 1,29, porque as faixas do SERPRO e da InfoSimples caem com o volume somado (modelo A).
-6. **O WhatsApp é repassado ao escritório:** ~R$ 55 por escritório médio por mês (R$ 0,5 mil, 5,5 mil e 55 mil nas três escalas). Não entra no piloto (fase F5, decisão P9 do backend).
-7. **Depois do piloto, em ordem:** InfoSimples (certidões e DTE), eSocial e EFD-Reinf, WhatsApp e e-mail (F5), cores (Domínio entrada, Alterdata), nuvens do escritório, assinatura, Calculadora RFB, cobrança (F6) e, por último, Open Finance como módulo à parte (fase 3 do produto).
+1. **O piloto completo tem ~88 semanas-pessoa (sp) de tamanho**, contra ~37 sp do piloto mínimo do backend. As sp medem tamanho, não calendário: o Enzo desenvolve com agentes de IA, e o prazo é dado pela sequência de entregas (2.1) e pelo caminho crítico externo (2.2), que não acelera com IA. A diferença de tamanho: F5 (CRM e WhatsApp), Timesheet e Financeiro (F6, sem o BPO), os conectores que estavam depois do piloto, a extensão e o MCP aberto. A Pluggy saiu do piloto (decisão do dono de 15/11/2026; seção 2.4).
+2. **Piloto em bloco:** os dois escritórios, com todos os setores, começam juntos quando a última entrega (E9) estiver pronta. A alternativa em ondas foi descartada pelo dono em 15/11/2026.
+3. **Custo mensal do piloto, provável** (SERPRO pelo preço normal da loja, faixa 1):
+
+   | Faixa | Valor por mês |
+   | --- | ---: |
+   | Só APIs | **~R$ 650** |
+   | APIs + infraestrutura AWS e Supabase | **~R$ 2,5 mil** |
+   | APIs + infraestrutura + modelos de IA | **~R$ 3,4 mil** (até R$ 4,1 mil no cenário alto) |
+
+4. **Total de 3 meses de piloto em uso:** ~R$ 11,0 mil (até ~R$ 13,0 mil), com ~R$ 750 de custos únicos. A infraestrutura de homologação durante a construção não está nessa conta.
+5. **Pedir no dia 1** (seção 2.3): e-CNPJ da Heild e, logo depois, o contrato SERPRO; procurações dos 10 clientes (30 dias para o aceite); InfoSimples com DPA; projeto no Google Cloud com o client ID para o administrador do Workspace do escritório liberar o app; certificado de assinatura de código para o agente local; contas nas lojas de extensão e no Microsoft Partner Center; saída do sandbox do SES; produção restrita do ADN, do eSocial e do Reinf; DPAs do fornecedor de modelos e do Supabase; certificados em nuvem e assinatura para os 2 escritórios; número de teste da Meta.
 
 ---
 
 ## 1. O que pedir já (contratos, credenciais e prazos)
 
-Ordem de pedido: do que tem o prazo mais longo ou trava outro passo para o mais rápido.
+Do prazo mais longo, ou que trava outro passo, para o mais rápido.
 
 | # | O que pedir | Quem pede | Prazo de aprovação (fonte) | Teste grátis antes | Precisa estar pronto em |
 | --- | --- | --- | --- | --- | --- |
-| 1 | **e-CNPJ A1 da Heild** (empresa da plataforma) | Dono | Emissão em AC, em geral no mesmo dia [a confirmar com a AC] | — | Antes do item 2 |
-| 2 | **Contrato SERPRO: Integra Contador** (modelo A: plataforma contratante, termo por escritório) | Dono, com o e-CNPJ | Online na loja; **chaves em até 10 minutos** (API Center do SERPRO, conferido 15/11/2026). A aceitação formal do modelo A (um contratante para vários escritórios) **[prazo a confirmar com o comercial do SERPRO]** | **Ambiente de demonstração com dados simulados** | F4 (pode desenvolver com a demonstração desde a F3) |
-| 3 | **Contrato SERPRO: Consulta CNPJ** (e CPF, se o Societário precisar) | Dono | Igual, até 10 minutos | Demonstração com CNPJs fictícios; CPF [a confirmar] | F4 |
-| 4 | **Procurações dos 10 clientes do piloto** (Autorização de Acesso ao escritório no e-CAC) | Cada cliente outorga; o escritório aceita | O escritório tem **30 dias para aceitar**; sem aceite, cancela (08, V1 I-13) | — | Início do piloto (pedir junto com o convite ao app) |
-| 5 | **Verificação do Meta Business** da Heild como provedora e dos números dos escritórios | Dono; cada escritório | **Até 14 dias úteis**; modelo de mensagem até 24 h (Meta, conferido 15/11/2026). Revisão do app para o Embedded Signup **[prazo a confirmar]** | Número de teste da Meta | F5 (pós-piloto), mas pedir agora pelo prazo |
-| 6 | **Parceria Thomson Reuters (Domínio)**: "Quero ser parceiro", para a API de entrada | Dono | **[prazo a confirmar]**; é de um concorrente e não tem compromisso de prazo | Homologação depois do cadastro | Pós-piloto (cores) |
-| 7 | **Conta InfoSimples e DPA** | Dono | Cadastro online imediato; DPA **[prazo a confirmar]** | **R$ 100 de crédito por 30 dias** | Pós-piloto; sem DPA, DTE fica desligado |
-| 8 | **Produção restrita do ADN** e PoC da procuração com e-CNPJ do escritório | Time + um escritório do piloto | Acesso com certificado; **[prazo a confirmar]** | Produção restrita | F4 |
-| 9 | **Saída do sandbox do SES** em sa-east-1 | Time | Pedido no console da AWS **[prazo a confirmar; costuma ser de horas a um dia]** | Sandbox (só envia a endereços verificados) | F2 (convites) |
-| 10 | **Conta no fornecedor de modelos** com termos de retenção e geografia | Dono + frente de IA | Imediato; processamento no Brasil **[a confirmar]** | Créditos iniciais [a confirmar] | F3 (runner de operários) |
-| 11 | **Verificação do app Google** para escopos restritos do Drive (`drive`, `drive.metadata.readonly`) | Time | **[prazo e custo da avaliação de segurança a confirmar]**; em geral semanas | Até 100 usuários de teste sem verificação [a confirmar] | Pós-piloto (nuvens do escritório) |
-| 12 | **Publisher verification da Microsoft** (Graph) | Time | **[a confirmar]** | Tenant de desenvolvedor | Pós-piloto |
-| 13 | **Web services de RS e SC para contabilistas**: cadastro do contabilista e autorização de cada cliente | Escritório do piloto, se tiver cliente nessas UFs | **[a confirmar]** | — | Só se o piloto tiver cliente no RS ou em SC |
-| 14 | **Certificado em nuvem (Bird ID ou VIDaaS)** para o que exige A3 | Escritório ou pessoa | Emissão do certificado; API pelo DOC-ICP-17.01 | — | Pós-piloto (ECD, ECF e o que pedir A3) |
-| 15 | **Pluggy** | Dono | Contrato comercial | 15 dias em produção, sandbox | Fase 3 do produto |
+| 1 | **e-CNPJ A1 da Heild** | Dono | Emissão em AC, em geral no mesmo dia [a confirmar com a AC] | — | Antes do item 2 |
+| 2 | **Contrato SERPRO: Integra Contador e Consulta CNPJ** | Dono, com o e-CNPJ | Online; **chaves em até 10 minutos** (API Center do SERPRO, conferido 15/11/2026). **No piloto, preço normal da loja.** O Enzo fala com o comercial do SERPRO sobre o modelo A (a Heild contrata, cada escritório assina o termo) só para a escala | Demonstração com dados simulados | F4 (desenvolve com a demonstração desde a F3) |
+| 3 | **Procurações dos 10 clientes** (Autorização de Acesso no e-CAC) | Cada cliente outorga; o escritório aceita | O escritório tem **30 dias para aceitar**; sem aceite, cancela (08, V1 I-13) | — | Início do piloto |
+| 4 | **Google no piloto: liberação pelo administrador do Workspace do escritório** (app confiável em Controles de API), sem CASA nem modo de teste ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 2.1). A verificação de escopo restrito com CASA fica para antes da venda em escala. Linha original, para a escala: **verificação do app Google** para os escopos restritos do Drive (`drive.readonly`, `drive.metadata.readonly`) | Time | **[prazo e custo da avaliação de segurança a confirmar]**; costuma levar semanas | Usuários de teste sem verificação [limite a confirmar] | Onda de nuvens |
+| 5 | **Conta InfoSimples e DPA** | Dono | Cadastro online imediato; DPA [prazo a confirmar] | **R$ 100 de crédito por 30 dias** | Onda de certidões e DTE; sem DPA, o DTE fica desligado |
+| 7 | **Produção restrita do ADN** e PoC da procuração com e-CNPJ do escritório | Time + um escritório | [a confirmar] | Produção restrita | F4 |
+| 8 | **Conta de desenvolvedor da Chrome Web Store e do Edge** | Dono | Taxa única de US$ 5 no Chrome [valor a confirmar]; revisão a cada versão [prazo a confirmar] | Pacote não listado para os 2 escritórios | Onda da extensão |
+| 9 | **Publisher verification da Microsoft** (Graph e conector do Copilot) e registro no Entra ID | Time | [a confirmar] | Tenant de desenvolvedor | Ondas de nuvens e do MCP |
+| 10 | **Número de teste da Meta** (Cloud API) | Time | Imediato no painel da Meta; produção pede verificação de até 14 dias úteis (Meta, conferido 15/11/2026) | O próprio número de teste | Onda do WhatsApp |
+| 11 | **Assinatura eletrônica** (ZapSign Equipe ou Clicksign Start) para os 2 escritórios | Heild paga no piloto | Imediato | [teste a confirmar por provedor] | Onda de assinatura |
+| 12 | **Certificado em nuvem** (Bird ID) de um signatário por escritório | Escritório; a Heild paga no piloto | Emissão em AC | — | Onda de assinatura (ECD e ECF) |
+| 13 | **Cobrança**: Inter (sandbox, API Pix gratuita) ou Asaas do escritório | Escritório | Imediato (Asaas); convênio com o banco [prazo do banco] | Sandbox | Onda do Financeiro |
+| 14 | **Saída do sandbox do SES** | Time | Pedido no console da AWS [prazo a confirmar] | Sandbox | F2 |
+| 15 | **Conta no fornecedor de modelos** com DPA, sem treino com os dados e retenção mínima (decisão Q7: dado completo, sem máscara) | Dono + frente de IA | Imediato | [a confirmar] | F3 |
+| 16 | **Web services de RS e SC** para contabilistas | Escritório, se tiver cliente nessas UFs | [a confirmar] | — | Só se houver cliente |
+| 18 | **Certificado de assinatura de código OV** da Heild, para o agente local (Authenticode) | Dono | Emissão pela AC [prazo a confirmar]; US$ 150 a 300 por ano (tabela da Microsoft) | — | E4 |
+| 17 | **Alterdata** (eContador Master) | Escritório que usa Alterdata | Contrato do escritório | — | Onda de cores |
+| — | ~~Parceria Thomson Reuters (Domínio)~~ | — | **Depois do piloto (Q9)**; no piloto, arquivo de troca | — | — |
 
-O que **não precisa de contrato**: distribuição de DF-e, eSocial, EFD-Reinf, NFS-e Nacional (ADN e Sefin), dados abertos do CNPJ, BrasilAPI, BCB, Calculadora da RFB. Precisam só do certificado certo (A1 do cliente ou e-CNPJ do escritório com procuração).
-
-O que é **conta do escritório**, não da Heild: Alterdata (eContador Master), chave por empresa no Onvio, assinatura eletrônica, banco ou gateway de cobrança, número de WhatsApp, Google Workspace ou Microsoft 365, certificado em nuvem.
+O que **não precisa de contrato**: DF-e, eSocial, EFD-Reinf, NFS-e Nacional (ADN e Sefin), dados abertos do CNPJ, BrasilAPI, BCB, Calculadora da RFB e a integração não oficial do WhatsApp (WAHA, Apache-2.0).
 
 ---
 
 ## 2. A ordem, fase por fase
 
-As fases e as semanas-pessoa (sp) são as do backend (ARQUITETURA, 7), para 2 pessoas, ±30%. Aqui fica o que cada fase entrega **de API**.
+As fases e as semanas-pessoa (sp) do backend vêm da ARQUITETURA, 7 (2 pessoas, ±30%). O que é novo nesta versão está marcado com ★.
 
-### Antes da F0 (semana 0)
+| Fase | Entrega de API | sp |
+| --- | --- | ---: |
+| **F0 · Fundação** | Executor e envelope (`POST /v1/ferramentas/{nome}`), erro acionável com os 45 códigos comuns, idempotência, sessão, contratos gerados (OpenAPI e esquemas MCP), limites por ator | 5 |
+| **F1 · Núcleo** | Ferramentas de entidade do núcleo, cursor e visão compacta, `validar_apenas`, sincronização e SSE, leituras do app do cliente; carga dos dados abertos do CNPJ | 8 |
+| **F2 · Arquivos** | URL pré-assinada, `documento.registrar`, worker Python (OCR, PDF, extrato), escritas do app; SES | 5 |
+| ★ Índice sem cópia | Cópia de processamento (72 h), cache de entrega (7 dias), busca do original sob demanda, gravação em pasta designada do escritório ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 1) | 1 |
+| **F3 · Procedimentos** | Contexto e resolução, motor, runner de operários (fornecedor de modelos), MCP por setor, dois procedimentos de referência, `calculo.*` e BCB | 9 |
+| **F4 · Cofre e captura** | Cofre, framework de conector com teto de custo e cache, DF-e, ADN, Consulta CNPJ | 7 |
+| ★ Agente local | Serviço para Windows e Linux, conexão de saída, credencial por dispositivo, atualização assinada ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 3) | 5,5 |
+| ★ Integra Contador, base | Termo e token, eventos gratuitos, caixa postal (listar; abrir com cartão), SITFIS, PGDAS-D e DAS, procurações | 3 |
+| ★ Integra Contador, completo | DCTFWeb e MIT, Sicalc (DARF e recálculo), PAGTOWEB, parcelamentos, DEFIS, PGMEI | 2 |
+| ★ InfoSimples | Certidões federais, estaduais e municipais; DTE (listar; abrir com cartão); Sintegra; JUCESP | 1,5 |
+| ★ eSocial e EFD-Reinf | Envio, consulta e download (10/dia, nada do dia 1 ao 7) | 3 |
+| **F5 · CRM e comunicação** | Webhooks, conversas, mensagens, e-mail de entrada e saída, `email.triar` pelo integrante | 6 |
+| ★ WhatsApp não oficial | Serviço `wa-gateway` (WAHA), adaptador, QR e saúde, ritmo e opt-out ([`WHATSAPP.md`](WHATSAPP.md)) | 2 |
+| ★ WhatsApp oficial de teste | Adaptador `whatsapp_cloud` com o número de teste | 0,5 |
+| **F6 · Timesheet e Financeiro, sem o BPO** | Sessões de trabalho a partir de eventos, cobrança (banco do escritório, Asaas, Efí), NFS-e do escritório | 7 [estimativa: os 10 sp da F6 menos o BPO] |
+| ★ Extensão (v1 e captura de downloads) | [`EXTENSAO.md`](EXTENSAO.md) | 4,5 |
+| ★ Cores | Alterdata ePlugin (se um escritório usar) e arquivo de troca do Domínio, Questor e Contmatic | 2 |
+| ★ Conectores de armazenamento | Google Drive (Meu Drive e drives compartilhados), OneDrive e SharePoint, Dropbox, Box, S3 compatível, WebDAV, SFTP | 5 |
+| ★ Assinatura e certificado em nuvem | Um provedor pela interface comum; Bird ID por DOC-ICP-17.01 | 2,5 |
+| ★ Calculadora RFB | Versão offline em contêiner | 1 |
+| ★ MCP aberto (Q10) | OAuth 2.1 e MCP remoto para Claude, ChatGPT e Copilot Studio, só leitura e propostas | 3,5 |
+| **F7 · Endurecimento** | Teste sintético diário de todos os conectores, painel de saúde, teste de segredo, carga, restauração, runbook | 4 (era 3; mais conectores para monitorar) |
+| **Total do piloto completo** | | **~88 sp** |
+| Depois do piloto | Open Finance (Pluggy), como módulo à parte | +1,5 |
+| Condicional | Web services RS e SC, se houver cliente | +1,5 |
+| Durante o piloto, se um escritório usar | Agente do Microsoft 365 Copilot e complemento do Google Workspace (Q10) | +3,5 |
+| Experimento no fim do piloto | Copiloto da extensão em 2 portais | +3 |
 
-- Itens 1 a 5 e 8 da seção 1.
-- Definir o pacote de domínio das ferramentas (`pacotes/dominio`): o esqueleto Zod das ~68 ferramentas novas da API interna, os códigos de erro comuns e o teto de tokens por resposta compacta.
+A alternativa de começar em ondas foi **descartada** pelo dono em 15/11/2026: o piloto é em bloco.
 
-### F0 · Fundação do servidor (5 sp): o envelope
+### 2.1 Sequência de entregas e critério de pronto
 
-| Entrega de API | Detalhe |
-| --- | --- |
-| Executor e envelope | `POST /v1/ferramentas/{nome}`; resultados e HTTP da API interna, 2.3; erro acionável (2.4) com os 42 códigos comuns |
-| Idempotência | Tabela `idempotencia`, `Idempotency-Key` obrigatória em `executar`, 409 em hash diferente |
-| Sessão | `GET /v1/sessao`, JWT do Supabase, perfil materializado |
-| Contratos gerados | OpenAPI 3.1 e esquemas MCP a partir do Zod; snapshot no CI que quebra sem aumento de `versao` |
-| Limites | Taxa por ator (API interna, 1); a de dinheiro chega com os conectores |
+Cada entrega só começa a contar como pronta quando passa no critério. As dependências externas de cada uma estão na coluna da direita e na seção 2.2.
 
-Nenhuma API externa.
+| # | Entrega | O que inclui (fases da tabela acima) | sp | Critério de pronto | Depende de fora |
+| --- | --- | --- | ---: | --- | --- |
+| E1 | Fundação e núcleo | F0, F1 | 13 | Teste de fumaça do wireframe no modo `api` e teste de vazamento entre escritórios verdes contra o Supabase de São Paulo; OpenAPI e esquemas MCP gerados; snapshot de contratos no CI | Projetos Supabase em São Paulo (P4 do backend) |
+| E2 | Arquivos e app do cliente | F2, índice sem cópia | 6 | Upload e download pelo app com URL pré-assinada; OCR devolvendo campos; convite por e-mail chegando a endereço não verificado | **Saída do sandbox do SES** |
+| E3 | Procedimentos e integrantes | F3 | 9 | Os dois procedimentos de referência passam nos casos de gabarito; MCP por setor; respostas compactas abaixo do teto | **DPA do fornecedor de modelos** (sem treino, retenção mínima) |
+| E4 | Cofre, captura de notas e agente local | F4, agente local | 12,5 | DF-e e ADN capturando um mês real de um cliente de cada escritório, conferido contra o portal; **agente instalado no servidor do escritório, com o índice completo e busca sob demanda abaixo de 10 s** | **A1 dos clientes** onde for o caminho; **produção restrita do ADN** e PoC da procuração; **certificado de assinatura de código** |
+| E5 | Governo completo | Integra base e completo, InfoSimples, eSocial e Reinf, Calculadora RFB | 10,5 | Chamadas reais para os 10 clientes, nenhuma paga sem procuração vigente em 7 dias de log; caixa postal nunca aberta sem cartão | **e-CNPJ → contrato SERPRO**; **procurações aceitas**; **DPA da InfoSimples**; produção restrita do eSocial e do Reinf |
+| E6 | CRM, WhatsApp e e-mail | F5, WhatsApp não oficial, número de teste oficial | 8,5 | Dois números estáveis por 14 dias; ritmo e opt-out testados; **aceite do risco registrado pelos dois escritórios**; e-mail que chega vira tarefa pelo integrante | **Número de teste da Meta**; OAuth do Gmail ou do Graph dos escritórios |
+| E7 | Timesheet, Financeiro e extensão | F6 sem o BPO, extensão v1 e captura de downloads | 11,5 | Extensão publicada (não listada) nas duas lojas e vinculada às 20 contas; cobrança emitida e baixada em produção | **Revisão das lojas de extensão**; convênio de cobrança ou conta Asaas |
+| E8 | Conectores de armazenamento, cores, assinatura e MCP aberto | Conectores de armazenamento, cores (arquivo de troca e Alterdata), assinatura e certificado em nuvem, MCP aberto | 13 | Drive do escritório (Workspace) indexado, com os outros conectores testados em contas de desenvolvedor; envelope assinado e devolvido; Claude ou ChatGPT lendo e propondo, sem nada executado | **Liberação do app pelo administrador do Workspace**; publisher verification da Microsoft (para os testes); certificados em nuvem emitidos |
+| E9 | Endurecimento e início do piloto | F7 | 4 | Todos os critérios da seção 5 verdes; restauração de backup ensaiada; runbook; procurações vigentes; os dois escritórios treinados | — |
+| | **Total** | | **~88** | | |
 
-### F1 · Núcleo pela API (8 sp): as ferramentas de entidade
+E1 a E3 não dependem de quase nada de fora e podem andar enquanto os pedidos da seção 2.3 correm. A partir da E4, cada entrega tem uma dependência externa que pode atrasá-la mais do que o desenvolvimento.
 
-| Entrega de API | Detalhe |
-| --- | --- |
-| Ferramentas de entidade do núcleo | Cliente, pessoa, tarefa (todas as transições), obrigação, cartão, notificação, comunicação interna (as que já existem no wireframe), com `x.atualizar` restrito aos campos editáveis |
-| Paginação e visão | Cursor em toda lista; `visao: compacta \| tela`; teto medido no CI |
-| `validar_apenas` | Em toda `rascunhar` e `executar` |
-| Sincronização e SSE | `GET /v1/sincronizar`, `GET /v1/eventos/fluxo` |
-| App do cliente (leitura) | `pendencia.listar`, `documento.listar`, `tarefa.listar` (as dele), `cliente.perfil_em` |
+### 2.2 Caminho crítico externo
 
-Externa: **dados abertos do CNPJ** (carga mensal num job; sem contrato).
+O que não acelera com IA. Prazos de aprovação conhecidos; os não publicados ficam marcados.
 
-### F2 · Documentos e arquivos (5 sp)
+| Item | Prazo | Trava | Observação |
+| --- | --- | --- | --- |
+| ~~Verificação do app Google com CASA~~ | **Saiu do caminho crítico do piloto**: no piloto, o administrador do Workspace marca o app como confiável (minutos). Para a escala: verificação de escopo restrito de ~6 semanas, sem garantia, e CASA anual com laboratório autorizado (preço não publicado) | — | Fica para antes da venda em escala |
+| **Certificado de assinatura de código OV** | Emissão pela AC [prazo a confirmar] | E4 | Sem ele, o Windows mostra o aviso do SmartScreen no agente local; o Azure Artifact Signing não atende empresa brasileira |
+| **Liberação pelo administrador do Workspace** do escritório | Minutos, depois que a Heild tiver o projeto no Google Cloud e o client ID | E8 | Passo a passo em [`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 2.1 |
+| **Procurações dos 10 clientes** (Autorização de Acesso no e-CAC) | O cliente outorga; o escritório tem **até 30 dias para aceitar** | E5 | Depende de 10 pessoas de fora. Pedir junto com o convite ao app e cobrar pela régua |
+| **DPA da InfoSimples** | [a confirmar] | E5 (DTE) | Sem DPA, as capacidades que enviam o A1 do cliente ficam desligadas. Certidões funcionam sem ele |
+| **Revisão das lojas de extensão** (Chrome Web Store e Edge Add-ons) | [prazo a confirmar], a cada versão | E7 | A primeira revisão costuma ser a mais lenta; publicar cedo uma versão mínima não listada |
+| **Publisher verification da Microsoft** | Gratuita e em minutos com os pré-requisitos (conta no Partner Center e domínio verificado) | E8 | No piloto, só para testar o conector com tenant de desenvolvedor |
+| **Produção restrita do ADN, do eSocial e do Reinf** | [a confirmar] | E4, E5 | Testes com certificado antes de produção |
+| **e-CNPJ da Heild → contrato SERPRO** | Emissão em AC, em geral no mesmo dia [a confirmar]; chaves do SERPRO em até 10 minutos (SERPRO, conferido 15/11/2026) | E5 | Curto, mas tudo do SERPRO depende do e-CNPJ |
+| **Saída do sandbox do SES** | [prazo a confirmar; costuma ser de horas a um dia] | E2 | Pedido no console da AWS |
+| **Certificados em nuvem** (Bird ID) dos 2 signatários | Emissão em AC [a confirmar] | E8 | Pede validação de identidade da pessoa |
+| **DPA do Supabase** e **do fornecedor de modelos** | [a confirmar] | E1 (dado real), E3 | O jurídico revisa antes de entrar dado real (P3 do backend; decisão Q7) |
+| **Número de teste da Meta** | Imediato | E6 | Número oficial de produção, se um dia for preciso, pede verificação de até 14 dias úteis |
 
-| Entrega de API | Detalhe |
-| --- | --- |
-| Arquivos | `documento.preparar_envio` (URL pré-assinada), `documento.registrar`, `documento.obter_link`, `documento.registrar_leitura` (worker Python) |
-| App do cliente (escrita) | `pendencia.enviar`, `pendencia.nao_tenho`, `pendencia.ja_fiz`, `documento.assinar_ciencia` |
-| Extratos | `extrato.ler_arquivo` (OFX e CSV; PDF no worker Python) |
+### 2.3 O que pedir no dia 1
 
-Externas: **S3 e KMS** (já na infraestrutura), **SES** (convites e código do app), OCR próprio no worker Python.
+Para nada da lista acima travar o piloto, tudo isto sai no primeiro dia, antes de qualquer código:
 
-### F3 · Filas, procedimentos e encaixe dos integrantes (9 sp)
+1. **e-CNPJ A1 da Heild** e, assim que sair, o **contrato SERPRO** (Integra Contador e Consulta CNPJ) pela loja.
+2. **Procurações dos 10 clientes**: o escritório pede a cada cliente, com o passo a passo, e aceita no Portal de Serviços.
+3. **Conta InfoSimples e pedido do DPA.**
+4. **Projeto no Google Cloud da Heild**, com a Drive API, a tela de consentimento (domínio verificado, política de privacidade e termos publicados), o **client ID** e os escopos `drive.readonly`, `drive.file`, `openid` e `email`; e o envio do passo a passo ao administrador do Workspace do escritório ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 2.1).
+5. **Certificado de assinatura de código OV** para o agente local.
+6. **Contas de desenvolvedor** na Chrome Web Store, no Edge Add-ons e no Microsoft Partner Center (publisher verification).
+7. **Pedido de saída do sandbox do SES** em sa-east-1.
+8. **Produção restrita** do ADN, do eSocial e do Reinf, com o certificado de teste.
+9. **DPAs do fornecedor de modelos e do Supabase**, para o jurídico revisar.
+10. **Certificados em nuvem e planos de assinatura** para um signatário de cada escritório.
+11. **Número de teste da Meta.**
+12. **Projetos Supabase em São Paulo** (`heild-homologacao` e `heild-producao`; P4 do backend).
 
-| Entrega de API | Detalhe |
-| --- | --- |
-| Contexto e resolução | `cliente.resolver`, `pessoa.resolver`, `contexto.carregar`, `execucao.obter`, `procedimento.listar`, `validador.executar` |
-| Operações de processo de referência | `notas.conferir_entrada` (NFE-023) e `extrato.classificar_linhas` (CTB-004), com casos de gabarito |
-| MCP | `/mcp/setor/{codigo}` com os recortes do Contábil e `excecao`; tokens de serviço |
-| Cálculo | As funções `calculo.*` de fase 1 que os procedimentos de referência usam (M3), mais `calculo.multa_juros` |
-| Interno | Token de integrante, fila e pulso, `aprovacao.decidir` de ponta a ponta |
+### 2.4 Open Finance fora do piloto e o escritório que concilia no Domínio
 
-Externas: **fornecedor de modelos** pelo serviço `operarios` (item 10 da seção 1); **BCB SGS** (grátis, 0,5 sp, dentro da F3).
+**Decisão do dono (15/11/2026):** a Pluggy sai do piloto e volta depois dele como módulo à parte. Dois motivos: o valor (R$ 2.500 por mês para cerca de 20 contas) e o fato de que um dos dois escritórios já faz a conciliação por Open Finance direto no Domínio. **Nos dois escritórios do piloto, o extrato entra por OFX, CSV ou PDF**, pelo app do cliente ou pela pasta (`extrato.importar`, leitor de extratos).
 
-### F4 · Cofre e primeiros conectores (7 sp + 3 sp do Integra)
+**No escritório que concilia no Domínio, a Heild não deve conciliar de novo o que o Domínio já faz.** Há dois jeitos de evitar o retrabalho:
 
-| Entrega de API | Detalhe |
-| --- | --- |
-| Cofre | `POST /cofre/v1/credenciais` (A1 pelo app e e-CNPJ do escritório), `credencial.vincular`, `.rotacionar`, `.revogar`, `.usar` |
-| Framework de conector | Conexão, execução, cursor, retentativa, fila morta, teto de custo mensal por conexão (80% avisa, 100% só manual), cache de consulta paga |
-| **Distribuição de DF-e** | `dfe.distribuir`, `dfe.consultar_chave`, `dfe.manifestar`; respeita o 656 (1 h) e as 20 consultas/hora; liga no dia em que chega o A1 |
-| **ADN** | `adn.distribuir`; PoC com procuração e e-CNPJ do escritório; A1 do cliente como reserva |
-| **Consulta CNPJ** | Dados abertos primeiro; SERPRO só para CNPJ que o arquivo mensal ainda não tem |
-| Operações de Notas | `notas.capturar_agora`, `notas.manifestar` (cartão), `perfil_captura.obter`, `captura.saude` |
-| **Integra Contador (+3 sp, recomendado no piloto)** | Termo e token diário; `integra.eventos` (grátis, diário); `caixa_postal.verificar` (lista só quando o evento acusa) e `caixa_postal.abrir` (cartão, dá ciência); `situacao_fiscal.gerar`; `pgdas.preparar`, `pgdas.transmitir` (cartão); `guia.gerar`; `procuracao.conferir`. **Nunca chamar sem procuração vigente** (o 403 é cobrado): o conector confere a procuração antes |
+| Opção | Como funciona | Prós | Contras |
+| --- | --- | --- | --- |
+| **A. Ler a conciliação do Domínio pelo arquivo de troca** | O escritório exporta do Domínio o relatório ou o arquivo de lançamentos conciliados; a Heild importa (`core.importar_relatorio`) e mostra a competência como "conciliada no Domínio" | A Heild sabe o que foi conciliado e pode usar isso para conferir diferenças (CTB-018) e fechar a tarefa por evidência | Depende de uma exportação manual a cada competência (a Domínio não tem API de saída, e a parceria fica para depois do piloto); o formato do relatório precisa de um leitor próprio e pode mudar |
+| **B. Ligar a classificação da Heild só onde o Domínio não cobre** | Uma chave por cliente e conta, `conciliacao_no_core`. Onde está ligada, a Heild não importa extrato para classificar nem roda o CTB-004; mantém só a pendência "extrato chegou?" e a tarefa da competência, que a pessoa conclui. Onde o Domínio não cobre (conta sem Open Finance no Domínio, cartão, cliente que manda PDF), a Heild classifica como nos outros | Simples, sem arquivo novo e sem leitor de relatório; nada é feito duas vezes; a configuração é visível na ficha do cliente | A Heild não vê o resultado da conciliação do Domínio, só que a tarefa foi concluída |
 
-### F7 · Endurecimento para o piloto (3 sp)
-
-- Teste sintético diário de cada conector em modo leitura.
-- Painel de saúde dos conectores e alertas (três falhas seguidas).
-- Teste de que nenhum segredo aparece em resposta, evento, log ou contexto de modelo.
-- Medição do tamanho das respostas compactas com dados reais anonimizados.
-
-**Piloto pronto: ~40 sp (≈ 5 meses com 2 pessoas), com o Integra.**
-
-### Depois do piloto
-
-| Ordem | Etapa | Fase do backend | Esforço de API (sp) | Por que nesta ordem |
-| --- | --- | --- | ---: | --- |
-| 1 | **InfoSimples**: certidões, DTE estaduais (listar; abrir com cartão), Sintegra | logo após F7 | 1,5 | Fecha o Fiscal do mês (certidão e caixa estadual); depende do DPA |
-| 2 | **eSocial e EFD-Reinf**: envio, consulta, download com 10/dia e bloqueio dos dias 1 a 7 | idem | 3 | Abre o DP e o Reinf; grátis |
-| 3 | **WhatsApp e e-mail** (CRM, régua, `guia.enviar_ao_contato`) | F5 (6 sp do backend) | incluso | A verificação da Meta já terá saído |
-| 4 | **Cores**: Domínio entrada, Alterdata ePlugin, arquivo de troca | F5 ou F6 | 3,5 | Depende da parceria TR e do pacote do escritório |
-| 5 | **Nuvens do escritório**: Drive, Graph, S3 compatível, WebDAV, SFTP | F6 | 3,5 | Depende da verificação do app Google |
-| 6 | **Assinatura** (um provedor pela interface comum) e **certificado em nuvem** | F6 | 2,5 | Relatórios e contratos; ECD e ECF |
-| 7 | **Calculadora RFB offline** em contêiner | F6 | 1 | Consultoria e reforma |
-| 8 | **Web services RS e SC; SAE-NFC-e SP** | quando houver cliente | 1,5 | Só com cliente nessas UFs |
-| 9 | **Cobrança** (banco do escritório, Asaas, Efí) e **NFS-e do escritório** | F6 (10 sp do backend) | incluso | Financeiro e app do cliente |
-| 10 | **Open Finance (Pluggy)** | fase 3 do produto | 1,5 | Piso de R$ 2.500; módulo à parte |
+**Recomendação: B.** Resolve o retrabalho já no piloto, com uma configuração e sem depender de exportação manual. A leitura da opção A pode entrar depois, se o escritório quiser a conferência de diferenças na Heild, ou quando houver a parceria com a Thomson Reuters. Esforço de B: ~0,5 sp, dentro do que já está na conta (configuração por cliente e condição no gatilho do procedimento).
 
 ---
 
-## 3. Custo mensal estimado das APIs do Contábil
+## 3. Custo do piloto (2 escritórios, 5 clientes cada, 20 usuários)
 
 ### 3.1 Premissas
 
 | Premissa | Valor | Fonte |
 | --- | --- | --- |
-| Escala | Piloto: 2 escritórios × 5 clientes = 10 clientes. Depois, escritório médio de 100 clientes: 1.000, 10.000 e 100.000 clientes | Pedido do dono; HOSPEDAGEM 3 |
-| Uso por cliente por mês (provável) | Integra: 6 consultas, 1 emissão, 1 declaração; Consulta CNPJ: 0,1 Básica; InfoSimples: 6,2 consultas com R$ 0,02 médios de adicional; 20 e-mails; 5 min de áudio | 08, 10.2 e estudo de precificação 3.3 e 3.11 (decomposição em chamadas é aproximação do estudo) |
-| Integra e CNPJ | **Modelo A** (volume somado de todos os escritórios); o volume do mês inteiro paga a faixa atingida; **+5%** para respostas 403 cobradas | SERPRO, conferido 15/11/2026; o 5% é premissa |
-| InfoSimples | Cascata mensal de R$ 0,22 a 0,06; franquia mínima de R$ 100 | InfoSimples, conferido 15/11/2026 |
-| WhatsApp | 6 de utilidade, 0,5 de marketing e 25 de serviço por cliente; 1 número por escritório no piloto, 2 no médio; 1.000 de serviço grátis por número; **repassado ao escritório** | Estudo 3.3 e 1.1; Meta, conferido 15/11/2026 |
-| Câmbio | R$ 7,97 por US$ | Estudo 1.2 |
-| Fora da conta | Tokens de modelo (frente de IA e planos de IA, estudo 6.8); infraestrutura AWS e Supabase (HOSPEDAGEM 4); contas do escritório (assinatura, cores, cobrança, certificado em nuvem) | — |
+| Usuários | 20 contas (10 por escritório) | HOSPEDAGEM, 3 |
+| Uso de API por cliente | Integra: 6 consultas, 1 emissão, 1 declaração por mês, **em dobro** no piloto (testes); CNPJ 0,1; InfoSimples 6,2 consultas | 08, 10.2; estudo de precificação 3.11 |
+| Preços | Conferidos na fonte em 15/11/2026 ([`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md)) | — |
+| Câmbio | R$ 7,97 por US$ (com IOF e tributos de importação; com só o IOF, R$ 5,69) | Estudo, 1.2 |
+| IA | **R$ 26 por usuário por mês** no desenho recomendado e **R$ 60** no plano atual, como cenário alto | Avaliação dos integrantes (`docs/integrantes/AVALIACAO.md`, branch `wf-integrantes-pesquisa`), 4.2 |
+| Consultor | 80 perguntas por usuário por mês a R$ 0,217 | Estudo, 3.3 (pode ter sobreposição com o mix da avaliação; fica separado por cautela) |
+| Duração | 3 meses de uso | Premissa |
 
-### 3.2 A tabela (R$ por mês)
+### 3.2 Linha por linha (R$ por mês)
 
-| Linha | Piloto (10 clientes) | 10 escritórios (1.000) | 100 escritórios (10.000) | 1.000 escritórios (100.000) |
-| --- | ---: | ---: | ---: | ---: |
-| Integra Contador (com 5% de 403) | 23 | 1.648 | 8.190 | 58.800 |
-| — faixa atingida (consulta / emissão / declaração) | R$ 0,24 / 0,32 / 0,40 | 0,16 / 0,29 / 0,32 | 0,06 / 0,26 / 0,16 | 0,06 / 0,08 / 0,12 |
-| SERPRO Consulta CNPJ | 1 (+ R$ 7 uma vez no cadastro inicial) | 66 | 565 | 3.557 |
-| InfoSimples (com adicionais) | 100 (franquia mínima) | 1.164 | 8.850 | 54.610 |
-| SES | 0 | 16 | 159 | 1.594 |
-| Transcrição de áudio (com o CRM) | 1 | 100 | 1.000 | 10.000 |
-| DF-e, ADN, eSocial, Reinf, dados abertos, BCB, Calculadora RFB | 0 | 0 | 0 | 0 |
-| **Total pago pela plataforma** | **~R$ 125** (~R$ 25 sem a InfoSimples) | **~R$ 3,0 mil** | **~R$ 18,8 mil** | **~R$ 129 mil** |
-| Por cliente | — (domina a franquia da InfoSimples) | R$ 3,00 | R$ 1,88 | R$ 1,29 |
-| WhatsApp (repassado ao escritório) | ~R$ 4 (se ligado) | ~R$ 546 | ~R$ 5,5 mil | ~R$ 54,6 mil antes do desconto de volume |
-| Open Finance (módulo à parte, fase 3) | — | R$ 2.500 de piso da plataforma, rateado | idem até 500 conexões; excedente por requisição [preço não publicado] | idem |
+| Linha | Quem paga no piloto | R$/mês | Observação |
+| --- | --- | ---: | --- |
+| Integra Contador | Heild | 45 | **Preço normal da loja, faixa 1** (R$ 0,24 por consulta, R$ 0,32 por emissão, R$ 0,40 por declaração), uso em dobro, +5% de 403. Com 10 clientes, o modelo A ou o B dão o mesmo valor: o volume não sai da faixa 1 |
+| SERPRO Consulta CNPJ | Heild | 2 | Preço normal da loja (R$ 0,6591 a Básica); +R$ 7 uma vez no cadastro |
+| InfoSimples | Heild | 100 | Franquia mínima (uso real ~R$ 15); o 1º mês sai do crédito de teste |
+| WhatsApp não oficial (WAHA) | Heild | 0 | Só infraestrutura (abaixo) |
+| WhatsApp oficial, número de teste | Heild | 0 | |
+| Transcrição de áudio | Heild | 5 | 10 clientes × 5 min, com folga |
+| SES | Heild | 1 | |
+| Assinatura eletrônica (ZapSign Equipe, mensal) | Heild | 140 | 2 × R$ 69,90 |
+| Certificado em nuvem (Bird ID) | Heild | 70 | 2 × R$ 34,90 |
+| Cobrança (Asaas, tarifa promocional) | Heild | 16 | ~20 cobranças de teste × R$ 0,79; com o Inter, R$ 0 |
+| Integrador de NFS-e (Focus Solo) | Heild | 95 | Só se houver município fora do padrão; 30 dias grátis |
+| e-CNPJ da Heild, rateado | Heild | 25 | [preço a confirmar com a AC] |
+| Certificado de assinatura de código (agente local) | Heild | 150 | US$ 150 a 300 por ano, rateado (tabela da Microsoft) |
+| DF-e, ADN, eSocial, Reinf, BCB, Calculadora, dados abertos, conectores de armazenamento | — | 0 | Drive dentro da cota gratuita; o agente local roda no servidor do escritório |
+| Open Finance (Pluggy) | — | 0 | **Fora do piloto** (decisão de 15/11/2026); extrato por OFX, CSV ou PDF |
+| **Só APIs** | | **~650** | |
+| Infraestrutura AWS e Supabase do piloto | Heild | 1.570 | US$ 197 (HOSPEDAGEM, 4) |
+| `wa-gateway` (WAHA) e Calculadora offline | Heild | 296 | +US$ 24,80 (0,5 vCPU) + US$ 12,40 (0,25 vCPU) no Fargate ARM |
+| S3 de documentos: só índice, texto, miniaturas e cópias temporárias | Heild | 8 | ~3 GB, < US$ 1. Os originais ficam no escritório; antes eram ~80 GB (< US$ 2), que nunca tinham entrado na conta (HOSPEDAGEM, 4, deixa os documentos de fora) |
+| **APIs + infraestrutura** | | **~2.520** | Com o câmbio de R$ 5,69: ~R$ 1,9 mil |
+| Integrantes (20 × R$ 26) | Heild | 520 | Cenário alto: 20 × R$ 60 = 1.200 |
+| Consultor (20 × 80 × R$ 0,217) | Heild | 347 | |
+| Consultor da empresa no app (10 clientes × 10 perguntas × R$ 0,12) | Heild | 12 | Estudo, 3.10 |
+| Ajuda do sistema (20 × R$ 0,16) | Heild | 3 | Estudo, 3.3 |
+| **APIs + infraestrutura + IA** | | **~3.400** | Cenário alto: **~4.080** |
 
-No piloto, a InfoSimples só entra se as certidões forem ligadas antes do fim (ela está "logo depois" na ordem); sem ela, o piloto custa ~R$ 25 por mês de API.
+### 3.3 Custos únicos e total
 
-### 3.3 Leitura
+| Item | R$ |
+| --- | ---: |
+| Consulta CNPJ do cadastro inicial | 7 |
+| Conta da Chrome Web Store (US$ 5) | 40 |
+| Município novo no Focus, se precisar | 199 |
+| Tokens do piloto pré-registrado da avaliação dos integrantes ("centenas de reais", AVALIAÇÃO 11.6) | ~500 [estimativa] |
+| **Únicos** | **~750** |
+| **Total de 3 meses de uso** | **~R$ 11,0 mil** (alto ~R$ 13,0 mil) |
 
-1. **O modelo A do SERPRO vale muito com volume.** Com 1.000 escritórios, a consulta cai de R$ 0,24 para R$ 0,06; o custo do Integra por cliente vai de R$ 2,27 (faixa 1) para R$ 0,59. No modelo B (cada escritório contrata), um escritório médio fica sempre nas faixas 1 e 2: ~R$ 2,08 por cliente. A diferença com 1.000 escritórios é de ~R$ 150 mil por mês. Por isso a aceitação do modelo A pelo SERPRO é a pergunta comercial mais importante (Q2).
-2. **Pelo preço de faixa do SERPRO, crescer pode baratear a conta inteira do mês:** passar de 7.000 para 7.001 consultas faz todas as 7.001 custarem R$ 0,14 em vez de R$ 0,16. Vale agrupar as consultas no contrato da plataforma.
-3. **O 403 cobrado é o risco silencioso:** uma consulta a cliente sem procuração vigente custa como uma consulta boa. O conector confere a procuração (pelos eventos grátis de D-1) antes de chamar.
-4. **Os números ficam abaixo do estudo de precificação** (R$ 3,62 por cliente no médio), porque o estudo usa a faixa 1 em tudo. O teto de 130% por cliente (R$ 2,93 de Integra e CNPJ e R$ 1,78 de InfoSimples, estudo 3.11) dá folga para o uso real ficar até ~50% acima do provável sem excedente.
-5. **A franquia da InfoSimples domina o piloto:** R$ 100 por mês para ~60 consultas. Se o piloto precisar de certidões, vale usar o crédito de teste nos primeiros 30 dias.
-6. **Referências de fora desta conta:** infraestrutura ~US$ 197 por mês no piloto e ~US$ 463, 1.211 e 8,3 a 10,1 mil nas três escalas (HOSPEDAGEM 4); tokens de modelo, R$ 2,1 mil por mês de demanda bruta num escritório médio provável (estudo 3.4), controlados pelos planos de IA.
+A avaliação de segurança CASA do Google (preço negociado com o laboratório, não publicado) saiu do piloto e entra no custo de antes da venda em escala.
+
+### 3.4 Leitura
+
+1. **Sem a Pluggy, que custaria R$ 2.500 por mês para ~10 conexões, a infraestrutura passa a pesar mais que as APIs:** R$ 1,9 mil contra R$ 0,5 mil.
+2. **As maiores linhas de API do piloto são a assinatura eletrônica (R$ 140), a franquia da InfoSimples (R$ 100) e o integrador de NFS-e (R$ 95, só se houver município fora do padrão).** O SERPRO custa ~R$ 47.
+3. **A IA é barata no piloto** (R$ 0,9 mil a R$ 1,6 mil por mês) porque há só 20 usuários; ela cresce por usuário, não por escritório.
+4. **O que não está na conta:** o tempo das pessoas, o ambiente de homologação durante os meses de construção (~US$ 60 a 100 por mês [estimativa]) e o parecer jurídico sobre o WhatsApp não oficial.
 
 ---
 
-## 4. Critérios para passar de uma etapa à seguinte
+## 4. Custo das APIs com 10, 100 e 1.000 escritórios
+
+Sem mudança de método desde a versão 0.1. O escritório médio tem 100 clientes, o uso é o provável, o SERPRO está no modelo A com 5% de 403 e a InfoSimples, em cascata. **O WhatsApp sai da conta:** pela decisão Q5, o uso do dia a dia é não oficial (custo zero por mensagem; só infraestrutura) e a API oficial é contratada e paga pelo escritório.
+
+| Linha (R$/mês) | 10 escritórios (1.000 clientes) | 100 (10.000) | 1.000 (100.000) |
+| --- | ---: | ---: | ---: |
+| Integra Contador | 1.648 | 8.190 | 58.800 |
+| SERPRO Consulta CNPJ | 66 | 565 | 3.557 |
+| InfoSimples | 1.164 | 8.850 | 54.610 |
+| SES | 16 | 159 | 1.594 |
+| Transcrição | 100 | 1.000 | 10.000 |
+| **Total pago pela plataforma** | **~3,0 mil** | **~18,8 mil** | **~129 mil** |
+| Por cliente | R$ 3,00 | R$ 1,88 | R$ 1,29 |
+| `wa-gateway` (infraestrutura) | ~US$ 25 a 50 | ~US$ 50 a 200 | ~US$ 500 a 2.000 [estimativa, medir no piloto] |
+| Open Finance (módulo à parte) | Piso de R$ 2.500 da plataforma, rateado | idem até 500 conexões; acima, por requisição [preço não publicado] | idem |
+
+Nessas escalas, a Pluggy, a assinatura, a cobrança e o certificado em nuvem voltam a ser **conta do escritório**, como no estudo de precificação. No piloto, a Heild paga tudo para os escritórios testarem.
+
+O modelo A do SERPRO continua sendo a maior alavanca: com 1.000 escritórios, a diferença para cada escritório contratar sozinho é de ~R$ 150 mil por mês. A confirmação com o comercial do SERPRO é **pendência do Enzo** (Q2).
+
+---
+
+## 5. Critérios para passar de uma etapa à seguinte
 
 | Etapa | Pronto quando |
 | --- | --- |
 | Qualquer conector | Teste sintético diário verde por 7 dias; erros externos mapeados para os códigos da API interna; teto de custo configurado; nenhum segredo em log, evento ou resposta |
-| DF-e e ADN | Completude conferida em um mês real de um cliente de cada escritório contra o portal (paridade com o SIEG, se houver) |
+| DF-e e ADN | Completude conferida em um mês real de um cliente de cada escritório contra o portal |
 | Integra | Nenhuma chamada paga sem procuração vigente em 7 dias de log; caixa postal nunca aberta sem cartão (teste automatizado) |
-| Operação de processo | Casos de gabarito passando; taxa de `validar_apenas` com erro medida; resposta compacta abaixo do teto |
+| WhatsApp não oficial | Sessão estável por 14 dias nos 2 números do piloto; ritmo e opt-out aplicados (teste); cláusula de aceite registrada como evento pelos 2 escritórios ([`WHATSAPP.md`](WHATSAPP.md), 4.1) |
+| Extensão | Critérios do [`EXTENSAO.md`](EXTENSAO.md), 4 |
+| MCP aberto | Nenhuma ferramenta `executar` alcançável por token externo (teste); revogação imediata testada |
+| Agente local | Critérios do [`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 3.4: índice em < 24 h, mudança em até 15 min, busca sob demanda < 10 s, nenhuma escrita fora da pasta da Heild, revogação em < 1 min |
+| Operação de processo | Casos de gabarito passando; resposta compacta abaixo do teto |
 | App do cliente | Teste de vazamento: uma pessoa do cliente A nunca lê dado do cliente B nem do escritório |

@@ -431,3 +431,9 @@ Acréscimos:
 - **Por que o princípio 4 não muda.** Num teste com 908 pares de lei alemãs, a consolidação feita por modelo teve 93% a 99% de semelhança com o texto oficial, mas só 50,3% de acerto exato numa alteração e 20,51% em cadeias (Prior et al., NLLP 2025). Slide 10; Municipal, 11.2.
 - **Laço de melhoria da ingestão (novo).** Instruções dos extratores e do reconciliador, montador de cadeia, segmentador e limiares competem contra o ouro escondido, fora da produção, num laço inspirado na DGM; o validador, o consolidador, a base, o ouro e as funções de medida ficam trancados (Municipal, 15). Slide 30.
 - **"Três datas" (nomenclatura).** As três datas de cada versão deste plano (publicação, vigência, eficácia) descrevem a redação; as três datas do direito no JU-04 (fato, ato, hoje) escolhem qual redação usar.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [apis/PERGUNTAS.md](apis/PERGUNTAS.md) (branch `wf-backend-apis`, commit f9451f8, 15/11/2026), que registra as respostas a Q1 a Q10 e as decisões posteriores do mesmo dia. **Revê** o que o item anterior deste adendo dizia sobre as perguntas "pendentes".
+
+Resposta a Q8: tentar de novo. No teste de 15/11/2026, a **API de legislação do Senado funcionou sem cadastro** e serve à legislação federal; a busca SRU do LexML continua atrás de um desafio antirrobô em JavaScript (não contornado); o INLABS segue em manutenção e pede um cadastro gratuito da Heild, que o Enzo faz quando a manutenção acabar ([`apis/CATALOGO_CONTABIL.md`](apis/CATALOGO_CONTABIL.md), 8).

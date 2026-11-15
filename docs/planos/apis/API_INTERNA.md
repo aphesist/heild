@@ -1,6 +1,6 @@
 # API interna da Heild: o que o frontend e os agentes chamam (pacote Contábil)
 
-**Versão 0.1 · 15/11/2026 · desenho, nada implementado.** Branch `wf-backend-apis`, sobre o `wf-backend-stack`. Escopo: **só o pacote Contábil** (setores Societário, Fiscal, Notas, DP, Contábil, Consultoria, mais Gestão e os módulos que o Contábil usa). BPO e Jurídico ficam fora; onde uma ferramenta já existe no wireframe para o BPO, ela só é citada.
+**Versão 0.2 · 15/11/2026 · desenho, nada implementado.** A 0.2 aplica as respostas do dono: WhatsApp não oficial como padrão, e-mail virando tarefa pelo integrante (`email.triar`) e a seção 10 sobre abrir o MCP a assistentes de IA e ao Microsoft 365 e Google Workspace. Branch `wf-backend-apis`, sobre o `wf-backend-stack`. Escopo: **só o pacote Contábil** (setores Societário, Fiscal, Notas, DP, Contábil, Consultoria, mais Gestão e os módulos que o Contábil usa). BPO e Jurídico ficam fora; onde uma ferramenta já existe no wireframe para o BPO, ela só é citada.
 
 Este documento **não repete** o contrato que já está decidido em [`../backend/AGENTICO.md`](../backend/AGENTICO.md) (executor, ferramenta como unidade, procedimentos, MCP na borda, atores, cartão). Ele usa esse contrato para dizer **quais** ferramentas e grupos de endpoint existem, por setor, e **como** cada uma se comporta para o agente gastar pouco e errar pouco. As APIs externas que estão por trás das ferramentas de conector estão em [`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md); a ordem de construção, em [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md).
 
@@ -12,7 +12,7 @@ Fontes: catálogo de ferramentas do wireframe (`app/src/nucleo/permissoes/ferram
 2. **Três camadas por setor:** operações de processo (uma por procedimento: o agente chama uma vez e o motor faz os passos), contexto e resolução (leituras feitas para o agente) e operações de entidade (as 235 de hoje, para tela e para o planejador de exceção).
 3. **O recorte de um integrante do Fiscal tem 31 ferramentas**, não 235 (seção 5.4). O maior recorte do Contábil fica em ~9 mil tokens de esquema, abaixo do limite de ~10 mil em que vale ligar busca de ferramentas.
 4. **Toda resposta para agente é compacta:** totais, até 20 linhas, `ha_mais`, cursor, ids, nenhum texto livre que o modelo precise reescrever. Teto declarado por ferramenta e medido no CI.
-5. **Erro acionável sempre:** `codigo` estável, `campo`, `mensagem` para a pessoa e `acao_sugerida` com ferramenta e entrada prontas. 42 códigos comuns na seção 2.4.
+5. **Erro acionável sempre:** `codigo` estável, `campo`, `mensagem` para a pessoa e `acao_sugerida` com ferramenta e entrada prontas. 45 códigos comuns na seção 2.4.
 6. **Idempotência obrigatória** em todo `executar` (cabeçalho `Idempotency-Key`), com chave derivada automaticamente no motor de procedimentos. Repetir é seguro; mudar os argumentos com a mesma chave é 409.
 7. **`validar_apenas: true`** em toda ferramenta `rascunhar` e `executar`: o agente sabe que vai falhar antes de tentar, sem efeito e sem custo externo.
 8. **Ids, nunca nomes:** toda ação recebe `cliente_id`; nome vira id só por `cliente.resolver`, que devolve `AMBIGUO` com candidatos quando há dúvida.
@@ -23,6 +23,7 @@ Fontes: catálogo de ferramentas do wireframe (`app/src/nucleo/permissoes/ferram
 13. **Ciência e irreversíveis sempre com cartão:** abrir caixa postal, DTE ou intimação, transmitir, enviar ao cliente, manifestar, mandar lote ao core. O agente nunca recebe `executar` direto nessas.
 14. **O app do cliente é a única superfície pública:** 46 ferramentas `exposta_ao_cliente` no Contábil, todas filtradas pelos clientes e áreas da pessoa, com limite de taxa mais baixo e sem MCP.
 15. **Lacunas do catálogo do wireframe:** cerca de 68 ferramentas novas (operações de processo, contexto e conector) entram no `pacotes/dominio`; a lista está na seção 8.
+16. **MCP aberto (seção 10):** antes do piloto, OAuth 2.1 e MCP remoto para Claude, ChatGPT e Copilot Studio (~3,5 sp), só leitura e propostas aprovadas por pessoa; o agente do Microsoft 365 Copilot e o complemento do Google Workspace durante o piloto, se um escritório usar. Sem n8n, Make ou Zapier.
 
 ---
 
@@ -109,7 +110,7 @@ Códigos comuns (cada ferramenta declara os seus além destes):
 | Pré-requisito do processo | `FALTA_DOCUMENTO`, `FALTA_EXTRATO`, `FALTA_FOLHA`, `FALTA_RECEITA`, `FALTA_PROCURACAO`, `FALTA_CERTIFICADO`, `PERFIL_INCOMPLETO`, `DIVERGENCIA_NAO_RESOLVIDA` |
 | Validação | `VALIDADOR_FALHOU` (com `detalhes.validador`), `PARTIDAS_NAO_FECHAM`, `VALOR_NAO_CONFERE`, `SEM_ORIGEM` |
 | Idempotência e limites | `CHAVE_REUSADA` (409), `LIMITE_TAXA` (429), `TETO_CUSTO` (a conexão chegou a 100%), `ORCAMENTO_ESGOTADO` (do integrante ou da execução) |
-| Externo | `CREDENCIAL` (vencida, revogada, sem serviço autorizado), `INDISPONIVEL` (com `tentar_de_novo_em`), `LIMITE_EXTERNO` (ex.: 656 da DF-e, 10 downloads/dia do eSocial), `ESQUEMA_EXTERNO`, `CAPTCHA`, `DA_CIENCIA` (a capacidade dá ciência e precisa de cartão) |
+| Externo | `CREDENCIAL` (vencida, revogada, sem serviço autorizado), `INDISPONIVEL` (com `tentar_de_novo_em`), `LIMITE_EXTERNO` (ex.: 656 da DF-e, 10 downloads/dia do eSocial), `ESQUEMA_EXTERNO`, `CAPTCHA`, `DA_CIENCIA` (a capacidade dá ciência e precisa de cartão), `OPT_OUT` (o contato pediu para não receber), `NUMERO_RESTRITO` (sinal 463 ou 475 do WhatsApp; pausa contatos novos), `ORIGEM_INDISPONIVEL` (o armazenamento do escritório não respondeu: servidor desligado, credencial revogada) |
 
 Para o agente, a regra é simples: com `acao_sugerida`, chama a sugestão ou leva à pessoa; com `tentar_de_novo_em`, não tenta antes; com `VALIDADOR_FALHOU`, escala uma vez (AVALIAÇÃO 7.2); nos demais, cartão "não consegui, falta X".
 
@@ -172,7 +173,7 @@ Valem para todos os setores e entram em todos os recortes.
 
 | Ferramenta | Nível | Exposição | Entrada → saída (compacta) | Por que existe |
 | --- | --- | --- | --- | --- |
-| `cliente.resolver` | ler | equipe, agente | `{texto}` → `[{cliente_id, nome, cnpj_mascarado, confianca}]` ou `AMBIGUO` | Cliente errado é o erro mais grave; ação só aceita id |
+| `cliente.resolver` | ler | equipe, agente | `{texto}` → `[{cliente_id, nome, cnpj, confianca}]` ou `AMBIGUO` | Cliente errado é o erro mais grave; ação só aceita id |
 | `pessoa.resolver` / `identidade.resolver` | ler | equipe, agente | Número, e-mail, CPF ou nome → pessoa, contas, conversa aberta | Mesma regra para pessoa |
 | `contexto.carregar` | ler | agente | `{cliente_id, processo, competencia, orcamento_tokens}` → blocos em ordem fixa com id e hash: perfil na data, pendências, últimos 10 eventos do processo, execuções abertas, memória relevante | Uma chamada em vez de cinco; cortada pelo orçamento; pronta para cache |
 | `cliente.perfil_em` | ler | equipe, agente | `{cliente_id, data}` → versão do perfil | Regime, CNAE, UF, IE e IM na data certa |
@@ -337,10 +338,11 @@ Notação de exposição: **C** = app do cliente, **E** = equipe (tela e chat), 
 
 | Ferramenta | Nível | Expos. | Observação |
 | --- | --- | --- | --- |
-| `documento.preparar_envio` | executar | E, C, A | URL pré-assinada do S3 (5 min); a API nunca passa bytes |
+| `documento.preparar_envio` | executar | E, C, A | URL pré-assinada do S3 (5 min) para a cópia de processamento; a API nunca passa bytes. Depois de processado, o original é gravado na pasta designada do armazenamento do escritório ("Heild/Recebidos" ou a pasta do cliente), pelo conector ou pelo agente local, e a cópia expira em 72 h ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 1) |
 | `documento.registrar` | executar | E, C, servico | Depois do upload; o worker confere tamanho e SHA-256 |
 | `documento.registrar_leitura` | executar | servico | Só o worker Python (OCR, PDF, extrato) |
-| `documento.listar`, `documento.obter_link` | ler | E, C, A | Lista compacta sem conteúdo; link de 5 min depois de `autorizar`; abrir pelo app grava entrega |
+| `documento.listar`, `documento.obter_link` | ler | E, C, A | Lista compacta sem conteúdo. O link de 5 min sai do cache de entrega; se o arquivo não está lá, o worker busca o original no armazenamento do escritório (conector ou agente local). Origem fora do ar: `ORIGEM_INDISPONIVEL`, com miniatura e texto ainda disponíveis. Abrir pelo app grava a entrega |
+| `agente.gerar_codigo`, `agente.revogar`, `agente.saude`, `armazenamento.raizes_definir` (novas) | executar / ler | E (Administrador) | Agente local do servidor do escritório: código de instalação de uso único, revogação imediata, saúde e pastas raiz ([`ARMAZENAMENTO.md`](ARMAZENAMENTO.md), 3) |
 | `documento.classificar` | executar | E, A | Operário barato com contrato; confiança baixa vai para "triar" |
 | `documento.enviar_cliente` | executar, cartão | E, A | Irreversível |
 | `documento.atualizar`, `.mover`, `.arquivar`, `.forcar_visibilidade`, `.confirmar_origem`, `.resolver_conflito`, `.registrar_entrega` | executar | E, X | Já no wireframe |
@@ -353,9 +355,10 @@ O CRM inteiro é da fase F5; aqui só o que o Contábil usa para falar com o cli
 | Ferramenta | Nível | Expos. | Observação |
 | --- | --- | --- | --- |
 | `conversa.rascunhar_resposta` | rascunhar | E, A | Nova; o integrante prepara, a pessoa envia |
-| `conversa.responder` | executar, cartão para integrante | E, A, C | Irreversível; fora da janela de 24 h só com modelo aprovado (`MODELO_OBRIGATORIO`) |
+| `conversa.responder` | executar, cartão para integrante | E, A, C | Irreversível. Pela integração não oficial (padrão, [`WHATSAPP.md`](WHATSAPP.md)), o worker aplica ritmo e opt-out (`OPT_OUT`, `NUMERO_RESTRITO` com `tentar_de_novo_em`); pela Cloud API oficial, fora da janela de 24 h só com modelo aprovado (`MODELO_OBRIGATORIO`) |
 | `mensagem.enviar_modelo` | executar | E, A | Nova; régua e avisos ("sua guia saiu"), categoria utilidade |
 | `conversa.listar`, `conversa.obter` (com `resumo`), `canal.saude` | ler | E, A | Corpo da mensagem só sob demanda |
+| `email.triar` (processo; nova) | executar | A | **E-mail vira tarefa pelo integrante, não por automação externa:** a mensagem que entra na caixa do setor (conector de e-mail do escritório) vira Mensagem no CRM; o integrante de Gestão e Atendimento classifica (operário barato com contrato), liga ao cliente por `identidade.resolver`, guarda os anexos com `documento.registrar` e cria a tarefa (`tarefa.criar`, origem `email`) no setor certo. Em caso de dúvida, cartão. Vale também para o e-mail enviado, que vira registro (C2-08) |
 | `mensagem.transcrever` | executar | servico | Áudio → texto pelo conector de transcrição |
 | `conversa.criar`, `.assumir`, `.transferir`, `.resolver`, `.nota_interna`, `lead.*` | executar | E, X | |
 
@@ -430,7 +433,7 @@ Cada método de serviço simulado vira uma ferramenta de conector que roda no wo
 | `openFinance.conectar`, `.transacoes` | `banco.consentimento_convidar`, `banco.transacoes_desde` | `open_finance.convidar`, `extrato.importar` | API-19 | Pluggy (fase 3) |
 | `ocr.ler(documento)` | `documento.ocr` (fila `documento.ocr`) | `notas.registrar_nfse_municipal`, `documento.classificar` | API-01 (parte) | Worker Python ou fornecedor [a decidir] |
 | `transcricao.transcrever(audio)` | `mensagem.transcrever` | CRM, chat | API-02 | Fornecedor de fala [a decidir] |
-| `whatsapp.enviar`, `.janelaAberta` | `whatsapp.enviar`, `whatsapp.janela` | `conversa.responder`, `mensagem.enviar_modelo` | API-03 | WhatsApp Cloud API |
+| `whatsapp.enviar`, `.janelaAberta` | `whatsapp_web.enviar`, `whatsapp_web.sessao_saude` (padrão); `whatsapp_cloud.enviar`, `whatsapp_cloud.janela` (escritório com a oficial) | `conversa.responder`, `mensagem.enviar_modelo` | API-03, API-04 | WAHA auto-hospedado; WhatsApp Cloud API |
 | `email.enviar` | `email.enviar` | idem | API-05 | Gmail, Graph, SES |
 | `assinatura.enviar` / `conferenciaAssinatura.conferir` | `assinatura.enviar`, `assinatura.status`, `assinatura.validar_icp` | `contrato.enviar_assinatura`, `relatorio.enviar`, `contabil.assinatura.conferir` | API-22 | ZapSign, Clicksign, D4Sign; validador ICP |
 | `armazenamento.listar`, `.enviar`, `.link`; `arvore.ler` | `nuvem.listar_delta`, `nuvem.enviar`, `nuvem.link`, `nuvem.ler_arvore` | Arquivos, Raio-X | API-24 | Drive, Graph, S3, WebDAV, SFTP |
@@ -468,9 +471,63 @@ Ajustes nas que já existem:
 
 1. Assistente encaminha ao Fiscal (regra ou classificador barato; frente de IA).
 2. Integrante chama `cliente.resolver({texto: "Padaria Pão Quente"})` → um candidato, confiança 0,98 → `cliente_id = c203`.
-3. Chama `guia.enviar_ao_contato({cliente_id: "c203", competencia: "2026-10", tributo: "DAS", validar_apenas: true})` → `validado` sem erros (guia existe, contato com WhatsApp, janela fechada, modelo de utilidade aprovado).
+3. Chama `guia.enviar_ao_contato({cliente_id: "c203", competencia: "2026-10", tributo: "DAS", validar_apenas: true})` → `validado` sem erros (guia existe, contato com WhatsApp, sem opt-out, número sem restrição).
 4. Chama de novo sem `validar_apenas` → `aguardando_aprovacao` com `cartao_id` e `resumo_humano` "Enviar o DAS de outubro (R$ 1.284,10, vence 20/11) a Ana, pelo WhatsApp".
 5. Responde com `integrante.responder`: duas frases + o cartão do sistema. Nenhum número digitado pelo modelo.
-6. A pessoa aprova; o executor envia (`whatsapp.enviar`, R$ 0,035 de utilidade), grava evento, o cartão some.
+6. A pessoa aprova; o executor envia pela integração do escritório (`whatsapp_web.enviar`, sem custo por mensagem; ou R$ 0,035 de utilidade pela Cloud API), grava evento, o cartão some.
 
 Total: 3 ferramentas, ~1,2 mil tokens de resultados. Sem a operação de processo, seriam `documento.listar` + `identidade.resolver` + `conversa.rascunhar` + `conversa.responder`, com 4 a 6 mil tokens e quatro pontos de erro.
+
+---
+
+## 10. Abrir o MCP a assistentes de IA e às ferramentas do escritório (resposta Q10)
+
+O dono decidiu o recorte: se o MCP for aberto, é para **assistentes de IA** (Claude, ChatGPT, Copilot) e para as **ferramentas que os escritórios contábeis já usam**: Microsoft 365 (Copilot, Teams, Outlook, Excel, SharePoint) e Google Workspace. **Plataformas de automação (n8n, Make, Zapier) ficam de fora.** Elas não fazem falta: o CRM já engloba o e-mail, e o integrante de Gestão e Atendimento cria a tarefa a partir da mensagem que chega (seção 6.2), sem automação externa.
+
+### 10.1 As ferramentas e como cada uma se conecta
+
+Os recursos de cada produto mudam rápido; o que não foi conferido em documentação oficial nesta rodada está marcado.
+
+| Ferramenta | Como se conecta à Heild | Exemplo de uso |
+| --- | --- | --- |
+| **Claude (desktop e web)** | Conector MCP remoto, com OAuth 2.1 conforme a especificação de autorização do MCP | "Quais clientes do Simples estão com o DAS de outubro sem pagamento?" (`guia.listar`); "prepara a cobrança deles" vira proposta e cartão na Heild |
+| **ChatGPT** (planos de empresa) | Conector MCP remoto com OAuth [recursos e planos a confirmar] | O sócio pergunta a situação fiscal da carteira e recebe a lista com o link para a aba Fiscal |
+| **Microsoft Copilot Studio** | Ferramenta MCP num agente do Copilot Studio, com OAuth pelo Entra ID [a confirmar] | Agente interno do escritório no Teams que responde "o que vence esta semana para a Padaria?" |
+| **Microsoft 365 Copilot** (Teams, Outlook, Excel) | Agente declarativo com plugin de API (manifesto OpenAPI das ferramentas expostas), autenticado por OAuth no Entra ID [formato e requisitos a confirmar] | No Outlook, abrindo o e-mail de um cliente: "este cliente tem pendência?" (`pendencia.listar`); no Excel, puxar o consumo por cliente |
+| **SharePoint e OneDrive** | Não é conector de IA: é o armazenamento do escritório, já ligado pelo Graph (CATALOGO, 6) | Os documentos da Heild aparecem na biblioteca do escritório |
+| **Google Workspace (Gemini, Gmail, Planilhas)** | Complemento do Workspace chamando a API da Heild com OAuth; conector do Gemini para agentes [a confirmar disponibilidade] | Na planilha do sócio, uma função que traz a semana de obrigações da carteira |
+
+### 10.2 O que precisa existir
+
+| Peça | Regra |
+| --- | --- |
+| **OAuth 2.1** | Servidor de autorização da Heild (ou provedor pronto) com descoberta, registro dinâmico de cliente e PKCE. É o que Claude, ChatGPT, Copilot e o complemento do Google pedem. Consentimento por escopo, na tela da Heild, com o nome do aplicativo de fora |
+| **Escopo por setor** | O acesso nasce com os setores escolhidos e nunca passa do escopo da pessoa que autorizou (P13 das Fundações) |
+| **Só leitura e propostas** | Níveis `ler` e `rascunhar`. Proposta = a ferramenta devolve `aguardando_aprovacao` e cria o cartão na Heild, que uma pessoa aprova. Nada de `executar` direto por ferramenta de fora |
+| **Limites** | 120 chamadas/min por autorização. Consulta paga a órgão (situação fiscal, certidão) desligada por padrão: o de fora lê o que já está guardado |
+| **Auditoria** | Origem `api_externa`, aplicativo e pessoa em todo evento; tela "o que este aplicativo fez" em Configurações › Integrações |
+| **Revogação** | Na hora, pela pessoa ou pelo Administrador; expiração do *refresh* em 90 dias |
+| **Conteúdo** | Visão compacta com `origem_externa` marcado; a ativação pede o aceite do Administrador de que o dado do cliente vai para aquele fornecedor (LGPD) |
+| **Catálogo** | O recorte por setor da seção 5, sem `excecao`, configuração, cofre ou conector |
+
+### 10.3 Custo, risco e recomendação
+
+| Peça | Esforço (sp, ±30%) |
+| --- | ---: |
+| Servidor OAuth 2.1, consentimento, escopos, tela de aplicativos ligados, auditoria e revogação (serve a todos os de fora) | 3 |
+| MCP remoto com OAuth (Claude, ChatGPT, Copilot Studio) | 0,5, porque o MCP já existe desde a F3 |
+| Agente do Microsoft 365 Copilot (manifesto, registro no Entra ID, publicação no catálogo do tenant do escritório) | 1,5 |
+| Complemento do Google Workspace (publicação e verificação do Google) | 2 |
+| **Total** | **~7 sp** (3,5 só com Claude, ChatGPT e Copilot Studio) |
+
+Riscos:
+
+- **Injeção de instrução:** o assistente de fora pode ser manipulado por texto de cliente. Ficar só em leitura e propostas segura o pior, porque nada sai sem uma pessoa.
+- **Dado de cliente num fornecedor que a Heild não controla:** o próprio escritório escolhe e aceita.
+- **Suporte:** o escritório liga algo errado e acha que é defeito da Heild.
+- **Produtos que mudam:** os requisitos de conector de cada fornecedor mudam com frequência.
+
+**Recomendação:**
+
+- **Antes do piloto:** o servidor OAuth e o MCP remoto para Claude, ChatGPT e Copilot Studio (~3,5 sp), só com leitura e propostas aprovadas por pessoa, desligados por padrão e ligados pelo Administrador.
+- **Durante o piloto, se um dos dois escritórios usar:** o agente do Microsoft 365 Copilot e o complemento do Google Workspace (+3,5 sp).
