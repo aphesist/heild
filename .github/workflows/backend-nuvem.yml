@@ -4,7 +4,7 @@
 #
 # Travas (servidor/src/banco/nuvem-ci.ts): só o ref do HEILD-BACKEND; URL e senhas mascaradas;
 # NÃO migra (para se faltar migração); recusa escritório que não seja de demonstração; o login
-# app_api ganha senha nova a cada execução. Nunca contra o HEILD-PROD.
+# app_api tem senha estável derivada do segredo (só trocada se o login falhar). Nunca contra o HEILD-PROD.
 name: backend-nuvem
 
 on:
@@ -67,9 +67,13 @@ jobs:
 
       - name: Fumaça do wireframe no modo api
         run: |
+          # Sem `shell: bash` explícito o Actions roda `bash -e` sem pipefail: o `tee` esconderia a
+          # queda do script (a primeira execução saiu verde assim). Conta só o "tudo certo" do fim.
+          set -o pipefail
           mkdir -p capturas
-          cd app && node scripts/fundacao-fumaca.cjs ../capturas | tee ../fumaca.txt
+          cd app && node scripts/fundacao-fumaca.cjs ../capturas 2>&1 | tee ../fumaca.txt
           ! grep -q '^FALHA' ../fumaca.txt
+          grep -q '^tudo certo' ../fumaca.txt
 
       - name: Guardar o resultado
         if: always()
