@@ -10,7 +10,7 @@ O desenho que entra no design system está na proposta 7 de [PROPOSTAS_DESIGN_SY
 | --- | --- |
 | `ValorEditavel` | Valor sublinhado que abre o seletor. Tipos: escolha, múltipla (chips), intervalo, número, dinheiro, data, competência, entidade (cliente, pessoa ou setor, com busca), cor, texto curto ou de várias linhas, e plano de dois eixos. Mostra "+ Outra coisa" quando a lista não basta. Tem estados de carregando, vazio e erro (com "Tentar de novo"). Se a gravação falha, o valor volta e o erro aparece ao lado. O leitor de tela lê "Cliente: Padaria, alterar". No toque, a área de clique tem 44 px. |
 | `Suposicoes` | `FaixaSuposicoes` fica acima do campo de pedido ("Vou supor: Para **Padaria** · Competência **10/2026** · Setor **Fiscal**"), com cada valor editável. `CampoComSuposicoes` sublinha as palavras do pedido que geraram cada suposição, e clicar nelas abre o seletor. `ResumoSuposicoes` repete o resumo no topo da resposta. |
-| `Lacuna` | `RascunhoComLacunas` mostra o rascunho com o que o integrante não sabe em branco. Cada lacuna abre o seletor do tipo e, preenchida, vira valor editável. O rodapé conta: "Preencha as três lacunas e eu continuo", "Faltam duas". |
+| `Lacuna` | `RascunhoComLacunas` mostra o rascunho com o que o integrante não sabe em branco. Cada lacuna abre o seletor do tipo e, preenchida, vira valor editável. O rodapé conta: "Preencha as três lacunas e eu continuo", "Faltam duas". A lacuna marcada `opcional` não entra na conta e, em branco, sai do texto. |
 
 `EdicaoEmLinha` virou um invólucro do tipo texto, então os usos antigos ganharam o padrão sem mudar de API. Os números que eram editados como texto passaram para o seletor numérico.
 
@@ -37,7 +37,8 @@ O desenho que entra no design system está na proposta 7 de [PROPOSTAS_DESIGN_SY
   - Ata da reunião: data, presentes, decisões e próxima reunião.
   - Relatório do mês: competência, cliente e o que destacar.
   - Preenchido, o rascunho de mensagem vira a prévia que segue para aprovação.
-- **WhatsApp com o cliente:** não mudou.
+  - "Integrante sugere" no CRM: a sugestão aparece no compositor, no lugar do campo, com o que vem da conversa (nome de quem escreve, imposto citado, anexo recebido, assunto do e-mail) e lacunas para o resto: guia (competência e prazo; vencimento e valor quando já saiu; qual imposto quando a mensagem não diz), documento recebido (qual documento, entre os do cliente; competência e prazo), notas (competência e prazo), admissão, intimação, pedido de opinião, lead e o resto (prazo; assunto quando não há). Toda sugestão termina com "algo a acrescentar", opcional. O Enviar só libera sem lacuna obrigatória e diz o motivo ("Faltam duas lacunas"). "Editar como texto" leva o rascunho preenchido para o campo; "Descartar" volta ao campo de antes. O que sai é texto puro, pelo mesmo envio de sempre.
+- **WhatsApp com o cliente:** não mudou (as bolhas e o canal são os de sempre).
 
 ## QA
 
@@ -59,7 +60,7 @@ Também foram corrigidos no kit, durante a conversão:
 
 ## Em aberto
 
-- **Esperando o dono.** As lacunas no rascunho "integrante sugere" do CRM e a manipulação direta no "Editar painel" (perguntas (a) e (b)). O "Editar painel" segue como estava.
+- **Esperando o dono.** A manipulação direta no "Editar painel" (pergunta (b)). O "Editar painel" segue como estava. As lacunas do "integrante sugere" no CRM (pergunta (a)) foram decididas e entraram.
 - **O kit ainda não tem:**
   - seletor de hora (horários aparecem como texto validado em 00:00);
   - "limpar" na data (a ficha BPO não volta a "fora do paralelo");

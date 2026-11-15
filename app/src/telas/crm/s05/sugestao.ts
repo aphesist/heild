@@ -29,6 +29,12 @@ const impostos = [
   { re: /inss/i, nome: 'INSS' },
 ]
 
+/** Como chamar a pessoa: o primeiro nome, com o tratamento junto se houver ("Dra. Lívia"). */
+const chamar = (nome: string) => {
+  const [a, b] = nome.split(' ')
+  return /^(dra?|sra?)\.$/i.test(a) && b ? `${a} ${b}` : a
+}
+
 /** A última mensagem do cliente na conversa (o texto e a transcrição do áudio). */
 export function ultimaDoCliente(c: ConversaCrm) {
   const m = [...c.itens].reverse().find((i): i is Mensagem => i.tipo === 'mensagem' && i.de === 'cliente')
@@ -42,7 +48,7 @@ export function ultimaDoCliente(c: ConversaCrm) {
  */
 export function sugestaoDoIntegrante(c: ConversaCrm, documentos: string[]): SugestaoCrm {
   const { m, pergunta } = ultimaDoCliente(c)
-  const oi = c.lead ? 'Olá! ' : `Oi, ${c.pessoa.nome.split(' ')[0]}! `
+  const oi = c.lead ? 'Olá! ' : `Oi, ${chamar(c.pessoa.nome)}! `
   const setor = rotuloSetor[c.setor] ?? 'setor'
   const anexo = m?.anexos?.[0]?.nome
 
