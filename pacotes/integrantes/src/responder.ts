@@ -1,6 +1,7 @@
 import { comEscritorio, type ContextoExec, type Motor, type Sql } from '@heild/processos'
 import { pacoteDoProcedimento } from './integrantes.ts'
 import { resposta, type RespostaPadrao } from './resposta.ts'
+import { lacunasDoCartao, lerDaExecucao, suposicoesDaExecucao } from './suposicoes.ts'
 
 /**
  * A resposta do integrante para uma execução, no formato padrão (decisão 4). É montada pelo
@@ -19,7 +20,12 @@ export async function responderExecucao(sql: Sql, motor: Motor, ctx: ContextoExe
     const chamadas = await tx`select classe, centavos from chamada_modelo where execucao_id = ${execucao_id}`
     const [op] = await tx`select saida from passo_execucao where execucao_id = ${execucao_id} and tipo = 'operario' and estado = 'concluido' and (saida ? 'confianca' or saida ? 'pulado') and nome <> 'revisar' order by ordem desc, tentativa desc limit 1`
     const [cartao] = ex.cartao_id ? await tx`select id, tipo, resumo_humano, expira_em, extras from cartao_aprovacao where id = ${ex.cartao_id}` : []
-    return { chamadas, op: op?.saida as { confianca?: number; origem?: string; pulado?: boolean } | undefined, cartao }
+    // Feedforward: o que foi suposto; e, no "não consegui", as lacunas que a pessoa preenche.
+    const lido = await lerDaExecucao(tx, execucao_id)
+    const decisao = ex.estado === 'concluida' ? ((ex.saida as { decisao?: Record<string, unknown> } | null)?.decisao ?? null) : null
+    const suposicoes = await suposicoesDaExecucao(tx, lido, decisao)
+    const lacunas = cartao?.tipo === 'nao_consegui' ? lacunasDoCartao(((cartao.extras as { falhas?: { campo?: string }[] } | null)?.falhas ?? []), lido) : []
+    return { chamadas, op: op?.saida as { confianca?: number; origem?: string; pulado?: boolean } | undefined, cartao, suposicoes, lacunas }
   })
   const custo = { centavos: Math.round(extra.chamadas.reduce((a, c) => a + Number(c.centavos), 0) * 1_000_000) / 1_000_000, chamadas: extra.chamadas.length }
   // Escalada é ir ao escritor; o revisor de risco é um passo do procedimento, não escalada.
@@ -27,7 +33,7 @@ export async function responderExecucao(sql: Sql, motor: Motor, ctx: ContextoExe
   const confianca = extra.op && !extra.op.pulado && extra.op.origem !== 'pessoa' && typeof extra.op.confianca === 'number' ? extra.op.confianca : null
   const origem = { procedimento: ex.procedimento, execucao_id, pedido_id, posicao_na_fila: ex.posicao_na_fila ?? null }
   const nome = achado?.pacote.procedimento.nome ?? procedimento_id
-  const base = { de, origem, custo, confianca, escalou }
+  const base = { de, origem, custo, confianca, escalou, suposicoes: extra.suposicoes }
   const erro = (ex.erro ?? null) as { codigo?: string; mensagem?: string } | null
 
   switch (ex.estado) {
@@ -40,7 +46,7 @@ export async function responderExecucao(sql: Sql, motor: Motor, ctx: ContextoExe
       const c = extra.cartao
       const acao = c ? { cartao_id: c.id as string, tipo: c.tipo as string, resumo_humano: String(c.resumo_humano ?? ''), expira_em: c.expira_em ? new Date(c.expira_em).toISOString() : null } : null
       const cartoes = ((c?.extras as { cartoes?: unknown[] } | null)?.cartoes ?? []) as RespostaPadrao['cartoes']
-      if (c?.tipo === 'nao_consegui') return resposta({ ...base, tipo: 'nao_consegui', titulo: `${nome}: falta uma decisão`, resumo: acao?.resumo_humano, acao, cartoes })
+      if (c?.tipo === 'nao_consegui') return resposta({ ...base, tipo: 'nao_consegui', titulo: `${nome}: falta uma decisão`, resumo: acao?.resumo_humano, acao, cartoes, lacunas: extra.lacunas })
       const titulo = c?.tipo === 'escolha_responsavel' ? 'Para quem quer rotear esta atividade?' : c?.tipo === 'orcamento' ? `${nome}: parou por orçamento` : `${nome}: pronto para aprovar`
       return resposta({ ...base, tipo: 'aguardando_aprovacao', titulo, resumo: acao?.resumo_humano, acao, cartoes })
     }

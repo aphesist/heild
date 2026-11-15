@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "9853695aa046c4e5",
+  "catalogo_hash": "dd49396e79d6a6f0",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -242,6 +242,13 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80
+          },
+          "formato": {
+            "type": "string",
+            "enum": [
+              "heild.resposta@1",
+              "heild.resposta@2"
+            ]
           }
         },
         "required": [
@@ -330,6 +337,139 @@
       "x-heild-modulo": "agentes",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "assistente_preencher_lacuna",
+      "nome": "assistente.preencher_lacuna",
+      "description": "Preenche as lacunas de um rascunho que parou num \"não consegui\" e retoma a execução do ponto em que parou.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pedido_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "execucao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "valores": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "valores"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "assistente_prever_suposicoes",
+      "nome": "assistente.prever_suposicoes",
+      "description": "Prévia do que o integrante vai supor para um pedido (procedimento, setor, cliente, competência, valor) e do que falta anexar, sem executar. Regras primeiro; modelo barato só se precisar.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "texto": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "anexos": {
+            "type": "object",
+            "properties": {
+              "cliente_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "documento_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "exercicio": {
+                "type": "string",
+                "pattern": "^\\d{4}$"
+              },
+              "competencia": {
+                "type": "string",
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+              },
+              "conversa_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "additionalProperties": false
+          },
+          "usar_modelo": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "texto"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": false,
       "x-heild-erros": [],
