@@ -41,7 +41,13 @@ const diasAte = (prazo: string) => {
 /** Horas padrão por atividade (catálogo; aqui pelo prefixo, demonstração). */
 const horasPadrao = (codigo: string) => (/^FIS|^NFE/.test(codigo) ? 1.5 : /^DP/.test(codigo) ? 2 : /^CTB/.test(codigo) ? 3 : /^SOC/.test(codigo) ? 2.5 : 1)
 
-/** Arranjo padrão por papel (03, 4.2 e 4.3: "Restaurar padrão" volta ao do papel). */
+/**
+ * Arranjo padrão por papel (03, 4.2 e 4.3: "Restaurar padrão" volta ao do papel).
+ * Prazos vem antes dos indicadores: fica no topo em 4 e em 6 colunas (em 4,
+ * Prazos, Atrasadas e Vence hoje em cima; Entregues e Conversas abaixo do
+ * calendário). A Linha do tempo antes de Pendências fecha o fim das duas
+ * colunas na mesma altura em 4 colunas (QA_INTERFACE I-5, I-6).
+ */
 export function padraoDoPapel(papel: 'administrador' | 'gestor' | 'colaborador'): ItemGrade[] {
   const comum: ItemGrade[] = [
     { id: 'ind-atrasadas', tamanho: 'P' },
@@ -50,8 +56,8 @@ export function padraoDoPapel(papel: 'administrador' | 'gestor' | 'colaborador')
     { id: 'ind-conversas', tamanho: 'P' },
   ]
   if (papel === 'administrador')
-    return [{ id: 'primeiros', tamanho: 'L' }, ...comum, { id: 'faixas', tamanho: 'M' }, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'implantacoes', tamanho: 'G' }, { id: 'sla', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'linha', tamanho: 'G' }, { id: 'time', tamanho: 'G' }]
-  if (papel === 'gestor') return [...comum, { id: 'faixas', tamanho: 'M' }, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'sla', tamanho: 'G' }, { id: 'carga', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'linha', tamanho: 'G' }]
+    return [{ id: 'primeiros', tamanho: 'L' }, { id: 'faixas', tamanho: 'M' }, ...comum, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'implantacoes', tamanho: 'G' }, { id: 'sla', tamanho: 'G' }, { id: 'linha', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'time', tamanho: 'G' }]
+  if (papel === 'gestor') return [{ id: 'faixas', tamanho: 'M' }, ...comum, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'sla', tamanho: 'G' }, { id: 'carga', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'linha', tamanho: 'G' }]
   return [...comum, { id: 'ind-horas', tamanho: 'P' }, { id: 'medidor', tamanho: 'M' }, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'faixas', tamanho: 'M' }, { id: 'linha', tamanho: 'G' }, { id: 'time', tamanho: 'G' }]
 }
 
