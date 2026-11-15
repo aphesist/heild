@@ -111,3 +111,15 @@ Decidi com bom senso onde a pesquisa e o pedido não fechavam sozinhos; ficam aq
 - Integrante por integrante dos de todas as áreas: Assistente, Consultor, Atendimento e Financeiro.
 - As formas do I que faltam (atendimento, conversa, celular, arquivos, equipe).
 - Corpo, alma e espírito: Paracelso, Evola e a carta aos tessalonicenses, como no "Do inteiro".
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Origem do nome e o site antes do lançamento (15/11/2026)
+
+- **Origem do nome.** Os posts 01 e 16 usam a versão do design system desde 9/11/2026: islandês *heild*, "o inteiro"; raiz no nórdico antigo *heill* (Cleasby e Vigfússon, 1874). Não usar "do nórdico antigo *heild*", a forma antiga. Fonte: branch `design-system`, `design-system/README.md`; branch `claude/zealous-wright-fvok37`, `redes-sociais/posts/legendas.md`.
+- **Pendência antes de 30/11.** O site ainda não tem o aviso da bio ("ainda não lançada") e usa um contato de exemplo (`contato@heild.example`, branch `site`, `app/src/site/paginas.ts`); os dados da demonstração trazem a data futura 18/11/2026. O link da bio vai à demonstração guiada; o agendamento fica só no site. Ver D9 em [ATUALIZACOES.md](ATUALIZACOES.md).
+- **Fator R.** Se um post usar odontologia como exemplo, citar o § 5º-B, XX, com o § 5º-M, I (correção de 9/11/2026 no subplano 07).

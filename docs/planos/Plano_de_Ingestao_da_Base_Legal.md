@@ -1,5 +1,7 @@
 # Plano de Ingestão da Base Legal (multiagente)
 
+> **Revisto em 15/11/2026:** a revisão pela IA (decisão do Enzo, 9/11/2026) substitui a fila humana, a auditoria amostral e a concordância com os contadores; estadual nas 27 UFs; janela de 10 anos no federal e 5 no estadual e no municipal. Ver o adendo "consolidação dos planos" no fim deste documento.
+
 5 de novembro de 2026
 
 Este documento descreve como construir, com agentes autônomos, a base legal versionada no tempo que alimenta o assistente para contadores: quais modelos de documento (fichas) preparar, como os agentes se organizam, de onde vêm as informações e em que ordem tudo é feito. O cronograma, o orçamento e os detalhes de sindicatos, Juntas e do coletor estão no [Plano de desenvolvimento (6 meses)](Plano_MVP_6_meses.md), que é o plano de execução.
@@ -397,3 +399,41 @@ Outros estados ficam como expansão futura, se houver demanda: mesmas fichas e m
 - [LexML Brasil](https://www.lexml.gov.br)
 - [O que é o Querido Diário](https://docs.queridodiario.ok.org.br/en/latest/what-is-it.html)
 - [Diário dos Municípios Mineiros – Agência Minas](https://agenciaminas.mg.gov.br/news/pdf/129743.pdf)
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Fontes de acesso (15/11/2026)
+
+Fonte: [`apis/CATALOGO_CONTABIL.md`](apis/CATALOGO_CONTABIL.md), 8 (branch `wf-backend-apis`). Conferido em 15/11/2026: o **LexML barrou acesso automatizado** com verificação antirrobô e o **INLABS** da Imprensa Nacional estava em manutenção. A URN do LexML continua como padrão de identificação (princípio 2), mas a coleta automática por ele não é garantida. Recomendação pendente com o Enzo (Q8 do plano de APIs): pedir acesso formal ao Senado e à Imprensa Nacional e, se não sair, avaliar um agregador comercial de legislação, com a frente de IA escolhendo.
+
+### Revisão pela IA e as correções da seção 25 do Plano Municipal (9/11/2026)
+
+O [Plano Municipal](Plano_Base_Legislacao_Municipal.md) v0.4 (9/11/2026) registrou, na seção 25, correções a este plano que não tinham sido aplicadas. A decisão do Enzo de 9/11/2026 (Municipal, 13: revisão pela IA, não por pessoas, em toda a ingestão, federal, estadual e municipal) **substitui** os trechos abaixo; o texto acima fica como histórico. Fontes: Plano Municipal, seções 4, 6, 13, 15 e 25; branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/src/dados.js` (slides 10, 24 a 27 e 30), resumidos em [raciocinio/README.md](raciocinio/README.md).
+
+| Onde | Texto de hoje | Passa a valer |
+| --- | --- | --- |
+| 3.5 (congelamento) | "concordância entre agentes e contadores acima da meta"; os contadores preenchem 60 documentos à mão | Concordância entre extratores de famílias diferentes e contra o ouro, sem preenchimento manual pelos contadores |
+| 4.5 (portões) e passo 7 | sem acordo dos dois extratores, "a ficha vai para a fila humana" | Divergência que persiste vira rótulo de certeza baixa: o evento não entra no texto, e a certeza aparece no nível de cobertura. Não há fila humana |
+| 4.6 e agente "Auditor amostral" | auditoria amostral humana nas categorias de risco | Ouro reservado, que o processo nunca vê, e reportes dos usuários confirmados na publicação oficial |
+| 4.7 (papel humano) e Resumo | contadores fazem a auditoria por amostragem; fila de escalonamento | Papel humano restrito a CAPTCHA, pedidos de LAI, convênios e decisões de negócio. O canal dos contadores continua como fonte de material |
+| Agente Revisor | "Modelo grande", sem família | Revisor final de uma **terceira família**, que julga sem saber quem propôs o quê |
+| Resumo, 5.2 e Fase 3 | estadual em 5 UFs (SP, MG, PR, SC e RS); "Portão do M3: 5 UFs carregadas" | Estadual nas **27 UFs** |
+| Resumo e 5.3 | municipal: "capitais e municípios dos clientes do grupo" | Municípios fáceis primeiro e os demais sob demanda, com nível de cobertura C0 a C4 por ente e domínio |
+| Resumo (janela) | "os últimos 10 anos", para tudo | **10 anos no federal, 5 anos no estadual e no municipal** (Municipal, decisão 4); a janela do federal no jurídico está em D5 de [ATUALIZACOES.md](ATUALIZACOES.md) |
+| 5.3, Minas Gerais | linha em "Diários de associações de municípios" | Os 834 municípios mineiros publicam no caderno "Diário dos Municípios Mineiros" do jornal Minas Gerais (Imprensa Oficial, Decreto Estadual 48.175/2021); a AMM tem outro diário, no SIGPub (Municipal, 4.3) |
+
+Acréscimos:
+
+- **Por que o princípio 4 não muda.** Num teste com 908 pares de lei alemãs, a consolidação feita por modelo teve 93% a 99% de semelhança com o texto oficial, mas só 50,3% de acerto exato numa alteração e 20,51% em cadeias (Prior et al., NLLP 2025). Slide 10; Municipal, 11.2.
+- **Laço de melhoria da ingestão (novo).** Instruções dos extratores e do reconciliador, montador de cadeia, segmentador e limiares competem contra o ouro escondido, fora da produção, num laço inspirado na DGM; o validador, o consolidador, a base, o ouro e as funções de medida ficam trancados (Municipal, 15). Slide 30.
+- **"Três datas" (nomenclatura).** As três datas de cada versão deste plano (publicação, vigência, eficácia) descrevem a redação; as três datas do direito no JU-04 (fato, ato, hoje) escolhem qual redação usar.
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [apis/PERGUNTAS.md](apis/PERGUNTAS.md) (branch `wf-backend-apis`, commit f9451f8, 15/11/2026), que registra as respostas a Q1 a Q10 e as decisões posteriores do mesmo dia. **Revê** o que o item anterior deste adendo dizia sobre as perguntas "pendentes".
+
+Resposta a Q8: tentar de novo. No teste de 15/11/2026, a **API de legislação do Senado funcionou sem cadastro** e serve à legislação federal; a busca SRU do LexML continua atrás de um desafio antirrobô em JavaScript (não contornado); o INLABS segue em manutenção e pede um cadastro gratuito da Heild, que o Enzo faz quando a manutenção acabar ([`apis/CATALOGO_CONTABIL.md`](apis/CATALOGO_CONTABIL.md), 8).

@@ -1280,3 +1280,17 @@ Acessadas em 9/11/2026, salvo indicação. "Testado" = chamada feita durante a p
 - `docs/Plano_de_Ingestao_da_Base_Legal.md` (seções 2, 3.5, 4.2, 4.4 a 4.7 e 5.6: o desenho de extratores, revisor, reconciliador e portões), `docs/Plano_Assistente_de_IA_para_Contadores.md`, `docs/Plano_MVP_6_meses.md`, `docs/subplanos/07-Motores-e-Consultor.md`, `docs/subplanos/08-Conectores.md`, `docs/subplanos/10-BPO.md`, `docs/subplanos/juridico/JU-04-Motor-Juridico-e-Base-de-Leis.md` (3.1 a 3.6, 5.5 e decisões de 9/11/2026), `docs/Estudo_de_Precificacao_por_Modulo.md` (hora de R$ 90, P28)
 - `pesquisa/juridico/J9-ordem-dos-modulos-de-base.md`, `pesquisa/juridico/J3-atividades-advocacia.md`, `pesquisa/juridico/J6-outras-areas-candidatas.md`, `pesquisa/juridico/J4-fontes-e-integracoes.md`
 - `pesquisa/01-infra-aws.md` (S3), `pesquisa/02-custos-llm.md` (câmbio, preços de OpenAI e Google, custo por ato, volumes por UF, modelos por etapa), `pesquisa/04-juridico-tributario-dados.md` (LAI: 2 a 6 h por pedido), `pesquisa/plataforma/V2-estados-municipios.md`
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Correções da seção 25 aplicadas (15/11/2026)
+
+As correções da seção 25 foram levadas aos documentos afetados na consolidação de 15/11/2026: Plano de Ingestão (2a a 2e, 3a a 3c e 1), Plano do Assistente (3a, 3b, 6a e 6b), Plano de 6 meses (3a, 3b e 4) e JU-04 (5), cada um com adendo datado. A correção 5 também vale para a pesquisa `../pesquisa/juridico/J4-fontes-e-integracoes.md` (l. 102 e 216), que não foi alterada; a correção 6c fica como nota no legado (`../legado/apresentacao/`). Registro em [ATUALIZACOES.md](ATUALIZACOES.md).
+
+Ficaram para o Enzo duas divergências que este plano abriu com o JU-04 (ver [ATUALIZACOES.md](ATUALIZACOES.md)): **D5**, a janela do federal nos blocos que os pacotes jurídicos usam inteiros (10 anos, decisão 4, ou "desde a origem", JU-04, 3.5); e **D7**, o papel do especialista jurídico depois da revisão pela IA e o preço por pacote de blocos (6.2 deixa a regra de preço para o Estudo de Precificação).
+
+A apresentação "O raciocínio do Consultor" (branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/`, 9/11/2026) usa esta versão 0.4 nos slides 24 a 28 e não traz decisão nova sobre a base municipal.

@@ -746,3 +746,21 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | C2-08 E-mail enviado vira registro sozinho | Agora | 08 (conector de e-mail, pasta de enviados); 04; 01, 7 (pasta do cliente) (ampliado: lê tudo, entrada e enviados, com anexos) | Gestão e Atendimento |
 | C2-09 Malote e documentos em papel | Agora | 04 (canais e comunicados); 03, 6.1 (preferência de entrega na ficha); Arquivos (origem "malote") | Gestão e Atendimento |
 | C2-13 Aniversariantes e cartão de Natal | Só a ideia | 04 (comunicados por modelo) | Gestão e Atendimento |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/entregas/S05.md` e `DECISOES.md` (S05 e S08), propostas.
+
+- **Lead fechado (diverge do 01, 4.9).** O wireframe cria o cliente já **em implantação** ao fechar o contrato, pulando `aceito`. Vale o plano (`aceito`, com a trilha gerada ao entrar em `em_implantacao`, depois da assinatura e dos marcos P1 a P7); o wireframe deve ser ajustado.
+- **Números com mais seções (completa 10 e o adendo C2).** Nome de quem atende (C2-07: no começo, em negrito, no rodapé ou desligado), caixas de e-mail por setor por OAuth (C2-08), bloqueados, privacidade e retenção, respostas do integrante começando desligadas e valendo primeiro nos clientes-piloto (D-31, D-33).
+- **Teto do WhatsApp para aprovar lote (completa o adendo 19).** Aprovar lote pelo WhatsApp, com código de uso único de seis dígitos, só até **R$ 3.000** (`teto_whatsapp`, editável pelo Gestor do BPO); acima, o app com segundo fator. **[valor a validar no piloto]**
+
+### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
+
+Fonte: [`../apis/PERGUNTAS.md`](../apis/PERGUNTAS.md), Q5, e [`../apis/WHATSAPP.md`](../apis/WHATSAPP.md) (branch `wf-backend-apis`, 15/11/2026). **O WhatsApp do dia a dia (atendimento, suporte, recados) vai por integração não oficial com o WhatsApp Web (WAHA com a engine GOWS)**, sem custo por mensagem, com cláusula de aceite e responsabilidade do escritório pelo banimento por mau uso (aceite registrado como evento). A API oficial da Meta fica para envio em massa grande, contratada e paga pelo escritório. As opções comparadas e as boas práticas contra banimento estão em WHATSAPP.md.

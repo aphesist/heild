@@ -129,6 +129,8 @@ Das 179, 135 estão nas fases 0 a 2. Os setores de perfil (pessoa física, terce
 
 ### 3.2 Um integrante por setor com equipe
 
+> **Revisto em 15/11/2026:** pela decisão 1 do Enzo (15/11/2026), o integrante é compartilhado por setor (uma configuração do setor, com execução isolada por pedido), não um por pessoa; a memória do setor só muda por proposta aprovada (decisão 6, revê P10); o custo sai da bolsa do setor (decisão 5). Ver o adendo "consolidação dos planos" no fim deste documento.
+
 Sete integrantes de setor, mais o Consultor (seção 10, que responde pelo setor Consultoria) e o Geral (seção 9). Cada usuário recebe os dos setores que tem. Nomes e avatares vêm do tema.
 
 | Integrante | Função | Faz sozinho (IDs) | Prepara para a pessoa | Gatilhos típicos |
@@ -809,7 +811,7 @@ T1 e T2 são pré-requisito de tudo; T5 e T6 andam em paralelo com T3 e T4.
 | P7 | O modo cliente roda como sessão do Consultor do responsável, com escopo rebaixado ao da conta de cliente; ou um Consultor "do escritório", sem dono? | **Respondido:** o Consultor é do cliente, como serviço contratado à parte (10); não roda como sessão do responsável | Quando o cliente pergunta no app, a resposta sai de um agente que pertence ao contador responsável (vendo só o que o cliente pode ver). A escolha define quem responde pelo que foi dito e de quem é a memória. |
 | P8 | O Geral responde perguntas legais direto ou sempre encaminha ao Consultor? | **Respondido:** responde ali. Responde direto; o cartão mostra "pelo Consultor" | Perguntar no chat principal e receber ali é mais rápido. A dúvida é se vale marcar que foi "o Consultor", para o usuário saber onde continuar. |
 | P9 | Teto de 1,5 milhão de tokens por integrante por dia; por escritório, aviso a 80% e parada de jobs a 100% da cota mensal: razoável? | **Respondido:** limites por janela de 5 h e de 7 dias por usuário, mais o mensal do escritório; chat e perguntas continuam (12). Sim; jobs acumulam e rodam quando a cota renova | Cada agente tem um limite de gasto por dia e o escritório um por mês. Ao bater, os agentes param de trabalhar sozinhos, mas o chat continua. |
-| P10 | Memória do escritório por setor: o integrante escreve e vale, com revisão depois; ou só propõe e uma pessoa confirma antes? | **Respondido:** escreve e vale; o Administrador revisa depois (5.3; P14 das Fundações) | É o caderno compartilhado do setor. Escrever direto faz a regra valer na hora, mas um erro se espalha; confirmar antes é mais seguro e mais lento. |
+| P10 | Memória do escritório por setor: o integrante escreve e vale, com revisão depois; ou só propõe e uma pessoa confirma antes? | **Respondido:** escreve e vale; o Administrador revisa depois (5.3; P14 das Fundações) | É o caderno compartilhado do setor. Escrever direto faz a regra valer na hora, mas um erro se espalha; confirmar antes é mais seguro e mais lento. **Revista em 15/11/2026** pela decisão 6 do Enzo: só muda por proposta aprovada (`memoria.propor`). |
 | P11 | Integrante de Financeiro do escritório existe desde a primeira versão (desligado, só Administrador e Gestor) ou só quando o módulo financeiro existir? | **Respondido (segue a hipótese):** Existe, desligado por padrão | É o agente da cobrança do escritório. Como essa parte vem depois, a dúvida é se ele já aparece na lista sem fazer nada ou só surge depois. |
 
 ### 15.4 As duas perguntas reformuladas
@@ -945,3 +947,42 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | C2-03 Boletos de sindicato, convênio e seguro de vida | Agora | 03, 6.5 (Guias, holerites, pagamento); 02, 3.2 (gatilho do dia 25); 08 (robô de portal, depois) | DP |
 | C2-21 Fiscalização de licença como processo | Agora | 03, 6.1; 02, 3.2 (gatilho) | Societário |
 | C2-28 Pauta da reunião semanal | Só a ideia | 02, 9 (Geral); 03, 6.9 | Geral |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Integrantes: decisões do Enzo (15/11/2026)
+
+Fonte: [`../integrantes/DECISOES.md`](../integrantes/DECISOES.md) (branch `wf-integrantes-pesquisa`, `docs/integrantes/DECISOES.md`), sobre a avaliação em [`../integrantes/AVALIACAO.md`](../integrantes/AVALIACAO.md), e [`../backend/AGENTICO.md`](../backend/AGENTICO.md), 4.6.
+
+- **Integrante compartilhado por setor (substitui a nota "Cada pessoa tem os próprios integrantes" do adendo do UI lab de 7/11/2026 e a regra "Cada usuário recebe os dos setores que tem" de 3.2).** O integrante passa a ser uma **configuração do setor** (nome, procedimentos, ferramentas do recorte, regras e memória do setor), não um agente por pessoa. Cada pedido de cada pessoa, cada evento e cada job roda numa **execução própria e isolada**, com o contexto daquela conversa, daquele cliente e daquela tarefa (`contexto.carregar`); uma execução não lê o transcript de outra. Vinte pessoas ao mesmo tempo são vinte execuções paralelas, numa fila com prioridade (pessoa no chat, depois evento, depois job) e limite por setor (padrão de partida: 10 simultâneas). A memória privada da pessoa continua sendo dela e só entra nas execuções dela (5.1).
+- **Procedimento por processo é a forma padrão (decisão 2).** Os processos repetitivos rodam como procedimento: passos em código, operários com contrato e validadores, no motor de procedimentos do backend (AGENTICO, 4). O planejador de modelo (o loop livre da seção 4) fica para a exceção.
+- **Modelos por papel (decisão 3; completa 1.3, que não escolhe fornecedor).** Padrão: **Sonnet operário, Sonnet escritor, Opus revisor**. O Haiku só entra como operário por contrato, quando o piloto provar que ele não erra naquele passo. Onde o texto acima diz "modelo barato" para filhos, consolidação e auditoria, vale a classe `operario`, com o modelo que o piloto aprovar.
+- **Resposta no padrão e roteamento fixo (decisão 4).** Os integrantes dos setores respondem num formato e tom definidos pelo sistema, por processo, para o Assistente encaminhar sem reescrever. O roteamento segue regras primeiro, modelo barato depois e modelo caro só no ambíguo (completa 9.1 e o roteador da etapa 0).
+- **Quem paga (decisão 5).** Por padrão, o custo de modelo sai da **bolsa do setor** `(escritório, setor, mês)`. Opção a mais: antes de uma execução vinda de evento ou job, o integrante pode perguntar "Para quem quer rotear esta atividade?" (`integrante.perguntar_responsavel`); a pessoa escolhida vira a responsável, recebe os cartões e, se o escritório configurar, paga pelo plano dela. Substitui a regra de 13 e do estudo de precificação de que o consumo de um integrante é debitado do usuário dono dele (ver a divergência D3 em [`../ATUALIZACOES.md`](../ATUALIZACOES.md)).
+- **Memória do setor só muda por proposta aprovada (decisão 6; substitui a resposta de P10, "escreve e vale; o Administrador revisa depois").** Dentro de uma execução, a memória do setor é só leitura; aprender algo para todos gera `memoria.propor`, um cartão para Gestor ou Administrador. O que era o caderno que "vale ao escrever" passa a valer só depois da aprovação.
+- **Piloto pré-registrado e automatizado (decisão 7; completa 14).** Erro como desfecho principal, margem de não inferioridade de −3 pontos, e avaliação **automática**: casos com gabarito, execuções em modo sombra (o integrante faz em paralelo, sem efeito, e o sistema compara com o que a pessoa fez) e conferência determinística pelos validadores. Nenhum escritório confere à mão.
+- **Custo (13).** A conta da avaliação (custo relativo 0,43) supunha Haiku operário; com Sonnet operário o custo por tarefa sobe, e a conta será refeita com [`../integrantes/modelo_de_custo.py`](../integrantes/modelo_de_custo.py) depois do piloto.
+
+### Design system, protótipo e site (8 a 10/11/2026)
+
+Fontes: branch `design-system`, `design-system/orbs.md` e `produto/DESIGN.md`; branch `prototipo`, `app/PLANO.md` (decisões 28 e 29), `app/README.md`; branch `site`, `app/src/site/`.
+
+- **Estados do integrante (completa 9.2).** Sete estados, cada um com palavra na lista e no cabeçalho, nunca só com a reação do orb: disponível, pensando, trabalhando, precisa de você, concluído, em pausa (`dormindo`, o integrante pausado) e com erro.
+- **Cor do integrante criado (completa 11.1).** A proposta de integrante novo traz uma cor de uma paleta curta, que difere em claridade das cores já existentes, não só no matiz; a cor fica só no orb e nos marcadores. Nos grupos de orbs, se um sai do estado padrão, o grupo inteiro anima.
+- **Nomes de exibição no tema de fábrica (diverge de 3.2 e 9.1).** O design system, o protótipo e o site usam **Assistente** (o Geral de 9.1), **Atendimento** (Gestão e Atendimento) e **Financeiro** (Financeiro do escritório), além de Consultor, Fiscal, DP, Contábil, Societário, Notas e, no BPO, Contas a Pagar, Contas a Receber, Conciliação e Gerencial. Os identificadores e setores não mudam. A adoção como nomes oficiais está em D2 de [../ATUALIZACOES.md](../ATUALIZACOES.md).
+- **SLA e fila (esclarecimento do adendo dos dois integrantes novos).** O adendo "integrantes do BPO por função" substitui só o integrante BPO financeiro; o SLA e fila do modo BPO entre escritórios continua e falta no design system, no site e no protótipo, porque o modo BPO não foi desenhado. O `DESIGN.md` ainda lista um orb único "BPO": corrigir no branch `design-system`.
+- **O Assistente não reescreve (com a decisão 4 de 15/11/2026).** O Assistente acompanha o pedido até o fim, mas o fechamento é a montagem, por modelo fixo, das saídas que cada integrante já entrega no formato padrão (tabela, documento, cartão), não um texto novo. O "resumo com os números" do protótipo e do site (`roteiros.ts`: "o Assistente junta tudo com os números") deve ser essa montagem.
+- **Protótipo no modelo antigo.** O protótipo (`app/REVISAO.md`, seção 1, e a passagem "Fiscal (de Fernanda) para DP (de Ana Souza)") segue o integrante por pessoa; com a decisão 1, a passagem passa a ser de setor para setor, com a pessoa responsável indicada na tarefa. O ajuste é do branch `prototipo`.
+- **"Faz sozinho" no site (conflito com o adendo D-33).** O site diz "O integrante faz sozinho: ler a caixa postal, conciliar o extrato, montar a guia, cobrar o documento"; pelo plano, todo escritório começa sem categoria liberada para "faz sozinho". Ver D9 em [../ATUALIZACOES.md](../ATUALIZACOES.md).
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (propostas das sessões S01, S02, S03 e S05).
+
+- **Roteador do Geral (completa 9.1 e 9.3).** Ordem: pedido ao time; pergunta sobre o sistema (responde o assistente de ajuda, cartão `ajuda`, sem gastar o limite de IA, dentro das perguntas do Suporte); condição ("me avise quando", cartão `regra` que liga um job); pauta; cálculo; mensagem (prévia com canal, enviar pede aprovação); termo ambíguo (cartão `escolha`); anexo (vira Documento classificado).
+- **Não promovíveis (completa 3.3).** O wireframe acrescenta **abrir caixa postal** (dá ciência) e **reabrir competência** a transmitir, pagar, assinar e alterar regime. "Enviar ao cliente" fica promovível por atividade (o envio do DAS, FIS-010, aparece promovido).
+- **Integrantes na comunicação interna (pedido do 11, 8.1).** `@Fiscal` chama o integrante, que responde no fio marcado como IA; `@equipe Fiscal` avisa as pessoas do setor. Sem menção, o integrante só posta proposta de tarefa em grupo ou canal (mensagem com verbo de pedido ou prazo) e o resumo da manhã no canal do setor, se o Gestor ou o Administrador ligar. Em conversa pessoal, nunca.

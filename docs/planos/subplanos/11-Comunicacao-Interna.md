@@ -62,6 +62,8 @@ Os integrantes **não leem conversas pessoais**, a não ser que um dos dois o ch
 
 ## 6. Onde mora na tela
 
+> **Revisto em 15/11/2026:** decisão do Enzo (14/11/2026, wireframe): não há item na barra lateral; a comunicação interna abre pelo botão Chat do canto inferior direito, com as abas Equipe e Integrantes. Ver o adendo "consolidação dos planos" no fim deste documento.
+
 Item próprio na barra lateral, **Conversas internas** (nome provisório; separado do CRM, que é a conversa com clientes), com três grupos: Pessoais e grupos, Setores, Geral. O ícone mostra o número de não lidas. Uma janela pequena de conversa pode ficar aberta sobre qualquer tela.
 
 ## 7. Custo e preço
@@ -104,3 +106,21 @@ Incluída na plataforma, sem preço próprio. Custo: armazenamento das mensagens
 ## Ressalvas
 
 Nada aqui foi medido. O custo por usuário é premissa. A compatibilidade da regra "nada se apaga" com a LGPD está marcada para revisão jurídica.
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Onde mora na tela: decisão do Enzo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md`, Coordenação ("Conversas internas pelo botão Chat do canto inferior direito"), e `entregas/S05.md`. **Substitui a seção 6** ("item próprio na barra lateral, Conversas internas"):
+
+- não há item na barra lateral; a comunicação interna abre pelo botão **Chat** do canto inferior direito, em qualquer módulo;
+- a gaveta tem as abas **Equipe** (Pessoais e grupos, Setores, Geral) e **Integrantes**;
+- o botão soma as não lidas (conversa silenciada não soma) e os cartões pendentes;
+- "abrir em tela cheia" leva à rota própria (abas Conversas e Arquivos); a janela flutuante continua;
+- no celular, o destino "Chat" do menu inferior.
+
+Detalhes propostos pela sessão S05: menção a setor é `@equipe Fiscal` e `@Fiscal` chama o integrante; `@Nome` de quem não participa leva só o trecho, não o acesso; `#` cita cliente, tarefa, obrigação ou documento ("sem acesso" a quem não pode ver); a investigação fica em Preferências › Auditoria, com motivo escrito, evento, linha do sistema na conversa e aviso aos dois, só leitura; CPF, RG ou holerite num canal amplo oferece "Mover para uma tarefa"; aviso de primeiro uso com aceite; fixar no Geral só Gestor e Administrador. As entidades estão no adendo de 15/11/2026 do subplano 01. Pendente no wireframe: o horário de silêncio fica guardado, mas o sino ainda avisa nesse horário.

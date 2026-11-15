@@ -61,6 +61,8 @@ Não entrega: caixa de entrada e WhatsApp (04), tela de timesheet e captura exte
 
 ### 2.0 Decisão de navegação (7/11/2026): barra lateral com módulos, abas internas dentro de cada módulo
 
+> **Revisto em 15/11/2026:** U5 fechada (Timesheet: Meu tempo · Confirmações · Equipe · Rentabilidade); comunicação interna pelo botão Chat, sem item na barra; Configurações com oito abas em proposta. Ver o adendo "consolidação dos planos" no fim deste documento.
+
 O usuário enviou o esqueleto do design geral (Figma) e o UI lab o confirmou em 7/11/2026 (decisão 1 do UI lab): vale o seguinte, que muda a seção 2 e a 6: **as onze abas não ficam no mesmo lugar.** A navegação principal é uma **barra lateral à esquerda, expansível** (abre e fecha, com animação e texto), com os módulos e Configurações no pé; cada módulo tem, quando precisa, **abas internas em cima, centralizadas** (controle segmentado); cliente selecionado e sino ficam no canto direito.
 
 ```
@@ -954,3 +956,31 @@ Decisão do Enzo, depois da reclamação dos contadores de que a aba Obrigaçõe
 | **Gestor** e **Administrador**, ou conta configurada para isso | Seletor "Meus setores · um setor · todos"; o padrão é "meus setores" |
 
 Cada aba de setor (Fiscal, DP, Contábil, Societário) ganha também o bloco **"Obrigações do setor"**: as próximas do setor, com o mesmo dado, e o link "ver todas" que abre a aba Obrigações já filtrada. Assim a obrigação aparece dentro do setor sem duplicar o calendário. No cliente, a aba mostra a agenda dele filtrada pelos setores de quem olha; na carteira, a semana por cliente com o mesmo filtro. O dono da obrigação é a regra (subplano 07) e o vínculo usuário × setor (Fundações 4.1). **Pendente no protótipo** (repositório Heild, branch `prototipo`): hoje a aba mostra todas as áreas do cliente.
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md`, `entregas/S01.md` a `S10.md` e `MAPA_DE_TELAS.md`. Marcado **[Enzo]** o que ele decidiu ou delegou; o resto é proposta das sessões, a validar com os contadores.
+
+- **U5 fechada [Enzo delegou] (substitui a ordem de 2.0 e dos adendos 20, 23 e 24).** Abas do Timesheet: **Meu tempo · Confirmações · Equipe · Rentabilidade**: começa pelo que cada pessoa usa todo dia e termina na visão do Gestor.
+- **Gaveta do Chat com duas abas [Enzo] (completa 2.5).** Botão **Chat** no canto inferior direito, em todos os módulos: **Equipe** (subplano 11) e **Integrantes** (o Geral, com a mesma conversa do Início › Assistente para o cliente da tela; ícones dos integrantes; "+" cria integrante). O botão soma não lidas e cartões pendentes; a tela cheia tem rota própria (abas Conversas e Arquivos), sem item na barra; no celular, o destino "Chat" do menu inferior.
+- **Configurações com oito abas (proposta, S09).** Escritório · Usuários · Armazenamento · Tema · Integrantes · Assinatura · **Conectores** (a tela do 08, 2.4) · **Permissões** (a matriz usuário × aba × nível, com "Simular"). Uma exceção por tela pode liberar Conectores, Armazenamento, Integrantes ou Permissões (só leitura) a outra conta; Assinatura, Tema, Escritório e Usuários ficam sempre do Administrador. Recomendação: aceitar, trocando o setor fictício `configuracoes` do wireframe por regra explícita em `autorizar`.
+- **Implantação do escritório e Raio-X do Drive em tela cheia (proposta, S09).** Assistente de implantação em nove passos (dados, setores, equipe com modelos, importação com prévia, armazenamento e Raio-X, canais, tema, campanha de acessos, plano mestre com ondas), aberto por Escritório › "Continuar implantação"; Raio-X lê só a lista de pastas e arquivos e os achados viram decisões em lote.
+- **Tarefas e revisão (proposta, S04).** O bloco de tarefas tem quatro visões: Lista · Por responsável · Calendário · **Revisão (N)**, que aprova em lote e devolve com comentário obrigatório. "Ver todas" abre a tela Tarefas numa gaveta larga; no celular, Tarefas e Pendências no menu inferior.
+- **Trilha por cima do Painel (diverge de 8.1, "a trilha mora em Clientes e Societário").** A trilha de entrada e saída abre numa gaveta larga por cima de qualquer aba, pela faixa de ciclo de vida, por link ou pelo Societário. Cada marco dos moldes aponta para uma atividade real do catálogo; entra o molde **reentrada** (C2-24, CIC-010); os moldes se editam com versão nova em Gestão › Processos. A lista dos marcos está em `entregas/S04.md`.
+- **Faixa e estados.** Uma faixa só, por serviço, acima de toda aba; inativo, encerrado e arquivado deixam a aba só leitura; mudar estado é cartão ao Gestor; encerrar fica bloqueado com tarefa ou revogação aberta.
+- **Regras da aba Obrigações (hipóteses, S02).** Prazo interno padrão dois dias úteis antes do legal; gerar o calendário só Gestor e Administrador, idempotente; o Membro reprograma só as suas, e além do prazo legal confirma com a multa; "sem imposto no mês" encerra como concluída dispensada; quem tem Fiscal vê as obrigações de Notas.
+- **DP e ficha (proposta).** Widget **Visão do DP** troca entre *Admissão e rotina* e *Rescisão* (E-04); ficha do cliente em seis abas (Contatos · Responsáveis · App e serviços · Entrega · Relação · Histórico), entrega padrão "só digital" (C2-09).
+- **Busca, seletor e Visão geral.** Ctrl/Cmd+K ou "/" para busca, Ctrl/Cmd+J para o seletor; favoritos por conta (até 10) e recentes por aparelho; arranjo padrão da Visão geral por papel; calendário com filtro "eu · equipe · integrantes · todos".
+- **Fiscal e Contábil (hipóteses, S03).** Trava do REINF por trimestre no Presumido e no Real; travas do relatório (D-26): faturamento zerado, lucro maior que o faturamento, "outras receitas" acima de 20% **[limite a validar]**, balancete que não fecha; IRPF, ECD e ECF só por pessoa.
+
+### Item Clientes para quem não tem Painel (8/11/2026)
+
+O Plano da Plataforma se contradiz no DA-02.1: o item 9 diz que o item Clientes só existe no BPO puro (C1, sem Painel), e o item 10 diz que aparece para quem não tem o Painel, em qualquer cenário. A U4 do adendo do UI lab deste subplano segue o item 9; o protótipo implementa o item 10 (branch `prototipo`, `app/PLANO.md`, "A barra lateral da Marina": quem não tem Painel ganha o item Clientes, com Cadastro e Contatos, vendo só os clientes do pacote dela). Recomendação: adotar o item 10. Até a resposta do Enzo, a U4 fica como está; ver D4 em [../ATUALIZACOES.md](../ATUALIZACOES.md).
+
+O site chama o módulo do BPO de "Painel do BPO" (branch `site`, `app/src/site/SiteApp.tsx` e `SecoesBpo.tsx`); pelo plano, Painel é o item do pacote Contábil e o do BPO se chama BPO (2.0). Também em D4.

@@ -1,5 +1,7 @@
 # Plano: Assistente de IA para Contadores
 
+> **Revisto em 15/11/2026:** a cascata em produção é a de nove etapas do subplano 07; a verificação fica fora da área editável da DGM; a base é conferida pela IA, com estadual nas 27 UFs e municipal sob demanda. Ver o adendo "consolidação dos planos" no fim deste documento.
+
 5 de novembro de 2026
 
 Este documento descreve o produto e a arquitetura técnica. O plano de execução (cronograma de 6 meses, orçamento, aporte, preços e infraestrutura) está no [Plano de desenvolvimento (6 meses) e lançamento](Plano_MVP_6_meses.md), e a construção da base legal, no [Plano de Ingestão da Base Legal](Plano_de_Ingestao_da_Base_Legal.md).
@@ -450,3 +452,22 @@ Pacote extra: 100 perguntas por R$ 149.
 - [Rank1: Test-Time Compute for Reranking in Information Retrieval (arXiv)](https://arxiv.org/abs/2502.18418)
 - [How to Train Your Deep Research Agent? — Search-R1++ (arXiv)](https://arxiv.org/abs/2602.19526)
 - [Transformer Memory as a Differentiable Search Index (arXiv)](https://arxiv.org/abs/2202.06991)
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### O raciocínio do Consultor e a revisão pela IA (9/11/2026)
+
+Fontes: a apresentação "O raciocínio do Consultor" (branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/src/dados.js`, 33 slides, 9/11/2026), resumida em [raciocinio/README.md](raciocinio/README.md), e o [Plano Municipal](Plano_Base_Legislacao_Municipal.md) v0.4, seções 13, 15 e 25. Este plano é de 5/11/2026; onde o texto acima diverge, vale o que segue.
+
+- **A cascata em produção tem nove etapas (substitui "Estratégia de recuperação", sete etapas com a árvore de temas na frente).** É a do subplano 07, 3.1: entender, cache, vigência, palavras e significado, grafo, revisor, redação, verificação e saída, com a abstenção como saída válida, empacotada em `legal.consultar`. A árvore de temas (RAPTOR) e a política de busca (Search-R1) ficam atrás de chave até vencerem no benchmark; até lá, a etapa 1 classifica direto na taxonomia (07, 3.7). Slide 13.
+- **Fusão das buscas.** BM25 e a busca multivetorial rodam em paralelo e as listas são fundidas pela posição de cada item (reciprocal rank fusion; Cormack, Clarke e Büttcher, SIGIR 2009). Slide 16.
+- **Grafo (correção 6 da seção 25 do Plano Municipal).** O ganho de 10 a 30 vezes no custo, e de 6 a 13 no tempo, contra a busca em rodadas (IRCoT), é do **HippoRAG 1** (arXiv 2405.14831); o HippoRAG 2 mede cerca de 7% sobre o melhor embedding em memória associativa. Na Heild, as arestas são as da base (altera, regulamenta, remete, julga), não triplas extraídas por modelo, e o grafo só liga se vencer no benchmark. A "árvore guiada pela taxonomia" é uma **adaptação** do RAPTOR. Slide 12.
+- **Rank1.** Foi destilado de mais de 600 mil raciocínios em inglês (635 mil, pelo Plano Municipal, 15), sobre o MS MARCO; para a lei brasileira precisa de nova destilação em português e só substitui o reranqueador por API se vencer. Slide 17.
+- **Verificação trancada (substitui "O que a DGM pode mudar", que inclui a etapa de verificação).** Ficam fora da área editável a base legal, os cálculos e tabelas, a verificação de citações, o ouro e as funções de medida, as permissões e os limites (07, 9.4). No artigo da DGM, uma variante apagou os marcadores que denunciavam o uso inventado de ferramentas para passar no detector. A lista do que fica editável precisa do Enzo: D6 em [ATUALIZACOES.md](ATUALIZACOES.md). Slide 31.
+- **Laço inspirado na DGM, não a DGM inteira.** Uma rodada da DGM original no SWE-bench custou cerca de duas semanas e US$ 22 mil (arXiv 2505.22954). A Heild roda dois laços enxutos, ambos fora da produção: o do Consultor (07, 9.4) e o da ingestão (Plano Municipal, 15). Não confundir com os "dois laços" da Camada 4 (política de busca por RL e DGM). Slide 30.
+- **Base conferida pela IA, não por pessoas (decisão do Enzo, 9/11/2026, Plano Municipal, 13).** Onde este plano fala em "revisão automática ou humana conforme a fonte" (Camada 3) e em "auditoria de 100 dispositivos com no máximo 2% de erro" (cronograma, M3), passa a valer: revisão pela IA em toda a ingestão, com o critério do M3 medido contra o ouro reservado (acerto de pelo menos 98%, cobertura do ouro publicada junto). Documento achado na busca ao vivo entra na fila de ingestão e passa pela mesma revisão. Slides 26 e 27.
+- **Cobertura (correção 3 da seção 25).** "5 UFs" passa a 27 UFs no estadual, e "capitais e municípios dos clientes" passa a municípios fáceis e sob demanda, com janela de 10 anos no federal e 5 no estadual e no municipal (Plano Municipal, decisão 4). Cada ente e domínio tem nível de cobertura C0 a C4, mostrado na citação.

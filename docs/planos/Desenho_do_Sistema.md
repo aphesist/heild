@@ -547,3 +547,27 @@ Subplanos para sessões filhas, nesta ordem, um por vez e cada um construído so
 - **Comunicação interna** (pedido do Enzo): conversas pessoais, grupos, canal de cada setor e canal geral, quase como um Microsoft Teams, **sem possibilidade de excluir mensagens** (editar guarda o histórico). Faz parte da plataforma comum, para todos os pacotes. Desenho no [subplano 11](subplanos/11-Comunicacao-Interna.md).
 - **Aba Obrigações:** compartilhada, mas dinâmica por setor: cada setor vê as suas obrigações e o seu integrante; quem tem vários setores, o Gestor e o Administrador escolhem ver um, vários ou todos. Cada aba de setor tem o bloco "Obrigações do setor". Detalhe no adendo do [subplano 03](subplanos/03-Painel.md).
 - **Nome:** o setor continua **Societário** ("Legal" e "Legalização" são sinônimos na busca e na IA).
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Marca, tema de fábrica, notificações e suporte (8 e 9/11/2026)
+
+Fontes: branch `design-system` (`design-system/README.md`, `produto/PRODUCT.md`, `orbs.md`) e branch `prototipo` (código e commits de 8 e 9/11/2026, depois da segunda rodada do UI lab já incorporada).
+
+- **Nome (seção 0).** O produto se chama **Heild**, do islandês *heild*, "o inteiro", com raiz no nórdico antigo *heill*, "são, inteiro" (Cleasby e Vigfússon, 1874, marcam *heild* como palavra moderna). Linha da marca: "O inteiro: todos os sistemas da empresa em um só lugar." Fora do produto (site, material de venda) é sempre Heild; dentro, vale o tema do escritório (1.9). Fonte: branch `design-system`, `design-system/README.md` (commit de 9/11/2026, que corrigiu "do nórdico antigo *heild*").
+- **Tema de fábrica com a marca Heild (completa 1.9).** Sem personalização, o tema mostra a marca Heild (HE com a barra fechada, HEILD aberta, com a troca animada do `<heild-logo>`). A marca branca usa `logotipo_ref` (marca curta) e o campo novo `logo_completa_ref` (logo inteira, na barra aberta, no login e no app), trocados sem animação. Fonte: branch `prototipo`, `app/src/components/compostos/marca.tsx` e `app/src/theme/tipos.ts` (8/11/2026).
+- **Notificações na tela (completa 1.7).** Além do sino, o aviso chega no canto inferior direito, em três tipos: mensagem de cliente (foto, nome, empresa, canal), integrante (orb no estado e o que fez ou pede) e confirmação do sistema. Quem já está na conversa de onde o aviso vem não recebe notificação, e o aviso nasce lido. Fonte: branch `prototipo`, `app/src/ambiente/interface.tsx` e `app/README.md` (8/11/2026).
+- **Horário do suporte (proposta para D11, a confirmar).** O protótipo usa segunda a sexta, das 8h às 20h, com fila e espera visíveis; fora do horário, a mensagem fica para o dia seguinte (branch `prototipo`, `app/README.md`, "Suporte da plataforma"). São 12 horas por dia útil, mais que o horário comercial suposto no custo de R$ 2 por assento (Estudo, 6.8): se for adotado, refazer a premissa.
+- **Posicionamento.** A Heild substitui as ferramentas de gestão, atendimento, prazos, captura e financeiro do escritório, não o sistema contábil core: escrituração, apuração, folha e SPED continuam no Domínio, na Alterdata ou na Contmatic (Plano da Plataforma, 3.4 e 8.2). O `PRODUCT.md` do branch `design-system` diz que a Heild substitui o Domínio; precisa ser corrigido lá.
+
+### Wireframe interativo (14 e 15/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (registros de 14/11/2026) e `docs/wireframe/STATUS.md`. Só os três registros da Coordenação foram aceitos pelo Enzo; os das sessões são propostas.
+
+- **Comunicação interna pelo botão Chat (decisão do Enzo; completa 2.1 e o adendo de 14/11).** Abre pelo botão flutuante **Chat** do canto inferior direito, em todos os módulos. A gaveta tem duas abas: **Equipe** (pessoais, grupos, canal do setor e geral) e **Integrantes** (o time de IA). O botão soma as não lidas das duas; "abrir em tela cheia" leva à tela das conversas, com rota própria. Não há item novo na barra lateral; no celular, o destino "Chat" do menu inferior abre a mesma gaveta. Detalhe no subplano 11, seção 6.
+- **"Membro" nas telas (diverge de 1.1).** O wireframe mostra o papel de execução como **Membro**, o nome que o Enzo usa; no código e no banco continua `colaborador`. A decisão de 7/11 ("os nomes ... Colaborador ... ficam") é revista só se o Enzo aceitar: D2 em [ATUALIZACOES.md](ATUALIZACOES.md).
+- **O wireframe é a base do produto (completa 9).** A pedido do Enzo, os dados do wireframe passaram a morar nas entidades das Fundações: 76 tabelas com RLS por escritório e repositórios que conferem a permissão e gravam evento, em dois modos (local e Supabase). O backend real ([backend/](backend/)) nasce em cima dessas telas e repositórios: as telas não mudam e o adaptador troca.
