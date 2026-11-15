@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { definirContrato } from '@heild/processos'
-import { procedimentoDeEscolha, type OpcoesEscolha } from '../escolha.ts'
+import { procedimentoDeEscolha, type Escolha, type Lido, type OpcoesEscolha } from '../escolha.ts'
 import { resolverCom } from '../metas.ts'
 
 /**
@@ -93,15 +93,31 @@ const opcoesFaq = {
 export const gesFaq = procedimentoDeEscolha(opcoesFaq)
 
 /** v2 (B3b): revisor de risco (Opus) antes do cartão, porque o ato é irreversível. */
-export const gesFaqV2 = procedimentoDeEscolha({
+const opcoesFaqV2 = {
   ...opcoesFaq,
   versao: 2,
   orcamento: { centavos: 30, tokens: 12_000 },
-  revisor: { evidencias: (e, l) => {
+  revisor: { evidencias: (e: Escolha, l: Lido) => {
       const f = (l.contexto.base as PerguntaFrequente[]).find((x) => x.id === e.faq_id)
       return [
         { rotulo: 'Pergunta da base escolhida', valor: f?.pergunta ?? String(e.faq_id) },
         { rotulo: 'Resposta aprovada que vai ao cliente', valor: (f?.resposta ?? '').slice(0, 300) },
       ]
     } },
+} satisfies OpcoesEscolha
+export const gesFaqV2 = procedimentoDeEscolha(opcoesFaqV2)
+
+/**
+ * v3: a resposta ao cliente segue o modo da categoria `resposta_factual` escolhido pelo escritório
+ * (cartão por padrão, envio automático ou desligado); o texto é o da base aprovada.
+ */
+export const gesFaqV3 = procedimentoDeEscolha({
+  ...opcoesFaqV2,
+  versao: 3,
+  aprovacao: {
+    ...opcoesFaq.aprovacao,
+    exigida: 'por_categoria',
+    categoria: 'resposta_factual',
+    mensagem_ao_cliente: (e, l) => (l.contexto.base as PerguntaFrequente[]).find((f) => f.id === e.faq_id)?.resposta ?? '',
+  },
 })

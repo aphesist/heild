@@ -2,15 +2,24 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { comEscritorio, type Sql } from '@heild/processos'
 import { esperar, lerExecucao, montar, pessoa, semear, sqlAdmin } from './ambiente.ts'
 import { comQuemFala, prefixoDeQuemFala } from '../src/identificacao.ts'
+import { dentroDoHorario, HORARIO_PADRAO, horarioDe, proximaAbertura, saudacao, textoDoHorario } from '../src/horario.ts'
+import { classificarConversa } from '../src/avaliacao/conversas.ts'
+import { gabaritoConversas } from '../src/avaliacao/gabarito-conversas.ts'
+import { FILA_RETOMAR_TRIAGEM, problemasDeEscopo, problemasDeEstilo } from '../src/setores/triagem-conversa.ts'
 
 /**
- * GES-TRIAR-REPASSAR: a triagem do número compartilhado (04, adendo A; 02, "Triagem do número
- * compartilhado"). Com integrantes, o integrante decide (sem menu); o menu é opção ("menu e integrante").
+ * GES-TRIAR-REPASSAR v3: a triagem do número compartilhado como conversa (decisão do Enzo de
+ * 15/11/2026). Sem menu nem pergunta fechada; fora do horário, só a resposta automática.
  */
 
 let admin: Sql
 let h: Awaited<ReturnType<typeof montar>>
 const terminal = (e: { estado: string }) => ['concluida', 'aguardando_cartao', 'falhou', 'cancelada', 'parcial'].includes(e.estado)
+const SP = 'America/Sao_Paulo'
+/** Segunda-feira, 16/11/2026, 14h em São Paulo: dentro do horário padrão. */
+const EXPEDIENTE = '2026-11-16T14:00:00-03:00'
+/** Sábado, 21/11/2026, 10h: fora do horário padrão. */
+const SABADO = '2026-11-21T10:00:00-03:00'
 
 beforeAll(async () => {
   admin = sqlAdmin()
@@ -21,229 +30,218 @@ afterAll(async () => {
   await admin.end()
 })
 
-interface OpcoesConversa {
-  cliente?: string | null
-  pessoa?: string
-  responsavel?: string
-  setor?: string
-  status?: string
-  etiquetas?: string[]
-}
-
-async function conversa(esc: string, mensagens: string[], o: OpcoesConversa = {}) {
-  return comEscritorio(admin, esc, async (tx) => {
-    const [c] = await tx`insert into conversa (escritorio_id, cliente_id, pessoa_id, setor_id, responsavel_id, status, canal_resposta_atual, ultima_mensagem_em, etiquetas)
-                         values (${esc}, ${o.cliente === undefined ? 'c-1' : o.cliente}, ${o.pessoa ?? null}, ${o.setor ?? 'gestao_atendimento'}, ${o.responsavel ?? null},
-                         ${o.status ?? 'nova'}, 'whatsapp', now(), ${o.etiquetas ?? []}) returning id`
-    for (const corpo of mensagens) await mensagem(esc, c!.id, corpo)
+async function conversa(esc: string, mensagens: string[], o: { cliente?: string | null; setor?: string; status?: string; etiquetas?: string[] } = {}) {
+  const id = await comEscritorio(admin, esc, async (tx) => {
+    const [c] = await tx`insert into conversa (escritorio_id, cliente_id, setor_id, status, canal_resposta_atual, ultima_mensagem_em, etiquetas)
+                         values (${esc}, ${o.cliente === undefined ? 'c-1' : o.cliente}, ${o.setor ?? 'gestao_atendimento'}, ${o.status ?? 'nova'}, 'whatsapp', now(), ${o.etiquetas ?? []}) returning id`
     return c!.id as string
   })
+  for (const m of mensagens) await cliente(esc, id, m)
+  return id
 }
 
-async function mensagem(esc: string, conversa_id: string, corpo: string) {
-  // Um instante depois da anterior: a ordem das mensagens importa para a resposta à pergunta.
+async function cliente(esc: string, conversa_id: string, corpo: string) {
   await new Promise((r) => setTimeout(r, 5))
   await comEscritorio(admin, esc, (tx) => tx`insert into mensagem (escritorio_id, conversa_id, direcao, canal, autor_tipo, corpo, criado_em) values (${esc}, ${conversa_id}, 'entrada', 'whatsapp', 'pessoa', ${corpo}, clock_timestamp())`)
 }
 
-async function triar(esc: string, entrada: Record<string, unknown>) {
-  const { execucao_id } = await h.motor.iniciar(await pessoa(admin, esc, 'u-ana'), 'GES-TRIAR-REPASSAR', entrada)
+async function triar(esc: string, conversa_id: string, agora = EXPEDIENTE) {
+  const { execucao_id } = await h.motor.iniciar(await pessoa(admin, esc, 'u-ana'), 'GES-TRIAR-REPASSAR', { conversa_id, agora })
   return esperar(() => lerExecucao(admin, esc, execucao_id), terminal)
 }
 
-const aprovar = async (esc: string, cartao_id: string) => h.motor.decidirCartao(await pessoa(admin, esc, 'u-ana'), { cartao_id, decisao: 'aprovar' })
+const falas = (id: string) => admin`select autor_tipo, autor_id, corpo, extras from mensagem where conversa_id = ${id} and direcao = 'saida' order by criado_em`
 
-describe('quem fala com o cliente', () => {
-  it('pessoa com setor, integrante marcado como IA, sistema com o escritório; o prefixo não se repete na sequência', () => {
+describe('tom e escopo da triagem (por regra)', () => {
+  it('mensagem natural passa; menu, lista, jargão de robô, formatação e duas perguntas não', () => {
+    expect(problemasDeEstilo('Boa tarde! Tudo bem? Me conta o que você precisa.')).toEqual([])
+    expect(problemasDeEstilo('Entendi! Vou passar para o pessoal do DP, que cuida disso.')).toEqual([])
+    expect(problemasDeEstilo('Escolha uma opção: 1. Fiscal 2. DP')).toContain('menu')
+    expect(problemasDeEstilo('É sobre:\n1. Fiscal\n2. DP')).toContain('lista_ou_menu')
+    expect(problemasDeEstilo('Olá! Sou um assistente virtual. Como posso ajudá-lo hoje?')).toContain('jargao_de_robo')
+    expect(problemasDeEstilo('Prezado cliente, recebemos sua solicitação.')).toContain('jargao_de_robo')
+    expect(problemasDeEstilo('É *urgente*?')).toContain('formatacao')
+    expect(problemasDeEstilo('É da folha? Ou do imposto?')).toContain('mais_de_uma_pergunta')
+  })
+
+  it('a triagem não dá valor, prazo, promessa, resposta técnica nem pede documento sensível', () => {
+    expect(problemasDeEscopo('Vou passar para o pessoal do fiscal, que cuida disso.')).toEqual([])
+    expect(problemasDeEscopo('O DAS deve dar uns R$ 150,00.')).toContain('valor')
+    expect(problemasDeEscopo('Fica uns 6% do faturamento.')).toContain('valor')
+    expect(problemasDeEscopo('Vence até o dia 20, fique tranquilo.')).toContain('prazo')
+    expect(problemasDeEscopo('Em 2 dias eles te respondem.')).toContain('prazo')
+    expect(problemasDeEscopo('Pode deixar que eu resolvo!')).toContain('promessa')
+    expect(problemasDeEscopo('Me passa sua senha do gov.br?')).toContain('documento_sensivel')
+    expect(problemasDeEscopo('Me manda uma foto do documento?')).toContain('documento_sensivel')
+    expect(problemasDeEscopo('A conta de luz é dedutível, sim.')).toContain('resposta_tecnica')
+  })
+
+  it('quem fala: pessoa com setor, integrante com (IA), sistema com o escritório; sem repetir na sequência', () => {
     expect(prefixoDeQuemFala({ tipo: 'pessoa', setor: 'dp', nome: 'Ana' })).toBe('*DP · Ana*')
-    expect(prefixoDeQuemFala({ tipo: 'integrante', nome: 'Integrante de Atendimento' })).toBe('*Integrante de Atendimento (IA)*')
+    expect(prefixoDeQuemFala({ tipo: 'integrante', nome: 'Atendimento' })).toBe('*Atendimento (IA)*')
     expect(prefixoDeQuemFala({ tipo: 'sistema', escritorio: 'Escritório Teste' })).toBe('*Escritório Teste*')
-    // Nome com marcação não quebra o negrito.
-    expect(prefixoDeQuemFala({ tipo: 'integrante', nome: 'Fis*cal' })).toBe('*Fis cal (IA)*')
     const ia = { tipo: 'integrante', nome: 'Atendimento' } as const
-    expect(comQuemFala(ia, 'Oi.')).toBe('*Atendimento (IA)*\nOi.')
     expect(comQuemFala(ia, 'Oi de novo.', ia)).toBe('Oi de novo.')
     expect(comQuemFala({ tipo: 'pessoa', setor: 'dp', nome: 'Ana' }, 'Assumi.', ia)).toBe('*DP · Ana*\nAssumi.')
   })
 })
 
-describe('triagem pelo integrante (padrão com integrantes, sem menu)', () => {
-  it('palavra-chave decide por regra; sem ela, o integrante decide; o destino recebe o resumo e a nota interna', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const porRegra = await triar(s.esc, { conversa_id: await conversa(s.esc, ['Preciso do holerite de outubro do Pedro.'], { cliente: null }) })
-    expect(porRegra.saida).toMatchObject({ acao: 'rotear', setor: 'dp', origem: 'regra', motivo_regra: 'palavra_chave', incerta: false })
-    expect(await admin`select 1 from chamada_modelo where execucao_id = ${porRegra.id}`).toHaveLength(0)
+describe('horário de atendimento', () => {
+  it('padrão de segunda a sexta, das 8h às 18h, no fuso do escritório; próxima abertura e saudação', () => {
+    expect(textoDoHorario(HORARIO_PADRAO)).toBe('de segunda a sexta, das 8h às 18h')
+    expect(textoDoHorario({ dias: [1, 3, 5], inicio: '09:30', fim: '17:00' })).toBe('segunda, quarta e sexta, das 9h30 às 17h')
+    expect(dentroDoHorario(new Date(EXPEDIENTE), HORARIO_PADRAO, SP)).toBe(true)
+    expect(dentroDoHorario(new Date(SABADO), HORARIO_PADRAO, SP)).toBe(false)
+    expect(dentroDoHorario(new Date('2026-11-16T18:00:00-03:00'), HORARIO_PADRAO, SP)).toBe(false)
+    expect(dentroDoHorario(new Date('2026-11-16T07:59:00-03:00'), HORARIO_PADRAO, SP)).toBe(false)
+    // Sexta à noite → segunda às 8h; segunda de madrugada → segunda às 8h.
+    expect(proximaAbertura(new Date('2026-11-20T19:00:00-03:00'), HORARIO_PADRAO, SP).toISOString()).toBe('2026-11-23T11:00:00.000Z')
+    expect(proximaAbertura(new Date('2026-11-16T05:00:00-03:00'), HORARIO_PADRAO, SP).toISOString()).toBe('2026-11-16T11:00:00.000Z')
+    expect(saudacao(new Date(EXPEDIENTE), SP)).toBe('Boa tarde')
+    expect(saudacao(new Date('2026-11-16T09:00:00-03:00'), SP)).toBe('Bom dia')
+    // Configuração do escritório: válida vale; inválida ou ausente vira o padrão, sem derrubar a triagem.
+    expect(horarioDe({ horario_atendimento: { dias: [1, 2, 3, 4, 5, 6], inicio: '08:00', fim: '12:00' } })).toEqual({ dias: [1, 2, 3, 4, 5, 6], inicio: '08:00', fim: '12:00' })
+    expect(horarioDe({ horario_atendimento: { dias: [1], inicio: '18:00', fim: '08:00' } })).toEqual(HORARIO_PADRAO)
+    expect(horarioDe(null)).toEqual(HORARIO_PADRAO)
+  })
+})
 
-    const id = await conversa(s.esc, ['Vamos levar a empresa para outra cidade. O que muda no registro?'])
-    const porModelo = await triar(s.esc, { conversa_id: id })
-    expect(porModelo.saida).toMatchObject({ acao: 'rotear', setor: 'societario', origem: 'integrante', integrante_id: 'i-societario', cliente_id: 'c-1', sugestao: null })
-    const [c] = await admin`select setor_id, resumo, etiquetas, extras from conversa where id = ${id}`
-    expect(c).toMatchObject({ setor_id: 'societario' })
+describe('gabarito de conversas', () => {
+  it('cobre os grupos pedidos, com ids distintos; setor errado é crítico, cartão e pessoa não', () => {
+    expect(new Set(gabaritoConversas.map((c) => c.id)).size).toBe(gabaritoConversas.length)
+    expect(new Set(gabaritoConversas.map((c) => c.grupo))).toEqual(new Set(['vago', 'claro', 'misto', 'muda_assunto', 'irritado', 'delicado', 'pede_pessoa', 'sem_certeza', 'fora_do_horario', 'contexto', 'escopo']))
+    expect(gabaritoConversas.filter((c) => c.roteiro.length > 1).length).toBeGreaterThanOrEqual(10)
+    const dp = gabaritoConversas.find((c) => c.id === 'vago-rescisao')!
+    expect(classificarConversa(dp, 'dp')).toEqual({ acerto: true, erro_critico: false })
+    expect(classificarConversa(dp, 'fiscal')).toEqual({ acerto: false, erro_critico: true })
+    expect(classificarConversa(dp, 'cartao')).toEqual({ acerto: false, erro_critico: false })
+    const irritado = gabaritoConversas.find((c) => c.id === 'irritado-demora')!
+    expect(classificarConversa(irritado, 'gestao_atendimento')).toEqual({ acerto: false, erro_critico: true })
+  })
+})
+
+describe('triagem como conversa (v3)', () => {
+  it('assunto vago: o integrante cumprimenta e pergunta (sem cartão, com "(IA)"); com a resposta, repassa ao DP e avisa', async () => {
+    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    const id = await conversa(s.esc, ['Boa tarde, gente.'])
+    const ex1 = await triar(s.esc, id)
+    expect(ex1.saida).toMatchObject({ acao: 'perguntar', setor: null, origem: 'integrante', perguntas: 1 })
+    expect(await admin`select 1 from cartao_aprovacao where execucao_id = ${ex1.id}`).toHaveLength(0)
+    const [p1] = await falas(id)
+    expect(p1).toMatchObject({ autor_tipo: 'integrante', autor_id: 'i-atendimento' })
+    expect(p1!.corpo).toBe('*Atendimento (IA)*\nBoa tarde! Tudo bem? Me conta o que você precisa.')
+    expect(p1!.extras.tipo).toBe('triagem_conversa')
+    // A última fala é do escritório: nova triagem sem mensagem do cliente não faz nada.
+    expect(await triar(s.esc, id)).toMatchObject({ estado: 'falhou', erro: { codigo: 'SEM_MENSAGEM_NOVA' } })
+
+    await cliente(s.esc, id, 'Preciso desligar dois rapazes da equipe, vou precisar do acerto dos dois.')
+    const ex2 = await triar(s.esc, id)
+    expect(ex2.saida).toMatchObject({ acao: 'repassar', setor: 'dp', origem: 'integrante', perguntas: 1, integrante_id: 'i-dp' })
+    const [, p2] = await falas(id)
+    // O integrante falou por último: sem repetir o prefixo.
+    expect(p2!.corpo).toBe('Entendi! Vou passar para o pessoal do DP, que cuida disso.')
+    expect(p2!.extras.tipo).toBe('aviso_repasse')
+    const [c] = await admin`select setor_id, etiquetas, resumo, extras from conversa where id = ${id}`
+    expect(c).toMatchObject({ setor_id: 'dp' })
     expect(c!.etiquetas).toContain('triada')
-    expect(c!.extras).toMatchObject({ origem_roteamento: 'integrante', escolha_cliente: null })
-    expect(c!.resumo).toContain('Cliente Padaria Exemplo Ltda. Setor Societário (assunto reconhecido pelo integrante)')
-    const [nota] = await admin`select direcao, autor_tipo, corpo from mensagem where conversa_id = ${id} and direcao = 'nota_interna'`
-    expect(nota).toMatchObject({ autor_tipo: 'integrante', corpo: c!.resumo })
-    const [item] = await admin`select integrante_id, resumo from item_fila where escritorio_id = ${s.esc} and tipo = 'conversa_repassada' and resumo->>'conversa_id' = ${id}`
-    expect(item!.integrante_id).toBe('i-societario')
-    // O roteamento fica na cadeia de eventos, com a ferramenta do número compartilhado.
-    const [ev] = await admin`select texto from evento where execucao_id = ${porModelo.id} and ferramenta = 'conversa.rotear' and resultado = 'ok'`
-    expect(ev!.texto).toContain('roteada ao setor societario (integrante)')
+    expect(c!.resumo).toContain('Setor DP (assunto entendido pelo integrante em 1 pergunta(s))')
+    expect(c!.extras).toMatchObject({ origem_roteamento: 'integrante', triagem: { perguntas: 1 } })
+    const [nota] = await admin`select corpo from mensagem where conversa_id = ${id} and direcao = 'nota_interna'`
+    expect(nota!.corpo).toBe(c!.resumo)
+    const [ev] = await admin`select texto from evento where execucao_id = ${ex2.id} and ferramenta = 'conversa.triagem_responder' and resultado = 'ok'`
+    expect(ev!.texto).toContain('cliente avisado do repasse ao setor dp')
   })
 
-  it('entre 0,6 e 0,8 roteia e marca a triagem como incerta', async () => {
+  it('palavra-chave repassa sem modelo, com o aviso fixo e a saudação; conversa ligada a um setor pula em silêncio', async () => {
     const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const id = await conversa(s.esc, ['Talvez seja sobre o lucro do trimestre, não sei.'], { cliente: null })
-    const ex = await triar(s.esc, { conversa_id: id })
-    expect(ex.saida).toMatchObject({ acao: 'rotear', setor: 'contabil', origem: 'integrante', incerta: true })
-    const [c] = await admin`select etiquetas, resumo from conversa where id = ${id}`
-    expect(c!.etiquetas).toEqual(expect.arrayContaining(['triada', 'triagem_incerta']))
-    expect(c!.resumo).toContain('triagem incerta: confira')
-  })
-
-  it('cliente identificado pula a triagem por contexto: conversa aberta, resposta a envio em 7 dias, um só setor na carteira', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    // Conversa aberta no DP: vale mesmo com palavra-chave de outro setor.
-    const aberta = await conversa(s.esc, ['Conversa em andamento.'], { setor: 'dp', status: 'em_atendimento', etiquetas: ['triada'] })
-    const ex1 = await triar(s.esc, { conversa_id: await conversa(s.esc, ['E a guia do DAS, já saiu?']) })
-    expect(ex1.saida).toMatchObject({ setor: 'dp', origem: 'regra', motivo_regra: 'conversa_aberta' })
-    expect(await admin`select 1 from chamada_modelo where execucao_id = ${ex1.id}`).toHaveLength(0)
-    const resolverTudo = () => admin`update conversa set status = 'resolvida', ultima_mensagem_em = now() - interval '3 days' where cliente_id = 'c-1' and escritorio_id = ${s.esc}`
-    expect(aberta).toBeTruthy()
-    await resolverTudo()
-
-    // Resposta a algo que o Fiscal mandou há 2 dias.
-    const fiscal = await conversa(s.esc, [], { setor: 'fiscal', status: 'resolvida' })
-    await resolverTudo()
-    await admin`insert into mensagem (escritorio_id, conversa_id, direcao, canal, autor_tipo, autor_id, corpo, criado_em) values (${s.esc}, ${fiscal}, 'saida', 'whatsapp', 'usuario', 'u-ana', 'Segue a guia.', now() - interval '2 days')`
-    const ex2 = await triar(s.esc, { conversa_id: await conversa(s.esc, ['Recebi, obrigado.']) })
-    expect(ex2.saida).toMatchObject({ setor: 'fiscal', motivo_regra: 'resposta_a_envio' })
-    await resolverTudo()
-    await admin`update mensagem set criado_em = now() - interval '10 days' where conversa_id = ${fiscal}`
-
-    // Um só setor ativo na carteira.
-    await admin`insert into carteira_cliente (escritorio_id, usuario_id, cliente_id, setor_id) values (${s.esc}, 'u-ana', 'c-1', 'dp')`
-    const ex3 = await triar(s.esc, { conversa_id: await conversa(s.esc, ['Bom dia, preciso de uma ajuda.']) })
-    expect(ex3.saida).toMatchObject({ setor: 'dp', motivo_regra: 'setor_unico', responsavel_id: 'u-ana' })
-  })
-
-  it('sem confiança e sem responsável, pergunta ao cliente (cartão, porque responder é irreversível), com o prefixo da IA; a resposta "2" roteia', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const id = await conversa(s.esc, ['Oi, tudo bem? Preciso de uma ajuda.'], { cliente: null })
-    const ex = await triar(s.esc, { conversa_id: id })
-    expect(ex.estado).toBe('aguardando_cartao')
-    const [cartao] = await admin`select ferramenta, argumentos, resumo_humano from cartao_aprovacao where id = ${ex.cartao_id}`
-    expect(cartao).toMatchObject({ ferramenta: 'conversa.responder' })
-    expect(cartao!.resumo_humano).toContain('pergunta 1 de 2')
-    await aprovar(s.esc, ex.cartao_id!)
-    const fim = await esperar(() => lerExecucao(admin, s.esc, ex.id), (e) => e.estado === 'concluida')
-    expect(fim.saida).toMatchObject({ acao: 'perguntar', setor: null, pergunta: { numero: 1 } })
-    const [p] = await admin`select autor_tipo, autor_id, corpo, extras from mensagem where conversa_id = ${id} and direcao = 'saida'`
-    expect(p).toMatchObject({ autor_tipo: 'integrante', autor_id: 'i-atendimento' })
-    expect(p!.corpo.startsWith('*Atendimento (IA)*\n')).toBe(true)
-    expect(p!.corpo).toContain('Responda com o número.')
-    expect(p!.extras.tipo).toBe('pergunta_triagem')
-    const [c] = await admin`select status, etiquetas from conversa where id = ${id}`
-    expect(c).toMatchObject({ status: 'aguardando_cliente' })
-    expect(c!.etiquetas).toContain('triagem_perguntou')
-
-    // O cliente responde com o número da opção: regra, sem modelo.
-    const opcoes = p!.extras.opcoes as { setor: string }[]
-    await mensagem(s.esc, id, '2')
-    const ex2 = await triar(s.esc, { conversa_id: id })
-    expect(ex2.saida).toMatchObject({ acao: 'rotear', setor: opcoes[1]!.setor, origem: 'regra', motivo_regra: 'resposta_a_pergunta' })
-    expect(await admin`select 1 from chamada_modelo where execucao_id = ${ex2.id}`).toHaveLength(0)
-  })
-
-  it('depois de duas perguntas sem acordo, vai ao setor de entrada com a etiqueta triagem_sem_acordo', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const id = await conversa(s.esc, ['Oi.'], { cliente: null })
-    for (let i = 0; i < 2; i++) {
-      const ex = await triar(s.esc, { conversa_id: id })
-      await aprovar(s.esc, ex.cartao_id!)
-      await esperar(() => lerExecucao(admin, s.esc, ex.id), (e) => e.estado === 'concluida')
-      await mensagem(s.esc, id, 'Não sei.')
-    }
-    const [{ n }] = await admin`select count(*)::int as n from mensagem where conversa_id = ${id} and direcao = 'saida'`
-    expect(n).toBe(2)
-    const [segunda] = await admin`select corpo from mensagem where conversa_id = ${id} and direcao = 'saida' order by criado_em desc limit 1`
-    // O integrante falou por último: o prefixo não se repete.
-    expect(segunda!.corpo.startsWith('Ainda não consegui entender o assunto.')).toBe(true)
-    const fim = await triar(s.esc, { conversa_id: id })
-    expect(fim.saida).toMatchObject({ acao: 'entrada_padrao', setor: 'gestao_atendimento' })
-    const [c] = await admin`select etiquetas, resumo from conversa where id = ${id}`
-    expect(c!.etiquetas).toEqual(expect.arrayContaining(['triada', 'triagem_sem_acordo']))
-    expect(c!.resumo).toContain('sem acordo depois de 2 perguntas ao cliente')
-  })
-
-  it('com responsável, a dúvida vai à pessoa por cartão "não consegui"; a pessoa escolhe o setor', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const id = await conversa(s.esc, ['Preciso da guia do DAS e também quero saber como fica a folha com as férias do Pedro.'], { responsavel: 'u-ana' })
-    const ex = await triar(s.esc, { conversa_id: id })
-    const [c] = await admin`select id, tipo, resumo_humano from cartao_aprovacao where id = ${ex.cartao_id}`
-    expect(c).toMatchObject({ tipo: 'nao_consegui' })
-    expect(c!.resumo_humano).toContain('assuntos de setores diferentes')
-    await h.motor.decidirCartao(await pessoa(admin, s.esc, 'u-ana'), { cartao_id: c!.id, decisao: 'editar', argumentos_editados: { setor: 'dp', alternativa: null, misto: false, confianca: 1, motivo: 'Primeiro a folha.' } })
-    const fim = await esperar(() => lerExecucao(admin, s.esc, ex.id), (e) => e.estado === 'concluida')
-    expect(fim.saida).toMatchObject({ acao: 'rotear', setor: 'dp', origem: 'pessoa' })
-    // Nenhuma pergunta foi ao cliente.
-    expect(await admin`select 1 from mensagem where conversa_id = ${id} and direcao = 'saida'`).toHaveLength(0)
-  })
-
-  it('remetente desconhecido: repassa com o aviso; pelo histórico da mesma pessoa, reconhece o cliente', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const desconhecido = await conversa(s.esc, ['Bom dia, quero saber o valor dos impostos da minha empresa.'], { cliente: null })
-    const ex = await triar(s.esc, { conversa_id: desconhecido })
-    expect(ex.saida).toMatchObject({ setor: 'fiscal', cliente_id: null })
-    const [c] = await admin`select resumo from conversa where id = ${desconhecido}`
-    expect(c!.resumo).toContain('Remetente não identificado')
-
-    const antiga = await conversa(s.esc, ['Conversa antiga.'], { cliente: 'c-1', pessoa: 'p-maria', status: 'resolvida' })
-    await admin`update conversa set ultima_mensagem_em = now() - interval '30 days' where id = ${antiga}`
-    const nova = await conversa(s.esc, ['Preciso do holerite do mês.'], { cliente: null, pessoa: 'p-maria' })
-    const ex2 = await triar(s.esc, { conversa_id: nova })
-    expect(ex2.saida).toMatchObject({ setor: 'dp', cliente_id: 'c-1' })
-    const [c2] = await admin`select cliente_id from conversa where id = ${nova}`
-    expect(c2!.cliente_id).toBe('c-1')
-  })
-})
-
-describe('opção "menu e integrante"', () => {
-  it('vale a escolha do cliente; com confiança ≥ 0,8, o integrante deixa o cartão "Parece ser do…" e grava a divergência', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const id = await conversa(s.esc, ['É sobre a guia do DAS.'], { cliente: null })
-    const ex = await triar(s.esc, { conversa_id: id, triagem: 'menu_e_integrante', menu_escolhido: 'contabil' })
-    // Já roteou para o setor do menu; o cartão de sugestão espera quem atende.
-    expect(ex.estado).toBe('aguardando_cartao')
-    const [conv] = await admin`select setor_id, extras from conversa where id = ${id}`
-    expect(conv).toMatchObject({ setor_id: 'contabil' })
-    expect(conv!.extras).toMatchObject({ origem_roteamento: 'menu', escolha_cliente: 'contabil', sugestao_integrante: { setor: 'fiscal' } })
-    const [div] = await admin`select texto from evento where execucao_id = ${ex.id} and ferramenta = 'conversa.triagem_divergir' and resultado = 'ok'`
-    expect(div!.texto).toContain('vale a escolha do cliente')
-    const [cartao] = await admin`select ferramenta, argumentos, resumo_humano from cartao_aprovacao where id = ${ex.cartao_id}`
-    expect(cartao).toMatchObject({ ferramenta: 'conversa.transferir', argumentos: { setor: 'fiscal', manter_numero: true } })
-    expect(cartao!.resumo_humano).toMatch(/^Parece ser do Fiscal.*Transferir\?$/)
-    // Nenhuma mensagem vai ao cliente.
-    expect(await admin`select 1 from mensagem where conversa_id = ${id} and direcao = 'saida'`).toHaveLength(0)
-
-    await aprovar(s.esc, ex.cartao_id!)
-    const fim = await esperar(() => lerExecucao(admin, s.esc, ex.id), (e) => e.estado === 'concluida')
-    expect(fim.saida).toMatchObject({ setor_roteado: 'contabil', setor: 'fiscal', origem: 'menu', transferido: true, integrante_id: 'i-fiscal' })
-  })
-
-  it('palavras-chave que confirmam o menu dispensam o modelo; escolha de menu fora dessa opção é recusada', async () => {
-    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    const ex = await triar(s.esc, { conversa_id: await conversa(s.esc, ['Quero falar sobre a folha deste mês.'], { cliente: null }), triagem: 'menu_e_integrante', menu_escolhido: 'dp' })
-    expect(ex.saida).toMatchObject({ setor: 'dp', origem: 'menu', sugestao: null, transferido: false })
+    const id = await conversa(s.esc, ['Preciso do holerite de outubro do Pedro.'], { cliente: null })
+    const ex = await triar(s.esc, id)
+    expect(ex.saida).toMatchObject({ acao: 'repassar', setor: 'dp', origem: 'regra', motivo_regra: 'palavra_chave', perguntas: 0 })
     expect(await admin`select 1 from chamada_modelo where execucao_id = ${ex.id}`).toHaveLength(0)
-    const errado = await triar(s.esc, { conversa_id: await conversa(s.esc, ['Oi'], { cliente: null }), menu_escolhido: 'dp' })
-    expect(errado).toMatchObject({ estado: 'falhou', erro: { codigo: 'MENU_SEM_MENU' } })
-  })
-})
+    const [f] = await falas(id)
+    expect(f!.corpo).toBe('*Atendimento (IA)*\nBoa tarde! Vou passar sua mensagem para o pessoal do DP, que cuida disso. Daqui a pouco eles te respondem por aqui.')
 
-describe('pelo Assistente', () => {
-  it('"triar e repassar esta conversa" com a conversa anexada vai ao Atendimento', async () => {
+    await conversa(s.esc, ['Conversa em andamento.'], { setor: 'fiscal', status: 'em_atendimento', etiquetas: ['triada'] })
+    const nova = await conversa(s.esc, ['Oi, alguma novidade?'])
+    const ex2 = await triar(s.esc, nova)
+    expect(ex2.saida).toMatchObject({ acao: 'repassar', setor: 'fiscal', motivo_regra: 'conversa_aberta' })
+    expect(await falas(nova)).toHaveLength(0)
+  })
+
+  it('fora do horário: resposta automática fixa, sem IA e uma vez só; a triagem fica na fila para a primeira hora', async () => {
     const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    const id = await conversa(s.esc, ['Oi, preciso de uma ajuda com a empresa.'])
+    const ex = await triar(s.esc, id, SABADO)
+    expect(ex.saida).toMatchObject({ acao: 'fora_do_horario', setor: null, retomar_em: '2026-11-23T11:00:00.000Z' })
+    expect(await admin`select 1 from chamada_modelo where execucao_id = ${ex.id}`).toHaveLength(0)
+    const [f] = await falas(id)
+    expect(f).toMatchObject({ autor_tipo: 'sistema' })
+    expect(f!.corpo).toBe('*Escritório Teste*\nOlá! Recebemos sua mensagem. Nosso horário de atendimento é de segunda a sexta, das 8h às 18h. Assim que abrirmos, alguém responde por aqui.')
+    const [c] = await admin`select setor_id, etiquetas from conversa where id = ${id}`
+    expect(c).toMatchObject({ setor_id: 'gestao_atendimento' })
+    expect(c!.etiquetas).toContain('fora_do_horario')
+    const jobs = await admin`select start_after, data from pgboss.job where name = ${FILA_RETOMAR_TRIAGEM} and data->>'conversa_id' = ${id}`
+    expect(jobs).toHaveLength(1)
+    expect(new Date(jobs[0]!.start_after).toISOString()).toBe('2026-11-23T11:00:00.000Z')
+
+    // Outra mensagem no fim de semana: nada de segunda resposta automática.
+    await cliente(s.esc, id, 'É sobre o imposto da empresa.')
+    await triar(s.esc, id, SABADO)
+    expect(await falas(id)).toHaveLength(1)
+    // Na primeira hora do expediente, a triagem roda sobre o que ficou sem resposta.
+    const seg = await triar(s.esc, id, '2026-11-23T08:00:00-03:00')
+    expect(seg.saida).toMatchObject({ acao: 'repassar', setor: 'fiscal' })
+    const [, aviso] = await falas(id)
+    expect(aviso!.corpo.startsWith('*Atendimento (IA)*\n')).toBe(true)
+  })
+
+  it('cliente irritado vai a uma pessoa do Atendimento, com resposta de empatia e etiqueta urgente', async () => {
+    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    const id = await conversa(s.esc, ['Já é a terceira vez que eu mando mensagem e ninguém responde. Que absurdo!'])
+    const ex = await triar(s.esc, id)
+    expect(ex.saida).toMatchObject({ acao: 'pessoa', setor: 'gestao_atendimento', motivo_pessoa: 'irritado', integrante_id: null })
+    const [c] = await admin`select etiquetas, resumo from conversa where id = ${id}`
+    expect(c!.etiquetas).toEqual(expect.arrayContaining(['triada', 'precisa_pessoa', 'urgente']))
+    expect(c!.resumo).toContain('precisa de uma pessoa: cliente irritado')
+    const [f] = await falas(id)
+    expect(f!.corpo).toContain('Vou chamar alguém da equipe')
+  })
+
+  it(`depois de 3 perguntas sem certeza, cartão para uma pessoa escolher o setor; o cliente recebe o aviso fixo`, async () => {
+    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    const id = await conversa(s.esc, ['Oi.'])
+    for (const resposta of ['É coisa da empresa.', 'Depois eu explico melhor.', 'É complicado.']) {
+      expect((await triar(s.esc, id)).saida).toMatchObject({ acao: 'perguntar' })
+      await cliente(s.esc, id, resposta)
+    }
+    expect(await falas(id)).toHaveLength(3)
+    const ex = await triar(s.esc, id)
+    const [cartao] = await admin`select id, tipo, resumo_humano from cartao_aprovacao where id = ${ex.cartao_id}`
+    expect(cartao).toMatchObject({ tipo: 'nao_consegui' })
+    expect(cartao!.resumo_humano).toContain('Depois de 3 perguntas')
+    await h.motor.decidirCartao(await pessoa(admin, s.esc, 'u-ana'), { cartao_id: cartao!.id, decisao: 'editar', argumentos_editados: { acao: 'repassar', setor: 'fiscal', confianca: 1, motivo_pessoa: null, mensagem: 'Fiscal.' } })
+    const fim = await esperar(() => lerExecucao(admin, s.esc, ex.id), (e) => e.estado === 'concluida')
+    expect(fim.saida).toMatchObject({ acao: 'repassar', setor: 'fiscal', origem: 'pessoa' })
+    const ultima = (await falas(id)).at(-1)!
+    expect(ultima.corpo).toBe('Vou passar sua mensagem para o pessoal do fiscal, que cuida disso. Daqui a pouco eles te respondem por aqui.')
+  })
+
+  it('mensagem fora do tom (menu) não sai: escala uma vez e, sem conserto, vai ao cartão', async () => {
+    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    const id = await conversa(s.esc, ['Isso aqui é um teste de estilo.'])
+    const ex = await triar(s.esc, id)
+    const [cartao] = await admin`select tipo, resumo_humano from cartao_aprovacao where id = ${ex.cartao_id}`
+    expect(cartao).toMatchObject({ tipo: 'nao_consegui' })
+    expect(cartao!.resumo_humano).toContain('fora do tom de WhatsApp: menu')
+    expect(await falas(id)).toHaveLength(0)
+    const classes = await admin`select classe from chamada_modelo where execucao_id = ${ex.id} order by criado_em`
+    expect(classes.map((c) => c.classe)).toEqual(['operario', 'escritor'])
+  })
+
+  it('pelo Assistente: "triar e repassar esta conversa" com a conversa anexada vai ao Atendimento', async () => {
+    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    // Sem relógio na entrada: expediente o dia todo, para o teste não depender da hora em que roda.
+    await admin`update escritorio set configuracao = ${admin.json({ horario_atendimento: { dias: [0, 1, 2, 3, 4, 5, 6], inicio: '00:00', fim: '23:59' } })} where id = ${s.esc}`
     const id = await conversa(s.esc, ['Quando sai a guia do DAS deste mês?'])
     const r = await h.assistente.pedir(await pessoa(admin, s.esc, 'u-ana'), { texto: 'Pode triar e repassar esta conversa?', anexos: { conversa_id: id } })
     expect(r).toMatchObject({ estado: 'encaminhado', encaminhado_para: { integrante_id: 'i-atendimento' }, roteamento: { camada: 'regra', procedimento: 'GES-TRIAR-REPASSAR' } })

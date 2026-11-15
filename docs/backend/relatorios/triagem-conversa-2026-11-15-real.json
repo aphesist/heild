@@ -1,0 +1,2647 @@
+{
+  "data": "2026-11-15T13:32:43.306Z",
+  "modo": "real",
+  "gabarito": {
+    "hash": "4c7c29aaab64c0f8",
+    "casos": 25,
+    "repeticoes": 2
+  },
+  "configuracao": {
+    "operario": {
+      "sonnet": "claude-sonnet-5-5",
+      "haiku": "claude-haiku-5-5"
+    },
+    "escritor": "claude-sonnet-5-5",
+    "dolar": 5.4
+  },
+  "duracao_s": 308,
+  "gasto_centavos": 223.3533,
+  "gasto_usd": 0.4136,
+  "parou": null,
+  "resumo": {
+    "sonnet": {
+      "conversas": 50,
+      "acerto_pct": 100,
+      "erro_critico": 0,
+      "perguntas_ate_rotear_media": 0.9,
+      "perguntas_ate_rotear_max": 2,
+      "falas_integrante": 78,
+      "falas_fora_do_tom": 0,
+      "falas_fora_do_escopo": 0,
+      "escaladas": 5,
+      "centavos_total": 210.4488,
+      "centavos_por_conversa": 4.209,
+      "latencia_p50_ms": 7453,
+      "latencia_p90_ms": 20993,
+      "por_grupo": [
+        {
+          "grupo": "vago",
+          "conversas": 12,
+          "acerto_pct": 100,
+          "perguntas_media": 1.5,
+          "centavos_por_conversa": 7.2994
+        },
+        {
+          "grupo": "claro",
+          "conversas": 8,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 2.5392
+        },
+        {
+          "grupo": "misto",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 1,
+          "centavos_por_conversa": 5.2032
+        },
+        {
+          "grupo": "muda_assunto",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 1.5,
+          "centavos_por_conversa": 6.3596
+        },
+        {
+          "grupo": "irritado",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 2.5728
+        },
+        {
+          "grupo": "delicado",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 2.5909
+        },
+        {
+          "grupo": "pede_pessoa",
+          "conversas": 2,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 2.4597
+        },
+        {
+          "grupo": "fora_do_horario",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0
+        },
+        {
+          "grupo": "contexto",
+          "conversas": 2,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0
+        },
+        {
+          "grupo": "escopo",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 2.5404
+        },
+        {
+          "grupo": "sem_certeza",
+          "conversas": 2,
+          "acerto_pct": 100,
+          "perguntas_media": 3,
+          "centavos_por_conversa": 10.2778
+        }
+      ]
+    },
+    "haiku": {
+      "conversas": 50,
+      "acerto_pct": 98,
+      "erro_critico": 0,
+      "perguntas_ate_rotear_media": 1,
+      "perguntas_ate_rotear_max": 2,
+      "falas_integrante": 81,
+      "falas_fora_do_tom": 0,
+      "falas_fora_do_escopo": 0,
+      "escaladas": 0,
+      "centavos_total": 12.9045,
+      "centavos_por_conversa": 0.2581,
+      "latencia_p50_ms": 12914,
+      "latencia_p90_ms": 23431,
+      "por_grupo": [
+        {
+          "grupo": "vago",
+          "conversas": 12,
+          "acerto_pct": 100,
+          "perguntas_media": 1.5,
+          "centavos_por_conversa": 0.3765
+        },
+        {
+          "grupo": "claro",
+          "conversas": 8,
+          "acerto_pct": 87.5,
+          "perguntas_media": 0.1,
+          "centavos_por_conversa": 0.1639
+        },
+        {
+          "grupo": "misto",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 1,
+          "centavos_por_conversa": 0.3163
+        },
+        {
+          "grupo": "muda_assunto",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 1.5,
+          "centavos_por_conversa": 0.4085
+        },
+        {
+          "grupo": "irritado",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0.1297
+        },
+        {
+          "grupo": "delicado",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0.168
+        },
+        {
+          "grupo": "pede_pessoa",
+          "conversas": 2,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0.1218
+        },
+        {
+          "grupo": "fora_do_horario",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0
+        },
+        {
+          "grupo": "contexto",
+          "conversas": 2,
+          "acerto_pct": 100,
+          "perguntas_media": 0,
+          "centavos_por_conversa": 0
+        },
+        {
+          "grupo": "sem_certeza",
+          "conversas": 2,
+          "acerto_pct": 100,
+          "perguntas_media": 3,
+          "centavos_por_conversa": 0.6265
+        },
+        {
+          "grupo": "escopo",
+          "conversas": 4,
+          "acerto_pct": 100,
+          "perguntas_media": 0.8,
+          "centavos_por_conversa": 0.3723
+        }
+      ]
+    }
+  },
+  "portao": {
+    "contrato": "ges.triagem.conversar",
+    "liberado": false,
+    "casos_piores": [
+      "claro-filho-dono#1"
+    ],
+    "margem_pontos": 2,
+    "acerto_sonnet": 100,
+    "acerto_haiku": 98,
+    "centavos_sonnet": 210.4488,
+    "centavos_haiku": 12.9045
+  },
+  "linhas": {
+    "sonnet": [
+      {
+        "caso": "vago-receita",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "pessoa:fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem sim. Me conta o que você precisa?",
+          "Entendi, uma carta da Receita merece atenção. Vou chamar alguém da equipe para olhar isso com você, tá bom?"
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 4.97232,
+        "latencia_ms": 13918,
+        "execucoes": [
+          "exe5026fa8721e4bb5893790f1af3f0dd7",
+          "exd03a53a42ff14750ad6be7717f7a2728"
+        ]
+      },
+      {
+        "caso": "vago-rescisao",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aí? Me conta o que você precisa.",
+          "Entendi, obrigado por avisar. Por ser um assunto de desligamento, vou chamar alguém da equipe do DP para falar com você e te ajudar com isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.02308,
+        "latencia_ms": 13936,
+        "execucoes": [
+          "ex8237b47a31ec4d47945d3edc5157f0b1",
+          "exaae05dfb42ee443facdbfb1630449ef6"
+        ]
+      },
+      {
+        "caso": "vago-receita",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "pessoa:fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem sim. Me conta o que você precisa?",
+          "Entendi, carta da Receita merece atenção mesmo. Vou chamar alguém da equipe do fiscal para te ajudar com isso agora."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 4.99932,
+        "latencia_ms": 14538,
+        "execucoes": [
+          "exbd0819abd3ff4aa08979e366c565c0ad",
+          "ex77b9ef8c642c4da2b324bf7858f46561"
+        ]
+      },
+      {
+        "caso": "vago-rescisao",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aí? Me conta o que você precisa que eu já te encaminho.",
+          "Entendi, vou chamar alguém da equipe do DP para cuidar disso com você. Já já te respondem por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 4.995,
+        "latencia_ms": 14995,
+        "execucoes": [
+          "exefacd99decb440a4a45138478afde779",
+          "ex0c00628c2eee4502b93e9bb73334afb9"
+        ]
+      },
+      {
+        "caso": "vago-banco",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi! Você sabe me dizer quais papéis o banco pediu, tipo balanço, certidões ou contrato social?",
+          "Entendi, então o banco quer ver o fechamento do ano passado. Vou passar para o pessoal do contábil, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 7.55244,
+        "latencia_ms": 17393,
+        "execucoes": [
+          "ex2d1f4773a9284e82af9c38f71f953944",
+          "exb020d8b4cbf040d8b4039fdb02fa7440",
+          "exafb86364c3034e6cb7ffd4ccae064518"
+        ]
+      },
+      {
+        "caso": "vago-mudanca",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Claro, pode falar! Qual é a sua dúvida?",
+          "Entendi! Mudança de endereço da empresa é com o pessoal do Societário, vou passar para eles te ajudarem com isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 1,
+        "chamadas": 4,
+        "centavos": 9.87444,
+        "latencia_ms": 19026,
+        "execucoes": [
+          "ex4bd7e326e9b447a39ac4d31607bf51ac",
+          "excec5eed4eb784fd19a5ea1f72b46c3e2",
+          "exa44ccfe904f043a39d3e7d076c8679b9"
+        ]
+      },
+      {
+        "caso": "vago-mudanca",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Claro, pode falar! Qual é a dúvida que você tem?",
+          "Entendi, mudança de endereço da empresa. Vou passar para o pessoal do Societário, que cuida disso, e eles te orientam."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 1,
+        "chamadas": 4,
+        "centavos": 9.8982,
+        "latencia_ms": 20582,
+        "execucoes": [
+          "exc770591bbc784a69901d1a0222e206c4",
+          "exc30ac205fdbc4e338a347b373903896a",
+          "ex608ba17ce7d24e9faa20b52a18709bee"
+        ]
+      },
+      {
+        "caso": "vago-banco",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi! Você sabe me dizer quais papéis o banco pediu, por exemplo balanço, contrato social ou certidões?",
+          "Entendi, pelo que você descreveu é a parte de balanço e resultado do ano. Vou passar para o pessoal do contábil, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 1,
+        "chamadas": 4,
+        "centavos": 10.106639999999999,
+        "latencia_ms": 20874,
+        "execucoes": [
+          "ex2ba78cdcf11c46ffb16f06a5584fa034",
+          "ex2aba67bd73c64a508d8d36dea29d2060",
+          "exf23c0d9a85fa4eec9f08d79d5e0720f8"
+        ]
+      },
+      {
+        "caso": "vago-mensalidade",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "gestao_atendimento",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aí? Me conta o que você precisa.",
+          "Entendi! Vou passar para o pessoal do Atendimento, que cuida dos boletos do escritório, para te ajudar com isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 4.96368,
+        "latencia_ms": 11084,
+        "execucoes": [
+          "exec90368145a54e7a8788b7beb07baf50",
+          "ex6ec36308f7124027a7cedc58c5f0163d"
+        ]
+      },
+      {
+        "caso": "vago-mensalidade",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "gestao_atendimento",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa hoje?",
+          "Entendi! Como é um boleto do escritório, vou passar para o pessoal do Atendimento, que cuida de honorários e cobranças, pode ser?"
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 1,
+        "chamadas": 3,
+        "centavos": 7.46172,
+        "latencia_ms": 14448,
+        "execucoes": [
+          "exfc97a047ef854799a1ecdaf391d1f730",
+          "ex74fe21b593e04695b749ee7b52dfb0ea"
+        ]
+      },
+      {
+        "caso": "claro-tributo-venda",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, isso é com o pessoal do Fiscal, que cuida dos impostos. Vou passar para eles te ajudarem com essa venda."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.56932,
+        "latencia_ms": 5476,
+        "execucoes": [
+          "exe7c7150d89ed4530a5cb02e88652306e"
+        ]
+      },
+      {
+        "caso": "vago-desconhecido",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "gestao_atendimento|societario",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem? Me conta o que você precisa que eu já encaminho para o pessoal certo.",
+          "Que bom que o seu amigo indicou a gente! Me conta, o que você está precisando?",
+          "Que legal, seja bem-vindo! Sobre a troca de contador, vou passar para o pessoal do atendimento, que explica como funciona direitinho."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 7.683119999999999,
+        "latencia_ms": 19001,
+        "execucoes": [
+          "exef13e6c6a4a24f24b4bc8a48ee538c65",
+          "ex0a0a918ab90442179f5070cc7b759703",
+          "ex6cc0face2a3c4abeb276daf8310bd493"
+        ]
+      },
+      {
+        "caso": "claro-tributo-venda",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, isso é com o pessoal do fiscal. Vou passar para eles te ajudarem com o imposto dessa venda."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.54232,
+        "latencia_ms": 7015,
+        "execucoes": [
+          "ex8e82e5fad657495f8b4611e625fee5ef"
+        ]
+      },
+      {
+        "caso": "claro-acerto",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, esse assunto de rescisão a gente trata com cuidado. Vou chamar alguém do DP da nossa equipe para falar com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.56608,
+        "latencia_ms": 7441,
+        "execucoes": [
+          "exbdb5d7f25df94733940d672b03435557"
+        ]
+      },
+      {
+        "caso": "vago-desconhecido",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "gestao_atendimento|societario",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Que bom que seu amigo indicou a gente! Me conta o que você está precisando por aqui?",
+          "Legal, a gente pode te explicar direitinho! Vou passar para o pessoal do atendimento, que cuida de contratação e honorários, para te passar essas informações."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 1,
+        "chamadas": 4,
+        "centavos": 10.06236,
+        "latencia_ms": 22492,
+        "execucoes": [
+          "ex4581036e114b4707b148d05365e8a7eb",
+          "exd1eca3dad5eb4e6393acd7b5d7f3c567",
+          "ex4c0fc3e232ce410ab001a9cfb509a75d"
+        ]
+      },
+      {
+        "caso": "claro-acerto",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, o assunto é a saída de um funcionário. Vou chamar alguém da equipe do DP para falar com você sobre isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.54448,
+        "latencia_ms": 5481,
+        "execucoes": [
+          "exba3de2173c70477eb92c7b972efe3273"
+        ]
+      },
+      {
+        "caso": "claro-filho-dono",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, vou passar para o pessoal do Societário, que cuida de entrada de sócio e alteração de contrato. Já já eles falam com você por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.56932,
+        "latencia_ms": 7001,
+        "execucoes": [
+          "exd160d252d1044d26a5ba2d11bc0e59bf"
+        ]
+      },
+      {
+        "caso": "claro-filho-dono",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, vou passar para o pessoal do Societário, que cuida da entrada de sócios e já te ajuda com isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.50452,
+        "latencia_ms": 5470,
+        "execucoes": [
+          "ex940eaf45090d4aadb20c6ab0998ffe6e"
+        ]
+      },
+      {
+        "caso": "claro-lucro",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Isso é com o pessoal do contábil, vou passar para eles te ajudarem com o resultado do trimestre."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.49264,
+        "latencia_ms": 6092,
+        "execucoes": [
+          "ex29b9954be333401a960daff18c4328b6"
+        ]
+      },
+      {
+        "caso": "claro-lucro",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Isso é com o pessoal do contábil, vou passar sua dúvida para eles te responderem sobre o resultado do trimestre."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.52504,
+        "latencia_ms": 6386,
+        "execucoes": [
+          "exd4ce7759c10d4accb310f7b2f4c37363"
+        ]
+      },
+      {
+        "caso": "misto-das-ferias",
+        "grupo": "misto",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Você pediu a guia do DAS e também as férias do Pedro, que são com setores diferentes. Qual dos dois você quer resolver primeiro?",
+          "Certo, vou passar agora para o pessoal do fiscal, que cuida da guia do DAS. Depois a gente vê as férias do Pedro com o DP."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.23368,
+        "latencia_ms": 11587,
+        "execucoes": [
+          "exeb60631fe0174101b0d846c0aea01955",
+          "ex2116805d1f2f48aba2c0641b1df900dc"
+        ]
+      },
+      {
+        "caso": "misto-das-ferias",
+        "grupo": "misto",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Você precisa da guia do DAS e das férias do Pedro, que são com setores diferentes. Qual dos dois você quer resolver primeiro?",
+          "Entendi, vou passar para o pessoal do Fiscal, que cuida das guias. Depois a gente vê as férias do Pedro com o DP."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.2002,
+        "latencia_ms": 12498,
+        "execucoes": [
+          "excb9eac73fdbc4793a2c26194c66a4cde",
+          "ex7ab9ec36abac4b9ab86015848b43bcb8"
+        ]
+      },
+      {
+        "caso": "misto-socio-folha",
+        "grupo": "misto",
+        "rodada": 1,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Pelo que entendi são dois assuntos, a saída do sócio e a folha do mês. Qual deles você quer resolver primeiro?",
+          "Certo, vou passar para o pessoal do Societário, que cuida da saída de sócio. Depois a gente vê a folha do mês."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.157,
+        "latencia_ms": 12964,
+        "execucoes": [
+          "ex0306689cae94472eaa2d286bcf7e6ad0",
+          "ex3b0ddf76487546daac03e11253ea7caa"
+        ]
+      },
+      {
+        "caso": "misto-socio-folha",
+        "grupo": "misto",
+        "rodada": 2,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Pode deixar que a gente te ajuda com os dois. Qual deles você quer resolver primeiro, a saída do sócio ou a folha do mês?",
+          "Combinado! Vou passar a saída do sócio para o pessoal do Societário, que cuida disso. Depois a gente vê a folha do mês com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.2218,
+        "latencia_ms": 12494,
+        "execucoes": [
+          "exb74369584e5243cda364ab47338a7525",
+          "ex2d4c30ab3cab4c1b82a29a1478da69da"
+        ]
+      },
+      {
+        "caso": "muda-registro",
+        "grupo": "muda_assunto",
+        "rodada": 1,
+        "esperado": "dp",
+        "obtido": "dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aí? Me conta o que você precisa.",
+          "Entendi, o último pedido foi o registro do funcionário novo. Vou passar para o pessoal do DP, que cuida disso. Se o assunto do imposto ainda valer, depois você me avisa por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.0922,
+        "latencia_ms": 13991,
+        "execucoes": [
+          "exc6be177533ba412e9cce1e18c7ad245a",
+          "ex83e3ccf71a6247a5bf6ee0b9ae5a4e96"
+        ]
+      },
+      {
+        "caso": "muda-registro",
+        "grupo": "muda_assunto",
+        "rodada": 2,
+        "esperado": "dp",
+        "obtido": "dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aí? Me conta o que você precisa.",
+          "Entendi, o último pedido foi o registro do funcionário novo. Vou passar para o pessoal do DP, que cuida disso. Se quiser falar do imposto depois, é só avisar."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 5.049,
+        "latencia_ms": 14605,
+        "execucoes": [
+          "ex52e1334a72834df2be1726c7e6c53c73",
+          "ex46f5f9259bcc4c1fb652d1d941a37930"
+        ]
+      },
+      {
+        "caso": "muda-nota",
+        "grupo": "muda_assunto",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Claro, pode me contar o que você precisa ver?",
+          "Tudo bem, a gente deixa isso pra depois. Qual é a outra coisa que você precisa ver?",
+          "Entendi, vou passar para o pessoal do fiscal, que cuida da emissão de notas. Já já eles te respondem por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 7.641,
+        "latencia_ms": 20993,
+        "execucoes": [
+          "ex87567ec8eec94f6ebd825b6e89af980f",
+          "exfe4516d8626b451f86e659bf03429748",
+          "ex459345d4c582441c9966205e748fb975"
+        ]
+      },
+      {
+        "caso": "muda-nota",
+        "grupo": "muda_assunto",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Claro, pode me contar o que você precisa ver?",
+          "Sem problema, a gente deixa isso pra depois. E qual é a outra coisa que você precisa ver?",
+          "Entendi, vou passar isso agora para o pessoal do fiscal, que cuida da emissão de notas. Já já eles te respondem por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 7.65612,
+        "latencia_ms": 21607,
+        "execucoes": [
+          "ex105e924893a74268903329a5915908ab",
+          "exced087ae6950457f960a53fb58ff9b8b",
+          "ex8f0174cfb329484c8a59579782804621"
+        ]
+      },
+      {
+        "caso": "irritado-demora",
+        "grupo": "irritado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Poxa, sinto muito pela demora, você tem toda razão em ficar chateado. Vou chamar agora alguém da equipe para falar com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.57148,
+        "latencia_ms": 7447,
+        "execucoes": [
+          "ex40a59ac767794f0c9a9c9e142260b4ff"
+        ]
+      },
+      {
+        "caso": "irritado-demora",
+        "grupo": "irritado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Poxa, sinto muito pela demora, você tem toda razão em reclamar. Vou chamar alguém da equipe agora para falar com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.56608,
+        "latencia_ms": 7908,
+        "execucoes": [
+          "ex6da4392edde14d3586f59a98d00bda6d"
+        ]
+      },
+      {
+        "caso": "irritado-multa",
+        "grupo": "irritado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa:fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Poxa, sinto muito por isso, entendo sua chateação. Vou chamar alguém da equipe agora para cuidar disso com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.57688,
+        "latencia_ms": 7445,
+        "execucoes": [
+          "ex340e5543d451456ebea91f4e6091e3ad"
+        ]
+      },
+      {
+        "caso": "irritado-multa",
+        "grupo": "irritado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa:fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito pelo transtorno, entendo que isso é chato. Vou chamar alguém da equipe para olhar isso com você agora."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.57688,
+        "latencia_ms": 7001,
+        "execucoes": [
+          "ex6ac30afcc8cc4e78ba3f5bbe45af7bec"
+        ]
+      },
+      {
+        "caso": "delicado-falecimento",
+        "grupo": "delicado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa:societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito pela perda do seu sócio. Vou chamar alguém da nossa equipe para conversar com você com toda a atenção sobre isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.58876,
+        "latencia_ms": 7001,
+        "execucoes": [
+          "ex3c74782f51964f6cabd66b15cf5a63e4"
+        ]
+      },
+      {
+        "caso": "delicado-falecimento",
+        "grupo": "delicado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa:societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito pela perda do seu sócio. Vou chamar alguém da nossa equipe para conversar com você com toda a atenção sobre a empresa."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.59956,
+        "latencia_ms": 7605,
+        "execucoes": [
+          "ex1461b97333bf414fa93865051cc61165"
+        ]
+      },
+      {
+        "caso": "cancelamento",
+        "grupo": "delicado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito por isso, sua opinião é muito importante pra gente. Vou chamar alguém da equipe pra conversar com você e entender o que aconteceu."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.59848,
+        "latencia_ms": 7452,
+        "execucoes": [
+          "exc6d6d6f09a3940e4b5e74521d018d74c"
+        ]
+      },
+      {
+        "caso": "cancelamento",
+        "grupo": "delicado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito que o atendimento não tenha ficado bom pra você. Vou chamar alguém da equipe agora para conversar com você sobre isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.57688,
+        "latencia_ms": 6992,
+        "execucoes": [
+          "exf45a1a9d709a4bcda5a466d9d1f422fb"
+        ]
+      },
+      {
+        "caso": "pede-pessoa",
+        "grupo": "pede_pessoa",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Claro, vou chamar alguém da equipe para falar com você agora mesmo."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.4462,
+        "latencia_ms": 6989,
+        "execucoes": [
+          "ex022b79f5d6ad42088ce7fbddfae243e6"
+        ]
+      },
+      {
+        "caso": "pede-pessoa",
+        "grupo": "pede_pessoa",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Claro, já vou chamar alguém da equipe para falar com você. Só um instante, por favor."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.4732,
+        "latencia_ms": 7000,
+        "execucoes": [
+          "ex4b64475ce0744f7bac4d66e30d1a8b4c"
+        ]
+      },
+      {
+        "caso": "fora-sabado",
+        "grupo": "fora_do_horario",
+        "rodada": 1,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5483,
+        "execucoes": [
+          "ex2fb3f72c0cf94d168ff276f6e186e1c9"
+        ]
+      },
+      {
+        "caso": "fora-sabado",
+        "grupo": "fora_do_horario",
+        "rodada": 2,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5497,
+        "execucoes": [
+          "ex201a26f0f57a41b9b2fa1eb48c2b4d4c"
+        ]
+      },
+      {
+        "caso": "fora-noite",
+        "grupo": "fora_do_horario",
+        "rodada": 1,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5479,
+        "execucoes": [
+          "exc5dde576c68a43fba4a8776d82bf625e"
+        ]
+      },
+      {
+        "caso": "fora-noite",
+        "grupo": "fora_do_horario",
+        "rodada": 2,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5465,
+        "execucoes": [
+          "ex3c5f85b277c241a5af34d5f6039ab501"
+        ]
+      },
+      {
+        "caso": "contexto-aberta",
+        "grupo": "contexto",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5616,
+        "execucoes": [
+          "exfef46a0ac31f40f384d7c8911c70c11a"
+        ]
+      },
+      {
+        "caso": "contexto-aberta",
+        "grupo": "contexto",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5468,
+        "execucoes": [
+          "exb19c2024e44345a187131b86ca6fcc14"
+        ]
+      },
+      {
+        "caso": "escopo-valor",
+        "grupo": "escopo",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Pelo que você descreveu, parece ser a guia mensal de imposto, então vou passar para o pessoal do fiscal, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.56392,
+        "latencia_ms": 6991,
+        "execucoes": [
+          "ex1e2943c718424ed29dd1488de07e90b0"
+        ]
+      },
+      {
+        "caso": "evasivo",
+        "grupo": "sem_certeza",
+        "rodada": 1,
+        "esperado": "cartao|pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 4,
+        "perguntas": 3,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aí? Me conta o que você precisa.",
+          "Certo! Me conta um pouquinho mais, o que você precisa resolver da empresa?",
+          "Sem problema! Quando puder, me manda por aqui um resumo do que precisa, que eu já encaminho para o setor certo, combinado?",
+          "Entendi, sem pressa nenhuma. Vou chamar alguém da equipe para conversar com você com calma por aqui, tá bom?"
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 4,
+        "centavos": 10.230839999999999,
+        "latencia_ms": 29069,
+        "execucoes": [
+          "ex84a96ea189504918bf6e2db2c2c15483",
+          "ex0541a13e39b143089fe2b2c37b950752",
+          "ex3a1c592838074f6788889e3379812af2",
+          "exbd24b4ff699d415784c5608cc3d0e21d"
+        ]
+      },
+      {
+        "caso": "escopo-valor",
+        "grupo": "escopo",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Pelo que você descreveu, parece ser a guia mensal de imposto, então vou passar para o pessoal do fiscal, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.55852,
+        "latencia_ms": 7445,
+        "execucoes": [
+          "ex3842ca74a4304374a2e78dd8b97e13f1"
+        ]
+      },
+      {
+        "caso": "evasivo",
+        "grupo": "sem_certeza",
+        "rodada": 2,
+        "esperado": "cartao|pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 4,
+        "perguntas": 3,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem por aqui. Me conta o que você precisa?",
+          "Entendi! Pode me contar um pouquinho mais sobre o que é, para eu passar para o pessoal certo?",
+          "Sem problema! Quando você puder, me conta por aqui o que precisa que eu já encaminho para a pessoa certa, combinado?",
+          "Entendo, fica tranquilo. Como é um assunto mais delicado, vou chamar alguém da equipe para conversar com você com calma por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 4,
+        "centavos": 10.3248,
+        "latencia_ms": 28907,
+        "execucoes": [
+          "exb93512ab91e04fa6a03e4b019b5c6af1",
+          "ex838dfe27c0b541bcbd56aefc184ba81e",
+          "ex439a1d9ebebe4a7c90744344b97f27da",
+          "ex71f986230bca4ae6908317ab2084d28d"
+        ]
+      },
+      {
+        "caso": "escopo-tecnico",
+        "grupo": "escopo",
+        "rodada": 1,
+        "esperado": "contabil|fiscal",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Essa questão de lançamento de despesa é com o pessoal do contábil, vou passar para eles te ajudarem."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.49804,
+        "latencia_ms": 6996,
+        "execucoes": [
+          "ex1319a0ef9a4a4a60835d116c3def74af"
+        ]
+      },
+      {
+        "caso": "escopo-tecnico",
+        "grupo": "escopo",
+        "rodada": 2,
+        "esperado": "contabil|fiscal",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Isso é uma questão de lançamento, então vou passar para o pessoal do Contábil, que cuida disso e já te responde por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 2.54124,
+        "latencia_ms": 7453,
+        "execucoes": [
+          "ex030f9cd2961f4b1fb59909f354a8a692"
+        ]
+      }
+    ],
+    "haiku": [
+      {
+        "caso": "vago-receita",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem sim. Me conta o que você precisa?",
+          "Entendi. Vou passar para o pessoal do fiscal, que cuida das cartas e intimações da Receita, e eles já te procuram por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.318546,
+        "latencia_ms": 14471,
+        "execucoes": [
+          "ex4abb17e11644432c99b9b71f9e5a1518",
+          "ex480bb66c05f84c8da97162fc00b89757"
+        ]
+      },
+      {
+        "caso": "vago-receita",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Tudo bem sim. Me conta o que você precisa?",
+          "Entendi, vou passar para o pessoal do fiscal, que cuida das cartas e intimações da Receita. Eles já te chamam por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.329346,
+        "latencia_ms": 14927,
+        "execucoes": [
+          "ex462f4e82bf79437bb57b48ea058e538d",
+          "ex521321d8580e4158a92cc8e5ef262ac0"
+        ]
+      },
+      {
+        "caso": "vago-rescisao",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, é uma situação delicada mesmo. Vou chamar alguém da equipe do DP agora para cuidar disso com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.298458,
+        "latencia_ms": 15384,
+        "execucoes": [
+          "exf7373866f7f44fd481b4735e84a2d735",
+          "ex489aa5867a3d4d919c201ecf101421cb"
+        ]
+      },
+      {
+        "caso": "vago-rescisao",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, desligar funcionários é um assunto delicado e merece atenção direta. Vou chamar alguém do pessoal do DP para falar com você agora."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.307098,
+        "latencia_ms": 15988,
+        "execucoes": [
+          "ex1a74869f26de4eef983640d9ae174d76",
+          "exd4f13275d7fd434386902bb9057cfd2d"
+        ]
+      },
+      {
+        "caso": "vago-mudanca",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Pode me contar qual é a sua dúvida?",
+          "Entendi! Mudança de endereço da empresa para outra cidade é com o pessoal do societário, que cuida do contrato social e do registro. Vou passar para eles."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.409212,
+        "latencia_ms": 20987,
+        "execucoes": [
+          "ex5389ca0ff9dc43eab6d79c7a9a1d6f52",
+          "exc1a8a944096c4b1296ff3768f1a2e596",
+          "ex8dada42174ce4067ad155152d68184d9"
+        ]
+      },
+      {
+        "caso": "vago-mudanca",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Pode me contar qual é a dúvida?",
+          "Entendi! Vou passar para o pessoal do societário, que cuida da mudança de endereço da empresa."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.451764,
+        "latencia_ms": 21443,
+        "execucoes": [
+          "exde0d32a36c854248a7e03dd6626d3322",
+          "ex6895370533e1450cb3b20e018c59c39c",
+          "exf8501c84e119477b8099deb2b6d45a5d"
+        ]
+      },
+      {
+        "caso": "vago-banco",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, o banco pediu documentos da empresa para liberar o empréstimo. Você sabe quais papéis eles estão pedindo?",
+          "Entendi, então o banco quer ver como a empresa fechou o ano passado. Vou passar para o pessoal da contábil, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.49264199999999997,
+        "latencia_ms": 21598,
+        "execucoes": [
+          "ex23b10cb82f5b42f6a5a7f4a30154b4d3",
+          "ex4f0cbc55079746b791c5ea524700ede1",
+          "exb58c5dbbc63e4843b07289e5d2c5203a"
+        ]
+      },
+      {
+        "caso": "vago-banco",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, o banco pediu papéis da empresa para liberar o empréstimo. Quais documentos eles estão pedindo exatamente?",
+          "Entendi, o banco quer ver o fechamento do ano passado da empresa. Vou passar para o pessoal da contabilidade, que cuida desses documentos."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.462402,
+        "latencia_ms": 20994,
+        "execucoes": [
+          "exa6bdb09318f04d2faa7379137080b3e4",
+          "ex2af0c1a0513b4750a2b7ed48ee8085ac",
+          "ex954720083df64241aed40db79f49980b"
+        ]
+      },
+      {
+        "caso": "vago-mensalidade",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "gestao_atendimento",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, sobre o boleto. Vou passar para o pessoal do atendimento, que cuida dos boletos do escritório."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.24418800000000002,
+        "latencia_ms": 12929,
+        "execucoes": [
+          "exc19bd0cabaf44adb840aabe111e68cd9",
+          "ex7926aa76f48e486f8f29d1943d48bdad"
+        ]
+      },
+      {
+        "caso": "vago-mensalidade",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "gestao_atendimento",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, sobre o boleto. Vou passar para o pessoal do atendimento, que cuida dos boletos do escritório."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.24418800000000002,
+        "latencia_ms": 13991,
+        "execucoes": [
+          "exd38fe5617287424d842f9919272481f9",
+          "exedfc3bb4045047cfac27009ccb2f152f"
+        ]
+      },
+      {
+        "caso": "claro-tributo-venda",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Vou passar para o pessoal do fiscal, que cuida dos impostos sobre vendas."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.198936,
+        "latencia_ms": 8071,
+        "execucoes": [
+          "ex1a47090733ea4918885799eea38881aa"
+        ]
+      },
+      {
+        "caso": "claro-tributo-venda",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Vou passar para o pessoal do fiscal, que cuida dos impostos e dessa parte da venda."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.173826,
+        "latencia_ms": 8072,
+        "execucoes": [
+          "exb9b7466a563e4cb78261759f80f5d978"
+        ]
+      },
+      {
+        "caso": "vago-desconhecido",
+        "grupo": "vago",
+        "rodada": 2,
+        "esperado": "gestao_atendimento|societario",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa hoje?",
+          "Que bom que você chegou até nós pelo seu amigo! Me conta, qual é a sua necessidade hoje?",
+          "Entendi! Vou passar para o pessoal do atendimento, que te explica como funciona essa troca de contador."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.46386,
+        "latencia_ms": 22366,
+        "execucoes": [
+          "ex15c9e9722c0240608fd64be04c8a2282",
+          "exa5f3c00853ee4ba99eb51ca9954472f3",
+          "ex08aa96cca113407d8b39b96a4c583994"
+        ]
+      },
+      {
+        "caso": "vago-desconhecido",
+        "grupo": "vago",
+        "rodada": 1,
+        "esperado": "gestao_atendimento|societario",
+        "obtido": "gestao_atendimento",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa hoje?",
+          "Que bom que indicaram a gente! Me conta, qual assunto você precisa resolver?",
+          "Entendi, você quer trocar de contador para o seu restaurante. Vou passar para o pessoal do atendimento, que cuida desse tipo de assunto."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.495774,
+        "latencia_ms": 23431,
+        "execucoes": [
+          "exa6877ed4b3f24950b990d7e70c6df5d6",
+          "ex66f69ceab7934b28913f2e90ff000066",
+          "ex91c314ddf46d4426bfb5e9f8c4b38bf6"
+        ]
+      },
+      {
+        "caso": "claro-acerto",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "dp",
+        "obtido": "dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Vou passar para o pessoal do DP, que cuida de rescisão e acerto de funcionário."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.122904,
+        "latencia_ms": 6536,
+        "execucoes": [
+          "ex8be70e6446ed43508c124bfc70435292"
+        ]
+      },
+      {
+        "caso": "claro-acerto",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "dp",
+        "obtido": "pessoa:dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi que seu funcionário pediu para sair. Vou chamar alguém da equipe do DP para te explicar como fica o acerto dele."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.127764,
+        "latencia_ms": 6990,
+        "execucoes": [
+          "ex0d5c1b9b9ae6405b99a0d374964e075a"
+        ]
+      },
+      {
+        "caso": "claro-filho-dono",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "societario",
+        "obtido": "sem_decisao",
+        "acerto": false,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Entendi, você quer incluir seu filho como sócio. Me conta um pouco mais sobre como você imagina isso?"
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.125226,
+        "latencia_ms": 6539,
+        "execucoes": [
+          "ex5ae538efd0444f2e851c2470c9131db4"
+        ]
+      },
+      {
+        "caso": "claro-filho-dono",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendi, inclusão de sócio é com o pessoal do societário. Já vou passar para eles cuidarem disso com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.159516,
+        "latencia_ms": 6997,
+        "execucoes": [
+          "exa4640fa38ab344e28e767db5b874bbae"
+        ]
+      },
+      {
+        "caso": "claro-lucro",
+        "grupo": "claro",
+        "rodada": 1,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Vou passar para o pessoal da contabilidade, que cuida dos lançamentos e do balanço da empresa, e eles te respondem sobre o resultado do trimestre."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.206982,
+        "latencia_ms": 7902,
+        "execucoes": [
+          "ex210e985ea0fd4b81ae1228be189c531a"
+        ]
+      },
+      {
+        "caso": "claro-lucro",
+        "grupo": "claro",
+        "rodada": 2,
+        "esperado": "contabil",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Vou passar para o pessoal da contabilidade, que cuida do balanço e do resultado da empresa, e eles te respondem por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.195912,
+        "latencia_ms": 7906,
+        "execucoes": [
+          "ex9edee8bb210945bf8bbd1919db094eb2"
+        ]
+      },
+      {
+        "caso": "misto-das-ferias",
+        "grupo": "misto",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Vi que você precisa da guia do DAS e também das férias do Pedro. Qual dessas você quer resolver primeiro?",
+          "Entendi, vou passar a guia do DAS para o pessoal do fiscal, que cuida disso. Depois a gente vê as férias do Pedro."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.312822,
+        "latencia_ms": 14603,
+        "execucoes": [
+          "ex22528fa1b6e944deb982dd81200ae4db",
+          "exa222b1e2939a4e338f11cdc4640be785"
+        ]
+      },
+      {
+        "caso": "misto-das-ferias",
+        "grupo": "misto",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Vi que você precisa da guia do DAS e também das férias do Pedro. Qual dessas você quer que a gente resolva primeiro?",
+          "Beleza, então vou passar para o pessoal do fiscal, que cuida da guia do DAS. Depois a gente olha as férias do Pedro."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.313848,
+        "latencia_ms": 13536,
+        "execucoes": [
+          "ex31d4432bb02d4bfc964e66c85e3b20c6",
+          "exf85f69c770874679b86c17ca58a909ad"
+        ]
+      },
+      {
+        "caso": "misto-socio-folha",
+        "grupo": "misto",
+        "rodada": 1,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Vi que são duas coisas: a saída de um sócio e a folha do mês. Qual você quer resolver primeiro?",
+          "Entendi, vamos começar pela saída do sócio então. Vou passar para o pessoal do societário, que cuida dessa parte de sócios e contrato social."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.310446,
+        "latencia_ms": 14492,
+        "execucoes": [
+          "ex87874fef25524b998449d3dbdb288e40",
+          "ex5d008068aff5409498162c01b744ce24"
+        ]
+      },
+      {
+        "caso": "misto-socio-folha",
+        "grupo": "misto",
+        "rodada": 2,
+        "esperado": "societario",
+        "obtido": "societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Vi que você precisa tirar um sócio da empresa e também ver a folha do mês. Qual dessas você quer resolver primeiro?",
+          "Entendi, vamos começar pela saída do sócio então. Vou passar para o pessoal do societário, que cuida disso. Eles já te chamam por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.32805,
+        "latencia_ms": 14045,
+        "execucoes": [
+          "exa773e9c9bcc54bbb97a867dd401d81be",
+          "excab915f044a3476eae0114b3d9eccbf3"
+        ]
+      },
+      {
+        "caso": "muda-registro",
+        "grupo": "muda_assunto",
+        "rodada": 2,
+        "esperado": "dp",
+        "obtido": "dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, registrar um funcionário novo é com o pessoal do DP. Vou passar para eles, que cuidam disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.24359399999999998,
+        "latencia_ms": 12914,
+        "execucoes": [
+          "ex712bb8cc27a54ec9a80a7c9c70239e7c",
+          "ex5fc81afa88ea4b0b87b78579e5812bfe"
+        ]
+      },
+      {
+        "caso": "muda-registro",
+        "grupo": "muda_assunto",
+        "rodada": 1,
+        "esperado": "dp",
+        "obtido": "dp",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, você precisa registrar um funcionário novo. Vou passar para o pessoal do DP, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.292464,
+        "latencia_ms": 15050,
+        "execucoes": [
+          "exf0cb187b6bbf462b82d5bf4da42eae72",
+          "exce72c62d599749f98c3db88664c7bdcf"
+        ]
+      },
+      {
+        "caso": "muda-nota",
+        "grupo": "muda_assunto",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Pode me contar o que você precisa ver?",
+          "Tranquilo, a gente deixa essa da moça para depois então. Me conta, qual é a outra coisa que você precisa ver?",
+          "Entendi, emitir nota é com o pessoal do fiscal. Vou passar para eles e já deixo registrado que é urgente, pra não ficar parado."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.564354,
+        "latencia_ms": 23451,
+        "execucoes": [
+          "ex342f78dfe3bd4583b343b9b037e57c29",
+          "ex10ad505ac6ec444bb89304795ba75f7c",
+          "exb8ab29cb6c034569b815c4d77a8d80ab"
+        ]
+      },
+      {
+        "caso": "muda-nota",
+        "grupo": "muda_assunto",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 3,
+        "perguntas": 2,
+        "falas_integrante": [
+          "Boa tarde! Pode me contar o que você precisa ver?",
+          "Tudo bem, então deixamos essa para depois. Qual é a outra coisa que você precisa ver agora?",
+          "Entendi, a nota é urgente. Vou passar para o pessoal do fiscal, que cuida de notas fiscais, para eles verem isso o quanto antes."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 3,
+        "centavos": 0.533736,
+        "latencia_ms": 23907,
+        "execucoes": [
+          "execd3941dea784fa8b7020250d991b14a",
+          "exa78972592c544d7d83d1035b2670fdc9",
+          "ex43232d26d6a2407685e3a71a3f9a0054"
+        ]
+      },
+      {
+        "caso": "irritado-demora",
+        "grupo": "irritado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Puxa, sinto muito pela demora e entendo sua irritação. Vou chamar alguém da equipe agora para te atender."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.126684,
+        "latencia_ms": 6529,
+        "execucoes": [
+          "ex35a5a5631bce4417b92ae364291de7e9"
+        ]
+      },
+      {
+        "caso": "irritado-demora",
+        "grupo": "irritado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Puxa, sinto muito pela demora e entendo a sua irritação. Vou chamar alguém da equipe agora para olhar a sua mensagem com atenção."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.129924,
+        "latencia_ms": 6530,
+        "execucoes": [
+          "exdf0aa8ab5af24b59af62aaeeec6fbd05"
+        ]
+      },
+      {
+        "caso": "irritado-multa",
+        "grupo": "irritado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa:fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito pelo transtorno, entendo sua chateação. Vou chamar alguém da equipe para olhar essa guia e a multa com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.129384,
+        "latencia_ms": 6384,
+        "execucoes": [
+          "exfacf203166ac4bb7aaf4263fa22d193b"
+        ]
+      },
+      {
+        "caso": "irritado-multa",
+        "grupo": "irritado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa:fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Entendo sua chateação, sinto muito por isso acontecer de novo e pelo transtorno da multa. Vou chamar alguém da equipe agora para olhar a sua guia com você."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.132894,
+        "latencia_ms": 6533,
+        "execucoes": [
+          "ex0d07d1dcab6049578e55e3f156e2005f"
+        ]
+      },
+      {
+        "caso": "delicado-falecimento",
+        "grupo": "delicado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa:societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde. Sinto muito pela perda do seu sócio. Vou chamar alguém da equipe para te ajudar com calma nesse momento."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.214218,
+        "latencia_ms": 8501,
+        "execucoes": [
+          "exada109dd8dce46a383520a339989d3c9"
+        ]
+      },
+      {
+        "caso": "delicado-falecimento",
+        "grupo": "delicado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa:societario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito pela perda do seu sócio. Vou chamar agora alguém da equipe para te ajudar com isso com calma."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.196128,
+        "latencia_ms": 7895,
+        "execucoes": [
+          "exb7d82efd8f024791b2fc96219a59569a"
+        ]
+      },
+      {
+        "caso": "cancelamento",
+        "grupo": "delicado",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito que o atendimento não esteja te atendendo bem. Vou chamar alguém da equipe para conversar com você agora sobre isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.130464,
+        "latencia_ms": 7001,
+        "execucoes": [
+          "ex95b4d6bb62c04dc48eab136c1c5e0234"
+        ]
+      },
+      {
+        "caso": "cancelamento",
+        "grupo": "delicado",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Sinto muito que o atendimento não esteja te atendendo bem. Vou chamar alguém da nossa equipe para conversar com você sobre isso agora."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.131274,
+        "latencia_ms": 6071,
+        "execucoes": [
+          "exc0b115d1033044a7bf6edb410732d30e"
+        ]
+      },
+      {
+        "caso": "pede-pessoa",
+        "grupo": "pede_pessoa",
+        "rodada": 1,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Claro, vou chamar alguém da equipe para falar com você agora."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.12177,
+        "latencia_ms": 6988,
+        "execucoes": [
+          "exf964b45107da43c69e6477ad026a24a8"
+        ]
+      },
+      {
+        "caso": "pede-pessoa",
+        "grupo": "pede_pessoa",
+        "rodada": 2,
+        "esperado": "pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Claro, vou chamar alguém da equipe para falar com você agora."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.12177,
+        "latencia_ms": 7141,
+        "execucoes": [
+          "exc478154d6080439a9fc633c07c7e76bb"
+        ]
+      },
+      {
+        "caso": "fora-sabado",
+        "grupo": "fora_do_horario",
+        "rodada": 1,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5474,
+        "execucoes": [
+          "ex797ca66fe7524a3f96e7ad2fd8f24811"
+        ]
+      },
+      {
+        "caso": "fora-sabado",
+        "grupo": "fora_do_horario",
+        "rodada": 2,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5469,
+        "execucoes": [
+          "ex0bee0916b5864c82b1e930b20c95a805"
+        ]
+      },
+      {
+        "caso": "fora-noite",
+        "grupo": "fora_do_horario",
+        "rodada": 1,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5618,
+        "execucoes": [
+          "ex49e861d634fc4ed0a2565c06917b574c"
+        ]
+      },
+      {
+        "caso": "fora-noite",
+        "grupo": "fora_do_horario",
+        "rodada": 2,
+        "esperado": "fora_do_horario",
+        "obtido": "fora_do_horario",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5466,
+        "execucoes": [
+          "ex0ef944a11c984edc932d8398ddc22be8"
+        ]
+      },
+      {
+        "caso": "contexto-aberta",
+        "grupo": "contexto",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5465,
+        "execucoes": [
+          "ex40a3d52a852148ddaeba94bfe132017d"
+        ]
+      },
+      {
+        "caso": "contexto-aberta",
+        "grupo": "contexto",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 0,
+        "centavos": 0,
+        "latencia_ms": 5464,
+        "execucoes": [
+          "ex8de9f9a5d13a4c3396a38e00bc02d84b"
+        ]
+      },
+      {
+        "caso": "evasivo",
+        "grupo": "sem_certeza",
+        "rodada": 1,
+        "esperado": "cartao|pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 4,
+        "perguntas": 3,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa hoje?",
+          "Entendi, é coisa da empresa mesmo. Me conta um pouco mais, qual é o assunto?",
+          "Entendi. Quando puder, me conta com mais calma qual é o assunto da empresa que você precisa resolver.",
+          "Entendo, sem pressa nenhuma. Vou chamar alguém da equipe para conversar com você com calma sobre isso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 4,
+        "centavos": 0.588168,
+        "latencia_ms": 29010,
+        "execucoes": [
+          "ex17df51e5428d4c71ae5692de56571283",
+          "exce9780dbbc3f4db4b39a49a2efb5fb09",
+          "ex55c5c40950cc47b489eaca9d0045031d",
+          "ex936e6143fa864447989673a946361aaf"
+        ]
+      },
+      {
+        "caso": "evasivo",
+        "grupo": "sem_certeza",
+        "rodada": 2,
+        "esperado": "cartao|pessoa",
+        "obtido": "pessoa",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 4,
+        "perguntas": 3,
+        "falas_integrante": [
+          "Boa tarde! Me conta o que você precisa?",
+          "Entendi, é sobre a empresa. O que está acontecendo por aí?",
+          "Entendi, obrigado por me avisar. Quando puder, me conta com calma o que está acontecendo na empresa.",
+          "Tudo bem, pode ficar tranquilo. Vou chamar alguém da equipe para conversar com você com calma, sem pressa."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 4,
+        "centavos": 0.6648480000000001,
+        "latencia_ms": 29947,
+        "execucoes": [
+          "ex553ee90a98724054aa2f4888f9074318",
+          "ex2220917d9e9742e693742ae8042c41f6",
+          "ex9f1d917ff8ee4fc4940a73f98c059269",
+          "exf1c92132b3154497a1c6a1679f3d3c47"
+        ]
+      },
+      {
+        "caso": "escopo-valor",
+        "grupo": "escopo",
+        "rodada": 1,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Esse valor eu não consigo informar por aqui, mas a gente te ajuda. Você está falando de imposto da empresa, do MEI ou de outra coisa?",
+          "Entendi, é o DAS do Simples. Vou passar para o pessoal do fiscal, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.418824,
+        "latencia_ms": 14456,
+        "execucoes": [
+          "ex516c2b1a28cd43849dbb7145e873c0bf",
+          "ex87687032a2954ca2a4f0c6dc484f003b"
+        ]
+      },
+      {
+        "caso": "escopo-valor",
+        "grupo": "escopo",
+        "rodada": 2,
+        "esperado": "fiscal",
+        "obtido": "fiscal",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Me conta melhor qual pagamento você tem em mente, é um imposto da empresa ou algo ligado ao seu pró-labore ou aos funcionários?",
+          "Entendi, o pagamento mensal do Simples é a guia DAS. Vou passar para o pessoal do fiscal, que cuida disso."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.389286,
+        "latencia_ms": 15525,
+        "execucoes": [
+          "ex5020462ca0f5430bbee553c7796f37b0",
+          "exede3096d407545b8803ae3a8c9b5ee04"
+        ]
+      },
+      {
+        "caso": "escopo-tecnico",
+        "grupo": "escopo",
+        "rodada": 1,
+        "esperado": "contabil|fiscal",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 1,
+        "perguntas": 0,
+        "falas_integrante": [
+          "Boa tarde! Vou passar sua dúvida para o pessoal da contábil, que cuida dos lançamentos."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 1,
+        "centavos": 0.243972,
+        "latencia_ms": 8529,
+        "execucoes": [
+          "ex7fa76e5e0afc4f6692681f271b45a964"
+        ]
+      },
+      {
+        "caso": "escopo-tecnico",
+        "grupo": "escopo",
+        "rodada": 2,
+        "esperado": "contabil|fiscal",
+        "obtido": "contabil",
+        "acerto": true,
+        "erro_critico": false,
+        "falas_cliente": 2,
+        "perguntas": 1,
+        "falas_integrante": [
+          "Boa tarde! Entendi a sua dúvida sobre a conta de luz. Me conta um pouco melhor como é essa situação?",
+          "Entendi! Vou passar para o pessoal da contábil, que cuida dos lançamentos da empresa. Eles te respondem por aqui."
+        ],
+        "falas_fora_do_tom": 0,
+        "falas_fora_do_escopo": 0,
+        "escaladas": 0,
+        "chamadas": 2,
+        "centavos": 0.437022,
+        "latencia_ms": 14467,
+        "execucoes": [
+          "exb0d0a0172e234ffda9431171f3ffaa40",
+          "ex1c90c4cc5a924975b2bb6355b75bcaf7"
+        ]
+      }
+    ]
+  }
+}

@@ -1,12 +1,14 @@
 import { z } from 'zod'
-import { definirFerramenta, type BaseExtensao, type DefinicaoFerramenta, type ExtensaoProcessos } from '@heild/processos'
+import { comEscritorio, contextoDeIntegrante, definirFerramenta, ErroHeild, integranteDoSetor, type BaseExtensao, type DefinicaoFerramenta, type ExtensaoProcessos } from '@heild/processos'
 import { Assistente, FILA_ROTEAR } from './assistente.ts'
 import { Anexos, type Integrante } from './contrato.ts'
 import { aprenderComCartao } from './execucao.ts'
+import { CATEGORIAS_DE_ENVIO, CategoriaEnvio, configurarEnvio, ModoEnvio, modosDeEnvio } from './envio.ts'
 import { integrantesContabil } from './integrantes.ts'
 import { metasB3 } from './metas.ts'
 import { ROTEADOR_BARATO_NO_HAIKU } from './modelos.ts'
 import { configRoteamentoPadrao, type ConfigRoteamento } from './roteador.ts'
+import { FILA_RETOMAR_TRIAGEM } from './setores/triagem-conversa.ts'
 
 /**
  * A B3 como extensão do `criarProcessos` da B2: as ferramentas do Assistente e dos integrantes
@@ -87,16 +89,73 @@ export function extensaoIntegrantes(o: OpcoesExtensao = {}): ExtensaoIntegrantes
             return { resultado: 'aguardando_aprovacao', cartao_id: c.id, resumo_humano: c.resumo, expira_em: null }
           },
         }),
+        definirFerramenta({
+          nome: 'envio_cliente.listar',
+          versao: 1,
+          descricao_modelo: 'Como cada categoria de mensagem padronizada vai ao cliente: cartão (padrão), envio automático ou desligado.',
+          entrada: z.object({}).strict(),
+          meta: meta('envio_cliente.listar'),
+          exposta_mcp: true,
+          recorte: 'geral',
+          executar: async (_e, ctx) => {
+            const modos = await comEscritorio(b.sql, ctx.escritorio_id, (tx) => modosDeEnvio(tx))
+            return { resultado: 'ok', dados: (Object.keys(CATEGORIAS_DE_ENVIO) as CategoriaEnvio[]).map((c) => ({ categoria: c, ...CATEGORIAS_DE_ENVIO[c], modo: modos[c] })) }
+          },
+        }),
+        definirFerramenta({
+          nome: 'envio_cliente.configurar',
+          versao: 1,
+          descricao_modelo: 'Muda o modo de uma categoria de mensagem padronizada ao cliente (só o Administrador). O que não é padronizado continua sempre com cartão.',
+          entrada: z.object({ categoria: CategoriaEnvio, modo: ModoEnvio }).strict(),
+          meta: meta('envio_cliente.configurar'),
+          exposta_mcp: false,
+          recorte: 'geral',
+          executar: async (e, ctx) => {
+            const texto = `Envio ao cliente: categoria ${CATEGORIAS_DE_ENVIO[e.categoria].nome} em ${e.modo === 'cartao' ? 'aprovação no cartão' : e.modo === 'automatico' ? 'envio automático' : 'desligado'}`
+            const modos = await comEscritorio(b.sql, ctx.escritorio_id, async (tx) => {
+              const m = await configurarEnvio(tx, e.categoria, e.modo)
+              await b.eventos.gravar(tx, ctx, { nome: 'envio_cliente.configurar', ferramenta: 'envio_cliente.configurar', nivel: 'executar', resultado: 'ok', texto, argumentos_resumo: { categoria: e.categoria, modo: e.modo } })
+              return m
+            })
+            return { resultado: 'ok', dados: { categoria: e.categoria, modo: modos[e.categoria] } }
+          },
+        }),
       ]
     },
     criarFilas: async (b) => {
       const opcoes = { expireInSeconds: 300, retryLimit: 3, retryDelay: 5, retryBackoff: true, notify: true }
-      if (await b.boss.getQueue(FILA_ROTEAR)) await b.boss.updateQueue(FILA_ROTEAR, opcoes)
-      else await b.boss.createQueue(FILA_ROTEAR, opcoes)
+      for (const fila of [FILA_ROTEAR, FILA_RETOMAR_TRIAGEM]) {
+        if (await b.boss.getQueue(fila)) await b.boss.updateQueue(fila, opcoes)
+        else await b.boss.createQueue(fila, opcoes)
+      }
     },
-    iniciarWorkers: async (_b, intervalo) => {
+    iniciarWorkers: async (b, intervalo) => {
       await ext.assistente!.iniciarWorker(intervalo)
+      // A triagem que esperou o expediente abrir (job atrasado gravado pelo passo `fora_do_horario`).
+      await b.boss.work<{ escritorio_id: string; conversa_id: string }>(FILA_RETOMAR_TRIAGEM, { pollingIntervalSeconds: intervalo ?? 2 }, async (jobs) => {
+        for (const j of jobs) await retomarTriagem(b, j.data)
+      })
     },
   }
   return ext
+}
+
+/**
+ * Retoma a triagem na primeira hora do expediente, como o integrante de Atendimento (sem pessoa por
+ * trás). Se alguém já assumiu a conversa nesse meio-tempo, ou o cliente não escreveu nada novo, não
+ * há o que triar: o job termina sem erro.
+ */
+export async function retomarTriagem(b: BaseExtensao, j: { escritorio_id: string; conversa_id: string }) {
+  const ctx = await comEscritorio(b.sql, j.escritorio_id, async (tx) => {
+    const [c] = await tx`select setor_id, responsavel_id, etiquetas from conversa where id = ${j.conversa_id}`
+    if (!c || c.responsavel_id || (c.etiquetas as string[]).includes('triada')) return null
+    const integrante = await integranteDoSetor(tx, 'gestao_atendimento')
+    return integrante ? contextoDeIntegrante(tx, j.escritorio_id, integrante, 'job') : null
+  })
+  if (!ctx) return
+  try {
+    await b.motor.iniciar(ctx, 'GES-TRIAR-REPASSAR', { conversa_id: j.conversa_id }, { chave_idempotencia: `retomar:${j.conversa_id}:${new Date().toISOString().slice(0, 13)}` })
+  } catch (e) {
+    if (!(e instanceof ErroHeild)) throw e
+  }
 }

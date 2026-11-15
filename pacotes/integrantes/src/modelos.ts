@@ -21,6 +21,14 @@ export const CONTRATOS_NO_HAIKU: { contrato: string; evidencia: string }[] = [
   { contrato: 'ges.triagem.classificar', evidencia: '84 × 84 no contrato v2 (triagem do número compartilhado, 42 casos), 0 erro crítico' },
 ]
 
+/**
+ * Fica no Sonnet (não está na lista acima): `ges.triagem.conversar`, a triagem como conversa (v3). No
+ * gabarito de 25 conversas × 2, o Sonnet acertou 50/50 e o Haiku 49/50, sem erro crítico e com o tom
+ * e o escopo limpos nos dois; o portão bloqueou por um caso claro em que o Haiku fez uma pergunta a
+ * mais. Relatório: docs/backend/relatorios/triagem-conversa-2026-11-15-real.md.
+ */
+export const CONVERSA_NO_SONNET = { contrato: 'ges.triagem.conversar', evidencia: 'Sonnet 50/50 × Haiku 49/50 (portão bloqueado por um caso), 0 erro crítico' }
+
 /** O roteador barato do Assistente: Haiku só se o portão do roteador liberar (decisão 4 com a 3). */
 export const ROTEADOR_BARATO_NO_HAIKU = { liberado: true, evidencia: 'com o trecho: Haiku 28 × Sonnet 26 de 32, 0 erro crítico, e o Haiku acertou todo caso que o Sonnet acertou' }
 

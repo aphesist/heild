@@ -146,14 +146,12 @@ describe('avaliação: classificação, margem e portão do Haiku', () => {
 describe('gabarito ampliado (portão do Haiku)', () => {
   it('30 casos distintos por contrato de operário e 30 ou mais de roteamento, com casos em que o certo é não decidir', async () => {
     const { ampliadoPorContrato, roteamentoAmpliado } = await import('../src/avaliacao/gabarito-ampliado.ts')
-    expect(Object.keys(ampliadoPorContrato).sort()).toEqual(['ctb.competencia.escolher', 'ctb.ecd.apontar_atencao', 'dp.evento.classificar', 'fis.caixa_postal.classificar', 'fis.guia.identificar', 'ges.faq.escolher', 'ges.triagem.classificar', 'soc.alteracao.classificar'])
+    expect(Object.keys(ampliadoPorContrato).sort()).toEqual(['ctb.competencia.escolher', 'ctb.ecd.apontar_atencao', 'dp.evento.classificar', 'fis.caixa_postal.classificar', 'fis.guia.identificar', 'ges.faq.escolher', 'soc.alteracao.classificar'])
     for (const [contrato, casos] of Object.entries(ampliadoPorContrato)) {
       expect(new Set(casos.map((c) => c.id)).size, contrato).toBeGreaterThanOrEqual(30)
       // ECD: o certo é sempre apontar a conta plantada. Caixa postal: toda mensagem tem categoria; os
       // casos difíceis ali são os de várias datas (o prazo é uma delas), não os de não decidir.
       if (contrato === 'fis.caixa_postal.classificar') expect(casos.filter((c) => c.id.includes('duas-datas') || c.id.includes('efeitos')).length).toBeGreaterThanOrEqual(4)
-      // Triagem: não decidir é perguntar ao cliente (sem responsável) ou ir à pessoa (com responsável).
-      else if (contrato === 'ges.triagem.classificar') expect(casos.filter((c) => ['cartao', 'pergunta', 'sem_acordo'].includes(c.esperado)).length).toBeGreaterThanOrEqual(10)
       else if (contrato !== 'ctb.ecd.apontar_atencao') expect(casos.filter((c) => c.esperado === 'cartao').length, contrato).toBeGreaterThanOrEqual(3)
     }
     expect(new Set(roteamentoAmpliado.map((c) => c.id)).size).toBeGreaterThanOrEqual(30)

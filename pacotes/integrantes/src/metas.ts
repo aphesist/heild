@@ -15,6 +15,13 @@ export const metasB3: Ferramenta[] = [
   { nome: 'conversa.rotear', modulo: 'crm', nivel: 'executar', setor: 'alvo' },
   // Só registra a sugestão do integrante que diverge do menu (evento `conversa.triagem_divergir`).
   { nome: 'conversa.triagem_divergir', modulo: 'crm', nivel: 'executar', setor: 'alvo' },
+  // As falas da triagem ao cliente (decisão do Enzo de 15/11/2026): saem sem cartão porque só entendem
+  // o assunto e encaminham, com os limites de estilo e escopo conferidos por regra. Qualquer outra
+  // mensagem da IA ao cliente continua em `conversa.responder` (irreversível, com cartão).
+  { nome: 'conversa.triagem_responder', modulo: 'crm', nivel: 'executar', setor: 'alvo', exposta_ao_cliente: true },
+  // Envio ao cliente por categoria (subplano 02, adendo de 15/11/2026): o Administrador escolhe o modo.
+  { nome: 'envio_cliente.listar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'envio_cliente.configurar', modulo: 'agentes', nivel: 'executar', setor: 'geral', papel_minimo: 'administrador' },
 ]
 
 /** As ferramentas transversais do motor (B2), com os mesmos metadados do registro dela. */
