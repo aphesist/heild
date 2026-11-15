@@ -474,3 +474,46 @@ Ajustes nas que já existem:
 6. A pessoa aprova; o executor envia (`whatsapp.enviar`, R$ 0,035 de utilidade), grava evento, o cartão some.
 
 Total: 3 ferramentas, ~1,2 mil tokens de resultados. Sem a operação de processo, seriam `documento.listar` + `identidade.resolver` + `conversa.rascunhar` + `conversa.responder`, com 4 a 6 mil tokens e quatro pontos de erro.
+
+---
+
+## 10. Abrir o MCP e os tokens de serviço a terceiros (resposta Q10)
+
+O dono pediu para avaliar a abertura **antes do piloto**. Hoje o MCP serve só o orquestrador da Heild.
+
+### 10.1 O que o escritório ligaria
+
+| Ferramenta de fora | Como liga | Exemplo concreto |
+| --- | --- | --- |
+| **Claude Desktop e claude.ai** | Conector MCP remoto; pede OAuth 2.1 da especificação de autorização do MCP para o conector da web; no desktop, token por cabeçalho também serve [a confirmar por versão] | "Quais clientes do Simples têm DAS de outubro sem pagamento?" → `guia.listar` em leitura; "prepara a cobrança deles" → proposta que vira cartão na Heild |
+| **ChatGPT** | Conectores e apps com MCP remoto, com OAuth [recursos e planos a confirmar] | O sócio pergunta pelo ChatGPT do escritório a situação fiscal da carteira |
+| **n8n** | Nó cliente MCP ou HTTP com token `hsk_...` | Toda segunda, puxa `obrigacao.semana_da_carteira` e manda um resumo no canal interno do escritório |
+| **Make, Zapier** | HTTP com token; MCP onde o produto tiver cliente [a confirmar] | Pedido de admissão que chega por formulário próprio do escritório vira `admissao.receber_pedido` como proposta |
+| **Scripts próprios** | `POST /v1/ferramentas/{nome}` com token | Exportar para a planilha do sócio o consumo por cliente (`consumo.por_cliente`) |
+
+### 10.2 O que precisa existir
+
+| Peça | Regra |
+| --- | --- |
+| **Escopo por setor** | O token nasce com setores escolhidos e nunca passa do escopo da pessoa dona (P13 das Fundações) |
+| **Só leitura e propostas** | Níveis `ler` e `rascunhar`. Proposta = a ferramenta devolve `aguardando_aprovacao` e cria o cartão na Heild, que uma pessoa aprova. **Nada de `executar` direto** por terceiro, nem com `validar_apenas` ligado a uma execução depois |
+| **Limite de uso** | 120 chamadas/min por token; teto diário de chamadas que geram custo externo (situação fiscal, certidão) = 0 por padrão: terceiro lê o que já está em cache, não dispara consulta paga |
+| **Auditoria** | Origem `api_externa`, `token_id` e o cliente MCP declarado em todo evento; tela "o que este token fez" em Configurações › Integrações |
+| **Revogação** | Na hora, pela pessoa dona ou pelo Administrador; expiração padrão de 90 dias; aviso 7 dias antes |
+| **Conteúdo** | Respostas em visão compacta, com `origem_externa` marcado; o terceiro recebe dado do cliente, então a ativação pede aceite do Administrador de que o dado sai para aquele fornecedor (LGPD) |
+| **Catálogo** | O mesmo recorte por setor da seção 5, sem o recorte `excecao` e sem ferramentas de configuração, cofre ou conector |
+
+### 10.3 Custo e risco
+
+| | Tokens `hsk_...` (n8n, Make, Zapier, scripts, Claude Desktop por cabeçalho) | OAuth 2.1 do MCP (claude.ai, ChatGPT) |
+| --- | --- | --- |
+| Esforço | **~2 sp**: tela de tokens, escopo, limite, auditoria, revogação. O executor e o MCP já existem (F3) | **+2 a 3 sp**: servidor de autorização (descoberta, registro dinâmico de cliente, PKCE) ou um provedor OAuth pronto, consentimento por escopo |
+| Risco | Token vazado dá leitura do escopo até ser revogado | Mesmo risco, com consentimento mais claro |
+
+Riscos comuns:
+
+- **Injeção de instrução:** um agente de fora pode ser manipulado por texto de cliente. Ficar só em leitura e propostas segura o pior, porque nada sai sem uma pessoa.
+- **Dado de cliente em fornecedor que a Heild não controla.**
+- **Suporte:** o escritório liga algo errado e acha que é defeito da Heild.
+
+**Recomendação:** incluir os **tokens `hsk_...` antes do piloto (~2 sp)**, só com leitura e propostas que uma pessoa aprova, desligados por padrão e ligados pelo Administrador. É barato porque reaproveita o executor, o MCP e o cartão. O OAuth para claude.ai e ChatGPT entra durante o piloto, se um dos dois escritórios pedir.
