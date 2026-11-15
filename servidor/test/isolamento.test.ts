@@ -65,7 +65,8 @@ describe('pela API', () => {
 })
 
 describe('no banco (segunda barreira)', () => {
-  const api = postgres(config.pgApi, { onnotice: () => {}, max: 1 })
+  // O login da API (no Supabase, com TLS).
+  const api = postgres(config.pgApi, { onnotice: () => {}, max: 1, ...(['127.0.0.1', 'localhost'].includes(new URL(config.pgApi).hostname) ? {} : { ssl: 'require' as const }) })
   afterAll(() => api.end())
 
   it('o papel de login da API sozinho não lê nem grava nada', async () => {

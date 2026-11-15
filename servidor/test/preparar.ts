@@ -38,20 +38,30 @@ export default async function preparar() {
 async function prepararRemoto(url: string) {
   const { aplicarProjeto, refDoProjeto } = await import('../src/banco/aplicar-projeto.ts')
   const ref = refDoProjeto(url)
-  await aplicarProjeto({ url, confirmar: process.env.HEILD_CONFIRMAR_PROJETO, senhaApi: process.env.HEILD_PG_SENHA_API, aplicar: true, dizer: () => {} })
+  // Sem trava extra, o modo remoto não migra: só confere (migrar é o aplicar-projeto, à mão).
+  const migrar = process.env.HEILD_TESTE_REMOTO_MIGRAR === '1'
+  const r = await aplicarProjeto({ url, confirmar: process.env.HEILD_CONFIRMAR_PROJETO, senhaApi: process.env.HEILD_PG_SENHA_API, aplicar: migrar, dizer: () => {} })
+  if (!migrar && r.faltam.length) throw new Error(`Faltam migrações no projeto ${ref}: ${r.faltam.join(', ')}.`)
   const adm = postgres(url, { onnotice: () => {}, ssl: 'require', max: 1 })
   try {
     const reais = await adm`select id from escritorio where id not in ('esc-andrade', 'esc-horizonte') limit 1`
-    if (reais.length) throw new Error(`O projeto ${ref} tem escritório que não é de demonstração (${reais[0].id}): os testes semeiam e restauram, e não rodam aqui.`)
+    if (reais.length) throw new Error(`O projeto ${ref} tem escritório que não é de demonstração: os testes semeiam e restauram, e não rodam aqui.`)
   } finally {
     await adm.end()
   }
-  // A API dos testes conecta como app_api (sem BYPASSRLS) no mesmo projeto.
-  const u = new URL(url)
-  u.username = refDoProjeto(url) && u.hostname.includes('pooler') ? `app_api.${ref}` : 'app_api'
-  u.password = encodeURIComponent(process.env.HEILD_PG_SENHA_API ?? '')
+  // A API dos testes conecta como app_api (sem BYPASSRLS) no mesmo projeto. O CI já exporta as
+  // duas conexões (nuvem-ci.ts); à mão, elas saem daqui.
+  if (!process.env.HEILD_PG_URL_API) {
+    const u = new URL(url)
+    u.username = u.hostname.includes('pooler') ? `app_api.${ref}` : 'app_api'
+    u.password = encodeURIComponent(process.env.HEILD_PG_SENHA_API ?? '')
+    process.env.HEILD_PG_URL_API = u.toString()
+  }
   process.env.HEILD_PG_URL_ADMIN = url
-  process.env.HEILD_PG_URL_API = u.toString()
+  // A configuração já foi lida (o aplicar-projeto a importa): acerta as conexões deste processo.
+  const { config } = await import('../src/config.ts')
+  config.pgAdmin = url
+  config.pgApi = process.env.HEILD_PG_URL_API
   const { semearTodos } = await import('../src/banco/semear.ts')
   const { fecharConexoes } = await import('../src/banco/pg.ts')
   try {
