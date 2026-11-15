@@ -195,6 +195,7 @@ export async function rotearEmCascata(
   escritorio_id: string,
   pedido: { texto: string; tipoDocumento: string | null; trecho?: string },
   opcoes: OpcaoRota[],
+  o: { soBarato?: boolean } = {},
 ): Promise<{ decisao: DecisaoRota | null; tentativas: Tentativa[]; candidatos: string[] }> {
   const tentativas: Tentativa[] = []
   const r = rotearPorRegras(pedido.texto, pedido.tipoDocumento, opcoes)
@@ -205,7 +206,8 @@ export async function rotearEmCascata(
   // Os candidatos das regras vêm primeiro (ordem estável), depois as demais opções.
   const ordenadas = [...r.candidatos.map((id) => opcoes.find((o) => o.procedimento_id === id)!), ...opcoes.filter((o) => !r.candidatos.includes(o.procedimento_id))]
   let candidatos = r.candidatos
-  for (const camada of ['modelo_barato', 'modelo_caro'] as const) {
+  // `soBarato`: a prévia das suposições (roda enquanto a pessoa digita) nunca chama o modelo caro.
+  for (const camada of o.soBarato ? (['modelo_barato'] as const) : (['modelo_barato', 'modelo_caro'] as const)) {
     let res: Awaited<ReturnType<typeof chamarRoteador>>
     try {
       res = await chamarRoteador(d, escritorio_id, camada, pedido.texto, ordenadas, pedido.trecho)

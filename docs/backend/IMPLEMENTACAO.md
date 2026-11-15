@@ -819,6 +819,27 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - As v2 continuam carregadas para as execuções em andamento. A triagem conversando não entra nessa configuração: sai sem aprovação, por ser só triagem.
 
 
+13. **Feedforward e lacunas** (padrão da interface adotado pelo Enzo em 15/11/2026: antes de agir, o integrante mostra o que supôs para a pessoa corrigir; num rascunho, deixa lacuna no que não sabe, em vez de inventar).
+    - **`heild.resposta@2`** (`src/resposta.ts`) acrescenta duas listas. As opções vêm sempre dos dados, nunca de texto do modelo.
+      - `suposicoes[]`: campo, rótulo, valor assumido, tipo (cliente, competência, valor, setor, procedimento, canal, documento, data, quantidade, categoria, texto), as opções que os dados oferecem, a origem (`regra`, `modelo`, `pessoa` ou `pedido`) e a confiança;
+      - `lacunas[]`: id, campo, rótulo, tipo, opções e a posição no texto, onde a lacuna aparece como `[rótulo]`.
+    - **Compatibilidade:** a @1 continua aceita na leitura (`lerResposta` a converte em @2 vazia). `assistente.obter` aceita `formato: 'heild.resposta@1'` para quem ainda lê a versão anterior (`noFormato` tira os campos novos).
+    - **Montadas pelo sistema** (`src/suposicoes.ts`), a partir do estado da execução:
+      - as candidatas que o código leu do documento e o valor decidido ou proposto pelo operário, com a origem e a confiança;
+      - o cliente e o documento do pedido;
+      - no "não consegui", as lacunas: os campos que os validadores apontaram (como a quantidade do DP) ou, sem campo apontado (confiança baixa), os campos da escolha, com as candidatas como opções.
+
+      O destino suposto pelo Assistente vai em `suposicao_de_rota`, ao lado da resposta: a resposta do integrante continua sem reescrever (decisão 4).
+    - **`assistente.prever_suposicoes`** (ler): a prévia do que o integrante vai supor, antes de pedir, enquanto a pessoa digita (com debounce no app).
+      - Mostra o procedimento, o setor, o cliente, o documento, a competência e o valor citados no texto, e o que falta anexar (como lacunas).
+      - Regras primeiro. O roteador barato (Haiku) só entra quando a regra não decide e o texto tem 12 caracteres ou mais; nunca o caro. `usar_modelo: false` fica só nas regras.
+      - Não abre pedido nem execução e não grava evento. O custo do modelo sai da bolsa do roteamento, e o mesmo texto não paga de novo por 60 s (até 500 prévias em memória).
+    - **`assistente.preencher_lacuna`** (executar): a pessoa preenche as lacunas de um rascunho que parou num "não consegui" (pelo pedido ou pela execução).
+      - Os valores entram na proposta do operário, só nos campos do contrato (a confiança não é lacuna e vira 1, porque uma pessoa decidiu).
+      - A execução **retoma do ponto em que parou**, pela edição do "não consegui" no motor: os validadores conferem de novo e o procedimento segue, sem chamar o operário.
+      - Quem preencheu fica no cartão (`decidido_por`, comentário "Lacuna preenchida: …"), com os argumentos editados, e na cadeia.
+    - **Divisão com a B5:** aprovar um cartão de **ato** com argumentos alterados (recalcular o hash, revalidar e registrar quem alterou o quê) e "aprovar executa a ação guardada" ficam com a B5, no executor. A lacuna usa só o cartão "não consegui" do motor.
+
 ### Resultado real (15/11/2026)
 
 Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
@@ -847,6 +868,11 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
   - depois de 3 perguntas, cartão; a pessoa escolhe e o cliente recebe o aviso fixo;
   - mensagem fora do tom escala uma vez e vai ao cartão, sem sair nada;
   - pelo Assistente.
+- `feedforward.test.ts` (5):
+  - a @2 com a lacuna marcada no texto e a posição; a compatibilidade com a @1;
+  - a prévia por regra (sem modelo, sem abrir pedido nem execução, com a lacuna do anexo que falta);
+  - a prévia pelo barato, com cache, sem modelo em texto curto ou com `usar_modelo: false`;
+  - o "não consegui" do DP sem quantidade vira lacuna; preencher retoma, conclui com a quantidade, sem chamar o operário de novo, e registra quem preencheu.
 - `envio.test.ts` (5): todas as categorias começam em cartão e só o Administrador muda, com evento; FAQ em cartão (aprovar grava a mensagem na conversa, com prefixo), em automático (sem cartão, com o revisor) e desligado (nada sai); a guia em automático sai sem cartão, e a categoria de outra mensagem não mexe nela.
 
 ---

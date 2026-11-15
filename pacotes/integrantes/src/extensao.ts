@@ -3,6 +3,7 @@ import { comEscritorio, contextoDeIntegrante, definirFerramenta, ErroHeild, inte
 import { Assistente, FILA_ROTEAR } from './assistente.ts'
 import { Anexos, type Integrante } from './contrato.ts'
 import { aprenderComCartao } from './execucao.ts'
+import { FORMATOS_RESPOSTA } from './resposta.ts'
 import { CATEGORIAS_DE_ENVIO, CategoriaEnvio, configurarEnvio, ModoEnvio, modosDeEnvio } from './envio.ts'
 import { integrantesContabil } from './integrantes.ts'
 import { metasB3 } from './metas.ts'
@@ -55,11 +56,38 @@ export function extensaoIntegrantes(o: OpcoesExtensao = {}): ExtensaoIntegrantes
           nome: 'assistente.obter',
           versao: 1,
           descricao_modelo: 'Estado e resposta padrão de um pedido feito ao Assistente (só de quem pediu).',
-          entrada: z.object({ pedido_id: z.string().min(1).max(80) }).strict(),
+          entrada: z.object({ pedido_id: z.string().min(1).max(80), formato: z.enum(FORMATOS_RESPOSTA).optional() }).strict(),
           meta: meta('assistente.obter'),
           exposta_mcp: false,
           recorte: 'geral',
-          executar: async (e, ctx) => ({ resultado: 'ok', dados: await assistente.obter(ctx, e.pedido_id) }),
+          executar: async (e, ctx) => ({ resultado: 'ok', dados: await assistente.obterNoFormato(ctx, e.pedido_id, e.formato) }),
+        }),
+        definirFerramenta({
+          nome: 'assistente.prever_suposicoes',
+          versao: 1,
+          descricao_modelo: 'Prévia do que o integrante vai supor para um pedido (procedimento, setor, cliente, competência, valor) e do que falta anexar, sem executar. Regras primeiro; modelo barato só se precisar.',
+          entrada: z.object({ texto: z.string().min(1).max(4000), anexos: Anexos.optional(), usar_modelo: z.boolean().optional() }).strict(),
+          meta: meta('assistente.prever_suposicoes'),
+          exposta_mcp: false,
+          recorte: 'geral',
+          executar: async (e, ctx) => ({ resultado: 'ok', dados: await assistente.preverSuposicoes(ctx, e) }),
+        }),
+        definirFerramenta({
+          nome: 'assistente.preencher_lacuna',
+          versao: 1,
+          descricao_modelo: 'Preenche as lacunas de um rascunho que parou num "não consegui" e retoma a execução do ponto em que parou.',
+          entrada: z
+            .object({
+              pedido_id: z.string().min(1).max(80).optional(),
+              execucao_id: z.string().min(1).max(80).optional(),
+              valores: z.record(z.string().max(60), z.union([z.string().max(300), z.number(), z.boolean(), z.null()])).refine((v) => Object.keys(v).length > 0 && Object.keys(v).length <= 10, 'De 1 a 10 lacunas.'),
+            })
+            .strict()
+            .refine((x) => Boolean(x.pedido_id) !== Boolean(x.execucao_id), 'Informe o pedido ou a execução (um dos dois).'),
+          meta: meta('assistente.preencher_lacuna'),
+          exposta_mcp: false,
+          recorte: 'geral',
+          executar: async (e, ctx) => ({ resultado: 'ok', dados: await assistente.preencherLacuna(ctx, e) }),
         }),
         definirFerramenta({
           nome: 'integrante.listar',

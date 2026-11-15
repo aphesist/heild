@@ -17,7 +17,9 @@ import {
 import { Anexos, type Integrante } from './contrato.ts'
 import { integrantesContabil, pacoteDoProcedimento } from './integrantes.ts'
 import { responderExecucao } from './responder.ts'
-import { resposta, type RespostaPadrao } from './resposta.ts'
+import { lerResposta, noFormato, resposta, type FORMATOS_RESPOSTA, type Lacuna, type RespostaPadrao, type RespostaPadraoV1, type Suposicao } from './resposta.ts'
+import { competenciasDoTexto } from './escolha.ts'
+import { opcoesDe, rotuloDoCampo, tipoDoCampo } from './suposicoes.ts'
 import { opcoesDeRota, rotearEmCascata, rotearPorRegras, type ConfigRoteamento, type DecisaoRota, type OpcaoRota, type Tentativa } from './roteador.ts'
 
 /**
@@ -45,6 +47,8 @@ export interface RespostaAssistente {
   estado: string
   encaminhado_para: { integrante_id: string; setor: string; nome: string } | null
   roteamento: { camada: string; procedimento: string | null; confianca: number | null } | null
+  /** Feedforward do destino: o procedimento que o Assistente supôs, com as alternativas e a origem. */
+  suposicao_de_rota?: Suposicao | null
   /** A resposta do integrante, exatamente como ele a deu (ou a do Assistente, sem integrante). */
   resposta: RespostaPadrao
 }
@@ -61,11 +65,26 @@ export interface DependenciasAssistente {
   aguardar_ms?: number
 }
 
+/** A prévia das suposições de um pedido, antes de pedir (feedforward). Nada é executado nem gravado. */
+export interface PreviaSuposicoes {
+  procedimento: { id: string; nome: string; setor: string; integrante_id: string; origem: 'regra' | 'modelo'; confianca: number } | null
+  suposicoes: Suposicao[]
+  /** O que falta anexar para o procedimento suposto começar. */
+  lacunas: Lacuna[]
+  custo: { centavos: number; chamadas: number }
+}
+
 const hash = (t: string) => createHash('sha256').update(t).digest('hex')
+const PREVIA_TTL_MS = 60_000
+const PREVIA_MAX = 500
+/** Abaixo disso, a prévia fica só nas regras: o texto ainda não diz o bastante para pagar um modelo. */
+const PREVIA_MIN_CARACTERES_MODELO = 12
 const TRANSITORIOS = new Set(['em_execucao', 'na_fila'])
 
 export class Assistente {
   private readonly integrantes: Integrante[]
+  /** A prévia roda enquanto a pessoa digita (com debounce no app): o mesmo texto não paga o modelo duas vezes. */
+  private readonly previas = new Map<string, { em: number; previa: PreviaSuposicoes }>()
   constructor(private readonly d: DependenciasAssistente) {
     this.integrantes = d.integrantes ?? integrantesContabil
   }
@@ -209,8 +228,124 @@ export class Assistente {
     return comEscritorio(this.d.sql, escritorio_id, (tx) => contextoDePessoa(tx, escritorio_id, usuario_id, 'chat')).catch(() => null)
   }
 
+  /** `assistente.obter` no formato pedido (a @1 continua servida para quem ainda a lê). */
+  async obterNoFormato(ctx: ContextoExec, pedido_id: string, formato: (typeof FORMATOS_RESPOSTA)[number] = 'heild.resposta@2'): Promise<Omit<RespostaAssistente, 'resposta'> & { resposta: RespostaPadrao | RespostaPadraoV1 }> {
+    const r = await this.obter(ctx, pedido_id)
+    return { ...r, resposta: noFormato(lerResposta(r.resposta), formato) }
+  }
+
   /** `assistente.obter`: a conversa é privada (sigilo): só quem pediu lê o próprio pedido. */
   async obter(ctx: ContextoExec, pedido_id: string): Promise<RespostaAssistente> {
+    const r = await this.obterSemRoteamento(ctx, pedido_id)
+    // Feedforward: o destino que o Assistente supôs, com as alternativas e a origem (regra ou modelo).
+    const [p] = await comEscritorio(this.d.sql, ctx.escritorio_id, (tx) => tx`select camada, procedimento_id, confianca, tentativas, erro from pedido_assistente where id = ${pedido_id}`)
+    if (!p?.procedimento_id) return { ...r, suposicao_de_rota: null }
+    const candidatos = [...new Set([String(p.procedimento_id), ...(((p.tentativas ?? []) as Tentativa[]).flatMap((t) => t.candidatos ?? []))])]
+    const rota: Suposicao = {
+      campo: 'procedimento',
+      rotulo: 'Procedimento',
+      valor: String(p.procedimento_id),
+      tipo: 'procedimento',
+      opcoes: candidatos.slice(0, 12).map((id) => ({ valor: id, rotulo: (pacoteDoProcedimento(id)?.pacote.procedimento.nome ?? id).slice(0, 120) })),
+      origem: p.camada === 'regra' ? 'regra' : 'modelo',
+      confianca: p.confianca === null ? null : Number(p.confianca),
+    }
+    // Vai ao lado da resposta: a resposta do integrante segue SEM reescrever (decisão 4).
+    return { ...r, suposicao_de_rota: rota }
+  }
+
+  /**
+   * `assistente.prever_suposicoes`: o que o integrante vai supor, ANTES de pedir, para a pessoa corrigir
+   * enquanto digita. Regras primeiro; o roteador barato (Haiku) só quando a regra não decide e o texto
+   * já diz algo; nunca o caro. Não abre pedido nem execução e não grava evento; o custo do modelo sai
+   * da bolsa do roteamento.
+   */
+  async preverSuposicoes(ctx: ContextoExec, p: { texto: string; anexos?: Anexos; usar_modelo?: boolean }): Promise<PreviaSuposicoes> {
+    if (ctx.ator.tipo !== 'pessoa') throw new ErroPermissao('assistente.prever_suposicoes', 'Só uma pessoa da equipe usa a prévia.')
+    const anexos = p.anexos ?? {}
+    const chave = `${ctx.escritorio_id}:${ctx.ator.perfil.usuario_id}:${hash(JSON.stringify([p.texto.trim().toLowerCase(), anexos, p.usar_modelo ?? true]))}`
+    const guardada = this.previas.get(chave)
+    if (guardada && Date.now() - guardada.em < PREVIA_TTL_MS) return guardada.previa
+    const lido = await comEscritorio(this.d.sql, ctx.escritorio_id, async (tx) => {
+      const [doc] = anexos.documento_id ? await tx`select tipo, left(coalesce(metadados->>'texto_extraido', ''), 600) as trecho from documento where id = ${anexos.documento_id}` : []
+      const [cli] = anexos.cliente_id ? await tx`select nome from cliente where id = ${anexos.cliente_id}` : []
+      return { tipoDocumento: (doc?.tipo as string | undefined) ?? null, trecho: (doc?.trecho as string | undefined) || undefined, cliente: (cli?.nome as string | undefined) ?? null }
+    })
+    const opcoes = opcoesDeRota(this.integrantes, lido.tipoDocumento).filter((op) => this.d.motor.porOperacao(op.pacote.procedimento.operacao) && podeIniciar(ctx, op))
+    const regras = rotearPorRegras(p.texto, lido.tipoDocumento, opcoes)
+    let decisao = regras.decisao
+    let candidatos = regras.candidatos
+    let centavos = 0
+    let chamadas = 0
+    if (!decisao && (p.usar_modelo ?? true) && p.texto.trim().length >= PREVIA_MIN_CARACTERES_MODELO && opcoes.length) {
+      const r = await rotearEmCascata({ sql: this.d.sql, fornecedor: this.d.fornecedor, cfg: this.d.roteamento }, ctx.escritorio_id, { texto: p.texto, tipoDocumento: lido.tipoDocumento, trecho: lido.trecho }, opcoes, { soBarato: true })
+      decisao = r.decisao && r.decisao.procedimento_id !== 'nenhum' ? r.decisao : null
+      candidatos = r.candidatos
+      centavos = r.tentativas.reduce((a, t) => a + t.centavos, 0)
+      chamadas = r.tentativas.filter((t) => t.modelo).length
+    }
+    const op = decisao ? opcoes.find((x) => x.procedimento_id === decisao!.procedimento_id) : undefined
+    const origem: 'regra' | 'modelo' = decisao?.camada === 'regra' ? 'regra' : 'modelo'
+    const suposicoes: Suposicao[] = []
+    if (op && decisao) {
+      suposicoes.push({ campo: 'procedimento', rotulo: 'Procedimento', valor: op.procedimento_id, tipo: 'procedimento', opcoes: [...new Set([op.procedimento_id, ...candidatos])].slice(0, 12).map((id) => ({ valor: id, rotulo: (pacoteDoProcedimento(id)?.pacote.procedimento.nome ?? id).slice(0, 120) })), origem, confianca: decisao.confianca })
+      suposicoes.push({ campo: 'setor', rotulo: 'Setor', valor: op.setor, tipo: 'setor', opcoes: [], origem, confianca: decisao.confianca })
+    }
+    if (anexos.cliente_id) suposicoes.push({ campo: 'cliente_id', rotulo: 'Cliente', valor: anexos.cliente_id, tipo: 'cliente', opcoes: lido.cliente ? [{ valor: anexos.cliente_id, rotulo: lido.cliente.slice(0, 120) }] : [], origem: 'pedido', confianca: null })
+    if (anexos.documento_id) suposicoes.push({ campo: 'documento_id', rotulo: 'Documento', valor: anexos.documento_id, tipo: 'documento', opcoes: [], origem: 'pedido', confianca: null })
+    // Do texto, por regra: a competência citada (com as alternativas) e o valor em reais.
+    const competencias = competenciasDoTexto(p.texto)
+    if (competencias.length) suposicoes.push({ campo: 'competencia', rotulo: 'Competência', valor: competencias[0]!, tipo: 'competencia', opcoes: opcoesDe('competencia', competencias), origem: 'regra', confianca: null })
+    const valor = /R\$\s*([\d.]+,\d{2})/.exec(p.texto)?.[1]
+    if (valor) suposicoes.push({ campo: 'valor', rotulo: 'Valor', valor: `R$ ${valor}`, tipo: 'valor', opcoes: [], origem: 'regra', confianca: null })
+    const entrada = op ? op.pacote.entrada(anexos) : null
+    const lacunas: Lacuna[] = entrada && !entrada.ok ? entrada.falta.map((campo) => ({ id: campo, campo, rotulo: rotuloDoCampo(campo), tipo: tipoDoCampo(campo), posicao: null, opcoes: [] })) : []
+    const previa: PreviaSuposicoes = {
+      procedimento: op && decisao ? { id: op.procedimento_id, nome: op.pacote.procedimento.nome, setor: op.setor, integrante_id: op.integrante_id, origem, confianca: decisao.confianca } : null,
+      suposicoes,
+      lacunas,
+      custo: { centavos, chamadas },
+    }
+    if (this.previas.size >= PREVIA_MAX) this.previas.delete(this.previas.keys().next().value!)
+    this.previas.set(chave, { em: Date.now(), previa })
+    return previa
+  }
+
+  /**
+   * `assistente.preencher_lacuna`: a pessoa completa o rascunho que parou num "não consegui" e a
+   * execução RETOMA do ponto em que parou (os validadores conferem de novo, depois segue). Usa a
+   * proposta do operário com os valores preenchidos; quem preencheu fica no cartão (decidido_por) e
+   * na cadeia, com os argumentos editados.
+   */
+  async preencherLacuna(ctx: ContextoExec, p: { pedido_id?: string; execucao_id?: string; valores: Record<string, string | number | boolean | null> }): Promise<{ execucao_id: string; estado: string }> {
+    let execucao_id = p.execucao_id ?? null
+    const pedido_id = p.pedido_id
+    if (pedido_id) {
+      const [ped] = await comEscritorio(this.d.sql, ctx.escritorio_id, (tx) => tx`select solicitante_id, execucao_id from pedido_assistente where id = ${pedido_id}`)
+      if (!ped) throw new ErroRegra('PEDIDO_INEXISTENTE', 'Pedido não encontrado.')
+      if (ctx.ator.tipo !== 'pessoa' || ctx.ator.perfil.usuario_id !== ped.solicitante_id) throw new ErroPermissao('assistente.preencher_lacuna', 'Este pedido é de outra pessoa.')
+      execucao_id = (ped.execucao_id as string | null) ?? null
+    }
+    if (!execucao_id) throw new ErroRegra('SEM_RASCUNHO', 'Este pedido ainda não tem um rascunho para completar.')
+    const ex = await this.d.motor.obter(ctx, execucao_id)
+    const [c] = ex.cartao_id ? await comEscritorio(this.d.sql, ctx.escritorio_id, (tx) => tx`select id, tipo, argumentos, extras from cartao_aprovacao where id = ${ex.cartao_id}`) : []
+    if (!c || c.tipo !== 'nao_consegui' || ex.estado !== 'aguardando_cartao') throw new ErroRegra('SEM_LACUNA', 'Esta execução não está esperando uma lacuna.')
+    const proposta = (c.argumentos as { proposta?: Record<string, unknown> | null }).proposta
+    if (!proposta) throw new ErroRegra('SEM_PROPOSTA', 'Não há rascunho para completar: decida pelo cartão.')
+    const procedimento = this.d.motor.versao(ex.procedimento.split('@')[0]!, Number(ex.procedimento.split('@')[1]))
+    const passo = procedimento.passos.find((x) => x.nome === (c.extras as { passo: string }).passo)
+    if (!passo || passo.tipo !== 'operario') throw new ErroRegra('SEM_LACUNA', 'O cartão não é de um rascunho do integrante.')
+    const campos = Object.keys(passo.contrato.devolve.shape)
+    const fora = Object.keys(p.valores).filter((k) => !campos.includes(k) || k === 'confianca')
+    if (fora.length) throw new ErroEntrada(fora.map((campo) => ({ campo, mensagem: 'Campo que não é lacuna deste rascunho.' })))
+    // Só os campos do contrato (a proposta guardada leva marcas do motor, como classe e modelo).
+    const doContrato = Object.fromEntries(campos.filter((k) => k in proposta).map((k) => [k, proposta[k]]))
+    const completo = { ...doContrato, ...p.valores, ...(campos.includes('confianca') ? { confianca: 1 } : {}) }
+    await this.d.motor.decidirCartao(ctx, { cartao_id: c.id as string, decisao: 'editar', argumentos_editados: completo, comentario: `Lacuna preenchida: ${Object.keys(p.valores).join(', ')}` })
+    return { execucao_id, estado: 'executando' }
+  }
+
+  private async obterSemRoteamento(ctx: ContextoExec, pedido_id: string): Promise<RespostaAssistente> {
     const [p] = await comEscritorio(this.d.sql, ctx.escritorio_id, (tx) => tx`select * from pedido_assistente where id = ${pedido_id}`)
     if (!p) throw new ErroRegra('PEDIDO_INEXISTENTE', 'Pedido não encontrado.')
     if (ctx.ator.tipo !== 'pessoa' || ctx.ator.perfil.usuario_id !== p.solicitante_id) throw new ErroPermissao('assistente.obter', 'Este pedido é de outra pessoa.')
