@@ -6,19 +6,22 @@ import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
 import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
 import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
-import { gesTriarRepassar, LIMIAR_INCERTA, LIMIAR_ROTEIA } from './setores/triagem.ts'
+import { gesTriarRepassarV2, LIMIAR_ROTEIA } from './setores/triagem.ts'
 import { gesTriarRepassarV1 } from './setores/triagem-v1.ts'
+import { gesTriarRepassarV3 } from './setores/triagem-conversa.ts'
 
 /**
- * Decisão comparável da triagem: o setor; `pergunta` quando perguntou ao cliente; `sem_acordo` no
- * setor de entrada; `{menu}>{sugerido}` quando o cartão de sugestão transferiu; `cartao` quando foi à pessoa.
+ * Decisão comparável de UMA execução da triagem v3: o setor; `pergunta` quando continuou a conversa;
+ * `pessoa` quando chamou alguém; `fora_do_horario`; `cartao` quando foi ao cartão de uma pessoa.
+ * A conversa inteira (várias execuções) é avaliada em `avaliacao/conversas.ts`.
  */
 export function decisaoDaTriagem(e: { estado: string; saida: Record<string, unknown> | null; erro: { codigo?: string } | null }): string {
   if (e.estado === 'concluida' && e.saida) {
     const x = e.saida
     if (x.acao === 'perguntar') return 'pergunta'
-    if (x.acao === 'entrada_padrao') return 'sem_acordo'
-    return x.transferido ? `${String(x.setor_roteado)}>${String(x.setor)}` : String(x.setor)
+    if (x.acao === 'pessoa') return 'pessoa'
+    if (x.acao === 'fora_do_horario') return 'fora_do_horario'
+    return String(x.setor)
   }
   return e.estado === 'aguardando_cartao' || e.erro?.codigo === 'SOMBRA_NAO_DECIDIU' ? 'cartao' : `${e.estado}:${e.erro?.codigo ?? ''}`
 }
@@ -40,9 +43,9 @@ const entradaDeDocumento: PacoteProcedimento['entrada'] = (a: Anexos) =>
 const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
-const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassar].map(P)
+const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassarV3].map(P)
 /** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
-const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1].map(P)
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1, gesTriarRepassarV2].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
@@ -202,7 +205,7 @@ export const integranteAtendimento: Integrante = definirIntegrante(
     limites: { simultaneas: 10, segundo_plano_por_pessoa: 3 },
     limiar_confianca: 0.9,
     perguntar_responsavel: false,
-    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.rotear', 'conversa.triagem_divergir', 'conversa.listar'],
+    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.rotear', 'conversa.triagem_divergir', 'conversa.triagem_responder', 'conversa.listar'],
     procedimentos: [
       {
         procedimento: P(gesFaqV2),
@@ -217,22 +220,27 @@ export const integranteAtendimento: Integrante = definirIntegrante(
         decisao: decisaoDeEscolha(['faq_id']),
       },
       {
-        procedimento: P(gesTriarRepassar),
+        procedimento: P(gesTriarRepassarV3),
         entrada: (a) => (a.conversa_id ? { ok: true, entrada: { conversa_id: a.conversa_id } } : { ok: false, falta: ['conversa_id'] }),
         regras: [/\b(triar|triagem|repassar|repasse)\b.*\bconversa\b/i, /\bconversa\b.*\b(triar|repassar)\b/i],
         // Trabalha sobre a conversa do CRM, não sobre um documento anexado.
         aceita_documentos: [],
-        descricao_roteamento: 'Triar a conversa que chegou pelo número compartilhado de WhatsApp e repassar ao setor certo, com resumo (ou perguntar o assunto ao cliente).',
+        descricao_roteamento: 'Conversar com o cliente que escreveu no número compartilhado de WhatsApp até entender o assunto e repassar ao setor certo, com resumo.',
         apresentar: (s) =>
           s.acao === 'perguntar'
-            ? { titulo: 'Perguntei o assunto ao cliente', texto: 'Não deu para saber o setor pela mensagem; perguntei ao cliente, com opções.', dados: { acao: 'perguntar' } as Record<string, string | boolean> }
-            : {
-                titulo: `Conversa repassada ao setor ${String(s.setor)}`,
-                texto: `Repassei a conversa ao setor ${String(s.setor)}${s.incerta ? ' (triagem incerta: confira)' : ''}${s.cliente_id ? '' : ', com o remetente ainda não identificado'}.`,
-                dados: { setor: String(s.setor), origem: String(s.origem), cliente_identificado: s.cliente_id !== null } as Record<string, string | boolean>,
-              },
+            ? { titulo: 'Conversando com o cliente', texto: 'Ainda não deu para saber o assunto; continuei a conversa com o cliente.', dados: { acao: 'perguntar' } as Record<string, string | boolean> }
+            : s.acao === 'fora_do_horario'
+              ? { titulo: 'Mensagem fora do horário', texto: 'Mandei a resposta automática com o horário; a triagem retoma quando o expediente abrir.', dados: { acao: 'fora_do_horario' } as Record<string, string | boolean> }
+              : s.acao === 'pessoa'
+                ? { titulo: 'Conversa precisa de uma pessoa', texto: 'Passei a conversa para uma pessoa do Atendimento.', dados: { acao: 'pessoa', motivo: String(s.motivo_pessoa) } as Record<string, string | boolean> }
+                : {
+                    titulo: `Conversa repassada ao setor ${String(s.setor)}`,
+                    texto: `Repassei a conversa ao setor ${String(s.setor)}${s.cliente_id ? '' : ', com o remetente ainda não identificado'}.`,
+                    dados: { setor: String(s.setor), origem: String(s.origem), cliente_identificado: s.cliente_id !== null } as Record<string, string | boolean>,
+                  },
         decisao: decisaoDaTriagem,
-        limiares_do_plano: { roteia: LIMIAR_ROTEIA, incerta: LIMIAR_INCERTA, fonte: 'subplano 02, "Triagem do número compartilhado"' },
+        // Sem faixa incerta: abaixo de 0,8 a conversa continua (decisão do Enzo de 15/11/2026).
+        limiares_do_plano: { roteia: LIMIAR_ROTEIA, incerta: LIMIAR_ROTEIA, fonte: 'decisão do Enzo de 15/11/2026 (conversa até certeza razoável)' },
       },
     ],
   },

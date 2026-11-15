@@ -4,6 +4,11 @@ import { resolverCom } from '../metas.ts'
 import { comQuemFala, NOME_DO_SETOR } from '../identificacao.ts'
 
 /**
+ * GES-TRIAR-REPASSAR v2 (integrada no PR #36). Continua carregada só para as execuções que começaram
+ * nela terminarem; a operação inicia a v3 (`triagem-conversa.ts`, conversa natural, decisão do Enzo
+ * de 15/11/2026). Não mudar a estrutura: ela entra no hash publicado. As constantes e as palavras-chave
+ * daqui são usadas também pela v1 e pela v3.
+ *
  * Gestão e Atendimento · GES-TRIAR-REPASSAR: a triagem do número compartilhado de WhatsApp
  * (subplano 04, adendo A; subplano 02, "Triagem do número compartilhado"; respostas do Enzo de
  * 15/11/2026). O integrante de Atendimento reconhece quem escreve e o assunto e roteia a conversa ao
@@ -234,7 +239,7 @@ const SAIDA = z
   })
   .strict()
 
-export const gesTriarRepassar: Procedimento = definirProcedimento(
+export const gesTriarRepassarV2: Procedimento = definirProcedimento(
   {
     id: 'GES-TRIAR-REPASSAR',
     // v2: o desenho do plano (integrante como padrão, limiares 0,8/0,6, pergunta ao cliente, contexto,

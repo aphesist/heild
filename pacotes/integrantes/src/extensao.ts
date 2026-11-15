@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { definirFerramenta, type BaseExtensao, type DefinicaoFerramenta, type ExtensaoProcessos } from '@heild/processos'
+import { comEscritorio, contextoDeIntegrante, definirFerramenta, ErroHeild, integranteDoSetor, type BaseExtensao, type DefinicaoFerramenta, type ExtensaoProcessos } from '@heild/processos'
 import { Assistente, FILA_ROTEAR } from './assistente.ts'
 import { Anexos, type Integrante } from './contrato.ts'
 import { aprenderComCartao } from './execucao.ts'
@@ -7,6 +7,7 @@ import { integrantesContabil } from './integrantes.ts'
 import { metasB3 } from './metas.ts'
 import { ROTEADOR_BARATO_NO_HAIKU } from './modelos.ts'
 import { configRoteamentoPadrao, type ConfigRoteamento } from './roteador.ts'
+import { FILA_RETOMAR_TRIAGEM } from './setores/triagem-conversa.ts'
 
 /**
  * A B3 como extensão do `criarProcessos` da B2: as ferramentas do Assistente e dos integrantes
@@ -91,12 +92,38 @@ export function extensaoIntegrantes(o: OpcoesExtensao = {}): ExtensaoIntegrantes
     },
     criarFilas: async (b) => {
       const opcoes = { expireInSeconds: 300, retryLimit: 3, retryDelay: 5, retryBackoff: true, notify: true }
-      if (await b.boss.getQueue(FILA_ROTEAR)) await b.boss.updateQueue(FILA_ROTEAR, opcoes)
-      else await b.boss.createQueue(FILA_ROTEAR, opcoes)
+      for (const fila of [FILA_ROTEAR, FILA_RETOMAR_TRIAGEM]) {
+        if (await b.boss.getQueue(fila)) await b.boss.updateQueue(fila, opcoes)
+        else await b.boss.createQueue(fila, opcoes)
+      }
     },
-    iniciarWorkers: async (_b, intervalo) => {
+    iniciarWorkers: async (b, intervalo) => {
       await ext.assistente!.iniciarWorker(intervalo)
+      // A triagem que esperou o expediente abrir (job atrasado gravado pelo passo `fora_do_horario`).
+      await b.boss.work<{ escritorio_id: string; conversa_id: string }>(FILA_RETOMAR_TRIAGEM, { pollingIntervalSeconds: intervalo ?? 2 }, async (jobs) => {
+        for (const j of jobs) await retomarTriagem(b, j.data)
+      })
     },
   }
   return ext
+}
+
+/**
+ * Retoma a triagem na primeira hora do expediente, como o integrante de Atendimento (sem pessoa por
+ * trás). Se alguém já assumiu a conversa nesse meio-tempo, ou o cliente não escreveu nada novo, não
+ * há o que triar: o job termina sem erro.
+ */
+export async function retomarTriagem(b: BaseExtensao, j: { escritorio_id: string; conversa_id: string }) {
+  const ctx = await comEscritorio(b.sql, j.escritorio_id, async (tx) => {
+    const [c] = await tx`select setor_id, responsavel_id, etiquetas from conversa where id = ${j.conversa_id}`
+    if (!c || c.responsavel_id || (c.etiquetas as string[]).includes('triada')) return null
+    const integrante = await integranteDoSetor(tx, 'gestao_atendimento')
+    return integrante ? contextoDeIntegrante(tx, j.escritorio_id, integrante, 'job') : null
+  })
+  if (!ctx) return
+  try {
+    await b.motor.iniciar(ctx, 'GES-TRIAR-REPASSAR', { conversa_id: j.conversa_id }, { chave_idempotencia: `retomar:${j.conversa_id}:${new Date().toISOString().slice(0, 13)}` })
+  } catch (e) {
+    if (!(e instanceof ErroHeild)) throw e
+  }
 }

@@ -30,6 +30,11 @@ export interface InfoExecucao {
 export interface Facilidades {
   tx: Tx
   ctx: ContextoExec
+  /**
+   * Enfileira um job no pg-boss na MESMA transação do passo (some junto se o passo desfizer, como na
+   * sombra). Para retomar trabalho mais tarde (ex.: a triagem que espera o expediente abrir).
+   */
+  enfileirar?: (fila: string, dados: object, opcoes?: { depois?: Date; singleton?: string }) => Promise<unknown>
 }
 
 /** Cartão visual gerado pelo sistema (AGENTICO 8 e 13): o modelo nunca escreve tabela nem número. */

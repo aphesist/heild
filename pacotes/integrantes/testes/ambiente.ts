@@ -126,6 +126,24 @@ export const RESPOSTAS_SIMULADAS: Record<string, (e: any) => unknown> = {
       return { faq_id: primeira?.id ?? 'nenhuma', confianca: 0.95, motivo: 'Mesma pergunta.' }
   },
   'revisor.ato_irreversivel': () => ({ decisao: 'aprova', motivo: 'Decisão coerente com as evidências.' }),
+  'ges.triagem.conversar': (e: { conversa: unknown; saudacao: string; escritorio_ja_falou: boolean }) => {
+    const msgs = ((e.conversa as { conteudo?: { de: string; texto: string }[] })?.conteudo ?? []) as { de: string; texto: string }[]
+    const doCliente = msgs.filter((m) => m.de === 'cliente').map((m) => normal(m.texto))
+    const tudo = doCliente.join(' ')
+    const ultima = doCliente.at(-1) ?? ''
+    const pessoal: Record<string, string> = { contabil: 'pessoal da contabilidade', fiscal: 'pessoal do fiscal', dp: 'pessoal do DP', societario: 'pessoal do societário', gestao_atendimento: 'pessoal do atendimento' }
+    if (/teste de estilo/.test(tudo)) return { acao: 'perguntar', setor: null, confianca: 0.3, motivo_pessoa: null, mensagem: 'Escolha uma opção: 1. Fiscal 2. DP' }
+    if (/absurdo|terceira vez|ninguem responde/.test(tudo)) return { acao: 'pessoa', setor: null, confianca: 0.9, motivo_pessoa: 'irritado', mensagem: 'Poxa, desculpa pela demora. Vou chamar alguém da equipe para falar com você agora.' }
+    if (/faleceu|falecimento/.test(tudo)) return { acao: 'pessoa', setor: null, confianca: 0.9, motivo_pessoa: 'delicado', mensagem: 'Sinto muito. Vou chamar alguém da equipe para conversar com você com calma.' }
+    if (/atendente|falar com (uma pessoa|alguem)/.test(tudo)) return { acao: 'pessoa', setor: null, confianca: 0.9, motivo_pessoa: 'pediu_pessoa', mensagem: 'Claro! Vou chamar alguém da equipe para falar com você.' }
+    const achados: [RegExp, string][] = [[/tributo|imposto|nota|receita|guia/, 'fiscal'], [/funcionari|desligar|empregado|ferias/, 'dp'], [/endereco|dono|socio/, 'societario'], [/balanco|lucro|resultado/, 'contabil'], [/mensalidade|sabado/, 'gestao_atendimento']]
+    const setoresDe = (t: string) => [...new Set(achados.filter(([r]) => r.test(t)).map(([, x]) => x))]
+    const naUltima = setoresDe(ultima)
+    const setores = naUltima.length ? naUltima : setoresDe(tudo)
+    if (setores.length === 1) return { acao: 'repassar', setor: setores[0], confianca: 0.9, motivo_pessoa: null, mensagem: `Entendi! Vou passar para o ${pessoal[setores[0]!]}, que cuida disso.` }
+    if (setores.length > 1) return { acao: 'perguntar', setor: null, confianca: 0.5, motivo_pessoa: null, mensagem: 'Entendi, são duas coisas. Qual delas você quer resolver primeiro?' }
+    return { acao: 'perguntar', setor: null, confianca: 0.3, motivo_pessoa: null, mensagem: e.escritorio_ja_falou ? 'Certo! Me conta um pouco mais do que você precisa?' : `${e.saudacao}! Tudo bem? Me conta o que você precisa.` }
+  },
   'ges.triagem.classificar': (e: { trecho: unknown }) => {
     const t = normal(conteudo(e.trecho))
     const achados: [RegExp, string][] = [[/tributo|nota para|imposto|\bdas\b|guia/, 'fiscal'], [/contrat|empregado|receber pelo sistema|folha|ferias/, 'dp'], [/cidade|endereco|dono/, 'societario'], [/resultado|lucro|registram/, 'contabil'], [/mensalidade|sabado/, 'gestao_atendimento']]

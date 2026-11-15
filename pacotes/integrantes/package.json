@@ -16,7 +16,8 @@
     "test": "vitest run",
     "banco": "HEILD_PG_BANCO=heild_b3 bash ../processos/scripts/banco.sh",
     "avaliar": "tsx scripts/avaliar.ts",
-    "worker": "tsx scripts/worker.ts"
+    "worker": "tsx scripts/worker.ts",
+    "avaliar:conversas": "tsx scripts/avaliar-conversas.ts"
   },
   "dependencies": {
     "@heild/dominio": "0.1.0",

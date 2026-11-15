@@ -411,7 +411,7 @@ export class Motor {
         switch (passo.tipo) {
           case 'deterministico': {
             const ctx = await this.contextoDaExecucao(tx, ex)
-            const saida = await passo.executar(s, { tx, ctx })
+            const saida = await passo.executar(s, { tx, ctx, enfileirar: (f, d, o) => enfileirar(this.d.boss, tx, f, d, o) })
             await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, saida)
             return
           }
@@ -445,7 +445,7 @@ export class Motor {
             const f = this.ferramenta(passo.ferramenta)
             if (ex.sombra) {
               // Sombra: o efeito roda num savepoint que é sempre desfeito; fica só o que ele teria feito.
-              const r = await desfazendo(tx, (sp) => passo.executar(s, { tx: sp, ctx }))
+              const r = await desfazendo(tx, (sp) => passo.executar(s, { tx: sp, ctx, enfileirar: (f, d, o) => enfileirar(this.d.boss, sp, f, d, o) }))
               await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, r.dados)
               return
             }
@@ -458,7 +458,7 @@ export class Motor {
             }
             else if (dec.aprovacao) throw new ErroRegra('SEM_APROVACAO', `${passo.ferramenta} precisa de cartão de aprovação.`)
             await travarEfeito(tx, ex.escritorio_id, ex.setor, ex.cliente_id, ex.procedimento_id)
-            const r = await passo.executar(s, { tx, ctx })
+            const r = await passo.executar(s, { tx, ctx, enfileirar: (f, d, o) => enfileirar(this.d.boss, tx, f, d, o) })
             const evento_id = await this.d.eventos.gravar(tx, ctx, {
               nome: passo.ferramenta, ferramenta: passo.ferramenta, nivel: f.nivel, resultado: 'ok', texto: r.texto_evento,
               cliente_id: ex.cliente_id, setor: ex.setor, execucao_id: ex.id, aprovacao_id, causado_por_evento_id: ex.causado_por_evento_id,
