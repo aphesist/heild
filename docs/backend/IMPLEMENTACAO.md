@@ -16,7 +16,7 @@ O wireframe de demonstração (branch `wireframe`, na Vercel, com dados fictíci
 2. **Só a API grava.** O papel `api_executor` escreve, sem `BYPASSRLS`. `anon` e `authenticated`, o papel do navegador pela Data API, só leem. A RLS por escritório continua como segunda barreira, e o escritório vem só do token.
 3. **Uma porta de escrita, duas formas de chamar, um executor:**
    - `POST /v1/ferramentas/{nome}`: as **ferramentas tipadas** (Zod estrito, ids, nunca nomes) para agentes e integradores;
-   - `POST /v1/operacoes`: os **métodos dos repositórios** (734 operações) para o adaptador `api` do app.
+   - `POST /v1/operacoes`: os **métodos dos repositórios** (764 operações) para o adaptador `api` do app.
 4. **Feito para o agente errar pouco:**
    - `validar_apenas` em toda escrita;
    - `Idempotency-Key` obrigatória;
@@ -29,7 +29,7 @@ O wireframe de demonstração (branch `wireframe`, na Vercel, com dados fictíci
 6. **Imutabilidade nas duas barreiras:**
    - no repositório: `exclusao: 'proibida'`, versões da mensagem interna e cartão decidido uma vez só;
    - no banco: gatilhos novos para as entidades centrais e para a decisão do cartão.
-7. **O app fala com a API sem mudar as telas** (`VITE_HEILD_BANCO=api`). O `fundacao-fumaca.cjs` passa inteiro nesse modo.
+7. **O app fala com a API sem mudar as telas** (`VITE_HEILD_BANCO=api`). O `fundacao-fumaca.cjs` passa inteiro nesse modo, e 8 dos 13 scripts das sessões também. Os outros 5 param em checagens explicadas uma a uma, sem nenhuma regra recusada a mais pelo servidor.
 8. **Contratos gerados de uma fonte só:** o OpenAPI 3.1 e o esquema das ferramentas, no formato do `tools/list` do MCP, saem do Zod do pacote de domínio. O retrato fica em `servidor/contratos/`, e um teste falha se ele estiver velho.
 9. **62 testes da API contra Postgres real:** autorização, isolamento entre escritórios, idempotência, imutabilidade, cadeia e contratos.
 10. **Padrões profissionais registrados** em [`PADROES.md`](PADROES.md), com um checklist por endpoint e serviço. No código: timeouts no HTTP e no Postgres, pool, limite de taxa por ator, cabeçalhos de segurança, id do pedido e desligamento gracioso.
@@ -179,7 +179,7 @@ Para cada escrita (`servidor/src/executor/executor.ts`):
 | Para quem | Agentes, MCP (B2), integradores, testes | O adaptador `api` do app |
 | Entrada | Zod estrito, ids, enums. `*.atualizar` só aceita campos editáveis; status muda só pela transição | `{ comando: { tipo: 'operacao', operacao: 'tarefas.mudarStatus', argumentos, ids } }` ou `{ tipo: 'linhas', gravar, remover }` |
 | Execução | Vira a chamada de um método de repositório | O método de repositório, direto |
-| Catálogo | 27 ferramentas (`GET /v1/ferramentas`, `contratos/ferramentas.json`) | 734 operações (`GET /v1/operacoes`), tiradas do objeto `repos`. Repositório novo vira operação sem código novo |
+| Catálogo | 27 ferramentas (`GET /v1/ferramentas`, `contratos/ferramentas.json`) | 764 operações (`GET /v1/operacoes`), tiradas do objeto `repos`. Repositório novo vira operação sem código novo |
 
 As ferramentas tipadas do B1:
 
@@ -251,7 +251,34 @@ A migração `20261115200000_backend_b1.sql`, por cima das do wireframe e **sem 
 
 Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), com a semente regravada no servidor antes de cada script. Cada um foi rodado também no modo `local`, como linha de base.
 
-<!-- RESULTADOS_SESSOES -->
+**Resultado final: 8 de 13 scripts passam inteiros no modo `api` (no `local`, os 13 passam).** Os 5 que não passam param em uma ou duas checagens cada. Em nenhum deles o servidor recusou uma regra que devia aceitar: são script lendo o `localStorage`, demonstração simulando evento externo na conta da tela e uma regra do catálogo que o servidor aplica e o wireframe ignorava. A primeira rodada achou defeitos de verdade, e eles foram corrigidos (lista abaixo da tabela).
+
+| Script | `local` | `api` | Por quê |
+| --- | --- | --- | --- |
+| `fundacao-fumaca.cjs` | passa | **passa** | 71 escritas pela API, todas 200 |
+| `s01-inicio` | 37 ok | **37 ok** | |
+| `s02-painel-a` | 29 ok | 28 ok, 1 falha | **Artefato do script:** ele confere o cliente novo lendo o `localStorage` (`…:cliente`). No modo `api` os dados ficam no servidor. Conferido no Postgres: o cliente foi criado em "aceito", com a primeira versão do perfil |
+| `s03-painel-b` | 53 ok | **53 ok** | |
+| `s04-painel-c` | 43 ok | **43 ok** | |
+| `s05-crm-interna` | 42 ok | **42 ok** | |
+| `s06-timesheet` | 76 ok | **76 ok** | |
+| `s07-financeiro` | 72 ok | **72 ok** | Na primeira rodada, o download do CSV não chegou em 5 s; na repetição passou (tempo, não regra) |
+| `s08-bpo` | 51 ok | 49 ok, 2 falhas | **Evento externo simulado na conta da tela:** a demonstração faz chegar uma mensagem de cliente no CRM gravando `mensagem` e `conversa` em nome da pessoa logada (a Gestora do BPO, sem o setor da conversa). O servidor recusa (`SEM_SETOR`), e está certo: no backend real, mensagem que chega entra pelo webhook do conector. A segunda falha é consequência: depois da recusa, o banco relê o escritório, e a proposta de alçada mais nova some da tela por alguns instantes (pela API, a proposta funciona) |
+| `s08a-bpo-visao` | 76 ok | **76 ok** | |
+| `s08b-operacao` | 62 ok | 39 ok, 2 falhas | **Regra do catálogo que o servidor aplica:** `bpo.relatorio_mensal` tem `exige_aprovacao: 'se_integrante'`. O integrante Gerencial pede o rascunho e recebe um cartão (202), em vez de gravar direto como no wireframe. O passo seguinte do script ("o Gestor aprova o rascunho") não acha rascunho. A retomada depois do cartão é da B2. A outra falha é de texto: o servidor grava o integrante com o rótulo oficial ("Contas a Pagar"), e a tela da demonstração espera o sufixo "(integrante)", que vinha do nome montado no navegador |
+| `s08c-aprovacoes` | 37 ok | 36 ok, 1 falha | O mesmo do s08: mensagem de cliente simulada no CRM, agora pelo integrante, recusada por `SEM_SETOR` (aparece como erro no console) |
+| `s09-arquivos-config` | 48 ok | 47 ok, 1 falha | **Aceite de convite:** a pessoa convidada (situação "convidado") aceita o convite e o app grava a ativação com a conta dela. A API não entra com conta inativa. No produto, aceitar convite é fluxo do Supabase Auth, não ferramenta de quem ainda não tem conta ativa |
+| `s10-app-cliente` | 41 ok | **41 ok** | Na primeira rodada, dois tempos de espera do script estouraram; na repetição passou inteiro, sem nenhuma recusa da API |
+
+Defeitos que a primeira rodada achou, todos corrigidos e já no branch:
+
+- **A S08b ficava fora da API.** O repositório de documentos e os objetos `filaOperacao`, `conciliacaoOperacao` e `fechamentoOperacao` estavam fora de `repos` e ligados ao banco do navegador: o servidor respondia `TABELA_SEM_REGRA`, e no servidor eles gravariam no banco errado. Agora usam `bancoAtual()` e entram no registro de operações (764) e na captura.
+- **Integrante gravado como pessoa.** O integrante sem dono no contexto (motor da demonstração) ia como a pessoa da sessão, e o efeito ficava em nome dela. Agora vai sempre como integrante.
+- **`undefined` virando `null`.** Um campo `undefined` nos argumentos chegava como `null` e apagava um campo obrigatório (`documentos.atualizar`). Agora o campo sai, como no JSON.
+- **Fila travada por login recusado.** O comando ficava na frente da fila para sempre e bloqueava os seguintes. Agora é recusa: sai da fila e o banco relê o escritório.
+- **"ok" a quem não pode.** Uma transição que não muda nada (iniciar uma tarefa já em andamento) respondia 200 sem passar por `autorizar`. Agora confere a permissão do mesmo jeito.
+
+Como repetir: com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), rode `npm run semear -w @heild/servidor` e `node scripts/<script>.cjs <pasta>` em `app/`, um script por vez. Cada script conta com o escritório recém-semeado.
 
 ### Desvios do desenho, e por quê
 
