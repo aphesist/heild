@@ -458,7 +458,8 @@ export interface NotaEmitida extends Registro {
 /* ---------- Timesheet (S06; subplano 05 e Fundações 5.4) ---------- */
 
 /** Origem da sessão (05, 2). Atendimento no CRM é `plataforma` com `conversa_id`. */
-export type OrigemSessao = 'plataforma' | 'core' | 'extensao' | 'artefato' | 'confirmacao'
+/** `manual`: lançamento feito pela pessoa (S06b), ao lado da captura automática, nunca misturado sem aviso. */
+export type OrigemSessao = 'plataforma' | 'core' | 'extensao' | 'artefato' | 'confirmacao' | 'manual'
 export type ConfiancaSessao = 'automatica' | 'estimada' | 'confirmada' | 'contestada'
 export type PacoteTimesheet = 'contabil' | 'bpo' | 'juridico'
 
@@ -508,8 +509,13 @@ export interface SessaoTrabalho extends Registro {
   anomalia?: { tipo: 'sessao_longa' | 'dia_longo' | 'sobreposta' | 'sem_evento'; texto: string; revisada_em?: DataHora | null; revisao?: 'corrigida' | 'descartada' | 'mantida' } | null
   /** Integrante: série separada, nunca soma com horas humanas (05, 7). */
   custo?: { maquina_seg: number; centavos: number; passos: number; poupadas_min: number } | null
-  /** Aberta agora pela captura (fim avança enquanto há ação). */
+  /** Aberta agora pela captura (fim avança enquanto há ação) ou cronômetro do lançamento manual rodando. */
   ao_vivo?: boolean
+  /** S06b · lançamento manual: o que foi feito, se é faturável, de qual lançamento foi duplicado e as versões anteriores (editar cria versão). */
+  descricao?: string | null
+  faturavel?: boolean | null
+  lancamento_de?: Id | null
+  versoes?: { em: DataHora; por: Id; por_nome?: string; antes: Partial<Pick<SessaoTrabalho, 'cliente_id' | 'atividade_id' | 'rotulo' | 'tarefa_id' | 'inicio' | 'fim' | 'descricao' | 'faturavel'>> }[] | null
 }
 
 /** Item da confirmação assistida (05, 5.2): pré-preenchido, em um clique, válido por 7 dias. */

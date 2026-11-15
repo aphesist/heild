@@ -1,4 +1,4 @@
-import { CaretLeftIcon, CaretRightIcon, ChatCircleIcon, GlobeIcon, PauseIcon, PlayIcon, PuzzlePieceIcon, ShieldCheckIcon, TagIcon } from '@phosphor-icons/react'
+import { CaretLeftIcon, CaretRightIcon, ChatCircleIcon, GlobeIcon, PauseIcon, PlayIcon, PuzzlePieceIcon, ShieldCheckIcon, TagIcon, TimerIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { useNavegacao } from '@/ambiente/loja'
 import { useAcao } from '@/components/kit'
@@ -14,6 +14,8 @@ import { useAparencia } from '@/hooks/useAparencia'
 import { repos, rotuloMotivoContestacao } from '@/nucleo/repositorios'
 import { cn } from '@/lib/utils'
 import { DetalheLinha } from './acoes'
+import { Cronometro, LancarTempo, SemanaManual, type ContextoLancamento } from './lancamento'
+import type { SessaoTrabalho } from '@/nucleo/modelo/entidades'
 import { Caixa, CabecalhoTs, Faixa, Numero, TimesheetVazio, usePacote } from './comum'
 import { PausarExtensao, Dominios, religarExtensao, TermoCiencia, VincularExtensao } from './configuracao'
 import { agrupar, confiancaDaLinha, doPacote, linhaDoDia, registrada, resumoDe, rotuloConfianca, rotuloOrigem, semanaDe, useTimesheet, type LinhaDia, type PapelTs } from './dados'
@@ -44,6 +46,10 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
   const [aberta, setAberta] = useState<LinhaDia | null>(null)
   const [modal, setModal] = useState<'vincular' | 'pausar' | 'dominios' | 'termo' | null>(null)
   const [filtroMes, setFiltroMes] = useState<string | null>(null)
+  // S06b: lançamento manual (novo, com o contexto) e edição (cria versão).
+  const [lancar, setLancar] = useState<ContextoLancamento | null>(null)
+  const [editando, setEditando] = useState<SessaoTrabalho | null>(null)
+  const abrir = (l: LinhaDia) => (l.tipo === 'sessao' && l.s.origem === 'manual' ? setEditando(l.s) : setAberta(l))
   const { pacote, chip } = usePacote()
   const u = ts.usuario.id
   const vinculo = ts.vinculoDe(u)
@@ -89,6 +95,9 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
               { valor: 'mes', rotulo: 'Mês' },
             ]}
           />
+          <Button size="sm" className="rounded-full" onClick={() => setLancar({ cliente_id: clienteId ?? undefined, dia: vista === 'dia' ? dia : HOJE_TS })}>
+            <TimerIcon /> Lançar tempo
+          </Button>
           <div className="flex items-center gap-1 text-sm">
             <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label="Período anterior" onClick={() => setDesvio((d) => d - 1)}>
               <CaretLeftIcon />
@@ -131,7 +140,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
             {vista === 'dia' && (
               <Caixa>
                 <Pergunta>Onde foi o meu dia?</Pergunta>
-                <LinhaDoDia linhas={visiveis} rotulo={rotuloLinha} onAbrir={setAberta} agente={agente.map((a) => ({ inicio: a.inicio, minutos: Math.round((a.custo?.maquina_seg ?? 60) / 60), cor: aparencia({ setor: a.setor_id as never }).cor, texto: a.rotulo }))} />
+                <LinhaDoDia linhas={visiveis} rotulo={rotuloLinha} onAbrir={abrir} agente={agente.map((a) => ({ inicio: a.inicio, minutos: Math.round((a.custo?.maquina_seg ?? 60) / 60), cor: aparencia({ setor: a.setor_id as never }).cor, texto: a.rotulo }))} />
                 <Legenda
                   itens={['automatica', 'confirmada', 'estimada', 'sem', 'contestada']}
                   extra={
@@ -152,7 +161,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                     const i = l.tipo === 'item' ? l.i : undefined
                     return (
                       <li key={l.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-2.5" data-linha={l.tipo}>
-                        <button type="button" onClick={() => setAberta(l)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left">
+                        <button type="button" onClick={() => abrir(l)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left">
                           <Amostra c={c} />
                           <span className="w-24 shrink-0 text-xs tabular-nums sm:text-sm">
                             {hm(l.inicio)}–{hm(l.fim)}
@@ -168,6 +177,11 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                               {s?.contestacao && ` · contestada (${s.contestacao.status === 'pendente' ? 'aguardando o Gestor' : s.contestacao.status})`}
                             </span>
                           </span>
+                          {s?.origem === 'manual' && (
+                            <Badge variant="outline" className="shrink-0">
+                              {s.ao_vivo ? 'cronômetro' : 'manual'}
+                            </Badge>
+                          )}
                           {s && ts.ehExtra(s) && (
                             <Badge variant="outline" className="shrink-0">
                               <TagIcon /> extra
@@ -225,6 +239,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                 <p className="text-muted-foreground text-xs">Clique num dia para ver a linha do dia.</p>
               </Caixa>
             )}
+            {vista === 'semana' && <SemanaManual dias={semana.map((x) => x.d)} onLancar={setLancar} onAbrir={setEditando} />}
 
             {vista === 'mes' && (
               <>
@@ -289,6 +304,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
           </div>
 
           <div className="flex min-w-0 flex-col gap-4">
+            <Cronometro clienteId={clienteId} onLancar={() => setLancar({ cliente_id: clienteId ?? undefined, dia: vista === 'dia' ? dia : HOJE_TS })} />
             <Caixa>
               <Pergunta acao={vinculada ? <Badge variant={pausada ? 'outline' : 'sucesso'}>{pausada ? `pausada ${pausada}` : 'ativa'}</Badge> : <Badge variant="outline">não vinculada</Badge>}>Extensão</Pergunta>
               {vinculada ? (
@@ -398,6 +414,8 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
       </div>
 
       {aberta && <DetalheLinha linha={aberta} onFechar={() => setAberta(null)} />}
+      {lancar && <LancarTempo inicial={lancar} onFechar={() => setLancar(null)} />}
+      {editando && <LancarTempo editar={ts.sessoes.find((x) => x.id === editando.id) ?? editando} onFechar={() => setEditando(null)} />}
       {modal === 'termo' && <TermoCiencia onFechar={() => setModal(null)} />}
       {modal === 'vincular' && <VincularExtensao onFechar={() => setModal(null)} />}
       {modal === 'pausar' && <PausarExtensao onFechar={() => setModal(null)} />}

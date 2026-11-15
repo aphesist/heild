@@ -302,6 +302,40 @@ export function sementeS06(base: BaseS06, add: Add, escritorio: 'andrade' | 'hor
       }
     }
 
+  // S06b: lançamentos manuais (o que foi feito por fora), no intervalo de almoço para não cruzar a captura.
+  if (andrade) {
+    const manuais: [string, string, string, string, string | null, string, boolean][] = [
+      ['u4', '2026-11-04', '12:35', '12:45', 'Clínica Sorriso Ltda', 'Ligação sobre o alvará', true],
+      ['u4', '2026-11-06', '12:40', '12:55', 'Metalúrgica Andrade Ltda', 'Ligação com a Rita sobre a filial', true],
+      ['u4', '2026-11-10', '12:30', '12:40', 'Padaria Pão Quente ME', 'Ligação: certificado vencendo', true],
+      ['u4', '2026-11-12', '12:35', '12:50', 'Transportes Rota Sul S.A.', 'Ligação sobre a procuração', true],
+      ['u4', '2026-11-16', '12:30', '12:45', 'Metalúrgica Andrade Ltda', 'Ligação: exigência da Junta', true],
+      ['u4', '2026-11-17', '12:40', '12:50', 'Clínica Sorriso Ltda', 'Ligação de retorno', true],
+      ['u1', '2026-11-13', '12:30', '12:45', 'Loja Bela Vista Eireli', 'Guia de ICMS emitida no portal da SEFAZ', true],
+      ['u1', '2026-11-17', '12:35', '12:45', null, 'Conversa com o contador do Café Central (interno)', false],
+    ]
+    manuais.forEach(([u, dia, ini, fim, cli, descricao, faturavel], i) =>
+      sessoes.push({
+        id: `sm-s06b-${i}`,
+        ator_tipo: 'pessoa',
+        ator_id: u,
+        usuario_dono_id: u,
+        cliente_id: idCliente(cli),
+        setor_id: descricao.startsWith('Guia') ? 'fiscal' : 'gestao_atendimento',
+        atividade_id: cli ? (descricao.startsWith('Guia') ? 'FIS-010' : 'GES-033') : 'INT-REUNIAO',
+        rotulo: cli ? (descricao.startsWith('Guia') ? 'Emissão de guia no portal' : 'Ligação com cliente') : 'Reunião interna',
+        origem: 'manual',
+        inicio: dh(dia, ini),
+        fim: dh(dia, fim),
+        confianca: 'confirmada',
+        evidencias: ['lançado à mão pela pessoa'],
+        pacote: 'contabil',
+        descricao,
+        faturavel,
+        versoes: [],
+      }),
+    )
+  }
   sessoes.forEach((s) => add('sessao_trabalho', s))
   itens.forEach((i) => add('item_confirmacao', i))
 

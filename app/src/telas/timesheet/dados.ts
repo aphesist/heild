@@ -29,7 +29,7 @@ export const noDia = (dia: string) => (s: SessaoTrabalho) => diaDe(s.inicio) ===
 
 export const nomeSetor = (s?: string | null) => (s ? (rotuloSetorCurto[s as SetorIntegrante] ?? s) : '—')
 export const rotuloOrigem = (s: Pick<SessaoTrabalho, 'origem' | 'conversa_id' | 'tarefa_id'>) =>
-  s.origem === 'plataforma' ? (s.conversa_id ? 'conversa no CRM' : s.tarefa_id ? 'tarefa aberta' : 'tela do cliente') : ({ core: 'core', extensao: 'extensão', artefato: 'artefato', confirmacao: 'confirmação' } as const)[s.origem as 'core']
+  s.origem === 'plataforma' ? (s.conversa_id ? 'conversa no CRM' : s.tarefa_id ? 'tarefa aberta' : 'tela do cliente') : ({ core: 'core', extensao: 'extensão', artefato: 'artefato', confirmacao: 'confirmação', manual: 'lançamento manual' } as const)[s.origem as 'core']
 export const rotuloConfianca = { automatica: 'automática', confirmada: 'confirmada', estimada: 'estimada', contestada: 'contestada', sem: 'sem classificação' } as const
 export type ConfiancaVisual = keyof typeof rotuloConfianca
 

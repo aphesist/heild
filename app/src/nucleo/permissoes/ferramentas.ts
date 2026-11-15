@@ -111,6 +111,7 @@ export const ferramentas: Ferramenta[] = [
   f('timesheet.registrar', 'timesheet', 'executar', 'geral'),
   f('timesheet.confirmar', 'timesheet', 'executar', 'geral'),
   f('timesheet.confirmar_lote', 'timesheet', 'executar', 'geral'),
+  f('timesheet.lancar', 'timesheet', 'executar', 'geral'), // S06b: lançamento manual da própria pessoa
   f('timesheet.contestar', 'timesheet', 'executar', 'geral'),
   f('timesheet.decidir_contestacao', 'timesheet', 'executar', 'alvo', { papel_minimo: 'gestor', gestao: true }),
   f('timesheet.atribuir_artefato', 'timesheet', 'executar', 'geral', { papel_minimo: 'gestor', gestao: true }),

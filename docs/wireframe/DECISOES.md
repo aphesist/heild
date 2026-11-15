@@ -613,6 +613,18 @@ Formato de cada registro:
 - **Arquivos compartilhados:** `src/telas/modulos.ts` (reordena as quatro abas do Timesheet; mudança fora do "só acrescentar", registrada aqui).
 - **Situação:** proposta.
 
+#### 2026-11-15 · S06b · Lançamento manual de tempo, ao lado da captura automática
+
+- **Decisão:** o Timesheet passa a aceitar tempo lançado à mão (pedido do dono, 15/11), sem deixar de ter a captura automática como principal. O lançamento é uma **ação dentro de Meu tempo**, não uma aba nova: o botão "Lançar tempo" fica no cabeçalho e no cartão lateral, junto com o cronômetro, e a visão "O que lancei à mão nesta semana?" (cliente e atividade por dia) fica em Semana. Assim a ordem das abas decidida (Meu tempo · Confirmações · Equipe · Rentabilidade) continua igual. Campos do lançamento: cliente, tarefa ou atividade, data, início e fim ou duração, descrição e faturável. Ações: duplicar para outro dia, repetir os lançamentos do dia útil anterior, cronômetro (iniciar e parar). O cliente vem preenchido nesta ordem: o da tela de origem (seletor do topo ou o evento `heild:ts-lancar` com `{ cliente_id?, tarefa_id?, atividade_id?, dia? }`, que abre o lançamento de qualquer tela), o da tarefa aberta e, por último, o da última sessão do dia.
+- **Regras:** o lançamento é uma `sessao_trabalho` com `origem = 'manual'` e `confianca = 'confirmada'`, marcada como "manual" nas listas, no CSV e na Equipe. Se o intervalo cruza uma sessão já capturada, a pessoa precisa escolher entre "manter as duas" (as duas ficam e o lançamento leva a marca) e "o meu substitui a capturada" (a capturada fica com `substituida_por`). Editar guarda a versão anterior em `versoes`, e descartar marca o lançamento como substituído (nada se apaga). Só a própria pessoa lança, edita e para o cronômetro: o Gestor vê a proporção manual × automático na aba Equipe ("Quanto foi lançado à mão?").
+- **Tempo padrão do que é feito por fora:** fica em Configurações do Timesheet (Administrador), guardado em `escritorio.configuracao.timesheet.tempos_padrao` (nome, atividade, minutos). Vem com seis itens: ligação com cliente (10 min), emissão de guia no portal (15), e-mail ao cliente (5), conferência de documento (10), reunião com cliente (30) e certidão no portal (10). Escolher um deles no lançamento preenche a duração, que a pessoa pode alterar.
+- **Por quê:** pedido do Enzo repassado pela Coordenação. Ele muda a premissa "ninguém precisa mais apontar" do 05: o termo de ciência foi reescrito ("o registro automático faz quase tudo; o que foi feito fora do sistema você pode lançar à mão") e ganhou a linha "o que você lançar à mão, marcado como lançamento manual".
+- **Telas e ações:** S06-T01 (Lançar tempo, cronômetro, semana manual), S06-T03 (proporção manual), S06-T05 (tempo padrão), S06-A42 (CSV com fonte, descrição e faturável).
+- **Impacto no plano:** 05, 1.3 e 8.2. O lançamento manual vira uma sexta fonte (`manual`), opcional, e o termo de ciência (10.1) passa a citá-lo. 05, 1.4 ("apontamento manual livre não existe em tela alguma") fica revisto por este registro.
+- **Arquivos compartilhados:** `entidades.ts` (origem `manual` e os campos `descricao`, `faturavel`, `lancamento_de`, `versoes` na sessão, só acrescentando), `ferramentas.ts` (`timesheet.lancar`). Esquema em `app/supabase/migrations/20261115180000_s06b_lancamento_manual.sql`.
+- **Pedido a S09:** o modelo de texto "apresentação do Timesheet" em `TemaTela.tsx` ainda diz "ninguém precisa mais apontar horas". Sugestão: "A captura automática faz quase tudo; o que for feito fora do sistema, vocês lançam à mão com o tempo padrão do escritório."
+- **Situação:** proposta.
+
 ### S07 · Financeiro do escritório
 
 #### 2026-11-14 · S07 · Financeiro sobre as entidades do 09, com migração nova
