@@ -1,5 +1,7 @@
 import { ArrowsOutCardinalIcon, MinusIcon } from '@phosphor-icons/react'
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetCorpo, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { dimensoes, type DefWidget, type TamanhoWidget } from './tipos'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
@@ -35,9 +37,42 @@ interface Props {
  * A caixa de todo widget: mesma superfície, raio, respiro e cabeçalho.
  * No modo edição treme levemente, ganha o botão de esconder e a escolha de tamanho.
  */
+/**
+ * Contrato de transbordo (PADRAO_DE_INTERFACE.md, 3): passou do teto, o corpo rola
+ * com o esmaecido e o rodapé oferece "Ver tudo (N)", que abre o conteúdo inteiro
+ * numa gaveta. N é o tamanho da maior lista do corpo (itens de lista, linhas de tabela).
+ */
+function useTransbordo(corpo: React.RefObject<HTMLDivElement | null>, ativo: boolean) {
+  const [estado, setEstado] = useState<{ transborda: boolean; n: number }>({ transborda: false, n: 0 })
+  useEffect(() => {
+    const el = corpo.current
+    if (!el || !ativo) return
+    const medir = () => {
+      const transborda = el.scrollHeight > el.clientHeight + 4
+      let n = 0
+      for (const lista of el.querySelectorAll('ul, ol, tbody, [role="table"]')) n = Math.max(n, [...lista.children].filter((f) => !f.hasAttribute('data-cabecalho') && !f.hasAttribute('data-estado-vazio')).length)
+      setEstado((e) => (e.transborda === transborda && e.n === n ? e : { transborda, n }))
+    }
+    medir()
+    const ro = new ResizeObserver(medir)
+    ro.observe(el)
+    if (el.firstElementChild) ro.observe(el.firstElementChild)
+    const mo = new MutationObserver(medir)
+    mo.observe(el, { childList: true, subtree: true })
+    return () => {
+      ro.disconnect()
+      mo.disconnect()
+    }
+  }, [corpo, ativo])
+  return estado
+}
+
 export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover, onTamanho, className, alca }: Props) {
   const Icone = def.icone
   const usado = conteudo ?? tamanho
+  const corpo = useRef<HTMLDivElement>(null)
+  const { transborda, n } = useTransbordo(corpo, !editando)
+  const [tudo, setTudo] = useState(false)
   return (
     <ContextoTamanho.Provider value={usado}>
       <article
@@ -71,7 +106,27 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
           {!editando && def.acao && <div className="ml-auto flex shrink-0 items-center">{def.acao}</div>}
           {editando && <ArrowsOutCardinalIcon className="text-muted-foreground ml-auto size-4" aria-hidden />}
         </header>
-        <AreaRolagem data-corpo-widget className={cn('@container flex-1', editando && 'pointer-events-none')}>{def.conteudo(usado)}</AreaRolagem>
+        <AreaRolagem ref={corpo} data-corpo-widget className={cn('@container flex-1', editando && 'pointer-events-none')}>{def.conteudo(usado)}</AreaRolagem>
+        {transborda && !editando && (
+          <footer className="-mt-1 flex shrink-0 justify-end">
+            <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setTudo(true)}>
+              Ver tudo{n > 1 ? ` (${n.toLocaleString('pt-BR')})` : ''}
+            </Button>
+          </footer>
+        )}
+        {tudo && (
+          <Sheet open onOpenChange={(v) => !v && setTudo(false)}>
+            <SheetContent className="gap-0 sm:max-w-2xl">
+              <SheetHeader>
+                <SheetTitle>{def.titulo}</SheetTitle>
+                {def.descricao && <SheetDescription>{def.descricao}</SheetDescription>}
+              </SheetHeader>
+              <SheetCorpo className="@container">
+                <ContextoTamanho.Provider value="XL">{def.conteudo('XL')}</ContextoTamanho.Provider>
+              </SheetCorpo>
+            </SheetContent>
+          </Sheet>
+        )}
 
         {editando && (
           <>
