@@ -371,7 +371,7 @@ async function frenteWidgets(navegador) {
         const q = new URLSearchParams({ isolado: '1', variante: c.w.chave, tamanho: c.tamanho, cenario, estado: c.estado, tema, modo, densidade: c.densidade })
         erros.length = 0
         await p.evaluate((h) => (window.location.hash = h), `#/lab/ui/widget?${q}`)
-        await p.waitForSelector(`[data-lab-widget="${c.w.chave}"] article`, { timeout: 15000 }).catch(() => {})
+        await p.waitForSelector(`[data-lab-widget="${c.w.chave}"] article, [data-qa-raiz] [data-estado-vazio]`, { timeout: 15000 }).catch(() => {})
         await espera(p, 700)
         let achados
         try {

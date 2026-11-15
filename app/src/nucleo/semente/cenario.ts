@@ -129,7 +129,9 @@ const dominio = (() => {
 /** Chaves que identificam ou classificam: nunca mudam de texto nem de valor. */
 const CHAVE_FIXA = /^(id|.*_id|ids|chave|codigo|atividade_id|escritorio_id|criado_em|atualizado_em|arquivado_em|ordem|tipo|setor|setor_id|papel|modo|cor|cor_olhos|icone|rota|aba|href|url|link|destino|origem|tom|variante|nivel|versao|ano|mes|dia|semana|hora|competencia|cnpj|cpf|email.*|telefone|whatsapp|uf|regime|status|situacao|estado|etapa|prioridade|fase|canal|formato|extensao|mime|hash.*|token|senha|segundo_fator|ferramenta|nome_tabela|tabela|campo|chave_.*)$/i
 const PERCENTUAL = /(pct|percent|aliquota|taxa|margem|cobertura|uso|progresso|confianca|indice)/i
-const CHAVE_ESTADO = /^(status|situacao|estado|etapa|prioridade|tipo|tom|nivel|canal)$/i
+const CHAVE_ESTADO = /^(status|situacao|estado|etapa|prioridade)$/i
+/** Campos do banco que se misturam (todos os valores do domínio); regime, tipo e papel definem o que a tela mostra e ficam. */
+const MISTURA = CHAVE_ESTADO
 const TEXTO_LONGO = ' com a folha, o faturamento declarado, as notas de entrada e saída e os extratos dos três bancos da competência'
 const SEM_ESPACO = '_conferiraguiadodasdeoutubrocomafolhaeofaturamento12345678000190'
 
@@ -179,10 +181,14 @@ function clonar<T>(item: T, k: number): T {
 /** Uma lista de registros ou de rótulos (não uma série de números, nem a lista curta de siglas). */
 const ehLista = (v: unknown[]) => v.length > 0 && (v.every((x) => x && typeof x === 'object' && !Array.isArray(x)) || (v.every((x) => typeof x === 'string') && v.some((x) => (x as string).length > 4)))
 
-function transformar<T>(v: T, c: Cenario, chave: string, i = 0): T {
+/**
+ * `nivel` é a profundidade do valor: só as listas de primeiro nível (a coleção, ou uma propriedade dela)
+ * mudam de tamanho; as de dentro de cada item ficam como estão (senão 200 × 200 × 200).
+ */
+function transformar<T>(v: T, c: Cenario, chave: string, i = 0, nivel = 0): T {
   if (Array.isArray(v)) {
     let lista: unknown[] = v
-    if (c.itens !== undefined && ehLista(v)) lista = redimensionar(v, c.itens)
+    if (c.itens !== undefined && nivel <= 1 && ehLista(v)) lista = redimensionar(v, c.itens)
     // Status e tipos misturados: os valores que a própria lista já tem, em rodízio.
     const objetos = lista.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x))
     const estados = new Map<string, unknown[]>()
@@ -193,12 +199,12 @@ function transformar<T>(v: T, c: Cenario, chave: string, i = 0): T {
         item = { ...(item as Record<string, unknown>) }
         for (const [k, vals] of estados) if (vals.length > 1 && k in (item as object)) (item as Record<string, unknown>)[k] = vals[idx % vals.length]
       }
-      return transformar(item, c, chave, idx)
+      return transformar(item, c, chave, idx, nivel + 2)
     }) as T
   }
   if (v && typeof v === 'object') {
     const out: Record<string, unknown> = {}
-    for (const [k, val] of Object.entries(v as Record<string, unknown>)) out[k] = CHAVE_FIXA.test(k) && typeof val !== 'object' ? val : transformar(val, c, k, i)
+    for (const [k, val] of Object.entries(v as Record<string, unknown>)) out[k] = CHAVE_FIXA.test(k) && typeof val !== 'object' ? val : transformar(val, c, k, i, nivel + 1)
     return out as T
   }
   if (typeof v === 'string') {
@@ -243,9 +249,9 @@ export function fotografiaDoCenario(base: Fotografia, c: Cenario, escritorioId: 
     novas = novas.map((l, i) => {
       let r: Record<string, unknown> = { ...l }
       // Todos os valores do domínio, misturados.
-      for (const [campo, valores] of dom.valores) if (campo in r && c.itens !== undefined && c.itens > 1 && !ESTRUTURA.has(tabela)) r[campo] = valores[i % valores.length]
+      for (const [campo, valores] of dom.valores) if (MISTURA.test(campo) && campo in r && c.itens !== undefined && c.itens > 1 && !ESTRUTURA.has(tabela) && tabela !== 'cliente') r[campo] = valores[i % valores.length]
       if (c.opcionais === 'ausentes') for (const campo of dom.opcionais) if (campo !== 'extras' && campo !== 'arquivado_em' && campo !== 'ordem') delete r[campo]
-      r = tabela === 'registro_tela' ? { ...r, valor: transformar(r.valor, c, 'valor') } : transformar(r, c, '', i)
+      r = tabela === 'registro_tela' ? { ...r, valor: transformar(r.valor, c, 'valor') } : transformar(r, c, '', i, 2)
       return r
     })
     ;(foto as Record<string, unknown>)[tabela] = novas
