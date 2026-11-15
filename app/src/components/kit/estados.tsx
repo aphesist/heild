@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 
 export function EstadoVazio({ icone: Icone, titulo, descricao, acao, className, compacto }: { icone?: Icon; titulo: string; descricao?: ReactNode; acao?: ReactNode; className?: string; compacto?: boolean }) {
   return (
-    <div role="status" className={cn('flex flex-col items-center justify-center gap-2 text-center', compacto ? 'px-4 py-6' : 'px-6 py-12', className)}>
+    <div role="status" data-estado-vazio className={cn('flex flex-col items-center justify-center gap-2 text-center', compacto ? 'px-4 py-6' : 'px-6 py-12', className)}>
       {Icone && (
         <span className="bg-sunken text-muted-foreground flex size-11 items-center justify-center rounded-full">
           <Icone className="size-5" weight="duotone" />

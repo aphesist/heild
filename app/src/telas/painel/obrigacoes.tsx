@@ -1021,7 +1021,7 @@ function AcoesCarteira() {
   const faltando = itens.filter((i) => aberta(i) && i.falta)
   if (!escolheTodos || !faltando.length) return <BotaoGerar />
   return (
-    <span className="flex items-center gap-1">
+    <span className="flex flex-wrap items-center justify-end gap-1">
       <BotaoGerar />
       <Button
         size="sm"

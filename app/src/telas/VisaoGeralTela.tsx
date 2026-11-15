@@ -153,13 +153,13 @@ export function VisaoGeralTela({ dados, contexto, onAbrirIntegrante }: { dados: 
   })
   const hoje = new Date(`${HOJE_DEMO}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
   return (
-    <div className="area-rolagem h-full overflow-y-auto px-3 pb-8 sm:px-5">
+    <div className="area-rolagem h-full overflow-y-auto px-4 pb-8 sm:px-5 md:pb-24">
       <GradeWidgets
         key={`${usuario.id}:${clienteId ? 'cliente' : 'carteira'}`}
         chave={`visao-geral:${usuario.id}:${clienteId ? 'cliente' : 'carteira'}`}
         catalogo={catalogo}
         padrao={padraoDoPapel(usuario.papel)}
-        className="mx-auto max-w-6xl pt-1 ultra:max-w-[1600px]"
+        className="pagina pt-1"
         titulo={
           <div>
             <h1 className="text-2xl font-light tracking-tight sm:text-3xl">Hoje</h1>

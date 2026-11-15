@@ -19,6 +19,8 @@ export function cabe(tamanho: TamanhoWidget, { colunas = 1, linhas = 1 }: { colu
 interface Props {
   def: DefWidget
   tamanho: TamanhoWidget
+  /** Tamanho que o conteúdo usa quando a grade fez o widget crescer (padrão: o escolhido). */
+  conteudo?: TamanhoWidget
   editando?: boolean
   arrastando?: boolean
   onRemover?: () => void
@@ -32,10 +34,11 @@ interface Props {
  * A caixa de todo widget: mesma superfície, raio, respiro e cabeçalho.
  * No modo edição treme levemente, ganha o botão de esconder e a escolha de tamanho.
  */
-export function Widget({ def, tamanho, editando, arrastando, onRemover, onTamanho, className, alca }: Props) {
+export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover, onTamanho, className, alca }: Props) {
   const Icone = def.icone
+  const usado = conteudo ?? tamanho
   return (
-    <ContextoTamanho.Provider value={tamanho}>
+    <ContextoTamanho.Provider value={usado}>
       <article
         aria-label={def.titulo}
         className={cn(
@@ -46,16 +49,19 @@ export function Widget({ def, tamanho, editando, arrastando, onRemover, onTamanh
         )}
         {...(editando ? alca : {})}
       >
-        <header className="flex h-6 shrink-0 items-center gap-2">
+        {/* A ação do cabeçalho desce para a linha de baixo quando não cabe ao lado do título (celular). */}
+        <header className="flex min-h-6 shrink-0 flex-wrap items-center gap-x-2 gap-y-1">
           {Icone && <Icone weight="duotone" className="text-muted-foreground size-[18px] shrink-0" />}
-          <h3 className="min-w-0 truncate text-sm font-medium">{def.titulo}</h3>
+          <h3 className="min-w-0 truncate text-sm font-medium" title={def.titulo}>
+            {def.titulo}
+          </h3>
           <span className="min-w-0 flex-1 truncate">
-            {def.atividades && tamanho !== 'P' && !editando && <code className="text-muted-foreground hidden text-[11px] sm:inline">{def.atividades}</code>}
+            {def.atividades && usado !== 'P' && !editando && <code className="text-muted-foreground hidden text-[11px] sm:inline">{def.atividades}</code>}
           </span>
           {!editando && def.acao}
           {editando && <ArrowsOutCardinalIcon className="text-muted-foreground size-4" aria-hidden />}
         </header>
-        <div className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-auto', editando && 'pointer-events-none')}>{def.conteudo(tamanho)}</div>
+        <div className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-x-hidden overflow-y-auto', editando && 'pointer-events-none')}>{def.conteudo(usado)}</div>
 
         {editando && (
           <>
@@ -99,5 +105,5 @@ export function Widget({ def, tamanho, editando, arrastando, onRemover, onTamanh
 
 /** Estado vazio padrão de conteúdo de widget. */
 export function VazioWidget({ children }: { children: ReactNode }) {
-  return <p className="text-muted-foreground flex h-full items-center justify-center px-2 text-center text-sm">{children}</p>
+  return <p data-estado-vazio className="text-muted-foreground flex h-full items-center justify-center px-2 text-center text-sm">{children}</p>
 }

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 /** Tabela compacta dos widgets do Painel: rola de lado dentro da caixa quando não cabe. */
 export function Tabela({ colunas, minimo = 480, children }: { colunas: { rotulo: string; direita?: boolean; centro?: boolean }[]; minimo?: number; children: ReactNode }) {
   return (
-    <div className="-mx-1 h-full overflow-x-auto px-1">
+    <div data-rolagem-horizontal className="h-full overflow-x-auto">
       <table className="w-full text-sm" style={{ minWidth: minimo }}>
         <thead className="bg-surface sticky top-0">
           <tr className="text-muted-foreground text-left text-xs">

@@ -1,6 +1,7 @@
 // S10 · App do cliente: as ações principais de ponta a ponta (entrada, convite, pendências com devolução,
 // documentos, pedidos C2-02 e C2-14, conversa, assinatura, financeiro, empresa, avisos, aprovação no escritório).
-// Uso: app servido em http://localhost:6100/ (npx vite --port 6100) e `node scripts/s10-app-cliente.cjs <pasta-das-capturas>`.
+// Uso: app servido em http://localhost:6100/ (npx vite --port 6100) e `node scripts/s10-app-cliente.cjs <pasta-das-capturas>`;
+// URL_APP=http://localhost:6200/ muda o endereço, como nos outros testes.
 const { chromium } = require('playwright');
 (async () => {
   const out = process.argv[2] || '/tmp'; const b = await chromium.launch(); const errs = []; let falhas = 0;
@@ -14,7 +15,7 @@ const { chromium } = require('playwright');
   const lab = async () => { await p.getByRole('button', { name: /Demonstração/ }).click(); await espera(300); };
   const dlg = () => p.getByRole('dialog');
 
-  await p.goto('http://localhost:6100/#/app'); await espera(1200);
+  await p.goto((process.env.URL_APP || 'http://localhost:6100/') + '#/app'); await espera(1200);
 
   // S10-T01: entrada por código, código errado, contato fora da ficha
   await p.getByLabel('WhatsApp ou e-mail').fill('+55 11 90000-0000'); await espera(200);

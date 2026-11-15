@@ -57,7 +57,8 @@ export function widgetsContabil(ctx: CtxAba): WidgetsAba {
     return {
       catalogo: [
         widgetObrigacoesDoSetor('contabil', ctx),
-        w('kanban', 'Kanban do fechamento', 'CTB-026; D-21, D-22', 'Pendente, em andamento, conferência e concluído; arrastar e filtrar por fase', KanbanIcon, ['XL'], () => <KanbanCarteira />),
+        // Área de trabalho: largura inteira e três células de altura (PADRAO_DE_INTERFACE.md, 3).
+        { ...w('kanban', 'Kanban do fechamento', 'CTB-026; D-21, D-22', 'Pendente, em andamento, conferência e concluído; arrastar e filtrar por fase', KanbanIcon, ['XL'], () => <KanbanCarteira />), larguraTotal: true, linhasMinimas: 3 },
         w('minha-fila', 'Minha fila', 'D-22', 'Meus clientes, do mais atrasado ao menos', ListNumbersIcon, ['M', 'G'], (t) => <MinhaFila tamanho={t} />),
         w('carteira-fechamento', `Etapas por analista · ${COMPETENCIA}`, 'CTB-026', 'Clientes por etapa do fechamento e analista', FlagCheckeredIcon, ['G', 'XL'], () => <EtapasCarteira />),
         w('fila-assinatura', 'Fila de assinatura do contador', 'D-16', 'Tudo o que espera a assinatura do contador, de todos os clientes', PenNibIcon, ['M', 'G'], () => <FilaCarteira />),
@@ -1262,8 +1263,8 @@ function KanbanCarteira() {
             loja.registrar(usuario.nome, `Moveu ${l?.c.nome} no Kanban do fechamento para ${colunasKanban.find((c) => c.id === coluna)?.titulo} (D-22)`)
           }}
           render={(l) => (
-            <div className="bg-raised shadow-contorno flex flex-col gap-1 rounded-[14px] px-3 py-2 text-sm">
-              <span className="truncate font-medium">{l.c.nome}</span>
+            <div className="flex min-w-0 flex-col gap-1 px-1 py-0.5 text-sm">
+              <span className="truncate font-medium" title={l.c.nome}>{l.c.nome}</span>
               <span className="text-muted-foreground text-xs">
                 {l.p.analista} · {etapasFechamento[ordemEtapa(l.etapa)].rotulo}
                 {l.d.atrasoDias ? ` · ${l.d.atrasoDias} dias de atraso` : ''}

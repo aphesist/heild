@@ -43,7 +43,7 @@ export function LeadsTela({ leads: iniciais, onAbrirConversa }: { leads: Lead[];
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 px-3 pb-3 sm:px-5 sm:pb-4">
+    <div className="flex h-full flex-col gap-3 px-4 pb-3 sm:px-5 sm:pb-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="bg-sunken flex rounded-full p-0.5 text-xs">
           {(['quadro', 'lista', 'metricas'] as const).map((v) => (
@@ -61,7 +61,7 @@ export function LeadsTela({ leads: iniciais, onAbrirConversa }: { leads: Lead[];
       {vista === 'quadro' ? (
         <DndContext sensors={sensores} onDragStart={(e) => setArrastando(String(e.active.id))} onDragEnd={aoSoltar} onDragCancel={() => setArrastando(null)}>
           {/* O quadro é um painel de superfície (como a caixa de Conversas); as etapas são faixas divididas por linhas e os cartões ficam na camada elevada. */}
-          <div className="bg-surface shadow-painel divide-border/70 flex min-h-0 flex-1 divide-x overflow-x-auto rounded-[24px] sm:rounded-[34px]">
+          <div className="bg-surface shadow-painel divide-border/70 flex min-h-0 flex-1 snap-x snap-mandatory divide-x overflow-x-auto rounded-[24px] sm:snap-proximity sm:rounded-[34px]">
             {etapasLead.map((et) => (
               <Coluna key={et.id} id={et.id} rotulo={et.rotulo} itens={visiveis.filter((l) => l.etapa === et.id)} onAbrir={setAbertoId} arrastando={arrastando} />
             ))}
@@ -104,7 +104,7 @@ export function LeadsTela({ leads: iniciais, onAbrirConversa }: { leads: Lead[];
 function Coluna({ id, rotulo, itens, onAbrir, arrastando }: { id: EtapaLead; rotulo: string; itens: Lead[]; onAbrir: (id: string) => void; arrastando: string | null }) {
   const { setNodeRef, isOver } = useDroppable({ id })
   return (
-    <section ref={setNodeRef} aria-label={rotulo} className={cn('flex w-64 shrink-0 flex-col transition-colors lg:w-auto lg:min-w-52 lg:flex-1', isOver && 'bg-sunken/70', id === 'perdido' && 'bg-sunken/30')}>
+    <section ref={setNodeRef} aria-label={rotulo} className={cn('flex w-[85%] max-w-80 shrink-0 snap-start flex-col transition-colors sm:w-64 lg:w-auto lg:max-w-none lg:min-w-60 lg:flex-1', isOver && 'bg-sunken/70', id === 'perdido' && 'bg-sunken/30')}>
       <header className="flex items-center gap-2 px-4 pt-4 pb-3">
         <h3 className="text-sm font-medium">{rotulo}</h3>
         <span className="bg-sunken text-muted-foreground rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums">{itens.length}</span>

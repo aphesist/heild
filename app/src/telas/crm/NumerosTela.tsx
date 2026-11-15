@@ -48,8 +48,8 @@ export function NumerosTela() {
   const comNumero = canais.filter((c) => c.numero)
 
   return (
-    <AreaRolagem className="h-full px-3 pb-8 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-5 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-8 sm:px-5 md:pb-24">
+      <div className="pagina flex flex-col gap-5 pt-1">
         <header className="flex flex-wrap items-end gap-2">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-light tracking-tight sm:text-3xl">Configuração dos números</h1>

@@ -129,7 +129,12 @@ export function useConectorParado(id: IdConector) {
 
 /** Bloco vazio de um widget, com o porquê. */
 export function Vazio({ children }: { children: ReactNode }) {
-  return <p className="text-muted-foreground py-2 text-sm">{children}</p>
+  // Estado vazio (PADRAO_DE_INTERFACE.md, 9): sozinho no widget, fica no centro em vez de deixar o card vazio embaixo.
+  return (
+    <p data-estado-vazio className="text-muted-foreground flex h-full min-h-10 items-center justify-center py-2 text-center text-sm">
+      {children}
+    </p>
+  )
 }
 
 /** Mini-barra de progresso com rótulo. */

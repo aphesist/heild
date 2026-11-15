@@ -87,8 +87,8 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
 
   const lista = aba === 'recentes' ? recentes : resultados
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <header className="flex flex-wrap items-end gap-2">
           <div className="min-w-0 flex-1 basis-72">
             <h1 className="text-2xl font-light tracking-tight sm:text-3xl">{aba === 'recentes' ? 'Recentes' : 'Arquivos'}</h1>

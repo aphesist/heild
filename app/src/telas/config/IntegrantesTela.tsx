@@ -50,8 +50,8 @@ export function IntegrantesTela() {
   )
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig titulo="Integrantes" sub="O time de agentes do escritório. Um integrante nunca vê nem faz mais do que a pessoa dona dele." />
 
         {perguntas.some((p) => !p.decisao) && (

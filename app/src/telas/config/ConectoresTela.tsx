@@ -85,8 +85,8 @@ export function ConectoresTela() {
   const achados = auditoria(creds).length
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig titulo="Conectores e cofre" sub="Conexões, credenciais, saúde e custo. Nesta demonstração, nada sai do navegador." acao={<SeloDemonstracao fonte="Conectores e cofre" />} />
         {carregando ? (
           <Carregando rotulo="Lendo os conectores" linhas={4} />

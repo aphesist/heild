@@ -73,8 +73,8 @@ export function ModuloBpo({ aba, clienteId, onEscolher }: { aba: string; cliente
   return (
     <div className="flex h-full flex-col">
       {temC2 && (
-        <div className="flex flex-wrap items-center gap-2 px-3 pb-2 sm:px-5">
-          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 ultra:max-w-[1600px]">
+        <div className="flex flex-wrap items-center gap-2 px-4 pb-2 sm:px-5">
+          <div className="pagina flex w-full flex-wrap items-center gap-2">
             <Segmentado
               rotulo="Frente do BPO"
               valor={frente}

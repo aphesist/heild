@@ -96,8 +96,8 @@ export function PermissoesTela() {
   const modulosFiltro: IdModulo[] = ['painel', 'crm', 'timesheet', 'financeiro', 'bpo', 'arquivos', 'config']
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig titulo="Permissões" sub="Calculado agora, pela mesma regra que decide cada ação. Para mudar, edite a pessoa em Usuários." />
         <Caixa>
           <TituloBloco descricao="Clique numa célula para ver a regra que decidiu. Os integrantes de cada pessoa nunca passam disso.">Matriz usuário × aba × nível</TituloBloco>
