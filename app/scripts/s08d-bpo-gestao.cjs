@@ -170,6 +170,9 @@ const { chromium } = require('playwright')
   ok(await visivel(amostra.getByText('na fila')), 'divergência da auditoria de qualidade vira item na fila do analista')
   await shot('entregas')
   await ir('fila')
+  // Gestão por exceção: o item da empresa em dia fica recolhido; a amostra é sorteada.
+  const recolhidos = p.getByRole('button', { name: /de empresas em dia/ })
+  if (await recolhidos.count()) await recolhidos.first().click()
   ok(await visivel(p.getByText(/Corrigir .* \(auditoria de qualidade\)/)), 'o item de correção aparece na Fila')
 
   // 2. Volume e faturamento (A30, A31)
