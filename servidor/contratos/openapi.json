@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "b5d0b83ef12aac87",
+    "version": "969219ae7ef8f6bc",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -5638,7 +5638,7 @@
     "/v1/ferramentas/cartao.criar": {
       "post": {
         "operationId": "cartao_criar",
-        "summary": "Cria cartao com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria cartao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -5742,6 +5742,19 @@
                       }
                     ]
                   },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pendente"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "expira_em": {
                     "anyOf": [
                       {
@@ -5798,6 +5811,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -6606,7 +6625,7 @@
     "/v1/ferramentas/carteira_cliente.criar": {
       "post": {
         "operationId": "carteira_cliente_criar",
-        "summary": "Cria carteira cliente com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria carteira cliente com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -6690,6 +6709,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -10138,6 +10163,12 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
                   "tipo": {
                     "type": "string",
                     "enum": [
@@ -17587,7 +17618,7 @@
     "/v1/ferramentas/conversa_interna.criar": {
       "post": {
         "operationId": "conversa_interna_criar",
-        "summary": "Cria conversa interna com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria conversa interna com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -17692,6 +17723,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -19429,7 +19466,7 @@
     "/v1/ferramentas/convite.criar": {
       "post": {
         "operationId": "convite_criar",
-        "summary": "Cria convite com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria convite com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -19540,6 +19577,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -24681,7 +24724,7 @@
     "/v1/ferramentas/excecao_tela.criar": {
       "post": {
         "operationId": "excecao_tela_criar",
-        "summary": "Cria excecao tela com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria excecao tela com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -24778,6 +24821,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -30391,7 +30440,7 @@
     "/v1/ferramentas/identidade.criar": {
       "post": {
         "operationId": "identidade_criar",
-        "summary": "Cria identidade com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria identidade com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -30479,6 +30528,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -36668,7 +36723,7 @@
     "/v1/ferramentas/notificacao.criar": {
       "post": {
         "operationId": "notificacao_criar",
-        "summary": "Cria notificacao com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria notificacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -36826,6 +36881,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -41102,7 +41163,7 @@
     "/v1/ferramentas/obrigacao.criar": {
       "post": {
         "operationId": "obrigacao_criar",
-        "summary": "Cria obrigacao com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria obrigacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "painel"
         ],
@@ -41228,6 +41289,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -44490,7 +44557,7 @@
     "/v1/ferramentas/participacao.criar": {
       "post": {
         "operationId": "participacao_criar",
-        "summary": "Cria participacao com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria participacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -44565,6 +44632,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -46271,7 +46344,7 @@
     "/v1/ferramentas/pessoa.criar": {
       "post": {
         "operationId": "pessoa_criar",
-        "summary": "Cria pessoa com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria pessoa com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -46352,6 +46425,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -48755,7 +48834,7 @@
     "/v1/ferramentas/setor.criar": {
       "post": {
         "operationId": "setor_criar",
-        "summary": "Cria setor com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria setor com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -48846,6 +48925,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -55754,6 +55839,12 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
                   "setor_id": {
                     "type": "string",
                     "enum": [
@@ -55841,15 +55932,13 @@
                     "default": "pessoa",
                     "type": "string",
                     "enum": [
-                      "pessoa",
                       "obrigacao",
+                      "pedido_cliente",
                       "integrante",
-                      "cliente",
-                      "email",
-                      "whatsapp",
-                      "evento",
-                      "jornada",
-                      "core"
+                      "pessoa",
+                      "trilha",
+                      "core",
+                      "conversa"
                     ]
                   },
                   "origem_ref": {
@@ -65104,7 +65193,7 @@
     "/v1/ferramentas/usuario.criar": {
       "post": {
         "operationId": "usuario_criar",
-        "summary": "Cria usuario com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria usuario com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -65212,6 +65301,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -67609,7 +67704,7 @@
     "/v1/ferramentas/versao_perfil.criar": {
       "post": {
         "operationId": "versao_perfil_criar",
-        "summary": "Cria versao perfil com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria versao perfil com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -67774,6 +67869,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",
@@ -69475,7 +69576,7 @@
     "/v1/ferramentas/vinculo_setor.criar": {
       "post": {
         "operationId": "vinculo_setor_criar",
-        "summary": "Cria vinculo setor com os campos de negócio (o servidor põe id, escritório e datas).",
+        "summary": "Cria vinculo setor com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
         "tags": [
           "plataforma"
         ],
@@ -69568,6 +69669,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
                   },
                   "validar_apenas": {
                     "type": "boolean",

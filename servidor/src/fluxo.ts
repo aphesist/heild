@@ -120,7 +120,12 @@ export class Fluxo {
 
   private async lerEscritorio(esc: string, e: Escritorio) {
     const { mudancas, linhas } = await noEscritorio(this.sql, { sub: 'fluxo', escritorio_id: esc }, async (tx) => {
-      const mudancas = (await tx`select versao, tabela, id from mudanca where versao > ${e.versao} or gravada_em > now() - ${ATRASO_CONFIRMACAO}::interval order by versao limit ${MAX_MUDANCAS}`).map((m) => ({ versao: Number(m.versao), tabela: String(m.tabela) as NomeTabela, id: String(m.id) }))
+      // Duas buscas por índice: o que veio depois da última versão (chave primária) e os últimos
+      // segundos (commit fora de ordem; índice por escritório e hora). O repetido sai pelos `vistos`.
+      const mudancas = (
+        await tx`(select versao, tabela, id from mudanca where versao > ${e.versao} order by versao limit ${MAX_MUDANCAS})
+          union all (select versao, tabela, id from mudanca where gravada_em > now() - ${ATRASO_CONFIRMACAO}::interval and versao <= ${e.versao})`
+      ).map((m) => ({ versao: Number(m.versao), tabela: String(m.tabela) as NomeTabela, id: String(m.id) }))
       // Exclusões (só as que a regra da tabela deixa: convite, vínculo, exceção) vêm de `remocao`.
       const apagadas = (await tx`select versao_linha, tabela, id from remocao where versao_linha > ${e.versao} or removido_em > now() - ${ATRASO_CONFIRMACAO}::interval order by versao_linha limit ${MAX_MUDANCAS}`).map((m) => ({ versao: Number(m.versao_linha), tabela: String(m.tabela) as NomeTabela, id: String(m.id), removida: true }))
       const novas = [...mudancas, ...apagadas].filter((m) => !e.vistos.has(m.versao))

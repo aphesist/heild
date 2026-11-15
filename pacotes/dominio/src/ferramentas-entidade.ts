@@ -63,6 +63,8 @@ const TIPOS_POR_TABELA: Record<string, z.ZodType> = {
   'obrigacao.periodicidade': z.enum(['mensal', 'trimestral', 'anual', 'por_evento', 'diaria']),
   'cartao_aprovacao.tipo': z.enum(['aprovacao', 'escolha_responsavel', 'nao_consegui', 'orcamento', 'memoria']),
   'cartao_aprovacao.pedido_por_tipo': z.enum(['integrante', 'usuario', 'sistema']),
+  // O cartão nasce pendente: a decisão é só por aprovacao.decidir, de uma pessoa.
+  'cartao_aprovacao.status': z.enum(['pendente']),
   'notificacao.destinatario_tipo': z.enum(['usuario', 'pessoa', 'todos']),
   'conversa_interna.tipo': z.enum(['pessoal', 'grupo', 'canal_setor', 'canal_geral']),
   // O aviso marca a área da tela (que nem sempre é um setor do catálogo); a coluna é texto livre.
@@ -93,7 +95,7 @@ function gerar(e: Entidade): FerramentaEscrita[] {
   const r: FerramentaEscrita[] = []
   const base = { versao: 1, exposta_mcp: !!e.mcp }
   if (e.criar && !e.manuais?.criar)
-    r.push({ ...base, tipo: 'escrita', nome: `${e.nome}.criar`, descricao_modelo: `Cria ${e.nome.replace(/_/g, ' ')} com os campos de negócio (o servidor põe id, escritório e datas).`, entrada: objeto(e.criar, false, e.tabela), erros: ['CAMPO_OBRIGATORIO', 'ID_EM_USO', 'RESTRICAO_DO_BANCO'], chamada: (x: Record<string, unknown>, t) => ({ operacao: `${e.repo}.criar`, argumentos: [x, t?.texto ? { texto: t.texto } : {}] }) })
+    r.push({ ...base, tipo: 'escrita', nome: `${e.nome}.criar`, descricao_modelo: `Cria ${e.nome.replace(/_/g, ' ')} com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).`, entrada: objeto(e.criar, false, e.tabela).extend({ id: Id.optional() }), erros: ['CAMPO_OBRIGATORIO', 'ID_EM_USO', 'RESTRICAO_DO_BANCO'], chamada: (x: Record<string, unknown>, t) => ({ operacao: `${e.repo}.criar`, argumentos: [x, t?.texto ? { texto: t.texto } : {}] }) })
   if (e.editaveis && !e.manuais?.atualizar)
     r.push({
       ...base,

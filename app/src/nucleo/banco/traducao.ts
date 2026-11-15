@@ -79,12 +79,19 @@ function generico(e: Entidade, metodo: string, a: Args, obter?: Obter): Traducao
       if (!nome) return null
       // Na criação, nulo e ausente são o mesmo (o banco põe o padrão): o nulo sai da entrada.
       // A hora do status e a conclusão da tarefa nova são do servidor (quem cria não escolhe).
-      const dados = Object.fromEntries(Object.entries(semServidor(objeto(a[0]))).filter(([k, v]) => v !== null && !(e.tabela === 'tarefa' && (k === 'status_desde' || k.startsWith('concluida_')))))
+      // O id escolhido pela tela (AIP-133) vai junto; o gerado pelo repositório vai no envelope.
+      const bruto = objeto(a[0])
+      const dados = Object.fromEntries(Object.entries(semServidor(bruto)).filter(([k, v]) => v !== null && !(e.tabela === 'tarefa' && (k === 'status_desde' || k.startsWith('concluida_')))))
+      if (typeof bruto.id === 'string' && bruto.id) dados.id = bruto.id
       return [{ ferramenta: nome, entrada: dados, texto: textoDe(a[1]) }]
     }
     case 'atualizar': {
-      const patch = semServidor(objeto(a[1]))
       const id = String(a[0])
+      // O que não muda não vai (as telas espalham a linha inteira no patch): só o que de fato muda
+      // passa pelo esquema, e campo de estado igual ao atual não vira recusa.
+      const atual = obter?.(e.tabela, id) as Record<string, unknown> | undefined
+      const patch = Object.fromEntries(Object.entries(semServidor(objeto(a[1]))).filter(([k, v]) => !atual || JSON.stringify(v ?? null) !== JSON.stringify(atual[k] ?? null)))
+      if (atual && !Object.keys(patch).length) return []
       // Atualizar com o campo de estado é a transição (o patch não muda estado).
       if (e.tabela === 'tarefa' && 'status' in patch) {
         const t = transicaoDeTarefa(id, String(patch.status), typeof patch.cancelada_motivo === 'string' ? patch.cancelada_motivo : undefined)

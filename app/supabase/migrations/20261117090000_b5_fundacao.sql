@@ -74,6 +74,8 @@ create table public.mudanca (
   primary key (escritorio_id, versao)
 );
 create index mudanca_limpeza on public.mudanca (gravada_em);
+-- A volta do SSE relê os últimos segundos do escritório (commits fora de ordem): índice próprio.
+create index mudanca_recentes on public.mudanca (escritorio_id, gravada_em);
 alter table public.mudanca enable row level security;
 alter table public.mudanca force row level security;
 create policy mudanca_ler on public.mudanca for select using (escritorio_id = public.escritorio_atual());
@@ -185,3 +187,14 @@ create index if not exists cartao_por_status on public.cartao_aprovacao (escrito
 create index if not exists notificacao_recentes on public.notificacao (escritorio_id, criado_em desc, id desc);
 -- A ficha de um registro (a tarefa, o lote) lê os eventos dele pelo `resultado_ref` (evento.listar).
 create index if not exists evento_por_ref on public.evento (escritorio_id, resultado_ref, seq desc) where resultado_ref is not null;
+
+-- 5. Data API fechada no banco (P5; ARQUITETURA 5) --------------------------------------
+-- O navegador fala só com a API: `anon` e `authenticated` (os papéis do PostgREST) não leem
+-- nem gravam tabela nenhuma. É a segunda barreira do botão "Data API" desligado no painel do
+-- projeto novo. A API não perde nada: `api_executor` tem os privilégios dele (B1, B2, B5).
+-- Toda migração nova que criar tabela revoga também (o teste `isolamento` confere).
+revoke all on all tables in schema public from anon, authenticated;
+revoke all on all sequences in schema public from anon, authenticated;
+revoke execute on all functions in schema public from anon;
+alter default privileges in schema public revoke all on tables from anon, authenticated;
+alter default privileges in schema public revoke all on sequences from anon, authenticated;

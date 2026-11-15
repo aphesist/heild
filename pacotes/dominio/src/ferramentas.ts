@@ -151,6 +151,8 @@ export const ferramentasTipadas: FerramentaTipada[] = [
     descricao_modelo: 'Cria uma tarefa num setor, ligada a uma atividade do catálogo e, se houver, a um cliente.',
     entrada: z
       .object({
+        // Id escolhido por quem cria (AIP-133), opcional; repetido é ID_EM_USO.
+        id: Id.optional(),
         setor_id: SetorEsquema,
         atividade_id: Texto(60),
         titulo: Texto(200),
@@ -164,7 +166,7 @@ export const ferramentasTipadas: FerramentaTipada[] = [
         responsavel_id: Id.optional(),
         quem_conclui: z.enum(['pessoa', 'agente_sozinho', 'agente_prepara_pessoa_conclui']).default('pessoa'),
         // v1, campos opcionais acrescentados na B5 (compatível): o que a tela já grava ao criar.
-        origem: z.enum(['pessoa', 'obrigacao', 'integrante', 'cliente', 'email', 'whatsapp', 'evento', 'jornada', 'core']).default('pessoa'),
+        origem: z.enum(['obrigacao', 'pedido_cliente', 'integrante', 'pessoa', 'trilha', 'core', 'conversa']).default('pessoa'),
         origem_ref: z.string().max(200).nullable().optional(),
         // Nasce aberta: concluída e cancelada só pela transição (tarefa.concluir, tarefa.cancelar).
         status: z.enum(['a_fazer', 'em_andamento', 'aguardando_cliente', 'aguardando_terceiro', 'em_revisao']).default('a_fazer'),
@@ -276,6 +278,7 @@ export const ferramentasTipadas: FerramentaTipada[] = [
     descricao_modelo: 'Cadastra um cliente. O documento (CNPJ ou CPF) é único no escritório.',
     entrada: z
       .object({
+        id: Id.optional(),
         tipo: TipoClienteEsquema,
         codigo: Texto(20),
         documento: Texto(20),

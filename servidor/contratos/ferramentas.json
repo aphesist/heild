@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "b5d0b83ef12aac87",
+  "catalogo_hash": "969219ae7ef8f6bc",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -436,7 +436,7 @@
     {
       "name": "cartao_criar",
       "nome": "cartao.criar",
-      "description": "Cria cartao com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria cartao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -512,6 +512,19 @@
               }
             ]
           },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "pendente"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "expira_em": {
             "anyOf": [
               {
@@ -568,6 +581,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -600,7 +619,7 @@
     {
       "name": "carteira_cliente_criar",
       "nome": "carteira_cliente.criar",
-      "description": "Cria carteira cliente com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria carteira cliente com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -656,6 +675,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -888,6 +913,12 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
           "tipo": {
             "type": "string",
             "enum": [
@@ -1431,7 +1462,7 @@
     {
       "name": "conversa_interna_criar",
       "nome": "conversa_interna.criar",
-      "description": "Cria conversa interna com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria conversa interna com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1508,6 +1539,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -1665,7 +1702,7 @@
     {
       "name": "convite_criar",
       "nome": "convite.criar",
-      "description": "Cria convite com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria convite com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1748,6 +1785,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -2244,7 +2287,7 @@
     {
       "name": "excecao_tela_criar",
       "nome": "excecao_tela.criar",
-      "description": "Cria excecao tela com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria excecao tela com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -2313,6 +2356,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -2625,7 +2674,7 @@
     {
       "name": "identidade_criar",
       "nome": "identidade.criar",
-      "description": "Cria identidade com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria identidade com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -2685,6 +2734,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -3068,7 +3123,7 @@
     {
       "name": "notificacao_criar",
       "nome": "notificacao.criar",
-      "description": "Cria notificacao com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria notificacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -3198,6 +3253,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -3482,7 +3543,7 @@
     {
       "name": "obrigacao_criar",
       "nome": "obrigacao.criar",
-      "description": "Cria obrigacao com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria obrigacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -3580,6 +3641,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -3805,7 +3872,7 @@
     {
       "name": "participacao_criar",
       "nome": "participacao.criar",
-      "description": "Cria participacao com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria participacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -3852,6 +3919,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -3978,7 +4051,7 @@
     {
       "name": "pessoa_criar",
       "nome": "pessoa.criar",
-      "description": "Cria pessoa com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria pessoa com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -4031,6 +4104,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -4201,7 +4280,7 @@
     {
       "name": "setor_criar",
       "nome": "setor.criar",
-      "description": "Cria setor com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria setor com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -4264,6 +4343,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -4740,6 +4825,12 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
           "setor_id": {
             "type": "string",
             "enum": [
@@ -4827,15 +4918,13 @@
             "default": "pessoa",
             "type": "string",
             "enum": [
-              "pessoa",
               "obrigacao",
+              "pedido_cliente",
               "integrante",
-              "cliente",
-              "email",
-              "whatsapp",
-              "evento",
-              "jornada",
-              "core"
+              "pessoa",
+              "trilha",
+              "core",
+              "conversa"
             ]
           },
           "origem_ref": {
@@ -5576,7 +5665,7 @@
     {
       "name": "usuario_criar",
       "nome": "usuario.criar",
-      "description": "Cria usuario com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria usuario com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -5656,6 +5745,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -5820,7 +5915,7 @@
     {
       "name": "versao_perfil_criar",
       "nome": "versao_perfil.criar",
-      "description": "Cria versao perfil com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria versao perfil com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -5957,6 +6052,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
@@ -6078,7 +6179,7 @@
     {
       "name": "vinculo_setor_criar",
       "nome": "vinculo_setor.criar",
-      "description": "Cria vinculo setor com os campos de negócio (o servidor põe id, escritório e datas).",
+      "description": "Cria vinculo setor com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -6143,6 +6244,12 @@
                 "type": "null"
               }
             ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
           }
         },
         "required": [
