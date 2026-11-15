@@ -10,11 +10,12 @@ import { temas } from '@/theme/temas'
 import { fichasComponentes, type FichaLab } from './fichas'
 import { densidades, estados, hashDe, larguras, lerParams, quantidades, rotuloDensidade, rotuloEstado, rotuloQuantidade, rotuloTexto, textos, type ParamsLab } from './parametros'
 import { fichasRegras } from './regras'
+import { fichasEdicao } from './fichas-edicao'
 import { useListaWidgets } from './widgets'
 import { lerCenario, nomeCenario, QUANTIDADES, type Cenario } from '@/nucleo/semente/cenario'
 
 /** Todas as fichas do Lab: componentes e regras. */
-export const fichas: FichaLab[] = [...fichasComponentes, ...fichasRegras]
+export const fichas: FichaLab[] = [...fichasComponentes, ...fichasEdicao, ...fichasRegras]
 
 /** O QA (scripts/ui-lab-qa.cjs) lê daqui a matriz de cada ficha: nada duplicado no script. */
 declare global {

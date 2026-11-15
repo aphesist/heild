@@ -14,14 +14,17 @@ export function SheetContent({
   children,
   lado = 'direita',
   ...props
-}: ComponentProps<typeof SheetPrimitive.Content> & { lado?: 'direita' | 'esquerda' }) {
+}: ComponentProps<typeof SheetPrimitive.Content> & { lado?: 'direita' | 'esquerda' | 'baixo' }) {
   return (
     <SheetPrimitive.Portal>
       <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30" />
       <SheetPrimitive.Content
         className={cn(
-          'bg-popover text-popover-foreground fixed inset-y-0 z-50 flex w-full flex-col gap-4 shadow-lg sm:max-w-md',
-          lado === 'direita' ? 'right-0 border-l' : 'left-0 border-r',
+          'bg-popover text-popover-foreground fixed z-50 flex w-full flex-col gap-4 shadow-lg',
+          // Folha inferior (celular): seletores e escolhas rápidas; com teto de altura e o polegar ao alcance.
+          lado === 'baixo' ? 'inset-x-0 bottom-0 max-h-[85dvh] rounded-t-xl border-t pb-[env(safe-area-inset-bottom,0px)]' : 'inset-y-0 sm:max-w-md',
+          lado === 'direita' && 'right-0 border-l',
+          lado === 'esquerda' && 'left-0 border-r',
           className,
         )}
         {...props}

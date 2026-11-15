@@ -16,3 +16,4 @@ export { Celula, LinhaColunas, ListaColunas, type ColunaLista, type LarguraColun
 export { DuasPilhas } from './duas-pilhas'
 export { ListaComTeto, ListaVirtual, TetoDeFilhos, TETO_ITENS } from './lista-com-teto'
 export { Aviso, Bloco, Busca, Deslizante, Kpi, type TomAviso } from './pecas'
+export * from './valor-editavel'

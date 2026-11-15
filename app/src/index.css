@@ -561,3 +561,95 @@
     animation: none;
   }
 }
+
+/*
+ * ValorEditavel (fase 6, proposta 7): o valor editável no lugar, com sublinhado
+ * pontilhado discreto. É um botão sem cara de botão, que quebra com o texto; no
+ * toque, a área de 44px cresce por um pseudo-elemento, sem mexer na linha.
+ */
+.valor-editavel {
+  position: relative;
+  display: inline;
+  max-width: 100%;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  overflow-wrap: anywhere;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--muted-foreground);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-color 150ms, text-decoration-color 150ms;
+}
+.valor-editavel:hover,
+.valor-editavel:focus-visible,
+.valor-editavel[aria-expanded='true'] {
+  text-decoration-color: var(--foreground);
+  background-color: color-mix(in oklab, var(--accent) 70%, transparent);
+}
+.valor-editavel:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.valor-editavel-vazio {
+  color: var(--muted-foreground);
+}
+@media (pointer: coarse) {
+  .valor-editavel::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -4px;
+    right: -4px;
+    min-width: 44px;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .valor-editavel {
+    transition: none;
+  }
+}
+
+/* Trecho do pedido que gerou uma suposição (camada espelho do campo): só o sublinhado aparece. */
+.suposto {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--muted-foreground);
+}
+
+/* Lacuna do rascunho: o espaço a preencher, com tracejado e fundo rebaixado, que é um botão. */
+.lacuna {
+  display: inline;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+  color: var(--muted-foreground);
+  font: inherit;
+  background-color: var(--sunken);
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--muted-foreground);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.lacuna:hover,
+.lacuna:focus-visible,
+.lacuna[aria-expanded='true'] {
+  color: var(--foreground);
+  text-decoration-color: var(--foreground);
+}
+.lacuna:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
