@@ -167,16 +167,20 @@ function detectar(opcoes) {
   // 2. Sobreposição entre irmãos: a caixa de cada um soma o conteúdo que vaza dele (sem os absolutos e sem o que é cortado).
   const tinta = new Map()
   const fluxo = (el) => !/(absolute|fixed)/.test(cs(el).position)
+  // Caixa de tinta: a do elemento somada à dos filhos em fluxo que não são cortados. Elemento sem caixa
+  // (display: contents, vazio) não conta o ponto (0,0) que o navegador devolve; filho invisível não conta.
   const tintaDe = (el) => {
     if (tinta.has(el)) return tinta.get(el)
     const b = el.getBoundingClientRect()
-    let r = { left: b.left, right: b.right, top: b.top, bottom: b.bottom }
+    const semCaixa = cs(el).display === 'contents' || (b.width < 1 && b.height < 1)
+    let r = semCaixa ? null : { left: b.left, right: b.right, top: b.top, bottom: b.bottom }
     if (!corta(el)) {
       for (const f of el.children) {
-        if (!fluxo(f) || decorativo(f) || cs(f).display === 'none' || cs(f).visibility === 'hidden') continue
+        const sf = cs(f)
+        if (!fluxo(f) || decorativo(f) || sf.display === 'none' || sf.visibility === 'hidden' || parseFloat(sf.opacity) < 0.05) continue
         const fb = tintaDe(f)
         if (!fb || fb.right - fb.left < 1) continue
-        r = { left: Math.min(r.left, fb.left), right: Math.max(r.right, fb.right), top: Math.min(r.top, fb.top), bottom: Math.max(r.bottom, fb.bottom) }
+        r = r ? { left: Math.min(r.left, fb.left), right: Math.max(r.right, fb.right), top: Math.min(r.top, fb.top), bottom: Math.max(r.bottom, fb.bottom) } : { ...fb }
       }
     }
     tinta.set(el, r)
@@ -191,7 +195,7 @@ function detectar(opcoes) {
     const filhos = [...pai.children].filter((f) => fluxo(f) && !decorativo(f) && cs(f).display !== 'contents' && visivel(f))
     if (filhos.length < 2) continue
     if (/-space-[xy]-/.test(cls(pai))) continue
-    const caixas = filhos.map(tintaDe)
+    const caixas = filhos.map((f) => tintaDe(f) || { left: 0, right: 0, top: 0, bottom: 0 })
     const n = filhos.length
     for (let i = 0; i < n; i++)
       for (let j = i + 1; j < Math.min(n, i + 10); j++) {
@@ -377,6 +381,36 @@ function detectar(opcoes) {
     if (b.height < 120 || b.width < 120) continue
     if ((el.innerText || '').trim().length > 2 || el.querySelector('svg, img, canvas, input, textarea, select, orb-avatar, heild-logo, video, iframe')) continue
     add('vao', `card vazio ${Math.round(b.width)}×${Math.round(b.height)}: ${desc(el)}`, el)
+  }
+  // Fora da grade de widgets: card esticado bem além do conteúdo e vão sob a coluna mais curta (PADRAO_DE_INTERFACE.md, 5).
+  for (const g of todos) {
+    const sg = cs(g)
+    if (sg.display !== 'grid' || g.style.gridAutoRows || !visivel(g)) continue
+    const colsG = sg.gridTemplateColumns.split(' ').filter((x) => /px$/.test(x))
+    if (colsG.length < 2) continue
+    const filhosG = [...g.children].filter((k) => visivel(k) && cs(k).position !== 'absolute')
+    if (filhosG.length < 2) continue
+    const gbG = g.getBoundingClientRect()
+    if (gbG.height < 150) continue
+    const rsG = filhosG.map((k) => k.getBoundingClientRect())
+    filhosG.forEach((k, i) => {
+      const kb = rsG[i]
+      if (kb.width < 100) return
+      const abaixo = rsG.some((o, j) => j !== i && o.top >= kb.bottom - 2 && o.left < kb.right - 4 && o.right > kb.left + 4)
+      if (!abaixo) {
+        const vizinhos = rsG.filter((o, j) => j !== i && o.top < kb.bottom && o.bottom > kb.top)
+        const vao = Math.min(Math.max(kb.bottom, ...vizinhos.map((o) => o.bottom)), gbG.bottom) - kb.bottom
+        if (vao > 96) add('vao', `${Math.round(vao)}px vazios sob ${desc(k)}`, k)
+      }
+      if (kb.height >= 200 && k.tagName !== 'ARTICLE' && g.getAttribute('role') !== 'grid') {
+        const netos = [...k.children].filter((n) => visivel(n) && cs(n).position !== 'absolute')
+        if (netos.length) {
+          const fimConteudo = Math.max(...netos.map((n) => n.getBoundingClientRect().bottom))
+          const vao = kb.bottom - px(cs(k).paddingBottom) - fimConteudo
+          if (ehCard(k) ? vao > 160 && vao > kb.height * 0.35 : vao > 120 && vao > kb.height * 0.3) add('vao', `${Math.round(vao)}px vazios no fim de ${ehCard(k) ? 'card esticado' : 'coluna'} ${desc(k)}`, k)
+        }
+      }
+    })
   }
   for (const g of document.body.querySelectorAll('[style*="grid-auto-rows"]')) {
     const s = cs(g)
