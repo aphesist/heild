@@ -44,8 +44,20 @@ export class Banco {
     if (typeof window !== 'undefined') window.addEventListener('pagehide', () => void this.descarregar())
   }
 
-  /** Abre um escritório: carrega o que está guardado ou semeia com os dados de exemplo. */
-  async abrir(escritorioId: Id, semente: () => Fotografia): Promise<void> {
+  private abrindo: { id: Id; promessa: Promise<void> } | null = null
+
+  /** Abre um escritório: carrega o que está guardado ou semeia com os dados de exemplo. Pedido repetido (modo estrito do React) reaproveita a abertura em andamento. */
+  abrir(escritorioId: Id, semente: () => Fotografia): Promise<void> {
+    if (this.abrindo?.id === escritorioId) return this.abrindo.promessa
+    if (this.estado === 'pronto' && this.escritorioId === escritorioId) return Promise.resolve()
+    const promessa = this.abrirDeVerdade(escritorioId, semente).finally(() => {
+      if (this.abrindo?.promessa === promessa) this.abrindo = null
+    })
+    this.abrindo = { id: escritorioId, promessa }
+    return promessa
+  }
+
+  private async abrirDeVerdade(escritorioId: Id, semente: () => Fotografia): Promise<void> {
     await this.descarregar()
     this.escritorioId = escritorioId
     this.mudarEstado('carregando')
@@ -66,10 +78,22 @@ export class Banco {
   /** Volta o escritório aos dados de exemplo (o que foi feito na demonstração se perde, por escolha de quem pediu). */
   async restaurar(semente: () => Fotografia): Promise<void> {
     if (!this.escritorioId) return
+    // Nada do que estava pendente vale mais: o escritório vai ser apagado e semeado de novo.
+    if (this.relogio) clearTimeout(this.relogio)
+    this.relogio = null
     this.pendentes.clear()
-    const foto = semente()
-    await this.adaptador.substituir(this.escritorioId, foto)
-    this.trocarFoto(foto)
+    // Enquanto restaura, o banco não está pronto: a tela mostra "Abrindo o escritório" e
+    // nenhuma escrita da tela que sai entra na fila (ver transacao).
+    this.mudarEstado('carregando')
+    try {
+      const foto = semente()
+      await this.adaptador.substituir(this.escritorioId, foto)
+      this.trocarFoto(foto)
+      this.mudarEstado('pronto')
+    } catch (e) {
+      this.erro = e instanceof Error ? e.message : String(e)
+      this.mudarEstado('erro')
+    }
   }
 
   ler<T extends NomeTabela>(tabela: T): Tabelas[T][] {
@@ -110,7 +134,10 @@ export class Banco {
     }
     const resultado = fazer(tx)
     if (novas.size) {
-      for (const [t, linha, id] of marcas) this.marcar(t, linha, id)
+      // Fora do estado pronto (abrindo, trocando de escritório, restaurando), a escrita é da tela que
+      // está saindo: muda a memória que vai ser trocada, mas não vai para o adaptador (iria para o
+      // escritório errado, ou para um que acabou de ser apagado).
+      if (this.estado === 'pronto') for (const [t, linha, id] of marcas) this.marcar(t, linha, id)
       for (const [t, linhas] of novas) {
         ;(this.foto as Record<string, Registro[]>)[t] = linhas
         this.indices.delete(t)
@@ -118,7 +145,7 @@ export class Banco {
       this.foto = { ...this.foto }
       this.versao++
       this.avisar(new Set(novas.keys()))
-      this.agendarGravacao()
+      if (this.estado === 'pronto') this.agendarGravacao()
     }
     return resultado
   }

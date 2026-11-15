@@ -885,6 +885,89 @@ Formato de cada registro:
 - **Arquivos compartilhados:** nenhum.
 - **Situação:** proposta.
 
+### S08b · BPO › Fila e pedidos e Rotinas
+
+#### 2026-11-15 · S08b · Fila e Rotinas em `telas/bpo/operacao/`, com os mesmos nomes exportados
+
+- **Decisão:** as duas abas saíram de `OperacaoBpo.tsx` para `src/telas/bpo/operacao/` (fila, documentos, rotinas, seções, fechamento, integrantes, dados). `OperacaoBpo.tsx` só reexporta `FilaBpoTela`, `RotinasBpoTela`, `rotuloBola`, `slaDe` e `useAcoesFila`, para o módulo, os contratantes e o portal do convidado não mudarem.
+- **Por quê:** as abas cresceram muito; arquivos separados evitam conflito com as outras sessões do BPO.
+- **Telas e ações:** S08-T03, S08-T04.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** nenhum fora da regra.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Documentos que chegam viram entidade própria (`bpo_documento`)
+
+- **Decisão:** boleto, nota e comprovante que chegam pelo app, WhatsApp, e-mail ou DDA entram em "Documentos chegando" na Fila antes de virar conta. O integrante de Contas a Pagar lê (`conta_pagar.ler_documento`, rascunhar) e checa contra o cadastro da empresa: duplicidade (mesmo fornecedor, valor e vencimento, ou o mesmo código de barras), fornecedor novo, dados bancários diferentes do cadastro e valor acima do dobro da média do fornecedor. **Só lança sozinho** (captura é "faz sozinho", FIN-003) quando a leitura tem confiança alta e nenhuma checagem chamou atenção; senão, uma pessoa revisa e lança (e passa a ser quem digitou: outra pessoa confere). Duplicidade só passa com o motivo de quem confirmou que é outra cobrança. Dados bancários diferentes marcam o fornecedor como "alterado" e a conta com o alerta de confirmar por segundo canal antes do lote. Comprovante não vira conta: fica guardado com a conta certa. Descartar exige motivo (nada se apaga). Anexar ao pedido da fila completa "boleto ou nota" e "valor" e o SLA começa.
+- **Por quê:** 10, 3.5 descreve captura, leitura e checagem, mas não a caixa de entrada; o golpe mais comum é a troca de conta do fornecedor (10, 3.13). Tabela própria porque o documento tem ciclo de vida (chegou, lido, lançado, anexado, descartado) e trilha.
+- **Telas e ações:** S08-A14, A16; S08-T03.
+- **Impacto no plano:** 10, 3.12 ganha a entidade "Documento recebido do BPO" (proposta).
+- **Arquivos compartilhados:** `entidades.ts` (interface nova, linha em `Tabelas` e em `nomesTabelas`, no fim); `ferramentas.ts` (bloco S08b com `documento_bpo.receber`, `conta_pagar.ler_documento`, `documento_bpo.descartar`, `fila.comentar`, `fila.cobrar`, `conta_receber.cobrar`, `erp.lancar`, `erp.baixar`, `extrato.buscar`, `bpo.fechamento.executar`, `bpo.fechamento.reabrir`); migração nova `20261115120000_s08b_bpo_documento.sql` (não aplicada: pede autorização do dono, como a da S08).
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Bola parada e ordem por risco
+
+- **Decisão:** bola fora do BPO há 24 h ou mais é "bola parada" (selo no item, atalho no resumo, cobrança pelo integrante, anotada no item). A ordem "por risco" do integrante soma: prazo estourado 50, vence hoje 30, amanhã 15; pagamento 12; valor até 10; prazo legal em um dia 25; empresa vermelha 12, amarela 5; bola parada 8; pedido incompleto 4. Cada item mostra o motivo do risco.
+- **Por quê:** BPO-010 diz que a IA "ordena por risco e avisa bola parada" sem dizer como **[sem regra no plano]**; números como hipótese da sessão.
+- **Telas e ações:** S08-A13, A15.
+- **Impacto no plano:** nenhum (pesos a validar no piloto).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Membro abre a fila em "só as minhas"; pedido da equipe sem completude do cliente
+
+- **Decisão:** quem não reatribui (Membro) abre a fila com "só as minhas" ligado (guardado por pessoa); o Gestor abre com tudo. Pedido com o canal "da equipe" entra completo (a completude do BPO-009 é do pedido do cliente), com a visibilidade "interna do BPO" e quem pediu.
+- **Por quê:** 10, 5.4: o Colaborador "executa as suas"; o mapa pede pedidos dos clientes e da equipe.
+- **Telas e ações:** S08-A13, A14.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Rotinas por seções da operação
+
+- **Decisão:** sem empresa escolhida, as Rotinas mostram a carteira por exceção (checklist do dia, o que falta conferir, extrato, lançar no ERP, a receber em atraso e o mês aberto ou fechado, com atalho para a seção). Com uma empresa, seis seções: Hoje (checklist em três colunas e o calendário único, com a seta que leva aonde cada rotina se faz pelo código da atividade), Contas a pagar, A receber, Conciliação, Lançamentos no ERP e Fechamento. O integrante do cabeçalho muda com a seção (Contas a Pagar, Contas a Receber, Conciliação, Gerencial). No celular, as seções viram uma lista de escolha.
+- **Por quê:** 10, 3.1 e 3.2 descrevem a operação do dia; o mapa não diz como dividir a tela **[sem regra no plano]**.
+- **Telas e ações:** S08-A18 a A21.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Baixa no ERP por modo e extrato do Open Finance simulado
+
+- **Decisão:** conciliar no modo API (E1) manda a baixa ao ERP por comando (`erp.baixar`, evento "enviada e relida"); desfazer registra o estorno no ERP. No modo arquivo (E2) a linha conciliada vai para "Lançar no ERP" e a pessoa marca "Lancei no Nibo": a baixa manual conta no SLA com a marca "manual"; conta lançada na plataforma também espera ali. Quando não sobra nada para lançar, a pendência "lançar baixas" da fila se resolve sozinha, com evento. No livro próprio (E3) não há o que levar. "Buscar o extrato agora" chama o serviço de Open Finance da demonstração (latência e falha simulada) e grava linhas de exemplo por empresa, marcadas como demonstração.
+- **Por quê:** 10, 3.0 (fonte da verdade e modo arquivo); o serviço de Open Finance das Fundações devolve um extrato genérico.
+- **Telas e ações:** S08-A19, S08-T04.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (o serviço é só chamado).
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Fechamento do mês nas Rotinas, com o rascunho do Gerencial
+
+- **Decisão:** a seção Fechamento trata a competência de outubro (em 18/11): antes de fechar, extrato do mês conciliado, baixas do mês no ERP, contas do mês conferidas, rascunho do Gerencial e revisão do Gestor (mesma regra na tela e no repositório). O Gerencial rascunha a DRE gerencial, caixa, pagamentos, atrasos, pendências com o cliente e riscos (gravado na entrega "relatorio" da competência, com a marca `rascunho` que a aba Entregas já lê); o Gestor revisa e pode reescrever o texto; fechar é do Gestor do BPO e grava a entrega "fechamento" (a mesma que Entregas mostra) com o evento `bpo.mes_fechado` ao Contábil quando a empresa tem contabilidade; reabrir só o Administrador, com motivo. Enviar o relatório ao cliente continua em Entregas.
+- **Por quê:** 10, 3.10 (fechamento só com conciliação sem pendência e relatório aprovado; reabrir exige Administrador e motivo). A divisão com Entregas evita duas portas para o mesmo envio.
+- **Telas e ações:** S08-A18, A28 (só leitura compartilhada); S08-T04.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (usa `repos.bpo.entregas`).
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Datas da operação no dia da demonstração
+
+- **Decisão:** o que a operação grava (chegada de documento, anotação, conciliação, baixa manual, rascunho, revisão, fechamento) leva o dia 18/11 com a hora do relógio, como a S08 decidiu para o BPO; os eventos gravados pelo relógio da máquina aparecem no histórico e na "bola parada" levados a 18/11.
+- **Por quê:** sem isso, a bola passada agora pareceria parada há dias e o histórico mostraria a data da máquina.
+- **Telas e ações:** S08-T03, S08-T04.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08b · Pequenas mudanças em arquivos comuns, só acrescentando
+
+- **Decisão:** `ModuloBpo.tsx` ganhou uma linha que monta o trabalho dos integrantes da operação (`useEfeitosOperacaoBpo`, com chave própria `s08b:efeitos`, sem tocar no `integrantes.ts` da S08); `semente/andrade.ts`, uma linha (`sementeS08b`), com a semente tardia para banco já guardado; `PainelLab.tsx`, uma linha com a seção "Operação do BPO (S08b)" (boleto chegando pelo WhatsApp e boleto com os dados bancários trocados).
+- **Por quê:** regra das sessões de BPO (só acrescentar nos comuns).
+- **Telas e ações:** S08-T03, S08-T04.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** os três citados, uma linha cada.
+- **Situação:** proposta.
+
 ### S08d · BPO: gestão (Entregas, Volume, Rentabilidade), entre escritórios e app
 
 #### 2026-11-15 · S08d · Integrantes do grupo num arquivo próprio, montado por uma linha no módulo

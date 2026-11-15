@@ -18,6 +18,7 @@ import { EntregasBpoTela, RentabilidadeBpoTela, VolumeBpoTela } from './GestaoBp
 import { useEfeitosBpo } from './integrantes'
 import { useEfeitosS08a } from './integrantes-s08a' // S08a
 import { FilaBpoTela, RotinasBpoTela } from './OperacaoBpo'
+import { useEfeitosOperacaoBpo } from './operacao/integrantes' // S08b
 import { PortalConvidado } from './PortalConvidado'
 import { CarteiraBpoTela, VisaoBpoTela } from './VisaoBpo'
 import { useEfeitosS08d } from './efeitos-s08d' // S08d
@@ -49,6 +50,7 @@ export function ModuloBpo({ aba, clienteId, onEscolher }: { aba: string; cliente
   }, [escritorio.id, versao])
   useEfeitosBpo()
   useEfeitosS08a() // S08a: trabalhos da Visão geral, da Carteira e da implantação
+  useEfeitosOperacaoBpo() // S08b: trabalho dos integrantes na Fila e nas Rotinas
   useEfeitosS08d() // S08d: integrantes de Entregas, Volume, Rentabilidade e da frente entre escritórios
   const loja = useLoja()
   const contratantes = useContratantes()
