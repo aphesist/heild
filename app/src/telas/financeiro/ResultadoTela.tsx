@@ -186,7 +186,7 @@ export function ResultadoTela() {
       </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        <Caixa>
+        <Caixa data-pilha>
           <Pergunta acao={<Badge variant="outline">fase 4 · desligado</Badge>} descricao="Montado e desligado na v1: ainda não há dados suficientes para ativar (09, 7.4).">
             Orçado × realizado
           </Pergunta>
@@ -207,7 +207,7 @@ export function ResultadoTela() {
             </ul>
           )}
         </Caixa>
-        <Caixa>
+        <Caixa data-pilha>
           <Pergunta descricao="Só o Administrador. Cada um com memória de cálculo; o pagamento sai em contas a pagar, com aprovação.">Sócios, comissões e PLR</Pergunta>
           <ul className="flex flex-col gap-1.5 text-sm">
             {socios.map((s) => (

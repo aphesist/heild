@@ -121,7 +121,7 @@ export function ConciliacaoTela() {
       </Caixa>
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Caixa>
+        <Caixa data-pilha>
           <Pergunta
             descricao="A sugestão vem do histórico e das regras. Confirmar liga o lançamento e ensina uma regra (que só vale depois de aprovada)."
             acao={
@@ -165,7 +165,7 @@ export function ConciliacaoTela() {
             </ul>
           )}
         </Caixa>
-        <div className="flex flex-col gap-4 lg:sticky lg:top-0">
+        <div data-pilha className="flex flex-col gap-4 lg:sticky lg:top-0">
           <Caixa>
             <Pergunta descricao="O que pede uma pessoa: pagador desconhecido, valor diferente.">Divergências</Pergunta>
             {!divergencias.length && <p className="text-muted-foreground text-sm">Nenhuma divergência.</p>}

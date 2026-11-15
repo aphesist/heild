@@ -1,9 +1,13 @@
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 /** Caixa padrão de bloco de tela (mesma camada dos widgets: superfície sobre o fundo). */
-export function Caixa({ children, className }: { children: ReactNode; className?: string }) {
-  return <section className={cn('bg-surface shadow-cartao rounded-cartao flex min-w-0 flex-col gap-3 p-4 sm:p-5', className)}>{children}</section>
+export function Caixa({ children, className, ...props }: { children: ReactNode; className?: string } & Omit<ComponentProps<'section'>, 'children' | 'className'>) {
+  return (
+    <section className={cn('bg-surface shadow-cartao rounded-cartao flex min-w-0 flex-col gap-3 p-4 sm:p-5', className)} {...props}>
+      {children}
+    </section>
+  )
 }
 
 /** Número com rótulo, para faixas de resumo. */

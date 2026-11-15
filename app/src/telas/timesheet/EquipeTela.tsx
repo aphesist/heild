@@ -237,7 +237,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
         {!regs.length && <EstadoVazio compacto titulo="Nenhuma hora neste filtro" descricao="Troque o período, o setor ou limpe os filtros." />}
 
         <div className="grid items-start gap-4 xl:grid-cols-2">
-          <div className="flex min-w-0 flex-col gap-4">
+          <div data-pilha className="flex min-w-0 flex-col gap-4">
             <Caixa>
               <Pergunta>Quanto cada pessoa registrou, e quanto foi automático?</Pergunta>
               <LinhasEmpilhadas dados={porPessoa} onClicar={(n) => setVendoPessoa(porPessoa.find((p) => p.rotulo === n)?.id ?? null)} />
@@ -395,7 +395,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
               <p className="text-muted-foreground text-xs">Série separada: nunca soma com as horas humanas. Aprovação = cartões aprovados sem edição.</p>
             </Caixa>
           </div>
-          <div className="flex min-w-0 flex-col gap-4">
+          <div data-pilha className="flex min-w-0 flex-col gap-4">
             <Caixa>
               <Pergunta
                 acao={

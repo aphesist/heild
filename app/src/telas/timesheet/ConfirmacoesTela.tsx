@@ -61,7 +61,7 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoTs titulo="Confirmações" sub={`${pendentes.length} pendentes · leva uns 2 min · o que não for confirmado em 7 dias fica como sem classificação, sem cobrança`} papel={papel} />
         <div className={cn('grid items-start gap-4', gestor && 'lg:grid-cols-[minmax(0,1fr)_20rem]')}>
-          <div className="flex min-w-0 flex-col gap-4">
+          <div data-pilha className="flex min-w-0 flex-col gap-4">
             {dias.map((dia) => {
               const { mostrar, fora } = doDia(dia)
               return (
@@ -136,7 +136,7 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
           </div>
 
           {gestor && (
-            <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
+            <div data-pilha className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
               <Caixa>
                 <Pergunta>Arquivos sem pessoa</Pergunta>
                 <p className="text-muted-foreground -mt-1 text-xs">A nuvem não disse quem salvou. Atribua e a pessoa confirma (“foi você?”).</p>
