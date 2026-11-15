@@ -32,6 +32,9 @@ export const METODOS_GENERICOS = new Set(['criar', 'atualizar', 'arquivar', 'des
 /** Colunas que o servidor põe (nunca vêm de fora; API3). */
 const DO_SERVIDOR = new Set(['id', 'escritorio_id', 'criado_em', 'atualizado_em', 'arquivado_em', 'versao_linha', 'ordem'])
 
+/** Campos da tarefa que só a transição grava. */
+const DA_TRANSICAO = new Set(['status', 'status_desde', 'concluida_em', 'concluida_por_tipo', 'concluida_por_id', 'cancelada_motivo'])
+
 const TRANSICAO: Record<string, string> = {
   em_andamento: 'tarefa.iniciar',
   aguardando_cliente: 'tarefa.aguardar_cliente',
@@ -92,10 +95,14 @@ function generico(e: Entidade, metodo: string, a: Args, obter?: Obter): Traducao
       const atual = obter?.(e.tabela, id) as Record<string, unknown> | undefined
       const patch = Object.fromEntries(Object.entries(semServidor(objeto(a[1]))).filter(([k, v]) => !atual || JSON.stringify(v ?? null) !== JSON.stringify(atual[k] ?? null)))
       if (atual && !Object.keys(patch).length) return []
-      // Atualizar com o campo de estado é a transição (o patch não muda estado).
-      if (e.tabela === 'tarefa' && 'status' in patch) {
-        const t = transicaoDeTarefa(id, String(patch.status), typeof patch.cancelada_motivo === 'string' ? patch.cancelada_motivo : undefined)
-        if (t) return [t]
+      // Atualizar com o campo de estado é a transição (o patch não muda estado). Os campos que a
+      // transição grava (hora do status, quem concluiu, motivo do cancelamento) saem do patch.
+      if (e.tabela === 'tarefa') {
+        const transicao = 'status' in patch ? transicaoDeTarefa(id, String(patch.status), typeof patch.cancelada_motivo === 'string' ? patch.cancelada_motivo : undefined) : null
+        const resto = Object.fromEntries(Object.entries(patch).filter(([k]) => !DA_TRANSICAO.has(k)))
+        const r: Traducao[] = transicao ? [transicao] : []
+        if (Object.keys(resto).length || (!transicao && 'status' in patch)) r.push({ ferramenta: 'tarefa.atualizar', entrada: { tarefa_id: id, campos: transicao ? resto : { ...resto, ...('status' in patch ? { status: patch.status } : {}) } }, texto: textoDe(a[2]) })
+        return r
       }
       if (e.tabela === 'cliente' && 'estado_ciclo' in patch && Object.keys(patch).every((k) => k === 'estado_ciclo' || k === 'estado_ciclo_desde'))
         return [{ ferramenta: 'cliente.mudar_estado', entrada: { cliente_id: id, estado_ciclo: patch.estado_ciclo } }]
@@ -131,7 +138,14 @@ function generico(e: Entidade, metodo: string, a: Args, obter?: Obter): Traducao
       const anterior = objeto(a[0])
       const id = String(anterior.id ?? '')
       const atual = obter?.(e.tabela, id) as Record<string, unknown> | undefined
-      if (!id || !atual) return null
+      if (!id) return null
+      // Desfazer uma exclusão é recriar a linha como era (onde a regra deixou excluir).
+      if (!atual) {
+        const criar = ferramentaDaEntidade(e, 'criar')
+        if (!criar || !obter) return null
+        const dados = Object.fromEntries(Object.entries(semServidor(anterior)).filter(([, v]) => v !== null))
+        return [{ ferramenta: criar, entrada: { ...dados, id }, texto: 'Desfez a exclusão' }]
+      }
       const r: Traducao[] = []
       const editaveis = camposEditaveis(e)
       const mudados = Object.fromEntries(Object.entries(pick(anterior, editaveis)).filter(([k, v]) => JSON.stringify(v ?? null) !== JSON.stringify(atual[k] ?? null)))

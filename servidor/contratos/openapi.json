@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "6c60cf77199c52d5",
+    "version": "e16ce5d487b18926",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -53221,6 +53221,19 @@
                           "agente_prepara_pessoa_conclui"
                         ]
                       },
+                      "conversa_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "checklist": {
                         "maxItems": 200,
                         "type": "array",
@@ -65266,6 +65279,17 @@
                     "type": [
                       "boolean",
                       "null"
+                    ]
+                  },
+                  "ultimo_acesso": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
                     ]
                   },
                   "preferencias": {

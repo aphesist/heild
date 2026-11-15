@@ -66,6 +66,14 @@ const LER_POR_PREFIXO: [string, string][] = [
   ['subinquilino', 'bpo.ler'],
 ]
 
+/**
+ * Cadastro da equipe (classe 1): a estrutura das contas, não dado do setor. A coluna
+ * `setor_id` aqui diz a que setor a conta pertence; quem é da equipe vê a equipe inteira
+ * (é o que monta os perfis, as listas de pessoas e o "agindo como"). Para a pessoa do
+ * cliente, continuam fora (SO_EQUIPE).
+ */
+const CADASTRO_DA_EQUIPE = new Set<NomeTabela>(['usuario', 'vinculo_setor', 'excecao_tela', 'carteira_cliente', 'convite', 'setor', 'integrante'])
+
 /** O alvo de autorização de uma linha: setor e cliente, quando a linha tem. */
 export function alvoDaLinha(t: NomeTabela, l: Linha): Alvo {
   if (t === 'cliente') return { cliente_id: l.id }
@@ -130,6 +138,9 @@ export function podeLerLinha(e: EscopoLeitura, t: NomeTabela, l: Linha): boolean
     if (propria === false) return false
     if (t === 'mensagem_interna' && propria === null && !(e.canais ?? new Set()).has(String(l.conversa_interna_id))) return false
   }
+  if (CADASTRO_DA_EQUIPE.has(t)) return true
+  // O que é da própria pessoa (a sessão de trabalho dela, o que um integrante fez em nome dela) ela sempre vê.
+  if (perfil && (l.usuario_id === perfil.usuario_id || l.usuario_dono_id === perfil.usuario_id)) return true
   const alvo = alvoDaLinha(t, l)
   const f = ferramentaDeLeitura(t, alvo)
   if (!f) return true

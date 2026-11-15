@@ -139,6 +139,13 @@ describe('o tradutor (a chamada da tela vira a ferramenta)', () => {
     expect(traduzirOperacao('tarefas.atualizar', ['tk1', { cliente_id: 'c1', extras: { x: 1 } }], atual)).toEqual([])
   })
 
+  it('os campos que a transição grava saem do patch; o status vira a transição, antes do resto', () => {
+    expect(traduzirOperacao('tarefas.atualizar', ['tk1', { status: 'concluida', concluida_por_tipo: 'integrante', concluida_em: 'agora', titulo: 'Feita' }])).toEqual([
+      { ferramenta: 'tarefa.concluir', entrada: { tarefa_id: 'tk1' } },
+      { ferramenta: 'tarefa.atualizar', entrada: { tarefa_id: 'tk1', campos: { titulo: 'Feita' } } },
+    ])
+  })
+
   it('a criação leva o id escolhido pela tela (AIP-133) e deixa o nulo de fora', () => {
     expect(traduzirOperacao('cartoes.criar', [{ id: 's07-x', ferramenta: 'f', resumo_humano: 'r', pedido_por_tipo: 'integrante', usuario_dono_id: null, criado_em: 'agora' }])).toEqual([
       { ferramenta: 'cartao.criar', entrada: { id: 's07-x', ferramenta: 'f', resumo_humano: 'r', pedido_por_tipo: 'integrante' } },

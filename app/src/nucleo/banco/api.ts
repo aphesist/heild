@@ -267,6 +267,7 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
     const tabelas = (r.json.tabelas ?? {}) as Partial<Record<NomeTabela, Registro[]>>
     if (!tabelas.escritorio?.length) return null
     versoes.set(escritorio, Number(r.json.versao ?? 0))
+    leitorSincronizado = chaveDoLeitor()
     // Classe 3: o que já estava no cache fica (é histórico consultado), mais a página mais recente.
     const quentes = await aquecer(escritorio)
     for (const t of Object.keys(LISTA_DA_TABELA) as NomeTabela[]) {
@@ -300,6 +301,27 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       })().catch((e) => console.warn('[heild] delta não veio:', e instanceof Error ? e.message : e))
     }, 150)
   }
+
+  /**
+   * A pessoa da tela mudou (login, "agindo como"): o escopo de leitura do servidor é outro, então
+   * o cache das classes 1 e 2 é relido com o token dela e o fluxo troca de token.
+   */
+  let leitorSincronizado: string | null = null
+  const chaveDoLeitor = () => JSON.stringify(atorLeitor())
+  const relogioLeitor = typeof window !== 'undefined' ? window.setInterval(() => {
+    const esc = banco?.escritorioId
+    if (!esc || banco?.estado !== 'pronto' || leitorSincronizado === null) return
+    const chave = chaveDoLeitor()
+    if (chave === leitorSincronizado) return
+    leitorSincronizado = chave
+    void emSerie(() => enviarFila(esc))
+      .then(() => sincronizar(esc))
+      .then((foto) => {
+        if (foto && banco?.escritorioId === esc) banco.recarregarDe(foto)
+      })
+      .catch((e) => console.warn('[heild] não reli o escritório para a pessoa nova:', e instanceof Error ? e.message : e))
+  }, 1000) : null
+  void relogioLeitor
 
   /** O SSE do escritório, com o token de quem está na tela (troca de pessoa, troca de fluxo). */
   const garantirFluxo = (escritorio: Id) => {

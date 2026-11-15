@@ -202,6 +202,8 @@ export const ferramentasTipadas: FerramentaTipada[] = [
             // B5 (compatível): o que a ficha da tarefa edita. Quem conclui é a autonomia da tarefa,
             // não estado. Status, setor, cliente e responsável ficam de fora.
             quem_conclui: z.enum(['pessoa', 'agente_sozinho', 'agente_prepara_pessoa_conclui']).optional(),
+            // A conversa do CRM de onde a tarefa saiu (referência, não estado).
+            conversa_id: Id.nullable().optional(),
             checklist: z.array(ItemChecklistEsquema).max(200).optional(),
             aguardando_detalhe: z.record(z.string(), z.unknown()).nullable().optional(),
             risco: z.boolean().optional(),
