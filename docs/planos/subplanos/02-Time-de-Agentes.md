@@ -1024,3 +1024,20 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação: "os clientes ode
 | Fora do horário | Resposta automática fixa, sem IA, com o horário de trabalho; nenhuma triagem até abrir o expediente |
 | Custo | Mais caro que a pergunta fechada (cada troca chama o modelo); aceito pelo Enzo; bolsa do setor de Gestão e Atendimento |
 | Cartão de divergência | "Parece ser do X. Transferir?" vai ao atendente da conversa; sem atendente, a quem aprova no setor. Aprovar executa a transferência guardada |
+
+### Envio ao cliente: configurável por categoria (15/11/2026)
+
+Esclarecimento do Enzo de 15/11/2026, transmitido pela coordenação: "A ideia é ser configurável. O escritório pode ligar a IA automática para já enviar coisas ao cliente, de forma padronizada, igual na demo que fizemos (a aprovação ficaria no card). Então, se um serviço terminou, a IA pede a aprovação e manda a mensagem ao cliente direto no CRM."
+
+Deixa explícito o que já estava em 3.3, na lista "faz sozinho" por setor (Configurações › Integrantes), nas categorias liberadas de GES-062 (04, 8.1 e 8.3) e no D-33 (todo escritório começa sem categoria liberada). **A frase "nada sai ao cliente sem aprovação humana" do adendo do painel do Leandro (9/11/2026) não é regra fixa: é o padrão de partida, e o escritório muda por categoria.**
+
+| Modo, por categoria de mensagem | O que acontece |
+| --- | --- |
+| **Aprovação no cartão** (padrão; vale para toda categoria até o escritório mudar) | A IA prepara a mensagem padronizada (modelo do tema, 04, 8.2 "Modelos por evento"); a pessoa aprova no cartão; aprovar executa o envio pelo CRM, na conversa do cliente (Fundações, adendo de 15/11/2026) |
+| **Envio automático** | A IA envia sozinha a mensagem padronizada, que fica registrada na conversa (🤖 com o nome do tema), como as categorias "faz sozinho" de 3.3 |
+| **Desligado** | A IA não prepara nem envia essa categoria; o aviso fica com a pessoa |
+
+- **Categorias:** as que os planos já têm, ou seja, as mensagens por modelo do tema por evento (guia emitida, documento faltando, prazo chegando, tarefa concluída visível, admissão feita; 04, 8.2) e as respostas factuais de GES-025 (guia saiu, prazo, documento, andamento; 04, 8.1). Quem escolhe o modo é o Administrador, em Configurações › Integrantes, com a governança de GES-062 (04, A14). A promoção de 3.3 (30 cartões com 95% sem edição) continua como sugestão para passar de "aprovação no cartão" a "envio automático"; não é obrigatória para o Administrador decidir.
+- **Exemplo:** serviço concluído → a IA prepara "Sua guia de outubro está pronta: R$ 1.284,10, vence 20/11" com a guia anexa → aprovação no cartão (ou envio automático, se a categoria estiver ligada) → mensagem na conversa do cliente no CRM, com registro de entrega.
+- **A triagem conversando** (04, A.10) continua sem aprovação, por ser só triagem.
+- **O que não é padronizado** (resposta livre a uma dúvida técnica, parecer, qualquer texto sem modelo do tema) **continua sempre com aprovação**. Proposta: manter assim, e só rever numa versão futura se o escritório pedir.
