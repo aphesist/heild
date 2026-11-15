@@ -65,8 +65,8 @@ export function AprovacoesBpoTela({ empresa }: PropsBpo) {
   const prontas = lista.filter((e) => e.contas.some((c) => c.etapa === 'conferida' || c.etapa === 'em_lote'))
   const lotes = lista.flatMap((e) => e.lotes.map((l) => ({ e, l })))
   const abertos = lotes.filter(({ l }) => l.situacao === 'aguardando' || l.situacao === 'parcial')
-  // Em andamento: tudo que ainda pede algo (aprovação, liberar no banco, conferir a baixa, refazer). Encerrados: expirados e liberados já pagos.
-  const encerrado = ({ e, l }: { e: EmpresaVista; l: BpoLote }) => l.situacao === 'expirado' || (l.situacao === 'liberado' && l.conta_ids.filter((id) => !l.removidos.includes(id)).every((id) => e.contas.find((c) => c.id === id)?.etapa === 'paga'))
+  // Em andamento: o que pede algo (aprovar, liberar no banco, conferir a baixa, refazer) e o que acabou de ser pago. Expirados: nunca pagaram.
+  const encerrado = ({ l }: { l: BpoLote }) => l.situacao === 'expirado'
   const emAndamento = lotes.filter((x) => !encerrado(x))
   const lotesVistos = (filtroLotes === 'abertos' ? emAndamento : filtroLotes === 'decididos' ? lotes.filter(encerrado) : lotes).sort((a, b) => b.l.criado_em.localeCompare(a.l.criado_em))
   const comCliente = abertos.reduce((s, { l }) => s + l.total, 0)
@@ -207,7 +207,7 @@ export function AprovacoesBpoTela({ empresa }: PropsBpo) {
             onMudar={setFiltroLotes}
             opcoes={[
               { valor: 'abertos', rotulo: `Em andamento (${emAndamento.length})` },
-              { valor: 'decididos', rotulo: `Encerrados (${lotes.length - emAndamento.length})` },
+              { valor: 'decididos', rotulo: `Expirados (${lotes.length - emAndamento.length})` },
               { valor: 'todos', rotulo: 'Todos' },
             ]}
           />
