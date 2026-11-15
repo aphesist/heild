@@ -381,7 +381,8 @@ function detectar(opcoes) {
     const corpo = art.querySelector('[data-corpo-widget]')
     if (!corpo || corpo.querySelector('[data-estado-vazio]')) continue
     const cb = corpo.getBoundingClientRect()
-    if (cb.height < 150) continue
+    // Só nos widgets altos (G, XL): num widget de uma linha, um item só ocupar o corpo é natural.
+    if (cb.height < 200) continue
     let fim = cb.top
     let algo = false
     for (const f of corpo.querySelectorAll('*')) {
@@ -406,7 +407,8 @@ function detectar(opcoes) {
   for (const g of todos) {
     const sg = cs(g)
     // Linha de lista (li, tr) em grade não é composição de página: a célula alta de uma linha não é vão.
-    if (sg.display !== 'grid' || g.style.gridAutoRows || !visivel(g) || /^(LI|TR)$/.test(g.tagName) || g.getAttribute('role') === 'row') continue
+    // Vitrine do UI Lab (cards lado a lado para comparar) não é composição de tela.
+    if (sg.display !== 'grid' || g.style.gridAutoRows || !visivel(g) || /^(LI|TR)$/.test(g.tagName) || g.getAttribute('role') === 'row' || g.hasAttribute('data-vitrine')) continue
     const colsG = sg.gridTemplateColumns.split(' ').filter((x) => /px$/.test(x))
     if (colsG.length < 2) continue
     const filhosG = [...g.children].filter((k) => visivel(k) && cs(k).position !== 'absolute')

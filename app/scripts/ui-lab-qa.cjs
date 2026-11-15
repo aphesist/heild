@@ -53,6 +53,23 @@ const variantesTelas = opcao('variantes', 'demo,horizonte,membro,escuro').split(
 const escreverDoc = process.argv.includes('--doc')
 const temas = ['fabrica', 'horizonte', 'verde-campo', 'condesp', 'requinte']
 
+/** Espera as transições e animações finitas da página acabarem (troca de tema anima as cores): mede o estado final, nunca o meio. */
+async function assentar(p) {
+  await p
+    .evaluate(() =>
+      Promise.race([
+        Promise.all(
+          document
+            .getAnimations()
+            .filter((a) => a.effect?.getComputedTiming?.().iterations !== Infinity)
+            .map((a) => a.finished.catch(() => {})),
+        ),
+        new Promise((r) => setTimeout(r, 1500)),
+      ]),
+    )
+    .catch(() => {})
+}
+
 /* ---------- Amostragem por pares (determinística) ---------- */
 
 function aleatorio(semente) {
@@ -241,6 +258,7 @@ async function frenteLab(navegador) {
         if (c.estado === 'hover' || c.estado === 'foco') await espera(p, 250)
         let achados
         try {
+          await assentar(p)
           achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
         } catch (e) {
           achados = [{ regra: 'erro', detalhe: String(e).slice(0, 200) }]
@@ -300,7 +318,8 @@ async function frenteTelas(navegador) {
           await espera(p, 250)
           let achados
           try {
-            achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
+            await assentar(p)
+          achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
           } catch (e) {
             achados = [{ regra: 'erro', detalhe: String(e).slice(0, 200) }]
           }
@@ -385,7 +404,8 @@ async function frenteWidgets(navegador) {
     await espera(p, 250)
     let achados
     try {
-      achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
+      await assentar(p)
+          achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
     } catch (e) {
       if (caiu(e)) throw e
       achados = [{ regra: 'erro', detalhe: String(e).slice(0, 200) }]

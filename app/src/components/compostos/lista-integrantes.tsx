@@ -179,7 +179,7 @@ function ItemColuna({ it, ativo, onClick }: { it: Integrante; ativo: boolean; on
           {it.emObservacao && <EyeIcon className="text-muted-foreground size-3.5 shrink-0" aria-label="em observação" />}
         </span>
         <span className="text-muted-foreground block truncate text-xs">{it.setorRotulo}</span>
-        <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' && !pausado ? 'text-foreground font-medium' : 'text-muted-foreground')}>
+        <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' && !pausado ? 'text-foreground font-medium' : ativo ? 'text-foreground' : 'text-muted-foreground')}>
           {pausado ? 'Pausado · o chat responde' : (it.resumo ?? rotuloDoEstado[it.estado])}
         </span>
       </span>

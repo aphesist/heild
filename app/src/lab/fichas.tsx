@@ -318,7 +318,7 @@ function FichaCampos({ p }: { p: ParamsLab }) {
 
 function FichaEstados({ p }: { p: ParamsLab }) {
   return (
-    <div className="grid items-start gap-4 sm:grid-cols-3">
+    <div data-vitrine className="grid items-start gap-4 sm:grid-cols-3">
       <Caixa>
         <EstadoVazio icone={TrayIcon} titulo={textoDe(p.texto, 0)} descricao={textoDe(p.texto, 1)} acao={<Button size="sm" className="rounded-full">Criar</Button>} />
       </Caixa>
@@ -335,7 +335,7 @@ function FichaEstados({ p }: { p: ParamsLab }) {
 function FichaCaixa({ p }: { p: ParamsLab }) {
   const itens = lista(p, 6, (i) => i)
   return (
-    <div className="grid items-start gap-4 md:grid-cols-2">
+    <div data-vitrine className="grid items-start gap-4 md:grid-cols-2">
       <Caixa>
         <TituloBloco descricao={textoDe(p.texto, 1, 'detalhe')} acao={<Button size="sm" variant="ghost" className="rounded-full">Ver todas</Button>}>
           {textoDe(p.texto, 0)}
@@ -514,7 +514,7 @@ function FichaAvatares({ p }: { p: ParamsLab }) {
 function FichaRolagem({ p }: { p: ParamsLab }) {
   const itens = lista(p, 30, (i) => i)
   return (
-    <div className="grid items-start gap-4 md:grid-cols-3">
+    <div data-vitrine className="grid items-start gap-4 md:grid-cols-3">
       <Caixa>
         <TituloBloco>Vertical</TituloBloco>
         <AreaRolagem className="h-56">

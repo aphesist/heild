@@ -230,7 +230,7 @@ function Rolagem({ p }: { p: ParamsLab }) {
   const itens = Array.from({ length: 24 }, (_, i) => i)
   return (
     <Pagina titulo="Rolagem com esmaecido" descricao="Toda rolagem passa pela AreaRolagem: o topo e o fim (ou os lados) esmaecem só quando há conteúdo para aquele lado; parado no topo, nada é cortado. Com cabeçalho fixo, o esmaecido começa abaixo dele. A regra scripts/regra-rolagem.cjs barra qualquer classe de rolagem solta fora da primitiva.">
-      <div className="grid items-start gap-4 md:grid-cols-2">
+      <div data-vitrine className="grid items-start gap-4 md:grid-cols-2">
         <Caixa className="h-72">
           <TituloBloco>Lista que rola</TituloBloco>
           <AreaRolagem className="flex-1">
@@ -276,7 +276,7 @@ function Toque() {
 function Vazios() {
   return (
     <Pagina titulo="Estados vazios" descricao="PADRAO_DE_INTERFACE.md, 8: ícone regular em círculo rebaixado, a frase do que não há e a ação que resolve, no centro. No widget, o card fica no menor tamanho. Nunca um card em branco, nem enquanto carrega.">
-      <div className="grid items-start gap-4 md:grid-cols-2">
+      <div data-vitrine className="grid items-start gap-4 md:grid-cols-2">
         <Caixa>
           <EstadoVazio icone={TrayIcon} titulo="Nenhuma tarefa aberta" descricao="Mude os filtros ou crie uma tarefa." acao={<Button size="sm" className="rounded-full">Nova tarefa</Button>} />
         </Caixa>
