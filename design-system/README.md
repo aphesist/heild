@@ -69,7 +69,7 @@ O detalhe está em Tipografia.
 - Os integrantes falam na primeira pessoa e dizem o que fizeram e o que falta.
 - O botão diz o que acontece ("Aprovar", "Ver o cartão"). O aviso diz o que mudou e onde ver.
 - Termos do ofício sem explicação (PGDAS-D, DCTFWeb, fator R, lote). Nada de jargão de sistema ("job", "webhook") nem de marketing.
-- Sem emoji. Ícones da família Phosphor, no peso regular.
+- Sem emoji. Ícones da família Phosphor, no peso regular. Exceção: na navegação principal (barra lateral e menu inferior), regular no item inativo e preenchido no ativo. Duotone não se usa.
 - Nada inventado: a Heild ainda não foi lançada, então não há clientes, depoimentos, números de uso nem faixa de logos para mostrar.
 
 ## Sistema de movimento

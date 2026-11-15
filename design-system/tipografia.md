@@ -34,7 +34,8 @@ O `hero` é a voz da marca para fora: peso 500 e espaçamento bem apertado, como
 | Estilo | Tamanho / entrelinha | Peso | Espaçamento | Onde |
 | --- | --- | --- | --- | --- |
 | `display` | 48 / 48 | 300 | -0,025em | A pergunta do Assistente vazio, a saudação do login. 36px no celular |
-| `numero-grande` | 36 / 40 | 300 | 0 | O número de um widget, com algarismos tabulares |
+| `numero-grande` | 36 / 40 | 300 | 0 | O número que decide, num widget (pede ação), com algarismos tabulares |
+| `numero-medio` | 24 / 32 | 300 | 0 | O número que dá contexto e não decide (faixa de resumo, KPI ao lado do que pede ação), com algarismos tabulares |
 | `titulo-pagina` | 30 / 36 | 300 | -0,025em | Título da tela. 24px no celular |
 | `titulo-secao` | 24 / 32 | 300 | -0,025em | Gaveta, seção longa, estado vazio |
 | `titulo-bloco` | 18 / 28 | 600 | 0 | Nome no cabeçalho do chat, título de cartão grande |

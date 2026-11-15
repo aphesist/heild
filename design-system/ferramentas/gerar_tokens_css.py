@@ -48,7 +48,7 @@ for fo in t['type']['fonts']:
 saida.append('')
 saida.append(bloco(':root', 'claro'))
 outros = []
-for fam in ('spacing', 'radius', 'shadow', 'gradiente'):
+for fam in ('spacing', 'radius', 'grade', 'shadow', 'gradiente'):
     for x in t.get(fam, {}).get('tokens', []):
         v = x['value']
         if fam == 'shadow' and isinstance(v, dict):
@@ -60,5 +60,8 @@ saida.append(':root {\n' + '\n'.join(outros) + '\n}')
 saida.append('')
 saida.append(bloco('[data-tema="escuro"]', 'escuro'))
 saida.append('@media (prefers-color-scheme: dark) {\n' + bloco(':root:not([data-tema="claro"])', 'escuro', '  ') + '\n}')
+for x in t.get('grade', {}).get('tokens', []):
+    for consulta, v in x.get('media', {}).items():
+        saida.append(f'@media {consulta} {{\n  :root {{ --{x["name"]}: {v}; }}\n}}')
 open(os.path.join(RAIZ, 'tokens.css'), 'w').write('\n'.join(saida) + '\n')
 print('tokens.css:', len(cores), 'tokens por tema,', len(outros), 'outros tokens')

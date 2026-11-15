@@ -12,7 +12,7 @@ A tela se monta em camadas de areia. Cada camada tem um passo no claro e outro n
 | `superficie` | 100 | 850 | `--surface` | Painéis e cartões |
 | `elevada` | 50 | 800 | `--raised`, `--card`, `--popover` | Campo, menu, popover, cartão dentro de painel |
 | `borda` | 300 | 800 | `--border`, `--input` | Divisórias de 1px |
-| `texto-suave` | 650 | 400 | `--muted-foreground` | Texto secundário |
+| `texto-suave` | 700 | 400 | `--muted-foreground` | Texto secundário |
 | `texto` | 850 | 100 | `--foreground` | Texto principal |
 | `primaria` | 900 | 100 | `--primary` | Botão principal, aba ativa |
 
@@ -26,7 +26,7 @@ Regras:
 ## Texto
 
 - `texto` sobre qualquer camada, nos dois modos (11:1 ou mais).
-- `texto-suave` para hora, legenda, metadado e placeholder. Passa em `fundo`, `superficie`, `elevada` e `rebaixada` (4,6:1 ou mais). No claro, não use sobre `fundo-fim` (3,8:1) nem `lateral-fim` (2,85:1): o pé da barra lateral e a base da página levam `texto`.
+- `texto-suave` para hora, legenda, metadado e placeholder. No claro é areia 700 desde 15/11/2026 (antes 650), para passar também sobre `rebaixada` e `fundo-fim`: 4,95:1 no pior caso, 6,0 sobre `rebaixada` e 6,6 sobre `fundo`. Continua sem ir sobre `lateral-fim`: o pé da barra lateral leva `texto`.
 - Dentro de `primaria`, use `texto-sobre-primaria`.
 - Hierarquia de texto se faz com tamanho, peso e `texto-suave`. Não use opacidade solta (`texto` a 60%) nem uma terceira cor de texto.
 
@@ -81,5 +81,5 @@ Regras:
 
 ## Contraste conferido
 
-- Passam: `texto` em todas as camadas (11:1 ou mais); `texto-suave` em fundo, superfície, elevada e rebaixada; os três `*-texto` de estado e o `destaque-texto` (4,5:1 ou mais nos dois modos); `texto-sobre-primaria`, `texto-sobre-destaque` e `texto-sobre-erro`.
+- Passam: `texto` em todas as camadas (11:1 ou mais); `texto-suave` em fundo, superfície, elevada, rebaixada e fundo-fim (no claro, 4,95:1 ou mais); os três `*-texto` de estado e o `destaque-texto` (4,5:1 ou mais nos dois modos); `texto-sobre-primaria`, `texto-sobre-destaque` e `texto-sobre-erro`.
 - Valores do sistema que reprovam como texto, mantidos como estão e com a proposta ao lado: `sucesso` no claro (3,1:1), `atencao` no claro (3,4:1), `destaque` e `erro` no escuro (2,8:1), branco sobre `sucesso` (3,36:1).

@@ -2,22 +2,36 @@
 
 ## Raios
 
-O raio base do tema é 17px (`raio-lg`, 1,0625rem). Os outros saem dele ou são os raios fixos das peças grandes.
+O raio base do tema é 17px (`raio-lg`, 1,0625rem). **Todo raio é proporção dele** (desde 15/11/2026), para a marca branca escalar a forma inteira trocando um valor só. A única exceção é `raio-pilula`, sempre redondo. A coluna Valor mostra o resultado no tema da Heild.
 
 | Token | Valor | Onde |
 | --- | --- | --- |
-| `raio-sm` | 8,5px | Miniatura, ícone com fundo, campo pequeno |
-| `raio-md` | 12,75px | Item de menu, célula de calendário |
-| `raio-lg` | 17px | Botão retangular, campo, cartão de chat |
-| `raio-cartao` | 20px | Cartão de conteúdo, widget |
-| `raio-campo` | 24px | Campo do chat; painel no celular |
-| `raio-xl` | 25,5px | Gaveta, diálogo |
-| `raio-painel` | 34px | Painel grande da tela no desktop |
-| `raio-pilula` | redondo | Abas segmentadas, sugestões, selos, botões redondos |
+| `raio-sm` | 8,5px (base × 0,5) | Miniatura, ícone com fundo, campo pequeno |
+| `raio-md` | 12,75px (base × 0,75) | Item de menu, célula de calendário |
+| `raio-lg` | 17px (o base) | Botão retangular, campo, cartão de chat |
+| `raio-cartao` | 20px (base × 20/17) | Cartão de conteúdo, widget |
+| `raio-campo` | 24px (base × 24/17) | Campo do chat; painel no celular |
+| `raio-xl` | 25,5px (base × 1,5) | Gaveta, diálogo |
+| `raio-painel` | 34px (base × 2) | Painel grande da tela no desktop |
+| `raio-pilula` | redondo (fixo) | Abas segmentadas, sugestões, selos, botões redondos |
 
 - Quanto maior a peça, maior o raio. Elemento dentro de outro tem raio menor que o de fora (cartão de 20px dentro de painel de 34px).
 - Nenhum canto vivo na interface. A exceção são tabela e gráfico, que ficam dentro de um cartão arredondado.
 - Botão de ação principal e sugestão são pílulas; campos e cartões, retângulos arredondados.
+- Raio em pixel solto não existe: use o token mais próximo.
+
+## Cartão clicável
+
+Cartão inteiro clicável (aviso do time, cliente na lista, cartão do kanban) tem dois estados, com os tokens que já existem:
+
+- **Hover:** a camada sobe um passo (`superficie` → `elevada`). A sombra não muda e o cartão não se move.
+- **Selecionado:** contorno de 2px em `destaque` (o marcador de seleção do índigo, em `cores.md`).
+
+## Grade de widgets
+
+- **Célula de widget:** 156px (`celula-widget`); 136px em tela baixa (janela com até 760px de altura). É a unidade do teto de altura de cada tamanho e a altura mínima de um widget.
+- O widget tem a **altura do conteúdo**, em passos de `espaco-1` (4px), de no mínimo uma célula e com teto em células. Nunca estica para fechar um vão: a grade preenche reordenando e encaixando.
+- Vale para o produto e para o site e as apresentações que mostram o produto.
 
 ## Sombras
 
