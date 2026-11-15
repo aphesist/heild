@@ -86,7 +86,7 @@ São **42 casos** no gabarito:
 - conversa com responsável;
 - "menu e integrante", com o menu confirmado, sem pista e contra o texto.
 
-Foram 2 repetições, em [`integrantes-ajustes-2026-11-15-triagem.json`](integrantes-ajustes-2026-11-15-triagem.json). A v1 (menu como regra principal, limiar 0,9) foi substituída antes da integração.
+Foram 2 repetições, em [`integrantes-ajustes-2026-11-15-triagem.json`](integrantes-ajustes-2026-11-15-triagem.json). A v1 (menu como regra principal, limiar 0,9) continua carregada para as execuções em andamento; a operação inicia a v2.
 
 | | Acerto | Erro crítico | Chamadas por execução | Custo do operário | p50 / p90 da chamada | p50 / p90 da execução |
 | --- | --- | --- | --- | --- | --- | --- |

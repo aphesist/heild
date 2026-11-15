@@ -767,7 +767,7 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - **Limites conhecidos:**
       - O cartão de sugestão vai a quem pode aprovar no setor da execução, ainda não ao atendente da conversa.
       - Recusar esse cartão encerra a execução como recusada, e o roteamento pelo menu continua valendo.
-      - A v1 (menu como regra principal, limiar 0,9) nunca foi integrada e foi substituída pela v2.
+      - A v1 (menu como regra principal, limiar 0,9), integrada com o PR #34, continua carregada (`src/setores/triagem-v1.ts`, com o mesmo hash publicado), para as execuções que começaram nela terminarem. A operação inicia a v2.
     - Pelo chat, o Assistente encaminha "triar e repassar esta conversa" com a conversa anexada (`anexos.conversa_id`).
 
 ### Resultado real (15/11/2026)

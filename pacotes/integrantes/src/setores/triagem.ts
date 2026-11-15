@@ -30,7 +30,7 @@ import { comQuemFala, NOME_DO_SETOR } from '../identificacao.ts'
 export const SETORES_DE_DESTINO = ['contabil', 'fiscal', 'dp', 'societario', 'gestao_atendimento'] as const
 export type SetorDestino = (typeof SETORES_DE_DESTINO)[number]
 
-const DESCRICAO: Record<SetorDestino, string> = {
+export const DESCRICAO: Record<SetorDestino, string> = {
   contabil: 'Contábil: lançamentos, extratos, balanço, competência dos documentos, ECD',
   fiscal: 'Fiscal: impostos, guias (DAS, DARF), notas fiscais, certidões, malha e intimações da Receita',
   dp: 'DP: folha de pagamento, funcionários, admissão, férias, rescisão, horas extras, pró-labore',
@@ -67,7 +67,7 @@ const DICA: Record<SetorDestino, string> = {
   gestao_atendimento: 'honorários, cadastro, outros assuntos',
 }
 
-// v2: devolve também a alternativa (as opções da pergunta ao cliente). A v1 nunca foi integrada.
+// v2: devolve também a alternativa (as opções da pergunta ao cliente).
 export const contratoTriagem = definirContrato({
   id: 'ges.triagem.classificar',
   versao: 2,
@@ -238,7 +238,7 @@ export const gesTriarRepassar: Procedimento = definirProcedimento(
   {
     id: 'GES-TRIAR-REPASSAR',
     // v2: o desenho do plano (integrante como padrão, limiares 0,8/0,6, pergunta ao cliente, contexto,
-    // menu e integrante). A v1 (menu como regra principal, limiar 0,9) ficou só no PR, sem integração.
+    // menu e integrante). A v1 (menu como regra principal, limiar 0,9) segue carregada em triagem-v1.ts.
     versao: 2,
     nome: 'Triar conversa do número compartilhado',
     setor: 'gestao_atendimento',

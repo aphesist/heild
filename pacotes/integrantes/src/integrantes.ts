@@ -7,6 +7,7 @@ import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
 import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
 import { gesTriarRepassar, LIMIAR_INCERTA, LIMIAR_ROTEIA } from './setores/triagem.ts'
+import { gesTriarRepassarV1 } from './setores/triagem-v1.ts'
 
 /**
  * Decisão comparável da triagem: o setor; `pergunta` quando perguntou ao cliente; `sem_acordo` no
@@ -41,7 +42,7 @@ const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
 const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassar].map(P)
 /** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
-const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha].map(P)
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
