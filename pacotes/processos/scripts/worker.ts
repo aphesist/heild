@@ -3,6 +3,9 @@
  * fila, roda os passos dos procedimentos, o despachante, os operários e os pedidos que a API
  * enfileira. Sem conector real (sessão futura), o conector `sped` responde que não está configurado.
  *
+ * Desde a B3, a API expõe os procedimentos de todos os integrantes: para rodar junto com ela, use o
+ * worker dos integrantes (`npm run worker -w @heild/integrantes`), que é este com a extensão da B3.
+ *
  * Uso: npm run worker   (DATABASE_URL padrão: o banco `heild` da API local, como superusuário)
  * Com o modelo real: HEILD_IA_FORNECEDOR=anthropic HEILD_DOLAR_REAIS=... ANTHROPIC_API_KEY=... npm run worker
  */
