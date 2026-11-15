@@ -92,7 +92,7 @@ export function RelatorioEmpresa({ e, entrega, aberto, onFechar, podeFechar, onF
   const marca = escritorio?.razao_social || escritorio?.nome_fantasia || 'Escritório'
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface max-h-[92dvh] overflow-y-auto rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
+      <DialogContent className="bg-surface max-h-[92dvh] rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
         <DialogHeader>
           <DialogTitle className="text-lg font-normal">Relatório de {rotuloCompetencia(entrega?.competencia ?? COMPETENCIA_FECHAR)} · {e.nome}</DialogTitle>
           <DialogDescription>{enviado ? `Enviado ${dataHora(entrega?.enviado_em)} por ${entrega?.enviado_por}: está no app e em Arquivos › Entregáveis › BPO financeiro.` : 'Rascunho do Gerencial. Revise o resumo; nada sai ao cliente antes de uma pessoa fechar.'}</DialogDescription>
@@ -192,7 +192,7 @@ export function RelatorioContratante({ c, entrega, aberto, onFechar, podeFechar,
   const competencia = entrega?.competencia ?? COMPETENCIA_FECHAR
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface max-h-[92dvh] overflow-y-auto rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
+      <DialogContent className="bg-surface max-h-[92dvh] rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
         <DialogHeader>
           <DialogTitle className="text-lg font-normal">Relatório de {rotuloCompetencia(competencia)} · {c.nome}</DialogTitle>
           <DialogDescription>{enviado ? `Enviado ${dataHora(entrega?.enviado_em)} por ${entrega?.enviado_por}. Sai com a marca de ${c.nome}, nunca com a do BPO.` : 'Rascunho. Sai com a marca do contratante, nunca com a do BPO.'}</DialogDescription>

@@ -14,6 +14,7 @@ import { useAparencia } from '@/hooks/useAparencia'
 import { ListaMensagens } from './ListaMensagens'
 import { useEnviarAoIntegrante } from './inicio/chat-integrante'
 import { GavetaConfigurar, GavetaHistorico, GavetaJobs, GavetaMemoria } from './inicio/gavetas-integrante'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 interface Props {
   nomeUsuario: string
@@ -168,12 +169,12 @@ function ChatIntegrante({
         </div>
       )}
 
-      <div className="area-rolagem-dupla flex-1 overflow-y-auto px-4 pt-4 sm:px-6">
+      <AreaRolagem className="flex-1 px-4 pt-4 sm:px-6">
         {mensagens.length === 0 ? <Vazio integrante={integrante} onPedir={(s) => enviar(s, [])} /> : <ListaMensagens className="mx-auto max-w-3xl pb-6 ultra:max-w-4xl" mensagens={mensagens} acoes={{ onAbrirIntegrante, onVerNaAba }} />}
         {trabalhos.map((x) => (
           <ProgressoTrabalho key={x.uid} trabalho={x} className="mx-auto mb-6 max-w-3xl ultra:max-w-4xl" />
         ))}
-      </div>
+      </AreaRolagem>
       <div className="flex flex-col gap-2 px-3 pb-3 sm:px-6 sm:pb-5">
         <FilaIntegrante className="mx-auto w-full max-w-3xl ultra:max-w-4xl" integrante={integrante} />
         <CampoChat className="mx-auto w-full max-w-3xl ultra:max-w-4xl" onEnviar={enviar} desabilitado={pensando} placeholder={`Escreva para ${t.nome}`} />

@@ -14,6 +14,7 @@ import { useConsultorApp, type MsgConsultor } from './estado'
 import { EstadoErro, SeloDemonstracao } from '@/components/kit'
 import { P } from '@/dados/arquivos'
 import { servicos } from '@/servicos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const campo = 'bg-raised shadow-contorno h-10 rounded-[12px] px-3 text-sm outline-none'
@@ -444,13 +445,13 @@ function Consultor({ ctx }: { ctx: Ctx }) {
         </Faixa>
       ) : (
         <>
-          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
+          <AreaRolagem eixo="x" className="-mx-4 flex gap-1.5 px-4 pb-1">
             {sugestoes.map((x) => (
               <button key={x} type="button" onClick={() => enviar(x)} className="bg-sunken shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
                 {x}
               </button>
             ))}
-          </div>
+          </AreaRolagem>
           <div className="bg-surface shadow-cartao sticky bottom-0 flex items-center gap-2 rounded-full py-1 pr-1 pl-4">
             <input aria-label="Pergunta ao Consultor" value={texto} onChange={(e) => setTexto(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && enviar(texto)} placeholder="Pergunte sobre a sua empresa" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
             <Button size="icon-sm" className="rounded-full" aria-label="Perguntar" onClick={() => enviar(texto)} disabled={!texto.trim() || pensando}>

@@ -149,7 +149,7 @@ export function NovoIntegrante({ aberto, onFechar, onAtivar, criados = 0, pessoa
 
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && fechar()}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="gap-5 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo integrante</DialogTitle>
           <DialogDescription>Descreva o que ele deve fazer. O sistema propõe a configuração, você revisa e ativa.</DialogDescription>

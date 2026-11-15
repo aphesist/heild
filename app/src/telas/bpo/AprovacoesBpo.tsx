@@ -20,6 +20,7 @@ import { aprovadoresPara, dataCurta, dataHora, diasAte, hora, hojeBpo, quando, r
 import { useAcoesErp } from './FichaEmpresa'
 import { usePedirBpo } from './integrantes'
 import { acaoLigada, avancarEscalonamento, confirmarDadosBancarios, escalonamentoDo, excecoesDa, impressao, limitesDa, loteForaDoSla, modoDoLote, motivoLimiteConferir, motivoLimiteLote, motivoNaoEntraNoLote, nomesPassos, regrasSlaDe, trilhaDoLote } from './regras-s08c'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const categorias = ['Matéria-prima', 'Mercadoria para revenda', 'Ocupação', 'Energia', 'Água', 'Software', 'Serviços de terceiros', 'Impostos e taxas', 'Despesas gerais']
 
@@ -662,7 +663,7 @@ function TrilhaLote({ l, e, onFechar }: { l: BpoLote; e: EmpresaVista; onFechar:
         {eventos.length === 0 ? (
           <p className="text-muted-foreground text-sm">Os passos deste lote vieram da implantação (antes da trilha da plataforma). A partir de agora, cada decisão entra aqui.</p>
         ) : (
-          <ol className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto border-l pl-3 text-sm" aria-label="Trilha do lote">
+          <AreaRolagem as="ol" className="flex max-h-[60vh] flex-col gap-2 border-l pl-3 text-sm" aria-label="Trilha do lote">
             {eventos.map((ev) => {
               const h = impressao(`${anterior}|${ev.id}|${ev.texto}`)
               const li = (
@@ -676,7 +677,7 @@ function TrilhaLote({ l, e, onFechar }: { l: BpoLote; e: EmpresaVista; onFechar:
               anterior = h
               return li
             })}
-          </ol>
+          </AreaRolagem>
         )}
       </DialogContent>
     </Dialog>

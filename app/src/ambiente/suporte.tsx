@@ -8,6 +8,7 @@ import { duracaoEscrita, useEscritaTexto } from '@/lib/escrita'
 import { cn } from '@/lib/utils'
 import { useLoja, useNavegacao, type Destino } from './loja'
 import { useSessao } from './sessao'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /*
  * Suporte da plataforma (decisão do usuário, 8/11/2026): chat com a equipe da
@@ -411,7 +412,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          <div ref={rolagem} className="area-rolagem-dupla flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
+          <AreaRolagem ref={rolagem} className="flex flex-1 flex-col gap-2 p-4">
             {secao === 'ajuda' && (
               <BlocoFaq
                 aberto={ajuda.length === 1}
@@ -589,7 +590,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
                   ))}
                 </>
               ))}
-          </div>
+          </AreaRolagem>
 
           {secao !== 'historico' && (
             <div className="border-t p-3">
@@ -707,7 +708,7 @@ function BlocoFaq({
             </button>
           ))}
         </div>
-        <ul className="area-rolagem-dupla flex max-h-64 flex-col overflow-y-auto">
+        <AreaRolagem as="ul" className="flex max-h-64 flex-col">
           {lista.map((f) => (
             <li key={f.p} className="border-border/70 border-b last:border-0">
               <details className="py-1.5">
@@ -719,7 +720,7 @@ function BlocoFaq({
             </li>
           ))}
           {lista.length === 0 && <li className="text-muted-foreground py-2 text-xs">Nada nas perguntas frequentes.</li>}
-        </ul>
+        </AreaRolagem>
         {q && (
           <Button size="sm" variant="outline" className="w-fit rounded-full" disabled={esgotado} onClick={() => onPerguntar(busca)}>
             <QuestionIcon /> Perguntar ao assistente: “{busca.slice(0, 40)}”

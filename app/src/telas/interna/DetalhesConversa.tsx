@@ -13,6 +13,7 @@ import type { ConversaInterna } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
 import { EscolherPessoas } from './NovaConversa'
 import { PontoPresenca } from './pecas'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** Detalhes da conversa (11, 2 e 3): participantes com entrada e saída, nome do grupo, arquivos, silêncio e gatilhos. */
 export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInterna; onFechar: () => void }) {
@@ -48,7 +49,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
           <XIcon />
         </Button>
       </div>
-      <div className="area-rolagem-dupla flex flex-1 flex-col gap-5 overflow-y-auto p-4 text-sm">
+      <AreaRolagem className="flex flex-1 flex-col gap-5 p-4 text-sm">
         <section className="flex flex-col gap-1">
           <span className="text-muted-foreground text-xs">{rotuloTipo[conversa.tipo]}</span>
           {conversa.tipo === 'grupo' && participo ? (
@@ -163,7 +164,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
         <p className="text-muted-foreground flex items-start gap-1.5 text-[11px]">
           <PencilSimpleIcon className="mt-0.5 size-3 shrink-0" /> Mensagens são registro do escritório: não se apagam, nem pelo Administrador. Editar guarda a versão anterior.
         </p>
-      </div>
+      </AreaRolagem>
     </div>
   )
 }

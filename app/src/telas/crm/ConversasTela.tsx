@@ -308,7 +308,9 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
           largo && <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">Escolha uma conversa.</div>
         )}
 
-        {aberta && lateralFixa && <Lateral c={aberta} tarefas={tarefas} onAbrirLead={onAbrirLead} className="area-rolagem-dupla w-80 shrink-0 overflow-y-auto border-l pb-24" />}
+        {aberta && lateralFixa && <AreaRolagem className="w-80 shrink-0 border-l pb-24">
+            <Lateral c={aberta} tarefas={tarefas} onAbrirLead={onAbrirLead} />
+          </AreaRolagem>}
       </div>
       {aberta && !lateralFixa && (
         <Sheet open={lateral} onOpenChange={setLateral}>
@@ -317,7 +319,9 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
               <SheetTitle>{aberta.cliente ?? 'Lead'}</SheetTitle>
               <SheetDescription>O cadastro de quem escreve, projetado na conversa.</SheetDescription>
             </SheetHeader>
-            <Lateral c={aberta} tarefas={tarefas} onAbrirLead={onAbrirLead} className="area-rolagem-dupla overflow-y-auto" />
+            <AreaRolagem className="flex-1">
+              <Lateral c={aberta} tarefas={tarefas} onAbrirLead={onAbrirLead} />
+            </AreaRolagem>
           </SheetContent>
         </Sheet>
       )}

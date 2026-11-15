@@ -4,6 +4,7 @@ import { ResponsavelTarefa, StatusTarefaBadge } from '@/components/compostos/car
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { atrasadaE, diasNoStatus, responsavelE, type TarefaE } from './modelo'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** Gaveta larga das telas da S04 (ficha, trilha, lista completa). No celular ocupa a tela. */
 export function GavetaLarga({ titulo, descricao, onFechar, children, rodape, largura = 'xl' }: { titulo: ReactNode; descricao?: ReactNode; onFechar: () => void; children: ReactNode; rodape?: ReactNode; largura?: 'xl' | '3xl' | '5xl' }) {
@@ -20,7 +21,7 @@ export function GavetaLarga({ titulo, descricao, onFechar, children, rodape, lar
           <SheetTitle className="text-base leading-snug">{titulo}</SheetTitle>
           {descricao && <SheetDescription asChild><div>{descricao}</div></SheetDescription>}
         </SheetHeader>
-        <div className="area-rolagem-dupla flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-4">{children}</div>
+        <AreaRolagem className="flex flex-1 flex-col gap-5 p-4">{children}</AreaRolagem>
         {rodape && <footer className="flex flex-wrap items-center gap-2 border-t p-3">{rodape}</footer>}
       </SheetContent>
     </Sheet>

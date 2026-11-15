@@ -1,3 +1,4 @@
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 const meta: Meta = {
@@ -17,19 +18,19 @@ const linhas = Array.from({ length: 40 }, (_, i) => `Linha ${i + 1} · Padaria P
 
 export const Vertical: StoryObj = {
   render: () => (
-    <div className="bg-card h-72 max-w-md overflow-y-auto rounded-[18px] p-4 text-sm">
+    <AreaRolagem className="bg-card h-72 max-w-md rounded-[18px] p-4 text-sm">
       {linhas.map((l) => (
         <p key={l} className="py-1">
           {l}
         </p>
       ))}
-    </div>
+    </AreaRolagem>
   ),
 }
 
 export const Horizontal: StoryObj = {
   render: () => (
-    <div className="bg-card max-w-md overflow-x-auto rounded-[18px] p-4">
+    <AreaRolagem eixo="x" className="bg-card max-w-md rounded-[18px] p-4">
       <div className="flex w-[1400px] gap-2">
         {linhas.slice(0, 20).map((l) => (
           <span key={l} className="bg-muted shrink-0 rounded-full px-3 py-1 text-xs">
@@ -37,14 +38,14 @@ export const Horizontal: StoryObj = {
           </span>
         ))}
       </div>
-    </div>
+    </AreaRolagem>
   ),
 }
 
 export const SemBarra: StoryObj = {
   name: 'Sem barra (faixas)',
   render: () => (
-    <div className="bg-card sem-barra max-w-md overflow-x-auto rounded-[18px] p-4">
+    <AreaRolagem eixo="x" className="bg-card sem-barra max-w-md rounded-[18px] p-4">
       <div className="flex w-[1400px] gap-2">
         {linhas.slice(0, 20).map((l) => (
           <span key={l} className="bg-muted shrink-0 rounded-full px-3 py-1 text-xs">
@@ -52,6 +53,6 @@ export const SemBarra: StoryObj = {
           </span>
         ))}
       </div>
-    </div>
+    </AreaRolagem>
   ),
 }

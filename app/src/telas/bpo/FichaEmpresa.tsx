@@ -21,6 +21,7 @@ import { ImplantacaoBpo, passosImplantacao, SaidaBpo } from './ImplantacaoBpo'
 import { textoCaptura, usePedirBpo } from './integrantes'
 import { explicarAudit, usePedirS08a } from './integrantes-s08a'
 import { extrasS08a, gravarS08a, maisDias, slaPadrao } from './perfil-s08a'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** Passos da implantação (10, 3.3); a lista mora em `ImplantacaoBpo.tsx` (S08a). */
 export const passosOnboarding = passosImplantacao
@@ -206,19 +207,20 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
 
   return (
     <Sheet open onOpenChange={(v) => !v && onFechar()}>
-      <SheetContent className="gap-0 overflow-y-auto sm:max-w-2xl">
-        <SheetHeader className="bg-background/95 sticky top-0 z-10 gap-2 px-5 pt-5 pb-3 backdrop-blur">
+      <SheetContent className="gap-0 sm:max-w-2xl">
+        <AreaRolagem className="flex flex-1 flex-col">
+        <SheetHeader data-cabecalho-fixo className="bg-background/95 sticky top-0 z-10 gap-2 px-5 pt-5 pb-3 backdrop-blur">
           <SheetTitle className="pr-8 text-xl font-light">{nome}</SheetTitle>
           <SheetDescription>
             Ficha BPO · {rotuloSituacaoPerfil[perfil.situacao]} · {perfil.analista_nome === perfil.responsavel_nome ? perfil.responsavel_nome : `${perfil.analista_nome} faz, ${perfil.responsavel_nome} confere`}
           </SheetDescription>
-          <nav aria-label="Seções da ficha" className="-mx-1 flex gap-1 overflow-x-auto pb-0.5">
+          <AreaRolagem eixo="x" as="nav" aria-label="Seções da ficha" className="-mx-1 flex gap-1 pb-0.5">
             {secoes.map((s) => (
               <button key={s.id} type="button" onClick={() => irPara(s.id)} className="text-muted-foreground hover:text-foreground hover:bg-sunken shrink-0 cursor-pointer rounded-full px-2.5 py-1 text-xs">
                 {s.rotulo}
               </button>
             ))}
-          </nav>
+          </AreaRolagem>
         </SheetHeader>
         <div ref={corpo} className="flex flex-col gap-6 px-5 pt-3 pb-10">
           {e && (
@@ -390,6 +392,7 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
         </div>
         {editar && <EditarPerfil perfil={perfil} nome={nome} onFechar={() => setEditar(false)} />}
         {conectar && <ConectarGaveta tipo={conectar} perfil={perfil} nome={nome} onFechar={() => setConectar(null)} />}
+        </AreaRolagem>
       </SheetContent>
     </Sheet>
   )

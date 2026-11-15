@@ -2,6 +2,7 @@ import { ArrowsOutCardinalIcon, MinusIcon } from '@phosphor-icons/react'
 import { createContext, useContext, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { dimensoes, type DefWidget, type TamanhoWidget } from './tipos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const ContextoTamanho = createContext<TamanhoWidget>('M')
 
@@ -70,7 +71,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
           {!editando && def.acao && <div className="ml-auto flex shrink-0 items-center">{def.acao}</div>}
           {editando && <ArrowsOutCardinalIcon className="text-muted-foreground ml-auto size-4" aria-hidden />}
         </header>
-        <div data-corpo-widget className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-x-hidden overflow-y-auto', editando && 'pointer-events-none')}>{def.conteudo(usado)}</div>
+        <AreaRolagem data-corpo-widget className={cn('@container flex-1', editando && 'pointer-events-none')}>{def.conteudo(usado)}</AreaRolagem>
 
         {editando && (
           <>

@@ -12,6 +12,7 @@ import { pastaDoCliente, rotuloTipoDoc, type Documento, type VersaoDocumento } f
 import { registrar } from '@/nucleo/repositorios'
 import { useTema } from '@/theme/ThemeProvider'
 import type { SetorIntegrante } from '@/theme/tipos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Ações sobre um documento (S09-T01 e T02; 01, 7.4, 7.7 e 7.8; D-16; D-34),
@@ -100,7 +101,7 @@ export function DialogoVersoes({ d, onFechar }: { d: Documento; onFechar: () => 
           {versoes.length < 2 ? (
             <p className="text-muted-foreground p-6 text-sm">Este arquivo tem uma versão só. Quando alguém alterar na nuvem, a anterior fica guardada aqui.</p>
           ) : (
-            <div className="area-rolagem-dupla grid min-h-0 flex-1 gap-4 overflow-y-auto p-4 md:grid-cols-2">
+            <AreaRolagem className="grid flex-1 gap-4 p-4 md:grid-cols-2">
               {[
                 [ve, esq, setEsq],
                 [vd, dir, setDir],
@@ -117,7 +118,7 @@ export function DialogoVersoes({ d, onFechar }: { d: Documento; onFechar: () => 
                   </div>
                 )
               })}
-            </div>
+            </AreaRolagem>
           )}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -258,7 +259,7 @@ export function DialogoComprovante({ d, onFechar }: { d: Documento; onFechar: ()
               </Button>
             </DialogPrimitive.Close>
           </header>
-          <div className="bg-sunken/60 area-rolagem-dupla min-h-0 flex-1 overflow-y-auto p-4 sm:p-8">
+          <AreaRolagem className="bg-sunken/60 flex-1 p-4 sm:p-8">
             {/* A folha é sempre clara, como papel, com o cabeçalho do tema do escritório. */}
             <div className="mx-auto flex w-full max-w-[560px] flex-col gap-3 bg-white p-[7%] text-black shadow-[0_1px_2px_rgba(0,0,0,.12),0_12px_32px_-12px_rgba(0,0,0,.35)]">
               <header className="flex items-center gap-2 border-b border-black/10 pb-2">
@@ -300,7 +301,7 @@ export function DialogoComprovante({ d, onFechar }: { d: Documento; onFechar: ()
               )}
               <footer className="mt-4 border-t border-black/10 pt-1.5 font-mono text-[8.5px] text-black/45">Gerado em {new Date().toLocaleString('pt-BR')} por {usuario.nome}. O registro de entrega só cresce e segue a impressão digital do arquivo.</footer>
             </div>
-          </div>
+          </AreaRolagem>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

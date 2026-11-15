@@ -13,6 +13,7 @@ import { GavetaContestacao, qtdUnidade } from './GestaoBpo'
 import { useVariaveisContratante } from './ModuloBpo'
 import { rotuloBola, slaDe } from './OperacaoBpo'
 import { COMPETENCIA_FECHAR, RelatorioContratante, rotuloCompetencia, siglaDe } from './RelatorioBpo'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 type Aba = 'inicio' | 'fila' | 'aprovacoes' | 'relatorios' | 'volume' | 'conversa'
 const rotuloPapel = (p: string) => (p === 'responsavel_tecnico' ? 'responsável técnico' : p === 'socio' ? 'sócio' : 'equipe')
@@ -90,7 +91,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
       {!g ? (
         <main className="flex flex-1 items-center justify-center p-6 text-center text-sm">Nenhum convidado ativo neste contratante. O Administrador do BPO convida em Configuração.</main>
       ) : primeiroAcesso ? (
-        <main className="flex flex-1 items-center justify-center overflow-y-auto p-4">
+        <AreaRolagem as="main" className="flex flex-1 items-center justify-center p-4">
           <section className="bg-surface shadow-cartao flex w-full max-w-md flex-col gap-3 rounded-[24px] p-5" aria-label="Primeiro acesso">
             <EnvelopeOpenIcon className="size-8" />
             <h1 className="text-xl font-light">Olá, {g.nome.split(' ')[0]}. Você foi convidado por {c.nome}.</h1>
@@ -106,10 +107,10 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
               <CheckIcon /> Aceitar o convite e entrar
             </Button>
           </section>
-        </main>
+        </AreaRolagem>
       ) : (
         <>
-          <nav className="overflow-x-auto px-4 pt-3 sm:px-6">
+          <AreaRolagem eixo="x" as="nav" className="px-4 pt-3 sm:px-6">
             <Segmentado
               rotulo="Seções do portal"
               valor={aba}
@@ -123,8 +124,8 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                 { valor: 'conversa', rotulo: 'Conversa' },
               ]}
             />
-          </nav>
-          <main className="flex-1 overflow-y-auto px-4 pt-4 pb-10 sm:px-6">
+          </AreaRolagem>
+          <AreaRolagem as="main" className="flex-1 px-4 pt-4 pb-10 sm:px-6">
             <div className="mx-auto flex max-w-4xl flex-col gap-4">
               {aba === 'inicio' && (
                 <>
@@ -325,7 +326,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                 </section>
               )}
             </div>
-          </main>
+          </AreaRolagem>
         </>
       )}
       {contestar && c.volume && (

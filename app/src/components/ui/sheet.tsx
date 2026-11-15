@@ -2,6 +2,7 @@ import { Dialog as SheetPrimitive } from 'radix-ui'
 import { XIcon } from '@phosphor-icons/react'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from './area-rolagem'
 
 /** Gaveta lateral (ex.: gaveta do chat, subplano 03, 2.5). */
 export const Sheet = SheetPrimitive.Root
@@ -19,7 +20,7 @@ export function SheetContent({
       <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30" />
       <SheetPrimitive.Content
         className={cn(
-          'bg-popover text-popover-foreground fixed inset-y-0 z-50 flex w-full flex-col gap-4 border-l shadow-lg sm:max-w-md',
+          'bg-popover text-popover-foreground fixed inset-y-0 z-50 flex w-full flex-col gap-4 shadow-lg sm:max-w-md',
           lado === 'direita' ? 'right-0 border-l' : 'left-0 border-r',
           className,
         )}
@@ -33,6 +34,11 @@ export function SheetContent({
       </SheetPrimitive.Content>
     </SheetPrimitive.Portal>
   )
+}
+
+/** Corpo da gaveta: rola entre o cabeçalho e o rodapé, com o esmaecido. */
+export function SheetCorpo({ className, ...props }: ComponentProps<'div'>) {
+  return <AreaRolagem className={cn('flex flex-1 flex-col gap-5 p-4', className)} {...props} />
 }
 
 export function SheetHeader({ className, ...props }: ComponentProps<'div'>) {

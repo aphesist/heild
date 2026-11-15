@@ -20,6 +20,7 @@ import { rotuloBola, slaDe, useAcoesFila } from './comum-fila'
 import { bolaDesde, bolaParada, horasDesde, noDiaDaDemo, motivoRisco, riscoDe, rotuloCanal, rotuloTipoItem, textoHoras, useDocumentosBpo, useHistorico } from './dados'
 import { CaixaDocumentos } from './documentos'
 import { usePedirOperacao, useTrabalhandoEm } from './integrantes'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 type FiltroBola = 'todas' | 'bpo' | 'cliente' | 'terceiro'
 type FiltroTipo = 'todos' | BpoItemFila['tipo']
@@ -464,7 +465,8 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
     })
   return (
     <Sheet open onOpenChange={(v) => !v && onFechar()}>
-      <SheetContent className="gap-0 overflow-y-auto sm:max-w-xl">
+      <SheetContent className="gap-0 sm:max-w-xl">
+        <AreaRolagem className="flex flex-1 flex-col">
         <SheetHeader className="px-5 pt-5">
           <SheetTitle className="text-xl font-light">{f.texto}</SheetTitle>
           <SheetDescription>
@@ -661,6 +663,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
           )}
         </div>
         {lancar && <GavetaLancarConta e={e} f={f} onFechar={() => setLancar(false)} />}
+        </AreaRolagem>
       </SheetContent>
     </Sheet>
   )

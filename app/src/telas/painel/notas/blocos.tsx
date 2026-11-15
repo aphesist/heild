@@ -19,6 +19,7 @@ import { contatoDocs, nomeCliente } from './acoes'
 import { GavetaAbrirZip, GavetaConfigurarCaptura, GavetaDivergencia, GavetaRegistrarNfse } from './gavetas'
 import { useForcarCaptura, usePodeNotas } from './hooks'
 import { SaudeCaptura } from './saude'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const botaoAcao = 'h-6 rounded-full px-2 text-xs'
 const fmt = (n: number) => n.toLocaleString('pt-BR')
@@ -271,7 +272,7 @@ function Manifestacao({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
         </div>
       </div>
       {t === 'G' && (
-        <ul className="divide-border/70 flex min-h-0 flex-col divide-y overflow-y-auto">
+        <AreaRolagem as="ul" className="divide-border/70 flex flex-col divide-y">
           {semConclusao.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5">
               <span className="min-w-0 flex-1">
@@ -301,7 +302,7 @@ function Manifestacao({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
             .map((r) => (
               <Linha key={r.id} inicio={<IconeSituacao s="ok" />} titulo={r.nota} detalhe={`${r.situacao === 'confirmada' ? 'operação confirmada' : r.situacao === 'desconhecida' ? 'desconhecida' : 'não realizada'} · ${r.emitente}`} className="py-1.5" />
             ))}
-        </ul>
+        </AreaRolagem>
       )}
       {t === 'G' && semCiencia.length > 0 && pode.manifestar && (
         <Button size="sm" variant="outline" className="mt-auto w-fit shrink-0 rounded-full" onClick={ciencia}>
@@ -566,7 +567,7 @@ function EnvioCore({ clienteId, t }: { clienteId: string; t: TamanhoWidget }) {
   }
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
-      <ul className="divide-border/70 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
+      <AreaRolagem as="ul" className="divide-border/70 flex flex-1 flex-col divide-y">
         {!e.lotes.length && <li className="text-muted-foreground py-2 text-sm">Nenhum lote para enviar.</li>}
         {(t === 'M' ? e.lotes.filter((l) => l.erros).slice(0, 2) : e.lotes).map((l) => (
           <Linha
@@ -583,7 +584,7 @@ function EnvioCore({ clienteId, t }: { clienteId: string; t: TamanhoWidget }) {
             }
           />
         ))}
-      </ul>
+      </AreaRolagem>
       {t !== 'M' && (
         <div className="border-border/70 flex shrink-0 flex-col gap-1 border-t pt-2">
           {e.guarda.map((g) => (
@@ -726,7 +727,7 @@ function AtendimentoEmissao({ clienteId, t }: { clienteId: string; t: TamanhoWid
   return (
     <div className="flex h-full flex-col gap-2">
       {erro && <EstadoErro descricao={erro} className="py-3" />}
-      <ul className="divide-border/70 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
+      <AreaRolagem as="ul" className="divide-border/70 flex flex-1 flex-col divide-y">
         {e.emissoes.map((n) => (
           <Linha
             key={n.id}
@@ -793,7 +794,7 @@ function AtendimentoEmissao({ clienteId, t }: { clienteId: string; t: TamanhoWid
           />
         ))}
         {!e.emissoes.length && !e.atendimento.length && !e.faltando.length && <li className="text-muted-foreground py-2 text-sm">Nenhum pedido do cliente nem nota faltando.</li>}
-      </ul>
+      </AreaRolagem>
       {pode.documento && (
         <div className="mt-auto flex flex-wrap gap-1.5">
           <Button size="sm" variant="outline" className={botaoAcao} onClick={() => setGaveta('nfse')}>

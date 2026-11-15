@@ -482,7 +482,7 @@ function ServicosSimulados() {
                     {r.r.demonstracao && <SeloDemonstracao fonte={r.r.fonte} />}
                     <span className="text-muted-foreground text-[11px]">{r.r.latencia_ms} ms</span>
                   </div>
-                  <pre className="max-h-32 overflow-auto font-mono text-[11px] leading-snug whitespace-pre-wrap">{JSON.stringify(r.r.dados, null, 1)}</pre>
+                  <AreaRolagem eixo="ambos" as="pre" className="max-h-32 font-mono text-[11px] leading-snug whitespace-pre-wrap">{JSON.stringify(r.r.dados, null, 1)}</AreaRolagem>
                 </div>
               )}
             </li>

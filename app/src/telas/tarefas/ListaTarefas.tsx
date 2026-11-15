@@ -18,6 +18,7 @@ import type { SetorIntegrante } from '@/theme/tipos'
 import { opcoesResponsavel } from './FichaTarefa'
 import { acoesTarefa, atrasadaE, cartaoPendenteE, diaMes, diasNoStatus, HOJE_ISO, nomeClienteE, prazoE, responsavelE, rotuloOrigem, useClientesE, useTarefasE, type TarefaE } from './modelo'
 import { FiltroSelect, ResponsavelDe, StatusE } from './pecas'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 export type VisaoLista = 'lista' | 'responsavel' | 'calendario' | 'revisao'
 
@@ -175,9 +176,9 @@ export function ListaTarefas({
       )}
       {f.visao === 'responsavel' && <PorResponsavel tarefas={visiveis} setor={setor} gere={gere} />}
       {f.visao === 'calendario' && (
-        <div className="overflow-x-auto">
+        <AreaRolagem eixo="x" className="">
           <Calendario tarefas={visiveis.map((t) => paraTela(t, clientes))} visao="semana" onReprogramar={(t, prazo) => executar(() => acoesTarefa.reprogramar(t.id, isoDeDiaMes(prazo)), { sucesso: `Prazo interno: ${prazo}` })} />
-        </div>
+        </AreaRolagem>
       )}
       {f.visao === 'revisao' && <FilaRevisao tarefas={emRevisao} />}
     </div>
@@ -314,7 +315,7 @@ export function PorResponsavel({ tarefas, setor, gere }: { tarefas: TarefaE[]; s
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-muted-foreground text-xs">{gere ? 'Arraste uma tarefa para outra pessoa ou integrante para reatribuir.' : 'Você vê as tarefas dos colegas do setor; só o Gestor reatribui.'}</p>
-      <div className="overflow-x-auto pb-1">
+      <AreaRolagem eixo="x" className="pb-1">
         <Quadro
           colunas={colunas}
           itens={tarefas}
@@ -343,7 +344,7 @@ export function PorResponsavel({ tarefas, setor, gere }: { tarefas: TarefaE[]; s
             </button>
           )}
         />
-      </div>
+      </AreaRolagem>
     </div>
   )
 }

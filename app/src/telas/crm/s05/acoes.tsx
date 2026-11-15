@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { registrar, repos } from '@/nucleo/repositorios'
 import { useTema } from '@/theme/ThemeProvider'
 import { categoriasAtendimento, useCfgAtendimento } from './config'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 type Atualizar = (f: (c: ConversaCrm) => ConversaCrm) => void
 type MsgItem = Extract<ItemConversa, { tipo: 'mensagem' }>
@@ -143,7 +144,7 @@ export function DialogoMover({ c, conversas, aberto, onFechar, onMover }: { c: C
       ) : (
         <>
           <CampoEscolha rotulo="Conversa de destino" valor={alvo} onMudar={setDestino} opcoes={destinos.map((x) => ({ valor: x.id, rotulo: `${x.cliente ?? 'Lead'} · ${rotuloSetor[x.setor]} · ${x.pessoa.nome}` }))} />
-          <ul className="flex max-h-64 flex-col gap-1 overflow-y-auto">
+          <AreaRolagem as="ul" className="flex max-h-64 flex-col gap-1">
             {doCliente.map((m) => (
               <li key={m.id}>
                 <label className="hover:bg-sunken flex cursor-pointer items-start gap-2 rounded-[12px] px-2 py-1.5 text-sm">
@@ -155,7 +156,7 @@ export function DialogoMover({ c, conversas, aberto, onFechar, onMover }: { c: C
                 </label>
               </li>
             ))}
-          </ul>
+          </AreaRolagem>
         </>
       )}
     </Modal>
@@ -335,7 +336,7 @@ export function SimulacaoAtendimento({ aberto, onFechar }: { aberto: boolean; on
           Simulação · categorias liberadas: {liberadas.length ? liberadas.map((c) => c.rotulo).join(', ') : 'nenhuma (o integrante só sugere; começa assim, D-33)'}.
         </span>
       </div>
-      <ol className="bg-sunken/60 flex max-h-80 min-h-48 flex-col gap-2 overflow-y-auto rounded-[16px] p-3">
+      <AreaRolagem as="ol" className="bg-sunken/60 flex max-h-80 min-h-48 flex-col gap-2 rounded-[16px] p-3">
         {falas.length === 0 && <li className="text-muted-foreground m-auto text-center text-xs">Escreva como um cliente escreveria. Ex.: "Manda a segunda via do DAS?", "Quanto custa a contabilidade?"</li>}
         {falas.map((f, i) => (
           <li key={i} className={cn('flex max-w-[85%] flex-col gap-1', f.de === 'cliente' ? 'self-start' : 'self-end items-end')}>
@@ -356,7 +357,7 @@ export function SimulacaoAtendimento({ aberto, onFechar }: { aberto: boolean; on
           </li>
         ))}
         {pensando && <li className="text-muted-foreground self-end text-xs">{t.nome} está escrevendo…</li>}
-      </ol>
+      </AreaRolagem>
       <form
         className="flex items-center gap-2"
         onSubmit={(e) => {

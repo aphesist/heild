@@ -18,6 +18,7 @@ import { usePedirS08d, useTrabalhandoS08d } from './efeitos-s08d'
 import { BlocoAssinatura, margemPorDepto, qtdUnidade } from './GestaoBpo'
 import { rotuloBola, slaDe, useAcoesFila } from './OperacaoBpo'
 import { COMPETENCIA_FECHAR, RelatorioContratante } from './RelatorioBpo'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 export const rotuloDepto: Record<string, string> = { dp: 'DP', fiscal: 'Fiscal', contabil: 'Contábil', societario: 'Societário' }
 const rotuloModoContato: Record<Subinquilino['modo_contato'], string> = { invisivel: 'invisível (o cliente final não vê o BPO)', marca: 'com a marca do contratante', direto: 'direto (o BPO fala em nome próprio)' }
@@ -335,7 +336,7 @@ export function ConversaContratante({ c, lado, nome }: { c: ContratanteVista; la
   }
   return (
     <div className="flex flex-col gap-2">
-      <ol className="flex max-h-64 flex-col gap-2 overflow-y-auto" aria-label={`Conversa com ${lado === 'bpo' ? c.nome : 'a equipe'}`}>
+      <AreaRolagem as="ol" className="flex max-h-64 flex-col gap-2" aria-label={`Conversa com ${lado === 'bpo' ? c.nome : 'a equipe'}`}>
         {msgs.length === 0 && <li className="text-muted-foreground text-sm">Nenhuma mensagem ainda.</li>}
         {msgs.map((m) => (
           <li key={m.id} className={cn('flex max-w-[85%] flex-col rounded-[14px] px-3 py-2 text-sm', m.de === lado ? 'bg-primary text-primary-foreground self-end' : 'bg-sunken self-start')}>
@@ -345,7 +346,7 @@ export function ConversaContratante({ c, lado, nome }: { c: ContratanteVista; la
             {m.texto}
           </li>
         ))}
-      </ol>
+      </AreaRolagem>
       <form
         className="flex gap-2"
         onSubmit={(ev) => {

@@ -353,7 +353,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
             </Caixa>
             <Caixa>
               <Pergunta>O que os integrantes fizeram, custaram e pouparam?</Pergunta>
-              <div className="-mx-1 overflow-x-auto px-1">
+              <AreaRolagem eixo="x" className="-mx-1 px-1">
                 <table className="w-full min-w-[560px] text-sm">
                   <thead>
                     <tr className="text-muted-foreground text-left text-xs">
@@ -388,7 +388,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                   </tbody>
                 </table>
                 {!porIntegrante.length && <p className="text-muted-foreground py-3 text-sm">Nenhum trabalho de integrante neste filtro.</p>}
-              </div>
+              </AreaRolagem>
               <p className="text-muted-foreground text-xs">Série separada: nunca soma com as horas humanas. Aprovação = cartões aprovados sem edição.</p>
             </Caixa>
           </div>
@@ -574,7 +574,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
             <Caixa>
               <Pergunta>O padrão do catálogo está certo?</Pergunta>
               {ts.duracoes.length ? (
-                <div className="-mx-1 overflow-x-auto px-1">
+                <AreaRolagem eixo="x" className="-mx-1 px-1">
                   <table className="w-full min-w-[420px] text-sm">
                     <thead>
                       <tr className="text-muted-foreground text-left text-xs">
@@ -609,7 +609,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </AreaRolagem>
               ) : (
                 <p className="text-muted-foreground text-sm">A calibração aparece com 20 ou mais sessões medidas por atividade (05, 11.2).</p>
               )}

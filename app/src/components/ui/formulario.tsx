@@ -3,6 +3,7 @@ import { useId, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from './sheet'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Kit de formulário do sistema: a gaveta de cadastro e edição e os campos.
@@ -56,7 +57,7 @@ export function GavetaFormulario({
             if (!acaoDesabilitada) onAcao()
           }}
         >
-          <div className="area-rolagem-dupla flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-4">{children}</div>
+          <AreaRolagem className="flex flex-1 flex-col gap-5 p-4">{children}</AreaRolagem>
           <footer className="flex items-center gap-2 border-t p-3">
             {secundaria}
             <Button type="button" variant="ghost" className="ml-auto rounded-full" onClick={onFechar}>

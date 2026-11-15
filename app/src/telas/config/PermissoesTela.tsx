@@ -114,7 +114,7 @@ export function PermissoesTela() {
           {matriz.length === 0 ? (
             <EstadoVazio titulo="Nenhuma conta ativa" />
           ) : (
-            <div className="area-rolagem-dupla -mx-1 overflow-x-auto px-1">
+            <AreaRolagem eixo="x" className="-mx-1 px-1">
               <table className="w-full min-w-[640px] border-separate border-spacing-0 text-sm" aria-label="Matriz de permissões">
                 <thead>
                   <tr>
@@ -171,7 +171,7 @@ export function PermissoesTela() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </AreaRolagem>
           )}
         </Caixa>
 

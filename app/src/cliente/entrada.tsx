@@ -15,6 +15,7 @@ import { agoraTexto, HOJE, textosDoApp, type ConviteApp } from './dados'
 import { useAcesso, useConvites, type AcessoPessoa } from './estado'
 import { Campo, classeCampo, Faixa } from './pecas'
 import { enviarCodigo } from './simulados'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * S10-T01 · Entrada, primeiro acesso e convite (06, 2.1 e 2.2). Sem senha:
@@ -66,7 +67,7 @@ export function EntradaApp({ pessoas, onEntrar }: { pessoas: PessoaApp[]; onEntr
   }
 
   return (
-    <div className="area-rolagem-dupla flex h-full flex-col gap-5 overflow-y-auto px-6 py-8 [&>*]:shrink-0">
+    <AreaRolagem className="flex h-full flex-col gap-5 px-6 py-8 [&>*]:shrink-0">
       <div className="-ml-2 flex items-center gap-2.5">
         {ehHeild(tema) ? <Marca /> : <SiglaMarca />}
         <span>
@@ -176,7 +177,7 @@ export function EntradaApp({ pessoas, onEntrar }: { pessoas: PessoaApp[]; onEntr
           }}
         />
       )}
-    </div>
+    </AreaRolagem>
   )
 }
 

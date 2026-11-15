@@ -12,6 +12,7 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { visivelAoCliente, type Documento, type TipoDocumento } from '@/dados/arquivos'
 import type { DocumentoAba } from '@/dados/painel'
 import type { SetorIntegrante } from '@/theme/tipos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * D. Documentos da aba (03, 5 D; S02-A06 a A11): os mesmos arquivos de
@@ -166,7 +167,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
     <div className="flex flex-col gap-2">
       {gavetas}
       {filaAviso}
-      <div className="-mx-1 overflow-x-auto px-1">
+      <AreaRolagem eixo="x" className="-mx-1 px-1">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="text-muted-foreground text-left text-xs">
@@ -215,7 +216,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
             ))}
           </tbody>
         </table>
-      </div>
+      </AreaRolagem>
     </div>
   )
 }

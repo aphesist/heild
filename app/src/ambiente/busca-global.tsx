@@ -9,6 +9,7 @@ import { useTabela } from '@/nucleo/react'
 import { useClienteDaRota, useClientesNoEscopo } from './contexto-cliente'
 import { useLoja, useNavegacao, type IdModulo } from './loja'
 import { useSessao } from './sessao'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Busca global (S01-T09; contrato C7). Abre pelo ícone do cabeçalho, por
@@ -136,7 +137,7 @@ export function BuscaGlobal() {
         <DialogDescription id="busca-ajuda" className="sr-only">
           Busca só no que a sua conta pode ver. Setas para escolher, Enter para abrir.
         </DialogDescription>
-        <ul ref={lista} id="busca-resultados" role="listbox" aria-label="Resultados" className="area-rolagem-dupla min-h-0 flex-1 overflow-y-auto p-2">
+        <AreaRolagem as="ul" ref={lista} id="busca-resultados" role="listbox" aria-label="Resultados" className="flex-1 p-2">
           {!termo.trim() && (
             <li className="flex flex-col gap-3 px-3 py-4">
               <span className="text-muted-foreground text-xs">Experimente</span>
@@ -188,7 +189,7 @@ export function BuscaGlobal() {
               </ul>
             </li>
           ))}
-        </ul>
+        </AreaRolagem>
         <div className="text-muted-foreground flex items-center gap-3 border-t px-4 py-2 text-xs max-sm:hidden">
           <span>
             <kbd className="font-sans">↑↓</kbd> escolher

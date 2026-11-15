@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { CampoForm } from './dados'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Peças do app do cliente (S10). Tudo com as camadas e tokens do tema, para a
@@ -68,9 +69,9 @@ export function Chip({ ativo, onClick, children, contagem }: { ativo?: boolean; 
 
 export function Chips({ children, rotulo }: { children: ReactNode; rotulo?: string }) {
   return (
-    <div role="group" aria-label={rotulo} className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5">
+    <AreaRolagem eixo="x" role="group" aria-label={rotulo} className="-mx-4 flex gap-1.5 px-4 pb-0.5">
       {children}
-    </div>
+    </AreaRolagem>
   )
 }
 
@@ -112,7 +113,7 @@ export function Folha({ titulo, onFechar, children, rodape, rotulo }: { titulo: 
             <XIcon className="size-4" />
           </button>
         </header>
-        <div className="area-rolagem-dupla flex min-h-0 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4">{children}</div>
+        <AreaRolagem className="flex flex-col gap-3 px-4 pt-1 pb-4">{children}</AreaRolagem>
         {rodape && <div className="flex flex-col gap-2 border-t px-4 pt-3 pb-4">{rodape}</div>}
       </div>
     </div>

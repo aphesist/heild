@@ -8,6 +8,7 @@ import { CampoEscolha, CampoTexto, Interruptor } from '@/components/ui/formulari
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import type { Comunicado, Regua } from '@/dados/crm'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /* ---------- S05-A40: segmento descrito em texto vira predicado em tabela para confirmar ---------- */
 
@@ -122,7 +123,7 @@ export function ResultadoComunicado({ c, onFechar }: { c: Comunicado | null; onF
           <SheetTitle>{c?.titulo}</SheetTitle>
           <SheetDescription>Resultado por destinatário. Respostas abrem conversa no setor, etiquetadas com o comunicado.</SheetDescription>
         </SheetHeader>
-        <ul className="area-rolagem-dupla flex flex-col gap-1 overflow-y-auto p-3">
+        <AreaRolagem as="ul" className="flex flex-col gap-1 p-3">
           {c?.status !== 'enviado' && <li className="text-muted-foreground p-6 text-center text-sm">Ainda não saiu: o resultado aparece depois do envio.</li>}
           {c?.status === 'enviado' &&
             destinatarios.map((d, i) => (
@@ -144,7 +145,7 @@ export function ResultadoComunicado({ c, onFechar }: { c: Comunicado | null; onF
                 )}
               </li>
             ))}
-        </ul>
+        </AreaRolagem>
       </SheetContent>
     </Sheet>
   )

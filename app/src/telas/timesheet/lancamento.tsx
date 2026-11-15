@@ -13,6 +13,7 @@ import { repos } from '@/nucleo/repositorios'
 import { Caixa } from './comum'
 import { useTimesheet, type Ts } from './dados'
 import { Pergunta } from './graficos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** Evento para abrir o lançamento de qualquer tela, com o contexto da origem: `{ cliente_id?, tarefa_id?, dia? }`. */
 export const EVENTO_LANCAR = 'heild:ts-lancar'
@@ -301,7 +302,7 @@ export function SemanaManual({ dias, onLancar, onAbrir }: { dias: string[]; onLa
       >
         O que lancei à mão nesta semana?
       </Pergunta>
-      <div className="-mx-1 overflow-x-auto px-1">
+      <AreaRolagem eixo="x" className="-mx-1 px-1">
         <table className="w-full min-w-[560px] text-sm" data-testid="ts-semana-manual">
           <thead>
             <tr className="text-muted-foreground text-left text-xs">
@@ -366,7 +367,7 @@ export function SemanaManual({ dias, onLancar, onAbrir }: { dias: string[]; onLa
             </tfoot>
           )}
         </table>
-      </div>
+      </AreaRolagem>
     </Caixa>
   )
 }

@@ -10,6 +10,7 @@ import { CampoTexto } from '@/components/ui/formulario'
 import { cn } from '@/lib/utils'
 import type { Id } from '@/nucleo/modelo/entidades'
 import { PontoPresenca } from './pecas'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** Lista de colegas para escolher (conversa pessoal, grupo, adicionar ao grupo). */
 export function EscolherPessoas({ escolhidas, onMudar, excluir = [], unica }: { escolhidas: Id[]; onMudar: (ids: Id[]) => void; excluir?: Id[]; unica?: boolean }) {
@@ -23,7 +24,7 @@ export function EscolherPessoas({ escolhidas, onMudar, excluir = [], unica }: { 
         <MagnifyingGlassIcon className="text-muted-foreground size-4" />
         <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar colega" aria-label="Buscar colega" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
       </label>
-      <ul className="flex max-h-64 flex-col gap-0.5 overflow-y-auto">
+      <AreaRolagem as="ul" className="flex max-h-64 flex-col gap-0.5">
         {colegas.length === 0 && <li className="text-muted-foreground px-3 py-4 text-center text-sm">Ninguém com esse nome.</li>}
         {colegas.map((u) => {
           const sel = escolhidas.includes(u.id)
@@ -46,7 +47,7 @@ export function EscolherPessoas({ escolhidas, onMudar, excluir = [], unica }: { 
             </li>
           )
         })}
-      </ul>
+      </AreaRolagem>
     </div>
   )
 }

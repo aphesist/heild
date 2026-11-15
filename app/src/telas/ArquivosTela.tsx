@@ -133,7 +133,7 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
         ) : (
           <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
             <Caixa className="max-h-[70vh] overflow-hidden">
-              <ul className="area-rolagem-dupla -mx-1 flex min-h-0 flex-col overflow-y-auto px-1 text-sm">
+              <AreaRolagem as="ul" className="-mx-1 flex flex-col px-1 text-sm">
                 {raizes.map((r) => {
                   const aberto = abertos.includes(r.id)
                   return (
@@ -154,7 +154,7 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
                     </li>
                   )
                 })}
-              </ul>
+              </AreaRolagem>
             </Caixa>
 
             <Caixa className="min-h-[24rem]">

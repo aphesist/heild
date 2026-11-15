@@ -48,6 +48,7 @@ import { useEscritorio, useTabela } from '@/nucleo/react'
 import { repos } from '@/nucleo/repositorios'
 import { useTema } from '@/theme/ThemeProvider'
 import type { SetorIntegrante } from '@/theme/tipos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /* ---------- Presença e autor ---------- */
 
@@ -617,7 +618,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
   return (
     <div className={cn('relative flex flex-col gap-2', compacto ? 'p-2' : 'p-3')}>
       {lista.length > 0 && (
-        <ul role="listbox" aria-label={gatilho?.[1] === '@' ? 'Mencionar' : 'Citar'} className="bg-popover shadow-lg absolute right-3 bottom-full left-3 z-20 mb-1 flex max-h-72 flex-col overflow-y-auto rounded-[16px] border p-1">
+        <AreaRolagem as="ul" role="listbox" aria-label={gatilho?.[1] === '@' ? 'Mencionar' : 'Citar'} className="bg-popover shadow-lg absolute right-3 bottom-full left-3 z-20 mb-1 flex max-h-72 flex-col rounded-[16px] border p-1">
           <li className="text-muted-foreground px-3 py-1 text-[11px]">{gatilho?.[1] === '@' ? 'Mencionar pessoa, equipe ou integrante' : 'Citar cliente, tarefa, obrigação ou documento'}</li>
           {lista.map((s, i) => (
             <li key={s.chave} role="option" aria-selected={i === sel}>
@@ -628,7 +629,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
               </button>
             </li>
           ))}
-        </ul>
+        </AreaRolagem>
       )}
       {aviso && (
         <div role="alert" className="bg-warning/12 flex flex-col gap-2 rounded-[14px] p-3 text-sm">

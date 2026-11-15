@@ -19,6 +19,7 @@ import { ProgressoTrabalho } from './progresso-trabalho'
 import { BotoesDecisao, ResultadoDecisao, type Decisao } from './botoes-decisao'
 import { CartaoTarefa } from './cartao-tarefa'
 import { CartaoAjuda, CartaoCalculo, CartaoEscolha, CartaoPreviaMensagem, CartaoRegra } from './cartoes-s01'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 type Por<T extends Cartao['tipo']> = Extract<Cartao, { tipo: T }>
 
@@ -161,7 +162,7 @@ export function CartaoTabela({ cartao, onVerNaAba, className }: { cartao: Por<'t
           </Button>
         )}
       </div>
-      <div className="overflow-x-auto">
+      <AreaRolagem eixo="x" className="">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-muted-foreground text-xs">
@@ -184,7 +185,7 @@ export function CartaoTabela({ cartao, onVerNaAba, className }: { cartao: Por<'t
             ))}
           </tbody>
         </table>
-      </div>
+      </AreaRolagem>
     </div>
   )
 }

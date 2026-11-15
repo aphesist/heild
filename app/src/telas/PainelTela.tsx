@@ -23,6 +23,7 @@ import { SeletorSetores, widgetsObrigacoes } from './painel/obrigacoes'
 import { chavePadrao, padroes } from './painel/padroes'
 import { widgetsSocietario } from './painel/societario'
 import type { CtxAba, WidgetsAba } from './painel/tipos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 interface Props {
   abaId: string
@@ -97,7 +98,7 @@ export function PainelTela({ abaId, cliente, clientesNaCarteira, tarefas, integr
   const chave = `painel-${chavePadrao(aba.id, !cliente, cliente?.regime === 'Simples Nacional')}${soFicha ? '-proposta' : ''}`
 
   return (
-    <div className="area-rolagem h-full overflow-y-auto px-4 pb-10 sm:px-5 md:pb-24">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         {/* A */}
         <CabecalhoAba
@@ -140,6 +141,6 @@ export function PainelTela({ abaId, cliente, clientesNaCarteira, tarefas, integr
           )}
         </AbaCtx.Provider>
       </div>
-    </div>
+    </AreaRolagem>
   )
 }

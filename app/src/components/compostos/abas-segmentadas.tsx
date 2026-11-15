@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useId, type ReactNode } from 'react'
 import { Contador } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 export interface AbaSegmentada {
   id: string
@@ -26,11 +27,11 @@ interface Props {
 export function AbasSegmentadas({ abas, ativa, onTrocar, rotulo = 'Abas', className }: Props) {
   const grupo = useId()
   return (
-    <div
+    <AreaRolagem eixo="x"
       role="tablist"
       aria-label={rotulo}
       className={cn(
-        'bg-sunken inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full p-[3px] inset-shadow-trilho sem-barra esmaecer-lados',
+        'bg-sunken inline-flex max-w-full items-center gap-0.5 rounded-full p-[3px] inset-shadow-trilho sem-barra',
         className,
       )}
       onKeyDown={(e) => {
@@ -73,6 +74,6 @@ export function AbasSegmentadas({ abas, ativa, onTrocar, rotulo = 'Abas', classN
           </button>
         )
       })}
-    </div>
+    </AreaRolagem>
   )
 }

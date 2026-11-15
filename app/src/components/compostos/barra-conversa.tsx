@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip } from '@/components/ui/tooltip'
 import type { Conversa } from '@/dados/tipos'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 interface Props {
   atual: Conversa
@@ -40,7 +41,7 @@ export function BarraConversa({ atual, historico, contexto, onAbrir, onNova, onL
         </PopoverTrigger>
         <PopoverContent align="start" className="w-80 p-1">
           <div className="text-muted-foreground px-3 pt-2 pb-1 text-xs">Conversas · {contexto}</div>
-          <div className="area-rolagem-dupla max-h-80 overflow-y-auto">
+          <AreaRolagem className="max-h-80">
             {ordemGrupos.map((g) => {
               const itens = historico.filter((c) => c.grupo === g)
               if (!itens.length) return null
@@ -70,7 +71,7 @@ export function BarraConversa({ atual, historico, contexto, onAbrir, onNova, onL
               )
             })}
             {historico.length === 0 && <p className="text-muted-foreground px-3 py-4 text-sm">Nenhuma conversa com este cliente ainda.</p>}
-          </div>
+          </AreaRolagem>
         </PopoverContent>
       </Popover>
 

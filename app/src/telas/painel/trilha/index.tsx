@@ -16,6 +16,7 @@ import { ListaTarefas } from '@/telas/tarefas/ListaTarefas'
 import { checklistDe, comoIntegrante, criarTarefa, diaMes, diasEntre, HOJE_ISO, useClientesE, useTarefasE, type TarefaE } from '@/telas/tarefas/modelo'
 import { Entrada, GavetaLarga, Secao } from '@/telas/tarefas/pecas'
 import { bloqueio, bloqueiosDaMudanca, gerarTrilha, gravarTrilha, lerTrilha, moldes, moldeSugerido, mudarEstado, nomeSetor, rotuloCiclo, useTrilha, type EstadoTrilha, type IdMolde } from './modelo'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Trilha de implantação (S04-T07) e de saída e baixa (S04-T08), por cima do
@@ -503,13 +504,13 @@ function TrilhaSaida({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
               <p className="text-xs">
                 Gerado em {diaMes(estado.dossie.gerado_em)} · {estado.dossie.manifesto.length} pacotes{estado.dossie.enviado_em ? ` · enviado em ${diaMes(estado.dossie.enviado_em)}` : ''} <SeloDemonstracao fonte="armazenamento" />
               </p>
-              <ul className="flex max-h-32 flex-col gap-0.5 overflow-y-auto text-[11px]">
+              <AreaRolagem as="ul" className="flex max-h-32 flex-col gap-0.5 text-[11px]">
                 {estado.dossie.manifesto.map((x) => (
                   <li key={x.arquivo} className="flex gap-2">
                     <DownloadSimpleIcon className="size-3 shrink-0" /> <span className="min-w-0 flex-1 truncate">{x.arquivo}</span> <span className="text-muted-foreground font-mono">{x.hash}</span>
                   </li>
                 ))}
-              </ul>
+              </AreaRolagem>
             </>
           ) : (
             <p className="text-muted-foreground text-sm">Pacotes por setor, índice com manifesto (lista e hash) e termo de entrega (CIC-003).</p>

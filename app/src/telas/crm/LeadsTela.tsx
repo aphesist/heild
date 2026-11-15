@@ -61,11 +61,11 @@ export function LeadsTela({ leads: iniciais, onAbrirConversa }: { leads: Lead[];
       {vista === 'quadro' ? (
         <DndContext sensors={sensores} onDragStart={(e) => setArrastando(String(e.active.id))} onDragEnd={aoSoltar} onDragCancel={() => setArrastando(null)}>
           {/* O quadro é um painel de superfície (como a caixa de Conversas); as etapas são faixas divididas por linhas e os cartões ficam na camada elevada. */}
-          <div className="bg-surface shadow-painel divide-border/70 flex min-h-0 flex-1 snap-x snap-mandatory divide-x overflow-x-auto rounded-[24px] sm:snap-proximity sm:rounded-[34px]">
+          <AreaRolagem eixo="x" className="bg-surface shadow-painel divide-border/70 flex flex-1 snap-x snap-mandatory divide-x rounded-[24px] sm:snap-proximity sm:rounded-[34px]">
             {etapasLead.map((et) => (
               <Coluna key={et.id} id={et.id} rotulo={et.rotulo} itens={visiveis.filter((l) => l.etapa === et.id)} onAbrir={setAbertoId} arrastando={arrastando} />
             ))}
-          </div>
+          </AreaRolagem>
           <DragOverlay>{arrastando ? <CartaoLead lead={leads.find((l) => l.id === arrastando)!} className="shadow-2xl rotate-1" /> : null}</DragOverlay>
         </DndContext>
       ) : vista === 'lista' ? (
@@ -201,7 +201,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
           {etapa.rotulo} · {l.origem} · desde {l.desde.replace('há ', 'há ')}
         </SheetDescription>
       </SheetHeader>
-      <div className="area-rolagem-dupla flex flex-col gap-4 overflow-y-auto p-4 text-sm">
+      <AreaRolagem className="flex flex-col gap-4 p-4 text-sm">
         <ol className="flex gap-1" aria-label="Etapas">
           {etapasLead
             .filter((e) => e.id !== 'perdido')
@@ -455,7 +455,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
             <WarningIcon className="mt-0.5 size-3.5 shrink-0" /> Lead perdido fica guardado para campanhas futuras; o conteúdo das conversas some em 12 meses.
           </p>
         </div>
-      </div>
+      </AreaRolagem>
     </>
   )
 }

@@ -20,6 +20,7 @@ import { useJanelaFlutuante } from './JanelaFlutuante'
 import { ListaInternas } from './ListaInternas'
 import { DialogoNovaConversa } from './NovaConversa'
 import { PainelConversa } from './PainelConversa'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Conversas internas em tela cheia (`#/interna`; S05-T05): lista em três
@@ -157,7 +158,7 @@ function Preferencias({ onInvestigar }: { onInvestigar: (id: Id) => void }) {
             <DialogTitle className="font-medium">Abrir conversa pessoal em investigação</DialogTitle>
             <DialogDescription>Só em caso sério. A abertura exige motivo escrito, fica registrada nos eventos e os participantes são avisados (11, 5). O conteúdo não aparece aqui antes da abertura.</DialogDescription>
           </DialogHeader>
-          <ul className="flex max-h-72 flex-col gap-1 overflow-y-auto">
+          <AreaRolagem as="ul" className="flex max-h-72 flex-col gap-1">
             {alheias.length === 0 && <li className="text-muted-foreground py-4 text-center text-sm">Não há conversas pessoais de outras pessoas.</li>}
             {alheias.map((c) => {
               const ja = investigacoes.find((i) => i.conversa === c.id)
@@ -191,7 +192,7 @@ function Preferencias({ onInvestigar }: { onInvestigar: (id: Id) => void }) {
                 </li>
               )
             })}
-          </ul>
+          </AreaRolagem>
         </DialogContent>
       </Dialog>
     </>
@@ -212,7 +213,7 @@ function ArquivosInternos({ onAbrir }: { onAbrir: (conversa: Id, mensagem: Id) =
     .flatMap((m) => (extrasDe(m).anexos ?? []).map((a) => ({ ...a, m })))
     .sort((a, b) => b.m.criado_em.localeCompare(a.m.criado_em))
   return (
-    <div className="area-rolagem h-full overflow-y-auto px-4 pb-6 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-6 sm:px-5">
       <div className="mx-auto flex max-w-5xl flex-col gap-4">
         <header className="flex flex-wrap items-end justify-between gap-3 pt-2">
           <div>
@@ -258,6 +259,6 @@ function ArquivosInternos({ onAbrir }: { onAbrir: (conversa: Id, mensagem: Id) =
           )}
         </div>
       </div>
-    </div>
+    </AreaRolagem>
   )
 }

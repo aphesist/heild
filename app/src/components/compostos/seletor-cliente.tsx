@@ -8,6 +8,7 @@ import { gruposEconomicos } from '@/dados/grupos-s01'
 import type { Cliente } from '@/dados/tipos'
 import { normalizar } from '@/dados/busca'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** `null` = modo "Todos" (visão de carteira). */
 export type SelecaoCliente = string | null
@@ -161,7 +162,7 @@ export function SeletorCliente({ clientes: doModulo, selecionado, onSelecionar, 
           />
           <kbd className="text-muted-foreground shrink-0 font-sans text-[11px] max-sm:hidden">Ctrl+J</kbd>
         </div>
-        <ul role="listbox" aria-label="Clientes" className="area-rolagem-dupla max-h-[min(26rem,60vh)] overflow-y-auto p-1">
+        <AreaRolagem as="ul" role="listbox" aria-label="Clientes" className="max-h-[min(26rem,60vh)] p-1">
           {!busca && (
             <>
               <Opcao ativo={selecionado === null} onClick={() => escolher(null)} titulo={carteira ? 'Todos os meus' : 'Todos'} descricao={`Visão de carteira · ${clientes.length} ${clientes.length === 1 ? 'cliente' : 'clientes'}`} icone={<BriefcaseIcon />} />
@@ -185,7 +186,7 @@ export function SeletorCliente({ clientes: doModulo, selecionado, onSelecionar, 
           )}
           {filtrados.map((c) => opcaoCliente(c, c.id))}
           {filtrados.length === 0 && <li className="text-muted-foreground px-3 py-6 text-center text-sm">Nenhum cliente encontrado no que você pode ver</li>}
-        </ul>
+        </AreaRolagem>
       </PopoverContent>
     </Popover>
   )

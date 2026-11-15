@@ -14,6 +14,7 @@ import { useTema } from '@/theme/ThemeProvider'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { CampoInterno, DialogoVersoes, DialogoVirarTarefa, Mensagem, PontoPresenca, type AcoesMensagem } from './pecas'
 import { DetalhesConversa } from './DetalhesConversa'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 interface Props {
   conversa: ConversaInterna
@@ -165,13 +166,13 @@ export function PainelConversa({ conversa, compacto, destaque, investigacao, onV
           ))}
         </div>
       )}
-      <ol aria-label="Mensagens" className="area-rolagem-dupla flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-3 sm:px-3">
+      <AreaRolagem as="ol" aria-label="Mensagens" className="flex flex-1 flex-col gap-1 px-2 py-3 sm:px-3">
         {raizes.length === 0 && <li className="text-muted-foreground m-auto max-w-xs py-10 text-center text-sm">Nenhuma mensagem ainda. Mensagens não podem ser apagadas, mas dá para editar.</li>}
         {raizes.map((m) => (
           <Mensagem key={m.id} m={m} conversa={conversa} respostas={respostasDe(m.id)} destaque={destaque === m.id} vistoPor={vistoPor(m)} acoes={acoesMsg} compacto={compacto} />
         ))}
         {digitando && !fio && <Digitando nome={digitando.nome} cor={integrante(digitando.setor as SetorIntegrante).cor} />}
-      </ol>
+      </AreaRolagem>
       {!somenteLeitura ? (
         <CampoInterno conversa={conversa} compacto={compacto} onMoverParaTarefa={moverParaTarefa} />
       ) : (
@@ -247,7 +248,7 @@ function Fio({ raiz, respostas, conversa, acoes, destaque, somenteLeitura, onFec
           {compacto ? <ArrowLeftIcon /> : <XIcon />}
         </Button>
       </div>
-      <ol className="area-rolagem-dupla flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-3">
+      <AreaRolagem as="ol" className="flex flex-1 flex-col gap-1 px-2 py-3">
         {resumo && (
           <li className="bg-primary/6 mb-2 flex flex-col gap-1 rounded-[14px] p-3 text-sm">
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
@@ -265,7 +266,7 @@ function Fio({ raiz, respostas, conversa, acoes, destaque, somenteLeitura, onFec
           <Mensagem key={m.id} m={m} conversa={conversa} acoes={semFio} destaque={destaque === m.id} compacto />
         ))}
         {digitando && <Digitando nome={digitando.nome} cor={integrante(digitando.setor as SetorIntegrante).cor} />}
-      </ol>
+      </AreaRolagem>
       {!somenteLeitura && <CampoInterno conversa={conversa} respondeA={raiz.id} compacto onMoverParaTarefa={onMoverParaTarefa} placeholder="Responder no fio" />}
     </div>
   )

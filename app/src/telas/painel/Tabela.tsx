@@ -2,14 +2,18 @@ import { CheckIcon, MinusIcon, WarningIcon, XCircleIcon } from '@phosphor-icons/
 import type { ReactNode } from 'react'
 import type { Situacao } from '@/dados/painel-abas'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
-/** Tabela compacta dos widgets do Painel: rola de lado dentro da caixa quando não cabe. */
+/**
+ * Tabela compacta dos widgets do Painel: rola de lado e para baixo dentro da caixa quando não cabe.
+ * O cabeçalho fica fixo e o esmaecido do topo começa abaixo dele (a primeira linha nunca é cortada seca).
+ */
 export function Tabela({ colunas, minimo = 480, children }: { colunas: { rotulo: string; direita?: boolean; centro?: boolean }[]; minimo?: number; children: ReactNode }) {
   return (
-    <div data-rolagem-horizontal className="h-full overflow-x-auto">
+    <AreaRolagem eixo="ambos" className="h-full">
       {/* Números tabulares em toda a tabela (tipografia.md); cabeçalho no estilo rótulo (12/400), fixo ao rolar, separado das linhas pela borda. */}
       <table className="w-full text-sm tabular-nums" style={{ minWidth: minimo }}>
-        <thead className="bg-surface sticky top-0 z-[1]">
+        <thead data-cabecalho-fixo className="bg-surface sticky top-0 z-[1]">
           <tr className="text-muted-foreground text-left text-xs">
             {colunas.map((c, i) => (
               <th key={i} scope="col" className={cn('border-border border-b pt-1 pr-2 pb-2 font-normal last:pr-0', c.direita && 'text-right', c.centro && 'text-center')}>
@@ -20,7 +24,7 @@ export function Tabela({ colunas, minimo = 480, children }: { colunas: { rotulo:
         </thead>
         <tbody className="divide-border divide-y">{children}</tbody>
       </table>
-    </div>
+    </AreaRolagem>
   )
 }
 

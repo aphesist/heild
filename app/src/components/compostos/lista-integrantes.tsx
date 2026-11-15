@@ -7,6 +7,7 @@ import type { Integrante } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import { rotuloDoEstado, type EstadoIntegrante } from '@/lib/integrante'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 interface Props {
   integrantes: Integrante[]
@@ -60,7 +61,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
             className="placeholder:text-foreground/60 w-full bg-transparent text-[15px] outline-none"
           />
         </label>
-        <div className="area-rolagem-dupla -mx-1 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1 py-1">
+        <AreaRolagem className="-mx-1 flex flex-1 flex-col gap-1 px-1 py-1">
           {f.map((it) => (
             <ItemColuna key={it.id} it={it} ativo={it.id === selecionado} onClick={() => onSelecionar?.(it)} />
           ))}
@@ -69,7 +70,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
             <ItemColuna key={it.id} it={it} ativo={it.id === selecionado} onClick={() => onSelecionar?.(it)} />
           ))}
           {f.length + o.length === 0 && <p className="text-foreground/70 px-2 py-6 text-center text-sm">Nenhum integrante encontrado</p>}
-        </div>
+        </AreaRolagem>
         {onCriar && (
           <button type="button" onClick={onCriar} className="text-foreground/70 hover:text-foreground hover:bg-raised/50 flex shrink-0 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-sm transition-colors">
             <span className="border-foreground/30 flex size-12 shrink-0 items-center justify-center rounded-full border border-dashed">
@@ -86,9 +87,11 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
 
   if (variante === 'icones') {
     return (
-      <nav
+      <AreaRolagem
+        as="nav"
+        eixo={orientacao === 'horizontal' ? 'x' : 'y'}
         aria-label="Integrantes"
-        className={cn('flex items-center gap-3', orientacao === 'horizontal' ? 'sem-barra flex-row overflow-x-auto' : 'flex-col', className)}
+        className={cn('flex items-center gap-3', orientacao === 'horizontal' ? 'sem-barra flex-row' : 'flex-col', className)}
       >
         {todos.map((it) => {
           const t = aparencia(it)
@@ -115,7 +118,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
             </button>
           </Tooltip>
         )}
-      </nav>
+      </AreaRolagem>
     )
   }
 

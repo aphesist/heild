@@ -17,6 +17,7 @@ import { defDoItem, usePendencias } from './pendencias'
 import { Bloco, Faixa, Folha, Progresso, Selo } from './pecas'
 import { exportarTudo, registrarPush } from './simulados'
 import { useServicos } from './servicos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * S10-T02 · Início (06, 3.2). Blocos vazios somem; sem nada, "tudo em dia"
@@ -69,13 +70,13 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
       {!ctx.leitura && <Instalar ctx={ctx} />}
 
       {servicosAtivos.length > 0 && !ctx.leitura && (
-        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5">
+        <AreaRolagem eixo="x" className="-mx-4 flex gap-1.5 px-4 pb-0.5">
           {servicosAtivos.map((sv) => (
             <button key={sv.id} type="button" onClick={() => ctx.abrirServico(sv.id)} className="bg-surface shadow-cartao flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
               <SparkleIcon className="size-3.5" /> {sv.atalho ?? sv.nome}
             </button>
           ))}
-        </div>
+        </AreaRolagem>
       )}
 
       {implantacao && (

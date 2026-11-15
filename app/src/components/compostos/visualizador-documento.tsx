@@ -8,6 +8,7 @@ import { rotuloTipoArmazenamento } from '@/dados/configuracoes'
 import * as exemplo from '@/dados/exemplo'
 import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /* ---------- A folha (pré-visualização, com a marca do tema) ---------- */
 
@@ -210,7 +211,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
               </Button>
             </DialogPrimitive.Close>
           </header>
-          <nav aria-label="Pasta do documento" className="text-muted-foreground flex shrink-0 items-center gap-1 overflow-x-auto px-4 py-2 text-xs">
+          <AreaRolagem eixo="x" as="nav" aria-label="Pasta do documento" className="text-muted-foreground flex shrink-0 items-center gap-1 px-4 py-2 text-xs">
             <FolderOpenIcon className="size-4 shrink-0" />
             {trilha.map((p, i) => (
               <span key={i} className="flex shrink-0 items-center gap-1">
@@ -220,9 +221,9 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                 </button>
               </span>
             ))}
-          </nav>
+          </AreaRolagem>
           <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_22rem]">
-            <div className="bg-sunken/60 area-rolagem-dupla min-h-0 overflow-y-auto p-4 sm:p-8">
+            <AreaRolagem className="bg-sunken/60 p-4 sm:p-8">
               {d.s09?.indisponivelDesde ? (
                 <div className="bg-surface shadow-cartao mx-auto flex max-w-md flex-col items-center gap-3 rounded-cartao p-6 text-center">
                   <CloudSlashIcon className="text-muted-foreground size-10" />
@@ -237,8 +238,8 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
               ) : (
                 <PaginaDocumento d={d} />
               )}
-            </div>
-            <aside className="area-rolagem-dupla flex min-h-0 flex-col gap-4 overflow-y-auto border-t p-4 lg:border-t-0 lg:border-l">
+            </AreaRolagem>
+            <AreaRolagem as="aside" className="flex flex-col gap-4 border-t p-4 lg:border-t-0 lg:border-l">
               {d.s09?.semOrigem && (
                 <div className="bg-warning/15 flex flex-col gap-2 rounded-md p-3 text-sm">
                   <span className="flex items-start gap-1.5">
@@ -359,7 +360,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                   ))}
                 </ol>
               </section>
-            </aside>
+            </AreaRolagem>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

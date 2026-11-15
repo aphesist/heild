@@ -28,6 +28,7 @@ import type { Integrante, Mensagem, Tarefa } from '@/dados/tipos'
 import { useTema } from '@/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
 import { ListaMensagens } from './ListaMensagens'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 interface Props {
   /** Módulo (Painel, CRM...). */
@@ -51,7 +52,7 @@ interface Props {
 export function ModuloTela({ titulo, aba, cliente, tarefas, chat, children }: Props) {
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      <div className="area-rolagem flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+      <AreaRolagem className="flex-1 px-4 py-4 sm:px-5">
         <div className="pagina flex flex-col gap-6">
           <header>
             <h1 className="text-3xl font-light tracking-tight">{aba ?? titulo}</h1>
@@ -68,7 +69,7 @@ export function ModuloTela({ titulo, aba, cliente, tarefas, chat, children }: Pr
           )}
           {tarefas && <BlocoTarefas className="bg-surface rounded-[24px]" setor={aba ?? titulo} cliente={cliente} tarefas={tarefas} />}
         </div>
-      </div>
+      </AreaRolagem>
       {chat && <GavetaChat {...chat} contexto={cliente ?? 'Carteira'} />}
     </div>
   )
@@ -189,7 +190,7 @@ function ChatGeralGaveta({ chave, nomeUsuario, contexto, onAbrirIntegrante }: { 
           Agora falando {contexto === 'Carteira' ? 'da carteira' : `de ${contexto}`}
         </p>
       )}
-      <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
+      <AreaRolagem className="flex-1 p-4">
         {mensagens.length === 0 ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 text-center text-sm">
             <Orb cor={geral.cor} corOlhos={geral.corOlhos} tamanho={48} animado vivo />
@@ -198,7 +199,7 @@ function ChatGeralGaveta({ chave, nomeUsuario, contexto, onAbrirIntegrante }: { 
         ) : (
           <ListaMensagens mensagens={mensagens} acoes={{ onAbrirIntegrante }} />
         )}
-      </div>
+      </AreaRolagem>
       <CampoChat className="p-3" onEnviar={enviar} desabilitado={conversa.pensando} placeholder={`Pergunte ao ${geral.nome}`} />
     </div>
   )
@@ -227,7 +228,7 @@ function ChatIntegranteGaveta({ integrante, nomeUsuario, onVoltar, onAbrirIntegr
           Abrir no Time
         </Button>
       </div>
-      <div className="area-rolagem-dupla flex-1 overflow-y-auto p-4">
+      <AreaRolagem className="flex-1 p-4">
         {mensagens.length === 0 ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 text-center text-sm">
             <p>{integrante.funcao}.</p>
@@ -245,7 +246,7 @@ function ChatIntegranteGaveta({ integrante, nomeUsuario, onVoltar, onAbrirIntegr
         {trabalhos.map((x) => (
           <ProgressoTrabalho key={x.uid} trabalho={x} className="mt-4" />
         ))}
-      </div>
+      </AreaRolagem>
       <CampoChat className="p-3" onEnviar={enviar} desabilitado={pensando} placeholder={`Escreva para ${t.nome}`} />
     </div>
   )

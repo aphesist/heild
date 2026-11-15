@@ -13,6 +13,7 @@ import { useSessao } from '@/ambiente/sessao'
 import { HOJE_DEMO } from '@/components/compostos/calendario'
 import { useBanco } from '@/nucleo/react'
 import { padraoDoPapel, useCatalogoVivo } from './inicio/widgets-inicio'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 export interface DadosVisaoGeral {
   indicadores: Indicador[]
@@ -153,7 +154,7 @@ export function VisaoGeralTela({ dados, contexto, onAbrirIntegrante }: { dados: 
   })
   const hoje = new Date(`${HOJE_DEMO}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
   return (
-    <div className="area-rolagem h-full overflow-y-auto px-4 pb-8 sm:px-5 md:pb-24">
+    <AreaRolagem className="h-full px-4 pb-8 sm:px-5 md:pb-24">
       <GradeWidgets
         key={`${usuario.id}:${clienteId ? 'cliente' : 'carteira'}`}
         chave={`visao-geral:${usuario.id}:${clienteId ? 'cliente' : 'carteira'}`}
@@ -169,7 +170,7 @@ export function VisaoGeralTela({ dados, contexto, onAbrirIntegrante }: { dados: 
           </div>
         }
       />
-    </div>
+    </AreaRolagem>
   )
 }
 
@@ -180,7 +181,7 @@ function TimeAgora({ integrantes, compacto, onAbrir }: { integrantes: Integrante
   if (compacto)
     return (
       <GrupoOrbs divergente={divergente}>
-        <div className="flex h-full items-center gap-2 overflow-x-auto px-2">
+        <AreaRolagem eixo="x" className="flex h-full items-center gap-2 px-2">
           {integrantes.map((i) => {
             const t = aparencia(i)
             return (
@@ -189,7 +190,7 @@ function TimeAgora({ integrantes, compacto, onAbrir }: { integrantes: Integrante
               </button>
             )
           })}
-        </div>
+        </AreaRolagem>
       </GrupoOrbs>
     )
   return (

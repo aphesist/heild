@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
 import { useLoja, useNavegacao, usePersistente, type Destino, type Toast } from './loja'
 import { useSessao } from './sessao'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Notificações no canto inferior direito, como no WhatsApp Web ou no Discord: a
@@ -315,15 +316,15 @@ export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void 
           </div>
         </div>
         {categorias.length > 1 && (
-          <div role="radiogroup" aria-label="Categoria" className="flex gap-1.5 overflow-x-auto border-b px-3 py-2 [scrollbar-width:none]">
+          <AreaRolagem eixo="x" role="radiogroup" aria-label="Categoria" className="flex gap-1.5 border-b px-3 py-2 [scrollbar-width:none]">
             {(['todas', ...categorias] as const).map((c) => (
               <button key={c} type="button" role="radio" aria-checked={categoria === c} onClick={() => setCategoria(c)} className={cn('shrink-0 cursor-pointer rounded-full px-2.5 py-1 text-xs transition-colors', categoria === c ? 'bg-foreground text-background' : 'bg-sunken hover:bg-raised')}>
                 {c === 'todas' ? 'Todas' : rotuloCategoria[c]}
               </button>
             ))}
-          </div>
+          </AreaRolagem>
         )}
-        <ul className="area-rolagem-dupla max-h-[60vh] overflow-y-auto py-1">
+        <AreaRolagem as="ul" className="max-h-[60vh] py-1">
           {linhas.length === 0 && <li className="text-muted-foreground px-4 py-8 text-center text-sm">{filtro === 'nao_lidos' ? 'Tudo lido.' : 'Nada por aqui.'}</li>}
           {linhas.map((l) => {
             if (l.tipo === 'um') return item(l.n)
@@ -354,7 +355,7 @@ export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void 
               </li>
             )
           })}
-        </ul>
+        </AreaRolagem>
         <div className="flex items-center gap-1 border-t px-2 py-1.5">
           <Button size="sm" variant="ghost" className="rounded-full" disabled={!naoLidos} onClick={() => repos.notificacoes.lerTodas(usuario.id, meus.map((n) => n.id))}>
             <CheckIcon /> Marcar todos como lidos

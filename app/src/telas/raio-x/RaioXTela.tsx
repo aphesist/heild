@@ -29,6 +29,7 @@ import { registrar } from '@/nucleo/repositorios'
 import { servicos } from '@/servicos'
 import { Ficha } from '../config/comum-s09'
 import { MolduraTelaCheia } from '../config/telas-cheias'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 type Aba = 'achados' | 'clientes' | 'estrutura' | 'padroes' | 'orgaos' | 'dicionario'
 
@@ -269,7 +270,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                 {clientes.length === 0 ? (
                   <EstadoVazio titulo="Nenhum cliente cadastrado" descricao="Importe os clientes no passo 4 da implantação." compacto />
                 ) : (
-                  <div className="-mx-1 overflow-x-auto px-1">
+                  <AreaRolagem eixo="x" className="-mx-1 px-1">
                     <table className="w-full min-w-[560px] text-sm">
                       <thead>
                         <tr className="text-muted-foreground text-left text-xs">
@@ -293,7 +294,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </AreaRolagem>
                 )}
               </Caixa>
             )}

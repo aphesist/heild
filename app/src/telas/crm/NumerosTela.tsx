@@ -76,7 +76,7 @@ export function NumerosTela() {
         </div>
 
         <section className="bg-surface shadow-cartao overflow-hidden rounded-[24px]">
-          <div className="overflow-x-auto">
+          <AreaRolagem eixo="x" className="">
             <table className="w-full min-w-[760px] text-sm">
               <thead>
                 <tr className="text-muted-foreground border-b text-left text-xs">
@@ -138,17 +138,17 @@ export function NumerosTela() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </AreaRolagem>
         </section>
 
         <section className="flex flex-col gap-3">
-          <div className="-mx-3 flex gap-1.5 overflow-x-auto px-3 sm:mx-0 sm:flex-wrap sm:px-0" role="tablist" aria-label="Cadastros do atendimento">
+          <AreaRolagem eixo="x" className="-mx-3 flex gap-1.5 px-3 sm:mx-0 sm:flex-wrap sm:px-0" role="tablist" aria-label="Cadastros do atendimento">
             {secoes.map(([id, r, ic]) => (
               <Button key={id} role="tab" aria-selected={secao === id} size="sm" variant={secao === id ? 'secondary' : 'ghost'} className="shrink-0 rounded-full" onClick={() => setSecao(id)}>
                 {ic} {r}
               </Button>
             ))}
-          </div>
+          </AreaRolagem>
           <div className="bg-surface shadow-cartao rounded-[24px] p-4 sm:p-5">
             {secao === 'modelos' && <Modelos />}
             {secao === 'automaticas' && <MensagensAutomaticas />}

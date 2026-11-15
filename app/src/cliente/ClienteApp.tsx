@@ -21,6 +21,7 @@ import { Agenda } from './agenda'
 import { Avisos, PushSimulado, useNaoLidos } from './avisos'
 import { Assinaturas } from './assinaturas'
 import { Mais, PassosEscritorio } from './mais'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 // O que as outras partes do app (BPO, serviços, painel da demonstração) importam daqui.
 export { pessoasDoApp, primeiroNome, idDoUsuario, oQueMandar, type PessoaApp, type Area, type Tela, type Ctx } from './contexto'
@@ -178,7 +179,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
 
         <PushSimulado ctx={ctx} />
 
-        <main className={cn('area-rolagem-dupla min-h-0 flex-1 overflow-y-auto px-4 py-4', largo && 'mx-auto w-full max-w-3xl px-6')}>
+        <AreaRolagem as="main" className={cn('flex-1 px-4 py-4', largo && 'mx-auto w-full max-w-3xl px-6')}>
           {tela === 'inicio' && <Inicio ctx={ctx} pessoa={pessoa} />}
           {tela === 'documentos' && <Documentos ctx={ctx} />}
           {tela === 'pendencias' && <Pendencias ctx={ctx} />}
@@ -195,7 +196,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
           {tela === 'avisos' && <Avisos ctx={ctx} />}
           {tela === 'assinaturas' && <Assinaturas ctx={ctx} />}
           {tela === 'passos' && <PassosEscritorio ctx={ctx} />}
-        </main>
+        </AreaRolagem>
 
         {aviso && (
           <div role="status" className={cn('bg-foreground text-background absolute right-3 left-3 z-30 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm shadow-lg', largo ? 'bottom-4' : 'bottom-3')}>

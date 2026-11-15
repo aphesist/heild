@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { DotsSixVerticalIcon } from '@phosphor-icons/react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Arrastar e soltar (dnd-kit): `ListaOrdenavel` reordena uma lista;
@@ -105,14 +106,14 @@ function Coluna({ coluna, ids, contagem, children }: { coluna: ColunaQuadro; ids
         <span className="text-muted-foreground ml-auto text-xs tabular-nums">{contagem}</span>
       </header>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <ul ref={setNodeRef} className="flex min-h-16 flex-1 flex-col gap-1.5 overflow-y-auto">
+        <AreaRolagem as="ul" ref={setNodeRef} className="flex min-h-16 flex-1 flex-col gap-1.5">
           {children}
           {contagem === 0 && (
             <li data-estado-vazio className="text-muted-foreground flex min-h-16 flex-1 items-center justify-center rounded-md border border-dashed px-3 text-center text-xs">
               {coluna.bloqueada ? 'Nada nesta etapa' : 'Nada nesta etapa · arraste para cá'}
             </li>
           )}
-        </ul>
+        </AreaRolagem>
       </SortableContext>
     </section>
   )
@@ -186,7 +187,7 @@ export function Quadro<T>({
   const ativo = arraste ? porId.get(arraste.id) : undefined
   return (
     <DndContext sensors={sensores} collisionDetection={closestCorners} onDragStart={inicio} onDragOver={sobre} onDragEnd={fim} onDragCancel={() => setArraste(null)} accessibility={{ announcements: anuncios }}>
-      <div data-rolagem-horizontal className={cn('esmaecer-lados flex min-h-0 flex-1 snap-x snap-mandatory items-start gap-3 overflow-x-auto overscroll-x-contain pb-2 sm:snap-proximity', className)}>
+      <AreaRolagem eixo="x" className={cn('flex flex-1 snap-x snap-mandatory items-start gap-3 overscroll-x-contain pb-2 sm:snap-proximity', className)}>
         {colunas.map((c) => {
           const daColuna = itens.filter((i) => colunaAtual(i) === c.id)
           return (
@@ -199,7 +200,7 @@ export function Quadro<T>({
             </Coluna>
           )
         })}
-      </div>
+      </AreaRolagem>
       <DragOverlay>{ativo ? <div className="bg-raised shadow-lg w-68 rounded-md p-2 pl-8">{render(ativo)}</div> : null}</DragOverlay>
     </DndContext>
   )

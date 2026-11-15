@@ -11,6 +11,7 @@ import { pessoasDoApp, useDominioApp, useEmpresaAtual } from './contexto'
 import { useReenvios, useSaidaEscritorio } from './estado'
 import { prepararReenvio, prepararTermo } from './motor'
 import { Selo, type Tom } from './pecas'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Visão "App do cliente" do wireframe: o webapp instalável num aparelho (ou
@@ -59,7 +60,7 @@ export function MolduraCliente({ pessoa, onPessoa, onEscritorio }: { pessoa: str
             <div className="bg-background text-foreground relative min-h-0 flex-1">{app}</div>
           </div>
         )}
-        <aside className="area-rolagem-dupla flex max-h-[calc(100svh-4rem)] w-[min(22rem,100%)] flex-col gap-3 overflow-y-auto [&>*]:shrink-0">
+        <AreaRolagem as="aside" className="flex max-h-[calc(100svh-4rem)] w-[min(22rem,100%)] flex-col gap-3 [&>*]:shrink-0">
           <div>
             <p className="text-lg font-light tracking-tight">App do cliente</p>
             <p className="text-muted-foreground text-sm">Web instalável (PWA), incluído no plano; a marca branca e o app na loja são complementos. Usa os mesmos dados do escritório: o que a pessoa faz aqui chega na conversa do CRM, na tarefa e no sino de quem responde.</p>
@@ -95,7 +96,7 @@ export function MolduraCliente({ pessoa, onPessoa, onEscritorio }: { pessoa: str
           </section>
           <Farol />
           <Simulacoes />
-        </aside>
+        </AreaRolagem>
       </div>
     </>
   )

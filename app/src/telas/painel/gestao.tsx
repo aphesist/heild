@@ -40,6 +40,7 @@ import { gravarGestao, useGestao, type Processo } from './gestao/estado'
 import { Linha, Numero, Tabela } from './Tabela'
 import { moldes, type IdMolde } from './trilha/modelo'
 import type { CtxAba, WidgetsAba } from './tipos'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Gestão (S04-T02; 03, 6.9): equipe, carteira, permissões, produtividade,
@@ -591,7 +592,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
           ))}
         </select>
         {molde && (
-          <ul className="flex max-h-56 flex-col gap-0.5 overflow-y-auto text-xs">
+          <AreaRolagem as="ul" className="flex max-h-56 flex-col gap-0.5 text-xs">
             {moldes[molde].marcos.map((mc) => (
               <li key={mc.codigo} className="flex items-center gap-2">
                 <span className="min-w-0 flex-1 truncate">
@@ -608,7 +609,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
                 <span className="text-muted-foreground">dias</span>
               </li>
             ))}
-          </ul>
+          </AreaRolagem>
         )}
         <span className="text-muted-foreground text-[11px]">Mudar o molde cria versão nova; trilhas já geradas não mudam. {admin ? '' : 'Só o Administrador edita.'}</span>
       </div>
@@ -790,7 +791,7 @@ function Auditoria() {
           Exportar CSV
         </Mini>
       </div>
-      <ol className="flex flex-col gap-0.5 overflow-y-auto text-[11px]">
+      <AreaRolagem as="ol" className="flex flex-col gap-0.5 text-[11px]">
         {filtrados.map((e) => (
           <li key={e.id} className="truncate">
             <span className="text-muted-foreground tabular-nums">{new Date(e.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span> · <span className="font-mono">{e.ferramenta}</span> · {e.texto}
@@ -798,7 +799,7 @@ function Auditoria() {
           </li>
         ))}
         {!filtrados.length && <li className="text-muted-foreground">Nenhum evento com estes filtros.</li>}
-      </ol>
+      </AreaRolagem>
       <span className="text-muted-foreground text-[11px]">
         Métricas do app e custo: dados da demonstração <SeloDemonstracao fonte="indicadores" />
       </span>

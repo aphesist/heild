@@ -27,6 +27,7 @@ import { SecaoDemonstracaoBpo } from '@/telas/bpo/DemonstracaoBpo'
 // S08b: documentos chegando à fila do BPO (boleto pelo WhatsApp, dados bancários trocados).
 import { SecaoDemonstracaoOperacaoBpo } from '@/telas/bpo/operacao/demonstracao'
 import { SecaoLabS09 } from '@/telas/config/lab-s09'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 export type Visao = 'escritorio' | 'cliente'
 
@@ -110,7 +111,8 @@ export function PainelLab({
           </button>
         </PopoverTrigger>
       </div>
-      <PopoverContent align="center" side="left" collisionPadding={12} className="flex max-h-[calc(100dvh-1.5rem)] w-[min(22rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-y-auto p-3">
+      <PopoverContent align="center" side="left" collisionPadding={12} asChild className="w-[min(22rem,calc(100vw-1.5rem))] p-3">
+        <AreaRolagem className="flex max-h-[calc(100dvh-1.5rem)] flex-col gap-3">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">Controles do wireframe</p>
@@ -332,6 +334,7 @@ export function PainelLab({
             </div>
           </div>
         )}
+        </AreaRolagem>
       </PopoverContent>
     </Popover>
   )

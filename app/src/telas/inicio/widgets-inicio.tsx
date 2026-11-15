@@ -24,6 +24,7 @@ import type { SetorIntegrante } from '@/theme/tipos'
 import { ordemPrazo } from './minha-fila'
 import { useImplantacao } from '@/dados/implantacao'
 import { ListaPendencias } from './pendencias'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /*
  * Widgets vivos da Visão geral (S01-T05; 03, 4): tudo sai das tarefas,
@@ -233,14 +234,14 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
               Só atrasadas
             </button>
           </div>
-          <div className="area-rolagem-dupla min-h-0 flex-1 overflow-auto">
+          <AreaRolagem eixo="ambos" className="flex-1">
             {doCalendario.length === 0 ? (
               <EstadoVazio compacto icone={CalendarBlankIcon} titulo="Nenhuma tarefa nesta semana" descricao="Gere o calendário de dezembro em Painel › Obrigações." />
             ) : (
               // A chave recomeça o calendário quando o widget muda de largura (no celular, abre no dia).
               <Calendario key={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} tarefas={doCalendario} filtros={filtros} semFiltros visao={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} onReprogramar={reprogramar} />
             )}
-          </div>
+          </AreaRolagem>
         </div>
       ),
     },

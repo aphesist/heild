@@ -13,6 +13,7 @@ import { repos } from '@/nucleo/repositorios'
 import { brl, CabecalhoFin, Caixa, CartoesDaAba, Nota, Numero, PaginaFin, Pergunta } from './comum'
 import { projecaoCaixa, useFin, useIntegranteFin, usePodeFin, type Fin } from './dados'
 import { COMPETENCIA_ATUAL, rotuloCompetencia } from './dominio'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const sinal = (v: number) => (v < 0 ? `−${brl(-v)}` : brl(v))
 
@@ -99,7 +100,7 @@ export function ResultadoTela() {
         <Pergunta acao={<Interruptor ligado={ratear} onMudar={setRatear} rotulo="Ratear o Atendimento nos setores" />} descricao="O custo de pessoal vem das horas do Timesheet × custo-hora; operação, das contas a pagar classificadas.">
           Que setor dá resultado?
         </Pergunta>
-        <div className="-mx-1 overflow-x-auto px-1">
+        <AreaRolagem eixo="x" className="-mx-1 px-1">
           <table className="w-full text-sm sm:min-w-[640px]">
             <thead>
               <tr className="text-muted-foreground text-left text-xs">
@@ -138,7 +139,7 @@ export function ResultadoTela() {
               </tr>
             </tbody>
           </table>
-        </div>
+        </AreaRolagem>
       </Caixa>
 
       <div className="grid gap-4 lg:grid-cols-2">

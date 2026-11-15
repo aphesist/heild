@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import type { ConversaInterna, Id } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
 import { PontoPresenca } from './pecas'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const icone = { pessoal: UserIcon, grupo: UsersThreeIcon, canal_setor: HashIcon, canal_geral: MegaphoneIcon }
 type Periodo = 'todos' | 'hoje' | '7' | '30'
@@ -142,7 +143,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
         )}
       </div>
 
-      <div className="area-rolagem-dupla flex-1 overflow-y-auto px-2 pb-3">
+      <AreaRolagem className="flex-1 px-2 pb-3">
         {conversas.length === 0 && <EstadoVazio icone={UsersThreeIcon} titulo="Nenhuma conversa ainda" descricao="Comece com um colega ou use o canal do seu setor." acao={<Button size="sm" className="rounded-full" onClick={() => onNova('pessoal')}>Começar conversa</Button>} />}
 
         {buscando && (
@@ -227,7 +228,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
             </section>
           )
         })}
-      </div>
+      </AreaRolagem>
     </div>
   )
 }

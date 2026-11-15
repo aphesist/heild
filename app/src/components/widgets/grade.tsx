@@ -9,6 +9,7 @@ import { usePreferencia } from '@/hooks/usePreferencia'
 import { cn } from '@/lib/utils'
 import { arranjar, dimensoes, MODULO_PX, modulosPorCelula, tamanhoValido, vao, VAO_PX, type DefWidget, type ItemGrade, type Posicao, type TamanhoWidget } from './tipos'
 import { Widget } from './widget'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Colunas pela largura do contêiner, com célula de no mínimo ~150px
@@ -286,7 +287,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
             <SheetTitle>Adicionar widget</SheetTitle>
             <SheetDescription>Os que estão escondidos nesta tela. Entram no fim; arraste para onde quiser.</SheetDescription>
           </SheetHeader>
-          <ul className="area-rolagem-dupla flex flex-col gap-2 overflow-y-auto p-4">
+          <AreaRolagem as="ul" className="flex flex-col gap-2 p-4">
             {ocultos.map((d) => {
               const Icone = d.icone
               return (
@@ -316,7 +317,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
               )
             })}
             {!ocultos.length && <p className="text-muted-foreground py-6 text-center text-sm">Todos os widgets já estão na tela.</p>}
-          </ul>
+          </AreaRolagem>
         </SheetContent>
       </Sheet>
     </div>

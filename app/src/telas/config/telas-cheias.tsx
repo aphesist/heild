@@ -6,6 +6,7 @@ import { usePersistente } from '@/ambiente/loja'
 import { Button } from '@/components/ui/button'
 import { ImplantacaoTela } from '../implantacao/ImplantacaoTela'
 import { RaioXTela } from '../raio-x/RaioXTela'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
  * Telas cheias da S09 que abrem por cima de qualquer módulo: o assistente de
@@ -45,7 +46,7 @@ export function MolduraTelaCheia({ titulo, sub, onFechar, children, acao }: { ti
               </Button>
             </DialogPrimitive.Close>
           </header>
-          <div className="area-rolagem-dupla min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6">{children}</div>
+          <AreaRolagem className="flex-1 px-3 py-4 sm:px-6">{children}</AreaRolagem>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
