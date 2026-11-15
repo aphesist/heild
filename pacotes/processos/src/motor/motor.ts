@@ -403,6 +403,11 @@ export class Motor {
         const retomandoExterno = ex.estado === 'aguardando_externo' && passo.tipo === 'externo'
         if (ex.estado !== 'executando' && !retomandoExterno) return
         const s = await this.estado(tx, ex, p)
+        // Caminhos alternativos (B3b, triagem): cartão e efeito fora do caminho escolhido são pulados, sem evento.
+        if ((passo.tipo === 'aprovacao' || passo.tipo === 'efeito') && passo.pular_se?.(s)) {
+          await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, { pulado: true, motivo: 'fora do caminho escolhido' })
+          return
+        }
         switch (passo.tipo) {
           case 'deterministico': {
             const ctx = await this.contextoDaExecucao(tx, ex)

@@ -68,18 +68,45 @@ Entra só antes de ato irreversível: transmitir a ECD, enviar a guia ao cliente
 - **"nenhum" conta como não agir.** Com o trecho, o modelo respondeu "nenhum" em dois casos: "Obrigado pelo atendimento de ontem", em que não há procedimento e o pedido fica registrado, e a certidão negativa de um pedido vago. "nenhum" não leva a nenhuma ação, só registra o pedido sem procedimento. Por isso o roteiro passou a contá-lo como "perguntar", e a tabela acima já usa essa regra. Contado à parte, como estava no relatório cru, apareceriam 2 "erros" no Haiku com trecho e 1 no Sonnet com trecho, nenhum deles ação errada.
 - **Decisão:** o trecho fica **ligado** (`com_trecho: true`), porque o acerto sobe de 71,9% para 87,5% sem erro crítico e com custo menor (o caro é chamado menos). O roteador barato fica no **Haiku**: com o trecho, ele acertou todo caso que o Sonnet acertou.
 
-## Triar e repassar (número único de WhatsApp)
+## Triagem do número compartilhado (GES-TRIAR-REPASSAR v2)
 
-Item pedido depois dos ajustes (decisão do Enzo: o CRM também atende escritórios com um número só de WhatsApp). São 30 casos no gabarito: escolha no menu (inclusive contra o texto), palavra-chave, modelo, assunto misto e remetente desconhecido ou reconhecido pelo histórico. Foram 2 repetições, em [`integrantes-ajustes-2026-11-15-triagem.json`](integrantes-ajustes-2026-11-15-triagem.json).
+Item pedido depois dos ajustes. O CRM também atende escritórios com um número só de WhatsApp, e a triagem segue o desenho do PR #33 (subplano 04, adendo A, e subplano 02) com as respostas do Enzo:
+- com integrantes, o integrante decide, sem menu;
+- na opção "menu e integrante", vale a escolha do cliente, e o integrante só sugere;
+- limiares: 0,8 roteia; de 0,6 a 0,8 roteia como incerta; abaixo de 0,6 pergunta;
+- cliente identificado pula a triagem por contexto.
 
-| | Acerto | Erro crítico | Escaladas | Custo/execução | p50 | p90 |
+São **42 casos** no gabarito:
+- palavra-chave;
+- integrante decidindo;
+- assunto misto;
+- remetente desconhecido e reconhecido pelo histórico;
+- as três regras de contexto (com o envio de 10 dias, que já não vale);
+- resposta à pergunta, pelo número e pelo nome, e duas perguntas sem acordo;
+- conversa com responsável;
+- "menu e integrante", com o menu confirmado, sem pista e contra o texto.
+
+Foram 2 repetições, em [`integrantes-ajustes-2026-11-15-triagem.json`](integrantes-ajustes-2026-11-15-triagem.json). A v1 (menu como regra principal, limiar 0,9) continua carregada para as execuções em andamento; a operação inicia a v2.
+
+| | Acerto | Erro crítico | Chamadas por execução | Custo do operário | p50 / p90 da chamada | p50 / p90 da execução |
 | --- | --- | --- | --- | --- | --- | --- |
-| Sonnet | 60/60 | 0 | 4 | R$ 0,0079 | 3,4 s | 6,3 s |
-| Haiku | 60/60 | 0 | 6 | R$ 0,0018 | 3,5 s | 17,3 s (fila) |
+| Sonnet | 84/84 | 0 | 0,6 | R$ 0,81 | 1,8 s / 3,6 s | 7,8 s / 9,4 s |
+| Haiku | 84/84 | 0 | 0,6 | R$ 0,04 | 1,4 s / 1,7 s | 7,3 s / 8,0 s |
 
-- **30 das 60 execuções decidiram sem modelo:** pelo menu, sempre respeitado, ou por palavra-chave de um setor só.
-- **Os 4 casos de assunto misto e o remetente desconhecido sem assunto claro** pararam no cartão para uma pessoa do Atendimento, nos dois modelos.
-- **O Haiku foi liberado** no contrato `ges.triagem.classificar`.
+- **34 das 84 execuções decidiram sem modelo:** pela resposta à pergunta, pelo contexto, por palavra-chave ou pelo menu confirmado pelas palavras.
+- **As perguntas ao cliente saíram onde deviam:**
+  - nos 4 casos de assunto misto;
+  - no remetente desconhecido sem assunto;
+  - no envio antigo;
+  - no cliente com vários setores;
+  - na resposta que não diz nada ("Hã?").
+
+  Depois de duas perguntas, a conversa foi ao setor de entrada com `triagem_sem_acordo`. Com responsável na conversa, o caso foi ao cartão da pessoa.
+- **"Menu e integrante":**
+  - Contra o texto (o cliente escolheu Contábil e falou do DAS), a conversa ficou no Contábil, e o integrante sugeriu o Fiscal com o cartão.
+  - Sem pista ("Oi"), nenhuma sugestão.
+- **O Haiku continua liberado** no contrato `ges.triagem.classificar` (v2): igualou o Sonnet em todos os casos, a um vigésimo do custo.
+- A latência da execução inclui a fila da sombra (6 em paralelo); a chamada ao modelo fica abaixo de 4 s no p90.
 
 ## Custo da sessão
 
@@ -88,12 +115,13 @@ Item pedido depois dos ajustes (decisão do Enzo: o CRM também atende escritór
 | Rodadas pequenas (2 casos por contrato, depois os 3 procedimentos com revisor) | R$ 1,34 |
 | Rodada completa (840 execuções em sombra, 128 roteamentos) | R$ 21,20 |
 | Nova rodada do DP v2 (240 execuções) | R$ 1,31 |
-| Triar e repassar (120 execuções) | R$ 0,58 |
-| **Total** | **R$ 24,43 (≈ US$ 4,52)**, contra o teto de US$ 15 |
+| Triar e repassar v1 (120 execuções) | R$ 0,58 |
+| Triagem do número compartilhado v2 (168 execuções) | R$ 0,85 |
+| **Total** | **R$ 25,28 (≈ US$ 4,68)**, contra o teto de US$ 15 |
 
 ## O que foi trocado
 
-- **Haiku como operário** nos 8 contratos, contando o do triar e repassar (`pacotes/integrantes/src/modelos.ts`, `CONTRATOS_NO_HAIKU`, com a evidência por linha), aplicado pelo worker dos integrantes.
+- **Haiku como operário** nos 8 contratos, contando o da triagem (v2) (`pacotes/integrantes/src/modelos.ts`, `CONTRATOS_NO_HAIKU`, com a evidência por linha), aplicado pelo worker dos integrantes.
 - **Haiku como roteador barato** e **trecho do documento ligado** no roteador.
 - **Sonnet continua escritor** (a escalada) e **Opus continua revisor**.
 

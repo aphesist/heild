@@ -6,7 +6,22 @@ import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
 import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
 import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
-import { gesTriarRepassar } from './setores/triagem.ts'
+import { gesTriarRepassar, LIMIAR_INCERTA, LIMIAR_ROTEIA } from './setores/triagem.ts'
+import { gesTriarRepassarV1 } from './setores/triagem-v1.ts'
+
+/**
+ * Decisão comparável da triagem: o setor; `pergunta` quando perguntou ao cliente; `sem_acordo` no
+ * setor de entrada; `{menu}>{sugerido}` quando o cartão de sugestão transferiu; `cartao` quando foi à pessoa.
+ */
+export function decisaoDaTriagem(e: { estado: string; saida: Record<string, unknown> | null; erro: { codigo?: string } | null }): string {
+  if (e.estado === 'concluida' && e.saida) {
+    const x = e.saida
+    if (x.acao === 'perguntar') return 'pergunta'
+    if (x.acao === 'entrada_padrao') return 'sem_acordo'
+    return x.transferido ? `${String(x.setor_roteado)}>${String(x.setor)}` : String(x.setor)
+  }
+  return e.estado === 'aguardando_cartao' || e.erro?.codigo === 'SOMBRA_NAO_DECIDIU' ? 'cartao' : `${e.estado}:${e.erro?.codigo ?? ''}`
+}
 
 /**
  * Os integrantes do pacote Contábil (B3): um por setor, compartilhado pelas pessoas do setor.
@@ -27,7 +42,7 @@ const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
 const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassar].map(P)
 /** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
-const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha].map(P)
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
@@ -187,7 +202,7 @@ export const integranteAtendimento: Integrante = definirIntegrante(
     limites: { simultaneas: 10, segundo_plano_por_pessoa: 3 },
     limiar_confianca: 0.9,
     perguntar_responsavel: false,
-    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.listar'],
+    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.rotear', 'conversa.triagem_divergir', 'conversa.listar'],
     procedimentos: [
       {
         procedimento: P(gesFaqV2),
@@ -207,14 +222,17 @@ export const integranteAtendimento: Integrante = definirIntegrante(
         regras: [/\b(triar|triagem|repassar|repasse)\b.*\bconversa\b/i, /\bconversa\b.*\b(triar|repassar)\b/i],
         // Trabalha sobre a conversa do CRM, não sobre um documento anexado.
         aceita_documentos: [],
-        descricao_roteamento: 'Triar a conversa que chegou pelo número único de WhatsApp e repassar ao setor certo, com resumo.',
-        apresentar: (s) => ({
-          titulo: `Conversa repassada ao setor ${String(s.setor)}`,
-          texto: `Repassei a conversa ao setor ${String(s.setor)}${s.cliente_id ? '' : ', com o remetente ainda não identificado'}.`,
-          dados: { setor: String(s.setor), origem: String(s.origem), cliente_identificado: s.cliente_id !== null },
-        }),
-        decisao: (e) =>
-          e.estado === 'concluida' ? String(e.saida?.setor) : e.estado === 'aguardando_cartao' || e.erro?.codigo === 'SOMBRA_NAO_DECIDIU' ? 'cartao' : `${e.estado}:${e.erro?.codigo ?? ''}`,
+        descricao_roteamento: 'Triar a conversa que chegou pelo número compartilhado de WhatsApp e repassar ao setor certo, com resumo (ou perguntar o assunto ao cliente).',
+        apresentar: (s) =>
+          s.acao === 'perguntar'
+            ? { titulo: 'Perguntei o assunto ao cliente', texto: 'Não deu para saber o setor pela mensagem; perguntei ao cliente, com opções.', dados: { acao: 'perguntar' } as Record<string, string | boolean> }
+            : {
+                titulo: `Conversa repassada ao setor ${String(s.setor)}`,
+                texto: `Repassei a conversa ao setor ${String(s.setor)}${s.incerta ? ' (triagem incerta: confira)' : ''}${s.cliente_id ? '' : ', com o remetente ainda não identificado'}.`,
+                dados: { setor: String(s.setor), origem: String(s.origem), cliente_identificado: s.cliente_id !== null } as Record<string, string | boolean>,
+              },
+        decisao: decisaoDaTriagem,
+        limiares_do_plano: { roteia: LIMIAR_ROTEIA, incerta: LIMIAR_INCERTA, fonte: 'subplano 02, "Triagem do número compartilhado"' },
       },
     ],
   },

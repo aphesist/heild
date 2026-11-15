@@ -80,6 +80,8 @@ export type Passo<E = any> =
       /** Validadores que rodam de novo sobre argumentos editados no cartão. */
       revalidar?: string[]
       expira_horas?: number
+      /** Pula o cartão quando o caminho do procedimento não passa por ele (o efeito ligado deve pular junto). */
+      pular_se?: (s: Estado<E>) => boolean
     }
   | {
       tipo: 'externo'
@@ -104,6 +106,8 @@ export type Passo<E = any> =
       executar: (s: Estado<E>, f: Facilidades) => Promise<{ dados: unknown; texto_evento: string }>
       /** Exigido quando a ferramenta pede aprovação: o passo de aprovação que a liberou. */
       aprovacao?: string
+      /** Pula o efeito (sem evento) quando o caminho do procedimento não passa por ele. */
+      pular_se?: (s: Estado<E>) => boolean
     }
   | {
       tipo: 'concluir'

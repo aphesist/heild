@@ -152,6 +152,8 @@ describe('gabarito ampliado (portão do Haiku)', () => {
       // ECD: o certo é sempre apontar a conta plantada. Caixa postal: toda mensagem tem categoria; os
       // casos difíceis ali são os de várias datas (o prazo é uma delas), não os de não decidir.
       if (contrato === 'fis.caixa_postal.classificar') expect(casos.filter((c) => c.id.includes('duas-datas') || c.id.includes('efeitos')).length).toBeGreaterThanOrEqual(4)
+      // Triagem: não decidir é perguntar ao cliente (sem responsável) ou ir à pessoa (com responsável).
+      else if (contrato === 'ges.triagem.classificar') expect(casos.filter((c) => ['cartao', 'pergunta', 'sem_acordo'].includes(c.esperado)).length).toBeGreaterThanOrEqual(10)
       else if (contrato !== 'ctb.ecd.apontar_atencao') expect(casos.filter((c) => c.esperado === 'cartao').length, contrato).toBeGreaterThanOrEqual(3)
     }
     expect(new Set(roteamentoAmpliado.map((c) => c.id)).size).toBeGreaterThanOrEqual(30)

@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "06a955905848b865",
+  "catalogo_hash": "90e62653d9466486",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -119,7 +119,7 @@
     {
       "name": "atendimento_conversa_triar_e_repassar",
       "nome": "atendimento.conversa.triar_e_repassar",
-      "description": "Reconhece quem escreve e o assunto da conversa do número único e a repassa ao setor e ao integrante certos, com resumo.",
+      "description": "Reconhece quem escreve e o assunto da conversa do número compartilhado e a roteia ao setor e ao integrante certos, com resumo; na dúvida, pergunta.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -129,7 +129,24 @@
             "minLength": 1,
             "maxLength": 80
           },
+          "triagem": {
+            "type": "string",
+            "enum": [
+              "integrante",
+              "menu_e_integrante"
+            ]
+          },
           "menu_escolhido": {
+            "type": "string",
+            "enum": [
+              "contabil",
+              "fiscal",
+              "dp",
+              "societario",
+              "gestao_atendimento"
+            ]
+          },
+          "setor_entrada": {
             "type": "string",
             "enum": [
               "contabil",
@@ -156,7 +173,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": []
     },
