@@ -52,6 +52,15 @@ Formato de cada registro:
 - **Arquivos compartilhados:** gaveta do chat (S01 acomoda as duas abas; S05 preenche a aba Equipe e a tela cheia).
 - **Situação:** aceita pelo Enzo.
 
+#### 2026-11-15 · Coordenação · Grade de widgets: tamanho pelo conteúdo, sem esticar
+
+- **Decisão:** o tamanho do widget (P, M, G, L, XL) dá a largura e o teto de altura; a altura é a que o conteúdo pede (módulos de 4px), e a grade fecha vão por ordem e empacotamento (janela de três), nunca esticando um widget. A largura inteira vem da `larguraMinima` do conteúdo (kanban, semana), não de uma regra fixa. Revê a regra anti-buraco da versão 1 do `PADRAO_DE_INTERFACE.md` (vizinho que cresce para fechar a linha).
+- **Por quê:** pedido do dono: "não precisa pegar a largura inteira, só se aquele card pedir"; o card tem de fazer sentido para quem mexe. Direção em `DIRECAO_VISUAL.md`.
+- **Telas e ações:** todas as telas com `GradeWidgets` (Visão geral, Painel A/B/C).
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `components/widgets/` (tipos, grade, widget), `components/kit/ordenavel.tsx`, `components/kit/estados.tsx`, `index.css`, `telas/painel/padroes.ts`; `DefWidget.larguraTotal` e `linhasMinimas` viraram `larguraMinima` (rem) e `linhasMaximas` (células).
+- **Situação:** proposta.
+
 ### S01 · Início e moldura
 
 #### 2026-11-14 · S01 · Busca global: contrato C7 publicado
