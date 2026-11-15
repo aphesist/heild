@@ -1,6 +1,6 @@
 // S06 · Timesheet: regras das sessões de trabalho e da confirmação assistida (05; Fundações 5.4).
 import { diaDe, duracaoMin, hm, minHora } from '@/dados/timesheet-tempo'
-import { banco } from '../banco'
+import { bancoAtual } from '../banco'
 import type { ConfiancaSessao, ContestacaoSessao, Escritorio, Id, ItemConfirmacao, SessaoTrabalho } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
 import { idDoAtor, nomeDoAtor, type Contexto } from '../permissoes/perfil'
@@ -62,7 +62,7 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
   estender(id: Id, fim: string) {
     const s = this.obter(id)
     if (!s || !s.ao_vivo || Date.parse(fim) <= Date.parse(s.fim)) return
-    banco.transacao((tx) => tx.gravar('sessao_trabalho', { ...s, fim, atualizado_em: agora() }))
+    bancoAtual().transacao((tx) => tx.gravar('sessao_trabalho', { ...s, fim, atualizado_em: agora() }))
   }
 
   /** Encerra a sessão ao vivo no último evento (troca de tarefa, espera, conclusão). */
@@ -97,7 +97,7 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
     const quando = agora()
     const novas: SessaoTrabalho[] = partes.map((p) => ({
       id: novoId('ss'),
-      escritorio_id: banco.escritorioId ?? '',
+      escritorio_id: bancoAtual().escritorioId ?? '',
       criado_em: quando,
       atualizado_em: quando,
       ator_tipo: 'pessoa',
@@ -118,7 +118,7 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
       fora_da_jornada: s.fora_da_jornada,
     }))
     this.autorizar(ferramenta, s, {})
-    banco.transacao((tx) => {
+    bancoAtual().transacao((tx) => {
       novas.forEach((n) => tx.gravar('sessao_trabalho', n))
       tx.gravar('sessao_trabalho', { ...s, substituida_por: novas[0]?.id ?? 'descartada', ao_vivo: false, atualizado_em: quando })
       registrarEvento(tx, ctx, { nome: `sessao_trabalho.${verbo === 'confirmou' ? 'confirmar' : 'corrigir'}`, ferramenta, resultado_ref: s.id, cliente_id: s.cliente_id ?? null, setor_id: s.setor_id, texto: `${nomeDoAtor(ctx.ator)} ${verbo} a sessão ${hm(s.inicio)}–${hm(s.fim)} · ${s.rotulo}` })
@@ -159,7 +159,7 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
     const d = c.correcao_dados ?? {}
     const atual = this.atualizar(id, { contestacao: decisao }, { ...op, ctx, ferramenta: 'timesheet.decidir_contestacao', texto: `${nomeDoAtor(ctx.ator)} aceitou a contestação de ${s.rotulo} (${hm(s.inicio)}–${hm(s.fim)}): ${rotMotivo[c.motivo]}` })
     if (c.motivo === 'nao_era_trabalho') {
-      banco.transacao((tx) => tx.gravar('sessao_trabalho', { ...atual, substituida_por: 'descartada', atualizado_em: agora() }))
+      bancoAtual().transacao((tx) => tx.gravar('sessao_trabalho', { ...atual, substituida_por: 'descartada', atualizado_em: agora() }))
       return this.obter(id)!
     }
     const parte: Parte = { cliente_id: d.cliente_id !== undefined ? d.cliente_id : s.cliente_id, atividade_id: d.atividade_id !== undefined ? d.atividade_id : s.atividade_id, rotulo: d.rotulo ?? s.rotulo, inicio: d.inicio ?? s.inicio, fim: d.fim ?? s.fim, setor_id: s.setor_id }
@@ -211,8 +211,8 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
       }
       if (JSON.stringify(n) !== JSON.stringify(s)) mudou.push({ ...n, atualizado_em: quando })
     }
-    const vencidos = banco.ler('item_confirmacao').filter((i) => (i.situacao === 'pendente' || i.situacao === 'marcado') && i.dia >= de && i.dia <= ate && i.expira_em.slice(0, 10) < hoje)
-    banco.transacao((tx) => {
+    const vencidos = bancoAtual().ler('item_confirmacao').filter((i) => (i.situacao === 'pendente' || i.situacao === 'marcado') && i.dia >= de && i.dia <= ate && i.expira_em.slice(0, 10) < hoje)
+    bancoAtual().transacao((tx) => {
       mudou.forEach((m) => tx.gravar('sessao_trabalho', m))
       vencidos.forEach((i) => tx.gravar('item_confirmacao', { ...i, situacao: 'expirado', atualizado_em: quando }))
       registrarEvento(tx, ctx, { nome: 'timesheet.reconstruir', ferramenta: 'timesheet.reconstruir', texto: `${nomeDoAtor(ctx.ator)} reconstruiu o Timesheet de ${de} a ${ate}: ${doPeriodo.length} sessões relidas, ${mudou.length} ajustadas` })
@@ -227,7 +227,7 @@ export class RepositorioItensConfirmacao extends Repositorio<'item_confirmacao'>
     const i = this.obter(id)
     if (!i || (i.situacao !== 'pendente' && i.situacao !== 'marcado')) return
     exigirDono(i.usuario_id, contextoAtual(), 'marcar os próprios itens')
-    banco.transacao((tx) => tx.gravar('item_confirmacao', { ...i, situacao: marcado ? 'marcado' : 'pendente', atualizado_em: agora() }))
+    bancoAtual().transacao((tx) => tx.gravar('item_confirmacao', { ...i, situacao: marcado ? 'marcado' : 'pendente', atualizado_em: agora() }))
   }
 
   /** Confirma com a sugestão, com a alternativa ou com as partes corrigidas; cria as sessões confirmadas. */
@@ -236,7 +236,7 @@ export class RepositorioItensConfirmacao extends Repositorio<'item_confirmacao'>
     const ctx = op.ctx ?? contextoAtual()
     exigirDono(i.usuario_id, ctx, 'confirmar o próprio tempo')
     if (i.situacao !== 'pendente' && i.situacao !== 'marcado') throw new ErroRegra('Este item já foi resolvido.')
-    const ref = i.sessao_ref_id ? banco.obter('sessao_trabalho', i.sessao_ref_id) : undefined
+    const ref = i.sessao_ref_id ? bancoAtual().obter('sessao_trabalho', i.sessao_ref_id) : undefined
     const fim = i.fim ?? new Date(Date.parse(i.inicio) + (i.sugestao?.minutos ?? 15) * 60000).toISOString()
     const base = { inicio: ref?.inicio ?? i.inicio, fim: ref?.fim ?? fim, setor_id: i.setor_id ?? ref?.setor_id ?? 'gestao_atendimento', tarefa_id: i.sugestao?.tarefa_id ?? null }
     const partes: Parte[] =
@@ -254,7 +254,7 @@ export class RepositorioItensConfirmacao extends Repositorio<'item_confirmacao'>
       const quando = agora()
       const novas: SessaoTrabalho[] = partes.map((p) => ({
         id: novoId('ss'),
-        escritorio_id: banco.escritorioId ?? '',
+        escritorio_id: bancoAtual().escritorioId ?? '',
         criado_em: quando,
         atualizado_em: quando,
         ator_tipo: 'pessoa',
@@ -272,7 +272,7 @@ export class RepositorioItensConfirmacao extends Repositorio<'item_confirmacao'>
         evidencias: [`item de confirmação: ${i.texto}`, `pista: ${i.pista}`],
         pacote: /^(FIN|BPO)-/.test(p.atividade_id ?? '') ? 'bpo' : 'contabil',
       }))
-      banco.transacao((tx) => novas.forEach((n) => tx.gravar('sessao_trabalho', n)))
+      bancoAtual().transacao((tx) => novas.forEach((n) => tx.gravar('sessao_trabalho', n)))
       sessaoId = novas[0]?.id ?? null
     }
     const resultado = partes.map((p) => `${p.atividade_id ? `${p.atividade_id} ` : ''}${p.rotulo}`).join(' · ')
@@ -295,8 +295,8 @@ export class RepositorioItensConfirmacao extends Repositorio<'item_confirmacao'>
     const ctx = op.ctx ?? contextoAtual()
     exigirDono(i.usuario_id, ctx, 'descartar o próprio tempo')
     if (i.sessao_ref_id) {
-      const ref = banco.obter('sessao_trabalho', i.sessao_ref_id)
-      if (ref && !ref.substituida_por) banco.transacao((tx) => tx.gravar('sessao_trabalho', { ...ref, substituida_por: 'descartada', atualizado_em: agora() }))
+      const ref = bancoAtual().obter('sessao_trabalho', i.sessao_ref_id)
+      if (ref && !ref.substituida_por) bancoAtual().transacao((tx) => tx.gravar('sessao_trabalho', { ...ref, substituida_por: 'descartada', atualizado_em: agora() }))
     }
     return this.atualizar(id, { situacao: 'descartado', resultado: 'não era trabalho' }, { ...op, ctx, ferramenta: 'timesheet.confirmar', texto: `${nomeDoAtor(ctx.ator)} marcou ${hm(i.inicio)} como "não era trabalho"` })
   }

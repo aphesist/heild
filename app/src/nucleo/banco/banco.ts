@@ -25,6 +25,13 @@ export interface Transacao {
 
 type Ouvinte = (tabelas: ReadonlySet<NomeTabela>) => void
 
+/** Uma escrita de uma transação: linha gravada ou id removido. */
+export interface MarcaEscrita {
+  tabela: NomeTabela
+  linha: Registro | null
+  removido: Id | null
+}
+
 export class Banco {
   adaptador: Adaptador
   escritorioId: Id | null = null
@@ -38,6 +45,11 @@ export class Banco {
   private relogio: ReturnType<typeof setTimeout> | null = null
   /** Muda a cada escrita: serve de versão para `useSyncExternalStore`. */
   versao = 0
+  /**
+   * Quem quer saber de cada transação que deu certo com o banco pronto (o adaptador `api`
+   * transforma a escrita que não veio de um repositório num comando para a API).
+   */
+  aoTransacao: ((marcas: MarcaEscrita[]) => void) | null = null
 
   constructor(adaptador: Adaptador) {
     this.adaptador = adaptador
@@ -65,7 +77,7 @@ export class Banco {
       let foto = await this.adaptador.carregar(escritorioId)
       if (!foto) {
         foto = semente()
-        await this.adaptador.substituir(escritorioId, foto)
+        foto = (await this.adaptador.substituir(escritorioId, foto)) ?? foto
       }
       this.trocarFoto(foto)
       this.mudarEstado('pronto')
@@ -86,8 +98,8 @@ export class Banco {
     // nenhuma escrita da tela que sai entra na fila (ver transacao).
     this.mudarEstado('carregando')
     try {
-      const foto = semente()
-      await this.adaptador.substituir(this.escritorioId, foto)
+      const local = semente()
+      const foto = (await this.adaptador.substituir(this.escritorioId, local)) ?? local
       this.trocarFoto(foto)
       this.mudarEstado('pronto')
     } catch (e) {
@@ -138,6 +150,7 @@ export class Banco {
       // está saindo: muda a memória que vai ser trocada, mas não vai para o adaptador (iria para o
       // escritório errado, ou para um que acabou de ser apagado).
       if (this.estado === 'pronto') for (const [t, linha, id] of marcas) this.marcar(t, linha, id)
+      if (this.estado === 'pronto' && this.aoTransacao) this.aoTransacao(marcas.map(([tabela, linha, removido]) => ({ tabela, linha, removido })))
       for (const [t, linhas] of novas) {
         ;(this.foto as Record<string, Registro[]>)[t] = linhas
         this.indices.delete(t)
@@ -148,6 +161,37 @@ export class Banco {
       if (this.estado === 'pronto') this.agendarGravacao()
     }
     return resultado
+  }
+
+  /**
+   * Aplica o que o servidor confirmou (a linha como ficou gravada), sem gerar escrita nova:
+   * é a reconciliação da escrita otimista no modo `api`.
+   */
+  aplicarDoServidor(gravar: { tabela: NomeTabela; linha: Registro }[], remover: { tabela: NomeTabela; id: Id }[] = []): void {
+    if (!gravar.length && !remover.length) return
+    const mexidas = new Set<NomeTabela>()
+    for (const { tabela, linha } of gravar) {
+      const atual = this.foto[tabela] as Registro[] | undefined
+      if (!atual) continue
+      const i = atual.findIndex((r) => r.id === linha.id)
+      ;(this.foto as Record<string, Registro[]>)[tabela] = i >= 0 ? atual.map((r, j) => (j === i ? linha : r)) : [...atual, linha]
+      mexidas.add(tabela)
+    }
+    for (const { tabela, id } of remover) {
+      const atual = this.foto[tabela] as Registro[] | undefined
+      if (!atual) continue
+      ;(this.foto as Record<string, Registro[]>)[tabela] = atual.filter((r) => r.id !== id)
+      mexidas.add(tabela)
+    }
+    for (const t of mexidas) this.indices.delete(t)
+    this.foto = { ...this.foto }
+    this.versao++
+    this.avisar(mexidas)
+  }
+
+  /** Troca a memória inteira pela fotografia do servidor (depois de uma escrita recusada lá). */
+  recarregarDe(foto: Fotografia): void {
+    this.trocarFoto(foto)
   }
 
   /** Cópia do escritório inteiro (exportar, depurar). */

@@ -3,3 +3,6 @@ dist/
 .DS_Store
 *.log
 .vite/
+
+# Postgres local do servidor (servidor/scripts/pg-local.sh)
+servidor/.pgdata/

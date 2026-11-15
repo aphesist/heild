@@ -14,7 +14,18 @@ import { contextoAtual } from './contexto'
  * reverter (desfazer) e desfazerCriacao.
  */
 
-export const novoId = (prefixo: string) => `${prefixo}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+/** Id novo com prefixo ("tk", "ev"): ordenável pelo tempo e com sufixo aleatório. */
+export const novoIdPadrao = (prefixo: string) => `${prefixo}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+let geradorId: (prefixo: string) => string = novoIdPadrao
+export const novoId = (prefixo: string) => geradorId(prefixo)
+/**
+ * Troca o gerador de ids (null volta ao padrão). O modo `api` anota os ids que a tela
+ * gerou numa operação e o servidor repete os mesmos ao rodar a mesma operação: a linha
+ * otimista e a gravada têm o mesmo id.
+ */
+export function definirGeradorId(g: ((prefixo: string) => string) | null) {
+  geradorId = g ?? novoIdPadrao
+}
 export const agora = () => new Date().toISOString()
 
 export interface RegrasEntidade<K extends NomeTabela> {
@@ -81,6 +92,8 @@ export class Repositorio<K extends NomeTabela> {
     const quando = agora()
     const ultima = this.banco().ler(this.tabela).reduce((m, r) => Math.max(m, r.ordem ?? 0), 0)
     const linha = { ordem: ultima + 1, ...dados, id: dados.id ?? novoId(this.regras.prefixo), escritorio_id: b.escritorioId ?? '', criado_em: quando, atualizado_em: quando } as Tabelas[K]
+    // Criar nunca sobrescreve: id que já existe é erro (no servidor, protege de id repetido vindo de fora).
+    if (this.obter(linha.id)) throw new ErroRegra(`Já existe ${this.regras.artigo} com o id ${linha.id}.`, 'ID_EM_USO')
     this.validar(linha)
     const ctx = this.autorizar(op.ferramenta ?? this.regras.ferramentas.criar, linha, op)
     b.transacao((tx) => {
@@ -220,6 +233,9 @@ export class Repositorio<K extends NomeTabela> {
     if (op.semAutorizar) return ctx
     const d = autorizar(ctx, ferramenta, this.regras.alvo?.(linha) ?? {})
     if (!d.permitido) throw new ErroPermissao(ferramenta, d.motivo)
+    // No servidor, "uma pessoa precisa aprovar" para a operação e vira cartão (Fundações 3.3).
+    // No navegador do wireframe a demonstração segue como sempre seguiu.
+    if (d.aprovacao && exigirAprovacao && !aprovadas.has(ferramenta)) throw new ErroAprovacao(ferramenta, d.motivo, this.regras.alvo?.(linha) ?? {})
     return ctx
   }
 
@@ -235,6 +251,28 @@ export class Repositorio<K extends NomeTabela> {
       ...this.regras.alvo?.(linha),
     })
   }
+}
+
+/** Lançado quando a decisão de `autorizar` pede aprovação e o modo do servidor está ligado. */
+export class ErroAprovacao extends Error {
+  readonly ferramenta: string
+  readonly alvo: Alvo
+  constructor(ferramenta: string, motivo: string, alvo: Alvo) {
+    super(motivo)
+    this.ferramenta = ferramenta
+    this.alvo = alvo
+  }
+}
+
+let exigirAprovacao = false
+let aprovadas: ReadonlySet<string> = new Set()
+/**
+ * Liga o cartão de aprovação (servidor). `jaAprovadas`: as ferramentas que um cartão
+ * decidido por uma pessoa já liberou para esta execução.
+ */
+export function definirModoAprovacao(ligado: boolean, jaAprovadas: Iterable<string> = []) {
+  exigirAprovacao = ligado
+  aprovadas = new Set(jaAprovadas)
 }
 
 /** Grava um evento na transação (R2: todo efeito gera evento, na mesma transação). */

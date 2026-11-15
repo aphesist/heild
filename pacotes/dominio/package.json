@@ -1,0 +1,14 @@
+{
+  "name": "@heild/dominio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "O domínio da Heild que roda igual no navegador e no servidor: autorizar, catálogo, entidades, regras dos repositórios, contratos das ferramentas e a cadeia de eventos.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.4.0",
+    "zod": "^4.6.7"
+  }
+}

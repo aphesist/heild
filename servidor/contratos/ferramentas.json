@@ -1,0 +1,1571 @@
+{
+  "catalogo_hash": "ac9140665746a745",
+  "ferramentas": [
+    {
+      "name": "aprovacao_decidir",
+      "nome": "aprovacao.decidir",
+      "description": "Decide um cartão de aprovação. Só pessoa decide; cartão decidido não muda.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cartao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "decisao": {
+            "type": "string",
+            "enum": [
+              "aprovado",
+              "recusado",
+              "editado_e_aprovado"
+            ]
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "cartao_id",
+          "decisao"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "JA_DECIDIDO",
+        "SO_PESSOA_DECIDE"
+      ]
+    },
+    {
+      "name": "aprovacao_listar",
+      "nome": "aprovacao.listar",
+      "description": "Cartões de aprovação, por situação (pendentes por padrão).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "default": [
+              "pendente"
+            ],
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pendente",
+                "aprovado",
+                "recusado",
+                "editado_e_aprovado",
+                "expirado",
+                "cancelado"
+              ]
+            }
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CURSOR_INVALIDO"
+      ]
+    },
+    {
+      "name": "cliente_arquivar",
+      "nome": "cliente.arquivar",
+      "description": "Arquiva o cliente (Gestor ou Administrador). Nada se apaga.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "cliente_id",
+          "motivo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    },
+    {
+      "name": "cliente_atualizar",
+      "nome": "cliente.atualizar",
+      "description": "Muda campos cadastrais do cliente. O estado do ciclo muda por cliente.mudar_estado.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "nome": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "codigo": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "documento": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "servicos_contratados": {
+                "maxItems": 30,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "cliente_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "RESTRICAO_DO_BANCO"
+      ]
+    },
+    {
+      "name": "cliente_criar",
+      "nome": "cliente.criar",
+      "description": "Cadastra um cliente. O documento (CNPJ ou CPF) é único no escritório.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "pj",
+              "pf",
+              "mei",
+              "condominio",
+              "entidade_terceiro_setor",
+              "produtor_rural"
+            ]
+          },
+          "codigo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "documento": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "regime": {
+            "type": "string",
+            "enum": [
+              "simples",
+              "presumido",
+              "real",
+              "mei",
+              "imune_isento",
+              "pf"
+            ]
+          },
+          "estado_ciclo": {
+            "default": "em_implantacao",
+            "type": "string",
+            "enum": [
+              "prospect",
+              "proposta",
+              "aceito",
+              "em_implantacao",
+              "ativo",
+              "inativo",
+              "em_saida",
+              "em_baixa",
+              "encerrado",
+              "arquivado",
+              "eliminado"
+            ]
+          },
+          "servicos_contratados": {
+            "default": [],
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            }
+          }
+        },
+        "required": [
+          "tipo",
+          "codigo",
+          "documento",
+          "nome",
+          "regime"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "RESTRICAO_DO_BANCO"
+      ]
+    },
+    {
+      "name": "cliente_listar",
+      "nome": "cliente.listar",
+      "description": "Lista clientes no seu escopo (carteira), por estado do ciclo ou regime.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "estado_ciclo": {
+            "maxItems": 11,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "prospect",
+                "proposta",
+                "aceito",
+                "em_implantacao",
+                "ativo",
+                "inativo",
+                "em_saida",
+                "em_baixa",
+                "encerrado",
+                "arquivado",
+                "eliminado"
+              ]
+            }
+          },
+          "regime": {
+            "type": "string",
+            "enum": [
+              "simples",
+              "presumido",
+              "real",
+              "mei",
+              "imune_isento",
+              "pf"
+            ]
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CURSOR_INVALIDO"
+      ]
+    },
+    {
+      "name": "cliente_mudar_estado",
+      "nome": "cliente.mudar_estado",
+      "description": "Muda o estado do ciclo de vida do cliente (Gestor ou Administrador).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "estado_ciclo": {
+            "type": "string",
+            "enum": [
+              "prospect",
+              "proposta",
+              "aceito",
+              "em_implantacao",
+              "ativo",
+              "inativo",
+              "em_saida",
+              "em_baixa",
+              "encerrado",
+              "arquivado",
+              "eliminado"
+            ]
+          }
+        },
+        "required": [
+          "cliente_id",
+          "estado_ciclo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    },
+    {
+      "name": "cliente_obter",
+      "nome": "cliente.obter",
+      "description": "Um cliente pelo id.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          }
+        },
+        "required": [
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    },
+    {
+      "name": "evento_listar",
+      "nome": "evento.listar",
+      "description": "Linha do tempo: eventos do escritório (mais novos primeiro), por cliente, setor ou ferramenta.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "setor_id": {
+            "type": "string",
+            "enum": [
+              "societario",
+              "fiscal",
+              "notas",
+              "dp",
+              "contabil",
+              "consultor",
+              "gestao_atendimento",
+              "financeiro_escritorio",
+              "bpo_financeiro",
+              "bpo",
+              "pf",
+              "terceiro_setor",
+              "nichos",
+              "ciclo_vida"
+            ]
+          },
+          "ferramenta": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "so_linha_do_tempo": {
+            "default": true,
+            "type": "boolean"
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CURSOR_INVALIDO"
+      ]
+    },
+    {
+      "name": "mensagem_interna_editar",
+      "nome": "mensagem_interna.editar",
+      "description": "Edita a própria mensagem interna; a versão anterior fica guardada com autor e data.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "mensagem_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "corpo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          }
+        },
+        "required": [
+          "mensagem_id",
+          "corpo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "SO_AUTOR_EDITA"
+      ]
+    },
+    {
+      "name": "mensagem_interna_enviar",
+      "nome": "mensagem_interna.enviar",
+      "description": "Escreve numa conversa interna do escritório.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "conversa_interna_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "corpo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          },
+          "responde_a_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "conversa_interna_id",
+          "corpo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO"
+      ]
+    },
+    {
+      "name": "mensagem_interna_listar",
+      "nome": "mensagem_interna.listar",
+      "description": "Mensagens de uma conversa interna, das mais novas para as mais antigas.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "conversa_interna_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "required": [
+          "conversa_interna_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CURSOR_INVALIDO"
+      ]
+    },
+    {
+      "name": "notificacao_ler",
+      "nome": "notificacao.ler",
+      "description": "Marca um aviso como lido pela conta da sessão.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "notificacao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "notificacao_id",
+          "usuario_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    },
+    {
+      "name": "obrigacao_cancelar",
+      "nome": "obrigacao.cancelar",
+      "description": "Cancela uma obrigação com motivo (Gestor do setor ou Administrador). Fica no histórico.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "obrigacao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "obrigacao_id",
+          "motivo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "MOTIVO_OBRIGATORIO"
+      ]
+    },
+    {
+      "name": "obrigacao_listar",
+      "nome": "obrigacao.listar",
+      "description": "Lista as obrigações do escritório, por setor que gera a tarefa.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor_id": {
+            "type": "string",
+            "enum": [
+              "societario",
+              "fiscal",
+              "notas",
+              "dp",
+              "contabil",
+              "consultor",
+              "gestao_atendimento",
+              "financeiro_escritorio",
+              "bpo_financeiro",
+              "bpo",
+              "pf",
+              "terceiro_setor",
+              "nichos",
+              "ciclo_vida"
+            ]
+          },
+          "periodicidade": {
+            "type": "string",
+            "enum": [
+              "mensal",
+              "trimestral",
+              "anual",
+              "por_evento",
+              "diaria"
+            ]
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CURSOR_INVALIDO"
+      ]
+    },
+    {
+      "name": "tarefa_aguardar_cliente",
+      "nome": "tarefa.aguardar_cliente",
+      "description": "Marca a tarefa como aguardando o cliente.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "TAREFA_FINAL"
+      ]
+    },
+    {
+      "name": "tarefa_aguardar_terceiro",
+      "nome": "tarefa.aguardar_terceiro",
+      "description": "Marca a tarefa como aguardando terceiro (órgão, banco).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "TAREFA_FINAL"
+      ]
+    },
+    {
+      "name": "tarefa_arquivar",
+      "nome": "tarefa.arquivar",
+      "description": "Arquiva uma tarefa (some das listas, continua existindo).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "tarefa_id",
+          "motivo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    },
+    {
+      "name": "tarefa_atualizar",
+      "nome": "tarefa.atualizar",
+      "description": "Muda campos editáveis de uma tarefa (título, descrição, prazos, prioridade). Status muda só pelas ferramentas de transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "titulo": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "descricao": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "prazo_interno": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "prazo_legal": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "prioridade": {
+                "type": "string",
+                "enum": [
+                  "baixa",
+                  "normal",
+                  "alta",
+                  "urgente"
+                ]
+              },
+              "competencia": {
+                "type": "string",
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "tarefa_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO"
+      ]
+    },
+    {
+      "name": "tarefa_cancelar",
+      "nome": "tarefa.cancelar",
+      "description": "Cancela uma tarefa com motivo. Tarefa de obrigação só Gestor do setor ou Administrador cancela.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "tarefa_id",
+          "motivo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "TAREFA_FINAL",
+        "MOTIVO_OBRIGATORIO"
+      ]
+    },
+    {
+      "name": "tarefa_concluir",
+      "nome": "tarefa.concluir",
+      "description": "Conclui uma tarefa aberta. Concluída é final: reabrir é criar outra.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "se_fora_da_lista",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "TAREFA_FINAL"
+      ]
+    },
+    {
+      "name": "tarefa_criar",
+      "nome": "tarefa.criar",
+      "description": "Cria uma tarefa num setor, ligada a uma atividade do catálogo e, se houver, a um cliente.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor_id": {
+            "type": "string",
+            "enum": [
+              "societario",
+              "fiscal",
+              "notas",
+              "dp",
+              "contabil",
+              "consultor",
+              "gestao_atendimento",
+              "financeiro_escritorio",
+              "bpo_financeiro",
+              "bpo",
+              "pf",
+              "terceiro_setor",
+              "nichos",
+              "ciclo_vida"
+            ]
+          },
+          "atividade_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "titulo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "descricao": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "competencia": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+          },
+          "prazo_interno": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "prazo_legal": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "prioridade": {
+            "default": "normal",
+            "type": "string",
+            "enum": [
+              "baixa",
+              "normal",
+              "alta",
+              "urgente"
+            ]
+          },
+          "responsavel_tipo": {
+            "type": "string",
+            "enum": [
+              "usuario",
+              "integrante"
+            ]
+          },
+          "responsavel_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "quem_conclui": {
+            "default": "pessoa",
+            "type": "string",
+            "enum": [
+              "pessoa",
+              "agente_sozinho",
+              "agente_prepara_pessoa_conclui"
+            ]
+          }
+        },
+        "required": [
+          "setor_id",
+          "atividade_id",
+          "titulo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO"
+      ]
+    },
+    {
+      "name": "tarefa_enviar_revisao",
+      "nome": "tarefa.enviar_revisao",
+      "description": "Manda a tarefa para revisão.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "TAREFA_FINAL"
+      ]
+    },
+    {
+      "name": "tarefa_iniciar",
+      "nome": "tarefa.iniciar",
+      "description": "Põe a tarefa em andamento.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "TAREFA_FINAL"
+      ]
+    },
+    {
+      "name": "tarefa_listar",
+      "nome": "tarefa.listar",
+      "description": "Lista tarefas no seu escopo, com totais por situação. Filtre por setor, cliente, status ou competência.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor_id": {
+            "type": "string",
+            "enum": [
+              "societario",
+              "fiscal",
+              "notas",
+              "dp",
+              "contabil",
+              "consultor",
+              "gestao_atendimento",
+              "financeiro_escritorio",
+              "bpo_financeiro",
+              "bpo",
+              "pf",
+              "terceiro_setor",
+              "nichos",
+              "ciclo_vida"
+            ]
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "status": {
+            "maxItems": 7,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "a_fazer",
+                "em_andamento",
+                "aguardando_cliente",
+                "aguardando_terceiro",
+                "em_revisao",
+                "concluida",
+                "cancelada"
+              ]
+            }
+          },
+          "competencia": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+          },
+          "responsavel_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CURSOR_INVALIDO"
+      ]
+    },
+    {
+      "name": "tarefa_obter",
+      "nome": "tarefa.obter",
+      "description": "Uma tarefa pelo id, com checklist e prazos.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "visao": {
+            "default": "compacta",
+            "type": "string",
+            "enum": [
+              "compacta",
+              "tela"
+            ]
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    },
+    {
+      "name": "tarefa_reatribuir",
+      "nome": "tarefa.reatribuir",
+      "description": "Troca o responsável da tarefa (exige gestão do setor).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "responsavel_tipo": {
+            "type": "string",
+            "enum": [
+              "usuario",
+              "integrante"
+            ]
+          },
+          "responsavel_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id",
+          "responsavel_tipo",
+          "responsavel_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ]
+    }
+  ]
+}

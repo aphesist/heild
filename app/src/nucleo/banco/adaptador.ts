@@ -8,9 +8,10 @@ import type { Fotografia, Id, NomeTabela, Registro } from '../modelo/entidades'
  * - `local` (padrão): localStorage do navegador.
  * - `indexeddb`: IndexedDB do navegador (mais espaço).
  * - `supabase`: Postgres com RLS por escritório (ver app/supabase/README.md).
+ * - `api`: a API do backend real (servidor/), que confere a regra e grava (branch backend).
  * - `memoria`: nada persiste (Storybook, testes).
  */
-export type NomeAdaptador = 'local' | 'indexeddb' | 'supabase' | 'memoria'
+export type NomeAdaptador = 'local' | 'indexeddb' | 'supabase' | 'api' | 'memoria'
 
 /** O que mudou numa tabela desde a última gravação. */
 export interface Alteracao {
@@ -31,8 +32,11 @@ export interface Adaptador {
    * as alterações).
    */
   persistir(escritorioId: Id, alteracoes: Alteracao[], foto: Fotografia): Promise<void>
-  /** Troca tudo do escritório por esta fotografia (semente, restaurar demonstração). */
-  substituir(escritorioId: Id, foto: Fotografia): Promise<void>
+  /**
+   * Troca tudo do escritório por esta fotografia (semente, restaurar demonstração).
+   * O adaptador `api` semeia no servidor e devolve a fotografia do servidor, que vale no lugar da local.
+   */
+  substituir(escritorioId: Id, foto: Fotografia): Promise<void | Fotografia>
   /** Apaga os dados guardados do escritório (o próximo carregar devolve `null`). */
   esquecer(escritorioId: Id): Promise<void>
 }

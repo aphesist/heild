@@ -1,4 +1,5 @@
-import { banco } from '../banco'
+import { banco, bancoAtual } from '../banco'
+import { instalarCapturaApi } from '../banco/api'
 import type { Banco } from '../banco/banco'
 import type { CartaoAprovacao, Id, MensagemInterna, NomeTabela, Notificacao, StatusTarefa, Tabelas, Tarefa } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
@@ -6,8 +7,9 @@ import { idDoAtor, nomeDoAtor } from '../permissoes/perfil'
 import { criarReposBpo } from './bpo'
 import { contextoAtual } from './contexto'
 import { reposFinanceiro } from './financeiro'
-import { agora, novoId, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
+import { agora, definirGeradorId, novoId, novoIdPadrao, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
 import { registrarRepoSessoes, RepositorioItensConfirmacao, RepositorioSessoes } from './s06-timesheet'
+import { operacoesS08b } from './s08b-operacao'
 
 export * from './contexto'
 export * from './repositorio'
@@ -15,7 +17,7 @@ export * from './s06-timesheet'
 export { ehGestorBpo, eventoBpo } from './bpo'
 export { competenciaDe } from './financeiro'
 
-const b = (): Banco => banco
+const b = (): Banco => bancoAtual()
 
 /* ---------- Tarefa: cada transição é ferramenta própria (Fundações 4.8) ---------- */
 
@@ -43,7 +45,11 @@ export class RepositorioTarefas extends Repositorio<'tarefa'> {
   /** Troca o status pela ferramenta da transição. Concluída é final: reabrir cria tarefa nova. */
   mudarStatus(id: Id, status: StatusTarefa, op: OpcoesEscrita & { motivo?: string } = {}): Tarefa {
     const t = this.exigir(id)
-    if (t.status === status) return t
+    if (t.status === status) {
+      // Nada muda, mas a resposta não pode dizer "ok" a quem não pode: confere a permissão do mesmo jeito.
+      this.autorizar(op.ferramenta ?? ferramentaDaTransicao[status], t, op)
+      return t
+    }
     if (status === 'cancelada') return this.cancelar(id, op.motivo ?? '', op)
     if (t.status === 'cancelada') throw new ErroRegra('Tarefa cancelada não volta: crie uma tarefa nova.')
     const quando = agora()
@@ -120,7 +126,7 @@ export class RepositorioNotificacoes extends Repositorio<'notificacao'> {
   lerTodas(usuarioId: Id, ids: Id[]) {
     const alvo = ids.map((id) => this.obter(id)).filter((n): n is Notificacao => !!n && !n.lida_por.includes(usuarioId))
     if (!alvo.length) return
-    banco.transacao((tx) => alvo.forEach((n) => tx.gravar('notificacao', { ...n, lida_por: [...n.lida_por, usuarioId], atualizado_em: agora() })))
+    bancoAtual().transacao((tx) => alvo.forEach((n) => tx.gravar('notificacao', { ...n, lida_por: [...n.lida_por, usuarioId], atualizado_em: agora() })))
   }
 }
 
@@ -129,10 +135,10 @@ export class RepositorioNotificacoes extends Repositorio<'notificacao'> {
 export class RepositorioTela extends Repositorio<'registro_tela'> {
   lembrar(chave: string, valor: unknown) {
     const atual = this.obter(chave)
-    banco.transacao((tx) => tx.gravar('registro_tela', { ...(atual ?? { id: chave, escritorio_id: banco.escritorioId ?? '', criado_em: agora() }), valor, atualizado_em: agora() }))
+    bancoAtual().transacao((tx) => tx.gravar('registro_tela', { ...(atual ?? { id: chave, escritorio_id: bancoAtual().escritorioId ?? '', criado_em: agora() }), valor, atualizado_em: agora() }))
   }
   esquecer(chave: string) {
-    if (this.obter(chave)) banco.transacao((tx) => tx.remover('registro_tela', chave))
+    if (this.obter(chave)) bancoAtual().transacao((tx) => tx.remover('registro_tela', chave))
   }
 }
 
@@ -212,15 +218,20 @@ export type Repos = typeof repos
 
 registrarRepoSessoes(() => repos.sessoes) // S06
 
+// Backend (VITE_HEILD_BANCO=api): cada chamada de repositório da tela vira comando para a API.
+instalarCapturaApi({ repos: repos as unknown as Record<string, unknown>, modulos: operacoesS08b as unknown as Record<string, Record<string, unknown>>, banco, definirGeradorId, novoIdPadrao, contextoAtual })
+
+export { operacoesS08b }
+
 /** Registra um evento avulso (algo que aconteceu sem mudar uma linha: "Começou: conferir PGDAS-D"). */
 export function registrar(texto: string, nome = 'atividade.registrar', op: { ctx?: OpcoesEscrita['ctx']; cliente_id?: Id | null; setor_id?: Id | null } = {}) {
-  banco.transacao((tx) => registrarEvento(tx, op.ctx ?? contextoAtual(), { nome, ferramenta: 'evento.listar', texto, cliente_id: op.cliente_id ?? null, setor_id: op.setor_id ?? null }))
+  bancoAtual().transacao((tx) => registrarEvento(tx, op.ctx ?? contextoAtual(), { nome, ferramenta: 'evento.listar', texto, cliente_id: op.cliente_id ?? null, setor_id: op.setor_id ?? null }))
 }
 
 /** Linha nova com os campos de registro preenchidos, para gravar direto numa transação (semente, migração). */
 export function linhaNova<K extends NomeTabela>(_tabela: K, dados: Omit<Tabelas[K], 'escritorio_id' | 'criado_em' | 'atualizado_em'> & Partial<Pick<Tabelas[K], 'criado_em'>>): Tabelas[K] {
   const quando = dados.criado_em ?? agora()
-  return { ...dados, escritorio_id: banco.escritorioId ?? '', criado_em: quando, atualizado_em: quando } as Tabelas[K]
+  return { ...dados, escritorio_id: bancoAtual().escritorioId ?? '', criado_em: quando, atualizado_em: quando } as Tabelas[K]
 }
 
 export { novoId }
