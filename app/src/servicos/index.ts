@@ -9,7 +9,7 @@ import type { InfoServico } from './tipos'
 import { coresDemonstracao, extensaoDemonstracao, type ServicoCores, type ServicoExtensao } from './timesheet'
 import { calculadoraReformaDemonstracao, conferenciaAssinaturaDemonstracao, coreContabilDemonstracao, leitorExtratosDemonstracao, reinfDemonstracao, sicalcDemonstracao, type ServicoCalculadoraReforma, type ServicoConferenciaAssinatura, type ServicoCoreContabil, type ServicoLeitorExtratos, type ServicoReinf, type ServicoSicalc } from './s03'
 import { cobrancaDemonstracao, importacaoFinanceiroDemonstracao, indicesDemonstracao, type ServicoCobranca, type ServicoImportacaoFinanceiro, type ServicoIndices } from './cobranca'
-import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores } from './conectores'
+import { arvoreDemonstracao, cofreDemonstracao, conectoresDemonstracao, nuvensDemonstracao, type ServicoArvore, type ServicoCofre, type ServicoConectores, type ServicoNuvens } from './conectores'
 import { cadastrosDemonstracao, type ServicoCadastros } from './cadastros'
 
 export * from './tipos'
@@ -70,6 +70,8 @@ export interface Servicos {
   conectores: ServicoConectores
   cofre: ServicoCofre
   arvore: ServicoArvore
+  // S09b: nuvens (Google, Microsoft, Dropbox, Box) e servidor local com agente.
+  nuvens: ServicoNuvens
   /** S02: consulta CNPJ, procurações e Domicílio Judicial. */
   cadastros: ServicoCadastros
 }
@@ -106,6 +108,7 @@ export const servicos: Servicos = {
   conectores: conectoresDemonstracao,
   cofre: cofreDemonstracao,
   arvore: arvoreDemonstracao,
+  nuvens: nuvensDemonstracao,
   cadastros: cadastrosDemonstracao,
 }
 
@@ -152,7 +155,8 @@ export const catalogoServicos: (InfoServico & { id: keyof Servicos; api: string 
   { id: 'importacaoFinanceiro', api: 'API-30', nome: 'Importação do financeiro antigo', descricao: 'Contratos, cobranças e recebimentos de Conexa, Omie, Conta Azul, Nibo, Domínio Honorários ou planilha.', modo: 'demonstracao', requisito: 'Arquivo exportado da ferramenta antiga' },
   { id: 'conectores', api: 'API-06 a API-25', nome: 'Conectores (teste e conexão)', descricao: 'Conectar, testar e reprocessar cada integração.', modo: 'demonstracao', requisito: 'Backend dos conectores (08)' },
   { id: 'cofre', api: 'API-29', nome: 'Cofre de credenciais', descricao: 'Certificados, procurações e tokens guardados fora do banco.', modo: 'demonstracao', requisito: 'Cofre e KMS no backend' },
-  { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore do Drive', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo.', modo: 'demonstracao', requisito: 'Conector OAuth do Drive em leitura' },
+  { id: 'arvore', api: 'API-24', nome: 'Leitura da árvore de pastas', descricao: 'Raio-X: só nomes de pastas e arquivos, nunca o conteúdo, de qualquer provedor.', modo: 'demonstracao', requisito: 'Conector da nuvem ou agente do servidor local em leitura' },
+  { id: 'nuvens', api: 'API-24', nome: 'Nuvens e servidor local', descricao: 'Google Drive, OneDrive/SharePoint, Dropbox, Box e o agente Heild no servidor do escritório.', modo: 'demonstracao', requisito: 'Apps OAuth publicados em cada provedor e o agente assinado (Windows e Linux)' },
 ].map((s) => ({ ...s, modo: reais.has(s.id as keyof Servicos) ? 'real' : 'demonstracao' })) as (InfoServico & { id: keyof Servicos; api: string })[]
 
 /** Os serviços (para componentes; o mesmo objeto de `servicos`). */

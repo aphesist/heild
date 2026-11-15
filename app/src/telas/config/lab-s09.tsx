@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { CampoEscolha } from '@/components/ui/formulario'
 import { catalogoConectores, definirEstadoConector, restaurarConectores, rotuloEstado, type EstadoConexao, type IdConector } from '@/dados/conectores'
 import { useLoja } from '@/ambiente/loja'
+import { useAgentes } from './armazenamento-s09b'
 
 /**
  * Seção da S09 no painel Demonstração: põe um conector num estado de erro
@@ -13,6 +14,8 @@ export function SecaoLabS09() {
   const loja = useLoja()
   const [id, setId] = useState<IdConector>('integra_contador')
   const [estado, setEstado] = useState<EstadoConexao>('fora_do_ar')
+  const [agentes, setAgentes] = useAgentes()
+  const agente = agentes.find((a) => !a.revogado_em)
   return (
     <div className="bg-sunken/60 flex flex-col gap-1.5 rounded-[12px] p-2" data-lab="s09">
       <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
@@ -31,6 +34,20 @@ export function SecaoLabS09() {
         >
           Aplicar
         </button>
+        {agente && (
+          <button
+            type="button"
+            className="bg-raised shadow-contorno cursor-pointer rounded-full px-2.5 py-1"
+            onClick={() => {
+              const online = !agente.online
+              setAgentes((xs) => xs.map((a) => (a.id === agente.id ? { ...a, online, ...(online ? { ultima_sincronizacao: new Date().toISOString() } : {}) } : a)))
+              definirEstadoConector('servidor_local', online ? { estado: 'ativo', mensagem: undefined, ultima_execucao: new Date().toISOString() } : { estado: 'fora_do_ar', mensagem: `O agente de ${agente.dispositivo} está offline (servidor desligado ou sem internet).` })
+              loja.toast(`Agente ${agente.dispositivo}: ${online ? 'online' : 'offline'}.`, { modulo: 'config', aba: 'armazenamento' }, 'Ver em Armazenamento')
+            }}
+          >
+            Agente local {agente.online ? 'ficar offline' : 'voltar online'}
+          </button>
+        )}
         <button type="button" className="text-muted-foreground cursor-pointer rounded-full px-2.5 py-1 hover:underline" onClick={() => (restaurarConectores(), loja.toast('Conectores de volta ao padrão do escritório.'))}>
           Restaurar conectores
         </button>

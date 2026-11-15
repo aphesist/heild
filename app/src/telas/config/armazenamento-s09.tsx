@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { useEstadoConector } from '@/dados/conectores'
 import { CHAVE_RAIOX, estadoRaioXInicial, resumoDoEscritorio, type EstadoRaioX } from '@/dados/raiox'
 import { registrar } from '@/nucleo/repositorios'
+import { banco } from '@/nucleo/banco'
+import { ID_HORIZONTE } from '@/nucleo/semente'
 import { SeloEstado } from './comum-s09'
 import { useTelasCheias } from './telas-cheias'
 
@@ -20,6 +22,10 @@ export interface ItemManutencao {
   detalhe: string
   resolvido?: string
 }
+
+/** O Horizonte (servidor local) tem a sua própria lista. */
+export const manutencaoDoEscritorio = (): ItemManutencao[] =>
+  banco.escritorioId === ID_HORIZONTE ? [{ id: 'm1', tipo: 'fora_padrao', pasta: 'D:\\Clientes\\Mercado Central\\Fiscal\\outubro', detalhe: 'Mês por extenso no servidor local; o padrão novo é 2026-10. O integrante avisou quem salvou (D-01).' }] : manutencaoInicial
 
 export const manutencaoInicial: ItemManutencao[] = [
   { id: 'm1', tipo: 'fora_padrao', pasta: 'Metalúrgica Andrade/Fiscal/Out-26', detalhe: 'Salva por Rafael Nunes em 06/11; o padrão é 2026-10. O integrante Fiscal já avisou quem salvou (D-01).' },
@@ -34,13 +40,13 @@ const rotuloTipo = { fora_padrao: 'Fora do padrão', sem_cliente: 'Sem cliente',
 export function BlocoRaioX() {
   const [rx] = usePersistente<EstadoRaioX>(CHAVE_RAIOX, estadoRaioXInicial)
   const { abrir } = useTelasCheias()
-  const antigo = useEstadoConector('drive_antigo')
+  const antigo = useEstadoConector(rx.provedor === 'servidor_local' || banco.escritorioId === ID_HORIZONTE ? 'servidor_local' : 'drive_antigo')
   const pode = usePode('raiox.rodar')
   const r = resumoDoEscritorio()
   return (
     <Caixa>
       <TituloBloco
-        descricao="Diagnóstico das pastas de todos os clientes antes de o mapeamento valer. Lê só a lista de pastas e arquivos, nunca o conteúdo (D-10)."
+        descricao="Diagnóstico das pastas de todos os clientes antes de o mapeamento valer, em qualquer armazenamento (Drive, OneDrive, Dropbox, Box, servidor local). Lê só a lista de pastas e arquivos, nunca o conteúdo (D-10)."
         acao={
           pode && (
             <Button size="sm" className="rounded-full" onClick={() => abrir('raiox')}>
@@ -49,10 +55,10 @@ export function BlocoRaioX() {
           )
         }
       >
-        Raio-X do Drive
+        Raio-X das pastas
       </TituloBloco>
       <p className="flex flex-wrap items-center gap-2 text-sm">
-        <SeloEstado tom={antigo.tom}>Drive antigo: {antigo.rotulo}</SeloEstado>
+        <SeloEstado tom={antigo.tom}>{antigo.nome}: {antigo.rotulo}</SeloEstado>
         {rx.rodado_em ? (
           <span>
             Último em {new Date(rx.rodado_em).toLocaleDateString('pt-BR')}: {r.casaram} de {r.pastasCliente} pastas casaram; {rx.aplicado_em ? 'decisões aplicadas' : `${Object.keys(rx.decisoes).length} decisões tomadas, falta aplicar`}.
@@ -72,7 +78,7 @@ export function BlocoManutencao() {
   const loja = useLoja()
   const { usuario } = useSessao()
   const pode = usePode('armazenamento.configurar')
-  const [itens, setItens] = usePersistente<ItemManutencao[]>('s09:arm:manutencao', manutencaoInicial)
+  const [itens, setItens] = usePersistente<ItemManutencao[]>('s09:arm:manutencao', manutencaoDoEscritorio)
   const abertos = itens.filter((i) => !i.resolvido)
   const resolver = (i: ItemManutencao, como: string) => {
     setItens((xs) => xs.map((x) => (x.id === i.id ? { ...x, resolvido: como } : x)))

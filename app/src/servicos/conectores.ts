@@ -52,8 +52,20 @@ export interface ItemArvore {
 }
 
 export interface ServicoArvore {
-  /** Lê a lista de pastas e arquivos (sem conteúdo), com progresso. */
-  ler(raiz: string, aoProgresso?: (lidas: number, total: number) => void): Promise<Resultado<{ itens: number; pastas: number; arquivos: number }>>
+  /** Lê a lista de pastas e arquivos (sem conteúdo), com progresso, de qualquer provedor (Drive, OneDrive, Dropbox, Box, servidor local, S3, WebDAV, SFTP). */
+  ler(raiz: string, aoProgresso?: (lidas: number, total: number) => void, provedor?: string): Promise<Resultado<{ itens: number; pastas: number; arquivos: number }>>
+}
+
+/** Nuvens e servidor local (01, 7.1; API-24; S09b). */
+export interface ServicoNuvens {
+  /** Janela de autorização do provedor (Google, Microsoft, Dropbox, Box). `workspace`: conta corporativa que pode exigir a liberação do administrador. */
+  autorizar(provedor: string, op?: { workspace?: boolean; liberadoPeloAdmin?: boolean }): Promise<Resultado<{ conta: string; escopos: string[] }>>
+  /** Confere se o administrador do Google Workspace liberou a Heild nos Controles de API. */
+  verificarLiberacaoWorkspace(liberado: boolean): Promise<Resultado<{ liberado: boolean }>>
+  /** Espera o agente instalado no servidor usar o código de pareamento. */
+  parearAgente(codigo: string, so: 'windows' | 'linux'): Promise<Resultado<{ dispositivo: string; versao: string; pastas: string[] }>>
+  /** Revoga o dispositivo: o agente perde o acesso na próxima conexão. */
+  revogarAgente(id: string): Promise<Resultado<{ revogado_em: string }>>
 }
 
 const etapasTeste: Record<string, string[]> = {
@@ -105,13 +117,33 @@ export const cofreDemonstracao: ServicoCofre = {
   revogar: () => simular('Cofre de credenciais', () => ({ revogado_em: new Date().toISOString() }), { latencia: [500, 900] }),
 }
 
+const nomeProvedor: Record<string, string> = { google_drive: 'Google Drive', drive_antigo: 'Google Drive', onedrive: 'OneDrive / SharePoint', onedrive_sharepoint: 'OneDrive / SharePoint', dropbox: 'Dropbox', box: 'Box', servidor_local: 'Servidor local (agente)', s3: 'S3 compatível', s3_compativel: 'S3 compatível', webdav: 'WebDAV', sftp: 'SFTP' }
+
 export const arvoreDemonstracao: ServicoArvore = {
-  async ler(_raiz, aoProgresso) {
-    const total = 96210
+  async ler(_raiz, aoProgresso, provedor = 'drive_antigo') {
+    // Servidor local lê pelo agente (mais lento: vai pela conexão de saída dele).
+    const total = provedor === 'servidor_local' ? 61840 : 96210
     for (let i = 1; i <= 8; i++) {
       await esperar(380)
       aoProgresso?.(Math.round((total * i) / 8), total)
     }
-    return simular('Google Drive (só a lista)', () => ({ itens: total, pastas: 4812, arquivos: total - 4812 }), { latencia: [200, 400] })
+    return simular(`${nomeProvedor[provedor] ?? provedor} (só a lista)`, () => ({ itens: total, pastas: Math.round(total / 20), arquivos: total - Math.round(total / 20) }), { latencia: [200, 400] })
   },
+}
+
+const contaDe: Record<string, string> = { google_drive: 'ti@escritorio.com.br (Google)', onedrive_sharepoint: 'ti@escritorio.onmicrosoft.com', dropbox: 'Equipe do escritório (Dropbox Business)', box: 'escritorio (Box Business)' }
+
+export const nuvensDemonstracao: ServicoNuvens = {
+  autorizar: (provedor, op = {}) => {
+    if (provedor === 'google_drive' && op.workspace && !op.liberadoPeloAdmin)
+      return Promise.reject(new ErroServico('Google Workspace', 'admin_policy_enforced', 'O administrador do Google Workspace ainda não liberou a Heild (Controles de API). Peça a liberação e tente de novo.'))
+    return simular(nomeProvedor[provedor] ?? provedor, () => ({ conta: contaDe[provedor] ?? 'conta do escritório', escopos: ['ler a lista de pastas e arquivos', 'ler e gravar só na pasta escolhida'] }), { latencia: [700, 1200] })
+  },
+  verificarLiberacaoWorkspace: (liberado) => simular('Google Workspace', () => ({ liberado }), { latencia: [600, 1000] }),
+  async parearAgente(codigo, so) {
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(codigo)) throw new ErroServico('Agente Heild', 'codigo_invalido', 'Código de pareamento inválido.')
+    await esperar(1800)
+    return simular('Agente Heild', () => ({ dispositivo: so === 'windows' ? 'SRV-ARQUIVOS' : 'srv-arquivos', versao: '1.4.2', pastas: [] }), { latencia: [300, 600] })
+  },
+  revogarAgente: () => simular('Agente Heild', () => ({ revogado_em: new Date().toISOString() }), { latencia: [400, 800] }),
 }

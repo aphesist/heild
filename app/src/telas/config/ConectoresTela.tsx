@@ -59,7 +59,7 @@ const secoes: { id: Secao; rotulo: string }[] = [
   { id: 'auditoria', rotulo: 'Auditoria mensal' },
 ]
 
-const rotuloModo: Record<string, string> = { termo: 'termo do Integra', certificado: 'certificado', oauth: 'autorização (OAuth)', token: 'token', robo: 'robô com login', arquivo: 'arquivo', chave: 'chave de acesso' }
+const rotuloModo: Record<string, string> = { agente: 'agente no servidor', termo: 'termo do Integra', certificado: 'certificado', oauth: 'autorização (OAuth)', token: 'token', robo: 'robô com login', arquivo: 'arquivo', chave: 'chave de acesso' }
 
 /** Estado que o teste devolve → estado do conector. */
 const estadoDoTeste: Record<ResultadoTeste, EstadoConexao> = { ok: 'ativo', erro_credencial: 'erro_credencial', certificado_vencido: 'certificado_vencido', fora_do_ar: 'fora_do_ar', limite: 'limite', captcha: 'captcha', timeout: 'timeout' }
@@ -272,7 +272,7 @@ function Conectar({ c, onFechar }: { c: SaudeConector; onFechar: () => void }) {
             ? !!certificado
             : c.modo === 'robo'
               ? usuarioPortal.trim() && segredo.trim()
-              : c.modo === 'arquivo'
+              : c.modo === 'arquivo' || c.modo === 'agente'
                 ? true
                 : segredo.trim().length >= 8
 
@@ -373,6 +373,8 @@ function Conectar({ c, onFechar }: { c: SaudeConector; onFechar: () => void }) {
             {(id) => <CampoTexto id={id} tipo="password" valor={segredo} onMudar={setSegredo} />}
           </Campo>
         </>
+      ) : c.modo === 'agente' ? (
+        <p className="text-sm">O servidor local conecta pelo agente Heild instalado no servidor do escritório (código de pareamento, pastas compartilhadas, revogar). Abra Configurações › Armazenamento › Conectar nuvem › Servidor local.</p>
       ) : c.modo === 'arquivo' ? (
         <p className="text-sm">Sem API: o sistema exporta um arquivo e o integrante importa da pasta “importação” do Armazenamento todos os dias às 22h.</p>
       ) : (

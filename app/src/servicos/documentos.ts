@@ -25,8 +25,9 @@ export interface ArquivoNuvem {
 }
 
 export interface ServicoArmazenamento {
-  listar(pasta: string): Promise<Resultado<ArquivoNuvem[]>>
-  enviar(a: { nome: string; pasta: string; tamanhoBytes: number }): Promise<Resultado<ArquivoNuvem>>
+  /** `provedor` (S09b): qualquer um (google_drive, onedrive_sharepoint, dropbox, box, servidor_local, s3_compativel, webdav, sftp, plataforma); sem ele, o padrão do escritório. */
+  listar(pasta: string, provedor?: string): Promise<Resultado<ArquivoNuvem[]>>
+  enviar(a: { nome: string; pasta: string; tamanhoBytes: number; provedor?: string }): Promise<Resultado<ArquivoNuvem>>
   /** Link temporário para ver ou baixar (registra "visto" no índice). */
   link(id: string): Promise<Resultado<{ url: string; expira_em: string }>>
 }
@@ -54,11 +55,11 @@ export const assinaturaDemonstracao: ServicoAssinatura = {
 const kb = (b: number) => (b > 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1).replace('.', ',')} MB` : `${Math.max(1, Math.round(b / 1024))} KB`)
 
 export const armazenamentoDemonstracao: ServicoArmazenamento = {
-  listar: (pasta) =>
-    simular('Armazenamento em nuvem', () => [
+  listar: (pasta, provedor) =>
+    simular(provedor ? `Armazenamento (${provedor})` : 'Armazenamento em nuvem', () => [
       { id: ficticio.id('arq'), nome: 'Contrato social consolidado.pdf', pasta, tamanho: '412 KB', modificado_em: '12/11/2026' },
       { id: ficticio.id('arq'), nome: 'Balancete 10-2026.xlsx', pasta, tamanho: '96 KB', modificado_em: '14/11/2026' },
     ]),
-  enviar: (a) => simular('Armazenamento em nuvem', () => ({ id: ficticio.id('arq'), nome: a.nome, pasta: a.pasta, tamanho: kb(a.tamanhoBytes), modificado_em: new Date().toLocaleDateString('pt-BR') }), { latencia: [800, 1600] }),
+  enviar: (a) => simular(a.provedor ? `Armazenamento (${a.provedor})` : 'Armazenamento em nuvem', () => ({ id: ficticio.id('arq'), nome: a.nome, pasta: a.pasta, tamanho: kb(a.tamanhoBytes), modificado_em: new Date().toLocaleDateString('pt-BR') }), { latencia: [800, 1600] }),
   link: () => simular('Armazenamento em nuvem', () => ({ url: '#arquivo-demonstracao', expira_em: new Date(Date.now() + 15 * 60e3).toLocaleTimeString('pt-BR') }), { latencia: [200, 500] }),
 }

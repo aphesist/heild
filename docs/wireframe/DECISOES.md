@@ -1185,6 +1185,16 @@ Formato de cada registro:
 - **Por quê:** migrar essas quatro abas para entidades é trabalho do backend (tema, assinatura e integrantes têm entidade própria nas Fundações); o Horizonte serve para ver a implantação em andamento.
 - **Situação:** proposta.
 
+#### 2026-11-15 · S09 · Armazenamento com qualquer provedor e servidor local com agente (S09b)
+
+- **Decisão:** Configurações › Armazenamento aceita Google Drive, OneDrive/SharePoint, **Dropbox**, **Box**, **servidor local (agente Heild)**, S3, WebDAV, SFTP e o armazenamento da plataforma. Dropbox e Box autorizam pela mesma janela simulada do Google e da Microsoft. Google com conta Workspace mostra o passo a passo para o administrador liberar a Heild em Controles de API, e a autorização é recusada até ele liberar. O servidor local pareia por um código de 8 caracteres (vale 15 minutos, uma vez só), mostra o estado do agente (online ou offline, versão, última sincronização, arquivos), as pastas compartilhadas e o botão de revogar o dispositivo; o agente só abre conexão de saída. Uma faixa no topo diz que os arquivos ficam no armazenamento do escritório e que a Heild guarda só o índice e o texto. O Raio-X lê qualquer armazenamento conectado (escolha "Onde ler").
+- **Por quê:** pedido do Enzo, repassado pela coordenação ("não deve funcionar só o Drive"; um escritório do piloto usa servidor local).
+- **Telas e ações:** S09-T08 (S09-A55, A56), S09-T09 (C9 ganha `dropbox`, `box`, `servidor_local`), S09-T14 (S09-A96).
+- **Impacto no plano:** 01, 7.1 (lista de backends ganha Dropbox, Box e o agente local); 08, 7.8.
+- **Arquivos compartilhados:** `servicos/documentos.ts` (parâmetro opcional `provedor` em `listar` e `enviar`, sem mudar quem já chama), `servicos/index.ts` (serviço `nuvens`), `Plataforma.tsx` (Armazenamento sai da condição de dados fixos: agora tem padrão por escritório, e o Horizonte é o piloto com servidor local).
+- **Dados:** pelo núcleo, sem migração: conectores de armazenamento em `cfg.arm.conectores` e agentes em `s09:arm:agentes` (`registro_tela`), que valem no modo local e no Supabase. Nada aplicado no HEILD-PROD (combinado com a coordenação).
+- **Situação:** proposta.
+
 ### S10 · App do cliente
 
 #### 2026-11-14 · S10 · Estado do app no `registro_tela`, sem migração nova

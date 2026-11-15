@@ -135,6 +135,8 @@ export const dicionarioInicial: Dicionario = {
 
 export interface EstadoRaioX {
   rodado_em: string | null
+  /** Onde o Raio-X leu (S09b: qualquer nuvem ou o servidor local; padrão, o Drive antigo). */
+  provedor?: string
   decisoes: Record<string, Decisao>
   /** Decisões aplicadas (o mapeamento passou a valer). */
   aplicado_em: string | null
