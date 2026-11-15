@@ -6,6 +6,8 @@ O stack é o que o dono aceitou em 15/11/2026 (`docs/backend/PERGUNTAS.md`, P1 a
 
 **O que mudou na versão 0.2 (respostas do dono, [`PERGUNTAS.md`](PERGUNTAS.md)):**
 
+- **Pluggy fora do piloto** (decisão posterior do mesmo dia): o Open Finance volta depois do piloto, como módulo à parte (2.2).
+
 - **Q6:** o piloto (2 escritórios, 5 clientes cada) liga **tudo o que der para ligar, pago**, para os escritórios testarem o sistema inteiro.
 - **Q5:** o WhatsApp do dia a dia vai pela integração não oficial ([`WHATSAPP.md`](WHATSAPP.md)).
 - **Q9:** a parceria com a Thomson Reuters fica para depois do piloto.
@@ -14,23 +16,22 @@ O stack é o que o dono aceitou em 15/11/2026 (`docs/backend/PERGUNTAS.md`, P1 a
 
 ## Resumo
 
-1. **O piloto completo pede ~82 semanas-pessoa (sp).** São ~9,5 meses com 2 pessoas ou ~6,5 meses com 3, contra ~37 sp (4,5 meses) do piloto mínimo do backend. A diferença: F5 (CRM e WhatsApp), Timesheet e Financeiro (F6, sem o BPO), os conectores que estavam depois do piloto, a extensão e o MCP aberto.
+1. **O piloto completo pede ~80 semanas-pessoa (sp).** São ~9 meses com 2 pessoas ou ~6 meses com 3, contra ~37 sp (4,5 meses) do piloto mínimo do backend. A diferença: F5 (CRM e WhatsApp), Timesheet e Financeiro (F6, sem o BPO), os conectores que estavam depois do piloto, a extensão e o MCP aberto. A Pluggy saiu do piloto (decisão do dono de 15/11/2026; seção 2.2).
 2. **Alternativa sem mudar a decisão:** começar o uso com os escritórios em ~5,5 meses (onda 1, ~46 sp) e ligar o resto durante o piloto, em ondas de 2 a 3 semanas. O piloto termina com tudo ligado do mesmo jeito; só começa antes.
 3. **Custo mensal do piloto, provável:**
 
    | Faixa | Valor por mês |
    | --- | ---: |
-   | Só APIs | **R$ 3,0 mil** (R$ 2,5 mil é o piso da Pluggy; sem ela, ~R$ 500) |
-   | APIs + infraestrutura AWS e Supabase | **R$ 4,9 mil** |
-   | APIs + infraestrutura + modelos de IA | **R$ 5,7 mil** (até R$ 6,4 mil no cenário alto) |
+   | Só APIs | **~R$ 500** |
+   | APIs + infraestrutura AWS e Supabase | **~R$ 2,4 mil** |
+   | APIs + infraestrutura + modelos de IA | **~R$ 3,2 mil** (até R$ 3,9 mil no cenário alto) |
 
-4. **Total de 3 meses de piloto em uso:** ~R$ 18 mil (até ~R$ 20 mil), com ~R$ 750 de custos únicos. A infraestrutura de homologação durante a construção não está nessa conta.
+4. **Total de 3 meses de piloto em uso:** ~R$ 10,5 mil (até ~R$ 12,5 mil), com ~R$ 750 de custos únicos. A infraestrutura de homologação durante a construção não está nessa conta.
 5. **Pedir já:**
    - e-CNPJ da Heild;
    - contrato SERPRO (o Enzo fala com o comercial sobre o modelo A);
    - procurações dos 10 clientes;
    - conta InfoSimples e DPA;
-   - Pluggy;
    - verificação do app Google (escopos restritos do Drive);
    - conta de desenvolvedor na Chrome Web Store e no Edge;
    - planos de assinatura e certificados em nuvem para os 2 escritórios;
@@ -49,7 +50,6 @@ Do prazo mais longo, ou que trava outro passo, para o mais rápido.
 | 3 | **Procurações dos 10 clientes** (Autorização de Acesso no e-CAC) | Cada cliente outorga; o escritório aceita | O escritório tem **30 dias para aceitar**; sem aceite, cancela (08, V1 I-13) | — | Início do piloto |
 | 4 | **Verificação do app Google** para os escopos restritos do Drive (`drive`, `drive.metadata.readonly`) | Time | **[prazo e custo da avaliação de segurança a confirmar]**; costuma levar semanas | Usuários de teste sem verificação [limite a confirmar] | Onda de nuvens |
 | 5 | **Conta InfoSimples e DPA** | Dono | Cadastro online imediato; DPA [prazo a confirmar] | **R$ 100 de crédito por 30 dias** | Onda de certidões e DTE; sem DPA, o DTE fica desligado |
-| 6 | **Pluggy** (Open Finance) | Dono | Contrato comercial [prazo a confirmar]; pedir preço de piloto abaixo do piso | 15 dias em produção, sandbox | Onda de bancos |
 | 7 | **Produção restrita do ADN** e PoC da procuração com e-CNPJ do escritório | Time + um escritório | [a confirmar] | Produção restrita | F4 |
 | 8 | **Conta de desenvolvedor da Chrome Web Store e do Edge** | Dono | Taxa única de US$ 5 no Chrome [valor a confirmar]; revisão a cada versão [prazo a confirmar] | Pacote não listado para os 2 escritórios | Onda da extensão |
 | 9 | **Publisher verification da Microsoft** (Graph e conector do Copilot) e registro no Entra ID | Time | [a confirmar] | Tenant de desenvolvedor | Ondas de nuvens e do MCP |
@@ -91,15 +91,15 @@ As fases e as semanas-pessoa (sp) do backend vêm da ARQUITETURA, 7 (2 pessoas, 
 | ★ Nuvens do escritório | Drive, Graph, S3 compatível, WebDAV, SFTP | 3,5 |
 | ★ Assinatura e certificado em nuvem | Um provedor pela interface comum; Bird ID por DOC-ICP-17.01 | 2,5 |
 | ★ Calculadora RFB | Versão offline em contêiner | 1 |
-| ★ Open Finance (Pluggy) | Consentimento pelo app, transações por cursor | 1,5 |
 | ★ MCP aberto (Q10) | OAuth 2.1 e MCP remoto para Claude, ChatGPT e Copilot Studio, só leitura e propostas | 3,5 |
 | **F7 · Endurecimento** | Teste sintético diário de todos os conectores, painel de saúde, teste de segredo, carga, restauração, runbook | 4 (era 3; mais conectores para monitorar) |
-| **Total do piloto completo** | | **~82 sp** |
+| **Total do piloto completo** | | **~80 sp** |
+| Depois do piloto | Open Finance (Pluggy), como módulo à parte | +1,5 |
 | Condicional | Web services RS e SC, se houver cliente | +1,5 |
 | Durante o piloto, se um escritório usar | Agente do Microsoft 365 Copilot e complemento do Google Workspace (Q10) | +3,5 |
 | Experimento no fim do piloto | Copiloto da extensão em 2 portais | +3 |
 
-**Prazo:** com 2 pessoas, ~41 semanas, ou ~9,5 meses. Com 3 pessoas, ~6,5 meses (há perda de coordenação; as fases F0 a F3 não se dividem bem por três).
+**Prazo:** com 2 pessoas, ~40 semanas, ou ~9 meses. Com 3 pessoas, ~6 meses (há perda de coordenação; as fases F0 a F3 não se dividem bem por três).
 
 ### 2.1 Alternativa: começar antes, em ondas
 
@@ -110,9 +110,22 @@ A decisão do dono é o piloto com tudo. Esta alternativa mantém essa decisão 
 | 1 · Começa o uso | F0 a F4, Integra base, F5 com WhatsApp não oficial, F7 parcial | ~46 | ~5,5 |
 | 2 | Integra completo, InfoSimples, eSocial e Reinf | ~52,5 | ~6,5 |
 | 3 | F6 (Timesheet e Financeiro), extensão | ~64 | ~7,5 |
-| 4 | Cores, nuvens, assinatura, Calculadora, Open Finance, MCP aberto, número oficial de teste, resto da F7 | ~82 | ~9,5 |
+| 4 | Cores, nuvens, assinatura, Calculadora, MCP aberto, número oficial de teste, resto da F7 | ~80 | ~9 |
 
 O ganho: os escritórios começam a usar 4 meses antes, e o que der errado nos conectores da onda 1 aparece cedo. O custo: o piloto dura mais em calendário.
+
+### 2.2 Open Finance fora do piloto e o escritório que concilia no Domínio
+
+**Decisão do dono (15/11/2026):** a Pluggy sai do piloto e volta depois dele como módulo à parte. Dois motivos: o valor (R$ 2.500 por mês para cerca de 20 contas) e o fato de que um dos dois escritórios já faz a conciliação por Open Finance direto no Domínio. **Nos dois escritórios do piloto, o extrato entra por OFX, CSV ou PDF**, pelo app do cliente ou pela pasta (`extrato.importar`, leitor de extratos).
+
+**No escritório que concilia no Domínio, a Heild não deve conciliar de novo o que o Domínio já faz.** Há dois jeitos de evitar o retrabalho:
+
+| Opção | Como funciona | Prós | Contras |
+| --- | --- | --- | --- |
+| **A. Ler a conciliação do Domínio pelo arquivo de troca** | O escritório exporta do Domínio o relatório ou o arquivo de lançamentos conciliados; a Heild importa (`core.importar_relatorio`) e mostra a competência como "conciliada no Domínio" | A Heild sabe o que foi conciliado e pode usar isso para conferir diferenças (CTB-018) e fechar a tarefa por evidência | Depende de uma exportação manual a cada competência (a Domínio não tem API de saída, e a parceria fica para depois do piloto); o formato do relatório precisa de um leitor próprio e pode mudar |
+| **B. Ligar a classificação da Heild só onde o Domínio não cobre** | Uma chave por cliente e conta, `conciliacao_no_core`. Onde está ligada, a Heild não importa extrato para classificar nem roda o CTB-004; mantém só a pendência "extrato chegou?" e a tarefa da competência, que a pessoa conclui. Onde o Domínio não cobre (conta sem Open Finance no Domínio, cartão, cliente que manda PDF), a Heild classifica como nos outros | Simples, sem arquivo novo e sem leitor de relatório; nada é feito duas vezes; a configuração é visível na ficha do cliente | A Heild não vê o resultado da conciliação do Domínio, só que a tarefa foi concluída |
+
+**Recomendação: B.** Resolve o retrabalho já no piloto, com uma configuração e sem depender de exportação manual. A leitura da opção A pode entrar depois, se o escritório quiser a conferência de diferenças na Heild, ou quando houver a parceria com a Thomson Reuters. Esforço de B: ~0,5 sp, dentro do que já está na conta (configuração por cliente e condição no gatilho do procedimento).
 
 ---
 
@@ -145,18 +158,18 @@ O ganho: os escritórios começam a usar 4 meses antes, e o que der errado nos c
 | Certificado em nuvem (Bird ID) | Heild | 70 | 2 × R$ 34,90 |
 | Cobrança (Asaas, tarifa promocional) | Heild | 16 | ~20 cobranças de teste × R$ 0,79; com o Inter, R$ 0 |
 | Integrador de NFS-e (Focus Solo) | Heild | 95 | Só se houver município fora do padrão; 30 dias grátis |
-| **Open Finance (Pluggy)** | Heild | **2.500** | Piso com até 500 conexões; 15 dias grátis; pedir preço de piloto |
 | e-CNPJ da Heild, rateado | Heild | 25 | [preço a confirmar com a AC] |
 | DF-e, ADN, eSocial, Reinf, BCB, Calculadora, dados abertos, Drive, Graph | — | 0 | |
-| **Só APIs** | | **~3.000** | Sem a Pluggy: ~R$ 500 |
+| Open Finance (Pluggy) | — | 0 | **Fora do piloto** (decisão de 15/11/2026); extrato por OFX, CSV ou PDF |
+| **Só APIs** | | **~500** | |
 | Infraestrutura AWS e Supabase do piloto | Heild | 1.570 | US$ 197 (HOSPEDAGEM, 4) |
 | `wa-gateway` (WAHA) e Calculadora offline | Heild | 296 | +US$ 24,80 (0,5 vCPU) + US$ 12,40 (0,25 vCPU) no Fargate ARM |
-| **APIs + infraestrutura** | | **~4.870** | Com o câmbio de R$ 5,69: ~R$ 4,3 mil |
+| **APIs + infraestrutura** | | **~2.370** | Com o câmbio de R$ 5,69: ~R$ 1,8 mil |
 | Integrantes (20 × R$ 26) | Heild | 520 | Cenário alto: 20 × R$ 60 = 1.200 |
 | Consultor (20 × 80 × R$ 0,217) | Heild | 347 | |
 | Consultor da empresa no app (10 clientes × 10 perguntas × R$ 0,12) | Heild | 12 | Estudo, 3.10 |
 | Ajuda do sistema (20 × R$ 0,16) | Heild | 3 | Estudo, 3.3 |
-| **APIs + infraestrutura + IA** | | **~5.750** | Cenário alto: **~6.430** |
+| **APIs + infraestrutura + IA** | | **~3.250** | Cenário alto: **~3.930** |
 
 ### 3.3 Custos únicos e total
 
@@ -168,12 +181,12 @@ O ganho: os escritórios começam a usar 4 meses antes, e o que der errado nos c
 | Tokens do piloto pré-registrado da avaliação dos integrantes ("centenas de reais", AVALIAÇÃO 11.6) | ~500 [estimativa] |
 | Avaliação de segurança do Google para escopos restritos | [a confirmar] |
 | **Únicos** | **~750 + Google** |
-| **Total de 3 meses de uso** | **~R$ 18 mil** (alto ~R$ 20 mil) |
+| **Total de 3 meses de uso** | **~R$ 10,5 mil** (alto ~R$ 12,5 mil) |
 
 ### 3.4 Leitura
 
-1. **A Pluggy é 83% do custo de API do piloto.** O piso de R$ 2.500 cobre até 500 conexões, e o piloto usa ~10. Vale pedir à Pluggy um preço de piloto, ou ligar o Open Finance só no último mês, com os 15 dias grátis no começo dele.
-2. **A infraestrutura pesa mais que as APIs** quando se tira a Pluggy: R$ 1,9 mil contra R$ 0,5 mil.
+1. **Sem a Pluggy, que custaria R$ 2.500 por mês para ~10 conexões, a infraestrutura passa a pesar mais que as APIs:** R$ 1,9 mil contra R$ 0,5 mil.
+2. **As maiores linhas de API do piloto são a assinatura eletrônica (R$ 140), a franquia da InfoSimples (R$ 100) e o integrador de NFS-e (R$ 95, só se houver município fora do padrão).** O SERPRO custa ~R$ 47.
 3. **A IA é barata no piloto** (R$ 0,9 mil a R$ 1,6 mil por mês) porque há só 20 usuários; ela cresce por usuário, não por escritório.
 4. **O que não está na conta:** o tempo das pessoas, o ambiente de homologação durante os meses de construção (~US$ 60 a 100 por mês [estimativa]) e o parecer jurídico sobre o WhatsApp não oficial.
 
