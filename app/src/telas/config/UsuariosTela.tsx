@@ -60,7 +60,7 @@ export function UsuariosTela() {
   const visiveis = usuarios.filter((u) => mostrarInativos || u.situacao !== 'desativado')
 
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig
           titulo="Usuários e setores"

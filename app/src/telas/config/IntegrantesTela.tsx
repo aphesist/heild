@@ -50,7 +50,7 @@ export function IntegrantesTela() {
   )
 
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig titulo="Integrantes" sub="O time de agentes do escritório. Um integrante nunca vê nem faz mais do que a pessoa dona dele." />
 

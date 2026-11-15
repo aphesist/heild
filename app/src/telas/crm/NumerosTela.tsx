@@ -48,7 +48,7 @@ export function NumerosTela() {
   const comNumero = canais.filter((c) => c.numero)
 
   return (
-    <AreaRolagem className="h-full px-4 pb-8 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-8 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-5 pt-1">
         <header className="flex flex-wrap items-end gap-2">
           <div className="min-w-0 flex-1">

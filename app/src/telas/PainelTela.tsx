@@ -97,7 +97,7 @@ export function PainelTela({ abaId, cliente, clientesNaCarteira, tarefas, integr
   const chave = `painel-${chavePadrao(aba.id, !cliente, cliente?.regime === 'Simples Nacional')}${soFicha ? '-proposta' : ''}`
 
   return (
-    <div className="area-rolagem h-full overflow-y-auto px-4 pb-10 sm:px-5">
+    <div className="area-rolagem h-full overflow-y-auto px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         {/* A */}
         <CabecalhoAba

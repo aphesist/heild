@@ -27,7 +27,7 @@ export const mil = (v: number) => `R$ ${Math.round(v / 1000).toLocaleString('pt-
 /** Moldura das abas: rolagem, largura e o estado "carregando" enquanto o banco do Financeiro chega. */
 export function PaginaFin({ fin, children }: { fin: Fin; children: ReactNode }) {
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">{fin.politica ? children : <Carregando rotulo="Carregando o Financeiro" linhas={6} />}</div>
     </AreaRolagem>
   )

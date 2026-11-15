@@ -25,7 +25,7 @@ export { brl } from './dados'
  */
 export function PaginaBpo({ children }: { children: ReactNode }) {
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">{children}</div>
     </AreaRolagem>
   )

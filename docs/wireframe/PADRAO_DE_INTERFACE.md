@@ -37,7 +37,7 @@ A grade de widgets tem células de altura fixa (`--celula-widget`, 156px; 136px 
 | KPI, número, medidor | P (um número), M (número + detalhe ou 2 a 3 números) | não | sem rolagem; número com `tabular-nums` |
 | Lista curta (até ~5 linhas) | M (2 linhas + "e mais N"), G (até 6) | não | rola por dentro só se passar; o "ver todas" vai no cabeçalho |
 | Tabela | G (até 5 colunas), L/XL (mais colunas) | XL quando tem mais de 5 colunas | cabeçalho fixo; rola por dentro; no celular vira lista de linhas |
-| Kanban | XL com `larguraTotal` e `linhasMinimas: 3` | **sim** | colunas dividem a largura (mín. 15rem); cada coluna rola por dentro; no celular, colunas de 85% com encaixe horizontal (`snap-x`) |
+| Kanban | XL com `larguraTotal` e `linhasMinimas: 3` (ou tela própria, como os Leads) | **sim** | colunas dividem a largura (mín. 15rem); cada coluna rola por dentro; no celular, colunas de 85% com encaixe horizontal (`snap-x`); componente `Quadro` do kit |
 | Gráfico | M (sparkline), G/L (gráfico com eixo) | L quando é série longa | nunca rola; legenda dentro do card |
 | Formulário | fora da grade: gaveta (`GavetaFormulario`) | — | a gaveta rola; botões no rodapé fixo |
 | Linha do tempo | G ou L | não | rola por dentro, mais recente em cima |
@@ -46,7 +46,7 @@ A grade de widgets tem células de altura fixa (`--celula-widget`, 156px; 136px 
 
 - `larguraTotal: true` (em `DefWidget`) faz o widget, no tamanho XL, ocupar a linha inteira em qualquer faixa; `linhasMinimas` dá a altura mínima em células no XL. Use para o que é trabalho (arrastar, comparar colunas), não para listas. Hoje: Kanban do fechamento (Contábil) e Calendário (Visão geral).
 - O corpo do widget rola só na vertical (`overflow-x-hidden`); conteúdo largo (tabela) traz a própria faixa horizontal (`Tabela` do Painel já traz).
-- No celular, L e XL viram 2 colunas e dobram a altura (o conteúdo largo quebra em vez de vazar).
+- No celular, L e XL viram 2 colunas e ganham altura (L 2×2, XL 2×3); o conteúdo recebe o maior tamanho aceito que cabe na largura (um calendário G/XL abre no dia, não na semana).
 - Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; card de lista longa leva `max-h-[60vh] overflow-y-auto` na lista, não no card inteiro.
 
 ## 4. Quando ocupar a largura inteira
@@ -74,6 +74,7 @@ A grade de widgets tem células de altura fixa (`--celula-widget`, 156px; 136px 
 ## 7. Rolagem
 
 - A página não rola de lado em nenhuma largura **[QA]**. Rolagem horizontal só dentro de uma faixa que se declara (`overflow-x-auto` + `snap-x`, ou `data-rolagem-horizontal`): abas, kanban, tabela larga no tablet.
+- O botão flutuante Chat (tablet e computador) não cobre o fim da tela: a área de rolagem da página tem `md:pb-24`.
 - Rolagem interna só em: corpo do widget (já vem do `Widget`), lista de coluna do kanban, tabela com cabeçalho fixo, chat. Nunca duas rolagens verticais aninhadas na mesma direção visíveis ao mesmo tempo.
 
 ## 8. Toque e celular **[QA]**

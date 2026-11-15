@@ -144,7 +144,7 @@ export function TemaTela() {
   const setores = (Object.keys(r.integrantes_padrao) as SetorIntegrante[]).filter((s) => s !== 'geral')
 
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig
           titulo="Tema"

@@ -75,7 +75,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
   const rotuloLinha = (l: LinhaDia) => (l.tipo === 'sessao' ? `${l.s.atividade_id ? `${l.s.atividade_id} ` : ''}${l.s.rotulo}${l.s.cliente_id ? ` · ${ts.nomeCliente(l.s.cliente_id)}` : l.s.ator_tipo === 'pessoa' && !l.s.cliente_id ? ' · interno' : ''}` : l.tipo === 'item' ? `${l.i.texto}${l.i.sugestao?.cliente_id ? ` · ${ts.nomeCliente(l.i.sugestao.cliente_id)}?` : ''}` : 'sem classificação')
 
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoTs titulo="Meu tempo" sub={clienteNome ? `Só ${clienteNome} · troque o cliente no topo para ver tudo` : `${ts.usuario.nome} · o que o sistema registrou; você confirma ou contesta`} papel={papel}>
           {chip}

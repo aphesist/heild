@@ -70,7 +70,7 @@ export function ClientesTela({ aba, clientes }: { aba: string; clientes: Cliente
   const conta = (s: string) => todos.filter((c) => situacaoBpo(c) === s).length
 
   return (
-    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <header className="flex flex-wrap items-end gap-3">
           <div className="min-w-0 flex-1 basis-72">
