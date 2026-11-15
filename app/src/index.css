@@ -9,6 +9,8 @@
 @custom-variant baixa (@media (max-height: 760px));
 /* Ultrawide (21:9 e maiores). */
 @custom-variant ultra (@media (min-width: 1800px));
+/* Largo (>= 1440px), a quarta faixa do PADRAO_DE_INTERFACE.md: celular < 640 (base), tablet sm/md, computador lg/xl, largo. */
+@custom-variant largo (@media (min-width: 1440px));
 
 /*
  * Valores de partida, só para o primeiro quadro antes do ThemeProvider montar.
@@ -112,6 +114,22 @@
 /* Grade de widgets: altura da célula (tamanhos são múltiplos dela). */
 :root {
   --celula-widget: 156px;
+  /* Largura máxima do conteúdo de uma tela (utilitário .pagina), a do design system (forma.md, Espaçamento): 1152px; 1600px no ultrawide. */
+  --largura-pagina: 72rem;
+  /* Alvo de toque mínimo (PADRAO_DE_INTERFACE.md, 8). */
+  --alvo-toque: 2.75rem;
+}
+@media (min-width: 1800px) {
+  :root {
+    --largura-pagina: 100rem;
+  }
+}
+
+/* Contêiner de conteúdo de toda tela (PADRAO_DE_INTERFACE.md, 1): centrado, até --largura-pagina. */
+@utility pagina {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--largura-pagina);
 }
 @media (max-height: 760px) {
   :root {
@@ -281,6 +299,21 @@
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+  }
+  /*
+   * Toque (celular e tablet): todo controle pequeno ganha uma área de toque
+   * invisível de no mínimo 44px, centrada nele (PADRAO_DE_INTERFACE.md, 8). O
+   * desenho continua o mesmo; o dedo acerta. Quem já tem 44px não muda.
+   */
+  @media (pointer: coarse) {
+    :where(button, [role='button'], [role='tab'], [role='radio'], [role='checkbox'], [role='switch'], [role='menuitem'], [role='option'], summary, [data-slot='button']) {
+      position: relative;
+    }
+    :where(button, [role='button'], [role='tab'], [role='radio'], [role='checkbox'], [role='switch'], [role='menuitem'], [role='option'], summary, [data-slot='button'])::after {
+      content: '';
+      position: absolute;
+      inset: min(0px, calc((100% - var(--alvo-toque)) / 2));
+    }
   }
 }
 
