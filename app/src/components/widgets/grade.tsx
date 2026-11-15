@@ -245,7 +245,8 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
           <div
             ref={ref}
             {...(editando ? {} : toqueLongo)}
-            className="grid gap-x-4"
+            // Empacotamento denso: um widget menor sobe para o buraco que um maior deixou (P-9; nunca célula vazia no meio).
+            className="grid grid-flow-row-dense gap-x-4"
             style={{ gridTemplateColumns: `repeat(${colunas}, minmax(0, 1fr))`, gridAutoRows: 'var(--modulo-widget)' }}
           >
             {itens.map((item) => (

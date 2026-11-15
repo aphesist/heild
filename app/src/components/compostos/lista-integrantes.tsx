@@ -138,7 +138,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
             <Orb cor={t.cor} corOlhos={t.corOlhos} estado={it.estado} tamanho={36} cutucavel={false} animado modo="wander" espelho={{ id: it.id, papel: 'lateral' }} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">{t.nome}</span>
-              <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' ? 'text-foreground' : 'text-muted-foreground')}>{rotuloDoEstado[it.estado]}</span>
+              <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' || ativo ? 'text-foreground' : 'text-muted-foreground')}>{rotuloDoEstado[it.estado]}</span>
             </span>
             <Contador valor={it.pendentes} />
           </button>

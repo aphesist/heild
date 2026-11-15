@@ -278,6 +278,10 @@
 .linha-colunas > .celula-largo {
   display: none;
 }
+/* A célula nunca passa da faixa que ocupa (selo longo alinhado ao fim trunca, não vaza para a esquerda). */
+.linha-colunas > * {
+  max-width: 100%;
+}
 .linha-colunas > .celula-abaixo {
   grid-column: var(--coluna-abaixo, 1) / -1;
 }

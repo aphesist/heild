@@ -8,6 +8,7 @@ import { SeloDemonstracao } from '@/components/kit/selo-demonstracao'
 import { Button } from '@/components/ui/button'
 import type { StatusTarefa, Tarefa } from '@/dados/tipos'
 import { cn } from '@/lib/utils'
+import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { useTema } from '@/theme/ThemeProvider'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { rotuloStatus, statusFinal } from './rotulos'
@@ -237,6 +238,8 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
         </div>
       )}
       <DndContext sensors={sensores} onDragEnd={fim}>
+        {/* A semana tem largura mínima (7 dias legíveis): onde não cabe, rola de lado com as bordas esmaecidas. */}
+        <AreaRolagem eixo="x">
         {visao === 'mes' ? (
           <div className="grid grid-cols-7 gap-1" role="grid" aria-label={titulo}>
             {nomesDia.slice(1).concat('dom').map((n) => (
@@ -285,6 +288,7 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
             })}
           </div>
         )}
+        </AreaRolagem>
       </DndContext>
       {onReprogramar && <p className="text-muted-foreground text-xs">Arraste para reprogramar o prazo interno (ou use “reprogramar”). O prazo legal não muda.</p>}
     </div>

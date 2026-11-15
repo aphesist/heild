@@ -344,7 +344,8 @@ function detectar(opcoes) {
   }
   for (const el of comTexto) {
     if (!visivel(el)) continue
-    if (el.closest(':disabled, [aria-disabled="true"], [data-disabled], [inert]')) continue
+    // Texto de componente inativo (WCAG 1.4.3): o controle desabilitado e o rótulo que o envolve.
+    if (el.closest(':disabled, [aria-disabled="true"], [data-disabled], [inert], label:has(:disabled)')) continue
     const s = cs(el)
     let cor = rgba(s.color)
     if (cor[3] === 0) continue
@@ -389,7 +390,7 @@ function detectar(opcoes) {
     if (decorativo(el) || !ehCard(el) || !visivel(el)) continue
     const b = el.getBoundingClientRect()
     if (b.height < 120 || b.width < 120) continue
-    if ((el.innerText || '').trim().length > 2 || el.querySelector('svg, img, canvas, input, textarea, select, orb-avatar, heild-logo, video, iframe')) continue
+    if ((el.innerText || '').trim().length > 2 || el.querySelector('svg, img, canvas, input, textarea, select, orb-avatar, heild-logo, video, iframe, [role="status"]')) continue
     add('vao', `card vazio ${Math.round(b.width)}×${Math.round(b.height)}: ${desc(el)}`, el)
   }
   // Fora da grade de widgets: card esticado bem além do conteúdo e vão sob a coluna mais curta (PADRAO_DE_INTERFACE.md, 5).
