@@ -1374,3 +1374,39 @@ Formato de cada registro:
 - **Impacto no plano:** nenhum.
 - **Arquivos compartilhados:** nenhum.
 - **Situação:** aceita pela coordenação.
+
+#### 2026-11-15 · UI Lab · Estados de dados e estado vazio iguais em todos os widgets
+
+- **Decisão:** a caixa do widget desenha os estados de dados no lugar do conteúdo, pelo `ContextoEstadoWidget`: carregando (esqueleto), erro ("Não deu para carregar" com "Tentar de novo") e sem acesso ("Pedir acesso"); em P, M e L (uma célula de altura), só o título do estado e a ação; em G e XL, com ícone e explicação. O vazio é um só, `VazioWidget`, centrado, com o porquê ou o que vem a seguir e, quando existe, o botão da próxima ação (Documentos da aba vazio leva a Arquivos). O `Vazio` dos blocos S03 e os vazios improvisados passaram a ser ele.
+- **Por quê:** pedido do dono (cenários de carregando, erro e sem permissão; estado vazio com a próxima ação); antes, cada widget inventava o seu ou não tinha.
+- **Telas e ações:** todos os widgets do Início e do Painel.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `components/widgets/widget.tsx`, `telas/painel/s03/pecas.tsx`, `lab/widgets.tsx`.
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Pendências e Documentos da carteira juntam todos os clientes
+
+- **Decisão:** na versão carteira de cada aba, "Pendências do setor" lista as tarefas aguardando cliente de todos os clientes do setor e "Documentos da aba" lista os documentos do setor de todos os clientes, com o nome do cliente em cada linha; "Cobrar" usa o cliente da pendência.
+- **Por quê:** o QA de cenários mostrou que os dois widgets eram sempre vazios na carteira (o código devolvia lista vazia sem cliente), mesmo com clientes esperando.
+- **Telas e ações:** S02/S03 (abas do Painel na carteira).
+- **Impacto no plano:** nenhum (a carteira é a união das listas por cliente que já existem).
+- **Arquivos compartilhados:** `dados/painel.ts` (`PendenciaSetor.cliente`), `telas/painel/{comuns,documentos-aba}.tsx`, `components/compostos/painel-aba.tsx`.
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Raios só por token
+
+- **Decisão:** os 284 raios em pixel solto viraram o token de `forma.md` mais próximo (6 a 10px `sm`; 12 e 14 `md`; 16 e 18 `lg`; 20 e 22 `cartao`; 24 a 28 `campo`; 34 `painel`); `scripts/regra-raios.cjs` barra raio solto novo no build. Fica fixa só a moldura do aparelho no app do cliente (desenho do hardware).
+- **Por quê:** proposta 1 de `PROPOSTAS_DESIGN_SYSTEM.md` (decidir o mapa no Lab); com raio solto, o `raio_borda` do tema de escritório mudava só parte dos cantos.
+- **Telas e ações:** todas.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `package.json` (build), quase todo `src/`.
+- **Situação:** proposta (o mapa); a regra no `forma.md` segue como proposta ao design system.
+
+#### 2026-11-15 · UI Lab · Avisos nunca cobrem a ação principal
+
+- **Decisão:** `--desvio-campo` vira pilha (vale a maior altura entre os registrados; sai com o último) e é registrado também pelo rodapé da gaveta de formulário: os avisos sobem acima de Cancelar e da ação principal. O push simulado do app do cliente conta os 5 s pelo aviso mostrado, não pela lista.
+- **Por quê:** a suíte achou um aviso sobre "Enviar contestação" (s06) e o push do app preso na tela para sempre quando a central mudava durante o aviso (s10).
+- **Telas e ações:** toda gaveta de formulário; app do cliente.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `lib/desvio-campo.ts`, `components/ui/formulario.tsx`, `cliente/avisos.tsx`.
+- **Situação:** proposta.
