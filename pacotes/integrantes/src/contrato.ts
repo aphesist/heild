@@ -27,6 +27,8 @@ export const Anexos = z
     documento_id: z.string().min(1).max(80).optional(),
     exercicio: z.string().regex(/^\d{4}$/).optional(),
     competencia: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional(),
+    /** A conversa do CRM (triar e repassar o número único de WhatsApp). */
+    conversa_id: z.string().min(1).max(80).optional(),
   })
   .strict()
 export type Anexos = z.infer<typeof Anexos>

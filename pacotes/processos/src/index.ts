@@ -8,8 +8,9 @@ import { RegistroFerramentas, ferramentasDoMotor, operacaoDeProcesso } from './f
 import { Motor, type Conector, type LimitesPadrao } from './motor/motor.ts'
 import type { Procedimento } from './motor/definicao.ts'
 import { configDemonstracao, type ConfigModelos, type FornecedorModelo } from './operarios/fornecedor.ts'
-import { ctbCompetenciaDoc } from './procedimentos/contabil/competencia-documento.ts'
-import { ctbEcd } from './procedimentos/contabil/ecd.ts'
+import { ctbCompetenciaDoc, ctbCompetenciaDocV2 } from './procedimentos/contabil/competencia-documento.ts'
+import { ctbEcd, ctbEcdV2 } from './procedimentos/contabil/ecd.ts'
+export * from './procedimentos/revisor.ts'
 import { iniciarPedidosDaApi } from './ligacao-api.ts'
 
 export * from './banco.ts'
@@ -29,10 +30,12 @@ export * from './ligacao-api.ts'
 export { proporMemoria, decidirMemoria } from './memoria.ts'
 export * from './operarios/orcamento.ts'
 export { FornecedorAnthropic, configAnthropic, fornecedorDoAmbiente } from './operarios/anthropic.ts'
-export { ctbEcd, ctbCompetenciaDoc }
+export { ctbEcd, ctbEcdV2, ctbCompetenciaDoc, ctbCompetenciaDocV2 }
 
 /** Os procedimentos de referência do Contábil (AGENTICO 4; ARQUITETURA 7, F3). */
-export const procedimentosDeReferencia: Procedimento[] = [ctbEcd as unknown as Procedimento, ctbCompetenciaDoc as unknown as Procedimento]
+export const procedimentosDeReferencia: Procedimento[] = [ctbEcd, ctbCompetenciaDoc].map((p) => p as unknown as Procedimento)
+/** As versões novas da B3b (revisor de risco na ECD, instrução nova da competência), usadas pelos integrantes. */
+export const procedimentosDeReferenciaV2: Procedimento[] = [ctbEcdV2, ctbCompetenciaDocV2].map((p) => p as unknown as Procedimento)
 
 export interface OpcoesProcessos {
   url?: string
@@ -109,10 +112,12 @@ export async function criarProcessos(o: OpcoesProcessos) {
     resolverFerramenta: (nome) => registro.definicao(nome)?.meta ?? metasExtras.get(nome) ?? registro.meta(nome),
   })
   registro = new RegistroFerramentas(sql, eventos)
-  for (const p of o.procedimentos ?? procedimentosDeReferencia) {
-    motor.registrar(p)
-    registro.registrar(operacaoDeProcesso(motor, sql, p, { aguardar_ms: o.aguardar_ms }))
-  }
+  // Todas as versões ficam no motor (execuções em andamento terminam na sua); a operação de
+  // processo é uma só por procedimento e inicia sempre a versão mais nova.
+  for (const p of o.procedimentos ?? procedimentosDeReferencia) motor.registrar(p)
+  const atuais = new Map<string, Procedimento>()
+  for (const p of motor.procedimentos.values()) if ((atuais.get(p.id)?.versao ?? -1) < p.versao) atuais.set(p.id, p)
+  for (const p of atuais.values()) registro.registrar(operacaoDeProcesso(motor, sql, p, { aguardar_ms: o.aguardar_ms }))
   for (const f of ferramentasDoMotor(motor, sql, eventos)) registro.registrar(f)
   const base: BaseExtensao = { sql, boss, eventos, motor, registro, fornecedor: o.fornecedor, modelos: o.modelos ?? configDemonstracao, modo }
   for (const x of o.extensoes ?? []) for (const f of x.ferramentas?.(base) ?? []) registro.registrar(f)

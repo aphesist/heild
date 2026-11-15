@@ -1,0 +1,2337 @@
+{
+  "data": "2026-11-15T06:00:32.462Z",
+  "modo": "anthropic",
+  "gabarito": "ampliado 3be73049f13e73c8",
+  "configuracao": {
+    "modelos": {
+      "operario": "claude-sonnet-5-5",
+      "escritor": "claude-sonnet-5-5",
+      "revisor": "claude-opus-5-5"
+    },
+    "esforco": {
+      "operario": "low",
+      "escritor": "medium",
+      "revisor": "high"
+    },
+    "dolar": 5.4,
+    "repeticoes": 2,
+    "casos_por_contrato": "todos",
+    "contratos": [
+      "dp.evento.classificar"
+    ]
+  },
+  "duracao_s": 113,
+  "gasto_centavos": 131.4206,
+  "gasto_usd": 0.2434,
+  "parou": null,
+  "resumo_sonnet": {
+    "porSetor": [
+      {
+        "setor": "dp",
+        "execucoes": 60,
+        "acerto_pct": 100,
+        "erro_critico": 0,
+        "cartao_desnecessario": 0,
+        "falha": 0,
+        "chamadas_por_execucao": 1.25,
+        "centavos_total": 103.3636,
+        "centavos_por_execucao": 1.7227,
+        "latencia_p50_ms": 4963,
+        "latencia_p90_ms": 7945,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      }
+    ],
+    "porPapel": [
+      {
+        "papel": "escritor",
+        "modelos": "claude-sonnet-5-5",
+        "chamadas": 15,
+        "centavos_total": 21.9218,
+        "latencia_p50_ms": 1965,
+        "latencia_p90_ms": 5070
+      },
+      {
+        "papel": "operario",
+        "modelos": "claude-sonnet-5-5",
+        "chamadas": 60,
+        "centavos_total": 81.4417,
+        "latencia_p50_ms": 1616,
+        "latencia_p90_ms": 3708
+      }
+    ],
+    "total": {
+      "execucoes": 60,
+      "acerto_pct": 100,
+      "erro_critico": 0,
+      "centavos_total": 103.3636
+    }
+  },
+  "resumo_haiku": {
+    "porSetor": [
+      {
+        "setor": "dp",
+        "execucoes": 60,
+        "acerto_pct": 100,
+        "erro_critico": 0,
+        "cartao_desnecessario": 0,
+        "falha": 0,
+        "chamadas_por_execucao": 1.27,
+        "centavos_total": 28.057,
+        "centavos_por_execucao": 0.4676,
+        "latencia_p50_ms": 3946,
+        "latencia_p90_ms": 6887,
+        "erro_integrante_pct": 0,
+        "erro_pessoa_pct": 0,
+        "margem_pontos": 0,
+        "dentro_da_margem": true
+      }
+    ],
+    "porPapel": [
+      {
+        "papel": "escritor",
+        "modelos": "claude-sonnet-5-5",
+        "chamadas": 16,
+        "centavos_total": 23.7654,
+        "latencia_p50_ms": 1777,
+        "latencia_p90_ms": 2086
+      },
+      {
+        "papel": "operario",
+        "modelos": "claude-haiku-5-5",
+        "chamadas": 60,
+        "centavos_total": 4.2916,
+        "latencia_p50_ms": 1092,
+        "latencia_p90_ms": 1827
+      }
+    ],
+    "total": {
+      "execucoes": 60,
+      "acerto_pct": 100,
+      "erro_critico": 0,
+      "centavos_total": 28.057
+    }
+  },
+  "portoes": [
+    {
+      "contrato": "dp.evento.classificar",
+      "liberado": true,
+      "motivo": "Haiku igualou o Sonnet em 60 casos, sem erro crítico.",
+      "acerto_sonnet": 60,
+      "acerto_haiku": 60,
+      "erro_critico_haiku": 0,
+      "casos_piores": [],
+      "escaladas_sonnet": 15,
+      "escaladas_haiku": 16,
+      "centavos_sonnet": 103.3636,
+      "centavos_haiku": 28.057,
+      "configuracao": {
+        "dp.evento.classificar": {
+          "operario": "claude-haiku-5-5"
+        }
+      },
+      "margem_pontos": 0,
+      "dentro_da_margem": true
+    }
+  ],
+  "roteamento": {},
+  "roteamento_por_grupo": {},
+  "linhas": [
+    {
+      "caso": "dp-adm-beatriz",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4b765eaa45fa4e958f7cec9fe2de61e6",
+      "estado": "concluida",
+      "centavos": 1.40832,
+      "latencia_ms": 5336,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.40832:1545"
+      ]
+    },
+    {
+      "caso": "dp-adm-beatriz",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf19b0cfdd3de4b1b9daf82df6dbf9129",
+      "estado": "concluida",
+      "centavos": 1.40832,
+      "latencia_ms": 7945,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.40832:4734"
+      ]
+    },
+    {
+      "caso": "dp-adm-henrique",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "admissao:2026-10:-",
+      "obtido": "admissao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex22641a40bb134288b158e43c1c40b9eb",
+      "estado": "concluida",
+      "centavos": 1.31544,
+      "latencia_ms": 4883,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.31544:1292"
+      ]
+    },
+    {
+      "caso": "dp-adm-henrique",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "admissao:2026-10:-",
+      "obtido": "admissao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1d65ae74f32e4407bd8ec908d85920ba",
+      "estado": "concluida",
+      "centavos": 1.31544,
+      "latencia_ms": 6366,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.31544:3319"
+      ]
+    },
+    {
+      "caso": "dp-adm-igor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8c6f0313ad974e90a5629aa5bfcdbb80",
+      "estado": "concluida",
+      "centavos": 1.32408,
+      "latencia_ms": 4919,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.32408:1515"
+      ]
+    },
+    {
+      "caso": "dp-adm-igor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex688c329921c547eba5c3d4a603fc3388",
+      "estado": "concluida",
+      "centavos": 1.31868,
+      "latencia_ms": 4900,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.31868:1897"
+      ]
+    },
+    {
+      "caso": "dp-adto-diego",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-11:300",
+      "obtido": "adiantamento:2026-11:300",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:300",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4194c45be00b401a92b43e0e70358b42",
+      "estado": "concluida",
+      "centavos": 1.35972,
+      "latencia_ms": 4906,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35972:1371"
+      ]
+    },
+    {
+      "caso": "dp-adto-diego",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-11:300",
+      "obtido": "adiantamento:2026-11:300",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:300",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex7608494ed30c43b2be4f8783b9979869",
+      "estado": "concluida",
+      "centavos": 1.35972,
+      "latencia_ms": 5380,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35972:2655"
+      ]
+    },
+    {
+      "caso": "dp-adto-fernanda",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-10:1200",
+      "obtido": "adiantamento:2026-10:1200",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-10:1200",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex12810db8fd0f48348f5c50984703c020",
+      "estado": "concluida",
+      "centavos": 1.35864,
+      "latencia_ms": 4836,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35864:1504"
+      ]
+    },
+    {
+      "caso": "dp-adto-fernanda",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-10:1200",
+      "obtido": "adiantamento:2026-10:1200",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-10:1200",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8690ffee564c41929c55d93b288ea71c",
+      "estado": "concluida",
+      "centavos": 1.36944,
+      "latencia_ms": 4350,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.36944:1476"
+      ]
+    },
+    {
+      "caso": "dp-adto-joao",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3539d2d1e38b44b6a0ab0a9ad9f82d82",
+      "estado": "concluida",
+      "centavos": 1.33704,
+      "latencia_ms": 4865,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.33704:1508"
+      ]
+    },
+    {
+      "caso": "dp-adto-joao",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd76743b9a14c420b9513a82ab17fc2be",
+      "estado": "concluida",
+      "centavos": 1.33704,
+      "latencia_ms": 4918,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.33704:1408"
+      ]
+    },
+    {
+      "caso": "dp-adto-sergio",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-09:650",
+      "obtido": "adiantamento:2026-09:650",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-09:650",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa93c3c2e64c34be79dda509e28b62665",
+      "estado": "concluida",
+      "centavos": 1.33272,
+      "latencia_ms": 4336,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.33272:1304"
+      ]
+    },
+    {
+      "caso": "dp-adto-sergio",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-09:650",
+      "obtido": "adiantamento:2026-09:650",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-09:650",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex46288c0ec8b64af2a1a6a45e321096f5",
+      "estado": "concluida",
+      "centavos": 1.33272,
+      "latencia_ms": 3842,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.33272:1547"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9c5d0a5150584b56ac17a4241500c98f",
+      "estado": "cancelada",
+      "centavos": 2.9192400000000003,
+      "latencia_ms": 5853,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.44504:1537",
+        "escritor:claude-sonnet-5-5:1.4742:1536"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8d545d31694545f686c396cf23450711",
+      "estado": "cancelada",
+      "centavos": 2.93544,
+      "latencia_ms": 5897,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.46124:1524",
+        "escritor:claude-sonnet-5-5:1.4742:1965"
+      ]
+    },
+    {
+      "caso": "dp-duas-competencias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb7625d9db0c148e3a614c0f714a98a77",
+      "estado": "cancelada",
+      "centavos": 2.9386799999999997,
+      "latencia_ms": 7937,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.44936:1492",
+        "escritor:claude-sonnet-5-5:1.48932:3697"
+      ]
+    },
+    {
+      "caso": "dp-duas-competencias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbf9a1c46a52543ce9663132c702b52cd",
+      "estado": "cancelada",
+      "centavos": 2.94948,
+      "latencia_ms": 8917,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.44936:1633",
+        "escritor:claude-sonnet-5-5:1.50012:5070"
+      ]
+    },
+    {
+      "caso": "dp-falta-bruno",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-10:3",
+      "obtido": "falta:2026-10:3",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:3",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exef4bf609bc0840ab8609142b491948f4",
+      "estado": "concluida",
+      "centavos": 1.3284,
+      "latencia_ms": 4923,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.3284:1344"
+      ]
+    },
+    {
+      "caso": "dp-falta-bruno",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-10:3",
+      "obtido": "falta:2026-10:3",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:3",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex19280c9c87de4469aae1e34d86a5a7c7",
+      "estado": "concluida",
+      "centavos": 1.3284,
+      "latencia_ms": 4402,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.3284:1564"
+      ]
+    },
+    {
+      "caso": "dp-falta-carla",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-11:1",
+      "obtido": "falta:2026-11:1",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-11:1",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1f99d8d3a372474ea28e5c8150b9abef",
+      "estado": "concluida",
+      "centavos": 1.3122,
+      "latencia_ms": 4422,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.3122:1353"
+      ]
+    },
+    {
+      "caso": "dp-falta-carla",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-11:1",
+      "obtido": "falta:2026-11:1",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-11:1",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex6a364f0be9ef41a1a3d1f024eb45ea1c",
+      "estado": "concluida",
+      "centavos": 1.3014,
+      "latencia_ms": 5399,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.3014:2207"
+      ]
+    },
+    {
+      "caso": "dp-falta-maria",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2b43f1f82986412bbf7d394f479eb4d2",
+      "estado": "concluida",
+      "centavos": 1.31976,
+      "latencia_ms": 5398,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.31976:1679"
+      ]
+    },
+    {
+      "caso": "dp-falta-maria",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex620539c32275478b881c62d8b22be055",
+      "estado": "concluida",
+      "centavos": 1.31976,
+      "latencia_ms": 4896,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.31976:2162"
+      ]
+    },
+    {
+      "caso": "dp-falta-paula",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-10:4",
+      "obtido": "falta:2026-10:4",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:4",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9a141f82469843259657c45e06d454c0",
+      "estado": "concluida",
+      "centavos": 1.3608,
+      "latencia_ms": 4923,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.3608:1455"
+      ]
+    },
+    {
+      "caso": "dp-falta-paula",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-10:4",
+      "obtido": "falta:2026-10:4",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:4",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex85885e63ba0145cf947ad865d84b1190",
+      "estado": "concluida",
+      "centavos": 1.3608,
+      "latencia_ms": 4911,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.3608:2241"
+      ]
+    },
+    {
+      "caso": "dp-ferias-carlos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex935e1322f83f40058fae982f7d396b0f",
+      "estado": "concluida",
+      "centavos": 1.37376,
+      "latencia_ms": 4955,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.37376:1450"
+      ]
+    },
+    {
+      "caso": "dp-ferias-carlos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex07884092e42747c28c2f59daf9bf7db1",
+      "estado": "concluida",
+      "centavos": 1.36296,
+      "latencia_ms": 4917,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.36296:1629"
+      ]
+    },
+    {
+      "caso": "dp-ferias-e-adto",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0bde68299d5f45d794540c42e5746b70",
+      "estado": "cancelada",
+      "centavos": 2.8566000000000003,
+      "latencia_ms": 5849,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.39752:1622",
+        "escritor:claude-sonnet-5-5:1.45908:1550"
+      ]
+    },
+    {
+      "caso": "dp-ferias-e-adto",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex6af492e7ee734e18af29c17487be6b6d",
+      "estado": "cancelada",
+      "centavos": 2.8566000000000003,
+      "latencia_ms": 11830,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.39752:4758",
+        "escritor:claude-sonnet-5-5:1.45908:4642"
+      ]
+    },
+    {
+      "caso": "dp-ferias-luana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-10:-",
+      "obtido": "ferias:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex316a28a9e62f45c981d5520563f0ddaf",
+      "estado": "concluida",
+      "centavos": 2.77452,
+      "latencia_ms": 7382,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35648:1354",
+        "escritor:claude-sonnet-5-5:1.41804:1492"
+      ]
+    },
+    {
+      "caso": "dp-ferias-luana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-10:-",
+      "obtido": "ferias:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex30d2166d704646c388b943bb8e9e8494",
+      "estado": "concluida",
+      "centavos": 2.77452,
+      "latencia_ms": 10867,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35648:4827",
+        "escritor:claude-sonnet-5-5:1.41804:2363"
+      ]
+    },
+    {
+      "caso": "dp-ferias-renata",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex646e0a71f15b44edbf0dfd3f9198cf90",
+      "estado": "concluida",
+      "centavos": 2.73888,
+      "latencia_ms": 7883,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.33056:1756",
+        "escritor:claude-sonnet-5-5:1.40832:1554"
+      ]
+    },
+    {
+      "caso": "dp-ferias-renata",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1d98f7b821ab4e6d8aee1bb49ae29ba4",
+      "estado": "concluida",
+      "centavos": 2.72268,
+      "latencia_ms": 7900,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.33056:1530",
+        "escritor:claude-sonnet-5-5:1.39212:2630"
+      ]
+    },
+    {
+      "caso": "dp-he-joana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-11:8",
+      "obtido": "hora_extra:2026-11:8",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:8",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8e611cf9da0149cdb18d0f5fb595cbff",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 5393,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.32624:1854"
+      ]
+    },
+    {
+      "caso": "dp-he-joana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-11:8",
+      "obtido": "hora_extra:2026-11:8",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:8",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe3def1e84395461ebeea25240f3bf8ad",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 7353,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.32624:3708"
+      ]
+    },
+    {
+      "caso": "dp-he-lucas",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-11:4.5",
+      "obtido": "hora_extra:2026-11:4.5",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:4.5",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excbd4b4a5d209421eb117393b7e1a17cf",
+      "estado": "concluida",
+      "centavos": 1.38456,
+      "latencia_ms": 5383,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.38456:1616"
+      ]
+    },
+    {
+      "caso": "dp-he-lucas",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-11:4.5",
+      "obtido": "hora_extra:2026-11:4.5",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:4.5",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd68503104c024cf394723013e5582aa5",
+      "estado": "concluida",
+      "centavos": 1.38456,
+      "latencia_ms": 4858,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.38456:1850"
+      ]
+    },
+    {
+      "caso": "dp-he-marcos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-09:12",
+      "obtido": "hora_extra:2026-09:12",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-09:12",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exefd699febcb44b5286c0552cbb257047",
+      "estado": "concluida",
+      "centavos": 1.38024,
+      "latencia_ms": 5396,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.38024:1872"
+      ]
+    },
+    {
+      "caso": "dp-he-marcos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-09:12",
+      "obtido": "hora_extra:2026-09:12",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-09:12",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex51a8b8548f3144d9b50c5415746b59bd",
+      "estado": "concluida",
+      "centavos": 1.38564,
+      "latencia_ms": 5370,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.38564:1810"
+      ]
+    },
+    {
+      "caso": "dp-he-pedro",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa70c073fdaf64e5c923dd7419bca5ca2",
+      "estado": "concluida",
+      "centavos": 1.35756,
+      "latencia_ms": 5922,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35756:2031"
+      ]
+    },
+    {
+      "caso": "dp-he-pedro",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex062e8a975b7a4e398492c58b221f1080",
+      "estado": "concluida",
+      "centavos": 1.35756,
+      "latencia_ms": 6908,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35756:3554"
+      ]
+    },
+    {
+      "caso": "dp-he-rafael",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-10:6",
+      "obtido": "hora_extra:2026-10:6",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:6",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exaf01c2fa70c74be4907bf7d86fbc3211",
+      "estado": "concluida",
+      "centavos": 1.34676,
+      "latencia_ms": 5392,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.34676:1705"
+      ]
+    },
+    {
+      "caso": "dp-he-rafael",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-10:6",
+      "obtido": "hora_extra:2026-10:6",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:6",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exffe30a891e8d4490864e1014e636ca8e",
+      "estado": "concluida",
+      "centavos": 1.34676,
+      "latencia_ms": 4918,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.34676:1562"
+      ]
+    },
+    {
+      "caso": "dp-he-sem-quantidade",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe07d5632dce949efbc721f715a6e6833",
+      "estado": "cancelada",
+      "centavos": 2.87064,
+      "latencia_ms": 5340,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35:1404",
+        "escritor:claude-sonnet-5-5:1.52064:1441"
+      ]
+    },
+    {
+      "caso": "dp-he-sem-quantidade",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex64f1b614948043428eacfec2752239e9",
+      "estado": "cancelada",
+      "centavos": 2.86524,
+      "latencia_ms": 8874,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35:5121",
+        "escritor:claude-sonnet-5-5:1.51524:1478"
+      ]
+    },
+    {
+      "caso": "dp-outro-banco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "outro:2026-10:-",
+      "obtido": "outro:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0ef40e608db64ae6bce6da23f743e1cb",
+      "estado": "concluida",
+      "centavos": 1.40184,
+      "latencia_ms": 4963,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.40184:1489"
+      ]
+    },
+    {
+      "caso": "dp-outro-banco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "outro:2026-10:-",
+      "obtido": "outro:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex761c21801c0944ab9a55db3ad632afd8",
+      "estado": "concluida",
+      "centavos": 1.38024,
+      "latencia_ms": 4880,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.38024:1799"
+      ]
+    },
+    {
+      "caso": "dp-outro-dependente",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf6766636454b4139a6de3fff831200d9",
+      "estado": "concluida",
+      "centavos": 2.8123199999999997,
+      "latencia_ms": 6402,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.35648:1375",
+        "escritor:claude-sonnet-5-5:1.45584:1393"
+      ]
+    },
+    {
+      "caso": "dp-outro-dependente",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex90fc51cc4dde431189c6d0478426fa26",
+      "estado": "concluida",
+      "centavos": 1.34568,
+      "latencia_ms": 4827,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.34568:1728"
+      ]
+    },
+    {
+      "caso": "dp-outro-endereco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9e4b1de6f5954a7cadcb3bb1d18e9cce",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 4924,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.32624:1697"
+      ]
+    },
+    {
+      "caso": "dp-outro-endereco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex190aadc9a4e94d82ad0eb9ccd4ba607c",
+      "estado": "concluida",
+      "centavos": 1.32624,
+      "latencia_ms": 4382,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.32624:1481"
+      ]
+    },
+    {
+      "caso": "dp-resc-alex",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "rescisao:2026-09:-",
+      "obtido": "rescisao:2026-09:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-09:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8f44df6b6d604165a7c91d3b7ae50557",
+      "estado": "concluida",
+      "centavos": 1.34676,
+      "latencia_ms": 4861,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.34676:1336"
+      ]
+    },
+    {
+      "caso": "dp-resc-alex",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "rescisao:2026-09:-",
+      "obtido": "rescisao:2026-09:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-09:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8a56c87951c54a9084af47f55068f940",
+      "estado": "concluida",
+      "centavos": 1.34676,
+      "latencia_ms": 3963,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.34676:1441"
+      ]
+    },
+    {
+      "caso": "dp-resc-sandra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "rescisao:2026-11:-",
+      "obtido": "rescisao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex54c1a8b115524e24aea5c4edffc77684",
+      "estado": "concluida",
+      "centavos": 1.36188,
+      "latencia_ms": 4864,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.36188:1522"
+      ]
+    },
+    {
+      "caso": "dp-resc-sandra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "rescisao:2026-11:-",
+      "obtido": "rescisao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc0dc5e6b13774276bcd0efa05700e341",
+      "estado": "concluida",
+      "centavos": 1.36188,
+      "latencia_ms": 3830,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.36188:1763"
+      ]
+    },
+    {
+      "caso": "dp-resc-vitor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "rescisao:2026-10:-",
+      "obtido": "rescisao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd2ed6a5fa7704ccfb33fcbb5305d22f4",
+      "estado": "concluida",
+      "centavos": 1.39104,
+      "latencia_ms": 4423,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.39104:1329"
+      ]
+    },
+    {
+      "caso": "dp-resc-vitor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "rescisao:2026-10:-",
+      "obtido": "rescisao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex09498f149fca46b9b3731e624cb4bd91",
+      "estado": "concluida",
+      "centavos": 1.39104,
+      "latencia_ms": 4395,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.39104:1641"
+      ]
+    },
+    {
+      "caso": "dp-sem-nada",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8af764bd012e4307944e8fc57b280a86",
+      "estado": "cancelada",
+      "centavos": 2.76912,
+      "latencia_ms": 6394,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.28412:1597",
+        "escritor:claude-sonnet-5-5:1.485:2112"
+      ]
+    },
+    {
+      "caso": "dp-sem-nada",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex96b11b57a04642e9bdc89a115ff532e4",
+      "estado": "cancelada",
+      "centavos": 2.75832,
+      "latencia_ms": 11965,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.30572:4788",
+        "escritor:claude-sonnet-5-5:1.4526:5130"
+      ]
+    }
+  ],
+  "linhas_haiku": [
+    {
+      "caso": "dp-adm-beatriz",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe295fe978ddc4a94ae6424105e1221ba",
+      "estado": "concluida",
+      "centavos": 0.067716,
+      "latencia_ms": 3477,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067716:1092"
+      ]
+    },
+    {
+      "caso": "dp-adm-beatriz",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc45267c5c70a48a9aa7c90b8ee22d800",
+      "estado": "concluida",
+      "centavos": 0.067716,
+      "latencia_ms": 3468,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067716:904"
+      ]
+    },
+    {
+      "caso": "dp-adm-henrique",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "admissao:2026-10:-",
+      "obtido": "admissao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excd5a1ef974ae4aecaa5134ea2fe65ecf",
+      "estado": "concluida",
+      "centavos": 0.065772,
+      "latencia_ms": 3391,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065772:855"
+      ]
+    },
+    {
+      "caso": "dp-adm-henrique",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "admissao:2026-10:-",
+      "obtido": "admissao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex347ac083469b4880ac244737f4796466",
+      "estado": "concluida",
+      "centavos": 0.067392,
+      "latencia_ms": 3889,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067392:989"
+      ]
+    },
+    {
+      "caso": "dp-adm-igor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exccc3c6cc3ce44dd19066b60a2dcd55a2",
+      "estado": "concluida",
+      "centavos": 0.064854,
+      "latencia_ms": 2959,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064854:809"
+      ]
+    },
+    {
+      "caso": "dp-adm-igor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "admissao:2026-11:-",
+      "obtido": "admissao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "admissao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex13f142e2cbbb4969b2ace4148d7e67ae",
+      "estado": "concluida",
+      "centavos": 0.064314,
+      "latencia_ms": 3930,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064314:1095"
+      ]
+    },
+    {
+      "caso": "dp-adto-diego",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-11:300",
+      "obtido": "adiantamento:2026-11:300",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:300",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbe4bfb236e314b4db0b5d07485a17408",
+      "estado": "concluida",
+      "centavos": 0.068526,
+      "latencia_ms": 4460,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.068526:1564"
+      ]
+    },
+    {
+      "caso": "dp-adto-diego",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-11:300",
+      "obtido": "adiantamento:2026-11:300",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:300",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex68977e9fe8084d8d88a5a0f8abbd1573",
+      "estado": "concluida",
+      "centavos": 0.068526,
+      "latencia_ms": 4438,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.068526:1718"
+      ]
+    },
+    {
+      "caso": "dp-adto-fernanda",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-10:1200",
+      "obtido": "adiantamento:2026-10:1200",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-10:1200",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8d9772a7ff0a4fe1bb3666333c7df2d7",
+      "estado": "concluida",
+      "centavos": 0.067932,
+      "latencia_ms": 3915,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067932:890"
+      ]
+    },
+    {
+      "caso": "dp-adto-fernanda",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-10:1200",
+      "obtido": "adiantamento:2026-10:1200",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-10:1200",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3966735773d646da94d38fb90e84d6a4",
+      "estado": "concluida",
+      "centavos": 0.067932,
+      "latencia_ms": 3946,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067932:993"
+      ]
+    },
+    {
+      "caso": "dp-adto-joao",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbc3d1802bed34ee5871e55c930afc224",
+      "estado": "concluida",
+      "centavos": 0.066582,
+      "latencia_ms": 3392,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066582:828"
+      ]
+    },
+    {
+      "caso": "dp-adto-joao",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-11:500",
+      "obtido": "adiantamento:2026-11:500",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-11:500",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excd7d6d943e5a46cd97e275b363915d02",
+      "estado": "concluida",
+      "centavos": 0.066312,
+      "latencia_ms": 3855,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066312:1061"
+      ]
+    },
+    {
+      "caso": "dp-adto-sergio",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "adiantamento:2026-09:650",
+      "obtido": "adiantamento:2026-09:650",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-09:650",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex24db60f51f5e42f68674944eb35cb5f3",
+      "estado": "concluida",
+      "centavos": 0.066906,
+      "latencia_ms": 3428,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066906:822"
+      ]
+    },
+    {
+      "caso": "dp-adto-sergio",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "adiantamento:2026-09:650",
+      "obtido": "adiantamento:2026-09:650",
+      "resultado": "acerto",
+      "pessoa": "adiantamento:2026-09:650",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exaeb4f715894c4abcb9c510bc8029d410",
+      "estado": "concluida",
+      "centavos": 0.066906,
+      "latencia_ms": 3868,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066906:965"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb5154d9ed5a04ec5bf47f4f39280102d",
+      "estado": "cancelada",
+      "centavos": 1.5702120000000002,
+      "latencia_ms": 5374,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.069012:1030",
+        "escritor:claude-sonnet-5-5:1.5012:1724"
+      ]
+    },
+    {
+      "caso": "dp-dois-eventos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex916474c386f84743887c28b6e0312ea1",
+      "estado": "cancelada",
+      "centavos": 1.5691320000000002,
+      "latencia_ms": 5377,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067932:1031",
+        "escritor:claude-sonnet-5-5:1.5012:1973"
+      ]
+    },
+    {
+      "caso": "dp-duas-competencias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd869352bd7d5471e8dead404eb7ea9a1",
+      "estado": "cancelada",
+      "centavos": 1.594458,
+      "latencia_ms": 6411,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.105138:2126",
+        "escritor:claude-sonnet-5-5:1.48932:1661"
+      ]
+    },
+    {
+      "caso": "dp-duas-competencias",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex66f90c35f01542f29e8b6f8e396cd8e3",
+      "estado": "cancelada",
+      "centavos": 1.640088,
+      "latencia_ms": 5395,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.123768:2290",
+        "escritor:claude-sonnet-5-5:1.51632:1777"
+      ]
+    },
+    {
+      "caso": "dp-falta-bruno",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-10:3",
+      "obtido": "falta:2026-10:3",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:3",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exfa833b95ae154352bbba83ce84ee9b6f",
+      "estado": "concluida",
+      "centavos": 0.06642,
+      "latencia_ms": 3442,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06642:887"
+      ]
+    },
+    {
+      "caso": "dp-falta-bruno",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-10:3",
+      "obtido": "falta:2026-10:3",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:3",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4c70c11f8fd14f19a3d52fe357bd47c8",
+      "estado": "concluida",
+      "centavos": 0.06561,
+      "latencia_ms": 3979,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06561:1130"
+      ]
+    },
+    {
+      "caso": "dp-falta-carla",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-11:1",
+      "obtido": "falta:2026-11:1",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-11:1",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex7259d15f47c0435895c56bfa19eade46",
+      "estado": "concluida",
+      "centavos": 0.06507,
+      "latencia_ms": 3961,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06507:1198"
+      ]
+    },
+    {
+      "caso": "dp-falta-carla",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-11:1",
+      "obtido": "falta:2026-11:1",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-11:1",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex44b0c7dccda94079bbf5663afef94028",
+      "estado": "concluida",
+      "centavos": 0.06507,
+      "latencia_ms": 3420,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06507:880"
+      ]
+    },
+    {
+      "caso": "dp-falta-maria",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex5d4a04de74f848e888d3e03a7a6de2af",
+      "estado": "concluida",
+      "centavos": 0.065988,
+      "latencia_ms": 5899,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065988:1842"
+      ]
+    },
+    {
+      "caso": "dp-falta-maria",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-09:2",
+      "obtido": "falta:2026-09:2",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-09:2",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4d982fdf12ad40ccbccd056213299939",
+      "estado": "concluida",
+      "centavos": 0.064638,
+      "latencia_ms": 3439,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064638:822"
+      ]
+    },
+    {
+      "caso": "dp-falta-paula",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "falta:2026-10:4",
+      "obtido": "falta:2026-10:4",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:4",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex7babbebf6e0d46d0b4b4562c402798c9",
+      "estado": "concluida",
+      "centavos": 0.0648,
+      "latencia_ms": 2850,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.0648:749"
+      ]
+    },
+    {
+      "caso": "dp-falta-paula",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "falta:2026-10:4",
+      "obtido": "falta:2026-10:4",
+      "resultado": "acerto",
+      "pessoa": "falta:2026-10:4",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex34f78deb6a4a4a82a055388c886508c4",
+      "estado": "concluida",
+      "centavos": 0.06669,
+      "latencia_ms": 2884,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06669:871"
+      ]
+    },
+    {
+      "caso": "dp-ferias-carlos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1d71852b0ec44f5f9bec4330bfb5ae28",
+      "estado": "concluida",
+      "centavos": 0.065178,
+      "latencia_ms": 3929,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065178:800"
+      ]
+    },
+    {
+      "caso": "dp-ferias-carlos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex19290c74b0f24f1797aea312410bc430",
+      "estado": "concluida",
+      "centavos": 0.065178,
+      "latencia_ms": 3936,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065178:919"
+      ]
+    },
+    {
+      "caso": "dp-ferias-e-adto",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex56cc41a66ae647639c1f912ee0fb7a44",
+      "estado": "cancelada",
+      "centavos": 1.582956,
+      "latencia_ms": 6352,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.123876:2030",
+        "escritor:claude-sonnet-5-5:1.45908:2086"
+      ]
+    },
+    {
+      "caso": "dp-ferias-e-adto",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf674a39a310e41b58356e2d530ee232a",
+      "estado": "cancelada",
+      "centavos": 1.527336,
+      "latencia_ms": 4309,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.068256:887",
+        "escritor:claude-sonnet-5-5:1.45908:1550"
+      ]
+    },
+    {
+      "caso": "dp-ferias-luana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-10:-",
+      "obtido": "ferias:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex15a5072ffbff4fe3ab1c69c030b8ba9c",
+      "estado": "concluida",
+      "centavos": 0.065124,
+      "latencia_ms": 3822,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065124:1426"
+      ]
+    },
+    {
+      "caso": "dp-ferias-luana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-10:-",
+      "obtido": "ferias:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf05f634dc6a14698919993630b17f4b5",
+      "estado": "concluida",
+      "centavos": 0.064584,
+      "latencia_ms": 4454,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064584:1427"
+      ]
+    },
+    {
+      "caso": "dp-ferias-renata",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8ef061aa28104389bab7408006b97f80",
+      "estado": "concluida",
+      "centavos": 0.065448,
+      "latencia_ms": 3860,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065448:823"
+      ]
+    },
+    {
+      "caso": "dp-ferias-renata",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "ferias:2026-11:-",
+      "obtido": "ferias:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "ferias:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9ab491e3d4de47d08d796c9fe9ec6a74",
+      "estado": "concluida",
+      "centavos": 0.064098,
+      "latencia_ms": 3880,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064098:972"
+      ]
+    },
+    {
+      "caso": "dp-he-joana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-11:8",
+      "obtido": "hora_extra:2026-11:8",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:8",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex414f56552b0649dc9fea327e76c48aab",
+      "estado": "concluida",
+      "centavos": 0.066852,
+      "latencia_ms": 4406,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066852:856"
+      ]
+    },
+    {
+      "caso": "dp-he-joana",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-11:8",
+      "obtido": "hora_extra:2026-11:8",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:8",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8397fc8e16bd41908b15a3a94d67ea81",
+      "estado": "concluida",
+      "centavos": 0.066852,
+      "latencia_ms": 3900,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066852:1036"
+      ]
+    },
+    {
+      "caso": "dp-he-lucas",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-11:4.5",
+      "obtido": "hora_extra:2026-11:4.5",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:4.5",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa2a74fa2923d495c8274947ee7d137db",
+      "estado": "concluida",
+      "centavos": 0.067338,
+      "latencia_ms": 4906,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.067338:1252"
+      ]
+    },
+    {
+      "caso": "dp-he-lucas",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-11:4.5",
+      "obtido": "hora_extra:2026-11:4.5",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-11:4.5",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdf63badbab9248638c941dd2f92221ca",
+      "estado": "concluida",
+      "centavos": 0.068958,
+      "latencia_ms": 3466,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.068958:1081"
+      ]
+    },
+    {
+      "caso": "dp-he-marcos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-09:12",
+      "obtido": "hora_extra:2026-09:12",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-09:12",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9b505af408e644438389a2a2f9928163",
+      "estado": "concluida",
+      "centavos": 0.066582,
+      "latencia_ms": 3900,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066582:903"
+      ]
+    },
+    {
+      "caso": "dp-he-marcos",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-09:12",
+      "obtido": "hora_extra:2026-09:12",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-09:12",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa048e4f9d3e0455bbfa7bbd3c222bb60",
+      "estado": "concluida",
+      "centavos": 0.066582,
+      "latencia_ms": 3331,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066582:1156"
+      ]
+    },
+    {
+      "caso": "dp-he-pedro",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex6f38b00f93b54404be2052b0da501e85",
+      "estado": "concluida",
+      "centavos": 0.065988,
+      "latencia_ms": 3904,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065988:998"
+      ]
+    },
+    {
+      "caso": "dp-he-pedro",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-10:10",
+      "obtido": "hora_extra:2026-10:10",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:10",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa08d4c0bf5c94d169baf286adca7daac",
+      "estado": "concluida",
+      "centavos": 0.066528,
+      "latencia_ms": 3904,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066528:1131"
+      ]
+    },
+    {
+      "caso": "dp-he-rafael",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "hora_extra:2026-10:6",
+      "obtido": "hora_extra:2026-10:6",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:6",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb3764bc1b51748a5a455df185d3255bf",
+      "estado": "concluida",
+      "centavos": 0.065988,
+      "latencia_ms": 5402,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065988:1472"
+      ]
+    },
+    {
+      "caso": "dp-he-rafael",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "hora_extra:2026-10:6",
+      "obtido": "hora_extra:2026-10:6",
+      "resultado": "acerto",
+      "pessoa": "hora_extra:2026-10:6",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb9720cd701b74e83b3cf9f0bdbd88d2b",
+      "estado": "concluida",
+      "centavos": 0.066528,
+      "latencia_ms": 3965,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066528:1416"
+      ]
+    },
+    {
+      "caso": "dp-he-sem-quantidade",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex038ca345c7c04f02b13952b4f73eac23",
+      "estado": "cancelada",
+      "centavos": 1.51524,
+      "latencia_ms": 5917,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06696:1554",
+        "escritor:claude-sonnet-5-5:1.44828:1973"
+      ]
+    },
+    {
+      "caso": "dp-he-sem-quantidade",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2bb6cf6e9e8e4897a6fc52ed77d90bcc",
+      "estado": "cancelada",
+      "centavos": 1.58868,
+      "latencia_ms": 5424,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.06804:1575",
+        "escritor:claude-sonnet-5-5:1.52064:1512"
+      ]
+    },
+    {
+      "caso": "dp-outro-banco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "outro:2026-10:-",
+      "obtido": "outro:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex00f618fc281d46ffa71fc74c19c64830",
+      "estado": "concluida",
+      "centavos": 1.545912,
+      "latencia_ms": 6887,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066312:1025",
+        "escritor:claude-sonnet-5-5:1.4796:2025"
+      ]
+    },
+    {
+      "caso": "dp-outro-banco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "outro:2026-10:-",
+      "obtido": "outro:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd1f69ef445eb414e9ec6a763f44e0b36",
+      "estado": "concluida",
+      "centavos": 1.513782,
+      "latencia_ms": 7400,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.066582:1827",
+        "escritor:claude-sonnet-5-5:1.4472:1862"
+      ]
+    },
+    {
+      "caso": "dp-outro-dependente",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4344a2b356464ee08e29284ec2c0821f",
+      "estado": "concluida",
+      "centavos": 1.5887339999999999,
+      "latencia_ms": 6887,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.089694:1540",
+        "escritor:claude-sonnet-5-5:1.49904:1695"
+      ]
+    },
+    {
+      "caso": "dp-outro-dependente",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex556add16b6b1444b96e90edfa66a06e5",
+      "estado": "concluida",
+      "centavos": 1.616814,
+      "latencia_ms": 6945,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.096174:1515",
+        "escritor:claude-sonnet-5-5:1.52064:1652"
+      ]
+    },
+    {
+      "caso": "dp-outro-endereco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd115d9844b454ac09b8e68489200d74a",
+      "estado": "concluida",
+      "centavos": 1.531872,
+      "latencia_ms": 7453,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.090072:1403",
+        "escritor:claude-sonnet-5-5:1.4418:1922"
+      ]
+    },
+    {
+      "caso": "dp-outro-endereco",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "outro:2026-11:-",
+      "obtido": "outro:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "outro:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex54da39d824dd468b91b2ab4fff349177",
+      "estado": "concluida",
+      "centavos": 1.5883019999999999,
+      "latencia_ms": 6990,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065502:1057",
+        "escritor:claude-sonnet-5-5:1.5228:2195"
+      ]
+    },
+    {
+      "caso": "dp-resc-alex",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "rescisao:2026-09:-",
+      "obtido": "rescisao:2026-09:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-09:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex537cc023091d40a8b297da2c2113ef6f",
+      "estado": "concluida",
+      "centavos": 0.064908,
+      "latencia_ms": 4419,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064908:1577"
+      ]
+    },
+    {
+      "caso": "dp-resc-alex",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "rescisao:2026-09:-",
+      "obtido": "rescisao:2026-09:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-09:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd78a2ea94ef0417d9cc01a930e88948c",
+      "estado": "concluida",
+      "centavos": 0.064908,
+      "latencia_ms": 3944,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.064908:1592"
+      ]
+    },
+    {
+      "caso": "dp-resc-sandra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "rescisao:2026-11:-",
+      "obtido": "rescisao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exdfca06da37a24e41aec7a029d28c1e02",
+      "estado": "concluida",
+      "centavos": 0.065124,
+      "latencia_ms": 3875,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065124:1426"
+      ]
+    },
+    {
+      "caso": "dp-resc-sandra",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "rescisao:2026-11:-",
+      "obtido": "rescisao:2026-11:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-11:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf1012ec2fc0e454194effed202b5f926",
+      "estado": "concluida",
+      "centavos": 0.065934,
+      "latencia_ms": 3900,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065934:1583"
+      ]
+    },
+    {
+      "caso": "dp-resc-vitor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "rescisao:2026-10:-",
+      "obtido": "rescisao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex640b235ee1cb4caeb90d92e803942389",
+      "estado": "concluida",
+      "centavos": 0.071172,
+      "latencia_ms": 3971,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.071172:1688"
+      ]
+    },
+    {
+      "caso": "dp-resc-vitor",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "rescisao:2026-10:-",
+      "obtido": "rescisao:2026-10:-",
+      "resultado": "acerto",
+      "pessoa": "rescisao:2026-10:-",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex65e8dbdc51c24697b1cad65647462415",
+      "estado": "concluida",
+      "centavos": 0.070092,
+      "latencia_ms": 4445,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.070092:1560"
+      ]
+    },
+    {
+      "caso": "dp-sem-nada",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex342382f2a4d84aa6b376a91430761495",
+      "estado": "cancelada",
+      "centavos": 1.595646,
+      "latencia_ms": 5862,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.137646:2167",
+        "escritor:claude-sonnet-5-5:1.458:1522"
+      ]
+    },
+    {
+      "caso": "dp-sem-nada",
+      "setor": "dp",
+      "procedimento": "DP-EVENTO-FOLHA",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8b12191d06eb47d8a410109c7e37041d",
+      "estado": "cancelada",
+      "centavos": 1.566216,
+      "latencia_ms": 4960,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.065016:953",
+        "escritor:claude-sonnet-5-5:1.5012:1762"
+      ]
+    }
+  ],
+  "rotas": {}
+}

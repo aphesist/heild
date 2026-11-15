@@ -17,12 +17,13 @@ export async function responderExecucao(sql: Sql, motor: Motor, ctx: ContextoExe
     : { tipo: 'integrante' as const, id: 'i-desconhecido', setor: String(ex.setor ?? ''), nome: 'Integrante' }
   const extra = await comEscritorio(sql, ctx.escritorio_id, async (tx) => {
     const chamadas = await tx`select classe, centavos from chamada_modelo where execucao_id = ${execucao_id}`
-    const [op] = await tx`select saida from passo_execucao where execucao_id = ${execucao_id} and tipo = 'operario' and estado = 'concluido' order by ordem desc, tentativa desc limit 1`
+    const [op] = await tx`select saida from passo_execucao where execucao_id = ${execucao_id} and tipo = 'operario' and estado = 'concluido' and (saida ? 'confianca' or saida ? 'pulado') and nome <> 'revisar' order by ordem desc, tentativa desc limit 1`
     const [cartao] = ex.cartao_id ? await tx`select id, tipo, resumo_humano, expira_em, extras from cartao_aprovacao where id = ${ex.cartao_id}` : []
     return { chamadas, op: op?.saida as { confianca?: number; origem?: string; pulado?: boolean } | undefined, cartao }
   })
   const custo = { centavos: Math.round(extra.chamadas.reduce((a, c) => a + Number(c.centavos), 0) * 1_000_000) / 1_000_000, chamadas: extra.chamadas.length }
-  const escalou = extra.chamadas.some((c) => c.classe !== 'operario')
+  // Escalada é ir ao escritor; o revisor de risco é um passo do procedimento, não escalada.
+  const escalou = extra.chamadas.some((c) => c.classe === 'escritor')
   const confianca = extra.op && !extra.op.pulado && extra.op.origem !== 'pessoa' && typeof extra.op.confianca === 'number' ? extra.op.confianca : null
   const origem = { procedimento: ex.procedimento, execucao_id, pedido_id, posicao_na_fila: ex.posicao_na_fila ?? null }
   const nome = achado?.pacote.procedimento.nome ?? procedimento_id

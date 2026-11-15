@@ -3,6 +3,7 @@ import { ErroRegra } from '../../contexto.ts'
 import { definirProcedimento } from '../../motor/definicao.ts'
 import { definirContrato } from '../../operarios/contrato.ts'
 import { Conta } from '../../validadores/contabil.ts'
+import { contratoRevisar, linhaDaRevisao } from '../revisor.ts'
 
 /**
  * CTB-ECD-TRANSMITIR · Conferir e transmitir a ECD do cliente (Contábil).
@@ -44,9 +45,46 @@ const ArgumentosTransmissao = z
   .object({ cliente_id: z.string(), exercicio: z.string().regex(/^\d{4}$/), documento_id: z.string(), hash_arquivo: z.string().length(64) })
   .strict()
 
-export const ctbEcd = definirProcedimento({
+/**
+ * v2 (B3b): antes do cartão, o revisor de risco (Opus) confere o compacto do que vai ser transmitido
+ * (decisão 3; só nos atos irreversíveis). Se ele devolver, o caso vai ao cartão "não consegui" com
+ * o motivo. A v1 continua carregada para as execuções em andamento.
+ */
+const passosRevisor = [
+  {
+    tipo: 'operario' as const,
+    nome: 'revisar',
+    contrato: contratoRevisar,
+    recebe: (s: { entrada: { exercicio: string }; saidas: Record<string, any> }) => ({
+      ato: 'contabil.ecd_ecf.transmitir',
+      resumo: resumoTransmissao(s),
+      decisao: { exercicio: s.entrada.exercicio, contas: s.saidas.carregar.contas.length as number, pontos_de_atencao: (s.saidas.apontar_atencao?.apontamentos ?? []).length as number },
+      evidencias: [
+        { rotulo: 'Conferências por regra', valor: 'CNPJ, exercício, partidas, saldos por conta, competências fechadas e entrega anterior: todas passaram' },
+        ...(s.saidas.separar_atipicas.contas_atipicas as { conta_codigo: string; nome: string; variacao_percentual: number }[]).slice(0, 15).map((c) => ({ rotulo: `Atípica ${c.conta_codigo}`, valor: `${c.nome}, variação ${c.variacao_percentual}%` })),
+        ...((s.saidas.apontar_atencao?.apontamentos ?? []) as { conta_codigo: string; motivo: string }[]).slice(0, 10).map((a) => ({ rotulo: `Apontada ${a.conta_codigo}`, valor: a.motivo })),
+      ],
+    }),
+  },
+  {
+    tipo: 'validar' as const,
+    nome: 'conferir_revisao',
+    validadores: ['revisao_aprovou'],
+    dados: (s: { saidas: Record<string, any> }) => ({ revisao: s.saidas.revisar ?? null }),
+    sobre: 'revisar',
+    ao_falhar: 'escalar' as const,
+  },
+]
+
+function resumoTransmissao(s: { entrada: { exercicio: string }; saidas: Record<string, any> }) {
+  const c = s.saidas.carregar
+  const n = (s.saidas.apontar_atencao?.apontamentos ?? []).length
+  return `Transmitir a ECD ${s.entrada.exercicio} de ${c.cliente_nome} (CNPJ ${c.cnpj_cliente}): ${c.contas.length} contas, débitos ${reais(c.total_debitos_centavos)} = créditos ${reais(c.total_creditos_centavos)}, arquivo ${String(c.hash).slice(0, 12)}. ${n ? `${n} ponto(s) de atenção.` : 'Sem pontos de atenção.'}`
+}
+
+const definirEcd = (versao: number, comRevisor: boolean) => definirProcedimento({
   id: 'CTB-ECD-TRANSMITIR',
-  versao: 1,
+  versao,
   nome: 'Conferir e transmitir a ECD',
   setor: 'contabil',
   nivel_maximo: 'rascunhar',
@@ -100,7 +138,9 @@ export const ctbEcd = definirProcedimento({
         const atipicas = contas
           .map((c) => {
             const dif = Math.abs(c.saldo_final_centavos - c.saldo_inicial_centavos)
-            const base = Math.max(Math.abs(c.saldo_inicial_centavos), 1)
+            // v2: conta que começa o exercício zerada (receita, custo, conta nova) mede contra o saldo
+            // final (100%); a v1 dividia por 1 centavo e mostrava variações absurdas ao operário.
+            const base = comRevisor && c.saldo_inicial_centavos === 0 ? Math.max(Math.abs(c.saldo_final_centavos), 1) : Math.max(Math.abs(c.saldo_inicial_centavos), 1)
             return { conta_codigo: c.codigo, nome: c.nome, dif, variacao_percentual: Math.round((dif / base) * 1000) / 10 }
           })
           .filter((c) => c.dif >= 100_000 && c.variacao_percentual >= 50)
@@ -127,6 +167,7 @@ export const ctbEcd = definirProcedimento({
       sobre: 'apontar_atencao',
       ao_falhar: 'escalar',
     },
+    ...(comRevisor ? passosRevisor : []),
     {
       tipo: 'aprovacao',
       nome: 'aprovar_transmissao',
@@ -136,11 +177,7 @@ export const ctbEcd = definirProcedimento({
       revalidar: ['arquivo_aprovado_confere'],
       argumentos: (s) => ({ cliente_id: s.entrada.cliente_id, exercicio: s.entrada.exercicio, documento_id: s.saidas.carregar.documento_id, hash_arquivo: s.saidas.carregar.hash }),
       // Texto do cartão montado pelo sistema, com números do arquivo (nunca do modelo).
-      resumo: (s) => {
-        const c = s.saidas.carregar
-        const n = (s.saidas.apontar_atencao?.apontamentos ?? []).length
-        return `Transmitir a ECD ${s.entrada.exercicio} de ${c.cliente_nome} (CNPJ ${c.cnpj_cliente}): ${c.contas.length} contas, débitos ${reais(c.total_debitos_centavos)} = créditos ${reais(c.total_creditos_centavos)}, arquivo ${String(c.hash).slice(0, 12)}. ${n ? `${n} ponto(s) de atenção.` : 'Sem pontos de atenção.'}`
-      },
+      resumo: (s) => resumoTransmissao(s) + (comRevisor ? linhaDaRevisao(s.saidas.revisar) : ''),
       cartoes: (s) => [
         {
           tipo: 'tabela',
@@ -196,3 +233,6 @@ export const ctbEcd = definirProcedimento({
     },
   ],
 })
+
+export const ctbEcd = definirEcd(1, false)
+export const ctbEcdV2 = definirEcd(2, true)

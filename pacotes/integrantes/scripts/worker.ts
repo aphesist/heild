@@ -7,7 +7,7 @@
  * Com o modelo real: HEILD_IA_FORNECEDOR=anthropic HEILD_DOLAR_REAIS=... ANTHROPIC_API_KEY=... npm run worker -w @heild/integrantes
  */
 import { criarProcessos, FornecedorDemonstracao, fornecedorDoAmbiente } from '@heild/processos'
-import { extensaoIntegrantes, procedimentosDosIntegrantes } from '../src/index.ts'
+import { extensaoIntegrantes, modelosDosIntegrantes, procedimentosDosIntegrantes } from '../src/index.ts'
 
 const url = process.env.DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/heild'
 const real = fornecedorDoAmbiente()
@@ -15,7 +15,8 @@ const p = await criarProcessos({
   url,
   modo: 'worker',
   fornecedor: real?.fornecedor ?? new FornecedorDemonstracao(),
-  ...(real ? { modelos: real.modelos } : {}),
+  // Os contratos que o portão liberou para o Haiku (src/modelos.ts).
+  ...(real ? { modelos: modelosDosIntegrantes(real.modelos) } : {}),
   procedimentos: procedimentosDosIntegrantes,
   extensoes: [extensaoIntegrantes()],
 })

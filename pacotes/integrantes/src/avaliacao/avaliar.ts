@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { comEscritorio, type ContextoExec, type Motor, type Sql } from '@heild/processos'
+import { comEscritorio, type ContextoExec, type Motor, type Sql, type Tx } from '@heild/processos'
 import type { ExecucaoParaDecisao } from '../contrato.ts'
 import { pacoteDoProcedimento } from '../integrantes.ts'
 
@@ -16,6 +16,11 @@ export interface CasoGabarito {
   /** O documento do caso (o mesmo formato que o worker de documentos grava). */
   /** Os metadados podem depender do cliente do ambiente (ex.: a ECD leva o CNPJ dele). */
   documento: { tipo: string; metadados: Record<string, unknown> | ((a: { cnpj: string }) => Record<string, unknown>) }
+  /**
+   * Casos cuja entrada não é um documento (ex.: a conversa do CRM): grava o que precisa e devolve a
+   * entrada do procedimento. Sem isto, o caso grava o documento e a entrada é cliente e documento.
+   */
+  preparar?: (tx: Tx, a: { escritorio_id: string; cliente_id: string }) => Promise<Record<string, unknown>>
   /** Entrada extra além de cliente e documento (ex.: exercício da ECD). */
   entrada_extra?: Record<string, unknown>
   /**
@@ -104,9 +109,11 @@ async function gravarDocumento(sql: Sql, a: AmbienteAvaliacao, c: CasoGabarito) 
 export async function avaliarCaso(a: AmbienteAvaliacao, c: CasoGabarito, rodada = 1, esperarMs = 180_000): Promise<LinhaAvaliacao> {
   const achado = pacoteDoProcedimento(c.procedimento)
   if (!achado) throw new Error(`Procedimento sem integrante: ${c.procedimento}`)
-  const documento_id = await gravarDocumento(a.sql, a, c)
+  const entrada = c.preparar
+    ? await comEscritorio(a.sql, a.escritorio_id, (tx) => c.preparar!(tx, { escritorio_id: a.escritorio_id, cliente_id: a.cliente_id }))
+    : { cliente_id: a.cliente_id, documento_id: await gravarDocumento(a.sql, a, c), ...c.entrada_extra }
   const inicio = Date.now()
-  const { execucao_id } = await a.motor.iniciar(a.ctx, c.procedimento, { cliente_id: a.cliente_id, documento_id, ...c.entrada_extra }, { sombra: true, chave_idempotencia: `sombra:${c.id}:${rodada}:${documento_id}` })
+  const { execucao_id } = await a.motor.iniciar(a.ctx, c.procedimento, entrada, { sombra: true, chave_idempotencia: `sombra:${c.id}:${rodada}:${randomUUID().slice(0, 8)}` })
   let ex = await lerExecucao(a.sql, a.escritorio_id, execucao_id)
   while (!TERMINAL.has(ex.estado)) {
     if (Date.now() - inicio > esperarMs) break

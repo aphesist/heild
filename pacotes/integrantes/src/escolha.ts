@@ -1,6 +1,6 @@
 import './validadores.ts'
 import { z } from 'zod'
-import { definirProcedimento, ErroRegra, type CartaoVisual, type Contrato, type Estado, type Procedimento, type ResolverFerramenta } from '@heild/processos'
+import { contratoRevisar, definirProcedimento, ErroRegra, linhaDaRevisao, type CartaoVisual, type Contrato, type Estado, type Passo, type Procedimento, type ResolverFerramenta } from '@heild/processos'
 
 /**
  * Fábrica dos procedimentos "ler e escolher" dos setores (B3). O caminho é sempre o mesmo, em código:
@@ -58,6 +58,11 @@ export interface OpcoesEscolha {
     /** Campos extras que vão nos argumentos aprovados (ex.: o texto aprovado da resposta). */
     extras?: (escolha: Escolha, lido: Lido) => Record<string, string>
   }
+  /**
+   * Revisor de risco (Opus) antes do cartão: só nos procedimentos com ato irreversível (enviar ao
+   * cliente, transmitir). Recebe o compacto: o resumo, a decisão, as evidências e o trecho.
+   */
+  revisor?: { evidencias: (escolha: Escolha, lido: Lido) => { rotulo: string; valor: string }[] }
   memoria?: string[]
   orcamento: { centavos: number; tokens: number }
   resolver?: ResolverFerramenta
@@ -131,6 +136,35 @@ export function procedimentoDeEscolha(o: OpcoesEscolha): Procedimento {
           sobre: 'escolher',
           ao_falhar: 'escalar',
         },
+        ...(o.revisor
+          ? ([
+              {
+                tipo: 'operario' as const,
+                nome: 'revisar',
+                contrato: contratoRevisar,
+                // A decisão de uma pessoa (cartão "não consegui") não volta ao revisor.
+                pular_se: (s: Estado) => escolhida(s.saidas, campos).origem === 'pessoa',
+                recebe: (s: Estado) => {
+                  const e = escolhida(s.saidas, campos)
+                  return {
+                    ato: o.aprovacao.ferramenta,
+                    resumo: o.aprovacao.resumo(e.escolha, lido(s)),
+                    decisao: e.escolha,
+                    evidencias: [{ rotulo: 'Validadores do procedimento', valor: `todos passaram (${o.validadores.join(', ')})` }, ...o.revisor!.evidencias(e.escolha, lido(s))].slice(0, 30),
+                    ...(lido(s).trecho ? { trecho: lido(s).trecho } : {}),
+                  }
+                },
+              },
+              {
+                tipo: 'validar' as const,
+                nome: 'conferir_revisao',
+                validadores: ['revisao_aprovou'],
+                dados: (s: Estado) => ({ revisao: s.saidas.revisar ?? null }),
+                sobre: 'revisar',
+                ao_falhar: 'escalar' as const,
+              },
+            ] satisfies Passo[])
+          : []),
         {
           tipo: 'aprovacao',
           nome: 'aprovar',
@@ -142,7 +176,7 @@ export function procedimentoDeEscolha(o: OpcoesEscolha): Procedimento {
             const extras = o.aprovacao.extras?.(e, lido(s))
             return { documento_id: s.entrada.documento_id, ...e, ...(extras ? { extras } : {}) }
           },
-          resumo: (s) => o.aprovacao.resumo(escolhida(s.saidas, campos).escolha, lido(s)),
+          resumo: (s) => o.aprovacao.resumo(escolhida(s.saidas, campos).escolha, lido(s)) + (o.revisor ? linhaDaRevisao(s.saidas.revisar) : ''),
           cartoes: o.aprovacao.cartoes ? (s) => o.aprovacao.cartoes!(escolhida(s.saidas, campos).escolha, lido(s)) : undefined,
         },
         {

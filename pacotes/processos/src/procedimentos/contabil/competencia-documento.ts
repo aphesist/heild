@@ -44,9 +44,28 @@ export function candidatasDe(texto: string, chegada: Date): string[] {
   return [...achadas].filter((x) => Competencia.safeParse(x).success).sort().reverse().slice(0, 6)
 }
 
-export const ctbCompetenciaDoc = definirProcedimento({
+/**
+ * v2 (B3b): a instrução diz a ordem de precedência das datas. O teste real mostrou o caso "seguro"
+ * (só o vencimento no texto) indo ao cartão sem necessidade. Os candidatos, os validadores e o
+ * limiar não mudam: a instrução só orienta a escolha entre as mesmas opções.
+ */
+export const contratoEscolherCompetenciaV2 = definirContrato({
+  ...contratoEscolherCompetencia,
+  versao: 2,
+  instrucao:
+    'Você lê um trecho de documento contábil e escolhe a competência (mês de referência) entre as candidatas. ' +
+    'Use esta ordem: (1) mês de referência, competência ou período escrito no documento; ' +
+    '(2) período de apuração, de leitura ou de prestação do serviço; ' +
+    '(3) mês em que a despesa ou o fato aconteceu; ' +
+    '(4) se o documento só traz o vencimento de uma parcela ou conta, o mês do vencimento. ' +
+    'Nunca use a data de pagamento, de emissão do recibo ou de chegada quando houver uma data dos itens anteriores. ' +
+    'Se houver duas referências sem indicação de qual vale, ou nenhuma data, use confiança baixa. ' +
+    'Responda só com uma das candidatas, a confiança de 0 a 1 e um motivo curto.',
+})
+
+const definirCompetencia = (versao: number, contrato: typeof contratoEscolherCompetencia) => definirProcedimento({
   id: 'CTB-COMPETENCIA-DOC',
-  versao: 1,
+  versao,
   nome: 'Classificar a competência de um documento',
   setor: 'contabil',
   nivel_maximo: 'executar',
@@ -89,7 +108,7 @@ export const ctbCompetenciaDoc = definirProcedimento({
     {
       tipo: 'operario',
       nome: 'escolher_competencia',
-      contrato: contratoEscolherCompetencia,
+      contrato,
       pular_se: (s) => s.saidas.ler_documento.regra !== null,
       recebe: (s) => ({ tipo_documento: s.saidas.ler_documento.tipo, trecho: s.saidas.ler_documento.trecho, candidatas: s.saidas.ler_documento.candidatas }),
     },
@@ -143,6 +162,10 @@ export const ctbCompetenciaDoc = definirProcedimento({
     },
   ],
 })
+
+/** v1 continua carregada: execuções em andamento terminam na versão em que começaram. */
+export const ctbCompetenciaDoc = definirCompetencia(1, contratoEscolherCompetencia)
+export const ctbCompetenciaDocV2 = definirCompetencia(2, contratoEscolherCompetenciaV2)
 
 function escolhida(saidas: Readonly<Record<string, any>>): { competencia: string; origem: 'regra' | 'modelo' | 'pessoa'; confianca: number | null; motivo: string } {
   const op = saidas.escolher_competencia

@@ -11,10 +11,19 @@ export interface ExecucaoPagadora {
   setor: string
   pagador_tipo: 'bolsa_setor' | 'usuario'
   pagador_id: string | null
+  sombra?: boolean
 }
 
-/** A bolsa que paga: a do setor (padrão, decisão 5) ou a da pessoa responsável, se o escritório configurar. */
-export const bolsaDe = (ex: ExecucaoPagadora) => (ex.pagador_tipo === 'usuario' && ex.pagador_id ? `pessoa:${ex.pagador_id}` : ex.setor)
+/** A bolsa do piloto: o modo sombra mede às custas dela, nunca da bolsa do setor (B3b). */
+export const BOLSA_PILOTO = 'piloto'
+
+/**
+ * A bolsa que paga: a do setor (padrão, decisão 5) ou a da pessoa responsável, se o escritório
+ * configurar. A sombra (piloto automatizado) paga com a bolsa própria do piloto: medir não gasta
+ * o dinheiro de operar.
+ */
+export const bolsaDe = (ex: ExecucaoPagadora) =>
+  ex.sombra ? BOLSA_PILOTO : ex.pagador_tipo === 'usuario' && ex.pagador_id ? `pessoa:${ex.pagador_id}` : ex.setor
 
 const MES = `to_char(now() at time zone 'America/Sao_Paulo', 'YYYY-MM')`
 
@@ -37,7 +46,7 @@ export async function reservar(tx: Tx, ex: ExecucaoPagadora, chave: string, esti
      where setor = $2 and mes = ${MES} and gasto_centavos + $1::numeric <= saldo_centavos returning mes`,
     [estimativa.centavos, bolsa],
   )
-  if (!b) throw new ErroOrcamento('BOLSA_SEM_SALDO', `A bolsa ${bolsa.startsWith('pessoa:') ? 'da pessoa responsável' : `do setor ${bolsa}`} não tem saldo para a próxima chamada de modelo.`)
+  if (!b) throw new ErroOrcamento('BOLSA_SEM_SALDO', `A bolsa ${bolsa.startsWith('pessoa:') ? 'da pessoa responsável' : bolsa === BOLSA_PILOTO ? 'do piloto' : `do setor ${bolsa}`} não tem saldo para a próxima chamada de modelo.`)
   await tx`insert into reserva_orcamento (escritorio_id, chave, execucao_id, bolsa_setor, bolsa_mes, centavos, tokens)
            values (${ex.escritorio_id}, ${chave}, ${ex.id}, ${bolsa}, ${b.mes}, ${estimativa.centavos}, ${estimativa.tokens})`
   return { centavos: estimativa.centavos, tokens: estimativa.tokens, bolsa_setor: bolsa, bolsa_mes: b.mes }

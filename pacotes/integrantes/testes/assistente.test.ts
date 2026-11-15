@@ -31,7 +31,9 @@ describe('ponta a ponta: chat → roteamento → integrante → procedimento →
     expect(RespostaPadrao.parse(r1.resposta)).toEqual(r1.resposta)
     expect(r1.resposta).toMatchObject({ de: { tipo: 'integrante', id: 'i-fiscal' }, acao: { tipo: 'aprovacao' }, confianca: 0.95, escalou: false })
     expect(r1.resposta.cartoes[0]).toMatchObject({ tipo: 'tabela', titulo: 'Guia conferida' })
-    expect(r1.resposta.custo.chamadas).toBe(1)
+    // Operário e revisor de risco (o envio ao cliente é irreversível).
+    expect(r1.resposta.custo.chamadas).toBe(2)
+    expect(r1.resposta.acao!.resumo_humano).toContain('Revisor de risco: aprovou')
 
     // Encaminhar sem reescrever: o objeto do Assistente é idêntico ao do integrante.
     const doIntegrante = await responderExecucao(admin, h.motor, ana, r1.resposta.origem.execucao_id!, r0.pedido_id)
@@ -61,9 +63,15 @@ describe('ponta a ponta: chat → roteamento → integrante → procedimento →
     expect(r1.resposta.dados).toMatchObject({ tipo_evento: 'hora_extra', competencia: '2026-10', quantidade: '10' })
     const [p] = await admin`select centavos, tentativas from pedido_assistente where id = ${r0.pedido_id}`
     expect(p!.tentativas.map((t: { camada: string }) => t.camada)).toEqual(['regra', 'modelo_barato'])
-    const [b] = await admin`select gasto_centavos from bolsa_setor where escritorio_id = ${s.esc} and setor = 'assistente'`
-    expect(b!.gasto_centavos).toBeCloseTo(Number(p!.centavos), 6)
+    // O custo do roteamento é do setor de destino: saiu da bolsa de trânsito e entrou na do DP.
     expect(Number(p!.centavos)).toBeGreaterThan(0)
+    const [pp] = await admin`select bolsa_pagadora from pedido_assistente where id = ${r0.pedido_id}`
+    expect(pp!.bolsa_pagadora).toBe('dp')
+    const [ass] = await admin`select gasto_centavos from bolsa_setor where escritorio_id = ${s.esc} and setor = 'assistente'`
+    expect(ass!.gasto_centavos).toBeCloseTo(0, 6)
+    const [dp] = await admin`select gasto_centavos from bolsa_setor where escritorio_id = ${s.esc} and setor = 'dp'`
+    const [op] = await admin`select coalesce(sum(c.centavos), 0)::float8 as c from chamada_modelo c join pedido_assistente pa on pa.execucao_id = c.execucao_id where pa.id = ${r0.pedido_id}`
+    expect(dp!.gasto_centavos).toBeCloseTo(Number(p!.centavos) + op!.c, 6)
   })
 
   it('barato em dúvida sobe ao caro; os dois em dúvida viram pergunta com opções (nunca um chute)', async () => {
@@ -76,6 +84,11 @@ describe('ponta a ponta: chat → roteamento → integrante → procedimento →
     const [p] = await admin`select tentativas, execucao_id from pedido_assistente where id = ${r0.pedido_id}`
     expect(p!.tentativas.map((t: { camada: string }) => t.camada)).toEqual(['regra', 'modelo_barato', 'modelo_caro'])
     expect(p!.execucao_id).toBeNull()
+    // Sem destino, o custo fica na bolsa do roteamento.
+    const [b] = await admin`select gasto_centavos from bolsa_setor where escritorio_id = ${s.esc} and setor = 'assistente'`
+    const [pp] = await admin`select centavos, bolsa_pagadora from pedido_assistente where id = ${r0.pedido_id}`
+    expect(pp!.bolsa_pagadora).toBe('assistente')
+    expect(b!.gasto_centavos).toBeCloseTo(Number(pp!.centavos), 6)
   })
 
   it('o caro decide quando o barato hesita', async () => {

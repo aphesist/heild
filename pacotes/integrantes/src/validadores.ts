@@ -64,3 +64,14 @@ definirValidador({
     return escolha.competencia <= agora ? ok : { ok: false, codigo: 'COMPETENCIA_FUTURA', mensagem: `A competência ${escolha.competencia} ainda não chegou.` }
   },
 })
+
+definirValidador({
+  nome: 'quantidade_quando_exigida',
+  versao: 1,
+  descricao: 'Hora extra, falta e adiantamento só se lançam com a quantidade (horas, dias ou valor) tirada do texto.',
+  dados: z.object({ escolha: z.object({ tipo_evento: z.string(), quantidade: z.union([z.string(), z.number(), z.null()]).optional() }).loose() }),
+  conferir: ({ escolha }) =>
+    ['hora_extra', 'falta', 'adiantamento'].includes(escolha.tipo_evento) && (escolha.quantidade === null || escolha.quantidade === undefined || escolha.quantidade === '')
+      ? { ok: false, codigo: 'SEM_QUANTIDADE', escalavel: true, campo: 'quantidade', mensagem: `Para lançar ${escolha.tipo_evento.replace('_', ' ')} é preciso a quantidade, e ela não foi informada.` }
+      : ok,
+})
