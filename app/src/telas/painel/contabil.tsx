@@ -58,7 +58,8 @@ export function widgetsContabil(ctx: CtxAba): WidgetsAba {
       catalogo: [
         widgetObrigacoesDoSetor('contabil', ctx),
         // Área de trabalho: largura inteira e três células de altura (PADRAO_DE_INTERFACE.md, 3).
-        { ...w('kanban', 'Kanban do fechamento', 'CTB-026; D-21, D-22', 'Pendente, em andamento, conferência e concluído; arrastar e filtrar por fase', KanbanIcon, ['XL'], () => <KanbanCarteira />), larguraTotal: true, linhasMinimas: 3 },
+        // Quatro colunas de no mínimo 15rem, os vãos e o respiro do card pedem ~64rem: a largura inteira até 1152px; no ultrawide, o lado sobra para outro widget.
+        { ...w('kanban', 'Kanban do fechamento', 'CTB-026; D-21, D-22', 'Pendente, em andamento, conferência e concluído; arrastar e filtrar por fase', KanbanIcon, ['XL'], () => <KanbanCarteira />), larguraMinima: 64, linhasMaximas: 4 },
         w('minha-fila', 'Minha fila', 'D-22', 'Meus clientes, do mais atrasado ao menos', ListNumbersIcon, ['M', 'G'], (t) => <MinhaFila tamanho={t} />),
         w('carteira-fechamento', `Etapas por analista · ${COMPETENCIA}`, 'CTB-026', 'Clientes por etapa do fechamento e analista', FlagCheckeredIcon, ['G', 'XL'], () => <EtapasCarteira />),
         w('fila-assinatura', 'Fila de assinatura do contador', 'D-16', 'Tudo o que espera a assinatura do contador, de todos os clientes', PenNibIcon, ['M', 'G'], () => <FilaCarteira />),

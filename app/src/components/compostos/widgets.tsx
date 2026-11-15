@@ -68,7 +68,7 @@ export function CalendarioSemana({ dias, itens, hoje, colunas = 5 }: { dias: { d
                   key={i.id}
                   type="button"
                   onClick={() => nav.irPara({ modulo: 'painel', aba: abaDe(i.setor) })}
-                  className={cn('bg-raised hover:bg-raised/70 flex cursor-pointer flex-col gap-0.5 rounded-[14px] px-2.5 py-2 text-left text-xs transition-colors', i.atrasada && 'ring-destructive/60 ring-1')}
+                  className={cn('bg-raised hover:bg-raised/70 flex cursor-pointer flex-col gap-0.5 rounded-md px-2.5 py-2 text-left text-xs transition-colors', i.atrasada && 'ring-destructive/60 ring-1')}
                 >
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <span className="size-2 shrink-0 rounded-full" style={{ background: s.cor }} aria-hidden />

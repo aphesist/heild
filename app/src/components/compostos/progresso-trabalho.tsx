@@ -34,7 +34,7 @@ export function ProgressoTrabalho({ trabalho: t, compacto, className }: { trabal
   const fim = t.fimEm ? new Date(t.fimEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''
   const cliente = t.cliente ? `${t.cliente} · ` : ''
   return (
-    <div role="status" aria-live="polite" data-concluido={concluido || undefined} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-[20px] p-4', className)}>
+    <div role="status" aria-live="polite" data-concluido={concluido || undefined} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-cartao p-4', className)}>
       <div className="flex items-center gap-3">
         {ap && <Orb cor={ap.cor} corOlhos={ap.corOlhos} estado={concluido ? 'concluido' : 'trabalhando'} tamanho={compacto ? 28 : 36} animado modo="drift" extras={false} cutucavel={false} />}
         <div className="min-w-0 flex-1">

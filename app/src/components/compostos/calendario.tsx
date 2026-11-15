@@ -267,7 +267,7 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
                   {grupos(lista).map((g) =>
                     g.grupo ? (
                       <div key={`g-${g.grupo}`} className="flex flex-col gap-1">
-                        <button type="button" aria-expanded={grupoAberto === `${iso}:${g.grupo}`} onClick={() => setGrupoAberto(grupoAberto === `${iso}:${g.grupo}` ? null : `${iso}:${g.grupo}`)} className="bg-raised hover:bg-raised/70 flex cursor-pointer items-center gap-1.5 rounded-[14px] px-2.5 py-2 text-left text-xs">
+                        <button type="button" aria-expanded={grupoAberto === `${iso}:${g.grupo}`} onClick={() => setGrupoAberto(grupoAberto === `${iso}:${g.grupo}` ? null : `${iso}:${g.grupo}`)} className="bg-raised hover:bg-raised/70 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2 text-left text-xs">
                           <span className="size-2 shrink-0 rounded-full" style={{ background: integrante(g.tarefas[0].setor).cor }} aria-hidden />
                           <span className="font-medium">{g.grupo}</span>
                           <span className="text-muted-foreground">× {g.tarefas.length}</span>
@@ -294,7 +294,7 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
 function Dia({ iso, hoje, foraDoMes, feriado, cabecalho, compacto, detalhe, children }: { iso: string; hoje: boolean; foraDoMes?: boolean; feriado?: string; cabecalho?: string; compacto?: boolean; detalhe?: boolean; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id: `dia:${iso}` })
   return (
-    <div ref={setNodeRef} role="gridcell" aria-label={`${diaMesDeIso(iso)}${feriado ? `, feriado: ${feriado}` : ''}`} className={cn('flex min-w-0 flex-col gap-1.5 rounded-[14px] p-1 transition-colors', compacto && 'min-h-24 border', isOver && 'bg-accent', foraDoMes && 'opacity-50', feriado && 'bg-sunken/60')}>
+    <div ref={setNodeRef} role="gridcell" aria-label={`${diaMesDeIso(iso)}${feriado ? `, feriado: ${feriado}` : ''}`} className={cn('flex min-w-0 flex-col gap-1.5 rounded-md p-1 transition-colors', compacto && 'min-h-24 border', isOver && 'bg-accent', foraDoMes && 'opacity-50', feriado && 'bg-sunken/60')}>
       <div className={cn('flex items-center gap-1 px-1 text-sm', hoje ? 'text-foreground font-medium' : 'text-muted-foreground', compacto && 'text-xs')}>
         {cabecalho ?? iso.slice(8, 10)}
         {hoje && <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[10px]">hoje</span>}
@@ -315,7 +315,7 @@ function ItemCalendario({ t, compacto, cor, nomeSetor, movel, reprogramando, onR
   const estilo = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 30 } : undefined
   const [data, setData] = useState(isoDeDiaMes(t.prazo))
   return (
-    <div ref={setNodeRef} style={estilo} className={cn('bg-raised flex flex-col gap-0.5 rounded-[12px] text-left text-xs', compacto ? 'px-1.5 py-1' : 'px-2.5 py-2', t.atrasada && 'ring-destructive/60 ring-1', isDragging && 'shadow-lg', t.status === 'concluida' && 'opacity-60')}>
+    <div ref={setNodeRef} style={estilo} className={cn('bg-raised flex flex-col gap-0.5 rounded-md text-left text-xs', compacto ? 'px-1.5 py-1' : 'px-2.5 py-2', t.atrasada && 'ring-destructive/60 ring-1', isDragging && 'shadow-lg', t.status === 'concluida' && 'opacity-60')}>
       <button type="button" {...attributes} {...listeners} onClick={onAbrir} aria-roledescription={movel ? 'tarefa arrastável' : undefined} className={cn('flex min-w-0 cursor-pointer flex-col gap-0.5 text-left', movel && 'touch-none')}>
         <span className="text-muted-foreground flex items-center gap-1.5">
           <span className="size-2 shrink-0 rounded-full" style={{ background: cor }} aria-hidden />

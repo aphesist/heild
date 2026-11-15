@@ -1,101 +1,157 @@
 # Padrão de interface do wireframe
 
-**Versão 1 · 15/11/2026 · QA de interface.** Como toda tela do `app/` organiza grade, cards, texto e toque, em qualquer largura. Vale para as sessões de tela; o que é marca (cores, raios, sombras, espaçamentos) continua no design system (`design-system/forma.md` no branch `design-system`) e aqui só é aplicado. O teste `app/scripts/qa-interface.cjs` confere as regras marcadas com **[QA]**.
+**Versão 2 · 15/11/2026 · direção de design de interface.** Como toda tela do `app/` organiza grade, cards, texto, estados, movimento e toque, em qualquer largura. Substitui a versão 1 (QA de interface), que fechava vãos esticando cards. A ideia por trás está no `DIRECAO_VISUAL.md`; o que é marca (cores, raios, sombras, espaçamentos, tipos) continua no design system (`design-system/forma.md`, `cores.md`, `tipografia.md` no branch `design-system`) e aqui só é aplicado. O teste `app/scripts/qa-interface.cjs` confere as regras marcadas com **[QA]**.
+
+**A regra que manda nas outras:** o card tem o tamanho do conteúdo e da tarefa, não o do vão que sobrou. Buraco se resolve com ordem e empacotamento, nunca esticando.
 
 ## 1. Faixas de largura e grade
 
 | Faixa | Largura da janela | Variante Tailwind | Barra lateral | Grade de widgets | Grade de cards fora dos widgets |
 | --- | --- | --- | --- | --- | --- |
 | Celular | < 640 | (base) | menu inferior com 5 destinos | 2 colunas | 1 coluna |
-| Tablet | 640 a 1023 | `sm:` `md:` | menu inferior até 767; de 768, fechada (76px), abre por cima | 2 ou 4 colunas | 2 colunas |
-| Computador | 1024 a 1439 | `lg:` `xl:` | fixa a partir de 1280 | 4 ou 6 colunas | 2 ou 3 colunas |
-| Largo | ≥ 1440 | `largo:` (e `ultra:` ≥ 1800) | fixa | 6 colunas (8 no ultrawide) | 3 ou 4 colunas |
+| Tablet | 640 a 1023 | `sm:` `md:` | menu inferior até 767; de 768, fechada (76px), abre por cima | 2 ou 4 colunas | 1 ou 2 colunas |
+| Computador | 1024 a 1439 | `lg:` `xl:` | fixa a partir de 1280 | 4 ou 6 colunas | 2 colunas (3 se forem do mesmo tipo) |
+| Largo | ≥ 1440 | `largo:` (e `ultra:` ≥ 1800) | fixa | 6 colunas (8 no ultrawide) | 2 ou 3 colunas |
 
-- **Contêiner da tela:** `pagina` (utilitário em `index.css`): centrado, até 1152px (1600px no ultrawide), como manda o design system. Dentro dele as peças podem ocupar a largura inteira; "80% da tela" é isso: o card de trabalho ocupa a largura toda do contêiner.
-- **Margem lateral:** `px-4 sm:px-5` na área de rolagem da tela (16px no celular, nunca menos).
-- **Colunas da grade de widgets** saem da largura do contêiner, não da janela (célula de no mínimo ~150px): < 600 → 2; < 980 → 4; < 1320 → 6; acima → 8 (`colunasPara`, `components/widgets/grade.tsx`).
-- **Grade de cards fora dos widgets:** sempre `grid gap-4` com colunas por faixa e `minmax(0,1fr)`: `grid gap-4 sm:grid-cols-2 lg:grid-cols-3`. Nada de `flex` com larguras fixas para dispor cards lado a lado.
-- **Grade sem colunas na faixa atual** (o celular de `grid lg:grid-cols-2`) tem uma coluna `minmax(0,1fr)` por padrão (base em `index.css`): nunca cresce até o conteúdo mais largo nem empurra a página para o lado.
+- **Contêiner da tela:** `pagina` (`index.css`): centrado, até 1152px (1600px no ultrawide), como manda o design system. Trocar de aba não move o conteúdo.
+- **Margem lateral:** `px-4 sm:px-5` na área de rolagem (16px no celular, nunca menos).
+- **Colunas da grade de widgets** saem da largura do contêiner (célula de no mínimo ~150px): < 600 → 2; < 980 → 4; < 1320 → 6; acima → 8 (`colunasPara`, `components/widgets/grade.tsx`).
+- **Grade sem colunas na faixa atual** tem uma coluna `minmax(0,1fr)` (base em `index.css`): nunca empurra a página para o lado.
 
-## 2. Espaçamento (tokens do design system, base 4px)
+## 2. Espaçamento e densidade (tokens do design system, base 4px)
 
 | Uso | Classe | Token |
 | --- | --- | --- |
-| Entre cards e na grade de widgets | `gap-4` | `espaco-4` (16px) |
-| Padding de card | `p-4` (`sm:p-5` em card de página) | `espaco-4` / `espaco-5` |
+| Entre cards e na grade de widgets | `gap-4` (na grade de widgets, o respiro de 16px embaixo de cada item) | `espaco-4` |
+| Padding de card | `p-4` (`sm:p-5` em `Caixa` de página) | `espaco-4` / `espaco-5` |
+| Entre título do card e corpo | `gap-3` | `espaco-3` |
+| Entre itens de uma lista | linha de 40 a 52px com divisória `border` (sem `gap` extra) | `espaco-2` / `espaco-3` |
 | Entre chips e botões de um grupo | `gap-2` | `espaco-2` |
 | Entre seções da tela | `gap-6` ou `gap-8` | `espaco-6` / `espaco-8` |
 
-Espaço entre irmãos vem de `gap`, nunca de margem. Nenhum valor solto (`gap-[13px]`, `p-[7px]`).
+- **Densidade confortável:** texto 14px, apertado dentro do grupo (8 a 12px), generoso entre grupos (24 a 32px). Mais espaço acima de um título do que abaixo dele.
+- Espaço entre irmãos vem de `gap`, nunca de margem. Nenhum valor solto (`gap-[13px]`, `p-[7px]`, `rounded-[14px]`).
+- **Raios aninhados** (forma.md): cartão e widget `rounded-cartao` (20px), coluna ou bloco dentro do cartão `rounded-lg` (17px), item dentro da coluna `rounded-md` (12,75px), ícone com fundo `rounded-sm`. Pílula para ação principal, sugestão, selo e abas. `rounded-cartao`, `rounded-campo` e `rounded-painel` são os tokens do design system, proporcionais ao raio do tema (seguem a marca branca).
 
-## 3. Tamanho do card por tipo de conteúdo
+## 3. Tamanho do card por conteúdo e tarefa
 
-A grade de widgets tem células de altura fixa (`--celula-widget`, 156px; 136px em tela baixa) e tamanhos P 1×1, M 2×1, G 2×2, L 4×1, XL 4×2 (colunas × linhas). O widget declara os tamanhos que fazem sentido em `tamanhos`; o arranjo padrão de cada aba escolhe um deles.
+### Como a grade de widgets mede
 
-| Conteúdo | Tamanhos | Largura total? | Altura e rolagem |
-| --- | --- | --- | --- |
-| KPI, número, medidor | P (um número), M (número + detalhe ou 2 a 3 números) | não | sem rolagem; número com `tabular-nums` |
-| Lista curta (até ~5 linhas) | M (2 linhas + "e mais N"), G (até 6) | não | rola por dentro só se passar; o "ver todas" vai no cabeçalho |
-| Tabela | G (até 5 colunas), L/XL (mais colunas) | XL quando tem mais de 5 colunas | cabeçalho fixo; rola por dentro; no celular vira lista de linhas |
-| Kanban | XL com `larguraTotal` e `linhasMinimas: 3` (ou tela própria, como os Leads) | **sim** | colunas dividem a largura (mín. 15rem); cada coluna rola por dentro; no celular, colunas de 85% com encaixe horizontal (`snap-x`); componente `Quadro` do kit |
-| Gráfico | M (sparkline), G/L (gráfico com eixo) | L quando é série longa | nunca rola; legenda dentro do card |
-| Formulário | fora da grade: gaveta (`GavetaFormulario`) | — | a gaveta rola; botões no rodapé fixo |
-| Linha do tempo | G ou L | não | rola por dentro, mais recente em cima |
-| Chat / pedir ao integrante | M ou G | não | a conversa vai para a gaveta do chat; no card, só as sugestões |
-| Área de trabalho (calendário, quadro, tabela grande) | XL com `larguraTotal` | **sim** | `linhasMinimas` 3 ou 4; rola por dentro |
+- O tamanho escolhido (P 1×1, M 2×1, G 2×2, L 4×1, XL 4×2, em colunas × células) dá **a largura e o teto de altura**. A célula tem 156px (136px em tela baixa).
+- **A altura é a que o conteúdo pede**, medida em módulos de 4px (`--modulo-widget`, o `espaco-1`): a grade solta o corpo do widget por um instante, lê a altura natural e devolve no mesmo quadro (`useAlturas`, `grade.tsx`). O card fica com a altura do conteúdo, de no mínimo uma célula.
+- **Teto e rolagem:** passou do teto do tamanho, o corpo rola por dentro (com o esmaecido de baixo). Se passa por até meia célula (a última linha de sugestões, o rodapé de uma lista), ganha essa meia célula em vez de ser cortado.
+- **Área de trabalho** (kanban, calendário) declara `linhasMaximas` (teto maior, em células) e `larguraMinima` (seção 4).
+- O conteúdo recebe o tamanho escolhido (`useTamanhoWidget()`); só na grade estreita (L e XL no celular) recebe o maior tamanho aceito que cabe na largura (o calendário abre no dia, não na semana).
+- O modo edição mostra exatamente o mesmo arranjo (sem pulo ao concluir).
 
-- `larguraTotal: true` (em `DefWidget`) faz o widget, no tamanho XL, ocupar a linha inteira em qualquer faixa; `linhasMinimas` dá a altura mínima em células no XL. Use para o que é trabalho (arrastar, comparar colunas), não para listas. Hoje: Kanban do fechamento (Contábil) e Calendário (Visão geral).
-- O corpo do widget rola só na vertical (`overflow-x-hidden`); conteúdo largo (tabela) traz a própria faixa horizontal (`Tabela` do Painel já traz).
-- No celular, L e XL viram 2 colunas e ganham altura (L 2×2, XL 2×3); o conteúdo recebe o maior tamanho aceito que cabe na largura (um calendário G/XL abre no dia, não na semana).
-- Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; card de lista longa leva `max-h-[60vh] overflow-y-auto` na lista, não no card inteiro.
+### Por tipo de conteúdo
 
-## 4. Quando ocupar a largura inteira
+| Conteúdo | Tarefa | Tamanho | Largura | Altura |
+| --- | --- | --- | --- | --- |
+| KPI, número, medidor | olhar e decidir se abre | P (um número), M (dois a três números ou número + detalhe) | estreito | uma célula; nunca rola; número `tabular-nums` em `titulo` leve |
+| Lista curta (até ~6 linhas) | escolher um item e agir | M ou G | 2 colunas | pelo conteúdo; o "ver todas" no cabeçalho |
+| Lista longa / fila | trabalhar item a item | G ou XL | 2 a 4 colunas | teto de 2 células e rola por dentro; filtros no topo do corpo |
+| Tabela | comparar linhas | G até 4 colunas de dado; XL de 5 a 6; mais de 6, `larguraMinima` | pelo número de colunas | cabeçalho fixo, rola por dentro; no celular vira lista de linhas |
+| Kanban | mover trabalho entre etapas | XL com `larguraMinima` = colunas × 15rem + vãos e `linhasMaximas` 4 (ou tela própria, como os Leads) | o que as colunas pedem | coluna com a altura do que carrega; cada uma rola por dentro; etapa vazia diz "Nada nesta etapa" |
+| Calendário | ver a semana ou o mês e reprogramar | G (dois dias), XL (semana) com `larguraMinima` 66rem (7 dias × 9rem) e `linhasMaximas` 3 | a da semana | pelo dia mais cheio, até o teto; no celular, o dia |
+| Gráfico | ver tendência | M (sparkline com o número), G/L (com eixo) | L quando a série é longa | nunca rola; legenda dentro do card |
+| Formulário | preencher e salvar | fora da grade: gaveta (`GavetaFormulario`) ou card de página | até 36rem de campo | a gaveta rola; botões no rodapé fixo |
+| Chat / pedir ao integrante | pedir algo | M (as sugestões) ou G | 2 colunas | a conversa vai para a gaveta do chat; no card, só as sugestões |
+| Linha do tempo | entender o que aconteceu | G; L quando vira faixa horizontal de etapas | 2 colunas; inteira se for faixa | rola por dentro, mais recente em cima |
+| Estado vazio | saber que não há nada e o que fazer | o menor que o widget aceita | — | uma célula; frase e ação no centro |
 
-- **Sim:** kanban, tabela com mais de 5 colunas, calendário de semana/mês, linha de filtros + resultados, comparação lado a lado, o cartão principal de uma tela de trabalho (ex.: a conversa no CRM).
-- **Não:** KPI, lista curta, card de ação, estado vazio. Esses ficam em M ou G e deixam a linha para os vizinhos.
+- Widget declara só os tamanhos que fazem sentido em `tamanhos`; o arranjo padrão escolhe pela tarefa (uma fila de trabalho merece G; uma lista de três relatórios, M).
+- Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; lista longa leva `max-h-[60vh] overflow-y-auto` na lista, não no card inteiro.
 
-## 5. Regra anti-buraco **[QA]**
+## 4. Largura inteira: só quando o conteúdo pede
 
-1. A grade de widgets **não deixa célula vazia no meio nem meia linha no fim**: `arranjar` (`components/widgets/tipos.ts`) coloca cada widget no primeiro lugar livre e, fora do modo edição, a linha que sobra é repartida entre os widgets da faixa; o que ainda sobrar é coberto pelo vizinho (cresce para o lado; desce se ganha um tamanho que aceita, M → G). O conteúdo recebe o tamanho que ganhou (`useTamanhoWidget()`), então um M que cresceu para 4 colunas mostra o seu L.
-2. No modo edição não há preenchimento: a pessoa vê exatamente o tamanho que escolheu.
-3. Fora da grade de widgets, cards da mesma linha têm a mesma altura: `grid` com `items-stretch` (o padrão) e o card com `h-full`. `items-start` só quando os cards são de tipo diferente **e** o mais baixo fica embaixo de outro (masonry consciente: `columns-2 gap-4` com `break-inside-avoid`).
-4. Widget com pouco conteúdo usa o menor tamanho que aceita; o arranjo padrão não põe G em lista de 2 itens.
+- **Critério escrito:** um card ocupa a largura inteira quando a **largura mínima do conteúdo** passa da largura do seu tamanho. Na grade de widgets isso é calculado: `larguraMinima` (rem, no XL) vira colunas pela largura real da coluna, até a grade inteira. Em 1152px, o kanban de quatro etapas (64rem) e a semana (66rem) pedem as seis colunas; no ultrawide (8 colunas) pedem seis e sobram duas para outro widget.
+- **Pedem largura:** kanban com quatro ou mais colunas, calendário de semana ou mês, tabela com mais de seis colunas de dado, linha do tempo em faixa (etapas lado a lado), comparação lado a lado, o cartão principal de uma tela de trabalho (a conversa no CRM).
+- **Não pedem:** KPI, lista, card de ação, estado vazio, gráfico curto, formulário. Esses deixam a linha para os vizinhos.
+- Fora da grade: largura inteira = o card fora da grade de colunas, sozinho na linha (`col-span-full` ou fora do `grid`).
 
-## 6. Texto **[QA]**
+## 5. Anti-buraco por ordem e empacotamento **[QA]**
 
-- Todo filho de `flex`/`grid` que tem texto leva `min-w-0` (senão ele não encolhe e empurra o card).
-- **Uma linha:** `truncate` + `title={texto}` (ou `Tooltip`) quando o texto pode ser maior que o espaço (nome de cliente, assunto). **Até duas linhas:** `line-clamp-2` + `title`.
-- **Quebra:** frases e descrições quebram (`break-words`); códigos longos sem espaço (CNPJ, chave, e-mail) levam `break-all` ou `truncate`.
-- **Botão:** o rótulo quebra em vez de vazar (`max-w-full`, altura mínima, não fixa, em `components/ui/button.tsx`). Botão com altura fixa passada por fora (`h-7`) continua de uma linha.
-- **Números:** `tabular-nums` em toda coluna, total e KPI; valores à direita em tabela.
-- Nada de `whitespace-nowrap` em texto de conteúdo; só em rótulo curto e fixo (aba, selo).
-- Nenhum texto passa da borda do card ou da tela; corte só com reticências (`truncate`/`line-clamp`).
+O que a grade faz (`arranjar`, `components/widgets/tipos.ts`):
 
-## 7. Rolagem
+1. **Ordem é prioridade.** O arranjo padrão (`padroes.ts` do Painel, `padraoDoPapel` do Início) lista os widgets na ordem da tarefa do dia: o que pede decisão (pendências, prazos, aprovações), depois o que se trabalha (filas, kanban, calendário), depois o que se consulta (relatórios, documentos, histórico).
+2. **Empacotamento.** Cada widget vai para o primeiro lugar livre, de cima para baixo e da esquerda para a direita; um widget menor que vem depois sobe para o vão de cima (como `grid-auto-flow: dense`).
+3. **Só cresce quem pede.** Um widget com mais conteúdo do que o teto mostra desce para o espaço livre logo abaixo dele, até a altura que o conteúdo pede. Nenhum widget cresce para o lado.
+4. **Acerto de faixa.** Se sob um widget sobra no máximo meia célula (até 84px) até o próximo widget ou o fim da grade, ele desce essa sobra e o fundo alinha com o vizinho. Mais que isso não: é buraco, e a correção é a ordem.
+5. **A sobra da última faixa** fica: é o fim natural do conteúdo, alinhado à esquerda, como a última linha de um parágrafo. O QA não conta a última faixa.
 
-- A página não rola de lado em nenhuma largura **[QA]**. Rolagem horizontal só dentro de uma faixa que se declara (`overflow-x-auto` + `snap-x`, ou `data-rolagem-horizontal`): abas, kanban, tabela larga no tablet.
-- O botão flutuante Chat (tablet e computador) não cobre o fim da tela: a área de rolagem da página tem `md:pb-24`.
-- Rolagem interna só em: corpo do widget (já vem do `Widget`), lista de coluna do kanban, tabela com cabeçalho fixo, chat. Nunca duas rolagens verticais aninhadas na mesma direção visíveis ao mesmo tempo.
+O que a sessão de tela faz quando ainda sobra vão no meio:
 
-## 8. Toque e celular **[QA]**
+- trocar a ordem no arranjo padrão (o widget baixo vai para junto de outro baixo; o alto, para junto de outro alto);
+- trocar o tamanho para o que a tarefa pede (lista de três itens em M, não em G);
+- juntar dois widgets fracos num só (ex.: "Atrasos e riscos" dentro de "Prazos");
+- nunca esticar um card para tapar o vão, nem pôr conteúdo de enchimento.
 
-- **Menu inferior** (< 768px, decidido): Início, Tarefas, Pendências, Chat, Mais. O conteúdo sobe a altura do menu (`ALTURA_MENU_INFERIOR`).
-- **Campos:** com ponteiro grosso, campo de texto e seleção têm no mínimo 44px de altura; caixa e rádio nativos, 24px (WCAG 2.5.8), com o rótulo (`label`) completando o alvo.
-- **Alvo de toque ≥ 44px.** Com ponteiro grosso (`@media (pointer: coarse)`), todo botão, aba, rádio, caixa e item de menu ganha uma área de toque invisível centrada de no mínimo 44px (`--alvo-toque`, em `index.css`): o desenho não muda, o dedo acerta. Controle novo não precisa fazer nada; quem desenha um alvo próprio (`div` clicável) usa `button` ou `role="button"`.
-- Ações principais no celular: botões de pelo menos `size="default"`, decisão em um toque; edição e configuração "no computador" (`SoLeituraNoCelular`).
+**Fora da grade de widgets** (telas com `grid` de `Caixa`):
+
+- Cards de alturas parecidas na mesma linha: `items-stretch` (o padrão) e o card com `h-full`: a linha fica com uma altura só e os títulos na mesma altura.
+- Cards de alturas diferentes: a coluna mais curta vira uma **pilha** (`flex flex-col gap-4`) com o próximo card de baixo, ou a linha usa `items-start` e o card mais baixo leva um vizinho embaixo. Nunca duas colunas com centenas de pixels vazios sob a mais curta.
+- Coluna lateral (resumo, ajuda) ao lado de uma lista longa: `lg:sticky lg:top-0 self-start`, para ficar à vista ao rolar em vez de deixar o vão.
+- Masonry só consciente: `columns-2 gap-4` com `break-inside-avoid`, quando os cards são independentes e sem ordem de leitura.
+
+## 6. Hierarquia: título, ação e número
+
+- **Título do card** em `corpo-enfase` (14/500), uma linha com `truncate` e `title`; é a pergunta que o card responde ("Quem está devendo?"). Sem rótulo acima do título, sem código de rastreio à vista (os IDs do mapa aparecem ao passar o mouse e no `title`).
+- **Ícone do card** no peso regular (Phosphor), 18px, em `texto-suave`; só um, à esquerda do título.
+- **Ação do card:** no máximo uma no cabeçalho (link "Ver todas →", "Abrir →"), em `texto-suave`; a ação principal do conteúdo é um botão no fim do corpo ou na linha do item. Mais de três ações: as outras vão para um menu "Mais".
+- **Uma ação, uma forma:** a mesma ação tem o mesmo botão em todo lugar (ex.: "Lançar tempo" uma vez por tela).
+- **Número:** `titulo` 36/300 com `tabular-nums` quando decide (KPI); 24/300 quando é contexto; valores em reais à direita na tabela; estado sempre com palavra ou ícone além da cor.
+
+## 7. Texto **[QA]**
+
+- Todo filho de `flex`/`grid` com texto leva `min-w-0`.
+- **Uma linha:** `truncate` + `title={texto}`. **Até duas linhas:** `line-clamp-2` + `title`.
+- **Quebra:** frases quebram (`break-words`, `text-pretty`); títulos equilibrados (`text-balance`); códigos longos sem espaço (CNPJ, chave, e-mail) `break-all` ou `truncate`.
+- **Botão:** o rótulo quebra em vez de vazar (`button.tsx`).
+- **Números:** `tabular-nums` em toda coluna, total e KPI (a `Tabela` já põe na tabela inteira).
+- Nada abaixo de 12px fora da hora da mensagem (11px). Nada em caixa alta.
+- Nenhum texto passa da borda do card ou da tela; corte só com reticências.
+
+## 8. Estados
+
+| Estado | Componente | Regra |
+| --- | --- | --- |
+| Vazio | `EstadoVazio` (kit), `VazioWidget`, `Vazio` (S03) | ícone regular em círculo rebaixado, frase que diz o que não há e a ação que resolve; no centro; marca `data-estado-vazio`. No widget, o card fica no menor tamanho (uma célula) |
+| Carregando | `Carregando` com `linhas` | esqueleto com a forma do conteúdo (linhas de 48px), nunca girador no meio do card; sem pulsar com movimento reduzido |
+| Erro | `EstadoErro` | o que deu errado em frase de colega e "Tentar de novo" |
+| Etapa vazia de kanban | `Quadro` | "Nada nesta etapa · arraste para cá" em borda tracejada, da altura de um cartão |
+| Aguardando decisão | contorno `atencao` a 60% (cores.md) | o card que pede decisão se destaca pelo contorno, não pelo tamanho |
+
+Nunca um card em branco, nem enquanto carrega.
+
+## 9. Movimento
+
+- **Só quando algo muda.** Entrada de cartão: sobe 4px e aparece em 0,3s `ease-out` (forma.md). Troca de aba: a pílula desliza (mola). Grade: os widgets refluem para o lugar novo ao editar. Kanban: o cartão acompanha o dedo e as colunas abrem espaço.
+- **Rotina em 150 a 250ms** (cor, sombra, opacidade); layout em 300 a 500ms; nada de coreografia ao abrir a tela.
+- **Hover não pula:** o card não se move sob o ponteiro; muda só a cor do link ou da linha. Card que é link inteiro pode subir 2px num filho, nunca o próprio card.
+- **Em repouso, só o orb** (design system). Nada pisca, nada gira.
+- **Movimento reduzido:** nada se desloca; o que confirma uma ação continua visível por cor e opacidade.
+
+## 10. Rolagem
+
+- A página não rola de lado em nenhuma largura **[QA]**. Rolagem horizontal só em faixa declarada (`overflow-x-auto` + `snap-x`, ou `data-rolagem-horizontal`): abas, kanban, tabela larga no tablet. Toda faixa assim leva `esmaecer-lados`: a borda esmaece 24px quando há mais conteúdo para aquele lado.
+- Rolagem interna só em: corpo do widget acima do teto, coluna do kanban, tabela com cabeçalho fixo, chat. Nunca duas rolagens verticais aninhadas visíveis ao mesmo tempo.
+- O botão flutuante Chat não cobre o fim da tela (`md:pb-24` na área de rolagem).
+
+## 11. Celular e toque **[QA]**
+
+- **Uma coluna na ordem de prioridade**, KPIs aos pares (P ocupa uma das duas colunas), cada card com a altura do que carrega.
+- **Menu inferior** (< 768px): Início, Tarefas, Pendências, Chat, Mais. O conteúdo sobe a altura do menu (`ALTURA_MENU_INFERIOR`).
+- **Kanban** em colunas de 85% com encaixe (`snap-x`), a próxima aparecendo na borda; **calendário** no dia; **tabela** vira lista de linhas (ou rola de lado com a borda esmaecida).
+- **Alvo de toque ≥ 44px** com ponteiro grosso (área invisível, `--alvo-toque`, `index.css`); campos com 44px; caixa e rádio com 24px e rótulo completando o alvo.
+- Ações principais com pelo menos `size="default"`, decisão em um toque; edição e configuração "no computador" (`SoLeituraNoCelular`).
 - Ícone sem texto sempre com `aria-label`.
 
-## 9. Estados vazios
-
-- Sem dados: `EstadoVazio` (kit) com ícone, frase e a ação que resolve (`acao`); dentro de widget, `VazioWidget` ou `Vazio` (S03), que centralizam a frase. Os três marcam `data-estado-vazio` (o QA não conta como buraco).
-- Nunca um card em branco: nem carregando (`Carregando` com linhas), nem com erro (`EstadoErro` com "Tentar de novo").
-- Estado vazio não ganha tamanho grande: widget que costuma ficar vazio entra em M no arranjo padrão.
-
-## 10. Como conferir
+## 12. Como conferir
 
 ```
-cd app && npx vite --port 6200 --strictPort
-node scripts/qa-interface.cjs /caminho/dos/prints [filtro-de-rota] [1440,1024,768,390]
+cd app && npx vite --port 6300 --strictPort
+URL_APP=http://localhost:6300/ node scripts/qa-interface.cjs /caminho/dos/prints [filtro-de-rota] [1440,1024,768,390]
 ```
 
-O script percorre todas as rotas (Início, Painel com e sem cliente, CRM, interna, Timesheet, Financeiro, BPO com e sem cliente, Arquivos, Configurações e o app do cliente) nas quatro larguras, salva um print alto de cada uma e grava `qa-interface.json` com o que achou em cada categoria: `rolagem`, `texto`, `toque`, `vazio`, `buraco`.
+O script percorre todas as rotas nas quatro larguras, salva um print alto de cada uma e grava `qa-interface.json` com o que achou em cada categoria: `rolagem`, `texto`, `toque`, `vazio` (widget com mais da metade do corpo vazio), `buraco` (célula vazia no meio da grade de widgets, ou vão sob card fora dela). Olhe também o print: o script não vê hierarquia nem ordem.

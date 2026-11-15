@@ -172,7 +172,7 @@ export function NovoIntegrante({ aberto, onFechar, onAtivar, criados = 0, pessoa
         </ol>
 
         {passo === 'descrever' && noLimite && (
-          <div role="alert" className="bg-sunken flex flex-col gap-2 rounded-[14px] p-4 text-sm">
+          <div role="alert" className="bg-sunken flex flex-col gap-2 rounded-md p-4 text-sm">
             <strong className="font-medium">Você chegou ao limite de {LIMITE_INTEGRANTES} integrantes criados.</strong>
             <p className="text-muted-foreground">É o limite do plano por pessoa. Desative um em Configurações › Integrantes ou peça ao Administrador para aumentar.</p>
           </div>
@@ -184,7 +184,7 @@ export function NovoIntegrante({ aberto, onFechar, onAtivar, criados = 0, pessoa
             <div className="flex flex-col gap-1.5">
               <span className="text-muted-foreground text-xs">Exemplos</span>
               {exemplos.map((x) => (
-                <button key={x} type="button" onClick={() => setDescricao(x)} className="bg-surface hover:bg-sunken cursor-pointer rounded-[12px] px-3 py-2 text-left text-sm transition-colors">
+                <button key={x} type="button" onClick={() => setDescricao(x)} className="bg-surface hover:bg-sunken cursor-pointer rounded-md px-3 py-2 text-left text-sm transition-colors">
                   {x}
                 </button>
               ))}
@@ -270,7 +270,7 @@ export function NovoIntegrante({ aberto, onFechar, onAtivar, criados = 0, pessoa
               <ul className="flex flex-col gap-1.5">
                 {proposta.ferramentas.map((f) => (
                   <li key={f.nome}>
-                    <label className={cn('flex items-start gap-3 rounded-[12px] px-3 py-2', f.semPermissao ? 'text-muted-foreground bg-sunken/60' : 'hover:bg-sunken cursor-pointer')}>
+                    <label className={cn('flex items-start gap-3 rounded-md px-3 py-2', f.semPermissao ? 'text-muted-foreground bg-sunken/60' : 'hover:bg-sunken cursor-pointer')}>
                       <input
                         type="checkbox"
                         className="accent-primary mt-1"
@@ -323,15 +323,15 @@ export function NovoIntegrante({ aberto, onFechar, onAtivar, criados = 0, pessoa
 
         {passo === 'revisao' && (
           <div className="flex flex-col gap-4">
-            <div className="bg-surface flex items-center gap-4 rounded-[18px] p-4">
+            <div className="bg-surface flex items-center gap-4 rounded-lg p-4">
               <Orb cor={cor} tamanho={48} />
               <div className="min-w-0">
                 <div className="font-medium">{nome}</div>
                 <div className="text-muted-foreground text-sm">{proposta.setores.join(' e ')} · {ferramentas.size} ferramentas · {proposta.gatilhos.length} gatilhos</div>
               </div>
             </div>
-            <div className="bg-sunken flex gap-3 rounded-[14px] p-3 text-sm">
-              <EyeIcon weight="duotone" className="mt-0.5 size-5 shrink-0" />
+            <div className="bg-sunken flex gap-3 rounded-md p-3 text-sm">
+              <EyeIcon className="mt-0.5 size-5 shrink-0" />
               <p>
                 <strong className="font-medium">14 dias de observação.</strong> Nesse período, tudo o que ele faria sozinho vira cartão para você aprovar. Ao fim, você decide o que ele passa a fazer sem perguntar.
               </p>

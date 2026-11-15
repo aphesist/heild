@@ -52,12 +52,12 @@ export function CabecalhoModulo({
       <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-1 md:col-start-3">
         <Tooltip conteudo="Buscar (Ctrl+K)">
           <Button variant="ghost" size="icon" className="shrink-0 rounded-full" aria-label="Buscar" onClick={() => abrirBusca()}>
-            <MagnifyingGlassIcon weight="duotone" className="size-5" />
+            <MagnifyingGlassIcon className="size-5" />
           </Button>
         </Tooltip>
         {sino ?? (
           <Button variant="ghost" size="icon" className="relative shrink-0 rounded-full" aria-label={`Notificações (${naoLidas})`}>
-            <BellIcon weight="duotone" className="size-5" />
+            <BellIcon className="size-5" />
             <Contador valor={naoLidas} className="absolute top-1 right-1" />
           </Button>
         )}

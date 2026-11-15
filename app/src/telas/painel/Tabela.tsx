@@ -7,17 +7,18 @@ import { cn } from '@/lib/utils'
 export function Tabela({ colunas, minimo = 480, children }: { colunas: { rotulo: string; direita?: boolean; centro?: boolean }[]; minimo?: number; children: ReactNode }) {
   return (
     <div data-rolagem-horizontal className="h-full overflow-x-auto">
-      <table className="w-full text-sm" style={{ minWidth: minimo }}>
-        <thead className="bg-surface sticky top-0">
+      {/* Números tabulares em toda a tabela (tipografia.md); cabeçalho no estilo rótulo (12/400), fixo ao rolar, separado das linhas pela borda. */}
+      <table className="w-full text-sm tabular-nums" style={{ minWidth: minimo }}>
+        <thead className="bg-surface sticky top-0 z-[1]">
           <tr className="text-muted-foreground text-left text-xs">
             {colunas.map((c, i) => (
-              <th key={i} className={cn('py-1 pr-2 font-medium', c.direita && 'text-right', c.centro && 'text-center')}>
+              <th key={i} scope="col" className={cn('border-border border-b pt-1 pr-2 pb-2 font-normal last:pr-0', c.direita && 'text-right', c.centro && 'text-center')}>
                 {c.rotulo}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-border/70 divide-y">{children}</tbody>
+        <tbody className="divide-border divide-y">{children}</tbody>
       </table>
     </div>
   )
@@ -59,7 +60,7 @@ export function IconeSituacao({ s, className }: { s: Situacao; className?: strin
 /** Dias até vencer: vermelho vencido, âmbar até 30 dias. */
 export function Dias({ dias }: { dias: number }) {
   return (
-    <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[11px] whitespace-nowrap tabular-nums', dias < 0 ? 'bg-destructive/12 text-destructive' : dias <= 30 ? 'bg-warning/15' : 'bg-sunken text-muted-foreground')}>
+    <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-xs whitespace-nowrap tabular-nums', dias < 0 ? 'bg-destructive/12 text-destructive' : dias <= 30 ? 'bg-warning/15' : 'bg-sunken text-muted-foreground')}>
       {dias < 0 ? `vencido há ${-dias} ${dias === -1 ? 'dia' : 'dias'}` : `${dias} dias`}
     </span>
   )

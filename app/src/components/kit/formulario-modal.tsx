@@ -87,7 +87,7 @@ export function FormularioModal<T extends Record<string, unknown>>({
   }
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className={cn('bg-surface rounded-[24px] border-0 p-5 sm:max-w-md', className)}>
+      <DialogContent className={cn('bg-surface rounded-xl border-0 p-5 sm:max-w-md', className)}>
         <DialogHeader>
           <DialogTitle className="font-medium">{titulo}</DialogTitle>
           {descricao && <DialogDescription>{descricao}</DialogDescription>}
@@ -102,7 +102,7 @@ export function FormularioModal<T extends Record<string, unknown>>({
         >
           {children}
           {erro && (
-            <p role="alert" className="bg-destructive/10 text-destructive rounded-[12px] px-3 py-2 text-sm">
+            <p role="alert" className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-sm">
               {erro}
             </p>
           )}

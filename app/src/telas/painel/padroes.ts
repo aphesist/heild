@@ -1,10 +1,12 @@
 import type { ItemGrade, TamanhoWidget } from '@/components/widgets/tipos'
 
 /**
- * Arranjo padrão de cada aba do Painel (com cliente e em carteira). Feito para
- * fechar a grade de 6 colunas sem buracos (a ordem já conta com o
- * `grid-auto-flow: dense`), na ordem de importância do setor, com tamanhos
- * que cabem o conteúdo de exemplo. Assimétrico de propósito.
+ * Arranjo padrão de cada aba do Painel (com cliente e em carteira). A ordem é a
+ * prioridade da tarefa do setor (o que pede decisão, o que se trabalha, o que
+ * se consulta) e o tamanho é o que o conteúdo e a tarefa pedem
+ * (PADRAO_DE_INTERFACE.md, 3). A altura vem do conteúdo e a grade empacota na
+ * ordem: buraco que sobrar se corrige aqui, trocando a ordem ou o tamanho,
+ * nunca esticando o widget.
  */
 const a = (lista: string): ItemGrade[] =>
   lista
@@ -30,7 +32,7 @@ export const padroes: Record<string, ItemGrade[]> = {
   'notas-carteira': a('carteira-captura:XL manifestacao:M carteira-eventos:G obrigacoes-setor:G acoes:G tarefas:XL relatorios:M'),
   'fiscal-carteira': a('carteira-fiscal:XL guias:G caixas:G obrigacoes-setor:G irpf-carteira:G pedir:M relatorios:M acoes:G tarefas:XL'),
   'dp-carteira': a('dp-visao:L obrigacoes-setor:M carteira-folha:XL carteira-rescisao:XL acoes:G tarefas:XL relatorios:G'),
-  'contabil-carteira': a('kanban:XL minha-fila:G fila-assinatura:G carteira-fechamento:XL obrigacoes-setor:G pedir:M relatorios:M acoes:G tarefas:XL'),
+  'contabil-carteira': a('kanban:XL minha-fila:G fila-assinatura:G carteira-fechamento:XL obrigacoes-setor:G relatorios:M acoes:G tarefas:XL pedir:M'),
   'consultoria-carteira': a('carteira-consultoria:XL avulsos:G pedir:G acoes:G tarefas:XL relatorios:G'),
 }
 

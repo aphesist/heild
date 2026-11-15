@@ -72,7 +72,7 @@ export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, de
     <div className={cn('flex flex-col gap-1.5', className)}>
       <div
         className={cn(
-          'bg-card flex flex-col gap-1 rounded-[22px] p-2 shadow-campo transition focus-within:ring-2 focus-within:ring-ring/40',
+          'bg-card flex flex-col gap-1 rounded-campo p-2 shadow-campo transition focus-within:ring-2 focus-within:ring-ring/40',
           ditado.ouvindo && 'ring-destructive/40 ring-2',
         )}
       >

@@ -86,7 +86,7 @@ export function Campo({ rotulo, ajuda, erro, children, className }: { rotulo: st
   )
 }
 
-const baseControle = 'bg-raised shadow-contorno placeholder:text-muted-foreground w-full rounded-[12px] px-3 text-sm outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px] disabled:opacity-50'
+const baseControle = 'bg-raised shadow-contorno placeholder:text-muted-foreground w-full rounded-md px-3 text-sm outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px] disabled:opacity-50'
 
 export function CampoTexto({
   id,

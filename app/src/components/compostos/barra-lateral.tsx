@@ -166,14 +166,14 @@ function ItemModulo({ item, ativo, aberta, onClick }: { item: ItemLateral; ativo
       aria-description={item.contador ? `${item.contador} pedindo atenção` : undefined}
       aria-current={ativo ? 'page' : undefined}
       className={cn(
-        'group relative flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-[14px] text-left transition-colors',
+        'group relative flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors',
         ativo ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
         aberta && !ativo && 'hover:bg-raised/50',
       )}
     >
       {/* Ativo: traço na borda da barra; aberta, também o fundo da linha. */}
       {ativo && <motion.span layoutId="lateral-traco" transition={mola} className="bg-foreground absolute top-2.5 -left-4 h-6 w-[3px] rounded-r-full" />}
-      {ativo && aberta && <motion.span layoutId="lateral-fundo" transition={mola} className="bg-raised absolute inset-0 rounded-[14px] shadow-cartao" />}
+      {ativo && aberta && <motion.span layoutId="lateral-fundo" transition={mola} className="bg-raised absolute inset-0 rounded-md shadow-cartao" />}
       <span className="relative flex size-11 shrink-0 items-center justify-center">
         <Icone weight={ativo ? 'fill' : 'duotone'} className="size-[26px] transition-transform group-hover:scale-105" />
         <span aria-hidden>
@@ -201,7 +201,7 @@ function ItemAcao({ aberta, rotulo, onClick, atalho, expande, children }: { aber
       onClick={onClick}
       aria-label={rotulo}
       aria-expanded={expande ? aberta : undefined}
-      className="text-muted-foreground hover:text-foreground hover:bg-raised/50 flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-[14px] text-left transition-colors"
+      className="text-muted-foreground hover:text-foreground hover:bg-raised/50 flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors"
     >
       <span className="flex size-11 shrink-0 items-center justify-center">{children}</span>
       <Rotulo aberta={aberta} className="text-xs">

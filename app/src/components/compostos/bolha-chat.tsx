@@ -46,7 +46,7 @@ export function BolhaChat({ mensagem, acoes, className }: { mensagem: Mensagem; 
             <ArrowBendDownRightIcon className="size-3" /> veio do Geral
           </span>
         )}
-        <div className="bg-secondary text-secondary-foreground max-w-[80%] rounded-[18px] rounded-br-[6px] px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">{mensagem.texto}</div>
+        <div className="bg-secondary text-secondary-foreground max-w-[80%] rounded-lg rounded-br-[6px] px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">{mensagem.texto}</div>
         {mensagem.anexos && mensagem.anexos.length > 0 && (
           <div className="flex flex-wrap justify-end gap-1.5">
             {mensagem.anexos.map((a) => (

@@ -94,6 +94,10 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.5);
   --radius-2xl: calc(var(--radius) * 2);
+  /* Raios do design system (forma.md) que não saem da escala do tema: proporcionais ao raio base (17px), para seguir a marca branca. */
+  --radius-cartao: calc(var(--radius) * 20 / 17);
+  --radius-campo: calc(var(--radius) * 24 / 17);
+  --radius-painel: calc(var(--radius) * 2);
 
   /* Sombras do sistema, na tinta do tema. */
   --shadow-contorno: 0 0 0 1px color-mix(in oklab, var(--contorno-ink) 7%, transparent);
@@ -114,6 +118,8 @@
 /* Grade de widgets: altura da célula (tamanhos são múltiplos dela). */
 :root {
   --celula-widget: 156px;
+  /* Módulo de altura da grade de widgets: 4px (espaco-1); a altura do card segue o conteúdo (PADRAO_DE_INTERFACE.md, 3). */
+  --modulo-widget: 4px;
   /* Largura máxima do conteúdo de uma tela (utilitário .pagina), a do design system (forma.md, Espaçamento): 1152px; 1600px no ultrawide. */
   --largura-pagina: 72rem;
   /* Alvo de toque mínimo (PADRAO_DE_INTERFACE.md, 8). */
@@ -230,6 +236,16 @@
     animation: none;
     mask-image: linear-gradient(to bottom, transparent 0, black var(--esmaecer-js-topo, 0px), black calc(100% - var(--esmaecer-js-fim, 0px)), transparent 100%);
   }
+}
+
+/*
+ * Faixa que rola de lado (.esmaecer-lados: abas segmentadas, kanban, atalhos):
+ * a borda esmaece 24px quando há mais conteúdo daquele lado (mascara-esmaecer
+ * do design system, gradientes.md). A página mede (src/lib/esmaecer-rolagem.ts);
+ * sem medida, nada esmaece.
+ */
+.esmaecer-lados {
+  mask-image: linear-gradient(to right, transparent 0, black var(--esmaecer-esquerda, 0px), black calc(100% - var(--esmaecer-direita, 0px)), transparent 100%);
 }
 
 @layer base {

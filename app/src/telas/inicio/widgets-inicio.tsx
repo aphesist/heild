@@ -199,9 +199,10 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
       descricao: 'Tarefas e obrigações por prazo interno, com o setor de cada uma; filtros e reprogramar',
       icone: CalendarBlankIcon,
       tamanhos: ['G', 'XL'],
-      // No XL, área de trabalho: a semana inteira na largura toda, com três células de altura.
-      larguraTotal: true,
-      linhasMinimas: 3,
+      // No XL, a semana: sete dias de no mínimo 9rem pedem ~66rem (largura inteira até 1152px; no ultrawide sobra lugar ao lado).
+      // A altura segue o dia mais cheio, até três células; passou disso, os dias rolam por dentro.
+      larguraMinima: 66,
+      linhasMaximas: 3,
       acao: <LinkWidget destino={{ modulo: 'painel', aba: 'obrigacoes' }}>Abrir</LinkWidget>,
       conteudo: (t) => (
         <div className="flex h-full min-h-0 flex-col gap-2">

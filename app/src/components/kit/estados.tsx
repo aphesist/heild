@@ -14,11 +14,11 @@ export function EstadoVazio({ icone: Icone, titulo, descricao, acao, className, 
     <div role="status" data-estado-vazio className={cn('flex flex-col items-center justify-center gap-2 text-center', compacto ? 'px-4 py-6' : 'px-6 py-12', className)}>
       {Icone && (
         <span className="bg-sunken text-muted-foreground flex size-11 items-center justify-center rounded-full">
-          <Icone className="size-5" weight="duotone" />
+          <Icone className="size-5" aria-hidden />
         </span>
       )}
-      <p className="text-sm font-medium">{titulo}</p>
-      {descricao && <p className="text-muted-foreground max-w-sm text-sm">{descricao}</p>}
+      <p className="text-sm font-medium text-balance">{titulo}</p>
+      {descricao && <p className="text-muted-foreground max-w-sm text-sm text-pretty">{descricao}</p>}
       {acao && <div className="mt-2">{acao}</div>}
     </div>
   )
@@ -29,13 +29,13 @@ export function Carregando({ rotulo = 'Carregando', linhas, className }: { rotul
     return (
       <div role="status" aria-label={rotulo} className={cn('flex flex-col gap-2', className)}>
         {Array.from({ length: linhas }, (_, i) => (
-          <div key={i} className="bg-sunken h-12 animate-pulse rounded-[14px]" style={{ animationDelay: `${i * 90}ms` }} />
+          <div key={i} className="bg-sunken h-12 animate-pulse rounded-md motion-reduce:animate-none" style={{ animationDelay: `${i * 90}ms` }} />
         ))}
       </div>
     )
   return (
     <div role="status" className={cn('text-muted-foreground flex items-center justify-center gap-2 px-6 py-12 text-sm', className)}>
-      <CircleNotchIcon className="size-4 animate-spin" /> {rotulo}…
+      <CircleNotchIcon className="size-4 animate-spin motion-reduce:animate-none" aria-hidden /> {rotulo}…
     </div>
   )
 }
@@ -44,10 +44,10 @@ export function EstadoErro({ titulo = 'Não deu certo', descricao, onTentar, cla
   return (
     <div role="alert" className={cn('flex flex-col items-center justify-center gap-2 px-6 py-12 text-center', className)}>
       <span className="bg-destructive/15 text-destructive flex size-11 items-center justify-center rounded-full">
-        <WarningCircleIcon className="size-5" weight="duotone" />
+        <WarningCircleIcon className="size-5" aria-hidden />
       </span>
-      <p className="text-sm font-medium">{titulo}</p>
-      {descricao && <p className="text-muted-foreground max-w-sm text-sm">{descricao}</p>}
+      <p className="text-sm font-medium text-balance">{titulo}</p>
+      {descricao && <p className="text-muted-foreground max-w-sm text-sm text-pretty">{descricao}</p>}
       {onTentar && (
         <Button variant="outline" size="sm" className="mt-2 rounded-full" onClick={onTentar}>
           <ArrowClockwiseIcon /> Tentar de novo

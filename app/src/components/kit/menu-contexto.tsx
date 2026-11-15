@@ -27,7 +27,7 @@ export interface AcaoMenu {
 }
 
 const classeItem = 'data-[highlighted]:bg-accent flex w-full cursor-pointer items-start gap-2.5 rounded-md px-3 py-2 text-left text-sm outline-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 [&_svg]:mt-0.5 [&_svg]:size-4'
-const classeConteudo = 'bg-popover text-popover-foreground shadow-campo z-50 min-w-52 rounded-[14px] p-1'
+const classeConteudo = 'bg-popover text-popover-foreground shadow-campo z-50 min-w-52 rounded-md p-1'
 
 function Itens({ acoes, Item, Separador }: { acoes: AcaoMenu[]; Item: typeof ContextMenu.Item | typeof DropdownMenu.Item; Separador: typeof ContextMenu.Separator | typeof DropdownMenu.Separator }) {
   return (

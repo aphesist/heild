@@ -37,7 +37,7 @@ export function CartaoRespostaLegal({ resposta: r, className }: { resposta: Resp
       <Secao titulo="Trechos citados" icone={<SealCheckIcon />}>
         <div className="flex flex-col gap-2">
           {r.trechos.map((t) => (
-            <figure key={t.id} className="bg-sunken flex flex-col gap-1.5 rounded-[12px] px-3 py-2.5">
+            <figure key={t.id} className="bg-sunken flex flex-col gap-1.5 rounded-md px-3 py-2.5">
               <figcaption className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <strong className="font-medium">{t.norma}</strong>
                 <span className="text-muted-foreground text-xs">
@@ -56,7 +56,7 @@ export function CartaoRespostaLegal({ resposta: r, className }: { resposta: Resp
 
       {r.calculo && (
         <Secao titulo="Cálculo" icone={<CalculatorIcon />}>
-          <div className="bg-sunken flex flex-col gap-2 rounded-[12px] px-3 py-2.5">
+          <div className="bg-sunken flex flex-col gap-2 rounded-md px-3 py-2.5">
             <div className="flex flex-wrap items-baseline justify-between gap-x-3">
               <span className="text-muted-foreground text-xs">{r.calculo.titulo}</span>
               <strong className="text-base font-semibold tabular-nums">{r.calculo.resultado}</strong>

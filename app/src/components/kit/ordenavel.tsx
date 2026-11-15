@@ -98,7 +98,8 @@ function Coluna({ coluna, ids, contagem, children }: { coluna: ColunaQuadro; ids
   return (
     // Coluna utilizável (PADRAO_DE_INTERFACE.md, 3): no celular, 85% da largura com encaixe (a próxima aparece na borda);
     // do tablet em diante, as colunas dividem a largura, com no mínimo 15rem, e a lista rola por dentro quando a altura é limitada.
-    <section aria-label={coluna.titulo} className={cn('bg-sunken/60 flex min-h-0 w-[85%] max-w-80 shrink-0 snap-start flex-col gap-2 rounded-[20px] p-2 transition-colors sm:w-auto sm:max-w-none sm:min-w-60 sm:flex-1 sm:basis-0', isOver && 'bg-sunken')}>
+    // A coluna tem a altura do que carrega (até a do quadro): etapa com um cartão não vira um poço vazio.
+    <section aria-label={coluna.titulo} className={cn('bg-sunken/60 flex max-h-full min-h-0 w-[85%] max-w-80 shrink-0 snap-start flex-col gap-2 self-start rounded-lg p-2 transition-colors duration-200 sm:w-auto sm:max-w-none sm:min-w-60 sm:flex-1 sm:basis-0', isOver && 'bg-sunken')}>
       <header className="flex items-center gap-2 px-2 pt-1">
         <h3 className="min-w-0 truncate text-sm font-medium" title={coluna.titulo}>{coluna.titulo}</h3>
         <span className="text-muted-foreground ml-auto text-xs tabular-nums">{contagem}</span>
@@ -106,6 +107,11 @@ function Coluna({ coluna, ids, contagem, children }: { coluna: ColunaQuadro; ids
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <ul ref={setNodeRef} className="flex min-h-16 flex-1 flex-col gap-1.5 overflow-y-auto">
           {children}
+          {contagem === 0 && (
+            <li data-estado-vazio className="text-muted-foreground flex min-h-16 flex-1 items-center justify-center rounded-md border border-dashed px-3 text-center text-xs">
+              {coluna.bloqueada ? 'Nada nesta etapa' : 'Nada nesta etapa · arraste para cá'}
+            </li>
+          )}
         </ul>
       </SortableContext>
     </section>
@@ -115,7 +121,7 @@ function Coluna({ coluna, ids, contagem, children }: { coluna: ColunaQuadro; ids
 function CartaoQuadro({ id, rotulo, desabilitado, children }: { id: string; rotulo: string; desabilitado?: boolean; children: ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: desabilitado })
   return (
-    <li ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }} className={cn('bg-raised shadow-cartao flex items-start gap-1 rounded-[14px] p-2', isDragging && 'opacity-40')}>
+    <li ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }} className={cn('bg-raised shadow-cartao flex items-start gap-1 rounded-md p-2', isDragging && 'opacity-40')}>
       {!desabilitado && <Alca rotulo={rotulo} {...attributes} {...listeners} />}
       <div className="min-w-0 flex-1">{children}</div>
     </li>
@@ -180,7 +186,7 @@ export function Quadro<T>({
   const ativo = arraste ? porId.get(arraste.id) : undefined
   return (
     <DndContext sensors={sensores} collisionDetection={closestCorners} onDragStart={inicio} onDragOver={sobre} onDragEnd={fim} onDragCancel={() => setArraste(null)} accessibility={{ announcements: anuncios }}>
-      <div data-rolagem-horizontal className={cn('flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 sm:snap-proximity', className)}>
+      <div data-rolagem-horizontal className={cn('esmaecer-lados flex min-h-0 flex-1 snap-x snap-mandatory items-start gap-3 overflow-x-auto overscroll-x-contain pb-2 sm:snap-proximity', className)}>
         {colunas.map((c) => {
           const daColuna = itens.filter((i) => colunaAtual(i) === c.id)
           return (
@@ -194,7 +200,7 @@ export function Quadro<T>({
           )
         })}
       </div>
-      <DragOverlay>{ativo ? <div className="bg-raised shadow-lg w-68 rounded-[14px] p-2 pl-8">{render(ativo)}</div> : null}</DragOverlay>
+      <DragOverlay>{ativo ? <div className="bg-raised shadow-lg w-68 rounded-md p-2 pl-8">{render(ativo)}</div> : null}</DragOverlay>
     </DndContext>
   )
 }

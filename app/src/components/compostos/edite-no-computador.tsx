@@ -15,8 +15,8 @@ export function useCelular() {
 
 export function AvisoEditeNoComputador({ className, texto }: { className?: string; texto?: string }) {
   return (
-    <div role="note" className={cn('bg-sunken flex items-start gap-3 rounded-[16px] px-4 py-3 text-sm', className)}>
-      <DesktopIcon className="text-muted-foreground mt-0.5 size-5 shrink-0" weight="duotone" />
+    <div role="note" className={cn('bg-sunken flex items-start gap-3 rounded-lg px-4 py-3 text-sm', className)}>
+      <DesktopIcon className="text-muted-foreground mt-0.5 size-5 shrink-0" />
       <p>
         <strong className="font-medium">Edite no computador.</strong> {texto ?? 'No celular esta tela é só leitura: dá para conferir, não para mudar.'}
       </p>

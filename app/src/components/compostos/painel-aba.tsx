@@ -70,7 +70,7 @@ export function CabecalhoAba({
           {cliente ? (
             <dl className="mt-3 flex flex-wrap gap-2">
               {perfil.map((c) => (
-                <div key={c.rotulo} className={cn('bg-surface shadow-contorno rounded-[14px] px-3 py-2', c.alerta && 'ring-warning/50 ring-1')}>
+                <div key={c.rotulo} className={cn('bg-surface shadow-contorno rounded-md px-3 py-2', c.alerta && 'ring-warning/50 ring-1')}>
                   <dt className="text-muted-foreground text-[11px]">{c.rotulo}</dt>
                   <dd className="flex items-center gap-1 text-sm font-medium">
                     {c.alerta && <WarningIcon weight="fill" className="text-warning size-3.5" aria-label="atenção" />}
@@ -92,7 +92,7 @@ export function CabecalhoAba({
           )}
         </div>
         {t && integrante && (
-          <div className="bg-surface shadow-cartao flex min-h-19 w-full items-center gap-3 rounded-[20px] p-3 lg:w-80">
+          <div className="bg-surface shadow-cartao flex min-h-19 w-full items-center gap-3 rounded-cartao p-3 lg:w-80">
             <Orb cor={t.cor} corOlhos={t.corOlhos} estado={integrante.estado} tamanho={40} animado modo="wander" cutucavel={false} />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium">{t.nome}</div>
@@ -107,7 +107,7 @@ export function CabecalhoAba({
       {historico && <HistoricoPerfil clienteId={clienteId} titulo={titulo} onFechar={() => setHistorico(false)} />}
       {extra && <div className="flex flex-wrap items-center gap-2">{extra}</div>}
       {faixa && (
-        <div className="bg-warning/10 flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+        <div className="bg-warning/10 flex items-center gap-2 rounded-md px-3 py-2 text-sm">
           <WarningIcon className="text-warning size-4 shrink-0" /> {faixa}
         </div>
       )}
@@ -253,7 +253,7 @@ export function AcoesAba({ itens, carteira }: { itens: AcaoCfg[]; carteira?: num
                 </span>
               </Tooltip>
             ) : (
-              <Button key={a.rotulo} size="sm" variant={a.nivel === 'preparar' ? 'outline' : 'secondary'} className="h-auto flex-col items-start gap-0 rounded-[14px] py-1.5 text-left" onClick={() => executar(a)}>
+              <Button key={a.rotulo} size="sm" variant={a.nivel === 'preparar' ? 'outline' : 'secondary'} className="h-auto flex-col items-start gap-0 rounded-md py-1.5 text-left" onClick={() => executar(a)}>
                 <span className="flex items-center gap-1.5 text-[13px]">
                   {iconeNivel[a.nivel]} {a.rotulo}
                   {carteira ? <span className="text-muted-foreground">· {carteira} clientes</span> : null}
@@ -302,7 +302,7 @@ export function RelatoriosAba({ itens, compacto }: { itens: string[]; compacto?:
       <ul className="-mx-2 flex flex-col">
         {gaveta}
         {itens.slice(0, 3).map((r) => (
-          <li key={r} className="hover:bg-sunken flex h-7 items-center gap-1 rounded-[10px] px-2 text-sm">
+          <li key={r} className="hover:bg-sunken flex h-7 items-center gap-1 rounded-sm px-2 text-sm">
             <span className="min-w-0 flex-1 truncate">{r}</span>
             <Button size="icon-sm" variant="ghost" className="size-6" aria-label={`Exportar ${r}`} onClick={() => fluxos.baixar(`${r}.csv`)}>
               <DownloadSimpleIcon />
@@ -318,7 +318,7 @@ export function RelatoriosAba({ itens, compacto }: { itens: string[]; compacto?:
     <ul className="flex flex-col gap-1">
       {gaveta}
       {itens.map((r) => (
-        <li key={r} className="hover:bg-sunken flex items-center gap-2 rounded-[12px] px-2 py-1.5 text-sm">
+        <li key={r} className="hover:bg-sunken flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
           <span className="flex-1">{r}</span>
           <Tooltip conteudo="Exportar CSV ou PDF">
             <Button size="icon-sm" variant="ghost" aria-label={`Exportar ${r}`} onClick={() => fluxos.baixar(`${r}.csv`)}>

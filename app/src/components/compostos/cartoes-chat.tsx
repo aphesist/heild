@@ -194,8 +194,8 @@ export function CartaoDocumento({ cartao, onAbrir, onBaixar, onVer, className }:
   const Icone = cartao.especie === 'guia' ? ReceiptIcon : FileTextIcon
   return (
     <div className={cn(casca, 'flex-row flex-wrap items-center gap-4', className)}>
-      <span className="bg-sunken flex size-11 shrink-0 items-center justify-center rounded-[14px]">
-        <Icone weight="duotone" className="text-muted-foreground size-6" />
+      <span className="bg-sunken flex size-11 shrink-0 items-center justify-center rounded-md">
+        <Icone className="text-muted-foreground size-6" />
       </span>
       <div className="min-w-0 flex-1 basis-40">
         {onVer ? (
@@ -240,8 +240,8 @@ export function CartaoConversaCrm({ cartao, onAbrir, className }: { cartao: Por<
   return (
     <div className={cn(casca, className)}>
       <div className="flex items-start gap-3">
-        <span className="bg-sunken flex size-11 shrink-0 items-center justify-center rounded-[14px]">
-          <ChatCircleTextIcon weight="duotone" className="text-muted-foreground size-6" />
+        <span className="bg-sunken flex size-11 shrink-0 items-center justify-center rounded-md">
+          <ChatCircleTextIcon className="text-muted-foreground size-6" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -251,7 +251,7 @@ export function CartaoConversaCrm({ cartao, onAbrir, className }: { cartao: Por<
           <div className="text-muted-foreground text-xs">
             {cartao.cliente} · {cartao.canal}
           </div>
-          <p className="bg-sunken mt-2 rounded-[12px] px-3 py-2 text-sm">“{cartao.ultima}”</p>
+          <p className="bg-sunken mt-2 rounded-md px-3 py-2 text-sm">“{cartao.ultima}”</p>
         </div>
       </div>
       {onAbrir && (
@@ -274,7 +274,7 @@ export function CartaoPassagem({ cartao, onAbrir, className }: { cartao: Por<'pa
   const de = integrante(cartao.de.setor)
   const para = integrante(cartao.para.setor)
   return (
-    <div className={cn('bg-surface flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[18px] px-4 py-3 text-sm shadow-contorno', className)}>
+    <div className={cn('bg-surface flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg px-4 py-3 text-sm shadow-contorno', className)}>
       <ArrowsLeftRightIcon className="text-muted-foreground size-4 shrink-0" />
       <span className="flex items-center gap-1.5">
         <Orb cor={de.cor} corOlhos={de.corOlhos} tamanho={18} extras={false} cutucavel={false} />
@@ -304,7 +304,7 @@ export function CartaoRetorno({ cartao, className }: { cartao: Por<'retorno'>; c
   const de = integrante(cartao.de)
   const geral = integrante('geral')
   return (
-    <div className={cn('bg-sunken flex flex-col gap-1.5 rounded-[16px] px-4 py-3 text-sm', className)}>
+    <div className={cn('bg-sunken flex flex-col gap-1.5 rounded-lg px-4 py-3 text-sm', className)}>
       <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
         <ArrowBendDownRightIcon className="size-3.5 -scale-x-100" />
         {de.nome} devolveu ao {geral.nome}

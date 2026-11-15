@@ -51,7 +51,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
     const o = outros.filter(casa)
     return (
       <div className={cn('from-sunken to-sunken-end flex flex-col gap-3 bg-gradient-to-b p-4 xl:p-5', className)}>
-        <label className="bg-raised/80 focus-within:bg-raised shadow-contorno flex h-12 shrink-0 items-center gap-3 rounded-[17px] px-3">
+        <label className="bg-raised/80 focus-within:bg-raised shadow-contorno flex h-12 shrink-0 items-center gap-3 rounded-lg px-3">
           <MagnifyingGlassIcon className="text-foreground/70 size-5" />
           <input
             value={busca}
@@ -71,7 +71,7 @@ export function ListaIntegrantes({ integrantes, selecionado, onSelecionar, onCri
           {f.length + o.length === 0 && <p className="text-foreground/70 px-2 py-6 text-center text-sm">Nenhum integrante encontrado</p>}
         </div>
         {onCriar && (
-          <button type="button" onClick={onCriar} className="text-foreground/70 hover:text-foreground hover:bg-raised/50 flex shrink-0 cursor-pointer items-center gap-3 rounded-[20px] px-2 py-2 text-left text-sm transition-colors">
+          <button type="button" onClick={onCriar} className="text-foreground/70 hover:text-foreground hover:bg-raised/50 flex shrink-0 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-sm transition-colors">
             <span className="border-foreground/30 flex size-12 shrink-0 items-center justify-center rounded-full border border-dashed">
               <PlusIcon className="size-5" />
             </span>
@@ -163,7 +163,7 @@ function ItemColuna({ it, ativo, onClick }: { it: Integrante; ativo: boolean; on
       type="button"
       aria-current={ativo || undefined}
       onClick={onClick}
-      className={cn('flex shrink-0 cursor-pointer items-center gap-3 rounded-[20px] px-2 py-2 text-left transition-colors', ativo ? 'bg-raised shadow-sm' : 'hover:bg-raised/50')}
+      className={cn('flex shrink-0 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors', ativo ? 'bg-raised shadow-sm' : 'hover:bg-raised/50')}
     >
       <span className={cn('relative', pausado && 'opacity-50 grayscale')}>
         <Orb cor={t.cor} corOlhos={t.corOlhos} estado={pausado ? 'dormindo' : it.estado} tamanho={48} cutucavel={false} animado modo="wander" espelho={{ id: it.id, papel: 'lateral' }} />
@@ -173,7 +173,7 @@ function ItemColuna({ it, ativo, onClick }: { it: Integrante; ativo: boolean; on
         <span className="flex items-center gap-1.5">
           <span className="truncate text-[15px] font-medium">{t.nome}</span>
           {pausado && <PauseIcon weight="fill" className="text-muted-foreground size-3.5 shrink-0" aria-label="pausado" />}
-          {it.emObservacao && <EyeIcon weight="duotone" className="text-muted-foreground size-3.5 shrink-0" aria-label="em observação" />}
+          {it.emObservacao && <EyeIcon className="text-muted-foreground size-3.5 shrink-0" aria-label="em observação" />}
         </span>
         <span className="text-foreground/60 block truncate text-xs">{it.setorRotulo}</span>
         <span className={cn('block truncate text-xs', it.estado === 'precisa_de_voce' && !pausado ? 'text-foreground font-medium' : 'text-foreground/75')}>

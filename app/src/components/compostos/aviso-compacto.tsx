@@ -17,7 +17,7 @@ export function AvisoCompacto({ aviso, onAbrir, className }: { aviso: Aviso; onA
       type="button"
       onClick={onAbrir}
       className={cn(
-        'bg-surface hover:bg-raised flex w-full cursor-pointer items-center gap-3 rounded-[18px] px-3 py-2.5 text-left shadow-contorno transition-colors',
+        'bg-surface hover:bg-raised flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left shadow-contorno transition-colors',
         className,
       )}
     >
