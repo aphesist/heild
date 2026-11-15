@@ -39,7 +39,7 @@ export type Envelope =
   | { resultado: 'erro'; codigo: string; campo: string | null; mensagem: string; acao_sugerida: unknown; erros?: { campo: string; mensagem: string }[] }
 
 export function definirFerramenta<E extends z.ZodObject>(d: DefinicaoFerramenta<E>): DefinicaoFerramenta<E> {
-  const js = z.toJSONSchema(d.entrada) as { additionalProperties?: unknown }
+  const js = z.toJSONSchema(d.entrada, { io: 'input' }) as { additionalProperties?: unknown }
   if (js.additionalProperties !== false) throw new Error(`${d.nome}: esquema de entrada precisa ser estrito (AGENTICO 3, regra 2).`)
   return d
 }

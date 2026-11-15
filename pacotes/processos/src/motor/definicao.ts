@@ -220,6 +220,6 @@ export function descreverPassos(passos: Passo[]) {
 }
 
 function isStrict(o: z.ZodObject) {
-  const js = z.toJSONSchema(o) as { additionalProperties?: unknown }
+  const js = z.toJSONSchema(o, { io: 'input' }) as { additionalProperties?: unknown }
   return js.additionalProperties === false
 }

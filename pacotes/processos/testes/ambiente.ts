@@ -25,17 +25,18 @@ export class ConectorSpedSimulado implements Conector {
   recusar: string | null = null
   atraso_ms = 0
 
-  async executar(_metodo: string, argumentos: Record<string, unknown>, o: { chave: string }) {
+  async executar(_metodo: string, argumentos: Record<string, unknown>, o: { chave: string; escritorio_id: string }) {
+    const chave = `${o.escritorio_id}|${o.chave}`
     if (this.atraso_ms) await new Promise((r) => setTimeout(r, this.atraso_ms))
     if (this.recusar) throw new ErroRegra('RECUSADO_PELO_ORGAO', this.recusar)
     if (this.falharAntesDeEnviar > 0) {
       this.falharAntesDeEnviar--
       throw new Error('Conexão recusada pelo órgão (simulado).')
     }
-    if (this.recebidos.has(o.chave)) throw new Error(`DUPLICADO no órgão: ${o.chave}`)
+    if (this.recebidos.has(chave)) throw new Error(`DUPLICADO no órgão: ${chave}`)
     this.envios++
-    const recibo = `REC-${createHash('sha1').update(o.chave).digest('hex').slice(0, 10).toUpperCase()}`
-    this.recebidos.set(o.chave, { recibo, argumentos })
+    const recibo = `REC-${createHash('sha1').update(chave).digest('hex').slice(0, 10).toUpperCase()}`
+    this.recebidos.set(chave, { recibo, argumentos })
     if (this.falharDepoisDeEnviar > 0) {
       this.falharDepoisDeEnviar--
       throw new Error('Tempo esgotado esperando o recibo (simulado: o envio chegou).')
@@ -43,9 +44,9 @@ export class ConectorSpedSimulado implements Conector {
     return { recibo }
   }
 
-  async consultar(_metodo: string, chave: string) {
+  async consultar(_metodo: string, chave: string, o: { escritorio_id: string }) {
     this.consultas++
-    const r = this.recebidos.get(chave)
+    const r = this.recebidos.get(`${o.escritorio_id}|${chave}`)
     return r ? { recibo: r.recibo } : null
   }
 }

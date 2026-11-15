@@ -23,7 +23,7 @@ export interface Contrato<R extends z.ZodObject = z.ZodObject, D extends z.ZodOb
 
 export function definirContrato<R extends z.ZodObject, D extends z.ZodObject>(c: Contrato<R, D>): Contrato<R, D> {
   for (const [nome, o] of [['recebe', c.recebe], ['devolve', c.devolve]] as const) {
-    const js = z.toJSONSchema(o) as { additionalProperties?: unknown }
+    const js = z.toJSONSchema(o, { io: 'input' }) as { additionalProperties?: unknown }
     if (js.additionalProperties !== false) throw new Error(`Contrato ${c.id}: '${nome}' precisa ser estrito`)
   }
   return c

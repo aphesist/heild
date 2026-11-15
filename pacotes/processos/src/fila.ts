@@ -41,12 +41,13 @@ export async function criarBoss(url: string, opcoes: { supervisaoSegundos?: numb
 
 export async function criarFilas(boss: PgBoss, o: OpcoesFila = {}) {
   const expira = o.expiraPassoSegundos ?? 15 * 60
-  const retry = { retryLimit: o.tentativas ?? 4, retryDelay: o.esperaInicialSegundos ?? 5, retryBackoff: true }
+  // `notify`: o job criado acorda os workers por LISTEN/NOTIFY (entregue no commit da transação do efeito).
+  const retry = { retryLimit: o.tentativas ?? 4, retryDelay: o.esperaInicialSegundos ?? 5, retryBackoff: true, notify: true }
   const filas: [string, Record<string, unknown>][] = [
     [FILAS.falha, { expireInSeconds: 60 }],
     [FILAS.passo, { expireInSeconds: expira, deadLetter: FILAS.falha, ...retry }],
     [FILAS.operario, { expireInSeconds: expira, deadLetter: FILAS.falha, ...retry }],
-    [FILAS.admitir, { expireInSeconds: 60, retryLimit: 10, retryDelay: 1 }],
+    [FILAS.admitir, { expireInSeconds: 60, retryLimit: 10, retryDelay: 1, notify: true }],
     [FILAS.despachar, { expireInSeconds: 120, ...retry }],
     [FILAS.expirarCartao, { expireInSeconds: 60, retryLimit: 5 }],
   ]
