@@ -1029,9 +1029,9 @@ Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), um por vez, com a sem
 | `s07-financeiro` | 72 ok | **72 ok** | |
 | `s08-bpo` | 49 ok, 2 falhas | **51 ok** | |
 | `s08a-bpo-visao` | 76 ok | **76 ok** | |
-| `s08b-operacao` | 39 ok, 2 falhas | 39 ok, 2 falhas | **As mesmas duas da B1, com a mesma causa, aceita pelo desenho.** `bpo.relatorio_mensal` exige aprovação se for integrante: o servidor devolve o cartão (202) em vez de gravar o rascunho, e o passo "o Gestor aprova o rascunho" não acha rascunho. A outra é o rótulo do integrante ("Contas a Pagar", o oficial do servidor, contra o "(integrante)" que a tela montava). Muda quando o cartão do executor rodar o comando aprovado (ver "O que falta") |
+| `s08b-operacao` | 39 ok, 2 falhas | **63 ok, 0 falhas** (decisão a) | Fechado. Aprovar o cartão do integrante executa o comando guardado (o rascunho do Gerencial nasce na aprovação), e o integrante leva o sufixo "(integrante)" nos textos. No modo `api`, quem pode aprovar decide pela API, porque a central de cartões do executor é tela do Painel |
 | `s08c-aprovacoes` | 36 ok, 1 falha | **37 ok** | |
-| `s09-arquivos-config` | 47 ok, 1 falha | 47 ok, 1 falha | **A mesma da B1, aceita pelo desenho:** a pessoa convidada (situação "convidado") aceita o convite e a tela grava em nome dela; a API não entra com conta inativa. No produto, aceitar o convite é o fluxo do Supabase Auth, que cria o login e a linha de `conta_auth` |
+| `s09-arquivos-config` | 47 ok, 1 falha | **48 ok, 0 falhas** (decisão b) | Fechado. Tocar na conta convidada faz as vezes do link do convite: a tela chama `POST /v1/auth/demonstracao/primeiro-acesso`, o servidor ativa a conta e devolve o token dela |
 | `s10-app-cliente` | 41 ok | **41 ok** | |
 
 **Depois da integração no `backend` (33761ed, com a triagem v2 do #36):** typecheck e lint sem aviso, retrato dos contratos em dia, 124 + 38 + 62 testes, a fumaça (26 ok) e os scripts como na tabela. O s10 falhou uma vez em três no A43 por tempo do script: o Pix simulado responde em 600 a 1400 ms, e o script esperava 1200 ms fixos. Agora ele espera o código aparecer, e passou três vezes seguidas.
@@ -1124,6 +1124,8 @@ Depois, pela API de gestão ou no painel:
 
 Transmitidas pela coordenação depois da E1. Branch `be5h-decisoes`, migração `20261118090000_b5_decisoes.sql` (por cima das outras; não vai para o HEILD-PROD).
 
+Conferência: testes do servidor 146, da B2 38 e da B3 78; contratos em dia. Scripts no modo `api`, com a API desta versão: s01, s02, s03, s04, s05, s06, s07, s08, s08a, s08b, s08c, s09 e s10 passam inteiros (s08b e s09 fecharam aqui).
+
 **a) Aprovar um cartão executa a ação guardada** (encaixe 4 da B1; fecha o s08b). `servidor/src/executor/aprovacao.ts`.
 
 - O cartão que o executor cria quando um integrante pede algo que exige aprovação guarda:
@@ -1144,7 +1146,10 @@ Transmitidas pela coordenação depois da E1. Branch `be5h-decisoes`, migração
   - O cartão fica `editado_e_aprovado` e grava `argumentos_editados`; o evento da decisão traz `argumentos_resumo.diferenca` (`{campo: {de, para}}`) e o texto "aprovou com alterações (campos)".
 - Os cartões de execução e de memória da B2 seguem com o motor, que já aceitava `argumentos_editados`. Acordar o integrante na recusa e na edição (gatilho 18) e o aprendizado do comentário são da B3, combinados pela coordenação.
 - No servidor, o nome do integrante leva o sufixo " (integrante)", como no wireframe e na semente (era a outra falha do s08b).
-- Testes: `aprovacao-executor.test.ts` (8): executa uma vez, duplo clique, recusa, quem não está em `pode_aprovar`, edição com diferença, campo que o integrante não mandou, estado mudado (409 com cartão novo) e hash adulterado.
+- O evento da decisão sai com o nome `aprovacao.decidir` (o mesmo do motor), `aprovacao_id` e `resultado_ref` apontando o cartão e `argumentos_resumo.diferenca`: é o que o gatilho 18 da B3 lê (PR #51) para acordar o integrante e transformar o comentário em proposta de memória.
+- Testes:
+  - `aprovacao-executor.test.ts` (8): executa uma vez, duplo clique, recusa, quem não está em `pode_aprovar`, edição com diferença, campo que o integrante não mandou, estado mudado (409 com cartão novo) e hash adulterado;
+  - `decisoes-ponta-a-ponta.test.ts` (2), com o worker da B2 e a extensão da B3: o integrante pede, a pessoa edita e aprova, a mensagem sai com a alteração, o integrante é acordado com a diferença e o comentário vira proposta de memória; e a recusa acorda o integrante sem executar nada.
 
 **b) Contas da equipe, dois caminhos** (fecha o s09). `servidor/src/auth/contas.ts`.
 
