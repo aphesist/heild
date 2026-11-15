@@ -877,7 +877,7 @@ npm run contratos:conferir  # o retrato de servidor/contratos está em dia (o CI
 
 Os testes antigos que mandavam operação genérica de tabela da F1 por `/v1/operacoes` passaram a usar a ferramenta tipada (é o comportamento novo, de propósito), e o `isolamento.test.ts` ganhou a Data API fechada no banco.
 
-**Resultado (15/11/2026):** 124 testes da API (B1 e B5) verdes em três rodadas seguidas, contra o Postgres local com RLS; 38 da B2 e 46 da B3, sem mudança nelas. Typecheck e lint sem aviso (o `npm run lint` passou a cobrir também `servidor/`, `pacotes/dominio` e o que a B5 escreveu no app, com `--deny-warnings`).
+**Resultado (15/11/2026):** 124 testes da API (B1 e B5) verdes em três rodadas seguidas, contra o Postgres local com RLS; 38 da B2 e 62 da B3 (depois do merge da B3b), sem mudança nelas. Typecheck e lint sem aviso (o `npm run lint` passou a cobrir também `servidor/`, `pacotes/dominio` e o que a B5 escreveu no app, com `--deny-warnings`).
 
 **Planos das consultas novas** (`EXPLAIN ANALYZE` com a semente): a ficha de um registro (`evento.listar` por `resultado_ref`) usa `evento_por_ref`; a cauda do SSE são duas buscas, pela chave `(escritorio_id, versao)` e por `mudanca_recentes`; as listas de mensagem interna por conversa e de tarefa por setor têm índice próprio (com a semente, pequena, o Postgres ainda prefere a varredura). O `sincronizar` lê por tabela, com a janela da classe 2 no SQL.
 
