@@ -642,6 +642,16 @@ HEILD_IA_FORNECEDOR=anthropic HEILD_DOLAR_REAIS=5.40 HEILD_TETO_USD=3 HEILD_AVAL
 | `avaliacao.test.ts` (6) | O gabarito inteiro em sombra sem nenhum efeito (nenhum cartão, documento, envio ao órgão nem evento de efeito); um operário que erra aparece como erro crítico e fora da margem; a sombra do dia a dia contra a decisão da pessoa; o portão do Haiku bloqueando e liberando, e devolvendo a configuração ao estado anterior |
 | `servidor/test/b3-assistente.test.ts` (3) | O mesmo ponta a ponta **pela API da B1**, com o worker dos integrantes ao lado e a cadeia conferindo no fim |
 
+### Avaliação real (15/11/2026, autorizada pelo dono)
+
+108 execuções em sombra com o Claude (`claude-sonnet-5-5` como operário e escritor), mais o portão do Haiku e o roteamento:
+
+- **98,1% de acerto e zero erro crítico** nos cinco setores; os casos em que o certo é não decidir pararam no cartão todas as vezes;
+- roteamento: 11 de 11, com 7 decididos por regra, 3 pelo Haiku e 1 virando pergunta à pessoa;
+- portão do Haiku: os oito contratos liberados neste gabarito (a configuração **não** foi trocada; ver o relatório);
+- custo da sessão: R$ 1,80 (≈ US$ 0,33), com débito em frações de centavo;
+- resumo e as decisões para a frente de IA em [`relatorios/integrantes-2026-11-15-real.md`](relatorios/integrantes-2026-11-15-real.md).
+
 ### Onde mora cada coisa
 
 ```

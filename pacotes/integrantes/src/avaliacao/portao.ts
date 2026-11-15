@@ -15,6 +15,15 @@ export interface DecisaoPortao {
   acerto_haiku: number
   erro_critico_haiku: number
   casos_piores: string[]
+  /**
+   * Quantas execuções escalaram ao escritor e quanto custaram, de cada lado. A escalada não esconde
+   * erro (erro com confiança alta passa nos validadores e conta como erro crítico), mas tira a
+   * economia: um Haiku que escala muito mais que o Sonnet não compensa.
+   */
+  escaladas_sonnet: number
+  escaladas_haiku: number
+  centavos_sonnet: number
+  centavos_haiku: number
   /** O que entra em `ConfigModelos.porContrato` quando liberado. */
   configuracao: Record<string, { operario: string }> | null
 }
@@ -37,7 +46,12 @@ export function decidirPortaoHaiku(contrato: string, sonnet: LinhaAvaliacao[], h
         : piores.length
           ? `Haiku errou onde o Sonnet acertou: ${[...new Set(piores)].join(', ')}.`
           : 'Sem casos para comparar.'
-  return { contrato, liberado, motivo, acerto_sonnet, acerto_haiku, erro_critico_haiku, casos_piores: [...new Set(piores)], configuracao: liberado ? { [contrato]: { operario: modeloHaiku } } : null }
+  const escaladas = (ls: LinhaAvaliacao[]) => ls.filter((l) => (l.chamadas ?? []).some((c) => c.classe !== 'operario')).length
+  const custo = (ls: LinhaAvaliacao[]) => Math.round(ls.reduce((a, l) => a + (l.centavos ?? 0), 0) * 10_000) / 10_000
+  return {
+    contrato, liberado, motivo, acerto_sonnet, acerto_haiku, erro_critico_haiku, casos_piores: [...new Set(piores)],
+    escaladas_sonnet: escaladas(sonnet), escaladas_haiku: escaladas(haiku), centavos_sonnet: custo(sonnet), centavos_haiku: custo(haiku),
+    configuracao: liberado ? { [contrato]: { operario: modeloHaiku } } : null }
 }
 
 /**

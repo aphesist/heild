@@ -98,6 +98,7 @@ const casos = setores.flatMap((s) => gabaritoPorSetor[s]!.slice(0, porSetor))
 const inicio = Date.now()
 let linhas: LinhaAvaliacao[] = []
 const portoes: DecisaoPortao[] = []
+const linhasHaiku: LinhaAvaliacao[] = []
 const rotas: LinhaRota[] = []
 const rotasSonnet: LinhaRota[] = []
 try {
@@ -116,6 +117,7 @@ try {
       const a = await ambiente()
       modelos.porContrato = { ...modelos.porContrato, [contrato]: { operario: 'claude-haiku-5-5' } }
       const haiku = await rodar(a, cs)
+      linhasHaiku.push(...haiku)
       delete modelos.porContrato[contrato]
       const sonnet = linhas.filter((l) => cs.some((c) => c.id === l.caso))
       portoes.push(decidirPortaoHaiku(contrato, sonnet, haiku))
@@ -157,7 +159,7 @@ const rota = rotas.length ? resumirRoteamento(rotas) : undefined
 console.table(r.porSetor)
 console.table(r.porPapel)
 if (rota) console.table([rota])
-if (portoes.length) console.table(portoes.map(({ contrato, liberado, motivo }) => ({ contrato, liberado, motivo })))
+if (portoes.length) console.table(portoes.map(({ contrato, liberado, escaladas_sonnet, escaladas_haiku, centavos_sonnet, centavos_haiku, motivo }) => ({ contrato, liberado, escaladas_sonnet, escaladas_haiku, centavos_sonnet, centavos_haiku, motivo })))
 if (parou) console.log(parou)
 const relatorio = {
   data: new Date().toISOString(),
@@ -172,6 +174,7 @@ const relatorio = {
   roteamento: rota ?? null,
   portoes,
   linhas: linhas.map(({ chamadas, ...l }) => ({ ...l, chamadas: chamadas.map((c) => `${c.classe}:${c.modelo}`) })),
+  linhas_haiku: linhasHaiku.map(({ chamadas, ...l }) => ({ ...l, chamadas: chamadas.map((c) => `${c.classe}:${c.modelo}`) })),
   rotas: [...rotas, ...rotasSonnet],
 }
 const pasta = path.resolve(import.meta.dirname, '../relatorios')
