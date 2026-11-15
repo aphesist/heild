@@ -968,7 +968,24 @@ O projeto do backend existe desde 15/11/2026: **HEILD-BACKEND**, ref `zfjivmgujy
 
 - **Daqui não há conexão Postgres** (o container só sai por HTTPS, pelo proxy). Por isso o `aplicar-projeto` ganhou `--http`: aplica pela API de gestão do Supabase (`POST /v1/projects/<ref>/database/query`), com as mesmas travas e mais uma, a região conferida na própria API de gestão (só sa-east-1). O Node só usa o proxy com `NODE_USE_ENV_PROXY=1`.
 - **Conferido (só leitura):** projeto saudável, vazio, `postgres` cria papéis, MFA por TOTP já ligado, gancho de token desligado, Data API exposta (`public, graphql_public`). A simulação lista as 10 migrações, de `fundacoes` a `b5_fundacao`.
-- **Ainda não aplicado:** a aplicação de verdade pede uma autorização que este ambiente não deu.
+- **Aplicado em 15/11/2026, com a autorização do dono:**
+  - as 10 migrações, pelo `aplicar-projeto --http --aplicar`, uma por transação, registradas em `heild_interno.migracao`, e o login `app_api` (sem `BYPASSRLS`; só assume `api_executor`), com a senha só no `servidor/.env.projeto` do container, fora do git;
+  - o gancho de token ligado pela API de gestão (`hook_custom_access_token_uri = pg-functions://postgres/heild_interno/gancho_token`), com o MFA por TOTP ligado;
+  - a Data API desligada pela API de gestão (`db_schema` vazio): o PostgREST do projeto responde 503 a qualquer tabela;
+  - a semente de demonstração (os dois escritórios de exemplo), num pedido só, numa transação, com `setval` da `versao_linha`.
+- **Chaves do Auth (15/11/2026):** o segredo JWT legado (HS256), que tinha aparecido na saída de uma leitura da configuração do PostgREST nesta sessão, foi **revogado pelo dono em 15/11/2026**, e as chaves antigas `anon` e `service_role` foram desligadas. Conferido depois, pela API de gestão e pelo JWKS público:
+  - chaves de assinatura: a HS256 está `revoked`; uma ES256 (P-256) está `in_use` e outra `standby`, e não há chave anterior;
+  - o JWKS público (`/auth/v1/.well-known/jwks.json`) publica só as duas ES256. A HS256 revogada não está nele, e o conjunto de chaves nem aceita o algoritmo HS256;
+  - as chaves legadas estão desligadas (`api-keys/legacy` responde `enabled: false`; o Auth devolve 401 para a `anon` antiga e 200 para a nova `publishable`);
+  - o gancho de token segue ligado. Ele não depende do tipo de chave: só monta as claims antes da assinatura;
+  - a API: o caminho de produção aceita só ES256 e RS256 pelo JWKS do projeto. HS256 só existe no token de demonstração, assinado com um segredo da própria API (não do Supabase) e recusado com `HEILD_DEMONSTRACAO=0`. Num teste vivo contra o JWKS real, um ES256 com o `kid` em uso e assinatura falsa e um HS256 forjado deram os dois `SESSAO_INVALIDA`. Nada do backend usa as chaves `anon` ou `service_role`.
+- **A barreira do banco, conferida no projeto** pela API de gestão:
+  - nenhuma tabela do `public` sem RLS forçada;
+  - nenhum privilégio de `anon` e `authenticated` em tabela, e o navegador recebe `permission denied`;
+  - como `api_executor` com as claims da Horizonte, zero linha da Andrade lida e zero alterada, e a inserção com o escritório da Andrade é recusada pela RLS; sem claims, nada visível;
+  - o gancho é executável só pelo servidor do Auth, que lê `conta_auth`; o navegador não o executa.
+  - Para o teste, a concessão de `api_executor` ao `postgres` foi feita dentro de uma transação desfeita; o `postgres` ficou só com a opção de administrador de quem criou o papel.
+- **O que ainda não roda daqui:** a fumaça e o teste de vazamento pela API contra o projeto. A API precisa de conexão Postgres com o pooler de São Paulo, e este container só sai por HTTPS. Rodam na hospedagem, no CI com o segredo do banco ou numa máquina com rede para o pooler, com o modo remoto dos testes (`HEILD_TESTE_URL_ADMIN`) e com a API apontada para o projeto.
 
 **Aplicar** (do diretório `servidor/`, com a senha do login `app_api` num `.env.projeto`, que o git ignora; nunca imprima nem commite):
 
@@ -1008,7 +1025,7 @@ Depois, pela API de gestão ou no painel:
 
 ### O que falta (depois da B5)
 
-- **Projeto HEILD-BACKEND:** aplicar as migrações (`aplicar-projeto --http --aplicar`, pendente de autorização), a semente, o gancho de token e a Data API desligada, e rodar o vazamento e a fumaça onde houver conexão Postgres com ele (critério da E1).
+- **Projeto HEILD-BACKEND:** migrações, semente, gancho de token e Data API desligada já aplicados. Falta rodar a fumaça e o vazamento pela API onde houver conexão Postgres com ele (o resto do critério da E1).
 - **Retomada do cartão do executor da B1:** o cartão que o executor cria quando um integrante pede algo que exige aprovação ainda não roda o comando guardado quando a pessoa aprova (encaixe 4 da B1). Os cartões de execução da B2 já retomam. É o que falta para o s08b (abaixo).
 - **Fluxo de convite pelo Supabase Auth:** quem aceita o convite cria o login e a linha de `conta_auth`. Hoje a ligação é feita por quem administra (é o que o s09 esbarra).
 - Os pontos de tela que ainda leem evento e mensagem interna inteiros, nas telas das fases seguintes.
