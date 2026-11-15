@@ -79,14 +79,14 @@ export function EdicaoEmLinha({
         aria-label={`${rotulo}: ${valor || 'vazio'}. Editar`}
         onClick={() => setEditando(true)}
         onKeyDown={(e) => e.key === 'F2' && setEditando(true)}
-        className={cn('group hover:bg-sunken/70 -mx-1.5 flex min-w-0 cursor-text items-start gap-1.5 rounded-[8px] px-1.5 py-0.5 text-left disabled:cursor-default disabled:hover:bg-transparent', className)}
+        className={cn('group hover:bg-sunken/70 -mx-1.5 flex min-w-0 cursor-text items-start gap-1.5 rounded-sm px-1.5 py-0.5 text-left disabled:cursor-default disabled:hover:bg-transparent', className)}
       >
         <span className={cn('min-w-0 flex-1 break-words', !valor && 'text-muted-foreground')}>{valor || placeholder}</span>
         {!desabilitado && <PencilSimpleIcon aria-hidden className="text-muted-foreground mt-0.5 size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />}
       </button>
     )
 
-  const base = 'bg-raised shadow-contorno focus-visible:ring-ring/40 w-full rounded-[8px] px-2 py-1 text-sm outline-none focus-visible:ring-[3px]'
+  const base = 'bg-raised shadow-contorno focus-visible:ring-ring/40 w-full rounded-sm px-2 py-1 text-sm outline-none focus-visible:ring-[3px]'
   return (
     <div className={cn('flex min-w-0 flex-col gap-1', className)}>
       <div className="flex items-start gap-1">

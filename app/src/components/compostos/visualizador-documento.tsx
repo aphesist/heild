@@ -182,7 +182,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
     <DialogPrimitive.Root open onOpenChange={(v) => !v && onFechar()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[60] bg-black/45" />
-        <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[60] flex flex-col overflow-hidden rounded-[24px] shadow-2xl outline-none sm:inset-6 lg:inset-x-[6vw]">
+        <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[60] flex flex-col overflow-hidden rounded-xl shadow-2xl outline-none sm:inset-6 lg:inset-x-[6vw]">
           <header className="flex shrink-0 items-center gap-2 border-b px-3 py-2 sm:px-4">
             <SiglaMarca />
             <span className="hidden text-sm font-medium sm:block">{tema.nome_produto}</span>
@@ -224,8 +224,8 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
           <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="bg-sunken/60 area-rolagem-dupla min-h-0 overflow-y-auto p-4 sm:p-8">
               {d.s09?.indisponivelDesde ? (
-                <div className="bg-surface shadow-cartao mx-auto flex max-w-md flex-col items-center gap-3 rounded-[24px] p-6 text-center">
-                  <CloudSlashIcon className="text-muted-foreground size-10" weight="duotone" />
+                <div className="bg-surface shadow-cartao mx-auto flex max-w-md flex-col items-center gap-3 rounded-cartao p-6 text-center">
+                  <CloudSlashIcon className="text-muted-foreground size-10" />
                   <p className="text-sm font-medium">Indisponível desde {d.s09.indisponivelDesde}</p>
                   <p className="text-muted-foreground text-sm">O índice tem o registro e a impressão digital, mas os bytes sumiram do conector (apagado na nuvem ou fora da pasta). O histórico e o registro de entrega continuam.</p>
                   {acoes.onAvisarSemBytes && (
@@ -240,7 +240,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
             </div>
             <aside className="area-rolagem-dupla flex min-h-0 flex-col gap-4 overflow-y-auto border-t p-4 lg:border-t-0 lg:border-l">
               {d.s09?.semOrigem && (
-                <div className="bg-warning/15 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+                <div className="bg-warning/15 flex flex-col gap-2 rounded-md p-3 text-sm">
                   <span className="flex items-start gap-1.5">
                     <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" /> Origem a confirmar: o arquivo caiu direto na nuvem, sem dizer quem mandou.
                   </span>
@@ -252,7 +252,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                 </div>
               )}
               {d.s09?.conflito && !d.s09.conflito.resolvido && (
-                <div className="bg-warning/15 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+                <div className="bg-warning/15 flex flex-col gap-2 rounded-md p-3 text-sm">
                   <span className="flex items-start gap-1.5">
                     <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" /> Cópia de conflito de “{d.s09.conflito.original}” ({d.s09.conflito.quando}).
                   </span>
@@ -264,7 +264,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                 </div>
               )}
               {d.s09?.conferencia && (
-                <p className="bg-sunken flex items-start gap-1.5 rounded-[14px] p-3 text-sm">
+                <p className="bg-sunken flex items-start gap-1.5 rounded-md p-3 text-sm">
                   <WarningIcon className="mt-0.5 size-4 shrink-0" /> Mudança de cliente pedida por {d.s09.conferencia.por} ({d.s09.conferencia.quando}): aguarda a conferência de um Gestor em Arquivos.
                 </p>
               )}

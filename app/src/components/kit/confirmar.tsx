@@ -73,10 +73,10 @@ export function DialogoConfirmacao({ pedido, onResponder }: { pedido: PedidoConf
         }
       }}
     >
-      <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-md" onOpenAutoFocus={(e) => pedido?.perigo && !pedido.exigirMotivo && e.preventDefault()}>
+      <DialogContent className="bg-surface rounded-xl border-0 p-5 sm:max-w-md" onOpenAutoFocus={(e) => pedido?.perigo && !pedido.exigirMotivo && e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-medium">
-            {pedido?.perigo && <WarningIcon className="text-destructive size-5 shrink-0" weight="duotone" />}
+            {pedido?.perigo && <WarningIcon className="text-destructive size-5 shrink-0" />}
             {pedido?.titulo}
           </DialogTitle>
           {pedido?.descricao && <DialogDescription>{pedido.descricao}</DialogDescription>}
@@ -90,7 +90,7 @@ export function DialogoConfirmacao({ pedido, onResponder }: { pedido: PedidoConf
               onChange={(e) => setMotivo(e.target.value)}
               rows={3}
               placeholder="Fica registrado com o seu nome e a data"
-              className="bg-raised shadow-contorno placeholder:text-muted-foreground focus-visible:ring-ring/40 w-full resize-y rounded-[12px] px-3 py-2.5 text-sm outline-none focus-visible:ring-[3px]"
+              className="bg-raised shadow-contorno placeholder:text-muted-foreground focus-visible:ring-ring/40 w-full resize-y rounded-md px-3 py-2.5 text-sm outline-none focus-visible:ring-[3px]"
             />
           </label>
         )}
