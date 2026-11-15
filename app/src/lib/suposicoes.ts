@@ -89,7 +89,7 @@ export function suporDoTexto(texto: string, ctx: ContextoSuposicoes): Suposicao[
   const hoje = new Date(`${ctx.hoje ?? new Date().toISOString().slice(0, 10)}T12:00:00`)
   const iso = (d: Date) => d.toISOString().slice(0, 10)
   const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
-  const pz = t.match(/\b(amanha|hoje)\b|\bate (?:a |o )?(domingo|segunda|terca|quarta|quinta|sexta|sabado)\b|\bdia (\d{1,2})\b|\b(\d{1,2})\/(\d{1,2})\b(?!\/)/)
+  const pz = t.match(/\b(amanha|(?:ate|para) hoje)\b|\bate (?:a |o )?(domingo|segunda|terca|quarta|quinta|sexta|sabado)\b|\bdia (\d{1,2})\b|\b(\d{1,2})\/(\d{1,2})\b(?!\/)/)
   if (pz?.index !== undefined) {
     let d = new Date(hoje)
     if (pz[1] === 'amanha') d.setDate(d.getDate() + 1)

@@ -171,7 +171,70 @@ function rotearPrevia(t: string, ctx: ContextoRoteiro): RespostaRoteiro | null {
         : assunto === 'documentos'
           ? `Oi, ${primeiro}! Ainda faltam alguns documentos para seguirmos. Pode mandar pelo app? A lista está em Pendências.`
           : `Oi, ${primeiro}! Tudo bem? Passando para dar um retorno: seguimos com o que combinamos e aviso assim que concluir.`
+  // Fase 6 (lacunas): o que o integrante não sabe (o prazo, o assunto do retorno) fica em branco, em vez de inventado.
+  const depois = { tipo: 'previa_mensagem' as const, cliente: ctx.cliente.nome, para, setor, canal: 'whatsapp' as const }
+  if (assunto === 'extrato')
+    return {
+      texto: `Deixei o rascunho para ${para}. Só não sei o prazo que você quer dar: preencha e eu monto a mensagem.`,
+      cartoes: [{ tipo: 'rascunho', id: id('rs'), titulo: `Mensagem para ${para}`, depois, partes: [`Oi, ${primeiro}! Para fecharmos outubro, precisamos do extrato bancário do mês. Consegue mandar por aqui ou pelo app até `, { lacuna: { id: 'prazo', pergunta: 'qual prazo', config: { tipo: 'data' } } }, '?'] }],
+    }
+  if (assunto === 'geral')
+    return {
+      texto: `Deixei o rascunho para ${para}. Falta o assunto do retorno: preencha e eu monto a mensagem.`,
+      cartoes: [{ tipo: 'rascunho', id: id('rs'), titulo: `Mensagem para ${para}`, depois, partes: [`Oi, ${primeiro}! Tudo bem? Passando para dar um retorno sobre `, { lacuna: { id: 'assunto', pergunta: 'qual assunto', config: { tipo: 'texto', placeholder: 'Ex.: a alteração do contrato social' } } }, ': ', { lacuna: { id: 'situacao', pergunta: 'em que pé está', config: { tipo: 'escolha', opcoes: [{ valor: 'seguimos com o que combinamos e aviso assim que concluir', rotulo: 'em andamento' }, { valor: 'já concluímos, e o documento está no app', rotulo: 'concluído' }, { valor: 'precisamos de um retorno seu para seguir', rotulo: 'esperando o cliente' }], outra: true } } }, '.'] }],
+    }
   return { texto: `Deixei o rascunho para ${para}. Edite à vontade; nada sai sem a sua aprovação.`, cartoes: [{ tipo: 'previa_mensagem', id: id('pv'), cliente: ctx.cliente.nome, para, setor, canal: 'whatsapp', texto }] }
+}
+
+/* ---------- 6b. Ata e relatório com lacunas (fase 6) ---------- */
+
+function rotearAta(t: string): RespostaRoteiro | null {
+  if (!/\bata\b/.test(t)) return null
+  return {
+    texto: 'Comecei a ata. Não estive na reunião: quem participou, o que se decidiu e a próxima data ficam com você.',
+    cartoes: [
+      {
+        tipo: 'rascunho',
+        id: id('ata'),
+        titulo: 'Ata da reunião',
+        partes: [
+          'Ata da reunião de ',
+          { lacuna: { id: 'data', pergunta: 'que dia', config: { tipo: 'data' } } },
+          '.\nPresentes: ',
+          { lacuna: { id: 'presentes', pergunta: 'quem participou', config: { tipo: 'texto', placeholder: 'Ex.: Fernanda, Rafael e Ana' } } },
+          '.\nDecisões: ',
+          { lacuna: { id: 'decisoes', pergunta: 'o que se decidiu', config: { tipo: 'texto', multilinha: true } } },
+          '.\nPróxima reunião: ',
+          { lacuna: { id: 'proxima', pergunta: 'quando é a próxima', config: { tipo: 'data' } } },
+          '.',
+        ],
+      },
+    ],
+  }
+}
+
+function rotearRelatorio(t: string, ctx: ContextoRoteiro): RespostaRoteiro | null {
+  if (!/\brelatorio\b/.test(t) || !/\b(mes|mensal|cliente|resumo)\b/.test(t)) return null
+  const cliente = ctx.cliente?.nome
+  return {
+    texto: `Montei o começo do relatório${cliente ? ` de ${cliente}` : ''}. O que destacar e a competência ficam com você; os números eu puxo depois de preenchido.`,
+    cartoes: [
+      {
+        tipo: 'rascunho',
+        id: id('rel'),
+        titulo: `Relatório do mês${cliente ? ` · ${cliente}` : ''}`,
+        partes: [
+          `Relatório de `,
+          { lacuna: { id: 'competencia', pergunta: 'qual competência', config: { tipo: 'competencia' } } },
+          cliente ? ` para ${cliente}.` : ' para ',
+          ...(cliente ? [] : [{ lacuna: { id: 'cliente', pergunta: 'qual cliente', config: { tipo: 'texto' as const } } }, '.']),
+          '\nNeste mês, o destaque é ',
+          { lacuna: { id: 'destaques', pergunta: 'o que destacar', config: { tipo: 'multipla', opcoes: [{ valor: 'os impostos pagos em dia', rotulo: 'impostos pagos' }, { valor: 'a folha fechada', rotulo: 'folha' }, { valor: 'as pendências de documento', rotulo: 'pendências' }, { valor: 'a variação do faturamento', rotulo: 'faturamento' }], outra: true } } },
+          '.',
+        ],
+      },
+    ],
+  }
 }
 
 /* ---------- 7. Confiança baixa ---------- */
@@ -191,7 +254,7 @@ function rotearAmbiguo(t: string): RespostaRoteiro | null {
 
 export function roteiroDoGeral(texto: string, ctx: ContextoRoteiro): RespostaRoteiro | null {
   const t = normalizar(texto)
-  return rotearAjuda(t) ?? rotearRegra(t, ctx) ?? rotearPauta(t, ctx) ?? rotearCalculo(t) ?? rotearPrevia(t, ctx) ?? rotearAmbiguo(t)
+  return rotearAjuda(t) ?? rotearRegra(t, ctx) ?? rotearAta(t) ?? rotearPauta(t, ctx) ?? rotearCalculo(t) ?? rotearPrevia(t, ctx) ?? rotearRelatorio(t, ctx) ?? rotearAmbiguo(t)
 }
 
 /** Roteiros da S01 no chat de um integrante (pedidos de regra, cálculo e rascunho valem lá também). */

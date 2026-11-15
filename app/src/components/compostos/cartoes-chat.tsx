@@ -1,4 +1,5 @@
 import { ArrowRightIcon, ArrowBendDownRightIcon, ShieldCheckIcon, TableIcon } from '@phosphor-icons/react'
+import { CartaoRascunho } from './cartao-rascunho'
 import { ArrowsLeftRightIcon, ChatCircleTextIcon, FileTextIcon, ReceiptIcon } from '@phosphor-icons/react'
 import { useState, useEffect } from 'react'
 import { useDocumentos } from '@/ambiente/documentos'
@@ -452,6 +453,8 @@ export function CartaoChat({ cartao, acoes }: { cartao: Cartao; acoes?: AcoesCar
       return <CartaoPreviaMensagem cartao={cartao} />
     case 'escolha':
       return <CartaoEscolha cartao={cartao} onEscolher={acoes?.onEnviar} />
+    case 'rascunho':
+      return <CartaoRascunho cartao={cartao} />
     case 'passagem':
       return <CartaoPassagem cartao={cartao} onAbrir={vitrine ? undefined : () => nav.irPara({ modulo: 'inicio', aba: 'time', integrante: integranteDoSetor(cartao.para.setor) })} />
   }

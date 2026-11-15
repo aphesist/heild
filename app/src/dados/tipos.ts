@@ -175,6 +175,13 @@ export type Cartao =
   | { tipo: 'previa_mensagem'; id: string; cliente: string; para: string; setor: SetorIntegrante; canal: 'whatsapp' | 'email' | 'app'; texto: string }
   /** S01: confiança baixa no roteamento (07, 2): pergunta com botões. */
   | { tipo: 'escolha'; id: string; pergunta: string; opcoes: { rotulo: string; texto: string }[] }
+  /**
+   * Fase 6: rascunho com lacunas (resposta, relatório, ata). O que o integrante
+   * não sabe fica em branco; preenchido, vira o texto final (e, com `depois`,
+   * a prévia de mensagem que segue para aprovação). Só configs sem função: o
+   * cartão é guardado na conversa.
+   */
+  | { tipo: 'rascunho'; id: string; titulo: string; partes: import('@/components/kit/valor-editavel').ParteRascunho[]; depois?: { tipo: 'previa_mensagem'; cliente: string; para: string; setor: SetorIntegrante; canal: 'whatsapp' | 'email' | 'app' } }
 
 /** Saída do `legal.consultar` mostrada ao usuário (07, 3.2 e 02, 9.3: cartão de citação e de cálculo). */
 export interface RespostaLegal {
