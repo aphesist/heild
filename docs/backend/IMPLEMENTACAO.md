@@ -973,6 +973,12 @@ O projeto do backend existe desde 15/11/2026: **HEILD-BACKEND**, ref `zfjivmgujy
   - o gancho de token ligado pela API de gestão (`hook_custom_access_token_uri = pg-functions://postgres/heild_interno/gancho_token`), com o MFA por TOTP ligado;
   - a Data API desligada pela API de gestão (`db_schema` vazio): o PostgREST do projeto responde 503 a qualquer tabela;
   - a semente de demonstração (os dois escritórios de exemplo), num pedido só, numa transação, com `setval` da `versao_linha`.
+- **Chaves do Auth (15/11/2026):** o segredo JWT legado (HS256), que tinha aparecido na saída de uma leitura da configuração do PostgREST nesta sessão, foi **revogado pelo dono em 15/11/2026**, e as chaves antigas `anon` e `service_role` foram desligadas. Conferido depois, pela API de gestão e pelo JWKS público:
+  - chaves de assinatura: a HS256 está `revoked`; uma ES256 (P-256) está `in_use` e outra `standby`, e não há chave anterior;
+  - o JWKS público (`/auth/v1/.well-known/jwks.json`) publica só as duas ES256. A HS256 revogada não está nele, e o conjunto de chaves nem aceita o algoritmo HS256;
+  - as chaves legadas estão desligadas (`api-keys/legacy` responde `enabled: false`; o Auth devolve 401 para a `anon` antiga e 200 para a nova `publishable`);
+  - o gancho de token segue ligado. Ele não depende do tipo de chave: só monta as claims antes da assinatura;
+  - a API: o caminho de produção aceita só ES256 e RS256 pelo JWKS do projeto. HS256 só existe no token de demonstração, assinado com um segredo da própria API (não do Supabase) e recusado com `HEILD_DEMONSTRACAO=0`. Num teste vivo contra o JWKS real, um ES256 com o `kid` em uso e assinatura falsa e um HS256 forjado deram os dois `SESSAO_INVALIDA`. Nada do backend usa as chaves `anon` ou `service_role`.
 - **A barreira do banco, conferida no projeto** pela API de gestão:
   - nenhuma tabela do `public` sem RLS forçada;
   - nenhum privilégio de `anon` e `authenticated` em tabela, e o navegador recebe `permission denied`;
