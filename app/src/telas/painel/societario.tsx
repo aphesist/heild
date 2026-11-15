@@ -918,6 +918,7 @@ function CertificadosCarteira() {
   const clientes = useTabela('cliente')
   const nome = (id: string) => clientes.find((c) => c.id === id)?.nome ?? id
   const ordenados = [...lista].sort((a, b) => a.validade.localeCompare(b.validade))
+  if (!ordenados.length) return <VazioWidget>Nenhum certificado digital na carteira. Eles entram pela ficha de cada cliente.</VazioWidget>
   return (
     <ul className="divide-border/70 flex flex-col divide-y">
       {ordenados.map((c) => (

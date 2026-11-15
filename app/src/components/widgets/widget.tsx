@@ -60,7 +60,7 @@ interface Props {
  * numa gaveta. N é o tamanho da maior lista do corpo (itens de lista, linhas de tabela).
  */
 function useTransbordo(corpo: React.RefObject<HTMLDivElement | null>, ativo: boolean) {
-  const [estado, setEstado] = useState<{ transborda: boolean; n: number }>({ transborda: false, n: 0 })
+  const [estado, setEstado] = useState<{ transborda: boolean; n: number; vazio: boolean }>({ transborda: false, n: 0, vazio: false })
   useEffect(() => {
     const el = corpo.current
     if (!el || !ativo) return
@@ -68,7 +68,10 @@ function useTransbordo(corpo: React.RefObject<HTMLDivElement | null>, ativo: boo
       const transborda = el.scrollHeight > el.clientHeight + 4
       let n = 0
       for (const lista of el.querySelectorAll('ul, ol, tbody, [role="table"]')) n = Math.max(n, [...lista.children].filter((f) => !f.hasAttribute('data-cabecalho') && !f.hasAttribute('data-estado-vazio')).length)
-      setEstado((e) => (e.transborda === transborda && e.n === n ? e : { transborda, n }))
+      // Rede de segurança: corpo sem texto e sem nada para ver ou usar vira o estado vazio padrão (nunca um card em branco).
+      const proprio = el.querySelector<HTMLElement>('[data-conteudo-widget]')
+      const vazio = !!proprio && !proprio.innerText.trim() && !proprio.querySelector('button, input, select, textarea, a[href], img, svg, canvas, [role="status"], [data-estado-vazio]')
+      setEstado((e) => (e.transborda === transborda && e.n === n && e.vazio === vazio ? e : { transborda, n, vazio }))
     }
     medir()
     const ro = new ResizeObserver(medir)
@@ -88,7 +91,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
   const Icone = def.icone
   const usado = conteudo ?? tamanho
   const corpo = useRef<HTMLDivElement>(null)
-  const { transborda, n } = useTransbordo(corpo, !editando)
+  const { transborda, n, vazio } = useTransbordo(corpo, !editando)
   const [tudo, setTudo] = useState(false)
   const dados = useContext(ContextoEstadoWidget)
   return (
@@ -126,7 +129,14 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
           {editando && <ArrowsOutCardinalIcon className="text-muted-foreground ml-auto size-4" aria-hidden />}
         </header>
         <AreaRolagem ref={corpo} data-corpo-widget className={cn('@container flex-1', editando && 'pointer-events-none')}>
-          {dados.estado === 'pronto' ? def.conteudo(usado) : <EstadoDoWidget {...dados} titulo={def.titulo} tamanho={usado} />}
+          {dados.estado === 'pronto' ? (
+            <div data-conteudo-widget className="contents">
+              {def.conteudo(usado)}
+            </div>
+          ) : (
+            <EstadoDoWidget {...dados} titulo={def.titulo} tamanho={usado} />
+          )}
+          {dados.estado === 'pronto' && vazio && <VazioWidget>Nada por aqui ainda.</VazioWidget>}
         </AreaRolagem>
         {transborda && !editando && (
           <footer className="-mt-1 flex shrink-0 justify-end">

@@ -522,6 +522,7 @@ function ReformaBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
 function RecuperacaoBloco({ cliente }: { cliente: Cliente }) {
   const { k } = useConsult(cliente)
   const fluxos = useFluxos()
+  if (!k.creditos.length) return <Vazio>Nenhuma oportunidade de recuperação levantada para este cliente.</Vazio>
   return (
     <ul className="flex flex-col gap-2">
       {k.creditos.map((c) => (

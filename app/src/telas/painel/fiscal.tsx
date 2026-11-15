@@ -370,6 +370,7 @@ function DeclaracoesBloco({ cliente }: { cliente: Cliente }) {
   return (
     <div className="flex flex-col gap-2">
       <SaudeConectores ids={['integra_contador', 'reinf']} />
+      {!f.declaracoes.length && <Vazio>Nenhuma declaração neste mês para o perfil do cliente.</Vazio>}
       <ul className="divide-border/70 flex flex-col divide-y">
         {f.declaracoes.map((d) => {
           const tx = estado.transmitidas[d.id]

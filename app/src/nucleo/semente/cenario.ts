@@ -198,6 +198,9 @@ function clonar<T>(item: T, k: number): T {
   return c as T
 }
 
+/** Listas que são configuração da aba (o que dá para fazer, os relatórios que existem), não dados: não mudam de tamanho. */
+const CHAVE_CONFIGURACAO = /^(acoes|relatorios)$/
+
 /** Uma lista de registros ou de rótulos (não uma série de números, nem a lista curta de siglas). */
 const ehLista = (v: unknown[]) => v.length > 0 && (v.every((x) => x && typeof x === 'object' && !Array.isArray(x)) || (v.every((x) => typeof x === 'string') && v.some((x) => (x as string).length > 4)))
 
@@ -208,7 +211,7 @@ const ehLista = (v: unknown[]) => v.length > 0 && (v.every((x) => x && typeof x 
 function transformar<T>(v: T, c: Cenario, chave: string, i = 0, nivel = 0): T {
   if (Array.isArray(v)) {
     let lista: unknown[] = v
-    if (c.itens !== undefined && nivel <= 1 && ehLista(v)) lista = redimensionar(v, c.itens)
+    if (c.itens !== undefined && nivel <= 1 && ehLista(v) && !CHAVE_CONFIGURACAO.test(chave)) lista = redimensionar(v, c.itens)
     // Status e tipos misturados: os valores que a própria lista já tem, em rodízio.
     const objetos = lista.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x))
     const estados = new Map<string, unknown[]>()
@@ -244,7 +247,7 @@ const ESTRUTURA = new Set<string>(['escritorio', 'assinatura', 'pessoa', 'identi
 /**
  * A fotografia do escritório de exemplo transformada pelo cenário. Cada lista
  * (tarefa, documento, conversa…) fica com `itens` linhas por cliente e setor; o
- * cliente escolhido no seletor (o primeiro) continua existindo mesmo com 0.
+ * os dois primeiros clientes (os das versões "cliente" das abas) continuam existindo mesmo com 0.
  */
 export function fotografiaDoCenario(base: Fotografia, c: Cenario, escritorioId: string): Fotografia {
   const foto = {} as Fotografia
@@ -252,7 +255,8 @@ export function fotografiaDoCenario(base: Fotografia, c: Cenario, escritorioId: 
     const dom = dominio(tabela)
     let novas: Record<string, unknown>[] = linhas.map((l) => ({ ...l, escritorio_id: escritorioId, ...(tabela === 'escritorio' ? { id: escritorioId } : {}) }))
     if (c.itens !== undefined && !ESTRUTURA.has(tabela)) {
-      if (tabela === 'cliente') novas = c.itens === 0 ? novas.slice(0, 1) : redimensionar(novas, c.itens)
+      // Os dois primeiros clientes ficam sempre: são os das versões "cliente" das abas (o Fiscal usa o do Simples, o segundo).
+      if (tabela === 'cliente') novas = c.itens <= 2 ? novas.slice(0, 2) : redimensionar(novas, c.itens)
       else {
         // Os grupos que as telas mostram (os dois primeiros clientes, que são os das versões "cliente", e o
         // que é do escritório) ficam com `itens` linhas por setor; os outros clientes só encolhem (com 0) ou ficam
