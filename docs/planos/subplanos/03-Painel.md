@@ -984,3 +984,14 @@ Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md`, `entregas/S01.md` a `S1
 O Plano da Plataforma se contradiz no DA-02.1: o item 9 diz que o item Clientes só existe no BPO puro (C1, sem Painel), e o item 10 diz que aparece para quem não tem o Painel, em qualquer cenário. A U4 do adendo do UI lab deste subplano segue o item 9; o protótipo implementa o item 10 (branch `prototipo`, `app/PLANO.md`, "A barra lateral da Marina": quem não tem Painel ganha o item Clientes, com Cadastro e Contatos, vendo só os clientes do pacote dela). Recomendação: adotar o item 10. Até a resposta do Enzo, a U4 fica como está; ver D4 em [../ATUALIZACOES.md](../ATUALIZACOES.md).
 
 O site chama o módulo do BPO de "Painel do BPO" (branch `site`, `app/src/site/SiteApp.tsx` e `SecoesBpo.tsx`); pelo plano, Painel é o item do pacote Contábil e o do BPO se chama BPO (2.0). Também em D4.
+
+---
+
+## Adendo: feedforward, lacunas e edição in-line no Painel (15/11/2026)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação; o padrão está no [Desenho do Sistema](../Desenho_do_Sistema.md), adendo do mesmo dia.
+
+- **Widgets, blocos e fichas** (anatomia de aba, 5): os valores se editam no lugar, com o seletor do tipo de dado (competência, data, responsável, setor, valor, situação). Os cards não têm botão "Editar". A permissão continua a da função única: quem não pode editar vê o valor sem o sublinhado.
+- **Ações do Painel que chamam a IA** (botões de atividade, "pedir ao integrante"): antes de enviar, a frase do pedido aparece com as suposições sublinhadas (cliente, competência, fonte do dado, setor de destino), editáveis pelo seletor, e só então vai ao integrante.
+- **Rascunhos devolvidos pela IA** (guia, mensagem, relatório, checklist): chegam com as lacunas marcadas no lugar; a ação final fica desligada enquanto houver lacuna obrigatória.
+- **Cartões de aprovação na aba e no chat:** argumentos editáveis in-line antes de aprovar, com a alteração registrada; botões Aprovar e Recusar.

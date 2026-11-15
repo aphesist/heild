@@ -571,3 +571,16 @@ Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (registros de 14/11/2026
 - **Comunicação interna pelo botão Chat (decisão do Enzo; completa 2.1 e o adendo de 14/11).** Abre pelo botão flutuante **Chat** do canto inferior direito, em todos os módulos. A gaveta tem duas abas: **Equipe** (pessoais, grupos, canal do setor e geral) e **Integrantes** (o time de IA). O botão soma as não lidas das duas; "abrir em tela cheia" leva à tela das conversas, com rota própria. Não há item novo na barra lateral; no celular, o destino "Chat" do menu inferior abre a mesma gaveta. Detalhe no subplano 11, seção 6.
 - **"Membro" nas telas (diverge de 1.1).** O wireframe mostra o papel de execução como **Membro**, o nome que o Enzo usa; no código e no banco continua `colaborador`. A decisão de 7/11 ("os nomes ... Colaborador ... ficam") é revista só se o Enzo aceitar: D2 em [ATUALIZACOES.md](ATUALIZACOES.md).
 - **O wireframe é a base do produto (completa 9).** A pedido do Enzo, os dados do wireframe passaram a morar nas entidades das Fundações: 76 tabelas com RLS por escritório e repositórios que conferem a permissão e gravam evento, em dois modos (local e Supabase). O backend real ([backend/](backend/)) nasce em cima dessas telas e repositórios: as telas não mudam e o adaptador troca.
+
+## Adendo: feedforward, lacunas e edição in-line (15/11/2026)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação. Motivos dele: mais moderno, mais bonito, mais intuitivo; e reduz erro, porque a suposição aparece antes da ação. Vale para todo o sistema (Painel, chat com os integrantes, cartões, CRM do lado da equipe e, depois, o Consultor no app do cliente). **O WhatsApp com o cliente não muda:** continua texto puro, em conversa natural.
+
+| Padrão | Como funciona |
+| --- | --- |
+| **Feedforward** | Antes de mandar um pedido à IA, a tela mostra o que ela vai supor, como texto com **sublinhados editáveis**: "Gerar o DAS de **outubro** da **Padaria Pão Quente** com **faturamento do PGDAS**". Cada sublinhado abre um **seletor próprio do tipo de dado** (calendário para competência e data, seletor de cliente, lista de setores ou pessoas, campo de valor, lista de opções da regra). A pessoa corrige a suposição antes da ação, e não depois |
+| **Lacunas** | Quando falta um dado, a IA **entrega o rascunho com espaços a preencher**, marcados no lugar onde o dado entra, em vez de perguntar em sequência ou inventar. Cada lacuna usa o mesmo seletor do tipo de dado. Enquanto houver lacuna obrigatória, a ação final fica desligada |
+| **Edição in-line** | Os cards **não têm mais botão "Editar"**: os valores se editam no lugar, com o mesmo seletor do tipo de dado, e a alteração grava evento como qualquer edição |
+| **Cartões de aprovação** | Os argumentos do cartão também se editam in-line antes de aprovar; o cartão guarda o que foi alterado (`argumentos_editados`, Fundações 6.4) e o evento registra a diferença. Os botões passam a ser **Aprovar** e **Recusar**; "Editar e aprovar" deixa de ser botão, porque editar é tocar no valor |
+
+O formato padrão de resposta dos integrantes ganha os campos **suposições** e **lacunas** (subplano 02, adendo de 15/11/2026). O detalhe por tela está nos adendos do mesmo dia dos subplanos 03 (Painel), 02 (integrantes e cartões), 01 (cartão de aprovação) e 06 (Consultor da empresa, como passo posterior).
