@@ -275,7 +275,7 @@ function Manifestacao({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
         <AreaRolagem as="ul" className="divide-border/70 flex flex-col divide-y">
           {semConclusao.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5">
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block truncate text-sm">{r.nota}</span>
                 <span className="text-muted-foreground block truncate text-xs">
                   {r.emitente} · {r.valor}

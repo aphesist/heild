@@ -211,7 +211,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="min-w-0 flex-1">{titulo}</div>
+        <div className="min-w-0 grow basis-40">{titulo}</div>
         {editando ? (
           <>
             <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setSalvo(null)}>

@@ -368,7 +368,7 @@ function TriagemBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
           const conf = estado.triagem[t.id]
           return (
             <li key={t.id} className="flex flex-wrap items-center gap-2 py-1.5 first:pt-0">
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block truncate font-mono text-xs">{t.nome}</span>
                 <span className="text-muted-foreground block truncate text-[11px]">
                   {t.canal} · {conf ? `confirmado ${conf.confirmado}` : `${t.regra}: ${t.detalhe}`}
@@ -648,7 +648,7 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
       {alerta && (
         <div role="alert" className="bg-warning/12 flex flex-wrap items-center gap-2 rounded-[12px] px-3 py-2 text-sm">
           <WarningIcon weight="fill" className="text-warning size-4 shrink-0" />
-          <span className="min-w-0 flex-1">
+          <span className="min-w-0 grow basis-40">
             <strong className="font-medium">{alerta.socio}</strong> recebeu {brl(alerta.lucro)} de lucro em {alerta.mes}: acima de R$ 50 mil, retenção de 10% = <strong className="font-medium">{brl(alerta.lucro * 0.1)}</strong>, DARF até 20/{String(Number(alerta.mes.slice(0, 2)) + 1).padStart(2, '0')} (Lei 15.270/2025).
           </span>
           <Button size="sm" variant="ghost" onClick={() => (atualizar((x) => ({ ...x, alertas50k: { ...x.alertas50k, [`${alerta.socio}:${alerta.mes}`]: hojeCurto() } })), loja.registrar(usuario.nome, `Viu o alerta de R$ 50 mil: ${alerta.socio} ${alerta.mes} · ${cliente.nome} (D-14)`))}>
@@ -682,7 +682,7 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
         <span className="text-muted-foreground text-xs">{duvidas.length ? `${duvidas.length} dúvida(s) do integrante` : 'Sem dúvidas: todas as saídas classificadas.'}</span>
         {duvidas.slice(0, tamanho === 'XL' ? 4 : 2).map((s) => (
           <div key={s.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-[10px] px-2 py-1 text-sm">
-            <span className="min-w-0 flex-1 truncate">
+            <span className="min-w-0 grow basis-40 truncate">
               {s.data} · {s.favorecido} · {brl(s.valor)}
             </span>
             {travado(s.mes) ? (
@@ -891,7 +891,7 @@ function RelatoriosBloco({ cliente }: { cliente: Cliente }) {
           return (
             <li key={rel.id} className="flex flex-col gap-1.5 py-1.5 first:pt-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block truncate text-sm">
                     {rel.nome} {rel.fase > 1 && <SeloFase fase={rel.fase} />}
                   </span>
@@ -1029,7 +1029,7 @@ function FilaAssinaturaBloco({ cliente }: { cliente: Cliente }) {
             <li key={it.id} className="bg-raised flex flex-col gap-1.5 rounded-[12px] px-3 py-2">
               <div className="flex flex-wrap items-center gap-2">
                 <PenNibIcon className="text-muted-foreground size-4 shrink-0" />
-                <span className="min-w-0 flex-1 text-sm">
+                <span className="min-w-0 grow basis-40 text-sm">
                   {it.nome}
                   <span className="text-muted-foreground block text-[11px]">{it.e!.motivo ?? `desde ${it.e!.quando}`}</span>
                 </span>
@@ -1092,7 +1092,7 @@ function DeclaracaoBloco({ cliente }: { cliente: Cliente }) {
         return (
           <div key={pd.id} className="flex flex-col gap-1.5 text-sm">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 {pd.pedidoPor} pediu em {pd.quando}
                 <span className="text-muted-foreground block text-xs">
                   {pd.finalidade} · últimos {pd.meses} meses

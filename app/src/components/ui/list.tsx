@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { cn, textoDoNo } from '@/lib/utils'
 
 /** Lista simples com divisórias. Base de listas de tarefas, clientes e integrantes. */
 export function List({ className, ...props }: ComponentProps<'ul'>) {
@@ -28,8 +28,8 @@ export function ListItem({
     <>
       {inicio && <div className="shrink-0">{inicio}</div>}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium">{titulo}</div>
-        {descricao && <div className="text-muted-foreground truncate text-xs">{descricao}</div>}
+        <div className="truncate text-sm font-medium" title={textoDoNo(titulo) || undefined}>{titulo}</div>
+        {descricao && <div className="text-muted-foreground truncate text-xs" title={textoDoNo(descricao) || undefined}>{descricao}</div>}
       </div>
       {fim && <div className="shrink-0">{fim}</div>}
     </>

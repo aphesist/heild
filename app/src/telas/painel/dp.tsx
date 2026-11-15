@@ -973,7 +973,7 @@ function Termos({ id }: { id: string }) {
           <option>Advertência por atraso</option>
           <option>Ciência do regulamento interno</option>
         </select>
-        <input aria-label="Empregado do termo" value={quem} onChange={(ev) => setQuem(ev.target.value)} placeholder="Empregado" className="bg-background h-8 min-w-0 flex-1 rounded-md border px-2 text-sm" />
+        <input aria-label="Empregado do termo" value={quem} onChange={(ev) => setQuem(ev.target.value)} placeholder="Empregado" className="bg-background h-8 min-w-0 grow basis-40 rounded-md border px-2 text-sm" />
         <Button type="submit" size="sm" variant="outline" className="h-8 rounded-full" disabled={!quem.trim()}>
           Gerar termo
         </Button>

@@ -195,7 +195,7 @@ export function NomeWhatsapp() {
             return (
               <li key={s.codigo} className="flex flex-wrap items-center gap-2 py-2 text-sm">
                 <WhatsappLogoIcon className="text-muted-foreground size-4" />
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block">{atual.nome}</span>
                   <span className="text-muted-foreground block text-xs">
                     {s.numero} · {s.nomeExibido}

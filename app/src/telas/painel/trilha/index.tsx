@@ -380,7 +380,7 @@ function PassarAtivo({ c, tarefas }: { c: ClienteE; tarefas: TarefaE[] }) {
   const pendente = repos.cartoes.listar((x) => x.status === 'pendente' && x.extras?.acao === 'ciclo.mudar' && (x.extras?.dados as { cliente?: string })?.cliente === c.id).length > 0
   return (
     <div className="bg-raised flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
-      <span className="min-w-0 flex-1">{b.length ? `Para passar a ativo: ${b.join('; ')}.` : 'O primeiro fechamento de cada setor terminou: o cliente pode passar a ativo (GES-106).'}</span>
+      <span className="min-w-0 grow basis-40">{b.length ? `Para passar a ativo: ${b.join('; ')}.` : 'O primeiro fechamento de cada setor terminou: o cliente pode passar a ativo (GES-106).'}</span>
       <Button size="sm" className="rounded-full" disabled={pendente} onClick={() => executar(() => pedirMudanca(c, 'ativo', b.length ? `com pendência: ${b.join('; ')}` : 'implantação concluída'), { sucesso: 'Cartão criado para o Gestor aprovar' })}>
         {pendente ? 'Cartão aguardando aprovação' : 'Passar a ativo'}
       </Button>
@@ -559,7 +559,7 @@ function TrilhaSaida({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
       </Secao>
       {gere && (
         <div className="bg-raised flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
-          <span className="min-w-0 flex-1">{bloqueios.length ? `Encerrar bloqueado: ${bloqueios.join('; ')}.` : 'Sem remanescentes: pode encerrar. As abas ficam só leitura com a retenção.'}</span>
+          <span className="min-w-0 grow basis-40">{bloqueios.length ? `Encerrar bloqueado: ${bloqueios.join('; ')}.` : 'Sem remanescentes: pode encerrar. As abas ficam só leitura com a retenção.'}</span>
           <Button
             size="sm"
             variant="destructive"
@@ -584,7 +584,7 @@ function PosDesligamento({ c }: { c: ClienteE }) {
   const fluxos = useFluxos()
   return (
     <div className="bg-sunken flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 grow basis-40">
         Encerrado em {diaMes(c.estado_ciclo_desde)}; retenção até {Number(c.estado_ciclo_desde.slice(0, 4)) + 5}. Pedido do ex-cliente ou do sucessor vira tarefa sem reabrir o cliente (CIC-007).
       </span>
       <Button

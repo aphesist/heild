@@ -223,7 +223,7 @@ export function Interruptor({ ligado, onMudar, rotulo, detalhe, desabilitado, oc
 export function CabecalhoSecao({ titulo, descricao, acao }: { titulo: string; descricao?: string; acao?: ReactNode }) {
   return (
     <header className="flex flex-wrap items-end gap-2">
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 grow basis-40">
         <h3 className="text-base font-medium">{titulo}</h3>
         {descricao && <p className="text-muted-foreground text-sm">{descricao}</p>}
       </div>
@@ -239,7 +239,9 @@ export function Passos({ passos, atual }: { passos: string[]; atual: number }) {
       {passos.map((p, i) => (
         <li key={p} className="flex min-w-0 flex-1 flex-col gap-1" aria-current={i === atual ? 'step' : undefined}>
           <span className={cn('h-1.5 rounded-full', i < atual ? 'bg-success' : i === atual ? 'bg-foreground' : 'bg-sunken')} />
-          <span className={cn('truncate text-[11px]', i === atual ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
+          <span className={cn('truncate text-xs', i === atual ? 'font-medium' : 'text-muted-foreground')} title={p}>
+            {p}
+          </span>
         </li>
       ))}
     </ol>

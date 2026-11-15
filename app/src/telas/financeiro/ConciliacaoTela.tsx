@@ -243,7 +243,7 @@ export function ConciliacaoTela() {
           {fin.contasBancarias.map((c) => (
             <li key={c.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
               <BankIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block">{c.nome}</span>
                 <span className="text-muted-foreground block text-xs">
                   {c.origem === 'open_finance' ? 'Open Finance' : c.origem === 'api_banco' ? 'API do banco (cobrança)' : c.origem === 'ofx' ? 'OFX' : 'manual'} · {c.conta_mascarada}
@@ -282,7 +282,7 @@ function Regras({ fin, pode }: { fin: Fin; pode: boolean }) {
         <ul className="flex flex-col gap-2">
           {propostas.map((r) => (
             <li key={r.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block font-mono text-xs">{r.padrao}</span>
                 <span className="text-muted-foreground block text-xs">
                   → {r.categoria}

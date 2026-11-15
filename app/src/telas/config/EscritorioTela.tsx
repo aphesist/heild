@@ -19,7 +19,7 @@ const usePessoas = () => useContas().filter((u) => u.situacao === 'ativo').map((
 export function CabecalhoConfig({ titulo, sub, acao }: { titulo: string; sub: string; acao?: React.ReactNode }) {
   return (
     <header className="flex flex-wrap items-end gap-2">
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 grow basis-40">
         <h1 className="text-2xl font-light tracking-tight sm:text-3xl">{titulo}</h1>
         <p className="text-muted-foreground text-sm">{sub}</p>
       </div>

@@ -318,6 +318,18 @@
 
 @layer base {
   /*
+   * Palavra sem espaço (CNPJ, chave, e-mail, endereço) quebra em vez de vazar
+   * da caixa (PADRAO_DE_INTERFACE.md, 7). Na tabela, só quebra quando não cabe:
+   * a coluna alarga primeiro e a tabela rola de lado.
+   */
+  body {
+    overflow-wrap: anywhere;
+  }
+  th,
+  td {
+    overflow-wrap: break-word;
+  }
+  /*
    * Barra de rolagem do sistema (UI kit): trilho invisível, polegar em pílula
    * fina na cor do texto do tema, mais forte ao passar o mouse. Sem setas.
    * Chrome, Edge e Safari usam ::-webkit-scrollbar; o Firefox, as propriedades padrão.

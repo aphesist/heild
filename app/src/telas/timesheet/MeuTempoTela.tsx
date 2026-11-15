@@ -161,7 +161,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                     const i = l.tipo === 'item' ? l.i : undefined
                     return (
                       <li key={l.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-2.5" data-linha={l.tipo}>
-                        <button type="button" onClick={() => abrir(l)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left">
+                        <button type="button" onClick={() => abrir(l)} className="flex min-w-0 grow basis-40 cursor-pointer items-center gap-3 text-left">
                           <Amostra c={c} />
                           <span className="w-24 shrink-0 text-xs tabular-nums sm:text-sm">
                             {hm(l.inicio)}–{hm(l.fim)}

@@ -90,7 +90,7 @@ export function UsuariosTela() {
                     .map((x) => x[0])
                     .join('')}
                 </span>
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
                     {u.nome}
                     <Badge variant={u.papel === 'administrador' ? 'default' : 'outline'}>{rotuloPapel[u.papel]}</Badge>
@@ -131,7 +131,7 @@ export function UsuariosTela() {
                 const dias = Math.max(0, Math.ceil((new Date(c.expira_em).getTime() - Date.now()) / 86_400_000))
                 return (
                   <li key={c.id} data-convite={c.destino} className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="min-w-0 flex-1">
+                    <span className="min-w-0 grow basis-40">
                       {c.destino}{' '}
                       <span className="text-muted-foreground">
                         · {c.papel_proposto ? rotuloPapel[c.papel_proposto] : 'Membro'} · {(c.setores_propostos ?? []).map((x) => nomeSetor(x as SetorIntegrante)).join(', ') || 'todos'} · {vencido ? 'vencido' : `expira em ${dias} dia(s)`}

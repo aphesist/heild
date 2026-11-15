@@ -50,7 +50,7 @@ export function Legenda({ itens, extra }: { itens: Confianca[]; extra?: ReactNod
 export function Pergunta({ children, acao }: { children: ReactNode; acao?: ReactNode }) {
   return (
     <header className="flex flex-wrap items-center gap-2">
-      <h3 className="min-w-0 flex-1 text-sm font-medium">{children}</h3>
+      <h3 className="min-w-0 grow basis-40 text-sm font-medium">{children}</h3>
       {acao}
     </header>
   )

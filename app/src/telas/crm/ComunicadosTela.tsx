@@ -40,7 +40,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
       <div className="pagina flex flex-col gap-6 pt-1">
         <section className="flex flex-col gap-3">
           <header className="flex flex-wrap items-end gap-2">
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 grow basis-40">
               <h1 className="text-2xl font-light tracking-tight sm:text-3xl">Comunicados</h1>
               <p className="text-muted-foreground text-sm">Para um segmento da carteira, por modelo aprovado. Fora da janela de 24 h, só para quem deu opt-in.</p>
             </div>
@@ -77,7 +77,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
 
         <section className="flex flex-col gap-3">
           <header className="flex flex-wrap items-end gap-2">
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 grow basis-40">
               <h2 className="text-lg font-light">Réguas</h2>
               <p className="text-muted-foreground text-sm">Cobranças em etapas, no fio da pessoa certa e no canal dela. Param sozinhas quando o cliente responde ou o item chega; três etapas sem resposta avisam o responsável.</p>
             </div>

@@ -419,7 +419,7 @@ function Ia({ t }: { t: TamanhoWidget }) {
               <span className="text-xs font-medium">Pedidos de promoção (30 cartões, 95% sem edição)</span>
               {g.promocoes.map((p) => (
                 <div key={p.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-[10px] px-2 py-1.5 text-xs">
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     {p.integrante}: {p.atividade} · {p.base}
                   </span>
                   {p.decidida ? (

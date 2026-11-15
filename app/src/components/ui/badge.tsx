@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority'
-import { Children, isValidElement, type ComponentProps, type ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { Children, type ComponentProps, type ReactNode } from 'react'
+import { cn, textoDoNo } from '@/lib/utils'
 
 export const badgeVariants = cva(
   'inline-flex w-fit max-w-full min-w-0 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium [&_svg]:size-3 [&_svg]:shrink-0',
@@ -19,16 +19,6 @@ export const badgeVariants = cva(
     defaultVariants: { variant: 'secondary' },
   },
 )
-
-/** Texto corrido dos filhos (para o `title` quando o selo trunca). */
-function textoDe(filhos: ReactNode): string {
-  let t = ''
-  Children.forEach(filhos, (f) => {
-    if (typeof f === 'string' || typeof f === 'number') t += f
-    else if (isValidElement<{ children?: ReactNode }>(f)) t += textoDe(f.props.children)
-  })
-  return t.replace(/\s+/g, ' ').trim()
-}
 
 /**
  * Selo de estado (cores.md: fundo do estado a 15%, texto em `texto`, ícone na cor
@@ -51,7 +41,7 @@ export function Badge({ className, variant, children, title, ...props }: Compone
   }
   fechar()
   return (
-    <span data-slot="badge" title={title ?? (textoDe(children) || undefined)} className={cn(badgeVariants({ variant }), className)} {...props}>
+    <span data-slot="badge" title={title ?? (textoDoNo(children) || undefined)} className={cn(badgeVariants({ variant }), className)} {...props}>
       {partes}
     </span>
   )

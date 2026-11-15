@@ -197,7 +197,7 @@ export function EntregasBpoTela({ empresa }: PropsBpo) {
               <ul className="divide-border/70 flex flex-col divide-y text-sm">
                 <li className="flex flex-wrap items-center gap-2 py-2">
                   <FileTextIcon className="text-muted-foreground size-4" />
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     Relatório de outubro (DRE, caixa, pagamentos, pendências)
                     {rel?.situacao === 'enviado' && <span className="text-muted-foreground block text-xs">enviado {dataHora(rel.enviado_em)} por {rel.enviado_por}</span>}
                     {rel?.situacao !== 'enviado' && rascunho && <span className="text-muted-foreground block text-xs">rascunho do Gerencial pronto para revisar</span>}
@@ -224,7 +224,7 @@ export function EntregasBpoTela({ empresa }: PropsBpo) {
                 </li>
                 <li className="flex flex-wrap items-center gap-2 py-2">
                   <FileTextIcon className="text-muted-foreground size-4" />
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     {e.contabil ? 'Fechamento ao setor Contábil (bpo.mes_fechado)' : 'Fechamento ao contador da empresa (BPO-013)'}
                     <span className="text-muted-foreground block text-xs">{fch?.situacao === 'enviado' ? `entregue ${dataHora(fch.enviado_em)}` : rel?.situacao !== 'enviado' ? 'até dia 7 · feche o relatório antes' : e.transacoes.length ? `até dia 7 · ainda há ${e.transacoes.length} lançamento(s) do extrato para conciliar` : 'até dia 7 · conciliação sem pendência e relatório aprovado'}</span>
                   </span>
@@ -677,7 +677,7 @@ export function VolumeBpoTela({ empresa }: PropsBpo) {
                         {v.contestacoes.map((c) => (
                           <div key={c.id} className="flex flex-wrap items-center gap-2 text-xs">
                             <ScalesIcon className="size-4" />
-                            <span className="min-w-0 flex-1">
+                            <span className="min-w-0 grow basis-40">
                               {qtdUnidade(c.quantidade, c.unidade)}: {c.motivo} · {c.por}
                             </span>
                             {c.situacao === 'aberta' ? (
@@ -962,7 +962,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
           <div className="border-border/70 flex flex-col gap-2 border-t pt-3">
             <div className="flex flex-wrap items-center gap-2">
               <ArrowsLeftRightIcon className="size-4" />
-              <span className="min-w-0 flex-1 text-sm">Redistribuição da semana</span>
+              <span className="min-w-0 grow basis-40 text-sm">Redistribuição da semana</span>
               <Button size="sm" variant="outline" className="rounded-full" disabled={trabalhando} onClick={pedirRedistribuicao}>
                 <RobotIcon /> {trabalhando ? 'Gerencial trabalhando…' : 'Pedir sugestão ao Gerencial'}
               </Button>

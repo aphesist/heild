@@ -100,7 +100,7 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
               <Avatar nome={usuario.nome} tamanho="lg" className="ring-background size-11 ring-2" />
               <Rotulo aberta={aberta} className="leading-tight">
                 <span className="block truncate text-sm font-medium">{usuario.nome}</span>
-                <span className="text-muted-foreground block truncate text-xs">{usuario.papel}</span>
+                <span className="block truncate text-xs">{usuario.papel}</span>
               </Rotulo>
             </button>
           </PopoverTrigger>
@@ -167,7 +167,8 @@ function ItemModulo({ item, ativo, aberta, onClick }: { item: ItemLateral; ativo
       aria-current={ativo ? 'page' : undefined}
       className={cn(
         'group relative flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors',
-        ativo ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+        // cores.md: texto-suave não passa no pé da barra (lateral-fim, 2,85:1); a barra inteira usa `texto` e o ativo se marca pelo fundo, o traço e o ícone cheio.
+        'text-foreground',
         aberta && !ativo && 'hover:bg-raised/50',
       )}
     >
@@ -201,12 +202,12 @@ function ItemAcao({ aberta, rotulo, onClick, atalho, expande, children }: { aber
       onClick={onClick}
       aria-label={rotulo}
       aria-expanded={expande ? aberta : undefined}
-      className="text-muted-foreground hover:text-foreground hover:bg-raised/50 flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors"
+      className="text-foreground hover:bg-raised/50 flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors"
     >
       <span className="flex size-11 shrink-0 items-center justify-center">{children}</span>
       <Rotulo aberta={aberta} className="text-xs">
         {rotulo}
-        {atalho && <kbd className="text-muted-foreground/80 ml-2 font-sans">{atalho}</kbd>}
+        {atalho && <kbd className="ml-2 font-sans">{atalho}</kbd>}
       </Rotulo>
     </button>
   )

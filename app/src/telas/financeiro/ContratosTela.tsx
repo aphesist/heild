@@ -427,7 +427,7 @@ function DetalheContrato({ fin, c, podeEditar, onFechar, onEditar }: { fin: Fin;
             <li key={a.id} className="bg-sunken/50 rounded-[14px] px-3 py-2">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">v{a.versao_para}</span>
-                <span className="min-w-0 flex-1">{a.resumo}</span>
+                <span className="min-w-0 grow basis-40">{a.resumo}</span>
                 <Badge variant={a.situacao === 'vigente' || a.situacao === 'aceito' ? 'sucesso' : 'destaque'}>{a.situacao.replace('_', ' ')}</Badge>
               </span>
               <span className="text-muted-foreground block text-xs">
@@ -448,7 +448,7 @@ function DetalheContrato({ fin, c, podeEditar, onFechar, onEditar }: { fin: Fin;
             return (
               <li key={x.id} className="flex flex-wrap items-center gap-2 py-2">
                 <span className="w-16 shrink-0">{rotuloCompetencia(x.competencia)}</span>
-                <span className="min-w-0 flex-1 text-xs">
+                <span className="min-w-0 grow basis-40 text-xs">
                   contrato {brl(c.total)} · cobrado {brl(base)} em itens{x.valor !== base ? ` + ${brl(x.valor - base, true)} de extras` : ''}
                 </span>
                 <Badge variant={confere ? 'sucesso' : 'destaque'}>{confere ? 'confere' : 'diferente (versão anterior?)'}</Badge>
@@ -685,7 +685,7 @@ function ExtrasAFaturar({ fin, podeEditar, onRegistrar }: { fin: Fin; podeEditar
           {comandasSemAvulso.map((t) => (
             <li key={t.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
               <ClipboardTextIcon className="text-muted-foreground size-4 shrink-0" />
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block">
                   Comanda de serviço extra: {t.titulo} <span className="text-muted-foreground">· {fin.nomeCliente(t.cliente_id)}</span>
                 </span>
@@ -1026,7 +1026,7 @@ function CampanhaReajuste({ fin, onFechar, onEnviado }: { fin: Fin; onFechar: ()
           <ul className="flex flex-col gap-2">
             {alvo.map((x) => (
               <li key={x.c.id} className="bg-sunken/50 flex flex-wrap items-center gap-3 rounded-[14px] px-3 py-2 text-sm">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block font-medium">{x.c.cliente}</span>
                   <span className="text-muted-foreground block text-xs">margem {x.m === undefined ? 'sem medição' : `${x.m}%`} · hoje {brl(x.c.total)}</span>
                 </span>

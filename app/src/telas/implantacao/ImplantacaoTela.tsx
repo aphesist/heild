@@ -162,7 +162,7 @@ function PassoSetores({ onFeito }: { onFeito: () => void }) {
       <ul className="divide-border/70 flex flex-col divide-y">
         {comEquipe.map((s) => (
           <li key={s.codigo} className="flex flex-wrap items-center gap-3 py-2">
-            <span className={cn('min-w-0 flex-1 text-sm', !s.ativo && 'text-muted-foreground')}>{s.nomeExibido}</span>
+            <span className={cn('min-w-0 grow basis-40 text-sm', !s.ativo && 'text-muted-foreground')}>{s.nomeExibido}</span>
             <span className="w-48">
               <CampoEscolha rotulo={`Responsável por ${s.nomeExibido}`} valor={s.responsavel ?? usuario.nome} onMudar={(v) => setSetores((xs) => xs.map((x) => (x.codigo === s.codigo ? { ...x, responsavel: v } : x)))} opcoes={contas.map((c) => ({ valor: c.nome, rotulo: c.nome }))} />
             </span>
@@ -310,7 +310,7 @@ function PassoClientes({ e, setE }: { e: EstadoImplantacao; setE: (f: (x: Estado
                   onChange={(ev) => setE((x) => ({ ...x, importacao: x.importacao && { ...x.importacao, linhas: x.importacao.linhas.map((y) => (y.id === l.id ? { ...y, incluir: ev.target.checked } : y)) } }))}
                   className="accent-foreground size-4"
                 />
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   {l.codigo} · {l.nome}
                   <span className="text-muted-foreground block text-xs">
                     {l.documento} · {l.regime}
@@ -511,7 +511,7 @@ function PassoMigracao({ e, setE, onFeito }: { e: EstadoImplantacao; setE: (f: (
         {e.ondas.map((o, i) => (
           <li key={o.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
             <span className="bg-raised flex size-6 items-center justify-center rounded-full text-xs">{i + 1}</span>
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 grow basis-40">
               <span className="block font-medium">{o.ferramenta}</span>
               <span className="text-muted-foreground block text-xs">
                 {o.o_que} · {o.quando}

@@ -64,7 +64,7 @@ export function IntegrantesTela() {
                 return (
                   <div key={p.id} className="flex flex-wrap items-center gap-3">
                     <Orb cor={t.cor} corOlhos={t.corOlhos} estado="precisa_de_voce" tamanho={32} cutucavel={false} extras={false} />
-                    <span className="min-w-0 flex-1 text-sm">
+                    <span className="min-w-0 grow basis-40 text-sm">
                       <span className="block">
                         {p.integrante}: posso passar a fazer <strong className="font-medium">{p.atividade}</strong> sozinho?
                       </span>
@@ -90,7 +90,7 @@ export function IntegrantesTela() {
               return (
                 <li key={p.setor} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', !p.ligado && 'opacity-60')}>
                   <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={30} cutucavel={false} extras={false} />
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     <span className="block text-sm font-medium">{t.nome}</span>
                     <span className="text-muted-foreground block truncate text-xs">
                       faz sozinho {p.sozinho} · prepara {p.prepara} · organiza {p.organiza} · avisa {nomeCanal[p.canal]}
@@ -168,7 +168,7 @@ export function IntegrantesTela() {
             {memoria.map((m) => (
               <li key={m.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', m.decisao && 'opacity-60')}>
                 <BrainIcon className="text-muted-foreground size-5 shrink-0" />
-                <span className="min-w-0 flex-1 text-sm">
+                <span className="min-w-0 grow basis-40 text-sm">
                   <span className="block">{m.regra}</span>
                   <span className="text-muted-foreground block text-xs">
                     {m.setor} · {m.escrita} · origem: {m.origem}
@@ -204,7 +204,7 @@ export function IntegrantesTela() {
           <ul className="flex flex-col gap-2 text-sm">
             {criadosPorUsuarios.map((c) => (
               <li key={c.nome} className="flex flex-wrap items-center gap-3">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   {c.nome}{' '}
                   <span className="text-muted-foreground">
                     · de {c.dono} · {c.setores} · {c.situacao} · {c.custo}

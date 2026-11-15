@@ -85,7 +85,7 @@ export function ArmazenamentoTela() {
               <li key={c.id} className="bg-sunken/50 flex flex-col gap-2 rounded-[16px] p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {c.tipo === 'plataforma' ? <DatabaseIcon className="text-muted-foreground size-5" /> : iconeProvedor(c.tipo)}
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     <span className="block text-sm font-medium">{c.nome}</span>
                     <span className="text-muted-foreground block text-xs">
                       {rotuloTipoArmazenamento[c.tipo]} · raiz {c.raiz} · {c.arquivos.toLocaleString('pt-BR')} arquivos · sincronização: {c.sincronizacao}

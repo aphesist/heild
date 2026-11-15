@@ -117,7 +117,7 @@ export function Faixa({ icone, children, acao }: { icone?: ReactNode; children: 
   return (
     <div className="bg-warning/10 flex flex-wrap items-center gap-3 rounded-[18px] px-4 py-3 text-sm">
       {icone}
-      <p className="min-w-0 flex-1">{children}</p>
+      <p className="min-w-0 grow basis-40">{children}</p>
       {acao}
     </div>
   )

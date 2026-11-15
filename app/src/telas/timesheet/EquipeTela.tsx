@@ -462,7 +462,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                   const c = s.contestacao!
                   return (
                     <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-2.5">
-                      <span className="min-w-0 flex-1">
+                      <span className="min-w-0 grow basis-40">
                         <span className="block truncate text-sm">
                           {ts.nomeUsuario(s.usuario_dono_id)} · {rotuloMotivoContestacao(c.motivo)} → {c.correcao}
                         </span>
@@ -488,7 +488,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
               <ul className="divide-border -mx-2 flex flex-col divide-y" data-testid="ts-anomalas">
                 {anomalas.map((s) => (
                   <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-2.5">
-                    <span className="min-w-0 flex-1">
+                    <span className="min-w-0 grow basis-40">
                       <span className="block truncate text-sm">
                         {ts.nomeUsuario(s.usuario_dono_id)} · {s.anomalia!.texto}
                       </span>
@@ -525,7 +525,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                 {ts.conectores.map((c) => (
                   <li key={c.id} className="flex flex-wrap items-start gap-3 text-sm">
                     <span className={cn('mt-1.5 size-2 shrink-0 rounded-full', c.status === 'conectado' ? 'bg-success' : c.status === 'importacao' ? 'bg-warning' : c.status === 'erro' ? 'bg-destructive' : 'bg-sunken ring-border ring-1')} />
-                    <span className="min-w-0 flex-1">
+                    <span className="min-w-0 grow basis-40">
                       <span className="block">
                         {c.core} <span className="text-muted-foreground">· {c.modo}</span>
                       </span>

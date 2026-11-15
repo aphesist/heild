@@ -69,7 +69,7 @@ export function SecaoFechamento({ e, onSecao, onEscolher }: { e: EmpresaVista; o
           {passos.map((p) => (
             <li key={p.chave} className="flex flex-wrap items-center gap-2 text-sm">
               {p.ok ? <CheckCircleIcon weight="fill" className="text-success size-4 shrink-0" /> : <CircleIcon className="text-muted-foreground size-4 shrink-0" />}
-              <span className={cn('min-w-0 flex-1', p.ok && 'text-muted-foreground')}>{p.texto}</span>
+              <span className={cn('min-w-0 grow basis-40', p.ok && 'text-muted-foreground')}>{p.texto}</span>
               {!p.ok && p.secao !== 'fechamento' && !fechado && (
                 <Button size="sm" variant="ghost" className="rounded-full" onClick={() => onSecao(p.secao)}>
                   Resolver <ArrowRightIcon />

@@ -488,7 +488,7 @@ export function PlanoContas({ onFechar }: Fechar) {
           <ul className="divide-border/70 flex flex-col divide-y">
             {fin.centros.map((c) => (
               <li key={c.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !c.ativo && 'opacity-50')}>
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block">{c.nome}</span>
                   <span className="text-muted-foreground block text-xs">{c.tipo === 'setor' ? 'setor fixo' : c.tipo === 'carteira_de_socio' ? 'carteira de sócio' : c.tipo}</span>
                 </span>
@@ -567,7 +567,7 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
         {fin.tabelaAvulsos.map((t) => (
           <li key={t.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !t.ativo && 'opacity-50')}>
             <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs">{t.atividade_id}</span>
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 grow basis-40">
               <span className="block">{t.nome}</span>
               <span className="text-muted-foreground block text-xs">
                 {unidade[t.unidade]} · {t.exige_aceite ? 'exige aceite do cliente' : 'sem aceite (cláusula do contrato)'}

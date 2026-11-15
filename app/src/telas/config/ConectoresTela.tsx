@@ -519,7 +519,7 @@ function Cofre() {
             {usosDe(vendoUso).map((u, i) => (
               <li key={i} className="flex flex-wrap items-center gap-2 py-2">
                 {u.resultado === 'ok' ? <CheckCircleIcon className="text-success size-4" /> : <XCircleIcon className="text-destructive size-4" />}
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   {u.por} · {catalogoConectores.find((x) => x.id === u.servico)?.nome ?? u.servico}
                   {u.cliente ? ` · ${u.cliente}` : ''}
                 </span>
@@ -840,7 +840,7 @@ function Auditoria({ onIr }: { onIr: (s: Secao) => void }) {
           {achados.map((a) => (
             <li key={a.id} className="flex flex-wrap items-center gap-3 py-2.5 text-sm">
               <Badge variant={a.tipo === 'vencendo' ? 'erro' : 'destaque'}>{rotulo[a.tipo]}</Badge>
-              <span className="min-w-0 flex-1">{a.texto}</span>
+              <span className="min-w-0 grow basis-40">{a.texto}</span>
               <Button size="sm" variant="ghost" className="rounded-full" onClick={() => onIr('cofre')}>
                 Abrir no cofre
               </Button>

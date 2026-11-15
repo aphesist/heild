@@ -798,7 +798,7 @@ function Prorrogacoes({ tamanho }: { tamanho: TamanhoWidget }) {
       <ul className="divide-border/70 flex flex-col divide-y">
         {visiveis.map((p) => (
           <li key={p.id} className="flex flex-wrap items-center gap-2 py-2 first:pt-0 last:pb-0">
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 grow basis-40">
               <span className="block text-sm">
                 <strong className="font-medium">{p.regra}</strong> · {p.situacao === 'sem_mudanca' ? 'sem mudança neste mês' : `prazo de ${p.competencia} prorrogado para ${ddmm(p.para)}`}
               </span>

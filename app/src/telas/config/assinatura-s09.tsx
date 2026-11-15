@@ -105,7 +105,7 @@ export function Pacotes() {
         </li>
         <li className="flex flex-wrap items-center gap-3 py-2.5">
           <ScalesIcon className="text-muted-foreground size-5" />
-          <span className="min-w-0 flex-1">
+          <span className="min-w-0 grow basis-40">
             Jurídico <span className="text-muted-foreground block text-xs">{juridico?.contratado ? `${juridico.advogados} advogado(s) · até ${juridico.processos} processos` : 'Processos, prazos, intimações e peças (pacote posterior)'}</span>
           </span>
           <Button size="sm" variant="outline" className="rounded-full" onClick={() => setConfig(true)}>

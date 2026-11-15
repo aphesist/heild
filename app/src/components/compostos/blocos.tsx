@@ -21,7 +21,7 @@ export function Numero({ valor, rotulo, detalhe }: { valor: ReactNode; rotulo: s
 export function TituloBloco({ children, acao, descricao }: { children: ReactNode; acao?: ReactNode; descricao?: ReactNode }) {
   return (
     <header className="flex flex-wrap items-start gap-2">
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 grow basis-40">
         <h3 className="text-sm font-medium text-balance">{children}</h3>
         {descricao && <p className="text-muted-foreground text-xs">{descricao}</p>}
       </div>

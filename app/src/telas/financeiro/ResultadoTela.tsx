@@ -253,7 +253,7 @@ export function ResultadoTela() {
               const cli = fin.clientes.find((x) => x.nome === c.cliente)
               return (
                 <li key={c.cliente} className="flex flex-wrap items-center gap-2 py-2">
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     <span className="block">{c.cliente}</span>
                     <span className="text-muted-foreground block text-xs">{c.itens}</span>
                   </span>
@@ -318,7 +318,7 @@ function Fechamentos({ fin, admin, podeFechar, onFechar, atualAberto = true }: {
         {lista.map((f) => (
           <li key={f.id} className="flex flex-wrap items-center gap-2 py-2">
             {f.situacao === 'fechado' ? <LockSimpleIcon className="size-4" /> : <LockSimpleOpenIcon className="text-muted-foreground size-4" />}
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 grow basis-40">
               <span className="block">{rotuloCompetencia(f.competencia)}</span>
               <span className="text-muted-foreground block text-xs">
                 {f.situacao === 'fechado' ? `fechado por ${f.fechado_por}${f.custo_hora ? ` · custo-hora ${brl(f.custo_hora)}` : ''}` : f.situacao === 'reaberto' ? `reaberto: ${f.motivo_reabertura}` : 'aberto'}

@@ -110,7 +110,7 @@ export function CaixasEmail() {
           <li key={c.setor} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3 text-sm">
             <EnvelopeSimpleIcon className="text-muted-foreground size-4" />
             <span className="w-40 font-medium">{rotuloSetor[c.setor as SetorIntegrante] ?? c.setor}</span>
-            <span className="min-w-0 flex-1 truncate">{c.endereco}</span>
+            <span className="min-w-0 grow basis-40 truncate">{c.endereco}</span>
             <Badge variant="outline">{c.provedor}</Badge>
             {c.conectada ? (
               <span className="text-muted-foreground flex items-center gap-1 text-xs">
@@ -185,7 +185,7 @@ export function Bloqueados() {
             <li key={b.numero} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-3 text-sm">
               <ProhibitIcon className="text-destructive size-4" />
               <span className="font-medium tabular-nums">{b.numero}</span>
-              <span className="text-muted-foreground min-w-0 flex-1 text-xs">
+              <span className="text-muted-foreground min-w-0 grow basis-40 text-xs">
                 {b.motivo} · por {b.por} em {b.em} · {b.mensagens} mensagens guardadas
               </span>
               <Button
@@ -280,7 +280,7 @@ export function Provedores() {
               <span className="w-40 font-medium">{rotuloSetor[c.setor]}</span>
               <span className="tabular-nums">{c.numero}</span>
               <Badge variant={p === 'experimental' || p === 'zapi' ? 'erro' : 'outline'}>{rotuloProvedor[p]}</Badge>
-              <span className="text-muted-foreground min-w-0 flex-1 text-xs">{provedores[c.setor] ? `desde ${provedores[c.setor].desde}` : 'qualidade alta · limite do escritório'}</span>
+              <span className="text-muted-foreground min-w-0 grow basis-40 text-xs">{provedores[c.setor] ? `desde ${provedores[c.setor].desde}` : 'qualidade alta · limite do escritório'}</span>
               {p !== 'cloud_api' && (
                 <Button
                   size="sm"

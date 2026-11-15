@@ -137,7 +137,7 @@ function PerguntasBloco({ cliente }: { cliente: Cliente }) {
           return (
             <li key={x.id} className="flex flex-col gap-1.5 py-2 first:pt-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block text-sm">{x.pergunta}</span>
                   <span className="text-muted-foreground block text-xs">
                     {x.quem} · {x.canal} · do {x.setorOrigem} · {x.quando}

@@ -74,7 +74,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
         <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-[10px] text-sm font-medium" aria-hidden>
           {siglaDe(c.nome)}
         </span>
-        <span className="min-w-0 flex-1">
+        <span className="min-w-0 grow basis-40">
           <span className="block truncate text-sm font-medium">{c.nome}</span>
           <span className="text-muted-foreground block truncate text-xs">Portal de acompanhamento · {c.escopo_mae.map((d) => rotuloDepto[d] ?? d).join(', ')}</span>
         </span>

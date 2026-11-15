@@ -51,7 +51,7 @@ export function NumerosTela() {
     <AreaRolagem className="h-full px-4 pb-8 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-5 pt-1">
         <header className="flex flex-wrap items-end gap-2">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 grow basis-40">
             <h1 className="text-2xl font-light tracking-tight sm:text-3xl">Configuração dos números</h1>
             <p className="text-muted-foreground text-sm">Só o Administrador muda. Conexão oficial com o WhatsApp (coexistência): o número continua no app do celular.</p>
           </div>

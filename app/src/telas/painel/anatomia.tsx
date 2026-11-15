@@ -176,7 +176,7 @@ export function CartoesPendentes({ setor, clienteId }: { setor: SetorIntegrante;
       {pendentes.slice(0, 3).map((c) => (
         <li key={c.id} className="bg-sunken flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
           <RobotIcon className="text-muted-foreground size-4 shrink-0" />
-          <span className="min-w-0 flex-1">
+          <span className="min-w-0 grow basis-40">
             <span className="block truncate">{c.resumo_humano}</span>
             <span className="text-muted-foreground block text-[11px]">preparado pelo {rotuloSetorCurto[setor]} · aguardando aprovação</span>
           </span>

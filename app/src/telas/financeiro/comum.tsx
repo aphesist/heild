@@ -196,7 +196,7 @@ export function Nota({ children, tom = 'neutro', className }: { children: ReactN
 export function Pergunta({ children, acao, descricao }: { children: ReactNode; acao?: ReactNode; descricao?: ReactNode }) {
   return (
     <header className="flex flex-wrap items-start gap-2">
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 grow basis-40">
         <h2 className="text-sm font-medium">{children}</h2>
         {descricao && <p className="text-muted-foreground text-xs">{descricao}</p>}
       </div>

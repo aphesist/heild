@@ -848,7 +848,7 @@ function EntregasContratantes({ contratantes }: { contratantes: ContratanteVista
               </ul>
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <FileTextIcon className="text-muted-foreground size-4" />
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   Relatório de outubro (marca do contratante)
                   <span className="text-muted-foreground block text-xs">{rel?.situacao === 'enviado' ? `enviado ${dataHora(rel.enviado_em)} por ${rel.enviado_por}` : rascunho ? `rascunho de ${String(rel?.extras?.rascunho_por ?? 'Atendimento')} pronto para revisar` : 'ainda sem rascunho'}</span>
                 </span>
@@ -940,7 +940,7 @@ function VolumeContratantes({ contratantes, todos }: { contratantes: Contratante
               {v.contestacoes.map((x) => (
                 <div key={x.id} className="flex flex-wrap items-center gap-2 text-xs">
                   <ScalesIcon className="size-4" />
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     {qtdUnidade(x.quantidade, x.unidade)}: {x.motivo} · {x.por}
                   </span>
                   {x.situacao === 'aberta' && gestor ? (
@@ -1179,7 +1179,7 @@ function ConfigContratante({ contratantes, contratante, onContexto, onPortal }: 
           <ul className="flex flex-col gap-1.5 text-sm">
             {c.procuracoes.map((p) => (
               <li key={p.empresa} className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1">{p.empresa}</span>
+                <span className="min-w-0 grow basis-40">{p.empresa}</span>
                 <span className="w-full sm:w-56">
                   <CampoEscolha
                     rotulo={`Credencial de ${p.empresa}`}
@@ -1217,7 +1217,7 @@ function ConfigContratante({ contratantes, contratante, onContexto, onPortal }: 
           <ul className="divide-border/70 flex flex-col divide-y text-sm" aria-label="Convidados do contratante">
             {c.convidados.map((g) => (
               <li key={g.id} className="flex flex-wrap items-center gap-2 py-2">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   {g.nome}
                   <span className="text-muted-foreground block text-xs">
                     {g.email} · {rotuloPapel(g.papel)}

@@ -27,7 +27,7 @@ export function VitrineKit() {
     <AreaRolagem className="from-background to-background-end text-foreground h-dvh bg-gradient-to-b">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
         <header className="flex flex-wrap items-end gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 grow basis-40">
             <Button variant="ghost" size="sm" className="-ml-2 rounded-full" onClick={() => irParaPagina('sistema')}>
               <ArrowLeftIcon /> Voltar ao sistema
             </Button>
@@ -62,7 +62,7 @@ function Secao({ titulo, descricao, acao, children, className }: { titulo: strin
   return (
     <section aria-label={titulo} className={cn('bg-surface shadow-painel flex min-w-0 flex-col gap-3 rounded-[24px] p-4', className)}>
       <header className="flex flex-wrap items-start gap-2">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 grow basis-40">
           <h2 className="text-base font-medium">{titulo}</h2>
           {descricao && <p className="text-muted-foreground text-xs">{descricao}</p>}
         </div>

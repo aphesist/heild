@@ -108,7 +108,7 @@ export function CaixaTela() {
               const s = x.entradas.reduce((t, v, i) => t + (i >= x.inicio ? v - x.saidas[i] : 0), 0)
               return (
                 <li key={c.id} className="flex flex-wrap items-center gap-2 py-2 text-sm">
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 grow basis-40">
                     <span className="block">{c.nome}</span>
                     <span className="text-muted-foreground block text-xs">
                       entradas {c.ajuste_entradas >= 0 ? '+' : ''}

@@ -380,7 +380,7 @@ function DeclaracoesBloco({ cliente }: { cliente: Cliente }) {
           return (
             <li key={d.id} className="flex flex-col gap-2 py-2 first:pt-0 last:pb-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block text-sm">
                     {d.nome} <span className="text-muted-foreground">{d.competencia}</span>
                   </span>
@@ -818,7 +818,7 @@ function CertidoesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Taman
               <div key={i.id} className="bg-raised flex flex-col gap-1.5 rounded-[12px] px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <GavelIcon className="text-muted-foreground size-4 shrink-0" />
-                  <span className="min-w-0 flex-1 text-sm">
+                  <span className="min-w-0 grow basis-40 text-sm">
                     {i.numero} · {i.assunto}
                     <span className="text-muted-foreground block text-xs">
                       {i.orgao} · prazo {ddmm(i.prazo)} ({dias} dias) · pede: {i.documentos.join(', ')}
@@ -1128,7 +1128,7 @@ function CarteiraFiscal() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="min-w-0 flex-1 text-sm">
+        <p className="min-w-0 grow basis-40 text-sm">
           PGDAS-D de outubro de <strong className="font-medium">{prontos.length} {prontos.length === 1 ? 'cliente pronto' : 'clientes prontos'}</strong>
           {deFora.length ? `; ${deFora.length} de fora` : ''}.
         </p>

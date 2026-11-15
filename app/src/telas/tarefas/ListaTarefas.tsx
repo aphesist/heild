@@ -384,7 +384,7 @@ export function FilaRevisao({ tarefas }: { tarefas: TarefaE[] }) {
             {lista.map((t) => (
               <li key={t.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-[12px] px-2.5 py-2 text-sm">
                 <CaixaSelecao rotulo={`Selecionar ${t.titulo}`} marcado={sel.marcado(t.id)} onMudar={(i) => sel.alternar(t.id, i)} />
-                <button type="button" className="min-w-0 flex-1 cursor-pointer text-left" onClick={() => fluxos.abrirTarefa(t.id)}>
+                <button type="button" className="min-w-0 grow basis-40 cursor-pointer text-left" onClick={() => fluxos.abrirTarefa(t.id)}>
                   <span className="block truncate">{t.titulo}</span>
                   <span className="text-muted-foreground block truncate text-xs">
                     {nomeClienteE(t, clientes)} · enviada por {String(t.extras?.enviada_revisao_por ?? responsavelE(t)?.nome ?? 'integrante')}

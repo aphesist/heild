@@ -631,7 +631,7 @@ function Comunicacoes() {
         <ul className="divide-border/70 flex flex-col divide-y">
           {lista.map((c) => (
             <li key={c.id} className="flex flex-wrap items-center gap-2 py-2 first:pt-0">
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block text-sm">
                   {c.tipo} · {c.tribunal}
                 </span>

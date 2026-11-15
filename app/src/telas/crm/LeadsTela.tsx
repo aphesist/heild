@@ -294,7 +294,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
             {[proposta, contrato].filter((d): d is NonNullable<typeof d> => !!d).map((d) => (
               <div key={d.tipo} className="bg-raised shadow-contorno flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2">
                 <FileTextIcon className="text-muted-foreground size-4" />
-                <span className="min-w-0 flex-1 truncate">{d.nome}</span>
+                <span className="min-w-0 grow basis-40 truncate">{d.nome}</span>
                 <Badge variant={d.situacao === 'assinado' || d.situacao === 'visto' ? 'sucesso' : d.situacao === 'rascunho' ? 'outline' : 'destaque'}>
                   {d.situacao === 'visto' && <EyeIcon />}
                   {{ rascunho: 'rascunho', enviado: 'enviado, sem abrir', visto: d.visto ?? 'visto', aguardando_assinatura: 'aguardando assinatura', assinado: 'assinado' }[d.situacao]}

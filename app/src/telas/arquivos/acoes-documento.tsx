@@ -91,7 +91,7 @@ export function DialogoVersoes({ d, onFechar }: { d: Documento; onFechar: () => 
         <DialogPrimitive.Overlay className="fixed inset-0 z-[65] bg-black/45" />
         <DialogPrimitive.Content aria-describedby={undefined} className="bg-background text-foreground fixed inset-2 z-[65] flex flex-col overflow-hidden rounded-[24px] shadow-2xl outline-none sm:inset-6">
           <header className="flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2.5">
-            <DialogPrimitive.Title className="min-w-0 flex-1 truncate text-sm font-medium sm:text-base">Versões · {d.nome}</DialogPrimitive.Title>
+            <DialogPrimitive.Title className="min-w-0 grow basis-40 truncate text-sm font-medium sm:text-base">Versões · {d.nome}</DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
               <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label="Fechar">
                 <XIcon />

@@ -129,7 +129,7 @@ function Casca({ p }: { p: ParamsLab }) {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3 sm:p-4">
         <header className="flex flex-col gap-3">
           <div className="flex flex-wrap items-end gap-3">
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 grow basis-40">
               <h2 className="font-heading text-2xl font-light tracking-tight">{ficha.nome}</h2>
               <p className="text-muted-foreground max-w-3xl text-sm text-pretty">{ficha.descricao}</p>
             </div>

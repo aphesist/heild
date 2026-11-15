@@ -1,7 +1,7 @@
 import { CheckIcon, MinusIcon, WarningIcon, XCircleIcon } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import type { Situacao } from '@/dados/painel-abas'
-import { cn } from '@/lib/utils'
+import { cn, textoDoNo } from '@/lib/utils'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /**
@@ -34,8 +34,14 @@ export function Linha({ inicio, titulo, detalhe, fim, className }: { inicio?: Re
     <li className={cn('flex items-center gap-3 py-2 first:pt-0 last:pb-0', className)}>
       {inicio}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm">{titulo}</span>
-        {detalhe && <span className="text-muted-foreground block truncate text-xs">{detalhe}</span>}
+        <span className="block truncate text-sm" title={textoDoNo(titulo) || undefined}>
+          {titulo}
+        </span>
+        {detalhe && (
+          <span className="text-muted-foreground block truncate text-xs" title={textoDoNo(detalhe) || undefined}>
+            {detalhe}
+          </span>
+        )}
       </span>
       {fim}
     </li>

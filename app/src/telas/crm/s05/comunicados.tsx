@@ -47,7 +47,7 @@ export function SegmentoPorTexto({ onUsar }: { onUsar: (descricao: string, predi
   return (
     <div className="bg-sunken/60 flex flex-col gap-2 rounded-[16px] p-3">
       <div className="flex flex-wrap gap-2">
-        <CampoTexto valor={texto} onMudar={setTexto} placeholder='ex.: "todos do Simples de SP com funcionários"' aria-label="Segmento em texto" className="min-w-0 flex-1" />
+        <CampoTexto valor={texto} onMudar={setTexto} placeholder='ex.: "todos do Simples de SP com funcionários"' aria-label="Segmento em texto" className="min-w-0 grow basis-40" />
         <Button
           size="sm"
           variant="outline"
@@ -302,7 +302,7 @@ export function ReguasPorCliente({ reguas }: { reguas: Regua[] }) {
           <li key={x.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5 text-sm">
             <span className="font-medium">{x.cliente}</span>
             <Badge variant="outline">{x.regua}</Badge>
-            <span className="text-muted-foreground min-w-0 flex-1">{x.regra}</span>
+            <span className="text-muted-foreground min-w-0 grow basis-40">{x.regra}</span>
             <Button
               size="icon-sm"
               variant="ghost"

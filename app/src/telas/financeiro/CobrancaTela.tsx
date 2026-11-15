@@ -365,7 +365,7 @@ function DetalheFatura({ fin, c, pode, onFechar }: { fin: Fin; c: Cobranca; pode
         <ul className="flex flex-col gap-1.5 text-sm">
           {notas.map((n) => (
             <li key={n.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[12px] px-3 py-2">
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 grow basis-40">
                 <span className="block">
                   {n.numero} · {n.servico}
                 </span>
@@ -586,7 +586,7 @@ function Devedores({ fin, pode, onAbrir }: { fin: Fin; pode: boolean; onAbrir: (
             const d = diasDeAtraso(c)
             return (
               <li key={c.id} className="flex flex-wrap items-center gap-2 py-2 text-sm">
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block truncate">{fin.nomeCliente(c.cliente_id)}</span>
                   <span className="text-muted-foreground block text-xs">
                     {rotuloCompetencia(c.competencia)} · {c.situacao === 'em_acordo' ? 'em acordo' : `${d} dias · régua em ${c.regua_etapa ?? rotuloDia(d)} · pausa parcial em ${Math.max(0, pausa - d)} dias`}
@@ -726,7 +726,7 @@ function NotasEscritorio({ fin, pode }: { fin: Fin; pode: boolean }) {
       <ul className="divide-border/70 flex flex-col divide-y">
         {lista.map((n) => (
           <li key={n.id} className="flex flex-wrap items-center gap-2 py-2 text-sm">
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 grow basis-40">
               <span className="block truncate">
                 {n.numero} · {fin.nomeCliente(n.cliente_id)}
               </span>
