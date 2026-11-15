@@ -1,0 +1,34 @@
+{
+  "name": "@heild/servidor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "tsx watch src/servidor.ts",
+    "start": "tsx src/servidor.ts",
+    "pg": "scripts/pg-local.sh",
+    "migrar": "tsx src/banco/migrar.ts",
+    "semear": "tsx src/banco/semear.ts",
+    "preparar": "scripts/pg-local.sh iniciar && tsx src/banco/migrar.ts && tsx src/banco/semear.ts",
+    "contratos": "tsx src/contratos.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.4.0",
+    "fastify": "^5.12.8",
+    "jose": "^6.2.17",
+    "postgres": "^3.4.9",
+    "zod": "^4.6.7",
+    "@heild/dominio": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}
