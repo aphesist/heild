@@ -179,6 +179,8 @@ async function decidir(tx: Tx, s: Sessao, d: DecisaoExecutor): Promise<Resultado
   for (const e of bsDecisao.escritas) {
     if (e.tabela !== 'evento' || !e.linha) continue
     Object.assign(e.linha, {
+      // O mesmo nome do evento de decisão do motor: é o que o gatilho 18 da B3 escuta.
+      nome: 'aprovacao.decidir',
       resultado: aprovar ? 'aprovado' : 'recusado',
       ...(diferenca ? { texto: `${nomeDoAtor(ator)} aprovou com alterações (${Object.keys(diferenca).join(', ')}): ${String(c.resumo_humano)}`, argumentos_resumo: { diferenca } } : {}),
     })

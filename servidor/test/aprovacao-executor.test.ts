@@ -101,7 +101,8 @@ describe('editar antes de aprovar (argumentos_editados)', () => {
     expect(await mensagensCom(original)).toBe(0)
     const c = await cartao(id)
     expect(c).toMatchObject({ status: 'editado_e_aprovado', argumentos_editados: { corpo: corrigido } })
-    const [ev] = await banco()`select argumentos_resumo, texto from evento where escritorio_id = 'esc-andrade' and aprovacao_id = ${id} and ferramenta = 'aprovacao.decidir'`
+    const [ev] = await banco()`select nome, argumentos_resumo, texto from evento where escritorio_id = 'esc-andrade' and aprovacao_id = ${id} and ferramenta = 'aprovacao.decidir'`
+    expect(ev.nome).toBe('aprovacao.decidir')
     expect(ev.argumentos_resumo).toMatchObject({ diferenca: { corpo: { de: original, para: corrigido } } })
     expect(ev.texto).toMatch(/aprovou com alterações \(corpo\)/)
   })
