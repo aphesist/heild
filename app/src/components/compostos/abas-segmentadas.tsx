@@ -30,7 +30,7 @@ export function AbasSegmentadas({ abas, ativa, onTrocar, rotulo = 'Abas', classN
       role="tablist"
       aria-label={rotulo}
       className={cn(
-        'bg-sunken inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full p-[3px] inset-shadow-trilho sem-barra',
+        'bg-sunken inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full p-[3px] inset-shadow-trilho sem-barra esmaecer-lados',
         className,
       )}
       onKeyDown={(e) => {

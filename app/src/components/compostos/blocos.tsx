@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 /** Caixa padrão de bloco de tela (mesma camada dos widgets: superfície sobre o fundo). */
 export function Caixa({ children, className }: { children: ReactNode; className?: string }) {
-  return <section className={cn('bg-surface shadow-cartao flex min-w-0 flex-col gap-3 rounded-[24px] p-4 sm:p-5', className)}>{children}</section>
+  return <section className={cn('bg-surface shadow-cartao rounded-cartao flex min-w-0 flex-col gap-3 p-4 sm:p-5', className)}>{children}</section>
 }
 
 /** Número com rótulo, para faixas de resumo. */
@@ -12,7 +12,7 @@ export function Numero({ valor, rotulo, detalhe }: { valor: ReactNode; rotulo: s
     <div className="flex min-w-0 flex-col">
       <span className="font-heading text-2xl font-light tabular-nums sm:text-3xl">{valor}</span>
       <span className="text-muted-foreground text-xs">{rotulo}</span>
-      {detalhe && <span className="text-muted-foreground text-[11px]">{detalhe}</span>}
+      {detalhe && <span className="text-muted-foreground text-xs">{detalhe}</span>}
     </div>
   )
 }
@@ -22,7 +22,7 @@ export function TituloBloco({ children, acao, descricao }: { children: ReactNode
   return (
     <header className="flex flex-wrap items-start gap-2">
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-medium">{children}</h3>
+        <h3 className="text-sm font-medium text-balance">{children}</h3>
         {descricao && <p className="text-muted-foreground text-xs">{descricao}</p>}
       </div>
       {acao}
