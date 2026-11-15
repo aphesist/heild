@@ -252,7 +252,10 @@ function detectar(opcoes) {
       const fora = [...el.querySelectorAll('*')].find((f) => {
         if (decorativo(f) || /(absolute|fixed)/.test(cs(f).position)) return false
         const fb = f.getBoundingClientRect()
-        return fb.width > 0 && fb.height > 0 && fb.right > ab.right + 2 && fb.left < ab.right
+        if (!(fb.width > 0 && fb.height > 0 && fb.right > ab.right + 2 && fb.left < ab.right)) return false
+        // Cortado por um ancestral (truncamento) dentro da área: não é ele que vaza.
+        for (let a = f.parentElement; a && a !== el; a = a.parentElement) if (/(hidden|clip)/.test(cs(a).overflowX)) return false
+        return true
       })
       if (fora) add('rolagem-lateral', `${Math.round(fora.getBoundingClientRect().right - ab.right)}px escondidos à direita da área: ${desc(fora)}`, el)
     }

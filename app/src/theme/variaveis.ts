@@ -131,6 +131,8 @@ export function variaveisCss(tema: Tema, modo: ModoCor): Record<string, string> 
     '--success-text': t.sucesso_texto ?? comContraste(t.sucesso, camadasTexto, t.texto),
     '--warning-text': t.atencao_texto ?? comContraste(atencao, camadasTexto, t.texto),
     '--highlight-text': t.destaque_texto ?? comContraste(t.destaque, camadasTexto, t.texto),
+    // A primária usada como texto (botão link, link no corpo): a própria cor, levada até 4,5:1 nas camadas quando não chega.
+    '--primary-text': comContraste(t.primaria, camadasTexto, t.texto),
     '--highlight': t.destaque,
     '--highlight-foreground': textoSobre(t.destaque),
     '--destructive': t.erro,

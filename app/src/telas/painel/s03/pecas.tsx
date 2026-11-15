@@ -6,7 +6,7 @@ import { usePermissao } from '@/components/kit'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useConectores, useEstadoConector, type IdConector } from '@/dados/conectores'
-import { cn } from '@/lib/utils'
+import { cn, textoDoNo } from '@/lib/utils'
 
 export type Nivel = 'preparar' | 'executar com aprovação' | 'executar' | 'só pessoa'
 
@@ -83,7 +83,13 @@ export function SeloFase({ fase, className }: { fase: number; className?: string
 /** Rótulo de situação: texto e cor (nunca só cor, 1.5). */
 export function Rotulo({ tom, children, className }: { tom: 'ok' | 'atencao' | 'erro' | 'neutro' | 'info'; children: ReactNode; className?: string }) {
   const cor = { ok: 'bg-success/15', atencao: 'bg-warning/15', erro: 'bg-destructive/12 text-foreground', neutro: 'bg-sunken text-muted-foreground', info: 'bg-raised shadow-contorno' }[tom]
-  return <span className={cn('inline-flex w-fit shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', cor, className)}>{children}</span>
+  // Nunca passa da largura de onde está (texto sem espaço, longo): trunca, com o texto inteiro no título.
+  const texto = textoDoNo(children)
+  return (
+    <span title={texto || undefined} className={cn('inline-flex w-fit max-w-full min-w-0 shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', cor, className)}>
+      <span className="min-w-0 truncate [&_svg]:inline [&_svg]:align-[-2px]">{children}</span>
+    </span>
+  )
 }
 
 /**

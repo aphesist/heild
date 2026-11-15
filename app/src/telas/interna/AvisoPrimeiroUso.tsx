@@ -10,7 +10,7 @@ export function AvisoPrimeiroUso() {
     <Dialog open={!aceite}>
       <DialogContent className="bg-surface rounded-campo border-0 p-6 sm:max-w-md [&>button:last-child]:hidden" onEscapeKeyDown={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <span className="bg-primary/10 text-primary mb-2 flex size-11 items-center justify-center rounded-full">
+          <span className="bg-primary/10 text-primary-text mb-2 flex size-11 items-center justify-center rounded-full">
             <ShieldCheckIcon className="size-5" weight="duotone" />
           </span>
           <DialogTitle className="font-medium">Mensagens não podem ser apagadas</DialogTitle>

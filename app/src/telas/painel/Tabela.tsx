@@ -51,7 +51,8 @@ export function Linha({ inicio, titulo, detalhe, fim, className }: { inicio?: Re
 /** Número grande com legenda, para widgets pequenos. */
 export function Numero({ valor, legenda, alerta }: { valor: ReactNode; legenda: ReactNode; alerta?: boolean }) {
   return (
-    <div className="flex h-full flex-col justify-end">
+    // O número e a legenda não encolhem por causa do texto ao lado (o texto do lado é que quebra ou corta).
+    <div className="flex h-full max-w-full shrink-0 flex-col justify-end">
       <span className={cn('font-heading text-4xl font-light tabular-nums', alerta && 'text-warning-text')}>{valor}</span>
       <span className="text-muted-foreground text-xs">{legenda}</span>
     </div>

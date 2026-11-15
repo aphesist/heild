@@ -115,8 +115,8 @@ function Erro({ texto, onTentar }: { texto: string; onTentar: () => void }) {
 function SimplesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWidget }) {
   const { f, estado } = useFiscal(cliente)
   const s = f.simples!
-  const decl = f.declaracoes.find((d) => d.nome === 'PGDAS-D')!
-  const transmitida = estado.transmitidas[decl.id]
+  const decl = f.declaracoes.find((d) => d.nome === 'PGDAS-D')
+  const transmitida = decl ? estado.transmitidas[decl.id] : undefined
   return (
     <div className="flex h-full flex-col gap-3">
       <MedidorSublimite rotulo="Receita 12 meses × sublimite" usado={s.rbt12} teto={3_600_000} semAviso={tamanho === 'M'} />

@@ -155,7 +155,8 @@ const TEXTO_LONGO = ' com a folha, o faturamento declarado, as notas de entrada 
 const SEM_ESPACO = '_conferiraguiadodasdeoutubrocomafolhaeofaturamento12345678000190'
 
 const ehData = (s: string) => /^\d{4}-\d{2}-\d{2}(T[\d:.]+Z?)?$/.test(s) || /^\d{2}\/\d{2}(\/\d{4})?$/.test(s)
-const ehTextoDeGente = (s: string) => s.length > 2 && /[a-zà-ú]{3}/i.test(s) && !ehData(s) && !/^[A-Z]{2,5}-\d{2,4}$/.test(s) && !/^[a-z0-9_:/.-]+$/.test(s)
+// Sigla ou código em maiúsculas (PGDAS-D, GIA-SP, FIS-010) não é texto de gente: fica como está.
+const ehTextoDeGente = (s: string) => s.length > 2 && /[a-zà-ú]{3}/i.test(s) && !ehData(s) && !/^[A-Z]{2,5}-\d{2,4}$/.test(s) && !/^[a-z0-9_:/.-]+$/.test(s) && /[a-zà-ú]/.test(s)
 
 function novaData(s: string, c: Cenario, i: number): string {
   const desloc = c.datas === 'vencidas' ? -(15 + (i % 40)) : c.datas === 'futuras' ? 10 + (i % 60) : 0

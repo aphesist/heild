@@ -300,7 +300,7 @@ function Acessos({ t }: { t: TamanhoWidget }) {
       <div className="flex h-full items-end justify-between gap-3">
         {gavetas}
         <Numero valor={`${lista.filter((a) => a.situacao === 'confirmada').length}/${lista.length}`} legenda="acessos em dia" />
-        <span className="text-muted-foreground pb-0.5 text-right text-xs">
+        <span className="text-muted-foreground line-clamp-3 min-w-0 pb-0.5 text-right text-xs">
           {lista.some((a) => a.situacao !== 'confirmada')
             ? `falta: ${lista
                 .filter((a) => a.situacao !== 'confirmada')
@@ -754,7 +754,7 @@ function AppDoCliente({ t }: { t: TamanhoWidget }) {
                 {[a.papeis.contabil && `Contábil: ${a.papeis.contabil}`, a.papeis.bpo_financeiro && `BPO: ${a.papeis.bpo_financeiro}`].filter(Boolean).join(' · ')}
               </span>
             </span>
-            <span className="text-muted-foreground shrink-0 text-right text-xs">{a.situacao === 'ativo' ? `${a.instalado ? 'instalado · ' : ''}${a.ultimo_acesso ?? ''}` : a.situacao === 'convite_pendente' ? `convite de ${ddmm(a.convidado_em)}` : `revogado por ${a.revogado_por}`}</span>
+            <span className="text-muted-foreground max-w-[50%] min-w-0 shrink-0 truncate text-right text-xs">{a.situacao === 'ativo' ? `${a.instalado ? 'instalado · ' : ''}${a.ultimo_acesso ?? ''}` : a.situacao === 'convite_pendente' ? `convite de ${ddmm(a.convidado_em)}` : `revogado por ${a.revogado_por}`}</span>
             {podeSoc && a.situacao !== 'revogado' && (
               <BotaoAcoes
                 rotulo={`Ações de ${a.pessoa}`}

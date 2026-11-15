@@ -79,6 +79,7 @@
   --color-success-text: var(--success-text);
   --color-warning-text: var(--warning-text);
   --color-highlight-text: var(--highlight-text);
+  --color-primary-text: var(--primary-text);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);

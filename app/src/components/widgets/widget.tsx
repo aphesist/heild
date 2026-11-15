@@ -18,6 +18,13 @@ const ContextoTamanho = createContext<TamanhoWidget>('M')
 export type EstadoDadosWidget = 'pronto' | 'carregando' | 'erro' | 'sem-permissao'
 export const ContextoEstadoWidget = createContext<{ estado: EstadoDadosWidget; onTentar?: () => void; onPedirAcesso?: () => void }>({ estado: 'pronto' })
 
+const ContextoTituloWidget = createContext<string>('')
+
+/** Título do widget em que o componente está (a gaveta de "Ver todos" usa). */
+export function useTituloWidget() {
+  return useContext(ContextoTituloWidget)
+}
+
 /** Tamanho do widget em que o componente está; para o conteúdo se adaptar. */
 export function useTamanhoWidget() {
   return useContext(ContextoTamanho)
@@ -86,6 +93,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
   const dados = useContext(ContextoEstadoWidget)
   return (
     <ContextoTamanho.Provider value={usado}>
+      <ContextoTituloWidget.Provider value={def.titulo}>
       <article
         aria-label={def.titulo}
         className={cn(
@@ -177,6 +185,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
           </>
         )}
       </article>
+      </ContextoTituloWidget.Provider>
     </ContextoTamanho.Provider>
   )
 }

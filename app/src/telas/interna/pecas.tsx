@@ -187,7 +187,7 @@ export function PlayerAudio({ m, onTentar }: { m: MensagemInterna; onTentar: () 
         {a.estado === 'indisponivel' && (
           <>
             Transcrição indisponível.{' '}
-            <button type="button" className="text-primary cursor-pointer underline-offset-2 hover:underline" onClick={onTentar}>
+            <button type="button" className="text-primary-text cursor-pointer underline-offset-2 hover:underline" onClick={onTentar}>
               Tentar de novo
             </button>
           </>
@@ -281,7 +281,7 @@ export function DialogoVirarTarefa({ m, inicial, onFechar, onCriada }: { m: Mens
       <Campo rotulo="Descrição">{(id) => <CampoArea id={id} valor={f.valores.descricao} onMudar={(x) => f.definir('descricao', x)} placeholder={m?.corpo} linhas={3} />}</Campo>
       <button
         type="button"
-        className="text-primary -mt-1 self-start text-xs underline-offset-2 hover:underline"
+        className="text-primary-text -mt-1 self-start text-xs underline-offset-2 hover:underline"
         onClick={() => {
           // Contrato C4: o formulário completo da S04 recebe os campos que ele já souber usar.
           const pedido: PedidoNovaTarefa = { setor: f.valores.setor as SetorIntegrante, cliente: loja.clientes.find((c) => c.id === f.valores.cliente)?.nome, titulo: f.valores.titulo, origem: 'conversa_interna', origemRef: m?.id }
@@ -390,7 +390,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
           <p className="text-foreground/90 text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">
             {partes.map((p, i) =>
               p.mencao ? (
-                <span key={i} className={cn('rounded px-0.5 font-medium', p.mencao.tipo === 'integrante' ? 'bg-primary/10 text-primary' : p.mencao.id === usuario.id ? 'bg-warning/25' : 'bg-sunken')}>
+                <span key={i} className={cn('rounded px-0.5 font-medium', p.mencao.tipo === 'integrante' ? 'bg-primary/10 text-primary-text' : p.mencao.id === usuario.id ? 'bg-warning/25' : 'bg-sunken')}>
                   {p.texto}
                 </span>
               ) : p.citacao ? (
@@ -407,7 +407,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
         <ListaAnexos m={m} />
         {reuniao && (
           <a href={reuniao} target="_blank" rel="noreferrer" className="bg-raised shadow-contorno hover:bg-sunken flex w-fit items-center gap-2 rounded-md px-3 py-2 text-xs">
-            <VideoCameraIcon className="text-primary size-4" /> Entrar na reunião <span className="text-muted-foreground max-w-40 truncate">{reuniao.replace(/^https?:\/\//, '')}</span>
+            <VideoCameraIcon className="text-primary-text size-4" /> Entrar na reunião <span className="text-muted-foreground max-w-40 truncate">{reuniao.replace(/^https?:\/\//, '')}</span>
           </a>
         )}
         {!!e.citacoes?.length && (
@@ -418,7 +418,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
           </div>
         )}
         {e.tarefa_id && (
-          <button type="button" onClick={() => fluxos.abrirTarefa(e.tarefa_id!)} className="text-primary flex w-fit cursor-pointer items-center gap-1.5 text-xs underline-offset-2 hover:underline">
+          <button type="button" onClick={() => fluxos.abrirTarefa(e.tarefa_id!)} className="text-primary-text flex w-fit cursor-pointer items-center gap-1.5 text-xs underline-offset-2 hover:underline">
             <CheckSquareOffsetIcon className="size-3.5" /> Virou tarefa: {e.tarefa_titulo}
           </button>
         )}
@@ -442,7 +442,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
         )}
         {e.ia?.demonstracao && <SeloDemonstracao fonte="Integrante (IA)" />}
         {!!respostas.length && acoes.onFio && (
-          <button type="button" onClick={() => acoes.onFio?.(m)} className="text-primary flex w-fit cursor-pointer items-center gap-1.5 text-xs font-medium underline-offset-2 hover:underline">
+          <button type="button" onClick={() => acoes.onFio?.(m)} className="text-primary-text flex w-fit cursor-pointer items-center gap-1.5 text-xs font-medium underline-offset-2 hover:underline">
             <ArrowBendUpLeftIcon className="size-3.5 -scale-x-100" /> {respostas.length} {respostas.length === 1 ? 'resposta' : 'respostas'} · última {quando(respostas.at(-1)!.criado_em)}
           </button>
         )}
@@ -625,7 +625,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
               <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => escolher(s)} className={cn('flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-left text-sm', i === sel ? 'bg-sunken' : 'hover:bg-sunken')}>
                 <span className="text-muted-foreground flex size-5 items-center justify-center">{s.icone}</span>
                 <span className="min-w-0 flex-1 truncate">{s.rotulo}</span>
-                <span className="text-muted-foreground shrink-0 text-xs">{s.detalhe}</span>
+                <span className="text-muted-foreground max-w-[50%] min-w-0 shrink-0 truncate text-xs">{s.detalhe}</span>
               </button>
             </li>
           ))}

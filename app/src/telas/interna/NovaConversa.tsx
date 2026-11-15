@@ -42,7 +42,7 @@ export function EscolherPessoas({ escolhidas, onMudar, excluir = [], unica }: { 
                 </span>
                 <span className="min-w-0 flex-1 truncate">{u.nome}</span>
                 <span className="text-muted-foreground text-xs">{u.cargo ?? ''}</span>
-                {sel && <CheckIcon className="text-primary size-4" />}
+                {sel && <CheckIcon className="text-primary-text size-4" />}
               </button>
             </li>
           )

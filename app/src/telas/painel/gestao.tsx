@@ -20,7 +20,7 @@ import { useMemo, useState } from 'react'
 import { useFluxos } from '@/ambiente/fluxos'
 import { salvarContas, useContas, useLoja, useNavegacao } from '@/ambiente/loja'
 import { perfilDe, useSessao } from '@/ambiente/sessao'
-import { EstadoVazio, SeloDemonstracao, useAcao } from '@/components/kit'
+import { EstadoVazio, SeloDemonstracao, TetoDeFilhos, useAcao } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { DefWidget, TamanhoWidget } from '@/components/widgets/tipos'
@@ -397,10 +397,10 @@ function Ia({ t }: { t: TamanhoWidget }) {
           <p className="text-muted-foreground text-xs">
             {pct(aprovados)}% aprovados · {pct(editados)}% editados · {pct(recusados)}% recusados · 318 ações feitas sozinhas · tempo humano médio de aprovação 2 min
           </p>
-          <div className={cn('grid gap-3', t === 'XL' && 'grid-cols-2')}>
+          <div className={cn('grid items-start gap-3', t === 'XL' && '@3xl:grid-cols-2')}>
             <div className="flex flex-col gap-1">
               <span className="text-xs font-medium">Faz sozinho (o Administrador só tira)</span>
-              <ul className="flex flex-col gap-0.5 text-xs">
+              <TetoDeFilhos classeLista="flex flex-col gap-0.5 text-xs" vazio={<p className="text-muted-foreground text-xs">Nada faz sozinho ainda.</p>}>
                 {g.sozinho.map((s) => (
                   <li key={s.id} className="flex items-center gap-2">
                     <span className={cn('min-w-0 flex-1 truncate', !s.ligado && 'text-muted-foreground line-through')}>
@@ -413,12 +413,13 @@ function Ia({ t }: { t: TamanhoWidget }) {
                     )}
                   </li>
                 ))}
-              </ul>
+              </TetoDeFilhos>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs font-medium">Pedidos de promoção (30 cartões, 95% sem edição)</span>
+              <TetoDeFilhos classeLista="flex flex-col gap-1" vazio={<p className="text-muted-foreground text-xs">Nenhum pedido de promoção.</p>}>
               {g.promocoes.map((p) => (
-                <div key={p.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-sm px-2 py-1.5 text-xs">
+                <li key={p.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-sm px-2 py-1.5 text-xs">
                   <span className="min-w-0 grow basis-40">
                     {p.integrante}: {p.atividade} · {p.base}
                   </span>
@@ -432,8 +433,9 @@ function Ia({ t }: { t: TamanhoWidget }) {
                   ) : (
                     <span className="text-muted-foreground">o Administrador decide</span>
                   )}
-                </div>
+                </li>
               ))}
+              </TetoDeFilhos>
               {aprendizados.length > 0 && (
                 <>
                   <span className="mt-1 text-xs font-medium">Aprendidos com as decisões</span>
@@ -528,7 +530,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
     // Duas colunas só quando o widget tem largura para o nome do processo não truncar (container, não a tela).
     <div className={cn('flex flex-col gap-3', t === 'XL' && '@3xl:grid @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-6')}>
       <div className="flex flex-col gap-2">
-        <ul className="flex flex-col gap-1.5">
+        <TetoDeFilhos classeLista="flex flex-col gap-1.5" vazio={<p className="text-muted-foreground text-sm">Nenhum processo recorrente ainda.</p>}>
           {g.processos.map((p) => (
             <li key={p.id} className="bg-raised flex flex-col gap-1 rounded-md px-3 py-2 text-sm">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -548,7 +550,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
               <span className="text-muted-foreground text-xs">Checklist: {p.checklist.join(' · ')}</span>
             </li>
           ))}
-        </ul>
+        </TetoDeFilhos>
         {novo ? (
           <form
             className="bg-raised flex flex-col gap-1.5 rounded-md p-3 text-xs"
@@ -834,7 +836,7 @@ function Rotinas({ t }: { t: TamanhoWidget }) {
           <div className="flex items-center gap-2">
             <span className={cn('size-2 shrink-0 rounded-full', r.status === 'ok' ? 'bg-success' : r.status === 'erro' ? 'bg-destructive' : 'bg-warning animate-pulse')} aria-hidden />
             <span className="min-w-0 flex-1 truncate">{r.nome}</span>
-            <span className="text-muted-foreground shrink-0 text-xs">{r.status === 'reprocessando' ? 'reprocessando…' : `${r.ultima}${r.fila ? ` · fila ${r.fila}` : ''}`}</span>
+            <span className="text-muted-foreground max-w-[50%] min-w-0 shrink-0 truncate text-xs">{r.status === 'reprocessando' ? 'reprocessando…' : `${r.ultima}${r.fila ? ` · fila ${r.fila}` : ''}`}</span>
             {r.status === 'erro' && (
               <Mini onClick={() => reprocessar(r.id)}>
                 <ArrowsClockwiseIcon /> Reprocessar

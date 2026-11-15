@@ -295,7 +295,7 @@ function TrilhaEntrada({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
               {pendentesCliente.map((i) => (
                 <span key={i.item} className="bg-raised flex items-center justify-between rounded-md px-2.5 py-2 text-sm">
                   {i.item}
-                  <span className="text-primary text-xs">Enviar</span>
+                  <span className="text-primary-text text-xs">Enviar</span>
                 </span>
               ))}
               {!pendentesCliente.length && <span className="text-sm">Tudo enviado. 🎉</span>}

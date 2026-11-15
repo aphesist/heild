@@ -56,7 +56,7 @@ function CapturaDoMes({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
       {t === 'M' ? (
         <Numero valor={fmt(totalXmls(e))} legenda={`XMLs capturados em ${e.competencia}`} />
       ) : (
-        <div className={cn('grid min-h-0 flex-1 gap-2', t === 'L' ? 'grid-cols-1 sm:grid-cols-3' : e.fluxos.length > 2 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2')}>
+        <div className={cn('grid gap-2', t === 'L' ? 'grid-cols-1 sm:grid-cols-3' : e.fluxos.length > 2 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2')}>
           {e.fluxos.map((f) => {
             const paridade = e.migracao_aberta ? (f.paridade === f.qtd ? 'paridade SIEG ok' : `SIEG achou ${fmt(f.paridade)} (${f.qtd - f.paridade > 0 ? '+' : ''}${f.qtd - f.paridade})`) : f.fonte
             const alerta = e.migracao_aberta && f.paridade !== f.qtd

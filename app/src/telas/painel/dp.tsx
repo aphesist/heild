@@ -25,7 +25,8 @@ import { useFluxos } from '@/ambiente/fluxos'
 import { useLoja } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { Contagem, Selo } from '@/components/compostos/painel-aba'
-import { EstadoVazio, SeloDemonstracao, useAcao } from '@/components/kit'
+import { EstadoVazio, SeloDemonstracao, TetoDeFilhos, useAcao } from '@/components/kit'
+import { VazioWidget } from '@/components/widgets/widget'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { DefWidget, TamanhoWidget } from '@/components/widgets/tipos'
@@ -69,7 +70,8 @@ export function widgetsDP(ctx: CtxAba): WidgetsAba {
 function useFazer() {
   return useAcao()
 }
-const Lista = ({ children, vazio }: { children: ReactNode[]; vazio: string }) => (children.length ? <ul className="divide-border/70 flex flex-col divide-y">{children}</ul> : <p className="text-muted-foreground py-2 text-sm">{vazio}</p>)
+// Contrato de transbordo: até o teto do tamanho do widget; além dele, "Ver todos (N)" numa gaveta.
+const Lista = ({ children, vazio }: { children: ReactNode[]; vazio: string }) => <TetoDeFilhos vazio={<VazioWidget>{vazio}</VazioWidget>}>{children}</TetoDeFilhos>
 const Mini = (p: React.ComponentProps<typeof Button>) => <Button size="sm" variant="outline" className="h-7 shrink-0 rounded-full px-2.5 text-xs" {...p} />
 const nomeCliente = (id: string) => repos.clientes.obter(id)?.nome ?? ''
 const dias = (iso: string) => diasEntre(HOJE_ISO, iso)
@@ -357,7 +359,7 @@ function Folha({ id, t }: { id: string; t: TamanhoWidget }) {
               {v.recebido ? 'recebida' : 'falta'}
             </Selo>
             <span className="min-w-0 flex-1 truncate">{v.item}</span>
-            <span className="text-muted-foreground shrink-0 text-xs">{v.via ?? v.esperado}</span>
+            <span className="text-muted-foreground max-w-[50%] min-w-0 shrink-0 truncate text-xs">{v.via ?? v.esperado}</span>
           </li>
         ))}
         {!e.variaveis.length && <li className="text-muted-foreground text-sm">Nenhuma variável esperada.</li>}
@@ -477,7 +479,7 @@ function Guias({ id, t }: { id: string; t: TamanhoWidget }) {
       depois: () => gravarDP(id, (x) => ({ boletos: x.boletos.map((y) => (y.id === b.id ? { ...y, status: 'emitido', arquivo: `${b.nome}.pdf` } : y)) })),
     })
   return (
-    <div className={cn('flex flex-col gap-3', t === 'XL' && 'grid grid-cols-2 gap-x-6')}>
+    <div className={cn('flex flex-col gap-3', t === 'XL' && '@3xl:grid @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-6')}>
       <div className="flex flex-col gap-1.5">
         <Lista vazio="Sem guias nesta competência.">
           {e.guias.map((g) => (
@@ -645,7 +647,7 @@ function Convencoes({ id, t }: { id: string; t: TamanhoWidget }) {
       depois: () => gravarDP(id, (x) => ({ cct: { ...x.cct, resumo: 'preparado', texto: ['Reajuste de 5,2% a partir de 01/11/2026 (retroativo na folha de novembro).', 'Piso da categoria: R$ 2.480,00.', 'Vale-refeição sobe para R$ 34,00 por dia.', 'Seguro de vida em grupo passa a ser obrigatório (boleto no dia 25).', 'Banco de horas: compensação em até 6 meses.'] } })),
     })
   return (
-    <div className={cn('flex flex-col gap-2', t === 'XL' && 'grid grid-cols-2 gap-x-6')}>
+    <div className={cn('flex flex-col gap-2', t === 'XL' && '@3xl:grid @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-6')}>
       <div className="flex flex-col gap-1.5 text-sm">
         <p>
           <span className="font-medium">{e.cct.sindicato}</span>

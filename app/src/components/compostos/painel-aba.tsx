@@ -418,11 +418,15 @@ export function Selo({ feito, alerta, children }: { feito: boolean; alerta?: boo
 
 /** Contagem regressiva de prazo legal (S-2200, rescisão): fica vermelha a 3 dias ou menos. */
 export function Contagem({ dias, rotulo }: { dias: number; rotulo: string }) {
-  const urgente = dias <= 3
+  // Prazo inválido não vira "NaN dias"; vencido diz que venceu (nunca "-5 dias"); o selo trunca, com o texto no título.
+  const valido = Number.isFinite(dias)
+  const urgente = valido && dias <= 3
+  const quando = !valido ? '' : dias === 0 ? 'vence hoje' : dias < 0 ? `venceu há ${-dias} ${dias === -1 ? 'dia' : 'dias'}` : `${dias} ${dias === 1 ? 'dia' : 'dias'}`
+  const texto = quando ? `${quando} · ${rotulo}` : rotulo
   return (
-    <span className={cn('flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums whitespace-nowrap', urgente ? 'bg-destructive/12 text-foreground' : 'bg-sunken')}>
-      <ClockCounterClockwiseIcon className="size-3.5 -scale-x-100" />
-      {dias === 0 ? 'vence hoje' : `${dias} ${dias === 1 ? 'dia' : 'dias'}`} · {rotulo}
+    <span title={texto} className={cn('flex w-fit max-w-full min-w-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums whitespace-nowrap', urgente ? 'bg-destructive/12 text-foreground' : 'bg-sunken')}>
+      <ClockCounterClockwiseIcon className="size-3.5 shrink-0 -scale-x-100" />
+      <span className="min-w-0 truncate">{texto}</span>
     </span>
   )
 }

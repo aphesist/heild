@@ -14,7 +14,7 @@ export const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         success: 'bg-success text-success-foreground hover:bg-success/90',
-        link: 'text-primary underline-offset-4 hover:underline',
+        link: 'text-primary-text underline-offset-4 hover:underline',
       },
       size: {
         // Altura mínima (não fixa): o rótulo que não cabe na largura do card quebra linha em vez de vazar (PADRAO_DE_INTERFACE.md, 6).

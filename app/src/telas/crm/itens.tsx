@@ -187,7 +187,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
         <div className="text-destructive-text flex items-center gap-1.5 text-xs">
           <WarningCircleIcon className="size-3.5" /> e-mail voltou: {item.devolvido}
           {onReenviar && (
-            <button type="button" className="text-primary cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>
+            <button type="button" className="text-primary-text cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>
               preparar reenvio por WhatsApp
             </button>
           )}
@@ -206,7 +206,7 @@ function Farol({ item, onReenviar }: { item: Extract<ItemConversa, { tipo: 'mens
       <span aria-hidden className={cn('size-2 rounded-full', cor === 'verde' ? 'bg-success' : cor === 'amarelo' ? 'bg-warning' : 'bg-destructive')} />
       {rotulo}
       {cor === 'vermelho' && onReenviar && (
-        <button type="button" className="text-primary cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>
+        <button type="button" className="text-primary-text cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>
           preparar reenvio por e-mail
         </button>
       )}

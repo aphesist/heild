@@ -689,7 +689,7 @@ function Prerequisitos({ tamanho }: { tamanho: TamanhoWidget }) {
           <li key={p.item} className="flex items-center gap-2 text-sm">
             <ChecksIcon className="text-success size-4 shrink-0" />
             <span className="min-w-0 flex-1 truncate">{p.item}</span>
-            <span className="text-muted-foreground shrink-0 text-xs">{p.detalhe}</span>
+            <span className="text-muted-foreground max-w-[50%] min-w-0 shrink-0 truncate text-xs">{p.detalhe}</span>
           </li>
         ))}
     </ul>
