@@ -56,6 +56,8 @@ try {
     if (parou) break
     modelos.porContrato = lado === 'haiku' ? { [CONTRATO]: { operario: 'claude-haiku-5-5' } } : {}
     const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'], bolsa_centavos: 1_000_000, bolsa_assistente: 1_000_000 })
+    // O horário de atendimento vem desligado por padrão; o gabarito o liga (padrão sugerido) para medir os casos de fora do horário.
+    await admin`update escritorio set configuracao = ${admin.json({ horario_atendimento: { ligado: true } })} where id = ${s.esc}`
     const a = { sql: admin, motor: h.motor, escritorio_id: s.esc, ctx: await pessoa(admin, s.esc, 'u-ana') }
     resultados[lado] = await avaliarConversas(a, casos, {
       repeticoes,

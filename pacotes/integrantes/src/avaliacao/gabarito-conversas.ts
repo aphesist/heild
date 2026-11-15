@@ -26,7 +26,7 @@ export interface CasoConversa {
    * quando o esperado é `pessoa` (04, A.10: assunto delicado vai a uma pessoa na hora).
    */
   aceitos?: Esperado[]
-  /** Relógio da triagem; padrão: segunda-feira, 14h (dentro do horário). */
+  /** Relógio da triagem; padrão: segunda-feira, 14h (dentro do horário). O roteiro de avaliação liga o horário padrão sugerido. */
   agora?: string
   /** Conversa aberta do cliente num setor (contexto que pula a triagem). */
   aberta?: SetorDestino

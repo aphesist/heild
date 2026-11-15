@@ -774,12 +774,12 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
 
 11. **Triagem como conversa** (`GES-TRIAR-REPASSAR` v3, `src/setores/triagem-conversa.ts`). A decisão do Enzo de 15/11/2026: "os clientes odeiam menu e falar com robô; os integrantes devem conversar como pessoas normais no WhatsApp". A pergunta de escolher o setor só vale nos fluxos de chatbot sem IA.
     - **Uma execução por mensagem do cliente**, enquanto a conversa espera triagem no setor de entrada. Sem mensagem nova do cliente, a execução recusa (`SEM_MENSAGEM_NOVA`); conversa já repassada também (`JA_TRIADA`).
-    - **Fora do horário de atendimento:**
+    - **Fora do horário de atendimento** (só com o horário ligado pelo escritório; vem desligado, item seguinte):
       - resposta automática fixa, sem IA, com o horário, com o prefixo `*{Escritório}*`, uma vez por período fechado;
       - nenhuma triagem; a conversa fica na fila com a etiqueta `fora_do_horario`;
       - um job atrasado (`atendimento.triagem_retomar`, gravado na mesma transação) retoma a triagem na primeira hora do expediente, como o integrante de Atendimento, se ninguém tiver assumido a conversa.
 
-      O horário vem de `escritorio.configuracao.horario_atendimento` (`dias`, `inicio`, `fim`), no fuso do escritório. O padrão é de segunda a sexta, das 8h às 18h, porque o plano ainda não fixou o horário (revisão de consistência, D11). Inválido ou ausente vira o padrão.
+      O horário vem de `escritorio.configuracao.horario_atendimento`, no fuso do escritório. **Vem desligado por padrão** (resposta do Enzo de 15/11/2026): sem `ligado: true`, a triagem atende a qualquer hora e não há resposta de fora do horário. Ligado, o padrão sugerido é de segunda a sexta, das 8h às 18h; `dias`, `inicio` e `fim` mudam o padrão, e um valor inválido vira o padrão sugerido. O roteiro de avaliação liga o horário para medir os casos de fora do horário.
     - **Regras, sem modelo, como na v2:**
       - conversa ligada a um setor nos últimos dias (conversa aberta, resposta a envio do escritório em 7 dias, um só setor ativo na carteira) pula a triagem em silêncio;
       - palavra-chave de um setor só repassa com um aviso fixo e natural ("Boa tarde! Vou passar sua mensagem para o pessoal do DP, que cuida disso. Daqui a pouco eles te respondem por aqui.");
@@ -797,7 +797,7 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - **As falas da triagem saem sem cartão** (ferramenta nova `conversa.triagem_responder`, executar, exposta ao cliente), porque só entendem o assunto e encaminham. Qualquer outra mensagem da IA ao cliente continua em `conversa.responder` (irreversível, com cartão). Todas levam `*{integrante} (IA)*`, sem repetir na sequência.
     - **O roteamento** é o da v2 (`conversa.rotear`, resumo escrito pelo sistema também como nota interna, integrante de destino acordado), com a origem e as perguntas em `conversa.extras.triagem`.
     - **Motor:** os passos ganharam `enfileirar` (pg-boss na mesma transação; some com o savepoint na sombra), para o job atrasado. A mudança só acrescenta.
-    - **Fora da v3:** a opção "menu e integrante" da v2 (sugestão por cartão quando o integrante discorda do menu). Com a decisão nova, a triagem pelo integrante não usa menu; se o escritório quiser menu, é o fluxo de chatbot sem IA.
+    - **Fora da v3** (confirmado pelo Enzo): a opção "menu e integrante" da v2 (sugestão por cartão quando o integrante discorda do menu). A triagem pelo integrante não usa menu; se o escritório quiser menu, é o fluxo de chatbot sem IA.
     - **Resultado real** ([`relatorios/triagem-conversa-2026-11-15-real.md`](relatorios/triagem-conversa-2026-11-15-real.md); 25 conversas × 2):
       - Sonnet acertou 50/50 e Haiku 49/50, sem erro crítico; nenhuma fala fora do tom ou do escopo nos dois (0 de 78 e 0 de 81).
       - Perguntas até rotear: média de 0,9 e máximo de 2. Custo por conversa: R$ 0,042 no Sonnet e R$ 0,0026 no Haiku.
@@ -835,13 +835,14 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
 - `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
 - `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
 - `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.
-- `triagem.test.ts` (12, triagem v3):
+- `triagem.test.ts` (13, triagem v3):
   - tom e escopo por regra: menu, lista, jargão de robô, formatação, duas perguntas; valor, prazo, promessa, documento sensível, resposta técnica;
-  - quem fala; horário de atendimento (padrão, fuso, próxima abertura, saudação, configuração inválida vira o padrão);
+  - quem fala; horário de atendimento (desligado por padrão; ligado, o padrão sugerido; fuso, próxima abertura, saudação, configuração inválida);
   - o gabarito de conversas cobre os grupos pedidos, e setor errado é crítico;
   - assunto vago: o integrante pergunta sem cartão, com "(IA)", e repassa ao DP avisando, sem repetir o prefixo; sem mensagem nova do cliente, não faz nada;
   - palavra-chave com aviso fixo e saudação, sem modelo; conversa aberta pula em silêncio;
-  - fora do horário: resposta fixa uma vez só, job atrasado para segunda às 8h, e a triagem roda na primeira hora;
+  - horário desligado (padrão): a mensagem do sábado é triada na hora, sem resposta automática nem job;
+  - horário ligado: fora dele, resposta fixa uma vez só, job atrasado para segunda às 8h, e a triagem roda na primeira hora;
   - cliente irritado vai a uma pessoa, com etiqueta urgente;
   - depois de 3 perguntas, cartão; a pessoa escolhe e o cliente recebe o aviso fixo;
   - mensagem fora do tom escala uma vez e vai ao cartão, sem sair nada;

@@ -12,8 +12,9 @@ import { DESCRICAO, DIAS_RESPOSTA_A_ENVIO, LIMIAR_ROTEIA, SETORES_DE_DESTINO, se
  * fluxos de chatbot sem IA.
  *
  * A cada mensagem nova do cliente na conversa que espera triagem:
- *   1. Fora do horário de atendimento: resposta automática FIXA (sem IA) com o horário; nenhuma
- *      triagem; a conversa fica na fila e a triagem retoma na primeira hora do expediente (job atrasado).
+ *   1. Com o horário de atendimento ligado pelo escritório (desligado por padrão), fora dele: resposta
+ *      automática FIXA (sem IA) com o horário; nenhuma triagem; a conversa fica na fila e a triagem
+ *      retoma na primeira hora do expediente (job atrasado).
  *   2. Regras, sem modelo: conversa ligada a um setor nos últimos dias (conversa aberta, resposta a
  *      envio do escritório em 7 dias, um só setor ativo na carteira) pula a triagem em silêncio;
  *      palavra-chave de um setor só repassa com um aviso fixo ao cliente.
@@ -361,7 +362,8 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
           const [esc] = await tx`select nome_fantasia, fuso_horario, configuracao from escritorio where id = ${s.execucao.escritorio_id}`
           const fuso = (esc?.fuso_horario as string | undefined) ?? 'America/Sao_Paulo'
           const horario = horarioDe(esc?.configuracao)
-          const fora = !dentroDoHorario(agora, horario, fuso)
+          // Horário desligado (padrão): atende a qualquer hora.
+          const fora = horario !== null && !dentroDoHorario(agora, horario, fuso)
           const avisos = fora ? await tx`select 1 from mensagem where conversa_id = ${c.id} and extras->>'tipo' = 'fora_do_horario' and (extras->>'retomar_em')::timestamptz > ${agora} limit 1` : []
 
           // Quem escreve: a conversa ligada ao cliente; senão, o histórico da mesma pessoa.
@@ -439,9 +441,9 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
             identificado_por,
             escritorio: String(esc?.nome_fantasia ?? 'Escritório'),
             fora_do_horario: fora,
-            retomar_em: fora ? proximaAbertura(agora, horario, fuso).toISOString() : null,
+            retomar_em: fora ? proximaAbertura(agora, horario!, fuso).toISOString() : null,
             ja_avisou_fora: avisos.length > 0,
-            horario_texto: textoDoHorario(horario),
+            horario_texto: horario ? textoDoHorario(horario) : '',
             saudacao: saudacao(agora, fuso),
             conversa: ordem.map((m) => ({ de: m.direcao === 'entrada' ? ('cliente' as const) : ('escritorio' as const), texto: String(m.corpo).slice(0, 600) })),
             ultimas_do_cliente: ultimas,

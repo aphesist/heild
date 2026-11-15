@@ -99,10 +99,15 @@ describe('horário de atendimento', () => {
     expect(proximaAbertura(new Date('2026-11-16T05:00:00-03:00'), HORARIO_PADRAO, SP).toISOString()).toBe('2026-11-16T11:00:00.000Z')
     expect(saudacao(new Date(EXPEDIENTE), SP)).toBe('Boa tarde')
     expect(saudacao(new Date('2026-11-16T09:00:00-03:00'), SP)).toBe('Bom dia')
-    // Configuração do escritório: válida vale; inválida ou ausente vira o padrão, sem derrubar a triagem.
-    expect(horarioDe({ horario_atendimento: { dias: [1, 2, 3, 4, 5, 6], inicio: '08:00', fim: '12:00' } })).toEqual({ dias: [1, 2, 3, 4, 5, 6], inicio: '08:00', fim: '12:00' })
-    expect(horarioDe({ horario_atendimento: { dias: [1], inicio: '18:00', fim: '08:00' } })).toEqual(HORARIO_PADRAO)
-    expect(horarioDe(null)).toEqual(HORARIO_PADRAO)
+    // Desligado por padrão: sem configuração, ou sem `ligado: true`, não há horário (atende a qualquer hora).
+    expect(horarioDe(null)).toBeNull()
+    expect(horarioDe({})).toBeNull()
+    expect(horarioDe({ horario_atendimento: { dias: [1, 2, 3, 4, 5], inicio: '08:00', fim: '18:00' } })).toBeNull()
+    expect(horarioDe({ horario_atendimento: { ligado: false, dias: [1], inicio: '08:00', fim: '12:00' } })).toBeNull()
+    // Ligado: sem dias e horas, o padrão sugerido; com, o dado; inválido vira o padrão, sem derrubar a triagem.
+    expect(horarioDe({ horario_atendimento: { ligado: true } })).toEqual(HORARIO_PADRAO)
+    expect(horarioDe({ horario_atendimento: { ligado: true, dias: [1, 2, 3, 4, 5, 6], inicio: '08:00', fim: '12:00' } })).toEqual({ dias: [1, 2, 3, 4, 5, 6], inicio: '08:00', fim: '12:00' })
+    expect(horarioDe({ horario_atendimento: { ligado: true, dias: [1], inicio: '18:00', fim: '08:00' } })).toEqual(HORARIO_PADRAO)
   })
 })
 
@@ -168,8 +173,20 @@ describe('triagem como conversa (v3)', () => {
     expect(await falas(nova)).toHaveLength(0)
   })
 
-  it('fora do horário: resposta automática fixa, sem IA e uma vez só; a triagem fica na fila para a primeira hora', async () => {
+  it('horário desligado (padrão): a mensagem do sábado é triada na hora, sem resposta de fora do horário', async () => {
     const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    const id = await conversa(s.esc, ['Preciso do holerite de outubro do Pedro.'])
+    const ex = await triar(s.esc, id, SABADO)
+    expect(ex.saida).toMatchObject({ acao: 'repassar', setor: 'dp', retomar_em: null })
+    const [f] = await falas(id)
+    expect(f!.extras.tipo).toBe('aviso_repasse')
+    expect(await admin`select 1 from pgboss.job where name = ${FILA_RETOMAR_TRIAGEM} and data->>'conversa_id' = ${id}`).toHaveLength(0)
+  })
+
+  it('horário ligado: fora dele, resposta automática fixa, sem IA e uma vez só; a triagem fica na fila para a primeira hora', async () => {
+    const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
+    // Ligado sem dias e horas: o padrão sugerido, de segunda a sexta, das 8h às 18h.
+    await admin`update escritorio set configuracao = ${admin.json({ horario_atendimento: { ligado: true } })} where id = ${s.esc}`
     const id = await conversa(s.esc, ['Oi, preciso de uma ajuda com a empresa.'])
     const ex = await triar(s.esc, id, SABADO)
     expect(ex.saida).toMatchObject({ acao: 'fora_do_horario', setor: null, retomar_em: '2026-11-23T11:00:00.000Z' })
@@ -240,8 +257,7 @@ describe('triagem como conversa (v3)', () => {
 
   it('pelo Assistente: "triar e repassar esta conversa" com a conversa anexada vai ao Atendimento', async () => {
     const s = await semear(admin, { executa_sozinho: ['GES-TRIAR-REPASSAR'] })
-    // Sem relógio na entrada: expediente o dia todo, para o teste não depender da hora em que roda.
-    await admin`update escritorio set configuracao = ${admin.json({ horario_atendimento: { dias: [0, 1, 2, 3, 4, 5, 6], inicio: '00:00', fim: '23:59' } })} where id = ${s.esc}`
+    // Sem relógio na entrada e com o horário desligado (padrão): atende a qualquer hora em que o teste rode.
     const id = await conversa(s.esc, ['Quando sai a guia do DAS deste mês?'])
     const r = await h.assistente.pedir(await pessoa(admin, s.esc, 'u-ana'), { texto: 'Pode triar e repassar esta conversa?', anexos: { conversa_id: id } })
     expect(r).toMatchObject({ estado: 'encaminhado', encaminhado_para: { integrante_id: 'i-atendimento' }, roteamento: { camada: 'regra', procedimento: 'GES-TRIAR-REPASSAR' } })
