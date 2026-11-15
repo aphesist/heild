@@ -235,7 +235,7 @@ export class Repositorio<K extends NomeTabela> {
     if (!d.permitido) throw new ErroPermissao(ferramenta, d.motivo)
     // No servidor, "uma pessoa precisa aprovar" para a operação e vira cartão (Fundações 3.3).
     // No navegador do wireframe a demonstração segue como sempre seguiu.
-    if (d.aprovacao && exigirAprovacao && !aprovadas.has(ferramenta)) throw new ErroAprovacao(ferramenta, d.motivo, this.regras.alvo?.(linha) ?? {})
+    if (d.aprovacao && exigirAprovacao && !aprovadas.has(ferramenta)) throw new ErroAprovacao(ferramenta, d.motivo, this.regras.alvo?.(linha) ?? {}, { tabela: this.tabela, id: (linha as { id?: string }).id })
     return ctx
   }
 
@@ -257,10 +257,13 @@ export class Repositorio<K extends NomeTabela> {
 export class ErroAprovacao extends Error {
   readonly ferramenta: string
   readonly alvo: Alvo
-  constructor(ferramenta: string, motivo: string, alvo: Alvo) {
+  /** A linha que a operação ia gravar (o cartão guarda a versão dela, se ela já existia). */
+  readonly registro?: { tabela: string; id?: string }
+  constructor(ferramenta: string, motivo: string, alvo: Alvo, registro?: { tabela: string; id?: string }) {
     super(motivo)
     this.ferramenta = ferramenta
     this.alvo = alvo
+    this.registro = registro
   }
 }
 

@@ -150,6 +150,15 @@ export async function carregarPerfil(tx: Tx, usuarioId: string): Promise<Perfil 
  * o integrante age em nome da pessoa do token e nunca passa do que ela pode (R4).
  * Na produção, o integrante chega com o token próprio emitido para o orquestrador (B2).
  */
+/** O integrante agindo em nome do dono (nunca passa do que o dono pode, R4). Nulo se não existe. */
+export async function contextoDoIntegrante(tx: Tx, integranteId: string, dono: Perfil): Promise<Contexto | null> {
+  const [i] = await tx`select id, nome_exibido, setor from integrante where id = ${integranteId}`
+  if (!i) return null
+  const nome = (i.nome_exibido as string | null) ?? (rotuloSetorCurto as Record<string, string>)[String(i.setor)] ?? String(i.setor)
+  // Nos textos, o integrante leva o sufixo, como no wireframe e na semente ("Contas a Pagar (integrante)").
+  return { ator: { tipo: 'integrante', id: String(i.id), nome: `${nome} (integrante)`, dono }, origem: 'chat' }
+}
+
 export async function abrirSessao(sql: Sql, claims: ClaimsToken, integranteId?: string): Promise<Sessao> {
   if (claims.tipo === 'cliente') {
     if (integranteId) throw new ErroApi('NEGADO', { mensagem: 'O app do cliente não age como integrante.' })
@@ -171,9 +180,9 @@ export async function abrirSessao(sql: Sql, claims: ClaimsToken, integranteId?: 
       throw new ErroApi('EXIGE_MFA', { mensagem: 'Entre com o segundo fator (código do aplicativo autenticador) para continuar.' })
     if (integranteId) {
       if (!config.demonstracao) throw new ErroApi('DEMONSTRACAO_DESLIGADA', { mensagem: 'Integrante só age com o token próprio (orquestrador).' })
-      const [i] = await tx!`select id, nome_exibido, setor from integrante where id = ${integranteId}`
-      if (!i) throw new ErroApi('NAO_ENCONTRADO', { campo: 'X-Heild-Integrante', mensagem: `Não encontrei o integrante ${integranteId}.` })
-      return { claims, perfil, ctx: { ator: { tipo: 'integrante', id: String(i.id), nome: (i.nome_exibido as string | null) ?? (rotuloSetorCurto as Record<string, string>)[String(i.setor)] ?? String(i.setor), dono: perfil }, origem: 'chat' } }
+      const ctx = await contextoDoIntegrante(tx!, integranteId, perfil)
+      if (!ctx) throw new ErroApi('NAO_ENCONTRADO', { campo: 'X-Heild-Integrante', mensagem: `Não encontrei o integrante ${integranteId}.` })
+      return { claims, perfil, ctx }
     }
     return { claims, perfil, ctx: { ator: { tipo: 'pessoa', perfil }, origem: 'tela' } }
   }

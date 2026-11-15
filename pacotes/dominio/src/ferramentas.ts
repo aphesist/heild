@@ -419,9 +419,16 @@ export const ferramentasTipadas: FerramentaTipada[] = [
   escrita({
     nome: 'aprovacao.decidir',
     versao: 1,
-    descricao_modelo: 'Decide um cartão de aprovação. Só pessoa decide; cartão decidido não muda.',
-    entrada: z.object({ cartao_id: Id, decisao: z.enum(['aprovado', 'recusado', 'editado_e_aprovado']), comentario: z.string().max(1000).optional() }).strict(),
-    erros: ['NAO_ENCONTRADO', 'JA_DECIDIDO', 'SO_PESSOA_DECIDE'],
+    descricao_modelo: 'Decide um cartão de aprovação. Só pessoa decide; cartão decidido não muda. Aprovar executa o que o integrante pediu, exatamente como pedido; argumentos_editados altera campos da entrada antes de aprovar (o evento registra a diferença).',
+    entrada: z
+      .object({
+        cartao_id: Id,
+        decisao: z.enum(['aprovado', 'recusado', 'editado_e_aprovado']),
+        comentario: z.string().max(1000).optional(),
+        argumentos_editados: z.record(z.string(), z.unknown()).optional(),
+      })
+      .strict(),
+    erros: ['NAO_ENCONTRADO', 'JA_DECIDIDO', 'SO_PESSOA_DECIDE', 'NEGADO', 'VERSAO_DESATUALIZADA', 'ENTRADA_INVALIDA', 'EXIGE_APROVACAO'],
     exposta_mcp: false,
     chamada: (e) => ({ operacao: 'cartoes.decidir', argumentos: [e.cartao_id, e.decisao, e.comentario ? { comentario: e.comentario } : {}] }),
   }),

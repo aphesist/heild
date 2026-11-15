@@ -12,7 +12,7 @@ export async function gravarEventos(
   tx: Tx,
   escritorioId: string,
   eventos: Registro[],
-  extra: { sessao_auth_id: string | null; idempotencia_chave: string | null },
+  extra: { sessao_auth_id: string | null; idempotencia_chave: string | null; aprovacao_id?: string | null },
   /** `manterHora`: só a semente da demonstração (eventos de exemplo com data no passado). */
   opcoes: { manterHora?: boolean } = {},
 ) {
@@ -39,9 +39,10 @@ export async function gravarEventos(
       ferramenta_versao: 1,
       sessao_auth_id: extra.sessao_auth_id,
       idempotencia_chave: extra.idempotencia_chave,
+      ...(extra.aprovacao_id ? { aprovacao_id: extra.aprovacao_id } : {}),
     } as unknown as EventoDaCadeia
     const hash = hashDoEvento(anterior, completo)
-    const valores = { ...base.valores, seq, ferramenta_versao: 1, sessao_auth_id: extra.sessao_auth_id, idempotencia_chave: extra.idempotencia_chave, hash_anterior: Buffer.from(anterior), hash: Buffer.from(hash) }
+    const valores = { ...base.valores, seq, ferramenta_versao: 1, sessao_auth_id: extra.sessao_auth_id, idempotencia_chave: extra.idempotencia_chave, ...(extra.aprovacao_id ? { aprovacao_id: extra.aprovacao_id } : {}), hash_anterior: Buffer.from(anterior), hash: Buffer.from(hash) }
     const [g] = await tx`insert into evento ${tx(valores as Record<string, unknown>, Object.keys(valores))} returning *`
     gravados.push(paraJson(g))
     anterior = new Uint8Array(hash)
