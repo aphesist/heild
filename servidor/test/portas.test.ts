@@ -65,7 +65,7 @@ describe('sincronização por versão', () => {
     await ferramenta(app, adm, 'tarefa.atualizar', { tarefa_id: t.id, campos: { titulo: 'Título mudado para o delta' } })
     // Convite pode ser excluído de vez (exclusao: 'definitiva'): a exclusão aparece no delta.
     const [cv] = await banco()`select id from convite where escritorio_id = 'esc-andrade' order by id limit 1`
-    if (cv) expect((await operacao(app, adm, { tipo: 'operacao', operacao: 'convites.excluir', argumentos: [cv.id] })).status).toBe(200)
+    if (cv) expect((await ferramenta(app, adm, 'convite.excluir', { convite_id: cv.id })).status).toBe(200)
     const delta = (await app.inject({ method: 'GET', url: `/v1/sincronizar?desde=${versao}`, headers: { authorization: `Bearer ${adm}` } })).json()
     expect(delta.tabelas.tarefa.map((x: { id: string }) => x.id)).toEqual([t.id])
     expect(delta.tabelas.cliente).toEqual([])
@@ -100,9 +100,15 @@ describe('escrita direta da tela (linhas)', () => {
     const sem = await operacao(app, adm, { tipo: 'linhas', gravar: [{ tabela: 'idempotencia', linha: { id: 'x' } }], remover: [] })
     expect(sem.corpo.codigo).toBe('TABELA_SEM_REGRA')
     const [cli] = await banco()`select id from cliente where escritorio_id = 'esc-andrade' order by id limit 1`
+    // Tabela da F1: campo fora dos editáveis nem chega ao banco (B5).
     const campo = await operacao(app, adm, { tipo: 'linhas', gravar: [{ tabela: 'cliente', linha: { id: cli.id, campo_que_nao_existe: 1 } }], remover: [] })
     expect(campo.status).toBe(400)
-    expect(campo.corpo).toMatchObject({ codigo: 'ENTRADA_INVALIDA', campo: 'cliente.campo_que_nao_existe' })
+    expect(campo.corpo).toMatchObject({ codigo: 'USE_FERRAMENTA_TIPADA', campo: 'cliente.campo_que_nao_existe' })
+    // Tabela de fase seguinte (CRM): o banco diz que a coluna não existe, com o nome.
+    const [ld] = await banco()`select id from conversa where escritorio_id = 'esc-andrade' order by id limit 1`
+    const noBanco = await operacao(app, adm, { tipo: 'linhas', gravar: [{ tabela: 'conversa', linha: { id: ld.id, campo_que_nao_existe: 1 } }], remover: [] })
+    expect(noBanco.status).toBe(400)
+    expect(noBanco.corpo).toMatchObject({ codigo: 'ENTRADA_INVALIDA', campo: 'conversa.campo_que_nao_existe' })
   })
 })
 

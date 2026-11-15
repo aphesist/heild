@@ -5,7 +5,7 @@ const app = api()
 let adm: string
 /** Tarefa nova, a fazer, criada pela própria API (os testes não dependem do que sobrou na semente). */
 const tarefaAberta = async () => {
-  const r = await operacao(app, adm, { tipo: 'operacao', operacao: 'tarefas.criar', argumentos: [{ setor_id: 'fiscal', atividade_id: 'FIS-001', titulo: 'Tarefa de teste', origem: 'pessoa', status: 'a_fazer', status_desde: new Date().toISOString(), prioridade: 'normal', checklist: [], risco: false, quem_conclui: 'pessoa' }] })
+  const r = await ferramenta(app, adm, 'tarefa.criar', { setor_id: 'fiscal', atividade_id: 'FIS-001', titulo: 'Tarefa de teste' })
   if (r.status !== 200) throw new Error(JSON.stringify(r.corpo))
   return r.corpo.linhas.tarefa[0].id as string
 }
@@ -84,13 +84,14 @@ describe('idempotência obrigatória', () => {
   })
 
   it('a tela manda os ids que gerou: a linha gravada fica com o mesmo id; repetir o id não sobrescreve', async () => {
-    const dados = { setor_id: 'fiscal', atividade_id: 'FIS-001', titulo: 'Conferir guia', origem: 'pessoa', status: 'a_fazer', status_desde: new Date().toISOString(), prioridade: 'normal', checklist: [], risco: false, quem_conclui: 'pessoa' }
+    const dados = { setor_id: 'fiscal', atividade_id: 'FIS-001', titulo: 'Conferir guia' }
     const ids = [{ p: 'tk', id: 'tk-da-tela-1' }, { p: 'ev', id: 'ev-da-tela-1' }]
-    const r = await operacao(app, adm, { tipo: 'operacao', operacao: 'tarefas.criar', argumentos: [dados], ids })
+    // A tela manda os ids no envelope da ferramenta tipada (heild_tela), fora do esquema dela.
+    const r = await ferramenta(app, adm, 'tarefa.criar', dados, { tela: { ids } })
     expect(r.status).toBe(200)
     expect(r.corpo.linhas.tarefa[0].id).toBe('tk-da-tela-1')
     expect(r.corpo.linhas.evento[0].id).toBe('ev-da-tela-1')
-    const de_novo = await operacao(app, adm, { tipo: 'operacao', operacao: 'tarefas.criar', argumentos: [{ ...dados, titulo: 'Outra' }], ids: [{ p: 'tk', id: 'tk-da-tela-1' }] })
+    const de_novo = await ferramenta(app, adm, 'tarefa.criar', { ...dados, titulo: 'Outra' }, { tela: { ids: [{ p: 'tk', id: 'tk-da-tela-1' }] } })
     expect(de_novo.status).toBe(409)
     expect(de_novo.corpo.codigo).toBe('ID_EM_USO')
     const [t] = await banco()`select titulo from tarefa where escritorio_id = 'esc-horizonte' and id = 'tk-da-tela-1'`

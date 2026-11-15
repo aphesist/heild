@@ -74,9 +74,13 @@ describe('papel e gestão', () => {
   })
 
   it('arquivar cliente é de Gestor: o Membro não passa nem trocando a ferramenta nas opções', async () => {
+    // Pela operação genérica nem entra (B5: só pela ferramenta tipada); pela ferramenta, a regra nega.
     const r = await operacao(app, rafael, { tipo: 'operacao', operacao: 'clientes.arquivar', argumentos: ['c1', { motivo: 'teste', ferramenta: 'cliente.atualizar', semAutorizar: true }] })
-    expect(r.status).toBe(403)
-    expect(r.corpo.codigo).toBe('PAPEL_INSUFICIENTE')
+    expect(r.status).toBe(400)
+    expect(r.corpo.codigo).toBe('USE_FERRAMENTA_TIPADA')
+    const t = await ferramenta(app, rafael, 'cliente.arquivar', { cliente_id: 'c1', motivo: 'teste' })
+    expect(t.status).toBe(403)
+    expect(t.corpo.codigo).toBe('PAPEL_INSUFICIENTE')
   })
 })
 

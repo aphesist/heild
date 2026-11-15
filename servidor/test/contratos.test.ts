@@ -13,9 +13,12 @@ describe('catálogo das ferramentas tipadas', () => {
     const abertos: string[] = []
     const andar = (s: any, onde: string) => {
       if (!s || typeof s !== 'object') return
-      if (s.type === 'object' && s.additionalProperties !== false) abertos.push(onde)
+      // Objeto com campos declarados é sempre estrito. O mapa livre declarado como tal (z.record:
+      // `propertyNames`, como `extras`, `regra_prazo`) é o único aberto, de propósito.
+      if (s.type === 'object' && s.additionalProperties !== false && !s.propertyNames) abertos.push(onde)
       for (const [k, v] of Object.entries(s.properties ?? {})) andar(v, `${onde}.${k}`)
       if (s.items) andar(s.items, `${onde}[]`)
+      for (const v of s.anyOf ?? []) andar(v, onde)
     }
     for (const f of ferramentasTipadas) andar(z.toJSONSchema(f.entrada, { io: 'input' }), f.nome)
     expect(abertos).toEqual([])

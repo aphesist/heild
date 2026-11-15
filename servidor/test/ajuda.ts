@@ -4,7 +4,7 @@ import { sqlAdmin } from '../src/banco/pg.ts'
 
 /** API de teste (inject, sem rede) e atalhos para entrar e chamar. */
 export function api(): FastifyInstance {
-  return criarApp({ logs: false })
+  return criarApp({ logs: false, relogios: false })
 }
 
 let contador = 0
@@ -22,12 +22,12 @@ export interface Chamada {
   cabecalhos: Record<string, unknown>
 }
 
-export async function ferramenta(app: FastifyInstance, token: string, nome: string, entrada: Record<string, unknown>, o: { chave?: string | null; integrante?: string } = {}): Promise<Chamada> {
+export async function ferramenta(app: FastifyInstance, token: string, nome: string, entrada: Record<string, unknown>, o: { chave?: string | null; integrante?: string; tela?: { ids?: { p: string; id: string }[]; texto?: string } } = {}): Promise<Chamada> {
   const headers: Record<string, string> = { authorization: `Bearer ${token}` }
   const k = o.chave === undefined ? chave(nome) : o.chave
   if (k) headers['idempotency-key'] = k
   if (o.integrante) headers['x-heild-integrante'] = o.integrante
-  const r = await app.inject({ method: 'POST', url: `/v1/ferramentas/${nome}`, payload: entrada, headers })
+  const r = await app.inject({ method: 'POST', url: `/v1/ferramentas/${nome}`, payload: o.tela ? { ...entrada, heild_tela: o.tela } : entrada, headers })
   return { status: r.statusCode, corpo: r.json(), cabecalhos: r.headers }
 }
 
