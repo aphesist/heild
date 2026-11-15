@@ -396,10 +396,10 @@ async function frenteWidgets(navegador) {
     fs.mkdirSync(path.dirname(arquivo), { recursive: true })
     await p
       .locator(`[data-lab-widget="${c.w.chave}"]`)
-      .screenshot({ path: arquivo, timeout: 20000 })
+      .screenshot({ path: arquivo, timeout: 20000, animations: 'disabled', caret: 'hide' })
       .catch((e) => {
         if (caiu(e)) throw e
-        return p.screenshot({ path: arquivo, timeout: 20000 })
+        return p.screenshot({ path: arquivo, timeout: 20000, animations: 'disabled', caret: 'hide' })
       })
       .catch((e) => {
         if (caiu(e)) throw e
