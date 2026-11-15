@@ -1,12 +1,13 @@
-import { BrainIcon, CheckIcon, LockSimpleIcon, PencilSimpleIcon, ShareNetworkIcon, TrashIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
+import { BrainIcon, CheckIcon, ShareNetworkIcon, TrashIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
 import { usePersistente } from '@/ambiente/loja'
 import { BotaoAlternar, BotaoIr } from '@/ambiente/interface'
 import { useState } from 'react'
 import { Caixa, Propriedade, TituloBloco } from '@/components/compostos/blocos'
+import { ValorEditavel } from '@/components/kit'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
+import { Campo, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor } from '@/components/ui/formulario'
 import { Orb } from '@/components/ui/orb'
 import { criadosPorUsuarios, integrantesPadraoCfg, limitesUsuario as limitesIniciais, memoriaParaRevisar, modelosIntegrante as modelosIniciais, perguntasPromocao, sozinhoFiscal, type IntegrantePadraoCfg } from '@/dados/configuracoes'
 import { useAparencia } from '@/hooks/useAparencia'
@@ -19,6 +20,12 @@ const nomeCanal = {
   central: 'na central de avisos',
   whatsapp_do_dono: 'no WhatsApp do dono',
 }
+const canais = [
+  { valor: 'chat', rotulo: 'Chat' },
+  { valor: 'central', rotulo: 'Central de avisos' },
+  { valor: 'whatsapp_do_dono', rotulo: 'WhatsApp do dono' },
+]
+const opcoesDe = (xs: string[]) => xs.map((x) => ({ valor: x, rotulo: x }))
 
 /**
  * Configurações › Integrantes (Fundações 9; subplano 02): o time padrão por
@@ -30,7 +37,7 @@ const nomeCanal = {
 export function IntegrantesTela() {
   const aparencia = useAparencia()
   const [padrao, setPadrao] = usePersistente('cfg.int.padrao', integrantesPadraoCfg)
-  const [ed, setEd] = useState<IntegrantePadraoCfg | null>(null)
+  const mudarPadrao = (setor: IntegrantePadraoCfg['setor'], p: Partial<IntegrantePadraoCfg>) => setPadrao((xs) => xs.map((x) => (x.setor === setor ? { ...x, ...p } : x)))
   const [sozinho, setSozinho] = useState<IntegrantePadraoCfg | null>(null)
   const [perguntas, setPerguntas] = usePersistente('cfg.int.perguntas', 
     perguntasPromocao.map((p) => ({
@@ -39,7 +46,7 @@ export function IntegrantesTela() {
     })),
   )
   const [limites, setLimites] = usePersistente('cfg.int.limites', limitesIniciais)
-  const [editandoLimites, setEditandoLimites] = useState(false)
+  const mudarLimites = (p: Partial<typeof limitesIniciais>) => setLimites((x) => ({ ...x, ...p }))
   const [modelos, setModelos] = usePersistente('cfg.int.modelos', modelosIniciais)
   const [publicando, setPublicando] = useState(false)
   const [memoria, setMemoria] = usePersistente('cfg.int.memoria', 
@@ -83,7 +90,9 @@ export function IntegrantesTela() {
         )}
 
         <Caixa>
-          <TituloBloco descricao="Cada pessoa com o setor tem o seu, com memória e fila próprias. Desligar pausa os de todos.">Time padrão por setor</TituloBloco>
+          <TituloBloco descricao="Cada pessoa com o setor tem o seu, com memória e fila próprias. Desligar pausa os de todos. Nome e cor ficam no Tema; o que o integrante faz por padrão e o que nunca faz (transmitir, pagar e assinar sempre passam por uma pessoa) é fixo da plataforma. Aqui: as regras do escritório para o setor, que valem antes das instruções de cada pessoa, e onde ele avisa.">
+            Time padrão por setor
+          </TituloBloco>
           <ul className="divide-border/70 flex flex-col divide-y">
             {padrao.map((p) => {
               const t = aparencia({ setor: p.setor })
@@ -92,9 +101,20 @@ export function IntegrantesTela() {
                   <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={30} cutucavel={false} extras={false} />
                   <span className="min-w-0 grow basis-40">
                     <span className="block text-sm font-medium">{t.nome}</span>
-                    <span className="text-muted-foreground block truncate text-xs">
-                      faz sozinho {p.sozinho} · prepara {p.prepara} · organiza {p.organiza} · avisa {nomeCanal[p.canal]}
-                      {p.instrucoesEscritorio && ` · “${p.instrucoesEscritorio}”`}
+                    <span className="text-muted-foreground block text-xs">
+                      faz sozinho {p.sozinho} · prepara {p.prepara} · organiza {p.organiza} · avisa{' '}
+                      <ValorEditavel rotulo={`Onde ${t.nome} avisa`} valor={p.canal} config={{ tipo: 'escolha', opcoes: canais, outra: false }} formatar={(v) => nomeCanal[v as IntegrantePadraoCfg['canal']]} onMudar={(v) => mudarPadrao(p.setor, { canal: v as IntegrantePadraoCfg['canal'] })} />
+                    </span>
+                    <span className="text-muted-foreground block text-xs">
+                      regras do escritório:{' '}
+                      <ValorEditavel
+                        rotulo={`Regras do escritório para ${t.nome}`}
+                        valor={p.instrucoesEscritorio}
+                        vazio="nenhuma"
+                        config={{ tipo: 'texto', multilinha: true, placeholder: 'Vale para todos os integrantes do setor' }}
+                        formatar={(v) => (v ? `“${v}”` : '')}
+                        onMudar={(v) => mudarPadrao(p.setor, { instrucoesEscritorio: v.trim() })}
+                      />
                     </span>
                   </span>
                   <span className="flex items-center gap-1">
@@ -103,9 +123,6 @@ export function IntegrantesTela() {
                         Faz sozinho
                       </Button>
                     )}
-                    <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Editar ${t.nome}`} onClick={() => setEd(p)}>
-                      <PencilSimpleIcon />
-                    </Button>
                     <Interruptor ocultarRotulo rotulo={`${t.nome} ligado`} ligado={p.ligado} onMudar={(v) => setPadrao((xs) => xs.map((x) => (x.setor === p.setor ? { ...x, ligado: v } : x)))} desabilitado={p.setor === 'geral'} />
                   </span>
                 </li>
@@ -116,22 +133,37 @@ export function IntegrantesTela() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <Caixa>
-            <TituloBloco
-              acao={
-                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setEditandoLimites(true)}>
-                  <PencilSimpleIcon /> Editar
-                </Button>
-              }
-              descricao="Tetos por pessoa; o integrante para e avisa ao chegar."
-            >
-              Limites
-            </TituloBloco>
+            <TituloBloco descricao="Tetos por pessoa, somando os integrantes dela; o integrante para e avisa ao chegar. A pessoa vê só a porcentagem; tokens e custo, só Gestor e Administrador.">Limites</TituloBloco>
             <dl className="divide-border/70 flex flex-col divide-y">
-              <Propriedade rotulo="Uso de IA por mês">{limites.tokensMes}</Propriedade>
-              <Propriedade rotulo="Custo por mês">{limites.custoMes}</Propriedade>
-              <Propriedade rotulo="Integrantes próprios">até {limites.integrantesPorUsuario} por pessoa</Propriedade>
-              <Propriedade rotulo="Tarefas em paralelo">{limites.concorrencia} por integrante</Propriedade>
-              <Propriedade rotulo="Jobs fora do horário">{limites.jobsForaHorario}</Propriedade>
+              <Propriedade rotulo="Uso de IA por mês">
+                <ValorEditavel rotulo="Uso de IA por mês" valor={limites.tokensMes} config={{ tipo: 'escolha', opcoes: opcoesDe(['2 mi por usuário', '4 mi por usuário', '8 mi por usuário', 'sem teto (dentro do plano)']), outra: false }} onMudar={(v) => mudarLimites({ tokensMes: v })} />
+              </Propriedade>
+              <Propriedade rotulo="Custo por mês">
+                <ValorEditavel rotulo="Custo por mês" valor={limites.custoMes} config={{ tipo: 'escolha', opcoes: opcoesDe(['R$ 90 por usuário', 'R$ 180 por usuário', 'R$ 360 por usuário']), outra: false }} onMudar={(v) => mudarLimites({ custoMes: v })} />
+              </Propriedade>
+              <Propriedade rotulo="Integrantes próprios">
+                até <ValorEditavel rotulo="Integrantes próprios por pessoa" valor={limites.integrantesPorUsuario} config={{ tipo: 'numero', min: 0, max: 8 }} className="tabular-nums" onMudar={(v) => mudarLimites({ integrantesPorUsuario: v })} /> por pessoa
+              </Propriedade>
+              <Propriedade rotulo="Tarefas em paralelo">
+                <ValorEditavel rotulo="Tarefas em paralelo por integrante" valor={limites.concorrencia} config={{ tipo: 'numero', min: 1, max: 4 }} className="tabular-nums" onMudar={(v) => mudarLimites({ concorrencia: v })} /> por integrante
+              </Propriedade>
+              <Propriedade rotulo="Jobs fora do horário">
+                <ValorEditavel
+                  rotulo="Jobs fora do horário do escritório"
+                  valor={limites.jobsForaHorario}
+                  config={{
+                    tipo: 'escolha',
+                    outra: false,
+                    opcoes: [
+                      { valor: 'só com aprovação', rotulo: 'Só com aprovação' },
+                      { valor: 'liberado', rotulo: 'Liberado' },
+                      { valor: 'nunca', rotulo: 'Nunca' },
+                    ],
+                  }}
+                  formatar={(v) => v}
+                  onMudar={(v) => mudarLimites({ jobsForaHorario: v })}
+                />
+              </Propriedade>
             </dl>
           </Caixa>
           <Caixa>
@@ -220,27 +252,7 @@ export function IntegrantesTela() {
         </Caixa>
       </div>
 
-      {ed && (
-        <EditarPadrao
-          p={ed}
-          onFechar={() => setEd(null)}
-          onSalvar={(n) => {
-            setPadrao((xs) => xs.map((x) => (x.setor === n.setor ? n : x)))
-            setEd(null)
-          }}
-        />
-      )}
       {sozinho && <FazSozinho p={sozinho} onFechar={() => setSozinho(null)} />}
-      {editandoLimites && (
-        <EditarLimites
-          l={limites}
-          onFechar={() => setEditandoLimites(false)}
-          onSalvar={(l) => {
-            setLimites(l)
-            setEditandoLimites(false)
-          }}
-        />
-      )}
       {publicando && (
         <PublicarModelo
           onFechar={() => setPublicando(false)}
@@ -261,42 +273,6 @@ export function IntegrantesTela() {
         />
       )}
     </AreaRolagem>
-  )
-}
-
-function EditarPadrao({ p, onFechar, onSalvar }: { p: IntegrantePadraoCfg; onFechar: () => void; onSalvar: (p: IntegrantePadraoCfg) => void }) {
-  const aparencia = useAparencia()
-  const t = aparencia({ setor: p.setor })
-  const [d, setD] = useState(p)
-  const [travar, setTravar] = useState(false)
-  return (
-    <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo={t.nome} descricao="Nome e cor ficam no Tema. Aqui: o que todos os integrantes deste setor seguem no escritório." acao="Salvar" onAcao={() => onSalvar(d)}>
-      <div className="bg-sunken/60 flex items-start gap-2 rounded-lg px-3 py-2.5 text-xs">
-        <LockSimpleIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-        <span>
-          <span className="block font-medium">Parte fixa (da plataforma)</span>
-          <span className="text-muted-foreground">O que o integrante do setor faz por padrão, em que ordem e o que nunca faz: transmitir, pagar e assinar sempre passam por uma pessoa.</span>
-        </span>
-      </div>
-      <Campo rotulo="Regras do escritório para este setor" ajuda="Vale para todos os integrantes do setor, antes das instruções de cada pessoa.">
-        {(id) => <CampoArea id={id} linhas={4} valor={d.instrucoesEscritorio} onMudar={(v) => setD({ ...d, instrucoesEscritorio: v })} />}
-      </Campo>
-      <Interruptor ligado={travar} onMudar={setTravar} rotulo="Travar estas regras" detalhe="As pessoas não conseguem contradizê-las nas instruções do próprio integrante." />
-      <Campo rotulo="Onde avisa">
-        {() => (
-          <Segmentado
-            rotulo="Canal"
-            valor={d.canal}
-            onMudar={(v) => setD({ ...d, canal: v })}
-            opcoes={[
-              { valor: 'chat', rotulo: 'Chat' },
-              { valor: 'central', rotulo: 'Central de avisos' },
-              { valor: 'whatsapp_do_dono', rotulo: 'WhatsApp do dono' },
-            ]}
-          />
-        )}
-      </Campo>
-    </GavetaFormulario>
   )
 }
 
@@ -334,49 +310,6 @@ function FazSozinho({ p, onFechar }: { p: IntegrantePadraoCfg; onFechar: () => v
         ))}
         <li className="text-muted-foreground py-2.5 text-xs">e mais {p.sozinho - lista.length} atividades ligadas…</li>
       </ul>
-    </GavetaFormulario>
-  )
-}
-
-function EditarLimites({ l, onFechar, onSalvar }: { l: typeof limitesIniciais; onFechar: () => void; onSalvar: (l: typeof limitesIniciais) => void }) {
-  const [d, setD] = useState(l)
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo="Limites dos integrantes"
-      descricao="Por pessoa, somando os integrantes dela. A pessoa vê só a porcentagem; tokens e custo, só Gestor e Administrador."
-      acao="Salvar"
-      onAcao={() => onSalvar(d)}
-    >
-      <Campo rotulo="Uso de IA por mês">
-        {(id) => (
-          <CampoEscolha id={id} valor={d.tokensMes} onMudar={(v) => setD({ ...d, tokensMes: v })} opcoes={['2 mi por usuário', '4 mi por usuário', '8 mi por usuário', 'sem teto (dentro do plano)'].map((x) => ({ valor: x, rotulo: x }))} />
-        )}
-      </Campo>
-      <Campo rotulo="Custo por mês">
-        {(id) => <CampoEscolha id={id} valor={d.custoMes} onMudar={(v) => setD({ ...d, custoMes: v })} opcoes={['R$ 90 por usuário', 'R$ 180 por usuário', 'R$ 360 por usuário'].map((x) => ({ valor: x, rotulo: x }))} />}
-      </Campo>
-      <Campo rotulo={`Integrantes próprios por pessoa: ${d.integrantesPorUsuario}`}>
-        {(id) => <input id={id} type="range" min={0} max={8} value={d.integrantesPorUsuario} onChange={(e) => setD({ ...d, integrantesPorUsuario: Number(e.target.value) })} className="accent-foreground w-full" />}
-      </Campo>
-      <Campo rotulo={`Tarefas em paralelo por integrante: ${d.concorrencia}`}>
-        {(id) => <input id={id} type="range" min={1} max={4} value={d.concorrencia} onChange={(e) => setD({ ...d, concorrencia: Number(e.target.value) })} className="accent-foreground w-full" />}
-      </Campo>
-      <Campo rotulo="Jobs fora do horário do escritório">
-        {() => (
-          <Segmentado
-            rotulo="Jobs fora do horário"
-            valor={d.jobsForaHorario}
-            onMudar={(v) => setD({ ...d, jobsForaHorario: v })}
-            opcoes={[
-              { valor: 'só com aprovação', rotulo: 'Só com aprovação' },
-              { valor: 'liberado', rotulo: 'Liberado' },
-              { valor: 'nunca', rotulo: 'Nunca' },
-            ]}
-          />
-        )}
-      </Campo>
     </GavetaFormulario>
   )
 }

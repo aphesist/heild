@@ -1,17 +1,27 @@
-import { CheckIcon, DownloadSimpleIcon, PencilSimpleIcon, PlusIcon, WarningIcon } from '@phosphor-icons/react'
+import { CheckIcon, DownloadSimpleIcon, PlusIcon, WarningIcon } from '@phosphor-icons/react'
 import { BotaoBaixar } from '@/ambiente/interface'
 import { useState } from 'react'
 import { BarraUso, Caixa, Propriedade, TituloBloco } from '@/components/compostos/blocos'
+import { ValorEditavel } from '@/components/kit'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoTexto, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
+import { Campo, CampoTexto, GavetaFormulario, Interruptor } from '@/components/ui/formulario'
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { assinatura as inicial, modulosAssinatura, planos } from '@/dados/configuracoes'
 import { cn } from '@/lib/utils'
 import { CabecalhoConfig } from './EscritorioTela'
 import { Complementos, Pacotes, PlanosIa } from './assinatura-s09'
+
+type Cobranca = typeof inicial.cobranca
+const formasPagamento = [
+  { valor: 'boleto', rotulo: 'Boleto' },
+  { valor: 'pix', rotulo: 'Pix automático' },
+  { valor: 'cartao', rotulo: 'Cartão' },
+]
+const exigeCnpj = (v: string) => (v.replace(/\D/g, '').length === 14 ? null : 'CNPJ com 14 dígitos.')
+const exigeEmail = (v: string) => (/^\S+@\S+\.\S+$/.test(v.trim()) ? null : 'E-mail como financeiro@seudominio.com.br.')
 
 /**
  * Configurações › Assinatura (Fundações 2.2; 06, saída do escritório): plano e
@@ -23,9 +33,10 @@ export function AssinaturaTela() {
   const loja = useLoja()
   const { usuario } = useSessao()
   const [modulos, setModulos] = usePersistente('cfg.ass.modulos', modulosAssinatura)
-  const [modal, setModal] = useState<'plano' | 'cobranca' | 'modulo' | 'saida' | null>(null)
+  const [modal, setModal] = useState<'plano' | 'modulo' | 'saida' | null>(null)
   const [modulo, setModulo] = useState<string | null>(null)
   const plano = planos.find((p) => p.id === a.plano)!
+  const mudarCobranca = (p: Partial<Cobranca>) => setA((x) => ({ ...x, cobranca: { ...x.cobranca, ...p } }))
 
   return (
     <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
@@ -96,19 +107,17 @@ export function AssinaturaTela() {
               <p className="text-muted-foreground text-xs">A 90% de qualquer limite você recebe um aviso. Uso de IA acima do plano é cobrado à parte, com teto que você define em Integrantes › Limites.</p>
             </Caixa>
             <Caixa>
-              <TituloBloco
-                acao={
-                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setModal('cobranca')}>
-                    <PencilSimpleIcon /> Editar
-                  </Button>
-                }
-              >
-                Cobrança
-              </TituloBloco>
+              <TituloBloco>Cobrança</TituloBloco>
               <dl className="divide-border/70 flex flex-col divide-y">
-                <Propriedade rotulo="CNPJ da nota">{a.cobranca.cnpj}</Propriedade>
-                <Propriedade rotulo="E-mail financeiro">{a.cobranca.email}</Propriedade>
-                <Propriedade rotulo="Forma">{a.cobranca.forma === 'boleto' ? 'Boleto' : a.cobranca.forma === 'pix' ? 'Pix automático' : 'Cartão'}</Propriedade>
+                <Propriedade rotulo="CNPJ da nota">
+                  <ValorEditavel rotulo="CNPJ para a nota fiscal" valor={a.cobranca.cnpj} config={{ tipo: 'texto', validar: exigeCnpj }} className="tabular-nums" onMudar={(v) => mudarCobranca({ cnpj: v.trim() })} />
+                </Propriedade>
+                <Propriedade rotulo="E-mail financeiro">
+                  <ValorEditavel rotulo="E-mail que recebe as faturas" valor={a.cobranca.email} config={{ tipo: 'texto', validar: exigeEmail }} className="break-all" onMudar={(v) => mudarCobranca({ email: v.trim() })} />
+                </Propriedade>
+                <Propriedade rotulo="Forma">
+                  <ValorEditavel rotulo="Forma de pagamento" valor={a.cobranca.forma} config={{ tipo: 'escolha', opcoes: formasPagamento, outra: false }} onMudar={(v) => mudarCobranca({ forma: v as Cobranca['forma'] })} />
+                </Propriedade>
               </dl>
             </Caixa>
           </div>
@@ -177,16 +186,6 @@ export function AssinaturaTela() {
           }}
         />
       )}
-      {modal === 'cobranca' && (
-        <EditarCobranca
-          c={a.cobranca}
-          onFechar={() => setModal(null)}
-          onSalvar={(c) => {
-            setA({ ...a, cobranca: c })
-            setModal(null)
-          }}
-        />
-      )}
       {modal === 'modulo' && modulo && (
         <GavetaFormulario
           aberta
@@ -250,30 +249,6 @@ function TrocarPlano({ atual, uso, onFechar, onTrocar }: { atual: string; uso: t
           <WarningIcon className="text-destructive mt-0.5 size-4 shrink-0" /> O escritório já usa mais do que esse plano permite ({uso.clientes} clientes, {uso.gb.toLocaleString('pt-BR')} GB). Reduza antes de trocar.
         </p>
       )}
-    </GavetaFormulario>
-  )
-}
-
-function EditarCobranca({ c, onFechar, onSalvar }: { c: typeof inicial.cobranca; onFechar: () => void; onSalvar: (c: typeof inicial.cobranca) => void }) {
-  const [d, setD] = useState(c)
-  return (
-    <GavetaFormulario aberta onFechar={onFechar} titulo="Dados de cobrança" acao="Salvar" acaoDesabilitada={!/^\S+@\S+\.\S+$/.test(d.email)} onAcao={() => onSalvar(d)}>
-      <Campo rotulo="CNPJ para a nota fiscal">{(id) => <CampoTexto id={id} valor={d.cnpj} onMudar={(v) => setD({ ...d, cnpj: v })} />}</Campo>
-      <Campo rotulo="E-mail que recebe as faturas">{(id) => <CampoTexto id={id} tipo="email" valor={d.email} onMudar={(v) => setD({ ...d, email: v })} />}</Campo>
-      <Campo rotulo="Forma de pagamento">
-        {() => (
-          <Segmentado
-            rotulo="Forma"
-            valor={d.forma}
-            onMudar={(v) => setD({ ...d, forma: v })}
-            opcoes={[
-              { valor: 'boleto', rotulo: 'Boleto' },
-              { valor: 'pix', rotulo: 'Pix automático' },
-              { valor: 'cartao', rotulo: 'Cartão' },
-            ]}
-          />
-        )}
-      </Campo>
     </GavetaFormulario>
   )
 }

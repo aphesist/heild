@@ -1,10 +1,11 @@
-import { BrainIcon, CheckCircleIcon, LockSimpleIcon, PencilSimpleIcon, TrashIcon, WarningIcon, XCircleIcon, MinusCircleIcon } from '@phosphor-icons/react'
+import { BrainIcon, CheckCircleIcon, LockSimpleIcon, TrashIcon, WarningIcon, XCircleIcon, MinusCircleIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { useJobs, type ResultadoJob } from '@/ambiente/jobs-s01'
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { useConfirmar } from '@/components/kit/confirmar'
 import { EstadoVazio } from '@/components/kit/estados'
+import { ValorEditavel } from '@/components/kit/valor-editavel'
 import { AvisoEditeNoComputador, useCelular } from '@/components/compostos/edite-no-computador'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -56,13 +57,10 @@ export function GavetaMemoria({ integrante, aberta, onFechar }: { integrante: In
   const confirmar = useConfirmar()
   const t = useAparencia()(integrante)
   const [itens, setItens] = usePersistente<ItemMemoria[]>(`s01:memoria:${usuario.id}:${integrante.id}`, () => memoriaInicial(integrante.setor))
-  const [editando, setEditando] = useState<string | null>(null)
-  const [texto, setTexto] = useState('')
   const [retorno, setRetorno] = useState<string | null>(null)
   const doSetor = memoriaDoSetor[integrante.setor] ?? []
-  const corrigir = (id: string) => {
+  const corrigir = (id: string, texto: string) => {
     setItens((xs) => xs.map((x) => (x.id === id ? { ...x, texto, origem: 'corrigido por você', quando: 'agora' } : x)))
-    setEditando(null)
     loja.registrar(usuario.nome, `memoria.corrigir no ${t.nome}: "${texto}"`)
     setRetorno(`memoria.corrigir → ok · ${t.nome} confirmou: "${texto}"`)
   }
@@ -87,34 +85,19 @@ export function GavetaMemoria({ integrante, aberta, onFechar }: { integrante: In
         <ul className="flex flex-col gap-2">
           {itens.map((m) => (
             <li key={m.id} className="bg-surface shadow-contorno flex flex-col gap-1.5 rounded-md p-3">
-              {editando === m.id ? (
-                <>
-                  <CampoArea valor={texto} onMudar={setTexto} linhas={2} />
-                  <div className="flex gap-2">
-                    <Button type="button" size="sm" className="rounded-full" disabled={!texto.trim()} onClick={() => corrigir(m.id)}>
-                      Corrigir
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" className="rounded-full" onClick={() => setEditando(null)}>
-                      Cancelar
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm">{m.texto}</p>
-                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                    <span className="flex-1">
-                      {m.origem} · {m.quando}
-                    </span>
-                    <Button type="button" size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Corrigir: ${m.texto}`} onClick={() => (setEditando(m.id), setTexto(m.texto))}>
-                      <PencilSimpleIcon />
-                    </Button>
-                    <Button type="button" size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Remover: ${m.texto}`} onClick={() => remover(m)}>
-                      <TrashIcon />
-                    </Button>
-                  </div>
-                </>
-              )}
+              {/* Corrigir no lugar: clicar no texto abre o campo; o aviso traz "Desfazer". O envio do seletor
+                  (num portal) sobe pela árvore do React até o formulário da gaveta e a fecharia: para aqui. */}
+              <p className="text-sm">
+                <ValorEditavel rotulo="Memória" valor={m.texto} config={{ tipo: 'texto', multilinha: true, validar: (v) => (v.trim() ? null : 'Escreva o que ele deve lembrar.') }} onMudar={(v) => corrigir(m.id, v.trim())} />
+              </p>
+              <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                <span className="flex-1">
+                  {m.origem} · {m.quando}
+                </span>
+                <Button type="button" size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Remover: ${m.texto}`} onClick={() => remover(m)}>
+                  <TrashIcon />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

@@ -59,6 +59,9 @@ export function ValorEditavel<V extends QualquerValor>({
   const [mostrado, setMostrado] = useState<V | null | undefined>(valor)
   const [erro, setErro] = useState<string | null>(null)
   const pendente = useRef(false)
+  // O Desfazer chega depois de outras mudanças: usa sempre o onMudar mais recente (quem fecha sobre o estado não desfaz os outros campos).
+  const ultimoOnMudar = useRef(onMudar)
+  ultimoOnMudar.current = onMudar
   useEffect(() => {
     if (!pendente.current) setMostrado(valor)
   }, [valor])
@@ -79,7 +82,7 @@ export function ValorEditavel<V extends QualquerValor>({
         const textoNovo = formatar ? formatar(novo as V) : textoDoValor(config, novo)
         loja.toastDesfazer(`${rotulo}: ${textoNovo}`, () => {
           setMostrado(antes)
-          void onMudar(antes as V)
+          void ultimoOnMudar.current(antes as V)
         })
       }
     } catch (e) {

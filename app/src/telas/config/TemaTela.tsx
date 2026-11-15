@@ -1,8 +1,9 @@
-import { CheckCircleIcon, ClockCounterClockwiseIcon, GlobeIcon, ImageIcon, PencilSimpleIcon, SpinnerIcon, WarningIcon } from '@phosphor-icons/react'
+import { CheckCircleIcon, ClockCounterClockwiseIcon, GlobeIcon, ImageIcon, SpinnerIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePersistente } from '@/ambiente/loja'
 import { BotaoFeito } from '@/ambiente/interface'
 import { useState, type CSSProperties } from 'react'
 import { Caixa, Propriedade, TituloBloco } from '@/components/compostos/blocos'
+import { ValorEditavel } from '@/components/kit'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -66,6 +67,10 @@ const camposCor: { chave: keyof TokensTema; rotulo: string; ajuda: string }[] = 
   { chave: 'sucesso', rotulo: 'Sucesso', ajuda: 'feito, pago, aprovado' },
 ]
 
+const exigeTexto = (v: string) => (v.trim() ? null : 'Não pode ficar vazio.')
+const exigeHost = (v: string) => (/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(v.trim().toLowerCase()) ? null : 'Endereço como painel.seudominio.com.br.')
+const exigeEmail = (v: string) => (/^\S+@\S+\.\S+$/.test(v.trim()) ? null : 'E-mail como nome@seudominio.com.br.')
+
 const modelosTexto = [
   {
     chave: 'assinatura_email',
@@ -120,9 +125,8 @@ export function TemaTela() {
   const [r, setR] = useState<Tema>(() => JSON.parse(JSON.stringify(tema)))
   const [modo, setModo] = useState<ModoCor>('claro')
   const [versoes, setVersoes] = usePersistente('cfg.tema.versoes', versoesIniciais)
-  const [modal, setModal] = useState<'publicar' | 'dominio' | 'email' | 'logo' | null>(null)
-  const [integranteEd, setIntegranteEd] = useState<SetorIntegrante | null>(null)
-  const [modeloEd, setModeloEd] = useState<string | null>(null)
+  const [modal, setModal] = useState<'publicar' | 'logo' | null>(null)
+  const [verificando, setVerificando] = useState<string | null>(null)
   const [modelos, setModelos] = usePersistente('cfg.tema.modelos', modelosTexto)
   const [dominios, setDominios] = usePersistente('cfg.tema.dominios', {
     painel: { host: 'painel.contabilandrade.com.br', ok: true },
@@ -136,6 +140,19 @@ export function TemaTela() {
   const alterado = JSON.stringify(r) !== JSON.stringify(tema)
   const marca = useMarcaBranca()
   const t = tokensDoModo(r, modo)
+
+  const setIntegrante = (s: SetorIntegrante, p: { nome?: string; cor?: string }) =>
+    setR((x) => {
+      const i = x.integrantes_padrao[s]!
+      return { ...x, integrantes_padrao: { ...x.integrantes_padrao, [s]: { ...i, nome: p.nome ?? i.nome, avatar: { ...i.avatar, cor: p.cor ?? i.avatar.cor } } } }
+    })
+  const verificarDns = (k: 'painel' | 'app') => {
+    setVerificando(k)
+    setTimeout(() => {
+      setVerificando(null)
+      setDominios((x) => ({ ...x, [k]: { ...x[k], ok: true } }))
+    }, 1300)
+  }
 
   const setToken = (k: keyof TokensTema, v: string) => setR((x) => (modo === 'claro' ? { ...x, tokens: { ...x.tokens, [k]: v } } : { ...x, modo_escuro: { ...x.modo_escuro, [k]: v } }))
 
@@ -230,45 +247,65 @@ export function TemaTela() {
               </div>
             </Caixa>
             <Caixa>
-              <TituloBloco
-                acao={
-                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setModal('dominio')}>
-                    <PencilSimpleIcon /> Editar
-                  </Button>
-                }
-                descricao="O tema é carregado pelo endereço, antes do login."
-              >
-                Domínios
-              </TituloBloco>
+              <TituloBloco descricao="O tema é carregado pelo endereço, antes do login. Crie o registro CNAME no seu provedor de DNS e verifique: leva de minutos a algumas horas.">Domínios</TituloBloco>
               <dl className="divide-border/70 flex flex-col divide-y">
                 {(['painel', 'app'] as const).map((k) => (
                   <Propriedade key={k} rotulo={k === 'painel' ? 'Painel da equipe' : 'App do cliente'}>
                     <span className="flex flex-wrap items-center gap-2">
-                      <code className="min-w-0 text-xs break-all">{dominios[k].host}</code>
+                      <ValorEditavel
+                        rotulo={k === 'painel' ? 'Domínio do painel da equipe' : 'Domínio do app do cliente'}
+                        valor={dominios[k].host}
+                        config={{ tipo: 'texto', validar: exigeHost }}
+                        className="min-w-0 font-mono text-xs break-all"
+                        onMudar={(v) => setDominios((x) => ({ ...x, [k]: { host: v.trim().toLowerCase(), ok: false } }))}
+                      />
                       {dominios[k].ok ? <Badge variant="sucesso">verificado</Badge> : <Badge variant="destaque">aguardando DNS</Badge>}
                     </span>
+                    {!dominios[k].ok && (
+                      <span className="mt-1.5 flex flex-col items-start gap-1.5">
+                        <code className="bg-sunken/60 rounded-md px-3 py-1.5 text-xs break-all">
+                          {dominios[k].host.split('.')[0]} CNAME {k}.plataforma-contabil.com.br
+                        </code>
+                        <Button type="button" size="sm" variant="outline" className="rounded-full" disabled={verificando === k} onClick={() => verificarDns(k)}>
+                          {verificando === k ? <SpinnerIcon className="animate-spin" /> : <GlobeIcon />} {verificando === k ? 'Verificando…' : 'Verificar DNS'}
+                        </Button>
+                      </span>
+                    )}
                   </Propriedade>
                 ))}
               </dl>
             </Caixa>
             <Caixa>
-              <TituloBloco
-                acao={
-                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setModal('email')}>
-                    <PencilSimpleIcon /> Editar
-                  </Button>
-                }
-              >
-                Remetente de e-mail e WhatsApp
-              </TituloBloco>
+              <TituloBloco descricao="Os e-mails do sistema (convites, comunicados, resumos) saem com este nome e endereço.">Remetente de e-mail e WhatsApp</TituloBloco>
               <dl className="divide-border/70 flex flex-col divide-y">
                 <Propriedade rotulo="E-mail">
-                  <span className="block">{remetente.nome}</span>
-                  <span className="text-muted-foreground block break-all">{remetente.email}</span>
-                  {remetente.ok && (
+                  <span className="block">
+                    <ValorEditavel rotulo="Nome do remetente" valor={remetente.nome} config={{ tipo: 'texto', validar: exigeTexto }} onMudar={(v) => setRemetente((x) => ({ ...x, nome: v.trim() }))} />
+                  </span>
+                  <span className="text-muted-foreground block">
+                    <ValorEditavel
+                      rotulo="Endereço do remetente"
+                      valor={remetente.email}
+                      config={{ tipo: 'texto', validar: exigeEmail }}
+                      className="break-all"
+                      onMudar={(v) => setRemetente((x) => ({ ...x, email: v.trim(), ok: v.trim().split('@')[1] === x.email.split('@')[1] && x.ok }))}
+                    />
+                  </span>
+                  {remetente.ok ? (
                     <Badge variant="sucesso" className="mt-1">
                       domínio verificado
                     </Badge>
+                  ) : (
+                    <span className="mt-1.5 flex flex-col items-start gap-1.5">
+                      {['SPF  TXT  v=spf1 include:mail.plataforma-contabil.com.br ~all', 'DKIM CNAME pc._domainkey → dkim.plataforma-contabil.com.br'].map((x) => (
+                        <code key={x} className="bg-sunken/60 rounded-md px-3 py-1.5 text-xs break-all">
+                          {x}
+                        </code>
+                      ))}
+                      <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={() => setRemetente((x) => ({ ...x, ok: true }))}>
+                        Verificar domínio
+                      </Button>
+                    </span>
                   )}
                 </Propriedade>
                 <Propriedade rotulo="Nome no WhatsApp">por número, no bloco abaixo</Propriedade>
@@ -298,19 +335,23 @@ export function TemaTela() {
           <div data-pilha className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0">
             <Previa tema={r} modo={modo} />
             <Caixa>
-              <TituloBloco descricao="Nome e cor do orb de cada setor. Cada pessoa pode dar outro nome ao seu. O Assistente é sempre o contraste do tema.">Integrantes padrão</TituloBloco>
+              <TituloBloco descricao="Nome e cor do orb de cada setor (toque no orb para trocar a cor). Vale para quem não deu outro nome ao seu. O Assistente é sempre o contraste do tema.">Integrantes padrão</TituloBloco>
               <ul className="largo:grid-cols-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
                 {setores.map((s) => {
                   const i = r.integrantes_padrao[s]!
                   return (
-                    <li key={s}>
-                      <button type="button" onClick={() => setIntegranteEd(s)} className="bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left">
+                    <li key={s} className="bg-sunken/50 flex items-center gap-2 rounded-md px-2.5 py-2">
+                      {/* O orb é a amostra da cor: clicar abre o seletor de cor do navegador, como nas Cores acima. */}
+                      <span className="relative shrink-0">
                         <Orb cor={(modo === 'escuro' && i.avatar.cor_escuro) || i.avatar.cor} corOlhos={i.avatar.cor_olhos} tamanho={26} cutucavel={false} extras={false} />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm">{i.nome}</span>
-                          <span className="text-muted-foreground block truncate text-xs">{rotuloSetor[s] ?? (s === 'financeiro_escritorio' ? 'Financeiro' : s)}</span>
+                        <input type="color" aria-label={`Cor do orb de ${i.nome}`} title="Cor do orb" value={i.avatar.cor.length === 7 ? i.avatar.cor : '#999999'} onChange={(e) => setIntegrante(s, { cor: e.target.value })} className="absolute inset-0 size-full cursor-pointer opacity-0" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm">
+                          <ValorEditavel rotulo={`Nome do integrante do ${rotuloSetor[s] ?? s}`} valor={i.nome} config={{ tipo: 'texto', validar: exigeTexto }} onMudar={(v) => setIntegrante(s, { nome: v.trim() })} />
                         </span>
-                      </button>
+                        <span className="text-muted-foreground block truncate text-xs">{rotuloSetor[s] ?? (s === 'financeiro_escritorio' ? 'Financeiro' : s)}</span>
+                      </span>
                     </li>
                   )
                 })}
@@ -354,16 +395,18 @@ export function TemaTela() {
             </Caixa>
             <ModelosDocumento />
             <Caixa className="flex-1">
-              <TituloBloco descricao="Textos com variáveis entre chaves. Os do atendimento ficam em CRM › Números › Mensagens automáticas.">Modelos de texto</TituloBloco>
+              <TituloBloco descricao="Textos com variáveis entre chaves: {nome}, {empresa}, {escritorio}, {competencia}, {link}, {crc}, {telefone}. Mudar um texto publica com a próxima versão do tema. Os do atendimento ficam em CRM › Números › Mensagens automáticas.">
+                Modelos de texto
+              </TituloBloco>
               <ul className="divide-border/70 flex flex-col divide-y">
                 {modelos.map((m) => (
-                  <li key={m.chave}>
-                    <button type="button" onClick={() => setModeloEd(m.chave)} className="hover:bg-sunken/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-col rounded-md px-2 py-2 text-left">
-                      <span className="flex items-center gap-2 text-sm">
-                        <code>{m.chave}</code> <span className="text-muted-foreground text-xs">{m.grupo}</span>
-                      </span>
-                      <span className="text-muted-foreground truncate text-xs">{m.texto}</span>
-                    </button>
+                  <li key={m.chave} className="flex flex-col py-2">
+                    <span className="flex items-center gap-2 text-sm">
+                      <code>{m.chave}</code> <span className="text-muted-foreground text-xs">{m.grupo}</span>
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      <ValorEditavel rotulo={`Texto de ${m.chave}`} valor={m.texto} config={{ tipo: 'texto', multilinha: true, validar: exigeTexto }} onMudar={(v) => setModelos((xs) => xs.map((x) => (x.chave === m.chave ? { ...x, texto: v } : x)))} />
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -402,59 +445,6 @@ export function TemaTela() {
             </div>
           ))}
         </GavetaFormulario>
-      )}
-      {modal === 'dominio' && (
-        <Dominios
-          inicial={dominios}
-          onFechar={() => setModal(null)}
-          onSalvar={(d) => {
-            setDominios(d)
-            setModal(null)
-          }}
-        />
-      )}
-      {modal === 'email' && (
-        <Remetente
-          inicial={remetente}
-          onFechar={() => setModal(null)}
-          onSalvar={(d) => {
-            setRemetente(d)
-            setModal(null)
-          }}
-        />
-      )}
-      {integranteEd && (
-        <EditarIntegrantePadrao
-          setor={integranteEd}
-          tema={r}
-          onFechar={() => setIntegranteEd(null)}
-          onSalvar={(nome, cor) => {
-            setR((x) => ({
-              ...x,
-              integrantes_padrao: {
-                ...x.integrantes_padrao,
-                [integranteEd]: {
-                  nome,
-                  avatar: {
-                    ...x.integrantes_padrao[integranteEd]!.avatar,
-                    cor,
-                  },
-                },
-              },
-            }))
-            setIntegranteEd(null)
-          }}
-        />
-      )}
-      {modeloEd && (
-        <EditarModeloTexto
-          m={modelos.find((m) => m.chave === modeloEd)!}
-          onFechar={() => setModeloEd(null)}
-          onSalvar={(texto) => {
-            setModelos((xs) => xs.map((x) => (x.chave === modeloEd ? { ...x, texto } : x)))
-            setModeloEd(null)
-          }}
-        />
       )}
     </AreaRolagem>
   )
@@ -523,154 +513,6 @@ function Publicar({ versao, onFechar, onPublicar }: { versao: number; onFechar: 
     >
       <Campo rotulo="O que mudou" ajuda="Aparece no histórico de versões.">
         {(id) => <CampoArea id={id} linhas={2} valor={m} onMudar={setM} />}
-      </Campo>
-    </GavetaFormulario>
-  )
-}
-
-type Dom = {
-  painel: { host: string; ok: boolean }
-  app: { host: string; ok: boolean }
-}
-
-function Dominios({ inicial, onFechar, onSalvar }: { inicial: Dom; onFechar: () => void; onSalvar: (d: Dom) => void }) {
-  const [d, setD] = useState(inicial)
-  const [verificando, setVerificando] = useState<string | null>(null)
-  return (
-    <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo="Domínios" descricao="Crie o registro CNAME no seu provedor de DNS e verifique. Leva de minutos a algumas horas." acao="Salvar" onAcao={() => onSalvar(d)}>
-      {(['painel', 'app'] as const).map((k) => (
-        <div key={k} className="flex flex-col gap-2">
-          <Campo rotulo={k === 'painel' ? 'Painel da equipe' : 'App do cliente'}>
-            {(id) => (
-              <CampoTexto
-                id={id}
-                mono
-                valor={d[k].host}
-                onMudar={(v) =>
-                  setD({
-                    ...d,
-                    [k]: { host: v.trim().toLowerCase(), ok: false },
-                  })
-                }
-              />
-            )}
-          </Campo>
-          <div className="bg-sunken/60 rounded-md px-3 py-2 font-mono text-xs">
-            {d[k].host.split('.')[0]} CNAME {k}.plataforma-contabil.com.br
-          </div>
-          {d[k].ok ? (
-            <span className="text-success-text flex items-center gap-1.5 text-sm">
-              <CheckCircleIcon weight="fill" className="size-4" /> Verificado · certificado HTTPS emitido
-            </span>
-          ) : (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="w-fit rounded-full"
-              disabled={verificando === k}
-              onClick={() => {
-                setVerificando(k)
-                setTimeout(() => {
-                  setVerificando(null)
-                  setD((x) => ({ ...x, [k]: { ...x[k], ok: true } }))
-                }, 1300)
-              }}
-            >
-              {verificando === k ? <SpinnerIcon className="animate-spin" /> : <GlobeIcon />} {verificando === k ? 'Verificando…' : 'Verificar DNS'}
-            </Button>
-          )}
-        </div>
-      ))}
-    </GavetaFormulario>
-  )
-}
-
-type Rem = { nome: string; email: string; ok: boolean }
-
-function Remetente({ inicial, onFechar, onSalvar }: { inicial: Rem; onFechar: () => void; onSalvar: (r: Rem) => void }) {
-  const [r, setR] = useState(inicial)
-  const dominio = r.email.split('@')[1] ?? ''
-  return (
-    <GavetaFormulario
-      aberta
-      largura="lg"
-      onFechar={onFechar}
-      titulo="Remetente de e-mail"
-      descricao="Os e-mails do sistema (convites, comunicados, resumos) saem com este nome e endereço."
-      acao="Salvar"
-      acaoDesabilitada={!/^\S+@\S+\.\S+$/.test(r.email)}
-      onAcao={() => onSalvar(r)}
-    >
-      <Campo rotulo="Nome do remetente">{(id) => <CampoTexto id={id} valor={r.nome} onMudar={(v) => setR({ ...r, nome: v })} />}</Campo>
-      <Campo rotulo="Endereço">
-        {(id) => (
-          <CampoTexto
-            id={id}
-            tipo="email"
-            valor={r.email}
-            onMudar={(v) =>
-              setR({
-                ...r,
-                email: v,
-                ok: v.split('@')[1] === inicial.email.split('@')[1] && inicial.ok,
-              })
-            }
-          />
-        )}
-      </Campo>
-      <div className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium">Registros para {dominio || 'o domínio'}</span>
-        {['SPF  TXT  v=spf1 include:mail.plataforma-contabil.com.br ~all', 'DKIM CNAME pc._domainkey → dkim.plataforma-contabil.com.br'].map((x) => (
-          <code key={x} className="bg-sunken/60 rounded-md px-3 py-1.5 text-xs">
-            {x}
-          </code>
-        ))}
-        {r.ok ? (
-          <span className="text-success-text flex items-center gap-1.5">
-            <CheckCircleIcon weight="fill" className="size-4" /> Domínio verificado
-          </span>
-        ) : (
-          <Button type="button" size="sm" variant="outline" className="w-fit rounded-full" onClick={() => setR({ ...r, ok: true })}>
-            Verificar domínio
-          </Button>
-        )}
-      </div>
-    </GavetaFormulario>
-  )
-}
-
-function EditarIntegrantePadrao({ setor, tema, onFechar, onSalvar }: { setor: SetorIntegrante; tema: Tema; onFechar: () => void; onSalvar: (nome: string, cor: string) => void }) {
-  const i = tema.integrantes_padrao[setor]!
-  const [nome, setNome] = useState(i.nome)
-  const [cor, setCor] = useState(i.avatar.cor)
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo={`Integrante do ${rotuloSetor[setor] ?? setor}`}
-      descricao="Vale para todos do escritório que não deram outro nome ao seu."
-      acao="Salvar"
-      acaoDesabilitada={!nome.trim()}
-      onAcao={() => onSalvar(nome.trim(), cor)}
-    >
-      <div className="flex justify-center py-2">
-        <Orb cor={cor} corOlhos={i.avatar.cor_olhos} tamanho={72} animado modo="follow" />
-      </div>
-      <Campo rotulo="Nome">{(id) => <CampoTexto id={id} valor={nome} onMudar={setNome} />}</Campo>
-      <Campo rotulo="Cor do orb" ajuda="No escuro, se a cor sumir no fundo, defina uma variação nas cores do modo escuro.">
-        {(id) => <input id={id} type="color" value={cor} onChange={(e) => setCor(e.target.value)} className="h-10 w-20 cursor-pointer rounded-md border-0 bg-transparent p-0" />}
-      </Campo>
-    </GavetaFormulario>
-  )
-}
-
-function EditarModeloTexto({ m, onFechar, onSalvar }: { m: (typeof modelosTexto)[number]; onFechar: () => void; onSalvar: (t: string) => void }) {
-  const [texto, setTexto] = useState(m.texto)
-  return (
-    <GavetaFormulario aberta onFechar={onFechar} titulo={m.chave} descricao={`Grupo: ${m.grupo}. Mudar um texto publica com a próxima versão do tema.`} acao="Salvar" acaoDesabilitada={!texto.trim()} onAcao={() => onSalvar(texto)}>
-      <Campo rotulo="Texto" ajuda="Variáveis: {nome}, {empresa}, {escritorio}, {competencia}, {link}, {crc}, {telefone}.">
-        {(id) => <CampoArea id={id} linhas={5} valor={texto} onMudar={setTexto} />}
       </Campo>
     </GavetaFormulario>
   )

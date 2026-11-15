@@ -1,6 +1,6 @@
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
-import { CalendarBlankIcon, CheckIcon, EnvelopeSimpleIcon, EyeIcon, PaperPlaneTiltIcon, PencilSimpleIcon, PlusIcon, TrashIcon, ShieldCheckIcon, SparkleIcon, UsersIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
+import { CalendarBlankIcon, CheckIcon, EnvelopeSimpleIcon, EyeIcon, PaperPlaneTiltIcon, PlusIcon, TrashIcon, ShieldCheckIcon, SparkleIcon, UsersIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
 import { BotaoFeito } from '@/ambiente/interface'
 import { useState, type ReactNode } from 'react'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario, Interruptor } from '@/components/ui/formulario'
 import { comunicados as iniciais, reguas as reguasIniciais, segmentoExemplo as seg, type Comunicado, type Regua } from '@/dados/crm'
+import { ValorEditavel } from '@/components/kit'
 import { cn } from '@/lib/utils'
 import { BoletimMensal, ComunicadosDeData, OpcaoPdfPendencias, ReguasPorCliente, ResultadoComunicado, SegmentoPorTexto } from './s05/comunicados'
 import { FilePdfIcon } from '@phosphor-icons/react'
@@ -22,6 +23,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
   const [novo, setNovo] = useState(false)
   const [reguas, setReguas] = usePersistente('crm.reguas', reguasIniciais)
   const [editando, setEditando] = useState<Regua | null>(null)
+  const mudarRegua = (id: string, p: Partial<Regua>) => setReguas((xs) => xs.map((x) => (x.id === id ? { ...x, ...p } : x)))
   const [resultado, setResultado] = useState<Comunicado | null>(null)
   // Enviado agora: os números chegam do provedor aos poucos (entregues, lidas, respostas).
   const acompanhar = (c: Comunicado) => {
@@ -94,14 +96,23 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
             {reguas.map((r) => (
               <li key={r.id} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4', !r.ativa && 'text-muted-foreground grayscale')}>
                 <div className="flex items-start gap-3">
-                  <button type="button" onClick={() => r.id !== 'r6' && setEditando(r)} className="min-w-0 flex-1 cursor-pointer text-left disabled:cursor-default" disabled={r.id === 'r6'}>
-                    <h3 className="flex items-center gap-1.5 text-sm font-medium">
-                      {r.nome} {r.id !== 'r6' && <PencilSimpleIcon className="text-muted-foreground size-3.5" />}
+                  <div className="min-w-0 flex-1">
+                    {/* As etapas (dia, texto, destinatário) não cabem num valor em linha: o título abre o editor da régua. */}
+                    <h3 className="text-sm font-medium">
+                      {r.id === 'r6' ? (
+                        r.nome
+                      ) : (
+                        <Button variant="link" className="text-foreground h-auto p-0 text-left text-sm font-medium whitespace-normal" aria-label={`${r.nome}: alterar as etapas`} onClick={() => setEditando(r)}>
+                          {r.nome}
+                        </Button>
+                      )}
                     </h3>
                     <p className="text-muted-foreground text-xs">
-                      dispara: {r.dispara} · para quando: {r.paraQuando}
+                      dispara:{' '}
+                      <ValorEditavel rotulo={`Começa quando · ${r.nome}`} valor={r.dispara} config={{ tipo: 'escolha', opcoes: [...new Set([...gatilhosRegua, r.dispara])].map((g) => ({ valor: g, rotulo: g })) }} desabilitado={r.id === 'r6'} onMudar={(v) => mudarRegua(r.id, { dispara: v })} /> · para quando:{' '}
+                      <ValorEditavel rotulo={`Para quando · ${r.nome}`} valor={r.paraQuando} config={{ tipo: 'escolha', opcoes: [...new Set(reguas.map((x) => x.paraQuando))].map((g) => ({ valor: g, rotulo: g })) }} desabilitado={r.id === 'r6'} onMudar={(v) => mudarRegua(r.id, { paraQuando: v })} />
                     </p>
-                  </button>
+                  </div>
                   <button
                     type="button"
                     role="switch"

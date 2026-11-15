@@ -1,10 +1,11 @@
-import { ArrowRightIcon, CalculatorIcon, CheckIcon, EyeIcon, LifebuoyIcon, PaperPlaneTiltIcon, PencilSimpleIcon, QuestionIcon, XIcon } from '@phosphor-icons/react'
+import { ArrowRightIcon, CalculatorIcon, CheckIcon, EyeIcon, LifebuoyIcon, PaperPlaneTiltIcon, QuestionIcon, XIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { useConversaDe } from '@/ambiente/fluxos'
 import { useJobs } from '@/ambiente/jobs-s01'
 import { useLoja, useNavegacao, type IdModulo } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { abrirSuporte } from '@/ambiente/suporte'
+import { ValorEditavel } from '@/components/kit/valor-editavel'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Orb } from '@/components/ui/orb'
@@ -46,7 +47,7 @@ export function CartaoAjuda({ cartao }: { cartao: Por<'ajuda'> }) {
   )
 }
 
-/** "Me avise quando..." devolvido como regra (02, 7.3). Sim vira job do integrante; editar ajusta a regra; não descarta. */
+/** "Me avise quando..." devolvido como regra (02, 7.3). Sim vira job do integrante; a regra se corrige no próprio cartão (fase 6); não descarta. */
 export function CartaoRegra({ cartao }: { cartao: Por<'regra'> }) {
   const loja = useLoja()
   const { usuario } = useSessao()
@@ -55,13 +56,13 @@ export function CartaoRegra({ cartao }: { cartao: Por<'regra'> }) {
   const nav = useNavegacao()
   const i = integrante(cartao.integrante)
   const decidido = loja.estado.decisoes[cartao.id] as Decisao | undefined
-  const [editando, setEditando] = useState(false)
   const [regra, setRegra] = useState(cartao.regra)
+  const corrigida = regra !== cartao.regra
   const decidir = (d: Decisao) => {
     loja.decidir(cartao.id, d)
     if (d === 'recusar') return loja.toast('Descartado. Nada vai ser vigiado.')
     criar({ integrante: cartao.integrante, titulo: cartao.pedido.replace(/^me avis[ea] (quando|se)\s*/i, '').slice(0, 60) || 'Regra do chat', regra, quando: cartao.linhas.find((l) => l.rotulo === 'Quando confere')?.valor ?? 'todo dia, 08:00', tipo: 'agendado', ativo: true, custo: 0.08 })
-    loja.registrar(usuario.nome, `Criou a regra para ${i.nome}: ${regra}`)
+    loja.registrar(usuario.nome, `Criou a regra para ${i.nome}${corrigida ? ` (corrigiu antes de ligar; sugerida: ${cartao.regra})` : ''}: ${regra}`)
     loja.toast(`${i.nome} passou a vigiar isso. Os resultados aparecem no chat dele.`, { modulo: 'inicio', aba: 'time' }, 'Ver jobs no Time')
   }
   return (
@@ -70,11 +71,9 @@ export function CartaoRegra({ cartao }: { cartao: Por<'regra'> }) {
         <Orb cor={i.cor} corOlhos={i.corOlhos} tamanho={22} extras={false} cutucavel={false} />
         <span className="text-muted-foreground text-xs">{cartao.compilavel ? `Regra para ${i.nome} vigiar` : 'Não consigo vigiar isso'}</span>
       </div>
-      {editando ? (
-        <textarea value={regra} onChange={(e) => setRegra(e.target.value)} rows={3} aria-label="Regra" className="bg-sunken rounded-lg p-2 text-sm outline-none" />
-      ) : (
-        <p className="text-sm font-medium">{cartao.compilavel ? regra : cartao.motivo}</p>
-      )}
+      <p className="text-sm font-medium">
+        {cartao.compilavel && !decidido ? <ValorEditavel rotulo="Regra" valor={regra} config={{ tipo: 'texto', multilinha: true, validar: (v) => (v.trim() ? null : 'Escreva a regra.') }} desfazer={false} onMudar={(v) => setRegra(v.trim())} /> : cartao.compilavel ? regra : cartao.motivo}
+      </p>
       {cartao.compilavel && (
         <dl className="bg-muted/60 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-lg px-3 py-2 text-xs">
           {cartao.linhas.map((l) => (
@@ -95,22 +94,10 @@ export function CartaoRegra({ cartao }: { cartao: Por<'regra'> }) {
               </Button>
             )}
           </div>
-        ) : editando ? (
-          <div className="flex gap-2">
-            <Button size="sm" onClick={() => (setEditando(false), decidir('editar_e_aprovar'))} disabled={!regra.trim()}>
-              <CheckIcon /> Salvar e ligar
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => (setEditando(false), setRegra(cartao.regra))}>
-              Cancelar
-            </Button>
-          </div>
         ) : (
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => decidir('aprovar')}>
-              <CheckIcon weight="bold" /> Sim, vigie
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setEditando(true)}>
-              <PencilSimpleIcon /> Editar
+            <Button size="sm" onClick={() => decidir(corrigida ? 'editar_e_aprovar' : 'aprovar')}>
+              <CheckIcon weight="bold" /> {corrigida ? 'Sim, vigie com a correção' : 'Sim, vigie'}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => decidir('recusar')}>
               <XIcon /> Não

@@ -56,7 +56,9 @@ function OutraCoisa({ onCriar, rotulo }: { onCriar: (texto: string) => void; rot
     <form
       className="flex items-center gap-1.5 p-1"
       onSubmit={(e) => {
+        // O seletor vive num portal, mas o submit sobe pela árvore do React: sem isto, fecharia a gaveta em volta.
         e.preventDefault()
+        e.stopPropagation()
         if (texto.trim()) onCriar(texto.trim())
       }}
     >
@@ -202,7 +204,9 @@ function SeletorNumero({ config, valor, rotulo, aplicar }: PropsSeletor) {
     <form
       className="flex flex-col gap-2 p-1"
       onSubmit={(e) => {
+        // O seletor vive num portal, mas o submit sobe pela árvore do React: sem isto, fecharia a gaveta em volta.
         e.preventDefault()
+        e.stopPropagation()
         confirmar()
       }}
     >
@@ -341,7 +345,9 @@ function SeletorTexto({ config, valor, rotulo, aplicar }: PropsSeletor) {
     <form
       className="flex flex-col gap-2 p-1"
       onSubmit={(e) => {
+        // O seletor vive num portal, mas o submit sobe pela árvore do React: sem isto, fecharia a gaveta em volta.
         e.preventDefault()
+        e.stopPropagation()
         confirmar()
       }}
     >

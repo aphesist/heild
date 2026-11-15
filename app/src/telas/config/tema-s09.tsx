@@ -1,12 +1,11 @@
-import { CheckCircleIcon, LockSimpleIcon, PencilSimpleIcon, SealCheckIcon, WhatsappLogoIcon } from '@phosphor-icons/react'
-import { useState, type CSSProperties } from 'react'
+import { CheckCircleIcon, LockSimpleIcon, SealCheckIcon, WhatsappLogoIcon } from '@phosphor-icons/react'
+import { type CSSProperties } from 'react'
 import { useSetoresCfg } from '@/ambiente/configuracoes'
 import { useLoja, useNavegacao, usePersistente } from '@/ambiente/loja'
 import { Caixa, TituloBloco } from '@/components/compostos/blocos'
-import { useConfirmar } from '@/components/kit'
+import { useConfirmar, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoArea, CampoTexto, GavetaFormulario } from '@/components/ui/formulario'
 import { cn } from '@/lib/utils'
 import { useBanco } from '@/nucleo/react'
 import { temas } from '@/theme/temas'
@@ -122,6 +121,8 @@ interface ModeloDoc {
   rodape: string
 }
 
+const exigeTexto = (v: string) => (v.trim() ? null : 'Não pode ficar vazio.')
+
 const modelosDocIniciais: ModeloDoc[] = [
   { id: 'relatorio', nome: 'Relatório mensal ao cliente', titulo: '{escritorio} · relatório de {competencia} · {empresa}', rodape: '{escritorio} · CRC {crc} · {telefone}' },
   { id: 'comprovante', nome: 'Comprovante de entrega', titulo: 'Comprovante de entrega · {documento}', rodape: 'Registro com impressão digital SHA-256 · {escritorio}' },
@@ -132,46 +133,41 @@ const modelosDocIniciais: ModeloDoc[] = [
 export function ModelosDocumento() {
   const { tema } = useTema()
   const [modelos, setModelos] = usePersistente<ModeloDoc[]>('s09:tema:modelos_doc', modelosDocIniciais)
-  const [ed, setEd] = useState<ModeloDoc | null>(null)
+  const mudar = (id: string, p: Partial<ModeloDoc>) => setModelos((xs) => xs.map((x) => (x.id === id ? { ...x, ...p } : x)))
   return (
     <Caixa>
-      <TituloBloco descricao="Cabeçalho e rodapé dos documentos que o sistema gera, com a marca do tema. Cada documento guarda a versão com que saiu.">Modelos de documento</TituloBloco>
+      <TituloBloco descricao="Cabeçalho e rodapé dos documentos que o sistema gera, com a marca do tema. Variáveis entre chaves: {escritorio}, {empresa}, {competencia}, {crc}, {telefone}, {documento}, {pessoa}, {data}. Cada mudança entra na próxima versão do tema; cada documento guarda a versão com que saiu.">
+        Modelos de documento
+      </TituloBloco>
       <ul className="grid gap-2 sm:grid-cols-2">
         {modelos.map((m) => (
-          <li key={m.id}>
-            <button type="button" onClick={() => setEd(m)} className="bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer flex-col gap-2 rounded-lg p-2.5 text-left">
-              <span className="flex aspect-[1/0.55] w-full flex-col gap-1 rounded-sm bg-white p-2 text-black shadow-[0_1px_2px_rgba(0,0,0,.12)]">
-                <span className="flex items-center gap-1 border-b border-black/10 pb-1 text-[9px]">
-                  <strong>{tema.sigla}</strong> <span className="truncate text-black/60">{m.titulo}</span>
-                </span>
-                <span className="h-1 w-full rounded bg-black/10" />
-                <span className="h-1 w-4/5 rounded bg-black/10" />
-                <span className="mt-auto truncate border-t border-black/10 pt-0.5 text-[8px] text-black/45">{m.rodape}</span>
+          <li key={m.id} className="bg-sunken/50 flex flex-col gap-2 rounded-lg p-2.5">
+            <span aria-hidden className="flex aspect-[1/0.55] w-full flex-col gap-1 rounded-sm bg-white p-2 text-black shadow-[0_1px_2px_rgba(0,0,0,.12)]">
+              <span className="flex items-center gap-1 border-b border-black/10 pb-1 text-[9px]">
+                <strong>{tema.sigla}</strong> <span className="truncate text-black/60">{m.titulo}</span>
               </span>
-              <span className="flex items-center justify-between gap-2 text-sm">
-                {m.nome} <PencilSimpleIcon className="text-muted-foreground size-4" />
-              </span>
-            </button>
+              <span className="h-1 w-full rounded bg-black/10" />
+              <span className="h-1 w-4/5 rounded bg-black/10" />
+              <span className="mt-auto truncate border-t border-black/10 pt-0.5 text-[8px] text-black/45">{m.rodape}</span>
+            </span>
+            <span className="text-sm">{m.nome}</span>
+            <dl className="flex flex-col gap-1 text-xs">
+              <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2">
+                <dt className="text-muted-foreground">Cabeçalho</dt>
+                <dd className="min-w-0">
+                  <ValorEditavel rotulo={`Cabeçalho de ${m.nome}`} valor={m.titulo} config={{ tipo: 'texto', validar: exigeTexto }} onMudar={(v) => mudar(m.id, { titulo: v.trim() })} />
+                </dd>
+              </div>
+              <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2">
+                <dt className="text-muted-foreground">Rodapé</dt>
+                <dd className="min-w-0">
+                  <ValorEditavel rotulo={`Rodapé de ${m.nome}`} valor={m.rodape} vazio="sem rodapé" config={{ tipo: 'texto', multilinha: true }} onMudar={(v) => mudar(m.id, { rodape: v.trim() })} />
+                </dd>
+              </div>
+            </dl>
           </li>
         ))}
       </ul>
-      {ed && (
-        <GavetaFormulario
-          aberta
-          onFechar={() => setEd(null)}
-          titulo={ed.nome}
-          descricao="Variáveis entre chaves: {escritorio}, {empresa}, {competencia}, {crc}, {telefone}, {documento}, {pessoa}, {data}. Entra na próxima versão do tema."
-          acao="Salvar"
-          acaoDesabilitada={!ed.titulo.trim()}
-          onAcao={() => {
-            setModelos((xs) => xs.map((x) => (x.id === ed.id ? ed : x)))
-            setEd(null)
-          }}
-        >
-          <Campo rotulo="Cabeçalho">{(id) => <CampoTexto id={id} valor={ed.titulo} onMudar={(v) => setEd({ ...ed, titulo: v })} />}</Campo>
-          <Campo rotulo="Rodapé">{(id) => <CampoArea id={id} linhas={2} valor={ed.rodape} onMudar={(v) => setEd({ ...ed, rodape: v })} />}</Campo>
-        </GavetaFormulario>
-      )}
     </Caixa>
   )
 }
@@ -182,10 +178,14 @@ export function NomeWhatsapp() {
   const [setores] = useSetoresCfg()
   const numeros = setores.filter((s) => s.numero)
   const [nomes, setNomes] = usePersistente<Record<string, { nome: string; situacao: 'aprovado' | 'em_analise' }>>('s09:tema:nome_whatsapp', {})
-  const [ed, setEd] = useState<{ numero: string; nome: string } | null>(null)
+  const enviar = (numero: string, nome: string) => {
+    setNomes((x) => ({ ...x, [numero]: { nome, situacao: 'em_analise' } }))
+    loja.toast('Nome enviado à Meta. Avisamos quando aprovar.')
+    setTimeout(() => setNomes((x) => ({ ...x, [numero]: { ...x[numero], situacao: 'aprovado' } })), 4000)
+  }
   return (
     <Caixa>
-      <TituloBloco descricao="O nome de exibição de cada número. A troca vai para a Meta aprovar (de minutos a 2 dias).">Nome no WhatsApp por número</TituloBloco>
+      <TituloBloco descricao="O nome de exibição de cada número. A troca vai para a Meta aprovar (de minutos a 2 dias). Regras da Meta: ligado ao nome do escritório, sem só palavras genéricas.">Nome no WhatsApp por número</TituloBloco>
       {numeros.length === 0 ? (
         <p className="text-muted-foreground text-sm">Nenhum número próprio por setor: todos usam o número principal (CRM › Números).</p>
       ) : (
@@ -196,38 +196,25 @@ export function NomeWhatsapp() {
               <li key={s.codigo} className="flex flex-wrap items-center gap-2 py-2 text-sm">
                 <WhatsappLogoIcon className="text-muted-foreground size-4" />
                 <span className="min-w-0 grow basis-40">
-                  <span className="block">{atual.nome}</span>
+                  <span className="block">
+                    {/* Sem "Desfazer": a troca já foi para a Meta; voltar ao nome antigo é outro envio. */}
+                    <ValorEditavel
+                      rotulo={`Nome de exibição de ${s.numero}`}
+                      valor={atual.nome}
+                      desfazer={false}
+                      config={{ tipo: 'texto', validar: (v) => (v.trim().length < 3 ? 'Pelo menos 3 letras.' : null) }}
+                      onMudar={(v) => enviar(s.numero!, v.trim())}
+                    />
+                  </span>
                   <span className="text-muted-foreground block text-xs">
                     {s.numero} · {s.nomeExibido}
                   </span>
                 </span>
                 <Badge variant={atual.situacao === 'aprovado' ? 'sucesso' : 'destaque'}>{atual.situacao === 'aprovado' ? 'aprovado pela Meta' : 'em análise na Meta'}</Badge>
-                <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Editar nome de ${s.numero}`} onClick={() => setEd({ numero: s.numero!, nome: atual.nome })}>
-                  <PencilSimpleIcon />
-                </Button>
               </li>
             )
           })}
         </ul>
-      )}
-      {ed && (
-        <GavetaFormulario
-          aberta
-          onFechar={() => setEd(null)}
-          titulo={`Nome do ${ed.numero}`}
-          descricao="Regras da Meta: ligado ao nome do escritório, sem só palavras genéricas."
-          acao="Enviar à Meta"
-          acaoDesabilitada={ed.nome.trim().length < 3}
-          onAcao={() => {
-            setNomes((x) => ({ ...x, [ed.numero]: { nome: ed.nome.trim(), situacao: 'em_analise' } }))
-            loja.toast('Nome enviado à Meta. Avisamos quando aprovar.')
-            const n = ed.numero
-            setTimeout(() => setNomes((x) => ({ ...x, [n]: { ...x[n], situacao: 'aprovado' } })), 4000)
-            setEd(null)
-          }}
-        >
-          <Campo rotulo="Nome de exibição">{(id) => <CampoTexto id={id} valor={ed.nome} onMudar={(v) => setEd({ ...ed, nome: v })} />}</Campo>
-        </GavetaFormulario>
       )}
     </Caixa>
   )

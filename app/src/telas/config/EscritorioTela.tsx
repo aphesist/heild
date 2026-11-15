@@ -1,11 +1,12 @@
-import { BuildingsIcon, PencilSimpleIcon, PlusIcon, WarningIcon } from '@phosphor-icons/react'
+import { BuildingsIcon, PlusIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePersistente } from '@/ambiente/loja'
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Caixa, Propriedade, TituloBloco } from '@/components/compostos/blocos'
+import { ValorEditavel } from '@/components/kit'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoEscolha, CampoTexto, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
+import { Campo, CampoTexto, GavetaFormulario, Interruptor } from '@/components/ui/formulario'
 import { subinquilinos as subIniciais, type SetorCfg } from '@/dados/configuracoes'
 import { useEscritorioCfg, useSetoresCfg, type EscritorioCfg } from '@/ambiente/configuracoes'
 import { useContas } from '@/ambiente/loja'
@@ -14,6 +15,11 @@ import { CalendarioEscritorio, FaixaImplantacao, SetoresNaoAtendidos } from './e
 
 /** Pessoas ativas do escritório (do banco), para escolher responsáveis. */
 const usePessoas = () => useContas().filter((u) => u.situacao === 'ativo').map((u) => u.nome)
+
+const fusos = ['America/Sao_Paulo', 'America/Manaus', 'America/Cuiaba', 'America/Recife', 'America/Noronha'].map((f) => ({ valor: f, rotulo: f.replace('America/', '').replace('_', ' ') }))
+const exigeTexto = (v: string) => (v.trim() ? null : 'Não pode ficar vazio.')
+const exigeCnpj = (v: string) => (v.replace(/\D/g, '').length === 14 ? null : 'CNPJ com 14 dígitos.')
+const exigeHora = (v: string) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(v.trim()) ? null : 'Hora no formato 00:00.')
 
 /** Cabeçalho comum das abas de Configurações. */
 export function CabecalhoConfig({ titulo, sub, acao }: { titulo: string; sub: string; acao?: React.ReactNode }) {
@@ -37,10 +43,18 @@ export function EscritorioTela() {
   const [e, setE] = useEscritorioCfg()
   const [setores, setSetores] = useSetoresCfg()
   const [subs, setSubs] = usePersistente('cfg.esc.subs', subIniciais)
-  const [modal, setModal] = useState<'dados' | 'regras' | 'notificacoes' | 'sub' | 'carteira' | null>(null)
-  const [setorEd, setSetorEd] = useState<SetorCfg | null>(null)
+  const [modal, setModal] = useState<'sub' | 'carteira' | null>(null)
+  const pessoas = usePessoas()
   const comEquipe = setores.filter((s) => s.temEquipe)
   const perfil = setores.filter((s) => !s.temEquipe)
+  // Edição em linha: o "Desfazer" do aviso roda depois de outras mudanças, então
+  // grava sempre sobre o estado e o setter mais recentes (senão desfaria os outros campos).
+  const ultimo = useRef({ e, setE, setores, setSetores })
+  useLayoutEffect(() => {
+    ultimo.current = { e, setE, setores, setSetores }
+  })
+  const mudarE = (p: Partial<EscritorioCfg>) => ultimo.current.setE({ ...ultimo.current.e, ...p })
+  const mudarSetor = (codigo: SetorCfg['codigo'], p: Partial<SetorCfg>) => ultimo.current.setSetores(ultimo.current.setores.map((x) => (x.codigo === codigo ? { ...x, ...p } : x)))
 
   return (
     <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
@@ -50,20 +64,48 @@ export function EscritorioTela() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <Caixa>
-            <TituloBloco acao={<EditarBotao onClick={() => setModal('dados')} />}>Dados</TituloBloco>
+            <TituloBloco descricao="O nome que aparece para clientes e equipe é o do tema (aba Tema).">Dados</TituloBloco>
             <dl className="divide-border/70 flex flex-col divide-y">
-              <Propriedade rotulo="Razão social">{e.razaoSocial}</Propriedade>
-              <Propriedade rotulo="Nome fantasia">{e.nomeFantasia}</Propriedade>
-              <Propriedade rotulo="CNPJ">{e.cnpj}</Propriedade>
-              <Propriedade rotulo="CRC">{e.crc}</Propriedade>
-              <Propriedade rotulo="Fuso horário">{e.fuso.replace('America/', '').replace('_', ' ')}</Propriedade>
+              <Propriedade rotulo="Razão social">
+                <ValorEditavel rotulo="Razão social" valor={e.razaoSocial} config={{ tipo: 'texto', validar: exigeTexto }} onMudar={(v) => mudarE({ razaoSocial: v.trim() })} />
+              </Propriedade>
+              <Propriedade rotulo="Nome fantasia">
+                <ValorEditavel rotulo="Nome fantasia" valor={e.nomeFantasia} config={{ tipo: 'texto' }} onMudar={(v) => mudarE({ nomeFantasia: v.trim() })} />
+              </Propriedade>
+              <Propriedade rotulo="CNPJ">
+                <ValorEditavel rotulo="CNPJ" valor={e.cnpj} config={{ tipo: 'texto', validar: exigeCnpj }} className="tabular-nums" onMudar={(v) => mudarE({ cnpj: v.trim() })} />
+              </Propriedade>
+              <Propriedade rotulo="CRC">
+                <ValorEditavel rotulo="CRC" valor={e.crc} vazio="opcional" config={{ tipo: 'texto' }} onMudar={(v) => mudarE({ crc: v.trim() })} />
+              </Propriedade>
+              <Propriedade rotulo="Fuso horário">
+                <ValorEditavel rotulo="Fuso horário" valor={e.fuso} config={{ tipo: 'escolha', opcoes: fusos, outra: false }} onMudar={(v) => mudarE({ fuso: v })} />
+              </Propriedade>
             </dl>
           </Caixa>
           <Caixa>
-            <TituloBloco acao={<EditarBotao onClick={() => setModal('regras')} />}>Regras de acesso</TituloBloco>
+            <TituloBloco descricao="A espera só vale nas telas que registram tempo (Painel com cliente e CRM): para o contador no último evento e cobre a tela, sem deslogar. Mexer o mouse não conta como ação.">Regras de acesso</TituloBloco>
             <dl className="divide-border/70 flex flex-col divide-y">
-              <Propriedade rotulo="Inatividade">espera depois de {e.inatividadeMin} min sem ação no Painel e no CRM (não desloga)</Propriedade>
-              <Propriedade rotulo="Segundo fator">{e.segundoFator === 'administradores' ? 'obrigatório para administradores' : e.segundoFator === 'todos' ? 'obrigatório para todos' : 'opcional'}</Propriedade>
+              <Propriedade rotulo="Inatividade">
+                espera depois de{' '}
+                <ValorEditavel rotulo="Minutos sem ação até a espera" valor={e.inatividadeMin} config={{ tipo: 'numero', min: 2, max: 5, unidade: 'min' }} className="tabular-nums" onMudar={(v) => mudarE({ inatividadeMin: v })} /> sem ação no Painel e no CRM (não desloga)
+              </Propriedade>
+              <Propriedade rotulo="Segundo fator">
+                <ValorEditavel
+                  rotulo="Segundo fator"
+                  valor={e.segundoFator}
+                  config={{
+                    tipo: 'escolha',
+                    outra: false,
+                    opcoes: [
+                      { valor: 'administradores', rotulo: 'obrigatório para administradores', detalhe: 'Para administradores é sempre obrigatório.' },
+                      { valor: 'todos', rotulo: 'obrigatório para todos' },
+                    ],
+                  }}
+                  formatar={(v) => (v === 'administradores' ? 'obrigatório para administradores' : v === 'todos' ? 'obrigatório para todos' : 'opcional')}
+                  onMudar={(v) => mudarE({ segundoFator: v as EscritorioCfg['segundoFator'] })}
+                />
+              </Propriedade>
               <Propriedade rotulo="Carteira de clientes">
                 <span className="flex flex-wrap items-center gap-2">
                   {e.carteiraLigada ? 'ligada: cada pessoa vê só os clientes da carteira' : 'desligada: quem tem o setor vê todos os clientes'}
@@ -77,33 +119,33 @@ export function EscritorioTela() {
         </div>
 
         <Caixa>
-          <TituloBloco descricao="Os setores são fixos e seguem as abas do sistema. Dá para renomear a exibição, desativar um setor que o escritório não atende e escolher quem responde por ele quando o cliente não tem responsável próprio.">
+          <TituloBloco descricao="Os setores são fixos e seguem as abas do sistema: não se apagam nem se fundem. Dá para renomear a exibição, desativar um setor que o escritório não atende (a aba some, o integrante pausa; nada se apaga) e escolher quem responde por ele quando o cliente não tem responsável próprio. O número de WhatsApp do setor fica em CRM › Números.">
             Setores
           </TituloBloco>
           <ul className="divide-border/70 flex flex-col divide-y">
             {comEquipe.map((s) => (
-              <li key={s.codigo}>
-                <button
-                  type="button"
-                  onClick={() => setSetorEd(s)}
-                  className={cn(
-                    'hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-0.5 rounded-md px-2 py-2.5 text-left text-sm sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]',
-                    !s.ativo && 'text-muted-foreground grayscale',
-                  )}
-                >
-                  <span className="font-medium">
-                    {s.nomeExibido}
-                    {s.nomeExibido !== s.nomePadrao && <span className="text-muted-foreground block text-xs font-normal">padrão: {s.nomePadrao}</span>}
-                  </span>
-                  <span className="text-muted-foreground col-span-2 row-start-2 text-xs sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:text-sm">
-                    responsável padrão: {s.responsavel ?? '—'}
-                    {s.numero ? ` · WhatsApp ${s.numero}` : ' · usa o número principal'}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    {!s.ativo && <Badge variant="outline">desativado</Badge>}
-                    <PencilSimpleIcon className="text-muted-foreground size-4" />
-                  </span>
-                </button>
+              <li
+                key={s.codigo}
+                className={cn('grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-0.5 py-2.5 text-sm sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]', !s.ativo && 'text-muted-foreground grayscale')}
+              >
+                <span className="font-medium">
+                  <ValorEditavel rotulo={`Nome exibido de ${s.nomePadrao}`} valor={s.nomeExibido} config={{ tipo: 'texto', validar: exigeTexto }} onMudar={(v) => mudarSetor(s.codigo, { nomeExibido: v.trim() })} />
+                  {s.nomeExibido !== s.nomePadrao && <span className="text-muted-foreground block text-xs font-normal">padrão: {s.nomePadrao}</span>}
+                </span>
+                <span className="text-muted-foreground col-span-2 row-start-2 text-xs sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:text-sm">
+                  responsável padrão:{' '}
+                  <ValorEditavel
+                    rotulo={`Responsável padrão de ${s.nomeExibido}`}
+                    valor={s.responsavel}
+                    config={{ tipo: 'entidade', opcoes: pessoas.map((p) => ({ valor: p, rotulo: p })), buscar: 'Buscar pessoa', outra: false }}
+                    onMudar={(v) => mudarSetor(s.codigo, { responsavel: v })}
+                  />
+                  {s.numero ? ` · WhatsApp ${s.numero}` : ' · usa o número principal'}
+                </span>
+                <span className="flex items-center gap-2">
+                  {!s.ativo && <Badge variant="outline">desativado</Badge>}
+                  <Interruptor ocultarRotulo rotulo={`${s.nomeExibido} ativo`} ligado={s.ativo} onMudar={(v) => mudarSetor(s.codigo, { ativo: v })} />
+                </span>
               </li>
             ))}
           </ul>
@@ -127,14 +169,28 @@ export function EscritorioTela() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <Caixa>
-            <TituloBloco acao={<EditarBotao onClick={() => setModal('notificacoes')} />} descricao="Padrão para quem não mudou as próprias preferências.">
-              Notificações
-            </TituloBloco>
+            <TituloBloco descricao="Padrão para quem não mudou as próprias preferências. Urgente vai a todos os canais e fura o silêncio; alta respeita o silêncio; normal vai para o resumo.">Notificações</TituloBloco>
             <dl className="divide-border/70 flex flex-col divide-y">
-              <Propriedade rotulo="Resumo diário">às {e.resumoHora}, com o que não foi urgente</Propriedade>
+              <Propriedade rotulo="Resumo diário">
+                às <ValorEditavel rotulo="Hora do resumo diário" valor={e.resumoHora} config={{ tipo: 'texto', validar: exigeHora, placeholder: '18:00' }} className="tabular-nums" onMudar={(v) => mudarE({ resumoHora: v.trim() })} />, com o que não foi urgente
+              </Propriedade>
               <Propriedade rotulo="Silêncio">
-                {e.silencio.de} às {e.silencio.ate}
-                {e.silencio.fimDeSemana ? ' e fins de semana' : ''} (urgente fura o silêncio)
+                <ValorEditavel rotulo="Silêncio de" valor={e.silencio.de} config={{ tipo: 'texto', validar: exigeHora, placeholder: '20:00' }} className="tabular-nums" onMudar={(v) => mudarE({ silencio: { ...ultimo.current.e.silencio, de: v.trim() } })} /> às{' '}
+                <ValorEditavel rotulo="Silêncio até" valor={e.silencio.ate} config={{ tipo: 'texto', validar: exigeHora, placeholder: '08:00' }} className="tabular-nums" onMudar={(v) => mudarE({ silencio: { ...ultimo.current.e.silencio, ate: v.trim() } })} />{' '}
+                <ValorEditavel
+                  rotulo="Silêncio nos fins de semana"
+                  valor={e.silencio.fimDeSemana ? 'sim' : 'nao'}
+                  config={{
+                    tipo: 'escolha',
+                    outra: false,
+                    opcoes: [
+                      { valor: 'sim', rotulo: 'e fins de semana' },
+                      { valor: 'nao', rotulo: 'só nos dias úteis' },
+                    ],
+                  }}
+                  onMudar={(v) => mudarE({ silencio: { ...ultimo.current.e.silencio, fimDeSemana: v === 'sim' } })}
+                />{' '}
+                (urgente fura o silêncio)
               </Propriedade>
             </dl>
           </Caixa>
@@ -176,36 +232,6 @@ export function EscritorioTela() {
         </div>
       </div>
 
-      {modal === 'dados' && (
-        <EditarDados
-          e={e}
-          onFechar={() => setModal(null)}
-          onSalvar={(n) => {
-            setE(n)
-            setModal(null)
-          }}
-        />
-      )}
-      {modal === 'regras' && (
-        <EditarRegras
-          e={e}
-          onFechar={() => setModal(null)}
-          onSalvar={(n) => {
-            setE(n)
-            setModal(null)
-          }}
-        />
-      )}
-      {modal === 'notificacoes' && (
-        <EditarNotificacoes
-          e={e}
-          onFechar={() => setModal(null)}
-          onSalvar={(n) => {
-            setE(n)
-            setModal(null)
-          }}
-        />
-      )}
       {modal === 'carteira' && (
         <GavetaFormulario
           aberta
@@ -237,138 +263,7 @@ export function EscritorioTela() {
           }}
         />
       )}
-      {setorEd && (
-        <EditarSetor
-          s={setorEd}
-          onFechar={() => setSetorEd(null)}
-          onSalvar={(n) => {
-            setSetores((xs) => xs.map((x) => (x.codigo === n.codigo ? n : x)))
-            setSetorEd(null)
-          }}
-        />
-      )}
     </AreaRolagem>
-  )
-}
-
-function EditarBotao({ onClick }: { onClick: () => void }) {
-  return (
-    <Button size="sm" variant="ghost" className="rounded-full" onClick={onClick}>
-      <PencilSimpleIcon /> Editar
-    </Button>
-  )
-}
-
-type Esc = EscritorioCfg
-
-function EditarDados({ e, onFechar, onSalvar }: { e: Esc; onFechar: () => void; onSalvar: (e: Esc) => void }) {
-  const [d, setD] = useState(e)
-  const cnpjOk = d.cnpj.replace(/\D/g, '').length === 14
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo="Dados do escritório"
-      descricao="O nome que aparece para clientes e equipe é o do tema (aba Tema)."
-      acao="Salvar"
-      acaoDesabilitada={!d.razaoSocial.trim() || !cnpjOk}
-      onAcao={() => onSalvar(d)}
-    >
-      <Campo rotulo="Razão social">{(id) => <CampoTexto id={id} valor={d.razaoSocial} onMudar={(v) => setD({ ...d, razaoSocial: v })} />}</Campo>
-      <Campo rotulo="Nome fantasia">{(id) => <CampoTexto id={id} valor={d.nomeFantasia} onMudar={(v) => setD({ ...d, nomeFantasia: v })} />}</Campo>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Campo rotulo="CNPJ" erro={!cnpjOk ? 'CNPJ com 14 dígitos.' : undefined}>
-          {(id) => <CampoTexto id={id} valor={d.cnpj} onMudar={(v) => setD({ ...d, cnpj: v })} />}
-        </Campo>
-        <Campo rotulo="CRC (opcional)">{(id) => <CampoTexto id={id} valor={d.crc} onMudar={(v) => setD({ ...d, crc: v })} />}</Campo>
-      </div>
-      <Campo rotulo="Fuso horário" ajuda="Vale para prazos, resumo diário e jornada.">
-        {(id) => (
-          <CampoEscolha
-            id={id}
-            valor={d.fuso}
-            onMudar={(v) => setD({ ...d, fuso: v })}
-            opcoes={['America/Sao_Paulo', 'America/Manaus', 'America/Cuiaba', 'America/Recife', 'America/Noronha'].map((f) => ({
-              valor: f,
-              rotulo: f.replace('America/', '').replace('_', ' '),
-            }))}
-          />
-        )}
-      </Campo>
-    </GavetaFormulario>
-  )
-}
-
-function EditarRegras({ e, onFechar, onSalvar }: { e: Esc; onFechar: () => void; onSalvar: (e: Esc) => void }) {
-  const [d, setD] = useState(e)
-  return (
-    <GavetaFormulario aberta onFechar={onFechar} titulo="Regras de acesso" acao="Salvar" onAcao={() => onSalvar(d)}>
-      <Campo
-        rotulo={`Modo de espera depois de ${d.inatividadeMin} min sem ação`}
-        ajuda="Só nas telas que registram tempo (Painel com cliente e CRM): para o contador no último evento e cobre a tela, sem deslogar. Início, Timesheet, Financeiro e Configurações não contam tempo. Mexer o mouse não conta como ação. De 2 a 5."
-      >
-        {(id) => <input id={id} type="range" min={2} max={5} value={d.inatividadeMin} onChange={(ev) => setD({ ...d, inatividadeMin: Number(ev.target.value) })} className="accent-foreground w-full" />}
-      </Campo>
-      <Campo rotulo="Segundo fator de autenticação" ajuda="Para administradores é sempre obrigatório.">
-        {() => (
-          <Segmentado
-            rotulo="Segundo fator"
-            valor={d.segundoFator}
-            onMudar={(v) => setD({ ...d, segundoFator: v })}
-            opcoes={[
-              { valor: 'administradores', rotulo: 'Só administradores' },
-              { valor: 'todos', rotulo: 'Todos' },
-            ]}
-          />
-        )}
-      </Campo>
-    </GavetaFormulario>
-  )
-}
-
-function EditarNotificacoes({ e, onFechar, onSalvar }: { e: Esc; onFechar: () => void; onSalvar: (e: Esc) => void }) {
-  const [d, setD] = useState(e)
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo="Notificações padrão"
-      descricao="Cada pessoa pode mudar as próprias. Urgente vai a todos os canais e fura o silêncio; alta respeita o silêncio; normal vai para o resumo."
-      acao="Salvar"
-      onAcao={() => onSalvar(d)}
-    >
-      <Campo rotulo="Hora do resumo diário">{(id) => <CampoTexto id={id} tipo="time" valor={d.resumoHora} onMudar={(v) => setD({ ...d, resumoHora: v })} className="w-32" />}</Campo>
-      <div className="grid grid-cols-2 gap-3">
-        <Campo rotulo="Silêncio de">{(id) => <CampoTexto id={id} tipo="time" valor={d.silencio.de} onMudar={(v) => setD({ ...d, silencio: { ...d.silencio, de: v } })} />}</Campo>
-        <Campo rotulo="até">{(id) => <CampoTexto id={id} tipo="time" valor={d.silencio.ate} onMudar={(v) => setD({ ...d, silencio: { ...d.silencio, ate: v } })} />}</Campo>
-      </div>
-      <Interruptor ligado={d.silencio.fimDeSemana} onMudar={(v) => setD({ ...d, silencio: { ...d.silencio, fimDeSemana: v } })} rotulo="Silêncio também nos fins de semana" />
-    </GavetaFormulario>
-  )
-}
-
-function EditarSetor({ s, onFechar, onSalvar }: { s: SetorCfg; onFechar: () => void; onSalvar: (s: SetorCfg) => void }) {
-  const [d, setD] = useState(s)
-  const pessoas = usePessoas()
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo={s.nomePadrao}
-      descricao="O setor não se apaga nem se funde: a tela é a mesma em todo escritório. Quem cuida de dois setores recebe os dois em Usuários."
-      acao="Salvar"
-      acaoDesabilitada={!d.nomeExibido.trim()}
-      onAcao={() => onSalvar(d)}
-    >
-      <Campo rotulo="Nome exibido" ajuda="Como a aba aparece para a equipe e o setor para o cliente.">
-        {(id) => <CampoTexto id={id} valor={d.nomeExibido} onMudar={(v) => setD({ ...d, nomeExibido: v })} />}
-      </Campo>
-      <Campo rotulo="Responsável padrão" ajuda="Recebe o trabalho do setor (e o do integrante) quando o cliente não tem responsável próprio. A mesma pessoa pode responder por vários setores.">
-        {(id) => <CampoEscolha id={id} valor={d.responsavel ?? pessoas[0]} onMudar={(v) => setD({ ...d, responsavel: v })} opcoes={pessoas.map((p) => ({ valor: p, rotulo: p }))} />}
-      </Campo>
-      <Interruptor ligado={d.ativo} onMudar={(v) => setD({ ...d, ativo: v })} rotulo="Setor ativo" detalhe={d.ativo ? 'Aparece nas abas e no time.' : 'A aba some, o integrante pausa; nada se apaga e dá para religar.'} />
-      <p className="text-muted-foreground text-xs">Número de WhatsApp do setor: em CRM › Números.</p>
-    </GavetaFormulario>
   )
 }
 

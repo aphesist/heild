@@ -1,7 +1,7 @@
-import { ArrowClockwiseIcon, BankIcon, ChatCircleIcon, CheckIcon, ClockCountdownIcon, FileTextIcon, PencilSimpleIcon, PlugsConnectedIcon, ScalesIcon, ShieldCheckIcon, WarningIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
+import { ArrowClockwiseIcon, BankIcon, ChatCircleIcon, CheckIcon, ClockCountdownIcon, FileTextIcon, PlugsConnectedIcon, ScalesIcon, ShieldCheckIcon, WarningIcon, WhatsappLogoIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useLoja } from '@/ambiente/loja'
-import { EstadoErro, SeloDemonstracao } from '@/components/kit'
+import { EstadoErro, SeloDemonstracao, ValorEditavel } from '@/components/kit'
 import { Button } from '@/components/ui/button'
 import { CampoArea, CampoTexto } from '@/components/ui/formulario'
 import { cn } from '@/lib/utils'
@@ -155,12 +155,12 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
   const tConfig = useTabela('bpo_configuracao')
   const noApp = useNoApp(ctx)
   const avisar = useAvisarEquipe(ctx)
-  const [editando, setEditando] = useState(false)
+  // Contas que a pessoa tirou deste pagamento, no próprio cartão (só quem aprova primeiro pode tirar; o lote guarda ao aprovar).
   const [fora, setFora] = useState<string[]>([])
   const [recusando, setRecusando] = useState(false)
   const [motivo, setMotivo] = useState('')
   const [zap, setZap] = useState<{ codigo: string; digitado: string } | null>(null)
-  const tirados = editando ? fora : l.removidos
+  const tirados = l.aprovacoes.length === 0 ? fora : l.removidos
   const itens = l.itens.filter((i) => !tirados.includes(i.conta))
   const total = itens.reduce((t, i) => t + i.valor, 0)
   const faixa2 = e?.faixa2 ?? 20_000
@@ -169,11 +169,12 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
   const posso = podem.some((p) => p.nome === eu)
   const jaAprovei = l.aprovacoes.some((a) => a.nome === eu)
   const aberto = l.situacao === 'aguardando' || l.situacao === 'parcial'
+  const podeTirar = aberto && posso && !jaAprovei && l.aprovacoes.length === 0
+  const corrigido = podeTirar && fora.length > 0
   const teto = tConfig[0]?.teto_whatsapp ?? 3_000
   const aprovar = (canal: 'app' | 'whatsapp') => {
-    const depois = noApp(() => repos.bpo.lotes.aprovar(l.id, eu, editando ? fora : [], canal))
+    const depois = noApp(() => repos.bpo.lotes.aprovar(l.id, eu, podeTirar ? fora : [], canal))
     if (!depois) return
-    setEditando(false)
     setZap(null)
     const completo = depois.situacao === 'aprovado'
     avisar(completo ? `${primeiroNome(eu)} aprovou o lote de ${brl(depois.total)}` : `${primeiroNome(eu)} aprovou; falta a segunda aprovação`)
@@ -187,7 +188,6 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
           const tirado = tirados.includes(i.conta)
           return (
             <li key={i.conta} className="flex items-start gap-2">
-              {editando && <input type="checkbox" aria-label={`Manter ${i.fornecedor}`} checked={!tirado} onChange={(ev) => setFora((xs) => (ev.target.checked ? xs.filter((x) => x !== i.conta) : [...xs, i.conta]))} className="accent-foreground mt-0.5 size-4 shrink-0" />}
               <span className={cn('min-w-0 flex-1', tirado && 'text-muted-foreground line-through')}>
                 <span className="block">{i.fornecedor}</span>
                 <span className="text-muted-foreground block text-xs">
@@ -207,6 +207,23 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
       <div className="border-border/70 flex items-end gap-2 border-t pt-2 text-sm">
         <span className="flex-1">
           Total <strong className="font-medium tabular-nums">{brl(total)}</strong>
+          {podeTirar && l.itens.length > 1 && (
+            <span className="text-muted-foreground">
+              {' '}
+              ·{' '}
+              <ValorEditavel
+                rotulo="Contas a pagar neste lote"
+                valor={l.itens.filter((i) => !fora.includes(i.conta)).map((i) => i.conta)}
+                config={{ tipo: 'multipla', outra: false, opcoes: l.itens.map((i) => ({ valor: i.conta, rotulo: `${i.fornecedor} · ${brl(i.valor)}` })) }}
+                formatar={(v) => `${v.length} de ${l.itens.length} contas`}
+                desfazer={false}
+                onMudar={(v) => {
+                  if (!v.length) throw new Error('Deixe ao menos uma conta, ou recuse o lote.')
+                  setFora(l.itens.filter((i) => !v.includes(i.conta)).map((i) => i.conta))
+                }}
+              />
+            </span>
+          )}
           <span className="text-muted-foreground block text-xs">
             saldo {brl(l.saldo)} · depois {brl(l.saldo - total)} · expira {quando(l.expira_em.slice(0, 10))}
           </span>
@@ -221,32 +238,17 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
       {aberto && !jaAprovei && posso && !recusando && !zap && (
         <div className="flex flex-wrap gap-1.5">
           <Button size="sm" className="rounded-full" onClick={() => aprovar('app')} disabled={itens.length === 0}>
-            <CheckIcon /> {editando ? 'Aprovar o que ficou' : 'Aprovar'}
+            <CheckIcon /> {corrigido ? 'Aprovar com a correção' : 'Aprovar'}
           </Button>
-          {!editando && (
-            <Button size="sm" variant="outline" className="rounded-full" onClick={() => (setFora([]), setEditando(true))}>
-              <PencilSimpleIcon /> Editar e aprovar
-            </Button>
-          )}
-          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => (editando ? setEditando(false) : setRecusando(true))}>
-            {editando ? (
-              'Cancelar'
-            ) : (
-              <>
-                <XIcon /> Recusar
-              </>
-            )}
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setRecusando(true)}>
+            <XIcon /> Recusar
           </Button>
-          {!editando && (
-            <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setZap({ codigo: String(100000 + Math.floor(Math.random() * 900000)), digitado: '' })}>
-              <WhatsappLogoIcon /> Pelo WhatsApp
-            </Button>
-          )}
-          {!editando && (
-            <Button size="sm" variant="ghost" className="rounded-full" onClick={() => ctx.abrirConversa('bpo_financeiro')}>
-              <ChatCircleIcon /> Perguntar
-            </Button>
-          )}
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setZap({ codigo: String(100000 + Math.floor(Math.random() * 900000)), digitado: '' })}>
+            <WhatsappLogoIcon /> Pelo WhatsApp
+          </Button>
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => ctx.abrirConversa('bpo_financeiro')}>
+            <ChatCircleIcon /> Perguntar
+          </Button>
         </div>
       )}
       {zap && (
