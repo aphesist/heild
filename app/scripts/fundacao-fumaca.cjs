@@ -22,9 +22,12 @@ const { chromium } = require('playwright')
   const shot = (n) => p.screenshot({ path: `${out}/fumaca-${n}.png` })
   const espera = (ms = 400) => p.waitForTimeout(ms)
   const hash = () => p.evaluate(() => location.hash)
-  // Espera o banco abrir (no modo Supabase a leitura passa pela rede).
+  // Espera o banco abrir (no modo Supabase a leitura passa pela rede). Ao recarregar, o app
+  // primeiro envia o que ficou na fila de gravações: com a API longe do banco (o CI contra
+  // São Paulo), isso leva mais que os 45 s padrão, e FUMACA_ESPERA_MS aumenta o teto.
+  const tetoPronto = Number(process.env.FUMACA_ESPERA_MS || 45000)
   const pronto = async () => {
-    await p.waitForFunction(() => document.body && !document.body.innerText.includes('Abrindo o escritório'), null, { timeout: 45000 })
+    await p.waitForFunction(() => document.body && !document.body.innerText.includes('Abrindo o escritório'), null, { timeout: tetoPronto })
     await espera(700)
   }
   const lateral = (n) => p.getByRole('button', { name: n, exact: true }).first().click().then(() => espera(500))

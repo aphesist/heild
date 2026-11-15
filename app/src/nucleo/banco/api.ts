@@ -394,6 +394,10 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       // Restaurar a demonstração: o servidor semeia com o mesmo código da semente e devolve o escritório.
       geracao.set(escritorioId, (geracao.get(escritorioId) ?? 0) + 1)
       guardarFila(escritorioId, [])
+      // A escrita que já estava a caminho termina antes (a fila para depois dela, pela geração):
+      // senão ela corre junto com a restauração e espera a trava do escritório (com a API longe
+      // do banco, passa do teto de trava e volta 500).
+      await emSerie(async () => {})
       const r = await chamar('POST', '/v1/demonstracao/restaurar', {}, await cabecalhosDe(escritorioId, { tipo: 'sistema' }))
       if (r.status !== 200) throw new ErroAdaptador('api', `Não restaurou o escritório ${escritorioId} (${r.status}): ${String(r.json?.mensagem ?? '')}`)
       versoes.set(escritorioId, Number(r.json.versao ?? 0))
