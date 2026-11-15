@@ -80,9 +80,36 @@ function Isolado({ p }: { p: ParamsLab }) {
   const ficha = fichas.find((f) => f.id === p.ficha)
   return (
     <AreaRolagem data-qa-raiz data-lab-ficha={p.ficha} data-lab-estado={p.estado} className="from-background to-background-end text-foreground h-dvh bg-gradient-to-b">
-      <div className="pagina flex flex-col gap-4 px-4 py-4 sm:px-5">{!sessao?.usuario ? null : ficha ? <Fragment key={hashDe(p)}>{ficha.render(p)}</Fragment> : <p className="text-muted-foreground text-sm">Ficha não encontrada: {p.ficha}</p>}</div>
+      <div className="pagina flex flex-col gap-4 px-4 py-4 sm:px-5">{!sessao?.usuario ? null : ficha ? <Fragment key={hashDe(p)}>
+            {ficha.render(p)}
+            <Desenhado />
+          </Fragment> : <p className="text-muted-foreground text-sm">Ficha não encontrada: {p.ficha}</p>}</div>
     </AreaRolagem>
   )
+}
+
+declare global {
+  interface Window {
+    __labDesenhado?: string
+  }
+}
+
+/**
+ * Sinal para o QA: depois que a ficha deste endereço montou e o navegador pintou
+ * (dois quadros), publica o endereço em window.__labDesenhado. O QA espera por ele
+ * em vez de um tempo fixo, e nunca fotografa o caso anterior.
+ */
+function Desenhado() {
+  useEffect(() => {
+    const hash = window.location.hash
+    let b = 0
+    const a = requestAnimationFrame(() => (b = requestAnimationFrame(() => (window.__labDesenhado = hash))))
+    return () => {
+      cancelAnimationFrame(a)
+      cancelAnimationFrame(b)
+    }
+  }, [])
+  return null
 }
 
 function Grupo({ titulo, children }: { titulo: string; children: ReactNode }) {

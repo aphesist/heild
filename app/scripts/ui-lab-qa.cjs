@@ -231,8 +231,8 @@ async function frenteLab(navegador) {
         const hash = `#/lab/ui/${c.ficha}?${q}`
         erros.length = 0
         await p.evaluate((h) => (window.location.hash = h), hash)
-        await p.waitForSelector(`[data-lab-ficha="${c.ficha}"]`, { timeout: 15000 }).catch(() => {})
-        await espera(p, c.ficha === 'widgets-reais' ? 1100 : 650)
+        await p.waitForFunction(() => window.__labDesenhado === window.location.hash, null, { timeout: 30000 }).catch(() => {})
+        await espera(p, c.ficha === 'widgets-reais' ? 600 : 250)
         if (c.estado === 'hover') {
           const alvo = p.locator('[data-qa-raiz] :is(button, a[href], [role=row], tr, [role=tab])').first()
           if (await alvo.count()) await alvo.hover({ timeout: 3000 }).catch(() => {})
@@ -375,10 +375,12 @@ async function frenteWidgets(navegador) {
     const q = new URLSearchParams({ isolado: '1', variante: c.w.chave, tamanho: c.tamanho, cenario, estado: c.estado, tema, modo, densidade: c.densidade })
     s.erros.length = 0
     await p.evaluate((h) => (window.location.hash = h), `#/lab/ui/widget?${q}`)
-    await p.waitForSelector(`[data-lab-widget="${c.w.chave}"] article, [data-qa-raiz] [data-estado-vazio]`, { timeout: 15000 }).catch((e) => {
+    // Espera o Lab dizer que desenhou ESTE endereço (window.__labDesenhado), nunca o caso anterior;
+    // depois, um respiro para os observadores do widget (transbordo, esmaecido) assentarem.
+    await p.waitForFunction(() => window.__labDesenhado === window.location.hash, null, { timeout: 30000 }).catch((e) => {
       if (caiu(e)) throw e
     })
-    await espera(p, 500)
+    await espera(p, 250)
     let achados
     try {
       achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
