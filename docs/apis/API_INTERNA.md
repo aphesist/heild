@@ -356,6 +356,7 @@ O CRM inteiro é da fase F5; aqui só o que o Contábil usa para falar com o cli
 | `conversa.responder` | executar, cartão para integrante | E, A, C | Irreversível; fora da janela de 24 h só com modelo aprovado (`MODELO_OBRIGATORIO`) |
 | `mensagem.enviar_modelo` | executar | E, A | Nova; régua e avisos ("sua guia saiu"), categoria utilidade |
 | `conversa.listar`, `conversa.obter` (com `resumo`), `canal.saude` | ler | E, A | Corpo da mensagem só sob demanda |
+| `email.triar` (processo; nova) | executar | A | **E-mail vira tarefa pelo integrante, não por automação externa:** a mensagem que entra na caixa do setor (conector de e-mail do escritório) vira Mensagem no CRM; o integrante de Gestão e Atendimento classifica (operário barato com contrato), liga ao cliente por `identidade.resolver`, guarda os anexos com `documento.registrar` e cria a tarefa (`tarefa.criar`, origem `email`) no setor certo. Em caso de dúvida, cartão. Vale também para o e-mail enviado, que vira registro (C2-08) |
 | `mensagem.transcrever` | executar | servico | Áudio → texto pelo conector de transcrição |
 | `conversa.criar`, `.assumir`, `.transferir`, `.resolver`, `.nota_interna`, `lead.*` | executar | E, X | |
 
@@ -477,43 +478,54 @@ Total: 3 ferramentas, ~1,2 mil tokens de resultados. Sem a operação de process
 
 ---
 
-## 10. Abrir o MCP e os tokens de serviço a terceiros (resposta Q10)
+## 10. Abrir o MCP a assistentes de IA e às ferramentas do escritório (resposta Q10)
 
-O dono pediu para avaliar a abertura **antes do piloto**. Hoje o MCP serve só o orquestrador da Heild.
+O dono decidiu o recorte: se o MCP for aberto, é para **assistentes de IA** (Claude, ChatGPT, Copilot) e para as **ferramentas que os escritórios contábeis já usam**: Microsoft 365 (Copilot, Teams, Outlook, Excel, SharePoint) e Google Workspace. **Plataformas de automação (n8n, Make, Zapier) ficam de fora.** Elas não fazem falta: o CRM já engloba o e-mail, e o integrante de Gestão e Atendimento cria a tarefa a partir da mensagem que chega (seção 6.2), sem automação externa.
 
-### 10.1 O que o escritório ligaria
+### 10.1 As ferramentas e como cada uma se conecta
 
-| Ferramenta de fora | Como liga | Exemplo concreto |
+Os recursos de cada produto mudam rápido; o que não foi conferido em documentação oficial nesta rodada está marcado.
+
+| Ferramenta | Como se conecta à Heild | Exemplo de uso |
 | --- | --- | --- |
-| **Claude Desktop e claude.ai** | Conector MCP remoto; pede OAuth 2.1 da especificação de autorização do MCP para o conector da web; no desktop, token por cabeçalho também serve [a confirmar por versão] | "Quais clientes do Simples têm DAS de outubro sem pagamento?" → `guia.listar` em leitura; "prepara a cobrança deles" → proposta que vira cartão na Heild |
-| **ChatGPT** | Conectores e apps com MCP remoto, com OAuth [recursos e planos a confirmar] | O sócio pergunta pelo ChatGPT do escritório a situação fiscal da carteira |
-| **n8n** | Nó cliente MCP ou HTTP com token `hsk_...` | Toda segunda, puxa `obrigacao.semana_da_carteira` e manda um resumo no canal interno do escritório |
-| **Make, Zapier** | HTTP com token; MCP onde o produto tiver cliente [a confirmar] | Pedido de admissão que chega por formulário próprio do escritório vira `admissao.receber_pedido` como proposta |
-| **Scripts próprios** | `POST /v1/ferramentas/{nome}` com token | Exportar para a planilha do sócio o consumo por cliente (`consumo.por_cliente`) |
+| **Claude (desktop e web)** | Conector MCP remoto, com OAuth 2.1 conforme a especificação de autorização do MCP | "Quais clientes do Simples estão com o DAS de outubro sem pagamento?" (`guia.listar`); "prepara a cobrança deles" vira proposta e cartão na Heild |
+| **ChatGPT** (planos de empresa) | Conector MCP remoto com OAuth [recursos e planos a confirmar] | O sócio pergunta a situação fiscal da carteira e recebe a lista com o link para a aba Fiscal |
+| **Microsoft Copilot Studio** | Ferramenta MCP num agente do Copilot Studio, com OAuth pelo Entra ID [a confirmar] | Agente interno do escritório no Teams que responde "o que vence esta semana para a Padaria?" |
+| **Microsoft 365 Copilot** (Teams, Outlook, Excel) | Agente declarativo com plugin de API (manifesto OpenAPI das ferramentas expostas), autenticado por OAuth no Entra ID [formato e requisitos a confirmar] | No Outlook, abrindo o e-mail de um cliente: "este cliente tem pendência?" (`pendencia.listar`); no Excel, puxar o consumo por cliente |
+| **SharePoint e OneDrive** | Não é conector de IA: é o armazenamento do escritório, já ligado pelo Graph (CATALOGO, 6) | Os documentos da Heild aparecem na biblioteca do escritório |
+| **Google Workspace (Gemini, Gmail, Planilhas)** | Complemento do Workspace chamando a API da Heild com OAuth; conector do Gemini para agentes [a confirmar disponibilidade] | Na planilha do sócio, uma função que traz a semana de obrigações da carteira |
 
 ### 10.2 O que precisa existir
 
 | Peça | Regra |
 | --- | --- |
-| **Escopo por setor** | O token nasce com setores escolhidos e nunca passa do escopo da pessoa dona (P13 das Fundações) |
-| **Só leitura e propostas** | Níveis `ler` e `rascunhar`. Proposta = a ferramenta devolve `aguardando_aprovacao` e cria o cartão na Heild, que uma pessoa aprova. **Nada de `executar` direto** por terceiro, nem com `validar_apenas` ligado a uma execução depois |
-| **Limite de uso** | 120 chamadas/min por token; teto diário de chamadas que geram custo externo (situação fiscal, certidão) = 0 por padrão: terceiro lê o que já está em cache, não dispara consulta paga |
-| **Auditoria** | Origem `api_externa`, `token_id` e o cliente MCP declarado em todo evento; tela "o que este token fez" em Configurações › Integrações |
-| **Revogação** | Na hora, pela pessoa dona ou pelo Administrador; expiração padrão de 90 dias; aviso 7 dias antes |
-| **Conteúdo** | Respostas em visão compacta, com `origem_externa` marcado; o terceiro recebe dado do cliente, então a ativação pede aceite do Administrador de que o dado sai para aquele fornecedor (LGPD) |
-| **Catálogo** | O mesmo recorte por setor da seção 5, sem o recorte `excecao` e sem ferramentas de configuração, cofre ou conector |
+| **OAuth 2.1** | Servidor de autorização da Heild (ou provedor pronto) com descoberta, registro dinâmico de cliente e PKCE. É o que Claude, ChatGPT, Copilot e o complemento do Google pedem. Consentimento por escopo, na tela da Heild, com o nome do aplicativo de fora |
+| **Escopo por setor** | O acesso nasce com os setores escolhidos e nunca passa do escopo da pessoa que autorizou (P13 das Fundações) |
+| **Só leitura e propostas** | Níveis `ler` e `rascunhar`. Proposta = a ferramenta devolve `aguardando_aprovacao` e cria o cartão na Heild, que uma pessoa aprova. Nada de `executar` direto por ferramenta de fora |
+| **Limites** | 120 chamadas/min por autorização. Consulta paga a órgão (situação fiscal, certidão) desligada por padrão: o de fora lê o que já está guardado |
+| **Auditoria** | Origem `api_externa`, aplicativo e pessoa em todo evento; tela "o que este aplicativo fez" em Configurações › Integrações |
+| **Revogação** | Na hora, pela pessoa ou pelo Administrador; expiração do *refresh* em 90 dias |
+| **Conteúdo** | Visão compacta com `origem_externa` marcado; a ativação pede o aceite do Administrador de que o dado do cliente vai para aquele fornecedor (LGPD) |
+| **Catálogo** | O recorte por setor da seção 5, sem `excecao`, configuração, cofre ou conector |
 
-### 10.3 Custo e risco
+### 10.3 Custo, risco e recomendação
 
-| | Tokens `hsk_...` (n8n, Make, Zapier, scripts, Claude Desktop por cabeçalho) | OAuth 2.1 do MCP (claude.ai, ChatGPT) |
-| --- | --- | --- |
-| Esforço | **~2 sp**: tela de tokens, escopo, limite, auditoria, revogação. O executor e o MCP já existem (F3) | **+2 a 3 sp**: servidor de autorização (descoberta, registro dinâmico de cliente, PKCE) ou um provedor OAuth pronto, consentimento por escopo |
-| Risco | Token vazado dá leitura do escopo até ser revogado | Mesmo risco, com consentimento mais claro |
+| Peça | Esforço (sp, ±30%) |
+| --- | ---: |
+| Servidor OAuth 2.1, consentimento, escopos, tela de aplicativos ligados, auditoria e revogação (serve a todos os de fora) | 3 |
+| MCP remoto com OAuth (Claude, ChatGPT, Copilot Studio) | 0,5, porque o MCP já existe desde a F3 |
+| Agente do Microsoft 365 Copilot (manifesto, registro no Entra ID, publicação no catálogo do tenant do escritório) | 1,5 |
+| Complemento do Google Workspace (publicação e verificação do Google) | 2 |
+| **Total** | **~7 sp** (3,5 só com Claude, ChatGPT e Copilot Studio) |
 
-Riscos comuns:
+Riscos:
 
-- **Injeção de instrução:** um agente de fora pode ser manipulado por texto de cliente. Ficar só em leitura e propostas segura o pior, porque nada sai sem uma pessoa.
-- **Dado de cliente em fornecedor que a Heild não controla.**
+- **Injeção de instrução:** o assistente de fora pode ser manipulado por texto de cliente. Ficar só em leitura e propostas segura o pior, porque nada sai sem uma pessoa.
+- **Dado de cliente num fornecedor que a Heild não controla:** o próprio escritório escolhe e aceita.
 - **Suporte:** o escritório liga algo errado e acha que é defeito da Heild.
+- **Produtos que mudam:** os requisitos de conector de cada fornecedor mudam com frequência.
 
-**Recomendação:** incluir os **tokens `hsk_...` antes do piloto (~2 sp)**, só com leitura e propostas que uma pessoa aprova, desligados por padrão e ligados pelo Administrador. É barato porque reaproveita o executor, o MCP e o cartão. O OAuth para claude.ai e ChatGPT entra durante o piloto, se um dos dois escritórios pedir.
+**Recomendação:**
+
+- **Antes do piloto:** o servidor OAuth e o MCP remoto para Claude, ChatGPT e Copilot Studio (~3,5 sp), só com leitura e propostas aprovadas por pessoa, desligados por padrão e ligados pelo Administrador.
+- **Durante o piloto, se um dos dois escritórios usar:** o agente do Microsoft 365 Copilot e o complemento do Google Workspace (+3,5 sp).
