@@ -68,6 +68,19 @@ Entra só antes de ato irreversível: transmitir a ECD, enviar a guia ao cliente
 - **"nenhum" conta como não agir.** Com o trecho, o modelo respondeu "nenhum" em dois casos: "Obrigado pelo atendimento de ontem", em que não há procedimento e o pedido fica registrado, e a certidão negativa de um pedido vago. "nenhum" não leva a nenhuma ação, só registra o pedido sem procedimento. Por isso o roteiro passou a contá-lo como "perguntar", e a tabela acima já usa essa regra. Contado à parte, como estava no relatório cru, apareceriam 2 "erros" no Haiku com trecho e 1 no Sonnet com trecho, nenhum deles ação errada.
 - **Decisão:** o trecho fica **ligado** (`com_trecho: true`), porque o acerto sobe de 71,9% para 87,5% sem erro crítico e com custo menor (o caro é chamado menos). O roteador barato fica no **Haiku**: com o trecho, ele acertou todo caso que o Sonnet acertou.
 
+## Triar e repassar (número único de WhatsApp)
+
+Item pedido depois dos ajustes (decisão do Enzo: o CRM também atende escritórios com um número só de WhatsApp). São 30 casos no gabarito: escolha no menu (inclusive contra o texto), palavra-chave, modelo, assunto misto e remetente desconhecido ou reconhecido pelo histórico. Foram 2 repetições, em [`integrantes-ajustes-2026-11-15-triagem.json`](integrantes-ajustes-2026-11-15-triagem.json).
+
+| | Acerto | Erro crítico | Escaladas | Custo/execução | p50 | p90 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Sonnet | 60/60 | 0 | 4 | R$ 0,0079 | 3,4 s | 6,3 s |
+| Haiku | 60/60 | 0 | 6 | R$ 0,0018 | 3,5 s | 17,3 s (fila) |
+
+- **30 das 60 execuções decidiram sem modelo:** pelo menu, sempre respeitado, ou por palavra-chave de um setor só.
+- **Os 4 casos de assunto misto e o remetente desconhecido sem assunto claro** pararam no cartão para uma pessoa do Atendimento, nos dois modelos.
+- **O Haiku foi liberado** no contrato `ges.triagem.classificar`.
+
 ## Custo da sessão
 
 | | Custo |
@@ -75,11 +88,12 @@ Entra só antes de ato irreversível: transmitir a ECD, enviar a guia ao cliente
 | Rodadas pequenas (2 casos por contrato, depois os 3 procedimentos com revisor) | R$ 1,34 |
 | Rodada completa (840 execuções em sombra, 128 roteamentos) | R$ 21,20 |
 | Nova rodada do DP v2 (240 execuções) | R$ 1,31 |
-| **Total** | **R$ 23,85 (≈ US$ 4,42)**, contra o teto de US$ 15 |
+| Triar e repassar (120 execuções) | R$ 0,58 |
+| **Total** | **R$ 24,43 (≈ US$ 4,52)**, contra o teto de US$ 15 |
 
 ## O que foi trocado
 
-- **Haiku como operário** nos 7 contratos (`pacotes/integrantes/src/modelos.ts`, `CONTRATOS_NO_HAIKU`, com a evidência por linha), aplicado pelo worker dos integrantes.
+- **Haiku como operário** nos 8 contratos, contando o do triar e repassar (`pacotes/integrantes/src/modelos.ts`, `CONTRATOS_NO_HAIKU`, com a evidência por linha), aplicado pelo worker dos integrantes.
 - **Haiku como roteador barato** e **trecho do documento ligado** no roteador.
 - **Sonnet continua escritor** (a escalada) e **Opus continua revisor**.
 

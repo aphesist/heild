@@ -731,15 +731,21 @@ app/supabase/migrations/20261116090000_b3_integrantes.sql
 As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-GUIA-CONFERIR` v1, `GES-FAQ-RESPONDER` v1) continuam carregadas no motor: execuções em andamento terminam na versão em que começaram. A operação de processo é uma só por procedimento e inicia sempre a versão mais nova. A lista de referência da B2 (`procedimentosDeReferencia`) continua com as v1; as v2 de referência estão em `procedimentosDeReferenciaV2`, e os integrantes usam as v2.
 9. **DP-EVENTO-FOLHA v2:** o gabarito ampliado pegou o Sonnet e o Haiku lançando hora extra sem quantidade. O validador `quantidade_quando_exigida` barra por regra hora extra, falta e adiantamento sem quantidade.
 
+10. **Triar e repassar** (`GES-TRIAR-REPASSAR`, `src/setores/triagem.ts`): para o escritório com um número só de WhatsApp, o integrante do Atendimento lê a conversa do CRM.
+    - **Quem escreve:** a conversa já ligada ao cliente ou, se não estiver, outra conversa da mesma pessoa que já esteja ligada a um cliente só.
+    - **Para onde vai:** cascata em quatro degraus. (1) A escolha do menu do chatbot, sempre respeitada. (2) Palavra-chave de um setor só. (3) O modelo barato e, abaixo do limiar, o caro. (4) Assunto misto ou dúvida que continua vira cartão para uma pessoa do Atendimento.
+    - **O repasse:** a conversa vai ao setor (`conversa.transferir`, por regra do escritório ou cartão), com o responsável da carteira ou o padrão do setor. Leva um resumo escrito pelo sistema e um aviso quando o remetente não foi identificado. O integrante do setor de destino é acordado com o resumo, e o repasse vai à cadeia.
+    - **O que fica fora:** o chatbot de menu (sem IA) é do CRM e do conector; o procedimento recebe a escolha como `menu_escolhido`. Pelo chat, o Assistente encaminha "triar e repassar esta conversa" com a conversa anexada (`anexos.conversa_id`).
+
 ### Resultado real (15/11/2026)
 
 Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
 
-- **Portão do Haiku:** os 7 contratos de operário e o roteador barato igualaram o Sonnet caso a caso, sem erro crítico. O DP só depois do v2: na v1, os dois modelos erraram o mesmo caso.
-- **O que foi trocado:** o Haiku como operário nos 7 contratos e como roteador barato. Sonnet continua escritor, Opus continua revisor. No total do operário, o custo caiu 18 vezes (R$ 5,66 para R$ 0,32 em 420 chamadas).
+- **Portão do Haiku:** os 8 contratos de operário (com o do triar e repassar) e o roteador barato igualaram o Sonnet caso a caso, sem erro crítico. O DP só depois do v2: na v1, os dois modelos erraram o mesmo caso.
+- **O que foi trocado:** o Haiku como operário nos 8 contratos e como roteador barato. Sonnet continua escritor, Opus continua revisor. No total do operário, o custo caiu 18 vezes (R$ 5,66 para R$ 0,32 em 420 chamadas).
 - **Roteador com trecho:** acerto de 71,9% para 87,5%, sem erro crítico; o trecho fica **ligado**.
 - **Revisor de risco:** R$ 0,041 e 2,6 s (p50) por revisão. Aprovou as 302 revisões; o ganho dele ainda não está medido neste gabarito.
-- **Custo da sessão:** R$ 23,85 (≈ US$ 4,42), contra o teto de US$ 15.
+- **Custo da sessão:** R$ 24,43 (≈ US$ 4,52), contra o teto de US$ 15.
 
 ### Testes da B3b
 
@@ -747,3 +753,4 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
 - `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
 - `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
 - `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.
+- `triagem.test.ts` (5): o menu é respeitado mesmo contra o texto, sem modelo, e o integrante de destino recebe o resumo; palavra-chave decide por regra; sem palavra-chave, o modelo decide; assunto misto vai ao cartão e a pessoa escolhe o setor; remetente desconhecido segue com o aviso, e o histórico reconhece o cliente; pelo Assistente, "triar e repassar esta conversa" vai ao Atendimento.

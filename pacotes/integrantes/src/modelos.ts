@@ -18,6 +18,7 @@ export const CONTRATOS_NO_HAIKU: { contrato: string; evidencia: string }[] = [
   { contrato: 'dp.evento.classificar', evidencia: '60 × 60 no DP-EVENTO-FOLHA v2 (com o validador de quantidade), 0 erro crítico' },
   { contrato: 'soc.alteracao.classificar', evidencia: '60 × 60, 0 erro crítico' },
   { contrato: 'ges.faq.escolher', evidencia: '55 × 55 (os mesmos 5 cartões desnecessários nos dois), 0 erro crítico' },
+  { contrato: 'ges.triagem.classificar', evidencia: '60 × 60 (triar e repassar), 0 erro crítico; escaladas 4 Sonnet × 6 Haiku' },
 ]
 
 /** O roteador barato do Assistente: Haiku só se o portão do roteador liberar (decisão 4 com a 3). */

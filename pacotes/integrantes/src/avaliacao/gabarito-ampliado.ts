@@ -348,3 +348,73 @@ export const roteamentoAmpliado: (CasoRota & { grupo: 'regra' | 'pedido_claro' |
 
 export const hashDoGabaritoAmpliado = () =>
   createHash('sha256').update(JSON.stringify({ g: gabaritoAmpliado.map((c) => ({ ...c, documento: typeof c.documento.metadados === 'function' ? 'fn' : c.documento })), r: roteamentoAmpliado })).digest('hex').slice(0, 16)
+
+// ── Gestão e Atendimento · ges.triagem.classificar (30): triar e repassar o número único ──
+
+type Remetente = 'conhecido' | 'historico' | 'desconhecido'
+
+/** Grava a conversa do caso (e, para o histórico, uma conversa antiga da mesma pessoa já ligada ao cliente). */
+function conversaDoCaso(mensagens: string[], remetente: Remetente, menu?: string) {
+  return async (tx: import('@heild/processos').Tx, a: { escritorio_id: string; cliente_id: string }) => {
+    const pessoa = `p-tri-${Math.random().toString(36).slice(2, 10)}`
+    if (remetente === 'historico')
+      await tx`insert into conversa (escritorio_id, cliente_id, pessoa_id, setor_id, status, canal_resposta_atual, ultima_mensagem_em)
+               values (${a.escritorio_id}, ${a.cliente_id}, ${pessoa}, 'fiscal', 'resolvida', 'whatsapp', now() - interval '30 days')`
+    const [c] = await tx`insert into conversa (escritorio_id, cliente_id, pessoa_id, setor_id, status, canal_resposta_atual, ultima_mensagem_em)
+                         values (${a.escritorio_id}, ${remetente === 'conhecido' ? a.cliente_id : null}, ${pessoa}, 'gestao_atendimento', 'nova', 'whatsapp', now()) returning id`
+    for (const corpo of mensagens)
+      await tx`insert into mensagem (escritorio_id, conversa_id, direcao, canal, autor_tipo, corpo) values (${a.escritorio_id}, ${c!.id}, 'entrada', 'whatsapp', 'pessoa', ${corpo})`
+    return { conversa_id: c!.id as string, ...(menu ? { menu_escolhido: menu } : {}) }
+  }
+}
+
+const triagem: [string, string[], Remetente, string | undefined, string][] = [
+  // O menu do chatbot manda: a escolha da pessoa é respeitada, mesmo quando o texto puxa para outro setor.
+  ['menu-fiscal', ['Bom dia, preciso de ajuda.'], 'conhecido', 'fiscal', 'fiscal'],
+  ['menu-dp', ['Quero falar sobre a folha deste mês.'], 'conhecido', 'dp', 'dp'],
+  ['menu-societario', ['Oi'], 'conhecido', 'societario', 'societario'],
+  ['menu-contra-texto', ['É sobre a guia do DAS.'], 'conhecido', 'contabil', 'contabil'],
+  ['menu-atendimento', ['Preciso de ajuda com a folha.'], 'conhecido', 'gestao_atendimento', 'gestao_atendimento'],
+  // Palavra-chave de um setor só: regra.
+  ['palavra-das', ['Quando sai a guia do DAS deste mês?'], 'conhecido', undefined, 'fiscal'],
+  ['palavra-holerite', ['Preciso do holerite de outubro do Pedro.'], 'conhecido', undefined, 'dp'],
+  ['palavra-extrato', ['Vou mandar o extrato bancário de outubro para os lançamentos.'], 'conhecido', undefined, 'contabil'],
+  ['palavra-contrato-social', ['Queremos alterar o contrato social para incluir um sócio.'], 'conhecido', undefined, 'societario'],
+  ['palavra-honorarios', ['Pode mandar a segunda via do boleto de honorários?'], 'conhecido', undefined, 'gestao_atendimento'],
+  ['palavra-intimacao', ['Recebi uma intimação da Receita pelo correio.'], 'conhecido', undefined, 'fiscal'],
+  ['palavra-admissao', ['A funcionária nova começa segunda, como faço a admissão?'], 'conhecido', undefined, 'dp'],
+  ['palavra-balancete', ['Vocês podem me mandar o balancete de setembro?'], 'conhecido', undefined, 'contabil'],
+  // Sem palavra-chave: o modelo decide.
+  ['modelo-tributo-venda', ['Fiz uma venda ontem e preciso saber quanto vou pagar de tributo sobre ela.'], 'conhecido', undefined, 'fiscal'],
+  ['modelo-contratado', ['O rapaz que contratamos semana passada já pode começar a receber pelo sistema?'], 'conhecido', undefined, 'dp'],
+  ['modelo-outra-cidade', ['Vamos levar a empresa para outra cidade. O que precisa mudar no registro?'], 'conhecido', undefined, 'societario'],
+  ['modelo-resultado', ['Como ficou o resultado da empresa no trimestre? Teve lucro?'], 'conhecido', undefined, 'contabil'],
+  ['modelo-cobranca-escritorio', ['Mudei de banco. Para onde vocês mandam a cobrança da mensalidade de vocês?'], 'conhecido', undefined, 'gestao_atendimento'],
+  ['modelo-acerto', ['Meu empregado pediu para sair, como fica o acerto dele?'], 'conhecido', undefined, 'dp'],
+  ['modelo-nota-outro-estado', ['Preciso emitir nota para um cliente de outro estado, tem algum cuidado?'], 'conhecido', undefined, 'fiscal'],
+  ['modelo-filho-dono', ['Quero colocar meu filho como dono de uma parte da empresa.'], 'conhecido', undefined, 'societario'],
+  ['modelo-sabado', ['Vocês atendem no sábado de manhã?'], 'conhecido', undefined, 'gestao_atendimento'],
+  ['modelo-conta-luz', ['Pagamos a conta de luz do mês passado em dinheiro. Como vocês registram isso?'], 'conhecido', undefined, 'contabil'],
+  // Assunto misto: uma pessoa decide a quem repassar primeiro.
+  ['misto-das-ferias', ['Preciso da guia do DAS e também quero saber como fica a folha com as férias do Pedro.'], 'conhecido', undefined, 'cartao'],
+  ['misto-socio-impostos', ['Queremos incluir um sócio e também saber o valor dos impostos do mês.'], 'conhecido', undefined, 'cartao'],
+  ['misto-extrato-boleto', ['Mandei o extrato para os lançamentos.', 'E preciso da segunda via do boleto de honorários.'], 'conhecido', undefined, 'cartao'],
+  ['misto-sem-palavra', ['Duas coisas: o rapaz novo começa segunda e vamos mudar a empresa de endereço.'], 'conhecido', undefined, 'cartao'],
+  // Remetente desconhecido: repassa com o aviso, ou pergunta se nem o assunto é claro.
+  ['desconhecido-impostos', ['Bom dia, quero saber o valor dos impostos da minha empresa.'], 'desconhecido', undefined, 'fiscal'],
+  ['desconhecido-vago', ['Oi, tudo bem?'], 'desconhecido', undefined, 'cartao'],
+  ['historico-holerite', ['Preciso do holerite do mês.'], 'historico', undefined, 'dp'],
+]
+
+export const ampliadoTriagem: CasoGabarito[] = triagem.map(([id, mensagens, remetente, menu, esperado]) => ({
+  id: `tri-${id}`,
+  setor: 'gestao_atendimento',
+  procedimento: 'GES-TRIAR-REPASSAR',
+  documento: { tipo: 'conversa', metadados: {} },
+  preparar: conversaDoCaso(mensagens, remetente, menu),
+  esperado,
+  pessoa: esperado,
+}))
+
+ampliadoPorContrato['ges.triagem.classificar'] = ampliadoTriagem
+gabaritoAmpliado.push(...ampliadoTriagem)

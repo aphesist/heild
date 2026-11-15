@@ -6,6 +6,7 @@ import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
 import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
 import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
+import { gesTriarRepassar } from './setores/triagem.ts'
 
 /**
  * Os integrantes do pacote Contábil (B3): um por setor, compartilhado pelas pessoas do setor.
@@ -24,7 +25,7 @@ const entradaDeDocumento: PacoteProcedimento['entrada'] = (a: Anexos) =>
 const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
-const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2].map(P)
+const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassar].map(P)
 /** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
 const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
@@ -186,7 +187,7 @@ export const integranteAtendimento: Integrante = definirIntegrante(
     limites: { simultaneas: 10, segundo_plano_por_pessoa: 3 },
     limiar_confianca: 0.9,
     perguntar_responsavel: false,
-    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'conversa.responder', 'conversa.listar'],
+    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.listar'],
     procedimentos: [
       {
         procedimento: P(gesFaqV2),
@@ -199,6 +200,21 @@ export const integranteAtendimento: Integrante = definirIntegrante(
           return { titulo: 'Cliente respondido', texto: `Respondi ao cliente com a resposta aprovada de "${BASE_PADRAO.find((f) => f.id === id)?.pergunta ?? id}".`, dados: { faq_id: id } }
         },
         decisao: decisaoDeEscolha(['faq_id']),
+      },
+      {
+        procedimento: P(gesTriarRepassar),
+        entrada: (a) => (a.conversa_id ? { ok: true, entrada: { conversa_id: a.conversa_id } } : { ok: false, falta: ['conversa_id'] }),
+        regras: [/\b(triar|triagem|repassar|repasse)\b.*\bconversa\b/i, /\bconversa\b.*\b(triar|repassar)\b/i],
+        // Trabalha sobre a conversa do CRM, não sobre um documento anexado.
+        aceita_documentos: [],
+        descricao_roteamento: 'Triar a conversa que chegou pelo número único de WhatsApp e repassar ao setor certo, com resumo.',
+        apresentar: (s) => ({
+          titulo: `Conversa repassada ao setor ${String(s.setor)}`,
+          texto: `Repassei a conversa ao setor ${String(s.setor)}${s.cliente_id ? '' : ', com o remetente ainda não identificado'}.`,
+          dados: { setor: String(s.setor), origem: String(s.origem), cliente_identificado: s.cliente_id !== null },
+        }),
+        decisao: (e) =>
+          e.estado === 'concluida' ? String(e.saida?.setor) : e.estado === 'aguardando_cartao' || e.erro?.codigo === 'SOMBRA_NAO_DECIDIU' ? 'cartao' : `${e.estado}:${e.erro?.codigo ?? ''}`,
       },
     ],
   },

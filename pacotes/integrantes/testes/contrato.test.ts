@@ -146,7 +146,7 @@ describe('avaliação: classificação, margem e portão do Haiku', () => {
 describe('gabarito ampliado (portão do Haiku)', () => {
   it('30 casos distintos por contrato de operário e 30 ou mais de roteamento, com casos em que o certo é não decidir', async () => {
     const { ampliadoPorContrato, roteamentoAmpliado } = await import('../src/avaliacao/gabarito-ampliado.ts')
-    expect(Object.keys(ampliadoPorContrato).sort()).toEqual(['ctb.competencia.escolher', 'ctb.ecd.apontar_atencao', 'dp.evento.classificar', 'fis.caixa_postal.classificar', 'fis.guia.identificar', 'ges.faq.escolher', 'soc.alteracao.classificar'])
+    expect(Object.keys(ampliadoPorContrato).sort()).toEqual(['ctb.competencia.escolher', 'ctb.ecd.apontar_atencao', 'dp.evento.classificar', 'fis.caixa_postal.classificar', 'fis.guia.identificar', 'ges.faq.escolher', 'ges.triagem.classificar', 'soc.alteracao.classificar'])
     for (const [contrato, casos] of Object.entries(ampliadoPorContrato)) {
       expect(new Set(casos.map((c) => c.id)).size, contrato).toBeGreaterThanOrEqual(30)
       // ECD: o certo é sempre apontar a conta plantada. Caixa postal: toda mensagem tem categoria; os

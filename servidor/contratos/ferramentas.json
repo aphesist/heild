@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "0f258379840e2196",
+  "catalogo_hash": "06a955905848b865",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -115,6 +115,50 @@
       "x-heild-erros": [
         "CURSOR_INVALIDO"
       ]
+    },
+    {
+      "name": "atendimento_conversa_triar_e_repassar",
+      "nome": "atendimento.conversa.triar_e_repassar",
+      "description": "Reconhece quem escreve e o assunto da conversa do número único e a repassa ao setor e ao integrante certos, com resumo.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "conversa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "menu_escolhido": {
+            "type": "string",
+            "enum": [
+              "contabil",
+              "fiscal",
+              "dp",
+              "societario",
+              "gestao_atendimento"
+            ]
+          }
+        },
+        "required": [
+          "conversa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
     },
     {
       "name": "atendimento_faq_responder",
