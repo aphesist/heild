@@ -21,6 +21,11 @@ export interface DefLacuna {
   /** O que falta, como aparece no texto ("quantas pessoas"). */
   pergunta: string
   config: ConfigValor
+  /**
+   * Opcional: não segura o "Continuar" nem o envio e, se ficar em branco,
+   * sai do texto final. Sem a marca, a lacuna é obrigatória.
+   */
+  opcional?: boolean
 }
 
 export type ParteRascunho = string | { lacuna: DefLacuna }
@@ -34,8 +39,9 @@ export function Lacuna({ def, onPreencher }: { def: DefLacuna; onPreencher: (v: 
     if (fechar !== false) setAberta(false)
   }
   const gatilho = (
-    <button type="button" className="lacuna" aria-label={`Lacuna: ${def.pergunta}, preencher`} aria-haspopup="dialog" aria-expanded={aberta} onClick={celular ? () => setAberta(true) : undefined}>
+    <button type="button" className="lacuna" aria-label={`Lacuna${def.opcional ? ' opcional' : ''}: ${def.pergunta}, preencher`} aria-haspopup="dialog" aria-expanded={aberta} onClick={celular ? () => setAberta(true) : undefined}>
       {def.pergunta}
+      {def.opcional && ' (opcional)'}
     </button>
   )
   const seletor = <Seletor config={def.config} valor={null} rotulo={def.pergunta} aplicar={preencher} />
@@ -67,13 +73,22 @@ export function Lacuna({ def, onPreencher }: { def: DefLacuna; onPreencher: (v: 
 
 const porExtenso = ['nenhuma', 'uma', 'duas', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez']
 
+/** Quantas lacunas obrigatórias ainda estão em branco (as opcionais não contam). */
+export function lacunasEmBranco(partes: ParteRascunho[], valores: Record<string, QualquerValor | undefined>) {
+  return partes.filter((p) => typeof p !== 'string' && !p.lacuna.opcional && valores[p.lacuna.id] === undefined).length
+}
+
+/** O número por extenso, para o rodapé e para o motivo de um botão desabilitado ("Faltam duas lacunas"). */
+export const numeroPorExtenso = (n: number) => porExtenso[n] ?? String(n)
+
 /**
  * O rascunho com lacunas e o rodapé "Preencha as três lacunas e eu continuo",
  * que conta o que falta ("Faltam duas"). Com tudo preenchido, "Continuar".
+ * As lacunas opcionais não entram na conta.
  */
 export function RascunhoComLacunas({ partes, valores, onPreencher, onContinuar, rotuloContinuar = 'Continuar', className, cabecalho }: { partes: ParteRascunho[]; valores: Record<string, QualquerValor | undefined>; onPreencher: (id: string, v: QualquerValor) => void; onContinuar?: () => void; rotuloContinuar?: string; className?: string; cabecalho?: ReactNode }) {
-  const lacunas = partes.filter((p): p is { lacuna: DefLacuna } => typeof p !== 'string')
-  const faltam = lacunas.filter((p) => valores[p.lacuna.id] === undefined).length
+  const lacunas = partes.filter((p): p is { lacuna: DefLacuna } => typeof p !== 'string' && !p.lacuna.opcional)
+  const faltam = lacunasEmBranco(partes, valores)
   const total = lacunas.length
   return (
     <div className={cn('flex min-w-0 flex-col gap-2', className)}>

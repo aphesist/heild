@@ -25,7 +25,7 @@ import {
   WarningIcon,
   XIcon,
 } from '@phosphor-icons/react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useItemNaRota } from '@/nucleo/rotas'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
@@ -50,6 +50,8 @@ import { assinar, useBloqueados, useCfgAtendimento } from './s05/config'
 import { DialogoAgendar, DialogoAutorizacao, DialogoLigarCliente, DialogoMover, exportarConversa, SimulacaoAtendimento } from './s05/acoes'
 import { CalendarPlusIcon, DownloadSimpleIcon, EnvelopeOpenIcon, FlaskIcon, ArrowsDownUpIcon, SealCheckIcon } from '@phosphor-icons/react'
 import { useDesvioCampo } from '@/lib/desvio-campo'
+import { RascunhoComLacunas, lacunasEmBranco, numeroPorExtenso, type ParteRascunho, type QualquerValor } from '@/components/kit'
+import { sugestaoDoIntegrante, textoDaSugestao } from './s05/sugestao'
 
 type Visao = 'sem' | 'minhas' | 'setor' | 'todas'
 
@@ -373,6 +375,13 @@ function Conversa({
   const [canal, setCanal] = useState<CanalCrm>(c.canal)
   const [resumoAberto, setResumoAberto] = useState(true)
   const [escrevendo, setEscrevendo] = useState(false)
+  // Sugestão do integrante com lacunas (fase 6): fica no lugar do campo até virar texto, ser enviada ou descartada.
+  const [sugestao, setSugestao] = useState<{ partes: ParteRascunho[]; valores: Record<string, QualquerValor | undefined> } | null>(null)
+  const refTexto = useRef<HTMLTextAreaElement>(null)
+  const refSugestao = useRef<HTMLDivElement>(null)
+  const idMotivo = useId()
+  const comSugestao = modo === 'responder' && !!sugestao
+  const faltamLacunas = comSugestao ? lacunasEmBranco(sugestao.partes, sugestao.valores) : 0
   const [respondidas, setRespondidas] = usePersistente<string[]>('crm.respondidas', [])
   const fim = useRef<HTMLDivElement>(null)
   const eu = useSessao().usuario.nome
@@ -389,37 +398,41 @@ function Conversa({
 
   const assumir = (prefixo = '') => onAtualizar((x) => (x.responsavel === eu ? x : { ...x, responsavel: eu, status: 'em_atendimento', naoLidas: 0, itens: [...x.itens, marco(`${eu} assumiu${prefixo}`)] }))
 
-  // O integrante do setor prepara a resposta (demonstração): escreve e deixa no campo para você revisar e enviar.
+  // O integrante do setor prepara a resposta (demonstração, fase 6): o que vem da conversa entra como texto; o que ele
+  // não sabe (prazo, valor, competência, qual documento) fica em branco. Você preenche, revisa e envia.
   const sugerir = () => {
     setEscrevendo(true)
-    const ultima = [...c.itens].reverse().find((i) => i.tipo === 'mensagem' && i.de === 'cliente') as Extract<ItemConversa, { tipo: 'mensagem' }> | undefined
-    const pergunta = `${ultima?.texto ?? ''} ${ultima?.audio?.transcricao ?? ''}`
-    const corpo = /iss|guia|imposto|das\b/i.test(pergunta)
-      ? 'a guia do ISS de outubro já está pronta: vence dia 20 e o valor é R$ 4.812,40. Mandei pelo app agora; qualquer dúvida, me chama.'
-      : /admi|funcion|contrat/i.test(pergunta)
-        ? 'já abrimos as admissões. Para seguir, preciso de RG, CPF, CTPS e o exame admissional de cada um; pode mandar por aqui ou pelo app.'
-        : /nota|xml|cancel/i.test(pergunta)
-          ? 'recebi. Vou conferir a nota no portal e te confirmo ainda hoje se precisa reemitir.'
-          : 'recebi sua mensagem. Já estou vendo com o setor e te retorno ainda hoje.'
-    // Pensa e escreve no campo aos poucos, como quem digita; você revisa antes de enviar.
     window.setTimeout(() => {
       setModo('responder')
-      const final = `Oi, ${primeiroNome}! ${corpo}`
-      const palavras = final.split(' ')
-      let n = 0
-      const t = window.setInterval(() => {
-        n += 1
-        setTexto(palavras.slice(0, n).join(' '))
-        if (n >= palavras.length) {
-          window.clearInterval(t)
-          setEscrevendo(false)
-        }
-      }, 70)
+      setSugestao({ partes: sugestaoDoIntegrante(c, docsDoCliente.map((d) => d.nome_arquivo)).partes, valores: {} })
+      setEscrevendo(false)
     }, 1600)
   }
 
+  // Quando a sugestão chega, o foco vai para a primeira lacuna (o botão "integrante sugere" sai de cena).
+  const chegouSugestao = !!sugestao
+  useEffect(() => {
+    const caixa = refSugestao.current
+    if (chegouSugestao) (caixa?.querySelector<HTMLElement>('.lacuna') ?? caixa?.querySelector<HTMLElement>('button'))?.focus()
+  }, [chegouSugestao])
+
+  const focarCampo = () => window.requestAnimationFrame(() => refTexto.current?.focus())
+  const descartarSugestao = () => {
+    setSugestao(null)
+    focarCampo()
+  }
+  // Preenchida, a sugestão vira texto livre no campo, para seguir editando.
+  const sugestaoParaTexto = () => {
+    if (!sugestao) return
+    setTexto(textoDaSugestao(sugestao.partes, sugestao.valores))
+    setSugestao(null)
+    focarCampo()
+  }
+
   const enviar = () => {
-    const t0 = texto.trim()
+    // Com a sugestão aberta, sai o texto puro dela (sem marcação de lacuna), e só sem lacuna obrigatória em branco.
+    if (comSugestao && faltamLacunas > 0) return
+    const t0 = (comSugestao ? textoDaSugestao(sugestao.partes, sugestao.valores) : texto).trim()
     if (!t0) return
     if (cnpjErrado) {
       lojaConv.toastErro('Envio bloqueado: o CNPJ do documento não é o da empresa desta conversa (D-34).')
@@ -464,6 +477,7 @@ function Conversa({
     }
     setTexto('')
     setAnexo(null)
+    if (comSugestao) setSugestao(null)
   }
 
   const tom = (t: 'formal' | 'direto' | 'amigável' | 'para leigo') => {
@@ -899,21 +913,43 @@ function Conversa({
               {modo === 'responder' && cfgAtend.assinatura.modo !== 'desligado' && (
                 <span className="text-muted-foreground px-1.5 text-xs">sai assinada: {assinar('…', eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura).replace(/\n/g, ' ').replace(/\*/g, '')}</span>
               )}
-              <textarea
-                value={texto}
-                onChange={(e) => setTexto(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    enviar()
-                  }
-                }}
-                readOnly={modo === 'responder' && foraDaJanela && !texto}
-                rows={2}
-                placeholder={modo === 'nota' ? 'Nota para a equipe…' : foraDaJanela ? 'Escolha um modelo acima' : `Responder ${primeiroNome} por ${rotuloCanal[canal]}… ( / para respostas rápidas)`}
-                className="placeholder:text-muted-foreground min-h-12 resize-none bg-transparent px-1.5 text-sm outline-none"
-              />
-              {modo === 'responder' && texto === '/' && (
+              {comSugestao ? (
+                <div ref={refSugestao} role="group" aria-label={`Sugestão do integrante ${rotuloSetor[c.setor] ?? ''}`.trim()} className="px-1.5">
+                  <RascunhoComLacunas
+                    partes={sugestao.partes}
+                    valores={sugestao.valores}
+                    onPreencher={(id, v) => setSugestao((x) => (x ? { ...x, valores: { ...x.valores, [id]: v } } : x))}
+                    onContinuar={sugestaoParaTexto}
+                    rotuloContinuar="Editar como texto"
+                    cabecalho={
+                      <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                        <SparkleIcon className="size-3.5 shrink-0" aria-hidden />
+                        <span className="min-w-0 flex-1">Sugestão do integrante {rotuloSetor[c.setor]}: o que ele não sabe ficou em branco.</span>
+                        <Button size="sm" variant="ghost" className="h-7 rounded-full px-2" onClick={descartarSugestao}>
+                          <XIcon /> Descartar
+                        </Button>
+                      </div>
+                    }
+                  />
+                </div>
+              ) : (
+                <textarea
+                  ref={refTexto}
+                  value={texto}
+                  onChange={(e) => setTexto(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      enviar()
+                    }
+                  }}
+                  readOnly={modo === 'responder' && foraDaJanela && !texto}
+                  rows={2}
+                  placeholder={modo === 'nota' ? 'Nota para a equipe…' : foraDaJanela ? 'Escolha um modelo acima' : `Responder ${primeiroNome} por ${rotuloCanal[canal]}… ( / para respostas rápidas)`}
+                  className="placeholder:text-muted-foreground min-h-12 resize-none bg-transparent px-1.5 text-sm outline-none"
+                />
+              )}
+              {modo === 'responder' && !comSugestao && texto === '/' && (
                 <ul className="bg-popover flex flex-col rounded-md border p-1 text-sm">
                   {respostasRapidas.map((r) => (
                     <li key={r.atalho}>
@@ -954,7 +990,7 @@ function Conversa({
                     )}
                   </Menu>
                 )}
-                {modo === 'responder' && (
+                {modo === 'responder' && !comSugestao && (
                   <>
                     <Tooltip conteudo="Respostas rápidas">
                       <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label="Respostas rápidas" onClick={() => setTexto('/')}>
@@ -981,17 +1017,32 @@ function Conversa({
                     </Menu>
                   </>
                 )}
-                <Button size="sm" className="ml-auto rounded-full" onClick={enviar} disabled={!texto.trim() || texto === '/' || cnpjErrado}>
-                  {modo === 'nota' ? (
-                    <>
-                      <NotePencilIcon /> Salvar nota
-                    </>
-                  ) : (
-                    <>
-                      <PaperPlaneRightIcon /> Enviar
-                    </>
+                <div className="ml-auto flex items-center gap-2">
+                  {faltamLacunas > 0 && (
+                    <span id={idMotivo} className="text-muted-foreground text-xs">
+                      Falta{faltamLacunas === 1 ? '' : 'm'} {numeroPorExtenso(faltamLacunas)} lacuna{faltamLacunas === 1 ? '' : 's'}
+                    </span>
                   )}
-                </Button>
+                  {/* Com lacuna em branco, o Enviar fica focável (aria-disabled) para o leitor de tela ler o motivo. */}
+                  <Button
+                    size="sm"
+                    className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50 rounded-full"
+                    onClick={enviar}
+                    disabled={(!comSugestao && (!texto.trim() || texto === '/')) || cnpjErrado}
+                    aria-disabled={faltamLacunas > 0 || undefined}
+                    aria-describedby={faltamLacunas > 0 ? idMotivo : undefined}
+                  >
+                    {modo === 'nota' ? (
+                      <>
+                        <NotePencilIcon /> Salvar nota
+                      </>
+                    ) : (
+                      <>
+                        <PaperPlaneRightIcon /> Enviar
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           )}

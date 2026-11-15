@@ -1,5 +1,5 @@
 export { ValorEditavel } from './valor-editavel'
 export { Seletor, type PropsSeletor } from './seletores'
 export { CampoComSuposicoes, FaixaSuposicoes, ResumoSuposicoes, fraseDoCampo, iconeDoCampo, type LinhaSuposicao } from './suposicoes'
-export { Lacuna, RascunhoComLacunas, type DefLacuna, type ParteRascunho } from './lacuna'
+export { Lacuna, RascunhoComLacunas, lacunasEmBranco, numeroPorExtenso, type DefLacuna, type ParteRascunho } from './lacuna'
 export { textoDoValor, type ConfigValor, type Opcao, type PontoPlano, type QualquerValor, type ValorDe } from './tipos'
