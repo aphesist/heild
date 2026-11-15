@@ -32,7 +32,7 @@ export function tokensDoModo(tema: Tema, modo: ModoCor): TokensTema {
 
 const mix = (a: string, b: string, pctA: number) => `color-mix(in oklab, ${a} ${pctA}%, ${b})`
 
-/** Escolhe texto claro ou escuro sobre uma cor hexadecimal (contraste WCAG simplificado). */
+/** Escolhe texto claro ou escuro sobre uma cor hexadecimal: o que dá o maior contraste WCAG. */
 export function textoSobre(cor: string): string {
   const hex = cor.replace('#', '')
   if (!/^[0-9a-f]{6}$/i.test(hex)) return '#ffffff'
@@ -41,7 +41,8 @@ export function textoSobre(cor: string): string {
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
   }
   const lum = 0.2126 * canal(0) + 0.7152 * canal(2) + 0.0722 * canal(4)
-  return lum > 0.45 ? '#0b0b0f' : '#ffffff'
+  // Contraste com o branco (luminância 1) contra o escuro (#0b0b0f, ~0,0035): vence o maior.
+  return (lum + 0.05) / (0.0035 + 0.05) >= 1.05 / (lum + 0.05) ? '#0b0b0f' : '#ffffff'
 }
 
 export function variaveisCss(tema: Tema, modo: ModoCor): Record<string, string> {

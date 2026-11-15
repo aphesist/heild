@@ -191,7 +191,7 @@ export const colunasTarefas: ColunaLista[] = [
   { rotulo: 'Prazo int. · legal', largura: 'conteudo', largo: true },
   { rotulo: 'Responsável', largura: '9.5rem', largo: true },
   { rotulo: 'Origem · dias', largura: 'conteudo', largo: true },
-  { rotulo: 'Status', largura: 'conteudo', alinhar: 'fim' },
+  { rotulo: 'Status', largura: 'conteudo', alinhar: 'fim', abaixo: true },
 ]
 
 /** Linha com pré-visualização (não inicia o tempo) e ação de um toque. */

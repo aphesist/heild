@@ -13,7 +13,7 @@ export const badgeVariants = cva(
         outline: 'text-foreground',
         destaque: 'border-transparent bg-warning/15 text-foreground [&_svg]:text-warning',
         sucesso: 'border-transparent bg-success/15 text-foreground [&_svg]:text-success',
-        erro: 'border-transparent bg-destructive/15 text-destructive',
+        erro: 'border-transparent bg-destructive/15 text-foreground [&_svg]:text-destructive',
       },
     },
     defaultVariants: { variant: 'secondary' },
