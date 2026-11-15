@@ -695,3 +695,7 @@ Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S10) e `entregas/S10.md
 ## Adendo: envio ao cliente configurável por categoria (15/11/2026)
 
 Esclarecimento do Enzo de 15/11/2026, transmitido pela coordenação. As "categorias liberadas" de 7.2 seguem o modo que o escritório escolhe por categoria: aprovação no cartão (padrão), envio automático da mensagem padronizada ou desligado. A mensagem chega ao cliente no mesmo fio, no app ou no WhatsApp. Desenho no [subplano 02](02-Time-de-Agentes.md), adendo "Envio ao cliente: configurável por categoria".
+
+## Adendo: feedforward e lacunas no Consultor da empresa, como passo posterior (15/11/2026)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação. Os padrões de feedforward (o que a IA vai supor aparece antes, com sublinhados editáveis) e de lacunas (rascunho com espaços a preencher) entram no Consultor da empresa (seção 9) **num passo posterior**, depois do Painel e do chat da equipe; a pergunta do cliente mostra, antes do envio, a empresa, a competência e o assunto que o Consultor vai assumir. O resto do app segue como está, e a conversa pelo WhatsApp não muda (texto puro). Padrão no [Desenho do Sistema](../Desenho_do_Sistema.md), adendo do mesmo dia.

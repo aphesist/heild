@@ -1045,3 +1045,12 @@ Deixa explícito o que já estava em 3.3, na lista "faz sozinho" por setor (Conf
 ### Horário desligado por padrão e fim do "menu e integrante" (15/11/2026, mais tarde)
 
 Decisões do Enzo de 15/11/2026, transmitidas pela coordenação (subplano 04, A.12): com integrantes, a triagem do número compartilhado é **só conversando**; quem quer menu usa o chatbot sem IA, e a opção "menu e integrante" saiu. O horário de atendimento é configurável por escritório e vem **desligado**: sem ele, a triagem atende a qualquer hora; ligado (padrão sugerido: segunda a sexta, das 8h às 18h), fora do horário vai a resposta automática fixa, sem IA, e a triagem espera o expediente.
+
+### Feedforward, lacunas e edição in-line (15/11/2026)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação; o padrão está no [Desenho do Sistema](../Desenho_do_Sistema.md), adendo do mesmo dia.
+
+- **Formato padrão de resposta** (decisão 4 dos integrantes) ganha dois campos: **`suposicoes`** (o que o integrante assumiu, cada item com o tipo de dado e o valor, para virar sublinhado editável) e **`lacunas`** (o que falta, cada item com o tipo de dado, o lugar no rascunho e se é obrigatório). O Assistente e a tela usam os dois sem reescrever.
+- **Chat com os integrantes (9.1 e 9.2):** antes de enviar o pedido, a tela mostra a frase com as suposições sublinhadas; o integrante entrega rascunho com lacunas, em vez de perguntar em sequência ou inventar.
+- **Cartões (9.3):** os argumentos se editam in-line antes de aprovar, com a alteração registrada; os botões passam de "Aprovar / Editar e aprovar / Recusar" (adendo do UI lab) para **Aprovar / Recusar**. Aprovar executa a ação guardada, como já decidido.
+- **WhatsApp com o cliente não muda:** texto puro, conversa natural, incluindo a triagem conversando (04, A.10).
