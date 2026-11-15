@@ -1,0 +1,7 @@
+node_modules/
+priv.pem
+pub.pem
+tokens.json
+rust/target/
+go/servidor
+carga/carga
