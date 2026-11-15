@@ -1,0 +1,10 @@
+{
+  "name": "poc-node",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "fastify": "^5",
+    "jose": "^5",
+    "postgres": "^3"
+  }
+}
