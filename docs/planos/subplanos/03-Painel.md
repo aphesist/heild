@@ -995,3 +995,10 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação; o padrão está 
 - **Ações do Painel que chamam a IA** (botões de atividade, "pedir ao integrante"): antes de enviar, a frase do pedido aparece com as suposições sublinhadas (cliente, competência, fonte do dado, setor de destino), editáveis pelo seletor, e só então vai ao integrante.
 - **Rascunhos devolvidos pela IA** (guia, mensagem, relatório, checklist): chegam com as lacunas marcadas no lugar; a ação final fica desligada enquanto houver lacuna obrigatória.
 - **Cartões de aprovação na aba e no chat:** argumentos editáveis in-line antes de aprovar, com a alteração registrada; botões Aprovar e Recusar.
+
+## Adendo: manipulação direta e central de cartões (15/11/2026, mais tarde)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação.
+
+- **"Editar painel" vira manipulação direta (revê o modo de edição de 4.3).** Na grade da Visão geral e nos blocos de cada aba, o widget se move e se redimensiona direto: **toque longo** (no toque) ou a **alça** do widget (no mouse) para arrastar, e a alça do canto para mudar de tamanho, respeitando os tamanhos fixos em que o conteúdo cabe (P, M, G, L, XL). Esconder e a galeria para adicionar ficam no menu do widget. O **modo de edição atual continua como alternativa acessível por teclado** (mover e redimensionar com as setas, sem arrastar). No celular (2.5, largura estreita), segue sem arrastar.
+- **Central de cartões de aprovação no Painel.** Um lugar com **tudo o que espera aprovação da pessoa**, agrupado **por setor e por cliente**, com filtros e contagem no item. Cada cartão segue o padrão novo (Desenho, adendo de 15/11/2026): a frase com os valores editáveis no lugar, **Aprovar** e **Recusar**, e um **comentário que vira proposta de lição** para a memória do setor (aprovada por Gestor ou Administrador, decisão 6 dos integrantes). Quem pode aprovar é o mesmo de hoje (o dono do cartão ou quem aprova no setor); aprovar executa a ação guardada. Os cartões continuam também no chat do integrante e no topo das ações da aba (seção 5); a central é a visão junta.

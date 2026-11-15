@@ -1054,3 +1054,7 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação; o padrão está 
 - **Chat com os integrantes (9.1 e 9.2):** antes de enviar o pedido, a tela mostra a frase com as suposições sublinhadas; o integrante entrega rascunho com lacunas, em vez de perguntar em sequência ou inventar.
 - **Cartões (9.3):** os argumentos se editam in-line antes de aprovar, com a alteração registrada; os botões passam de "Aprovar / Editar e aprovar / Recusar" (adendo do UI lab) para **Aprovar / Recusar**. Aprovar executa a ação guardada, como já decidido.
 - **WhatsApp com o cliente não muda:** texto puro, conversa natural, incluindo a triagem conversando (04, A.10).
+
+### Central de cartões (15/11/2026, mais tarde)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação: o Painel ganha a **central de cartões de aprovação** (subplano 03, adendo do mesmo dia), com tudo o que espera a aprovação da pessoa, por setor e cliente, no padrão novo (frase com valores editáveis, Aprovar e Recusar). O **comentário** do cartão vira **proposta de lição** para a memória do setor (`memoria.propor`, aprovada por Gestor ou Administrador, decisão 6). No CRM, a sugestão de resposta do integrante chega com lacunas pontilhadas (04, A.13).
