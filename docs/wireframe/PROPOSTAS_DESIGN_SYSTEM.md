@@ -22,3 +22,9 @@
 
 - **Hoje:** a grade de widgets mede altura em módulos de 4px (`espaco-1`) e a célula de 156px vem do app (`--celula-widget`), não do design system.
 - **Proposta:** levar para `forma.md` a "célula de widget" (156px; 136px em tela baixa) e a regra de que o widget tem a altura do conteúdo, em passos de `espaco-1`, com teto em células. Hoje é decisão de produto; vale registrar como forma da marca para o site e as apresentações mostrarem o produto do mesmo jeito.
+
+## 5. Ícones da barra lateral
+
+- **Hoje:** o README do design system pede Phosphor "no peso regular". A barra lateral do app usa duotone no item inativo e preenchido no ativo (`barra-lateral.tsx`), o que veio do desenho da navegação.
+- **No app:** os componentes base passaram para o peso regular; a barra lateral ficou como está, porque o preenchido marca o destino atual.
+- **Proposta:** escrever a exceção no design system: na navegação principal, regular no inativo e preenchido no ativo (sem duotone). Se aprovado, a barra troca o duotone pelo regular.
