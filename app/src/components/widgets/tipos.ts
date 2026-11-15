@@ -82,7 +82,9 @@ export interface Posicao {
  *    repartem as colunas que sobram entre eles (a linha fecha sem vão);
  * 3. o vão que restar é coberto pelo vizinho: o da esquerda cresce para a
  *    direita, o da direita para a esquerda, e o de cima desce quando ganha um
- *    tamanho que o widget aceita (M vira G, L vira XL).
+ *    tamanho que o widget aceita (M vira G, L vira XL);
+ * 4. se ainda sobrar vão embaixo de um widget, ele desce até a linha seguinte
+ *    ocupada (o espaço fica dentro do card, não como buraco na grade).
  * O conteúdo recebe o maior tamanho aceito que cabe no espaço final, então um
  * M que cresceu para 4 colunas mostra o seu L.
  */
@@ -160,6 +162,19 @@ export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWi
       let tudoLivre = true
       for (let c = p.coluna; c < p.coluna + p.colunas; c++) tudoLivre &&= livre(embaixo, c)
       if (tudoLivre && tamanhoQueCabe(it.def, p.colunas, p.linhas + 1, it.tamanho) !== tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho)) {
+        p.linhas++
+        marcar(p, it.id)
+      }
+    }
+    // 4. O vão que ainda sobrar embaixo de um widget (nenhum vizinho cobre) vira altura dele: o espaço fica dentro do card, não na grade.
+    for (const it of itens) {
+      const p = pos.get(it.id)!
+      for (;;) {
+        const embaixo = p.linha + p.linhas
+        if (embaixo >= ultima) break
+        let tudoLivre = true
+        for (let c = p.coluna; c < p.coluna + p.colunas; c++) tudoLivre &&= livre(embaixo, c)
+        if (!tudoLivre) break
         p.linhas++
         marcar(p, it.id)
       }
