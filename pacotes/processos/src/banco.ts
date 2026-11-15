@@ -2,10 +2,10 @@ import postgres from 'postgres'
 import { createHash } from 'node:crypto'
 
 export type Sql = postgres.Sql
-/** Transação já presa a um escritório (RLS) e ao papel `authenticated`. */
+/** Transação já presa a um escritório (RLS) e ao papel `api_executor`. */
 export type Tx = postgres.TransactionSql
 
-export function conectar(url = process.env.DATABASE_URL ?? 'postgres://postgres@localhost:54329/heild', max = 10): Sql {
+export function conectar(url = process.env.DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/heild_b2', max = 10): Sql {
   return postgres(url, {
     max,
     onnotice: () => {},
@@ -16,16 +16,31 @@ export function conectar(url = process.env.DATABASE_URL ?? 'postgres://postgres@
 }
 
 /**
+ * O papel de escrita da B1 (migração 20261115200000_backend_b1.sql): sem BYPASSRLS; `anon` e
+ * `authenticated` só leem. O motor grava com ele, como o executor da API.
+ */
+export const PAPEL_ESCRITA = 'api_executor'
+
+/** Tempo máximo de uma consulta, de espera por trava e de transação parada (configurável por ambiente). */
+export const LIMITES_TX = {
+  consulta: process.env.HEILD_TX_CONSULTA ?? '15s',
+  trava: process.env.HEILD_TX_TRAVA ?? '10s',
+  ocioso: process.env.HEILD_TX_OCIOSO ?? '60s',
+}
+
+/**
  * Roda `fn` numa transação presa ao escritório: fixa `request.jwt.claims` e o papel
- * `authenticated` com SET LOCAL, como a API fará (STACK 3.1). As políticas atuais
+ * `api_executor` com SET LOCAL, como o executor da B1 (STACK 3.1). As políticas
  * (`escritorio_atual()`) valem sem mudança: uma execução nunca enxerga outro escritório.
  */
 export async function comEscritorio<T>(sql: Sql, escritorio_id: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
   if (!escritorio_id) throw new Error('Escritório obrigatório para abrir a transação.')
   const claims = JSON.stringify({ role: 'authenticated', app_metadata: { escritorio_id } })
   return (await sql.begin(async (tx) => {
-    await tx`select set_config('request.jwt.claims', ${claims}, true)`
-    await tx`set local role authenticated`
+    // Limites por transação: nenhuma consulta presa segura o worker nem a trava do efeito.
+    await tx`select set_config('request.jwt.claims', ${claims}, true), set_config('role', ${PAPEL_ESCRITA}, true),
+             set_config('statement_timeout', ${LIMITES_TX.consulta}, true), set_config('lock_timeout', ${LIMITES_TX.trava}, true),
+             set_config('idle_in_transaction_session_timeout', ${LIMITES_TX.ocioso}, true)`
     return fn(tx)
   })) as T
 }
@@ -33,7 +48,8 @@ export async function comEscritorio<T>(sql: Sql, escritorio_id: string, fn: (tx:
 /**
  * Adaptador do pg-boss para a transação atual: o job entra na MESMA transação do efeito e do
  * evento (o outbox é a própria fila, STACK 4). O esquema `pgboss` não é do papel do escritório,
- * então o SQL do pg-boss roda com o papel da conexão e volta ao `authenticated` em seguida.
+ * então o SQL do pg-boss roda com o papel da conexão (o do worker) e volta ao `api_executor`.
+ * É a implementação de `enfileirarNaTransacao` que a B1 deixou combinada (servidor/src/executor/jobs.ts).
  */
 export function bossNaTransacao(tx: Tx) {
   return {
@@ -43,7 +59,7 @@ export function bossNaTransacao(tx: Tx) {
         const rows = await tx.unsafe(text, values as never[])
         return { rows: rows as unknown as any[] }
       } finally {
-        await tx`set local role authenticated`
+        await tx`select set_config('role', ${PAPEL_ESCRITA}, true)`
       }
     },
   }

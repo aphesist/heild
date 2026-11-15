@@ -49,7 +49,7 @@ export interface OpcoesProcessos {
  * desenvolvimento rodam no mesmo processo).
  */
 export async function criarProcessos(o: OpcoesProcessos) {
-  const url = o.url ?? process.env.DATABASE_URL ?? 'postgres://postgres@localhost:54329/heild'
+  const url = o.url ?? process.env.DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/heild_b2'
   const sql = o.sql ?? conectar(url)
   const boss = await criarBoss(url, { supervisaoSegundos: o.supervisaoSegundos })
   await criarFilas(boss, o.filas)

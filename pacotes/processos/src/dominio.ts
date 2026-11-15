@@ -1,12 +1,19 @@
 /**
- * Ponte para o pacote de domínio. Enquanto a B1 não extrai `pacotes/dominio` (STACK 2.4), a
- * autorização vem direto do wireframe (`app/src/nucleo/permissoes`): é a MESMA função que a tela
- * usa para esconder botões (R8). Quando o pacote existir, só os imports deste arquivo mudam.
+ * Ponte para o pacote de domínio da B1 (`@heild/dominio`): a autorização é a MESMA função que a
+ * tela usa para esconder botões (R8). A B2 importa só daqui, nunca do `app/` direto.
  */
-import { autorizar as autorizarCatalogo, autorizarPerfil, type Decisao } from '../../../app/src/nucleo/permissoes/autorizar.ts'
-import { ferramentas as catalogo, type Ferramenta } from '../../../app/src/nucleo/permissoes/ferramentas.ts'
-import type { Ator, Contexto, Perfil } from '../../../app/src/nucleo/permissoes/perfil.ts'
-import type { Modulo, Nivel } from '../../../app/src/nucleo/modelo/entidades.ts'
+import {
+  autorizar as autorizarCatalogo,
+  autorizarPerfil,
+  catalogo,
+  type Ator,
+  type Contexto,
+  type Decisao,
+  type Ferramenta,
+  type Modulo,
+  type Nivel,
+  type Perfil,
+} from '@heild/dominio'
 
 export type { Ator, Contexto, Decisao, Ferramenta, Modulo, Nivel, Perfil }
 export { autorizarPerfil }

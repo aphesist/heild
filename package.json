@@ -2,12 +2,18 @@
   "name": "heild",
   "private": true,
   "description": "Monorepo do backend da Heild (branch backend). O app (app/) continua com o próprio package.json e lockfile.",
-  "workspaces": ["pacotes/*", "servidor"],
-  "engines": { "node": ">=24" },
+  "workspaces": [
+    "pacotes/*",
+    "servidor"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "pg": "servidor/scripts/pg-local.sh",
     "dev": "npm run dev -w @heild/servidor",
     "test": "npm test -w @heild/servidor",
-    "typecheck": "npm run typecheck -w @heild/servidor"
+    "typecheck": "npm run typecheck -w @heild/servidor && npm run typecheck -w @heild/processos",
+    "test:b2": "npm test -w @heild/processos"
   }
 }

@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto'
 import type { PgBoss } from 'pg-boss'
+import { geneseDaCadeia, hashDoEvento, type EventoDaCadeia } from '@heild/dominio'
 import type { Tx } from './banco.ts'
 import { FILAS, enfileirar } from './fila.ts'
 import type { ContextoExec } from './contexto.ts'
@@ -32,16 +34,52 @@ export class PortaEventos {
   async gravar(tx: Tx, ctx: ContextoExec, e: NovoEvento): Promise<string> {
     const origem = ctx.origem === 'mcp' ? 'api_externa' : ctx.origem
     const dono = ctx.ator.tipo === 'integrante' ? (ctx.ator.dono?.usuario_id ?? null) : null
-    const [linha] = await tx`
-      insert into evento (escritorio_id, nome, ator_tipo, ator_id, ator_nome, usuario_dono_id, cliente_id, setor_id, ferramenta, nivel,
-        argumentos_resumo, resultado, resultado_ref, origem, texto, execucao_id, causado_por_evento_id, aprovacao_id, custo)
-      values (${ctx.escritorio_id}, ${e.nome}, ${tipoDoAtor(ctx.ator)}, ${idDoAtor(ctx.ator)}, ${nomeDoAtor(ctx.ator)}, ${dono},
-        ${e.cliente_id ?? null}, ${e.setor ?? null}, ${e.ferramenta}, ${e.nivel}, ${e.argumentos_resumo === undefined ? null : tx.json(e.argumentos_resumo as never)},
-        ${e.resultado}, ${e.resultado_ref ?? null}, ${origem}, ${e.texto}, ${e.execucao_id ?? null}, ${e.causado_por_evento_id ?? null},
-        ${e.aprovacao_id ?? null}, ${e.custo === undefined ? null : tx.json(e.custo as never)})
-      returning id`
-    await this.aoGravarEvento(tx, ctx.escritorio_id, linha!.id, e.resultado)
-    return linha!.id
+    // Cadeia de hash do escritório (B1, STACK 8): trava o elo, calcula com a função do pacote de
+    // domínio (a mesma que `auditoria.verificar_cadeia` usa) e grava evento e elo na transação do efeito.
+    await tx`insert into cadeia_evento (escritorio_id, seq, hash) values (${ctx.escritorio_id}, 0, ${Buffer.from(geneseDaCadeia(ctx.escritorio_id))}) on conflict (escritorio_id) do nothing`
+    const [elo] = await tx`select seq, hash from cadeia_evento where escritorio_id = ${ctx.escritorio_id} for update`
+    const seq = Number(elo!.seq) + 1
+    // Hora do servidor em milissegundos, como a canonização da cadeia usa.
+    const agora = new Date().toISOString()
+    const ev = {
+      id: `ev${randomUUID().replaceAll('-', '')}`,
+      escritorio_id: ctx.escritorio_id,
+      seq,
+      criado_em: agora,
+      nome: e.nome,
+      ator_tipo: tipoDoAtor(ctx.ator),
+      ator_id: idDoAtor(ctx.ator),
+      ator_nome: nomeDoAtor(ctx.ator),
+      usuario_dono_id: dono,
+      cliente_id: e.cliente_id ?? null,
+      setor_id: e.setor ?? null,
+      ferramenta: e.ferramenta,
+      ferramenta_versao: 1,
+      nivel: e.nivel,
+      argumentos_resumo: e.argumentos_resumo ?? null,
+      resultado: e.resultado,
+      resultado_ref: e.resultado_ref ?? null,
+      origem,
+      visivel_na_linha_do_tempo: e.resultado !== 'negado' && e.resultado !== 'erro',
+      texto: e.texto,
+      extras: null,
+      sessao_auth_id: null,
+      aprovacao_id: e.aprovacao_id ?? null,
+      causado_por_evento_id: e.causado_por_evento_id ?? null,
+      idempotencia_chave: null,
+    }
+    const hash = hashDoEvento(new Uint8Array(elo!.hash as Buffer), ev as EventoDaCadeia)
+    await tx`
+      insert into evento (escritorio_id, id, criado_em, atualizado_em, nome, ator_tipo, ator_id, ator_nome, usuario_dono_id, cliente_id, setor_id,
+        ferramenta, ferramenta_versao, nivel, argumentos_resumo, resultado, resultado_ref, origem, visivel_na_linha_do_tempo, texto,
+        aprovacao_id, causado_por_evento_id, seq, hash_anterior, hash, execucao_id, custo)
+      values (${ev.escritorio_id}, ${ev.id}, ${ev.criado_em}, ${ev.criado_em}, ${ev.nome}, ${ev.ator_tipo}, ${ev.ator_id}, ${ev.ator_nome}, ${dono},
+        ${ev.cliente_id}, ${ev.setor_id}, ${ev.ferramenta}, 1, ${ev.nivel}, ${ev.argumentos_resumo === null ? null : tx.json(ev.argumentos_resumo as never)},
+        ${ev.resultado}, ${ev.resultado_ref}, ${origem}, ${ev.visivel_na_linha_do_tempo}, ${ev.texto}, ${ev.aprovacao_id}, ${ev.causado_por_evento_id},
+        ${seq}, ${elo!.hash}, ${Buffer.from(hash)}, ${e.execucao_id ?? null}, ${e.custo === undefined ? null : tx.json(e.custo as never)})`
+    await tx`update cadeia_evento set seq = ${seq}, hash = ${Buffer.from(hash)} where escritorio_id = ${ctx.escritorio_id}`
+    await this.aoGravarEvento(tx, ctx.escritorio_id, ev.id, e.resultado)
+    return ev.id
   }
 
   /** Só eventos de sucesso acordam gatilhos; negado e erro ficam na trilha. */

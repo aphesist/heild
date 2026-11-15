@@ -13,7 +13,7 @@ import {
   type Sql,
 } from '../src/index.ts'
 
-export const URL_BANCO = process.env.DATABASE_URL ?? 'postgres://postgres@localhost:54329/heild'
+export const URL_BANCO = process.env.DATABASE_URL ?? 'postgres://postgres@127.0.0.1:54329/heild_b2'
 
 /** Conector SPED simulado (os conectores reais são de uma sessão futura). Guarda o que "chegou ao órgão". */
 export class ConectorSpedSimulado implements Conector {

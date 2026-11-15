@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { verificarCadeia, bytesToHex } from '@heild/dominio'
 import { comEscritorio, type Envelope } from '../src/index.ts'
 import { contar, documentoEcd, esperar, integrante, montar, pessoa, semear, sqlAdmin } from './ambiente.ts'
 
@@ -91,6 +92,13 @@ describe('CTB-ECD-TRANSMITIR', () => {
     // Cada passo concluído uma vez só.
     const repetidos = await admin`select ordem from passo_execucao where execucao_id = ${execucao_id} and estado = 'concluido' group by ordem having count(*) > 1`
     expect(repetidos).toHaveLength(0)
+    // A trilha da B2 entra na cadeia de hash do escritório (B1) e confere com a mesma verificação.
+    const eventos = await admin`select * from evento where escritorio_id = ${s.esc} order by seq`
+    expect(eventos.every((e) => e.seq !== null)).toBe(true)
+    const [elo] = await admin`select seq, hash from cadeia_evento where escritorio_id = ${s.esc}`
+    const paraCadeia = eventos.map((e) => ({ ...e, seq: Number(e.seq), criado_em: new Date(e.criado_em).toISOString(), hash_anterior: bytesToHex(e.hash_anterior), hash: bytesToHex(e.hash) }))
+    const v = verificarCadeia(s.esc, paraCadeia as never, { seq: Number(elo!.seq), hash: bytesToHex(elo!.hash) })
+    expect(v).toMatchObject({ ok: true, eventos: eventos.length })
   })
 
   it('recusa no cartão encerra sem transmitir', async () => {
