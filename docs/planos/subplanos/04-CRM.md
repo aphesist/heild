@@ -784,7 +784,7 @@ O escritório escolhe **por número** e pode misturar os dois: por exemplo, um n
 
 - **setores atendidos** (lista; pelo menos um);
 - **setor de entrada padrão** (onde cai o que ninguém roteou; padrão: Gestão e Atendimento, que já é o papel dele em 3.1, regra 1);
-- **forma de triagem**: `menu` (só o chatbot), `integrante` (só a triagem pelo integrante de Atendimento), `menu_e_integrante` (o menu primeiro; o integrante cuida do que o menu não resolve) ou `manual` (tudo cai no setor de entrada e uma pessoa repassa). **Padrão (resposta do Enzo à P2, 15/11/2026):** com integrantes contratados, `integrante` (triagem pelo integrante, sem menu); sem integrantes, `menu`. `menu_e_integrante` e `manual` são opções. O chatbot é, em geral, a reserva para o escritório que não contrata integrantes; o principal é o integrante decidindo;
+- **forma de triagem**: **Revisto em 15/11/2026, mais tarde (A.12): a opção `menu_e_integrante` saiu.** `menu` (só o chatbot), `integrante` (só a triagem pelo integrante de Atendimento), `menu_e_integrante` (o menu primeiro; o integrante cuida do que o menu não resolve) ou `manual` (tudo cai no setor de entrada e uma pessoa repassa). **Padrão (resposta do Enzo à P2, 15/11/2026):** com integrantes contratados, `integrante` (triagem pelo integrante, sem menu); sem integrantes, `menu`. `menu_e_integrante` e `manual` são opções. O chatbot é, em geral, a reserva para o escritório que não contrata integrantes; o principal é o integrante decidindo;
 - **quem passa pelo menu** (A.4).
 
 A regra 1 de 3.1 ("escritório com um número só usa o número no Gestão e Atendimento e transfere") vira o caso `manual` do número compartilhado; a regra 2 (setor sem número usa o principal) continua.
@@ -837,7 +837,7 @@ Fluxo de partida que vem pronto (o escritório edita):
 
 ### A.4 Quem passa pelo menu
 
-Vale para os números que usam menu (`menu` ou `menu_e_integrante`). Opção por número, com três valores (na triagem `integrante`, as mesmas regras sem modelo de `por_contexto` são o primeiro passo do integrante):
+Vale para os números que usam menu (o chatbot; a opção `menu_e_integrante` saiu, A.12). Opção por número, com três valores (na triagem `integrante`, as mesmas regras sem modelo de `por_contexto` são o primeiro passo do integrante):
 
 | Valor | Quem recebe o menu |
 | --- | --- |
@@ -857,9 +857,9 @@ No `por_contexto`, a regra sem modelo, nesta ordem:
 ### A.5 Convivência com a triagem pelo integrante
 
 - **Com integrantes contratados, o padrão é `integrante`:** não há menu, e a primeira mensagem já vai à triagem pelo integrante, que decide o setor. **Sem integrantes, o padrão é `menu`.**
-- Na opção `menu_e_integrante`, o menu vem primeiro; o integrante de Atendimento entra quando: o cliente responde com texto em vez de opção (segunda vez); escolhe "Falar com uma pessoa" ou a opção de outros assuntos; a conversa cai no setor de entrada por tempo limite (`sem_escolha`); ou o cliente identificado chega sem contexto em `desconhecidos`.
+- **Revisto em 15/11/2026, mais tarde (A.12): a opção `menu_e_integrante` saiu.** Texto anterior: na opção `menu_e_integrante`, o menu vem primeiro; o integrante de Atendimento entra quando: o cliente responde com texto em vez de opção (segunda vez); escolhe "Falar com uma pessoa" ou a opção de outros assuntos; a conversa cai no setor de entrada por tempo limite (`sem_escolha`); ou o cliente identificado chega sem contexto em `desconhecidos`.
 - A triagem é o trabalho novo do integrante de Atendimento descrito no subplano 02 (adendo de 15/11/2026, "Triagem do número compartilhado"): reconhece quem escreve e o assunto, roteia ao setor e ao integrante certos com resumo e pergunta quando estiver em dúvida.
-- **Quando o integrante e o menu discordam** (só acontece na opção `menu_e_integrante`; o cliente escolheu "Fiscal", e pelo texto o assunto é do DP): **vale a escolha do cliente para o roteamento**; o integrante não move a conversa sozinho. Com confiança alta (≥ 0,8), ele deixa na conversa um cartão para quem atende no setor escolhido: "Parece ser do DP (admissão). Transferir?", com um clique, sem mensagem ao cliente. Abaixo de 0,8, só registra a sugestão (métrica para o Gestor rever o texto do menu). A divergência grava `conversa.triagem_divergir`. Exceção: quando o cliente não escolheu um setor (texto livre, "outro assunto", "falar com uma pessoa", tempo limite), o integrante roteia, e uma pessoa corrige em um clique, como em 8.1.
+- **Revisto em 15/11/2026, mais tarde (A.12): a opção `menu_e_integrante` saiu.** Texto anterior: **quando o integrante e o menu discordam** (só acontece na opção `menu_e_integrante`; o cliente escolheu "Fiscal", e pelo texto o assunto é do DP): **vale a escolha do cliente para o roteamento**; o integrante não move a conversa sozinho. Com confiança alta (≥ 0,8), ele deixa na conversa um cartão para quem atende no setor escolhido: "Parece ser do DP (admissão). Transferir?", com um clique, sem mensagem ao cliente. Abaixo de 0,8, só registra a sugestão (métrica para o Gestor rever o texto do menu). A divergência grava `conversa.triagem_divergir`. Exceção: quando o cliente não escolheu um setor (texto livre, "outro assunto", "falar com uma pessoa", tempo limite), o integrante roteia, e uma pessoa corrige em um clique, como em 8.1.
 - **A pessoa sempre pode repassar ou transferir pela conversa**, com os botões que já existem (4.3). No número compartilhado, transferir não troca de número (A.6).
 
 ### A.6 Transferência entre setores sem trocar de número
@@ -929,3 +929,10 @@ Respostas do Enzo de 15/11/2026 (mais tarde), que revêem a P2 de A.9 na parte d
 ### A.11 Envio ao cliente configurável por categoria (15/11/2026)
 
 Esclarecimento do Enzo de 15/11/2026, transmitido pela coordenação. As "categorias liberadas" de 8.1, 8.3 e GES-062 passam a ter três modos, por categoria: **aprovação no cartão** (padrão; aprovar envia pelo CRM, na conversa), **envio automático** da mensagem padronizada, ou **desligado**. A triagem conversando (A.10) segue sem aprovação; o que não é padronizado segue sempre com aprovação (proposta). Desenho no [subplano 02](02-Time-de-Agentes.md), adendo "Envio ao cliente: configurável por categoria".
+
+### A.12 Horário de atendimento desligado por padrão e fim do "menu e integrante" (15/11/2026, mais tarde)
+
+Decisões do Enzo de 15/11/2026, transmitidas pela coordenação.
+
+- **Horário de atendimento configurável por escritório, desligado por padrão.** Sem o horário ligado, a triagem pelo integrante (A.10) atende a qualquer hora, inclusive à noite e no fim de semana. Ao ligar, o padrão sugerido é **segunda a sexta, das 8h às 18h**, com a resposta automática fixa, sem IA, fora do horário (modelo `fora_de_horario` de 4.5), e nenhuma triagem até abrir o expediente. Revê, para o número compartilhado, a regra de A.10 "fora do horário" (que vale só com o horário ligado) e o padrão de 4.5 (horário por setor, sempre ligado); o horário por setor continua possível depois de ligado. O SLA de 4.6 só corre dentro do horário quando ele está ligado; desligado, conta em horas corridas.
+- **A opção `menu_e_integrante` saiu.** Quem quer menu usa o chatbot sem IA (`menu`, A.2); com integrantes, a triagem é só conversando (`integrante`, A.10). As formas de triagem do número compartilhado passam a ser `integrante` (padrão com integrantes), `menu` (padrão sem integrantes) e `manual`. Com isso, a divergência entre menu e integrante (A.5) e a pergunta P2 de A.9 deixam de se aplicar; o cartão "Parece ser do X. Transferir?" continua para quando o integrante ou uma pessoa percebe que a conversa está no setor errado (A.10).

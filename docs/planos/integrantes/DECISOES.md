@@ -27,3 +27,5 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação: com o número de
 ## Adendo: triagem conversando (15/11/2026, mais tarde)
 
 Decisão do Enzo de 15/11/2026, transmitida pela coordenação: o integrante de Atendimento faz a triagem **conversando como uma pessoa** no WhatsApp, uma pergunta por vez, sem menu ("os clientes odeiam menu e falar com robô"). Escopo restrito à triagem (sem dúvida técnica, número, prazo ou promessa; assunto delicado vai a uma pessoa), mensagens com "(IA)", **sem aprovação só para as mensagens de triagem**; as demais mensagens da IA ao cliente continuam com aprovação. Custo maior, aceito. Fora do horário, resposta fixa sem IA e nenhuma triagem até abrir o expediente. Revê a pergunta fechada do adendo anterior. Desenho no [subplano 04](../subplanos/04-CRM.md), A.10, e no [subplano 02](../subplanos/02-Time-de-Agentes.md).
+
+Atualização do mesmo dia: a opção "menu e integrante" saiu (com integrantes, só a triagem conversando; menu só no chatbot sem IA), e o horário de atendimento vem desligado por padrão, de modo que a triagem atende a qualquer hora até o escritório ligar o horário ([subplano 04](../subplanos/04-CRM.md), A.12).

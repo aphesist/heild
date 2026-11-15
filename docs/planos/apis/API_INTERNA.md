@@ -540,7 +540,7 @@ Decisão do Enzo de 15/11/2026; desenho no [subplano 04](../subplanos/04-CRM.md)
 
 | Ferramenta | Nível | Exposição | Notas |
 | --- | --- | --- | --- |
-| `canal.configurar` (muda) | executar | E | Aceita `modo` (`setor`, `compartilhado`), `setores_atendidos`, `setor_entrada_id`, `triagem` (`menu`, `integrante`, `menu_e_integrante`, `manual`) e `quem_passa_pelo_menu` (`todos`, `desconhecidos`, `por_contexto`) |
+| `canal.configurar` (muda) | executar | E | Aceita `modo` (`setor`, `compartilhado`), `setores_atendidos`, `setor_entrada_id`, `triagem` (`menu`, `integrante`, `manual`; a opção `menu_e_integrante` saiu em 15/11/2026, subplano 04, A.12), `horario_ligado` (padrão falso) e `quem_passa_pelo_menu` (`todos`, `desconhecidos`, `por_contexto`) |
 | `fluxo.editar`, `fluxo.simular`, `fluxo.publicar` (novas) | executar (`simular` é ler) | E | Administrador e Gestor de Gestão e Atendimento. Blocos validados por esquema; publicar grava evento e versão |
 | `conversa.rotear` (nova) | executar | E, A | Abre ou retoma a conversa no setor, com `origem` (`menu`, `integrante`, `regra`, `pessoa`), `resumo` e `confianca`. Interna e reversível |
 | `atendimento.triar_numero_compartilhado` (nova; processo) | executar | A | O trabalho do integrante de Atendimento: regras, depois operário barato, depois modelo caro só no ambíguo; devolve a saída padrão do 02 e chama `conversa.rotear` ou pergunta. Em dúvida, devolve `AMBIGUO` com os setores candidatos |
