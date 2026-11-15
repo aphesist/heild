@@ -17,6 +17,7 @@ import { useContratantes, useEmpresaBpo } from './dados'
 import { EntregasBpoTela, RentabilidadeBpoTela, VolumeBpoTela } from './GestaoBpo'
 import { useEfeitosBpo } from './integrantes'
 import { FilaBpoTela, RotinasBpoTela } from './OperacaoBpo'
+import { useEfeitosOperacaoBpo } from './operacao/integrantes' // S08b
 import { PortalConvidado } from './PortalConvidado'
 import { CarteiraBpoTela, VisaoBpoTela } from './VisaoBpo'
 
@@ -46,6 +47,7 @@ export function ModuloBpo({ aba, clienteId, onEscolher }: { aba: string; cliente
     if (temBanco()) garantirSementeBpo()
   }, [escritorio.id, versao])
   useEfeitosBpo()
+  useEfeitosOperacaoBpo() // S08b: trabalho dos integrantes na Fila e nas Rotinas
   const loja = useLoja()
   const contratantes = useContratantes()
   const empresa = useEmpresaBpo(clienteId)

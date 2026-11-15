@@ -201,6 +201,18 @@ export const ferramentas: Ferramenta[] = [
   f('bpo.revisao.decidir', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
   f('erp.autorizar', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
   f('fila.responder', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
+  // S08b · Fila e Rotinas do BPO (10, 3.0, 3.5, 3.10 e 4.3): captura e leitura de documentos, lançamento e baixa no ERP, fechamento
+  f('documento_bpo.receber', 'bpo', 'executar', 'bpo_financeiro', { exposta_ao_cliente: true }),
+  f('conta_pagar.ler_documento', 'bpo', 'rascunhar', 'bpo_financeiro'),
+  f('documento_bpo.descartar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('fila.comentar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('fila.cobrar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('conta_receber.cobrar', 'bpo', 'rascunhar', 'bpo_financeiro'),
+  f('erp.lancar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('erp.baixar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('extrato.buscar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('bpo.fechamento.executar', 'bpo', 'executar', 'bpo_financeiro', { gestao: true, exige_aprovacao: 'sempre' }),
+  f('bpo.fechamento.reabrir', 'bpo', 'executar', 'bpo_financeiro', { papel_minimo: 'administrador', exige_aprovacao: 'sempre' }),
   // S07: Financeiro do escritório
   ...ferramentasFinanceiro,
   // S09 · Arquivos (01, 7): mover, visibilidade, origem, conflito, envio ao cliente.
