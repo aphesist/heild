@@ -62,6 +62,7 @@ export interface Resultado {
 }
 
 const MAX_TENTATIVAS = 60
+const SO_INSERCAO = new Set(['evento', 'registro_entrega'])
 
 export async function executar(sql: Sql, p: Pedido): Promise<Resultado> {
   const esc = p.sessao.claims.escritorio_id
@@ -174,8 +175,11 @@ async function carregar(tx: Tx, bs: BancoServidor, e: PrecisaCarregar) {
   const colunas = await colunasDe(tx)
   if (!colunas.has(e.tabela)) throw new ErroApi('TABELA_SEM_REGRA', { campo: e.tabela, mensagem: `A tabela ${e.tabela} não existe no banco.` })
   if (e.id !== undefined) {
-    // A linha que a operação vai mexer fica travada até o fim da transação.
-    const [linha] = await tx`select * from ${tx(e.tabela)} where id = ${e.id} for update`
+    // A linha que a operação vai mexer fica travada até o fim da transação. Tabela só de
+    // inserção (sem política de update) não aceita FOR UPDATE sob RLS: lá a leitura é simples.
+    const [linha] = SO_INSERCAO.has(e.tabela)
+      ? await tx`select * from ${tx(e.tabela)} where id = ${e.id}`
+      : await tx`select * from ${tx(e.tabela)} where id = ${e.id} for update`
     bs.carregarLinha(e.tabela, e.id, linha ? (paraJson(linha) as unknown as Registro) : undefined)
   } else {
     const linhas = await tx`select * from ${tx(e.tabela)} order by ordem nulls last, criado_em, id`
