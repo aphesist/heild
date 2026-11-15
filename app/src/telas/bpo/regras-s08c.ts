@@ -270,3 +270,12 @@ export const eHoje = (iso?: string | null) => !!iso && iso.slice(0, 10) === hoje
 export function registrarS08c(texto: string, clienteId?: string | null, ferramenta = 'bpo.ler') {
   eventoBpo(banco, texto, clienteId ?? null, ferramenta)
 }
+
+/** Confirma os dados bancários do fornecedor por segundo canal e troca o alerta das contas em aberto dele (10, 3.13). */
+export function confirmarDadosBancarios(e: EmpresaVista, fornecedorId: string, canal: string, quem: string) {
+  const f = e.fornecedores.find((x) => x.id === fornecedorId)
+  if (!f) return
+  repos.bpo.fornecedores.atualizar(f.id, { dados_bancarios_confirmados_em: hojeBpo, confirmado_por: quem, canal_confirmacao: canal }, { texto: `${quem} confirmou os dados bancários de ${f.nome} (${canal})` })
+  for (const c of e.contas.filter((x) => x.contraparte === f.nome && x.alerta?.startsWith('fornecedor novo') && !['paga', 'cancelada'].includes(x.etapa)))
+    repos.bpo.contas.atualizar(c.id, { alerta: `fornecedor novo; dados bancários confirmados por ${canal} em ${dataCurta(hojeBpo)} (${quem})` })
+}

@@ -19,7 +19,7 @@ import { BotaoErp, brl, CabecalhoBpo, Caixa, Numero, PaginaBpo, Regra, TituloBlo
 import { aprovadoresPara, dataCurta, dataHora, diasAte, hora, hojeBpo, quando, rotuloModoPagamento, useBpo, type EmpresaVista } from './dados'
 import { useAcoesErp } from './FichaEmpresa'
 import { usePedirBpo } from './integrantes'
-import { acaoLigada, avancarEscalonamento, escalonamentoDo, excecoesDa, impressao, limitesDa, loteForaDoSla, modoDoLote, motivoLimiteConferir, motivoLimiteLote, motivoNaoEntraNoLote, nomesPassos, regrasSlaDe, trilhaDoLote } from './regras-s08c'
+import { acaoLigada, avancarEscalonamento, confirmarDadosBancarios, escalonamentoDo, excecoesDa, impressao, limitesDa, loteForaDoSla, modoDoLote, motivoLimiteConferir, motivoLimiteLote, motivoNaoEntraNoLote, nomesPassos, regrasSlaDe, trilhaDoLote } from './regras-s08c'
 
 const categorias = ['Matéria-prima', 'Mercadoria para revenda', 'Ocupação', 'Energia', 'Água', 'Software', 'Serviços de terceiros', 'Impostos e taxas', 'Despesas gerais']
 
@@ -121,7 +121,7 @@ export function AprovacoesBpoTela({ empresa }: PropsBpo) {
         status={`${capturadas.length} para conferir; ${abertos.length === 1 ? '1 lote' : `${abertos.length} lotes`} com ${empresa ? 'o cliente' : 'os clientes'}`}
       >
         {empresa && <SeloTitular titular={{ tipo: 'empresa', clienteId: empresa.clienteId, nome: empresa.nome }} />}
-        <SePode ferramenta="conta_pagar.capturar">
+        <SePode ferramenta="bpo.conta.capturar">
           <Button size="sm" variant="outline" className="rounded-full" onClick={() => setLancar(true)}>
             <PlusIcon /> Lançar conta
           </Button>
@@ -330,7 +330,7 @@ function LinhaConferir({ e, c, mostrarEmpresa, marcado, onMarcar }: { e: Empresa
 
   async function confirmarFornecedor(id: string, nome: string) {
     const canal = await confirmar({ titulo: `Confirmar os dados bancários de ${nome}?`, descricao: 'Ligue para o telefone do cadastro (não o do boleto) ou peça a confirmação ao cliente. Diga por onde confirmou: vai para a trilha.', acao: 'Confirmar', exigirMotivo: true, rotuloMotivo: 'Canal da confirmação (ex.: ligação ao telefone do cadastro)' })
-    if (typeof canal === 'string') executar(() => repos.bpo.fornecedores.atualizar(id, { dados_bancarios_confirmados_em: hojeBpo, confirmado_por: usuario.nome, canal_confirmacao: canal }, { texto: `${usuario.nome} confirmou os dados bancários de ${nome} (${canal})` }), { sucesso: 'Dados bancários confirmados por segundo canal' })
+    if (typeof canal === 'string') executar(() => confirmarDadosBancarios(e, id, canal, usuario.nome), { sucesso: 'Dados bancários confirmados por segundo canal' })
   }
 }
 
@@ -401,7 +401,7 @@ function ProximoLote({ e, mostrarEmpresa }: { e: EmpresaVista; mostrarEmpresa: b
                   title={podeConfirmarFornecedor ? undefined : 'Sua conta não altera dados bancários de fornecedor.'}
                   onClick={async () => {
                     const canal = await confirmar({ titulo: `Confirmar os dados bancários de ${f.nome}?`, descricao: 'Ligue para o telefone do cadastro (não o do boleto) ou peça a confirmação ao cliente.', acao: 'Confirmar', exigirMotivo: true, rotuloMotivo: 'Canal da confirmação' })
-                    if (typeof canal === 'string') executar(() => repos.bpo.fornecedores.atualizar(f.id, { dados_bancarios_confirmados_em: hojeBpo, confirmado_por: usuario.nome, canal_confirmacao: canal }, { texto: `${usuario.nome} confirmou os dados bancários de ${f.nome} (${canal})` }), { sucesso: 'Dados bancários confirmados' })
+                    if (typeof canal === 'string') executar(() => confirmarDadosBancarios(e, f.id, canal, usuario.nome), { sucesso: 'Dados bancários confirmados' })
                   }}
                 >
                   <ShieldCheckIcon /> Confirmar dados
