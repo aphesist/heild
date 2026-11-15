@@ -72,7 +72,14 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
   let contaAtual: Id | null = null
   // Uma operação por vez: a fila de um escritório nunca sai com a conta de outro durante a troca.
   let corrente: Promise<unknown> = Promise.resolve()
-  const emSerie = <T,>(f: () => Promise<T>): Promise<T> => {
+  // Geração de cada escritório: restaurar a muda; envio começado numa geração antiga é descartado.
+  const geracao = new Map<Id, number>()
+  const geracaoDe = (id: Id) => geracao.get(id) ?? 0
+  const novaGeracao = (id: Id) => {
+    geracao.set(id, geracaoDe(id) + 1)
+    guardarFila(id, {})
+  }
+  const emSerie = <T>(f: () => Promise<T>): Promise<T> => {
     const p = corrente.then(f, f)
     corrente = p.catch(() => undefined)
     return p
@@ -102,16 +109,19 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
 
   /** Envia a fila; o que o Supabase confirmar sai dela. Tabelas em paralelo, pai antes do filho só onde importa (o escritório). */
   const enviarFila = async (escritorioId: Id) => {
+    const minhaGeracao = geracaoDe(escritorioId)
     const fila = lerFila(escritorioId)
     const tabelas = (Object.keys(fila) as NomeTabela[]).sort((a, b) => nomesTabelas.indexOf(a) - nomesTabelas.indexOf(b))
     if (!tabelas.length) return
     const c = await conectar(escritorioId)
     const enviarTabela = async (t: NomeTabela) => {
       const item = fila[t]!
+      if (geracaoDe(escritorioId) !== minhaGeracao) return t
       const linhas = Object.values(item.gravar)
       for (let i = 0; i < linhas.length; i += LOTE) {
         const lote = linhas.slice(i, i + LOTE)
-        const consulta = SO_INSERCAO.has(t) ? c.from(t).upsert(lote, { onConflict: 'escritorio_id,id', ignoreDuplicates: true }) : c.from(t).upsert(lote, { onConflict: t === 'escritorio' ? 'id' : 'escritorio_id,id' })
+        // defaultToNull: false — coluna que falta numa linha do lote fica com o padrão da tabela, não NULL.
+        const consulta = SO_INSERCAO.has(t) ? c.from(t).upsert(lote, { onConflict: 'escritorio_id,id', ignoreDuplicates: true, defaultToNull: false }) : c.from(t).upsert(lote, { onConflict: t === 'escritorio' ? 'id' : 'escritorio_id,id', defaultToNull: false })
         const { error } = await consulta
         falhou(`gravar ${t}`, error)
       }
@@ -125,6 +135,8 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
     const primeiro = tabelas.filter((t) => t === 'escritorio')
     const resto = tabelas.filter((t) => t !== 'escritorio')
     const resultados = [...(await Promise.allSettled(primeiro.map(enviarTabela))), ...(await Promise.allSettled(resto.map(enviarTabela)))]
+    // O escritório foi restaurado enquanto a rede respondia: a fila antiga já foi descartada.
+    if (geracaoDe(escritorioId) !== minhaGeracao) return
     // Tira da fila só o que foi confirmado e não mudou de novo enquanto a rede respondia.
     const depois = lerFila(escritorioId)
     const erros: string[] = []
@@ -166,56 +178,70 @@ export function adaptadorSupabase(config: ConfigSupabase): Adaptador {
   return {
     nome: 'supabase',
     descricao: 'No Supabase (Postgres com RLS por escritório)',
-    carregar: (escritorioId) => emSerie(async () => {
-      const c = await conectar(escritorioId)
-      // O que ficou pendente da última vez (recarregou no meio da gravação) vai antes de ler.
-      await enviarFila(escritorioId).catch((e) => console.error('[heild] fila do Supabase ainda pendente:', e instanceof Error ? e.message : e))
-      const { data: esc, error } = await c.from('escritorio').select('id').eq('id', escritorioId).maybeSingle()
-      falhou('carregar escritório', error)
-      if (!esc) return null
-      const foto = fotografiaVazia()
-      const tabelas = await Promise.all(nomesTabelas.map((t) => lerTabela(c, t, escritorioId)))
-      nomesTabelas.forEach((t, i) => ((foto as Record<string, unknown>)[t] = tabelas[i]))
-      // Linha ainda na fila (não confirmada) vence a lida do servidor.
-      const fila = lerFila(escritorioId)
-      for (const t of Object.keys(fila) as NomeTabela[]) {
-        const item = fila[t]!
-        const atuais = (foto[t] as Registro[]).filter((r) => !item.remover.includes(r.id) && !item.gravar[r.id])
-        ;(foto as Record<string, unknown>)[t] = [...atuais, ...Object.values(item.gravar)]
-      }
-      return foto
-    }),
+    carregar: (escritorioId) =>
+      emSerie(async () => {
+        const c = await conectar(escritorioId)
+        // O que ficou pendente da última vez (recarregou no meio da gravação) vai antes de ler.
+        await enviarFila(escritorioId).catch((e) => console.error('[heild] fila do Supabase ainda pendente:', e instanceof Error ? e.message : e))
+        const { data: esc, error } = await c.from('escritorio').select('id').eq('id', escritorioId).maybeSingle()
+        falhou('carregar escritório', error)
+        if (!esc) return null
+        const foto = fotografiaVazia()
+        const tabelas = await Promise.all(nomesTabelas.map((t) => lerTabela(c, t, escritorioId)))
+        nomesTabelas.forEach((t, i) => ((foto as Record<string, unknown>)[t] = tabelas[i]))
+        // Linha ainda na fila (não confirmada) vence a lida do servidor.
+        const fila = lerFila(escritorioId)
+        for (const t of Object.keys(fila) as NomeTabela[]) {
+          const item = fila[t]!
+          const atuais = (foto[t] as Registro[]).filter((r) => !item.remover.includes(r.id) && !item.gravar[r.id])
+          ;(foto as Record<string, unknown>)[t] = [...atuais, ...Object.values(item.gravar)]
+        }
+        return foto
+      }),
     persistir(escritorioId, alteracoes) {
       // Síncrono até aqui: a alteração já está segura no navegador antes de qualquer espera.
       guardarFila(escritorioId, juntar(lerFila(escritorioId), alteracoes))
       return emSerie(() => enviarFila(escritorioId))
     },
-    substituir: (escritorioId, foto: Fotografia) => emSerie(async () => {
-      const c = await conectar(escritorioId)
-      guardarFila(escritorioId, {})
-      // Apaga o escritório inteiro pela função da migração (a única porta que limpa eventos e
-      // mensagens internas, só para o escritório do JWT); as tabelas filhas vão por cascata.
-      const { error } = await c.rpc('restaurar_demonstracao')
-      falhou('restaurar a demonstração', error)
-      const escritorio = foto.escritorio as unknown as Record<string, unknown>[]
-      const { error: e } = await c.from('escritorio').insert(escritorio)
-      falhou('semear escritorio', e)
-      await Promise.all(
-        nomesTabelas
-          .filter((t) => t !== 'escritorio')
-          .map(async (t) => {
-            const linhas = foto[t] as unknown as Record<string, unknown>[]
-            for (let i = 0; i < linhas.length; i += LOTE) {
-              const { error: x } = await c.from(t).insert(linhas.slice(i, i + LOTE))
-              falhou(`semear ${t}`, x)
-            }
-          }),
-      )
-    }),
-    esquecer: (escritorioId) => emSerie(async () => {
-      guardarFila(escritorioId, {})
-      const { error } = await (await conectar(escritorioId)).rpc('restaurar_demonstracao')
-      falhou('restaurar a demonstração', error)
-    }),
+    substituir: (escritorioId, foto: Fotografia) => {
+      // Na hora (antes da série): a fila e os envios em andamento deste escritório deixam de valer.
+      novaGeracao(escritorioId)
+      return emSerie(async () => {
+        const c = await conectar(escritorioId)
+        guardarFila(escritorioId, {})
+        // Apaga o escritório inteiro pela função da migração (a única porta que limpa eventos e
+        // mensagens internas, só para o escritório do JWT); as tabelas filhas vão por cascata.
+        const { error } = await c.rpc('restaurar_demonstracao')
+        falhou('restaurar a demonstração', error)
+        const escritorio = foto.escritorio as unknown as Record<string, unknown>[]
+        const { error: e } = await c.from('escritorio').insert(escritorio, { defaultToNull: false })
+        falhou('semear escritorio', e)
+        // Todas as tabelas terminam (com ou sem erro) antes de devolver: uma falha não deixa inserção
+        // no ar enquanto a próxima operação da série apaga o escritório.
+        const resultados = await Promise.allSettled(
+          nomesTabelas
+            .filter((t) => t !== 'escritorio')
+            .map(async (t) => {
+              const linhas = foto[t] as unknown as Record<string, unknown>[]
+              for (let i = 0; i < linhas.length; i += LOTE) {
+                const { error: x } = await c.from(t).insert(linhas.slice(i, i + LOTE), { defaultToNull: false })
+                falhou(`semear ${t}`, x)
+              }
+            }),
+        )
+        const erros = resultados.flatMap((r) => (r.status === 'rejected' ? [r.reason instanceof Error ? r.reason.message : String(r.reason)] : []))
+        if (erros.length) throw new ErroAdaptador('supabase', erros.join(' · '))
+        // O que chegou à fila durante a semeadura era da tela antiga: descarta.
+        guardarFila(escritorioId, {})
+      })
+    },
+    esquecer: (escritorioId) => {
+      novaGeracao(escritorioId)
+      return emSerie(async () => {
+        guardarFila(escritorioId, {})
+        const { error } = await (await conectar(escritorioId)).rpc('restaurar_demonstracao')
+        falhou('restaurar a demonstração', error)
+      })
+    },
   }
 }
