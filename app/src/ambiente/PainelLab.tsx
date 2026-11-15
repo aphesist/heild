@@ -67,6 +67,14 @@ export function PainelLab({
   const ativas = (sessao?.contas ?? []).filter((u) => u.situacao === 'ativo')
   const banco = useBanco()
   const escritorio = { inatividadeMin: useEscritorio()?.inatividade_min ?? 3 }
+  // Os scripts de QA forçam os mesmos estados do painel (ver como, serviços falhando) sem clicar nele.
+  useEffect(() => {
+    const w = window as unknown as { __demonstracao?: Record<string, unknown> }
+    w.__demonstracao = { verComo: sessao?.definirVerComo, instabilidade: definirInstabilidade }
+    return () => {
+      delete w.__demonstracao
+    }
+  }, [sessao])
   // Fechada, a aba vira uma alça fina na borda (não cobre o sistema); Ctrl+Shift+D alterna.
   const [escondida, setEscondida] = usePreferencia('ui-lab:demonstracao-escondida', false)
   useEffect(() => {

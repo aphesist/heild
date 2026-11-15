@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, ArrowSquareOutIcon, FlaskIcon } from '@phosphor-icons/react'
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useSessaoBruta } from '@/ambiente/sessao'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Button } from '@/components/ui/button'
@@ -78,7 +78,7 @@ function Isolado({ p }: { p: ParamsLab }) {
   const ficha = fichas.find((f) => f.id === p.ficha)
   return (
     <AreaRolagem data-qa-raiz data-lab-ficha={p.ficha} data-lab-estado={p.estado} className="from-background to-background-end text-foreground h-dvh bg-gradient-to-b">
-      <div className="pagina flex flex-col gap-4 px-4 py-4 sm:px-5">{!sessao?.usuario ? null : ficha ? ficha.render(p) : <p className="text-muted-foreground text-sm">Ficha não encontrada: {p.ficha}</p>}</div>
+      <div className="pagina flex flex-col gap-4 px-4 py-4 sm:px-5">{!sessao?.usuario ? null : ficha ? <Fragment key={hashDe(p)}>{ficha.render(p)}</Fragment> : <p className="text-muted-foreground text-sm">Ficha não encontrada: {p.ficha}</p>}</div>
     </AreaRolagem>
   )
 }
