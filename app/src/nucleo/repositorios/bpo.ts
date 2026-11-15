@@ -184,7 +184,8 @@ export class RepositorioLotesBpo extends Repositorio<'bpo_lote'> {
     const ficam = l.conta_ids.filter((c) => !fora.includes(c))
     if (!ficam.length) throw new ErroRegra('Tirou todas as contas: recuse o lote, com o motivo.')
     const total = ficam.reduce((s, c) => s + (this.contas().obter(c)?.valor ?? 0), 0)
-    const necessarios = total > this.contas().faixas(l.cliente_id).faixa2 ? 2 : 1
+    // S08c: lote com exceção (fornecedor novo, dados alterados, fracionamento...) vai à aprovação reforçada (10, 3.7, linha "Com exceção").
+    const necessarios = total > this.contas().faixas(l.cliente_id).faixa2 || l.extras?.s08c_excecao ? 2 : 1
     const aprovacoes = [...l.aprovacoes, { nome, quando: agora(), canal }]
     const completo = aprovacoes.length >= necessarios
     const depois = this.atualizar(
@@ -303,10 +304,10 @@ export class RepositorioAlcadasBpo extends Repositorio<'bpo_alcada'> {
     const perfil = this.banco().ler('bpo_perfil').find((x) => x.cliente_id === p.cliente_id)
     if (modo && perfil) this.banco().transacao((tx) => tx.gravar('bpo_perfil', { ...perfil, modo_pagamento: modo, teto_m2: (p.extras?.teto_m2 as number | undefined) ?? perfil.teto_m2 ?? null, atualizado_em: agora() }))
     const cliente = this.banco().obter('cliente', p.cliente_id)
-    const ficha = cliente?.extras?.ficha as { contatos?: { nome: string; alcadaPagamento?: number }[] } | undefined
+    const ficha = cliente?.extras?.ficha as { contatos?: { nome: string; alcadaPagamento?: number; reforcada?: boolean }[] } | undefined
     if (cliente && ficha?.contatos)
       this.banco().transacao((tx) =>
-        tx.gravar('cliente', { ...cliente, atualizado_em: agora(), extras: { ...cliente.extras, ficha: { ...ficha, contatos: ficha.contatos!.map((c) => (p.pessoas[c.nome] !== undefined ? { ...c, alcadaPagamento: p.pessoas[c.nome] || undefined } : c)) } } }),
+        tx.gravar('cliente', { ...cliente, atualizado_em: agora(), extras: { ...cliente.extras, ficha: { ...ficha, contatos: ficha.contatos!.map((c) => aplicarReforcadaS08c(p.extras, c.nome, p.pessoas[c.nome] !== undefined ? { ...c, alcadaPagamento: p.pessoas[c.nome] || undefined } : c)) } } }),
       )
     return depois
   }
@@ -320,6 +321,12 @@ export class RepositorioAlcadasBpo extends Repositorio<'bpo_alcada'> {
   retirar(id: Id, op: OpcoesEscrita = {}) {
     return this.atualizar(id, { situacao: 'retirada' }, { ...op, ferramenta: 'alcada.alterar', texto: 'Proposta de alçadas retirada' })
   }
+}
+
+/** S08c: a proposta de alçada leva também quem entra na aprovação reforçada (`extras.reforcada`); vale com o aceite. */
+function aplicarReforcadaS08c<T extends { reforcada?: boolean }>(extras: Record<string, unknown> | undefined, nome: string, c: T): T {
+  const r = extras?.reforcada as Record<string, boolean> | undefined
+  return r && r[nome] !== undefined ? { ...c, reforcada: r[nome] } : c
 }
 
 /* ---------- Fila: pedidos e pendências, com a bola e o SLA ---------- */
