@@ -752,6 +752,139 @@ Formato de cada registro:
 - **Arquivos compartilhados:** `PainelLab.tsx` (uma linha).
 - **Situação:** proposta.
 
+### S08c · BPO › Aprovações e Configuração
+
+#### 2026-11-14 · S08c · Estado novo das duas telas em `extras`, sem migração
+
+- **Decisão:** o que as telas Aprovações e Configuração passaram a guardar fica no campo `extras` (jsonb) das tabelas que já existem: `bpo_configuracao.extras.s08c` (alçada de conferência por pessoa e ações "faz sozinho" desligadas), `bpo_perfil.extras.s08c_sla` (prazos do SLA), `bpo_lote.extras.s08c_escalonamento` e `s08c_excecao`, `bpo_alcada.extras` (`limite_dia`, `limite_mes`, `reforcada`, `vigencia_ate`). As regras e simulações ficam em `src/telas/bpo/regras-s08c.ts`.
+- **Por quê:** nenhuma coluna nova; funciona nos dois modos de dados sem migração (a `20261114180000_s08_bpo.sql` já tem `extras` em todas as tabelas). A sessão decidiu.
+- **Telas e ações:** S08-T05, S08-T07.
+- **Impacto no plano:** nenhum (no backend real, `limite_dia`, `limite_mes`, `pode_conferir_ate` e `pode_aprovar_reforcada` viram colunas da alçada e do vínculo, 10, 3.9).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Lote com exceção vai à aprovação reforçada
+
+- **Decisão:** as exceções da 3.7 (fornecedor novo, dados bancários alterados, valor 30% acima da média do fornecedor, duplicidade suspeita, fracionamento por fornecedor e dia, pessoa física) aparecem na conta como "sobe de faixa". Lote enviado com exceção leva `extras.s08c_excecao` e pede duas aprovações mesmo abaixo da faixa 2 (linha "Com exceção" da 3.7). No repositório, `aprovar` passou a considerar `s08c_excecao` ao recalcular quantas aprovações faltam (uma linha). "Fora do horário" e "urgência" ficam listados nas regras, sem detecção na demonstração.
+- **Por quê:** 10, 3.7 manda subir de faixa; sem isso, fornecedor novo passava com um aprovador.
+- **Telas e ações:** S08-A22, A24, A27; no app (S08d), o lote com exceção mostra "falta a segunda aprovação" depois da primeira, sem mudança na tela do app.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/repositorios/bpo.ts` (uma linha em `RepositorioLotesBpo.aprovar`, comentada "S08c"). Aviso à S08d: quem aprova continua vindo de `aprovadoresPara` (alçada para o total); a reforçada por exceção pede duas dessas pessoas.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Fornecedor novo só entra em lote com os dados confirmados por segundo canal
+
+- **Decisão:** conta conferida de fornecedor novo ou alterado sem `dados_bancarios_confirmados_em` não tem "Pôr no próximo lote": no lugar, "Confirmar dados" pede o canal (vai para a trilha) e troca o alerta das contas em aberto do fornecedor. O integrante, ao sugerir o lote, também pula essas contas.
+- **Por quê:** 10, 3.13 (troca de conta do fornecedor é a fraude mais comum) e 3.8 (cadastrar ou alterar dados bancários exige confirmação por segundo canal).
+- **Telas e ações:** S08-A23.
+### S08a · BPO: Visão geral, Carteira e Clientes
+
+#### 2026-11-15 · S08a · Dados novos do perfil BPO em `extras.s08a`, sem migração
+
+- **Decisão:** o que a S08a acrescenta ao perfil BPO da empresa (quem fez cada passo da implantação, item do contrato, termo, convites do app, carga inicial do ERP, paralelo com a comparação, prazos do SLA, versões do perfil, ativação e saída) fica em `bpo_perfil.extras.s08a` (tipo `ExtrasS08a` em `src/telas/bpo/perfil-s08a.ts`), gravado pelo repositório `repos.bpo.perfis` com evento. A coluna `extras jsonb` já existe na migração da S08: nenhuma migração nova, nada editado nas aplicadas. Os efeitos pendentes dos integrantes ficam em `s08a:efeitos` e os cartões em `s08a:cartoes` (`registro_tela`).
+- **Por quê:** os campos de 10, 3.12 (`termo_id`, `sla_id`, `conexoes_bancarias`) e de 3.14 viram tabelas próprias no backend; até lá, o JSON do perfil guarda o mesmo conteúdo nos dois modos de dados. A sessão decidiu.
+- **Telas e ações:** S08-A06, A09, A10, A11.
+- **Impacto no plano:** nenhum (só desenho; no backend, `termo`, `sla` e `versao_perfil` como tabelas).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08a · Visão geral por papel
+
+- **Decisão:** o Membro abre a Visão geral nas empresas em que é analista ou responsável ("o que é dele", 10, 5.4), com "Minhas · Toda a carteira" (lê a carteira inteira, como na Carteira); o Gestor e o Administrador abrem na carteira toda e veem o bloco "Por analista" (quem acumula vermelho; clicar abre a Carteira filtrada pela pessoa); a margem do BPO aparece só para quem vê Rentabilidade (Administrador; Gestor com Gestão ou Financeiro). Entram também "Fila em risco" (bola conosco e prazo hoje ou amanhã) e "Caixa das empresas" (saldo contra o mínimo, em barra com texto) e o volume do mês no subtítulo, como no wireframe de 10, 5.3. "Pedir o resumo do dia" põe a Conciliação para trabalhar e responder no Time.
+- **Por quê:** 10, 5.2 e 5.4 dizem o que cada papel vê, mas não a forma; a sessão decidiu.
+- **Telas e ações:** S08-T01, A01 a A04.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Alçada de conferência da pessoa do BPO e limites da alçada da empresa
+
+- **Decisão:** em Configuração › Equipe do BPO, o Gestor do BPO (ou o Administrador) define até quanto cada pessoa confere (`pode_conferir_ate`, 10, 3.9); vale a menor entre ela e a faixa da conta, e o botão "Conferir" desliga com o motivo. A proposta de alçada ganhou limite por dia e por mês, revisão anual e quem entra na reforçada; o limite diário aceito trava "Montar lote e enviar" quando o que já está com o cliente mais o lote passa dele. A marca "reforçada" por pessoa só vale com o aceite (o `aceitar` do repositório aplica `extras.reforcada` na ficha, junto com as alçadas).
+- **Por quê:** 10, 3.9 fala em limites por pagamento, dia e mês e em alçada da pessoa do BPO por vínculo; a forma é da sessão. A regra do limite de conferência é conferida na tela (o repositório comum segue com a segregação B2).
+- **Telas e ações:** S08-A22, A24, A36.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/repositorios/bpo.ts` (função nova `aplicarReforcadaS08c` e a chamada dela em `RepositorioAlcadasBpo.aceitar`). Aviso à S08d: o cartão "o escritório propôs novas alçadas" pode mostrar `extras.limite_dia` e `extras.reforcada` (hoje não mostra; o aceite funciona igual).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · M2 só até o teto; acima, o lote vai como M1
+
+- **Decisão:** na empresa em M2, o lote com alguma conta acima do teto é enviado como M1 (o cliente libera no banco), com o aviso na montagem e no cartão.
+- **Por quê:** 10, 3.4 põe teto no M2; o plano não diz o que fazer com a conta acima dele. A sessão escolheu o caminho que nunca paga sem o cliente.
+- **Telas e ações:** S08-A24, A35.
+#### 2026-11-15 · S08a · Carteira: filtros guardados, visão por analista e sincronizar a carteira
+
+- **Decisão:** a Carteira ganha busca, filtro pela cor, pelo ERP (com problema, modo arquivo, livro próprio), pela pessoa e pela situação do serviço, e ordem (auditoria, caixa perto do mínimo, SLA abaixo da meta, nome), guardados por pessoa (`s08a:carteira:filtros`). A visão "Por analista" mostra uma coluna por pessoa da equipe do BPO; arrastar a empresa reatribui **só o analista** (o responsável que confere não muda), vira uma versão do perfil e só o Gestor arrasta. "Sincronizar a carteira" põe a Conciliação para ler os ERPs por API que estão funcionando e dizer quais ficaram de fora e por quê (credencial vencida, modo arquivo, conector com problema).
+- **Por quê:** o plano pede reatribuir por arrastar na Fila (10, 5.4) e gestão por exceção na carteira; reatribuir a análise da empresa inteira pela Carteira é decisão da sessão.
+- **Telas e ações:** S08-T02, A06, A07, A17 (na Carteira).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Escalonamento avançado pelo relógio da demonstração
+
+- **Decisão:** o cartão do lote aberto mostra os passos do escalonamento (10, 3.6 e Q3) com o que já aconteceu e o próximo. O Gestor do BPO (ou o Administrador) tem "Avançar o relógio" (selo de demonstração): lembrete ao aprovador; substituto (se tiver alçada na ficha, entra no `pode_aprovar` do cartão; sem alçada, só acompanha e o alerta vai ao Gestor); alerta da véspera ao Gestor e ao sócio com a lista; vencido, só alerta, o cartão expira pelo `expirar` do repositório e as contas voltam para um lote novo. Cada passo vira aviso no sino e entra na trilha. O sócio que recebe os alertas é escolhido no escalonamento.
+- **Por quê:** o mapa pedia a linha do tempo do escalonamento visível no cartão; sem relógio, ninguém via os passos acontecerem. Fica no cartão (e não no painel Demonstração, arquivo comum do BPO) para não conflitar com as outras sessões.
+- **Telas e ações:** S08-A25, A37.
+#### 2026-11-15 · S08a · Implantação: ação em cada passo, caixa para o que foi feito fora
+
+- **Decisão:** cada um dos oito passos (10, 3.3) tem a sua ação: (1) gravar o item no contrato com faixa de volume e mensalidade; (2) enviar o termo de dados pelo app e registrar o aceite; (3) Contas a Pagar prepara o convite do app com a alçada de cada pessoa e deixa um **cartão de aprovação** (`s08a-convite-*`), que aparece na ficha, no chat e no sino; aprovado, sai; recusado, nada sai; (4) bancos por Open Finance; (5) ERP e a carga de 90 dias pela Conciliação; (6) Contas a Pagar lista os recorrentes do espelho sem dado bancário e uma pessoa confirma cada um; (7) o paralelo começa com 30 dias e o passo fecha quando o Gestor revisa a comparação do Gerencial (a demonstração não espera os 30 dias); (8) ativar só depois dos sete, com confirmação, evento e prova. A caixa de cada passo continua valendo para marcar o que foi feito fora da plataforma (contrato em papel, por exemplo), com quem e quando. O aceite do termo e o primeiro acesso ao app são simulados por botão marcado como demonstração. As faixas do contrato (até 150, 300 e 600 lançamentos) e as mensalidades sugeridas (R$ 900, R$ 1.400 e R$ 2.300) são exemplo.
+- **Por quê:** o mapa pede "integrantes que preparam e deixam cartão" e "nada sai ao cliente sem aprovação"; o plano lista os passos, não a tela de cada um. Valores de exemplo, a validar.
+- **Telas e ações:** S08-A10.
+- **Impacto no plano:** 10, 3.3 (faixas e valores a validar).
+- **Arquivos compartilhados:** `src/ambiente/efeitos.tsx` (um import e uma linha para os cartões `s08a-*`), `src/telas/bpo/ModuloBpo.tsx` (um import e uma linha `useEfeitosS08a()`), só acrescentando.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08a · Encerramento com aviso prévio, desistência e ordem revogar → apagar
+
+- **Decisão:** abrir o encerramento (Administrador, com motivo) marca o aviso prévio de 30 dias; os cinco passos de 10, 3.14 têm ação (gerar o pacote de saída com manifesto, revogar banco e ERP em um passo com confirmação, apagar o espelho com prova de exclusão, que só libera depois de revogar); "Desistir do encerramento" volta o serviço ao ativo com motivo e fica no histórico. Concluir tira o serviço BPO do cliente; o cadastro continua (em Clientes aparece "BPO encerrado" com "Pôr no BPO").
+- **Por quê:** o plano dá os passos e "aviso prévio" no contrato sem número; 30 dias é hipótese da sessão.
+- **Telas e ações:** S08-A11.
+- **Impacto no plano:** 10, 3.14 (prazo do aviso prévio a validar).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08a · Fornecedor confirmado por segundo canal pede canal, contato e dados conferidos
+
+- **Decisão:** na ficha BPO, "Confirmar" o fornecedor pede o canal (telefone já conhecido, e-mail do cadastro, presencial), com quem falou e banco, agência e conta conferidos; grava `risco = recorrente`, `dados_bancarios_confirmados_em`, `confirmado_por` e `canal_confirmacao` (ferramenta `fornecedor.alterar_dados_bancarios`, só pessoa). Fornecedor novo cadastrado à mão entra sem dado bancário. A auditoria deixa de pesar "fornecedor novo" quando ele é confirmado.
+- **Por quê:** 10, 3.13 manda confirmar por segundo canal; o plano não diz o que registrar.
+- **Telas e ações:** S08-A06, A10 (passo 6).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Integrantes por função na Configuração do BPO
+
+- **Decisão:** a Configuração lista os quatro integrantes do BPO com o que cada um faz sozinho (S), o que prepara (P) e o que nunca faz (travado: pagar, conferir, alterar dados bancários, mudar alçada, fechar o mês, revogar credencial, cobrança firme). Só o Administrador tira item do "faz sozinho" (01, 3.3: a lista vem cheia e ele só tira). Nas telas da S08c o efeito é real em dois pontos: a captura do ERP fica desligada com o motivo e "sugerir o lote" respeita a lista. As outras sessões podem ler `acaoLigada(config, integrante, acao)` de `regras-s08c.ts`.
+- **Por quê:** o pedido da S08c inclui "integrantes por função e o que cada um faz sozinho"; a classe vem do 10, 6.2 e 6.3.
+- **Telas e ações:** S08-T07.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/telas/bpo/integrantes.ts` (efeito novo `sugerir_lote`, no fim, comentado "S08c").
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Ferramentas próprias do BPO para capturar, cancelar e confirmar baixa
+
+- **Decisão:** `conta_pagar.capturar`, `conta_pagar.cancelar` e `conciliacao.confirmar` existem nos dois catálogos (BPO e Financeiro do escritório, S07); o índice guarda a última, a do Financeiro (setor `financeiro_escritorio`), e por isso a equipe do BPO sem o Financeiro (Marina, Lucas) não lançava conta nem confirmava baixa. Acrescentei `bpo.conta.capturar`, `bpo.conta.cancelar` e `bpo.conciliacao.confirmar` no fim do catálogo e o repositório do BPO passou a usá-las. Os nomes antigos continuam com o significado do Financeiro.
+- **Por quê:** permissão é por ferramenta e titular (10, 5.4, F1); o mesmo nome com dois setores é ambíguo.
+- **Telas e ações:** S08-A22 (lançar conta), A25 (baixa).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/permissoes/ferramentas.ts` (três linhas no fim); `src/nucleo/repositorios/bpo.ts` (cinco nomes de ferramenta trocados). **Pedido à coordenação (ou à S08b):** `src/telas/bpo/OperacaoBpo.tsx`, no botão de lançar conta (`SePode ferramenta="conta_pagar.capturar"`), trocar para `bpo.conta.capturar`; não mexi para não conflitar.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Trilha do lote com impressão encadeada de demonstração
+
+- **Decisão:** "Trilha" no cartão do lote lista os eventos do lote, das contas e do cartão (quem, quando, ferramenta) com uma impressão curta encadeada (FNV, não criptográfica) para mostrar a ideia da cadeia de hashes das Fundações (5.2). O backend real usa o hash das Fundações.
+- **Por quê:** 10, 3.11 pede a trilha como entregável ao cliente e ao auditor.
+- **Telas e ações:** S08-A25.
+- **Impacto no plano:** nenhum (só desenho).
+#### 2026-11-15 · S08a · Clientes do BPO puro sem o pacote Contábil e com o encerrado no cadastro
+
+- **Decisão:** no cenário "Só BPO", Clientes não mostra o pacote nem o responsável da contabilidade; filtra pela situação do BPO (em implantação, ativo, sem BPO); o cliente com o BPO encerrado continua no cadastro (com "Pôr no BPO"). O novo cliente confere o CNPJ ou CPF (dígitos, e se já existe, com "Abrir a ficha existente") e pode já abrir a implantação do BPO. Contatos filtram por quem aprova pagamentos e por quem usa o app.
+- **Por quê:** 10, 2.2 e 2.5: o cadastro é um só e é do núcleo; no C1 não há Painel nem pacote Contábil.
+- **Telas e ações:** S08-T08, A40 a A42.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
 ### S08d · BPO: gestão (Entregas, Volume, Rentabilidade), entre escritórios e app
 
 #### 2026-11-15 · S08d · Integrantes do grupo num arquivo próprio, montado por uma linha no módulo

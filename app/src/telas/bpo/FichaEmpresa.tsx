@@ -1,10 +1,11 @@
-import { ArrowsClockwiseIcon, BankIcon, CheckIcon, PencilSimpleIcon, PlugsConnectedIcon, SignOutIcon, WarningIcon } from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
+import { ArrowsClockwiseIcon, BankIcon, CheckIcon, PencilSimpleIcon, PlugsConnectedIcon, SignOutIcon, SparkleIcon, WarningIcon } from '@phosphor-icons/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useContas, useLoja, useNavegacao } from '@/ambiente/loja'
+import { useSessao } from '@/ambiente/sessao'
 import { useAcao, useConfirmar, usePode, Carregando, EstadoErro, SeloDemonstracao } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Passos } from '@/components/ui/formulario'
+import { Campo, CampoEscolha, CampoTexto, Fichas, GavetaFormulario } from '@/components/ui/formulario'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { destinoConectores } from '@/dados/conectores'
 import { cn } from '@/lib/utils'
@@ -13,29 +14,16 @@ import type { BpoPerfil, Regime } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
 import { agora, eventoBpo, repos } from '@/nucleo/repositorios'
 import { ErroServico, servicos } from '@/servicos'
-import { brl, Propriedade, SeloAudit, SeloErp, TituloBloco } from './comum'
+import { BancosEmpresa, FornecedoresEmpresa } from './BancosFornecedores'
+import { BotaoErp, brl, Propriedade, SeloAudit, SeloErp, TituloBloco } from './comum'
 import { agoraBpo, contaAberta, dataCurta, dataHora, hojeBpo, quando, rotuloModoErp, rotuloModoPagamento, rotuloSituacaoPerfil, useEmpresaBpo, type EmpresaVista } from './dados'
+import { ImplantacaoBpo, passosImplantacao, SaidaBpo } from './ImplantacaoBpo'
 import { textoCaptura, usePedirBpo } from './integrantes'
+import { explicarAudit, usePedirS08a } from './integrantes-s08a'
+import { extrasS08a, gravarS08a, maisDias, slaPadrao } from './perfil-s08a'
 
-/** Passos da implantação da empresa no BPO (10, 3.3). */
-export const passosOnboarding: { id: string; rotulo: string; detalhe: string }[] = [
-  { id: 'contrato', rotulo: 'Contrato', detalhe: 'Item BPO no contrato único, faixa de volume e alçadas assinadas (FIN-001)' },
-  { id: 'termo', rotulo: 'Termo de dados', detalhe: 'O BPO é operador da empresa (GES-054)' },
-  { id: 'convite_app', rotulo: 'Convite no app', detalhe: 'Sócio e financeiro com a alçada de pagamento' },
-  { id: 'bancos', rotulo: 'Bancos', detalhe: 'Conexão por Open Finance, com o consentimento do cliente (CTB-010)' },
-  { id: 'erp', rotulo: 'ERP', detalhe: 'Conectar o ERP do cliente (credencial no cofre) ou importar por arquivo; 90 dias de extrato' },
-  { id: 'fornecedores', rotulo: 'Fornecedores', detalhe: 'Recorrentes com dados bancários confirmados por segundo canal' },
-  { id: 'paralelo', rotulo: 'Paralelo', detalhe: 'Um mês em paralelo: o BPO prepara, o cliente ainda paga' },
-  { id: 'ativar', rotulo: 'Ativar', detalhe: 'O Gestor ativa o serviço; evento e prova' },
-]
-
-const passosSaida: { id: string; rotulo: string }[] = [
-  { id: 'mes', rotulo: 'Concluir o mês (conciliação e relatório)' },
-  { id: 'pacote', rotulo: 'Pacote de saída com manifesto entregue ao cliente' },
-  { id: 'revogar', rotulo: 'Revogar as conexões (banco e ERP) em um passo' },
-  { id: 'espelho', rotulo: 'Apagar o espelho do ERP e guardar a prova de exclusão' },
-  { id: 'servico', rotulo: 'Encerrar o serviço BPO (a contabilidade, se houver, continua)' },
-]
+/** Passos da implantação (10, 3.3); a lista mora em `ImplantacaoBpo.tsx` (S08a). */
+export const passosOnboarding = passosImplantacao
 
 const provedores = ['Conta Azul', 'Omie', 'Bling', 'Nibo', 'Granatum', 'sem ERP']
 const modoDe: Record<string, 'E1' | 'E2' | 'E3'> = { 'Conta Azul': 'E1', Omie: 'E1', Bling: 'E1', Nibo: 'E2', Granatum: 'E2', 'sem ERP': 'E3' }
@@ -146,160 +134,179 @@ export function BlocoErp({ e, compacto }: { e: EmpresaVista; compacto?: boolean 
   )
 }
 
+/** Seções da ficha BPO, na ordem em que aparecem (a barra do topo leva a cada uma). */
+const secoesFicha = [
+  { id: 'resumo', rotulo: 'Resumo' },
+  { id: 'ciclo', rotulo: 'Implantação' },
+  { id: 'perfil', rotulo: 'Perfil' },
+  { id: 'conexoes', rotulo: 'Bancos e ERP' },
+  { id: 'fornecedores', rotulo: 'Fornecedores' },
+  { id: 'historico', rotulo: 'Histórico' },
+] as const
+
+const rotuloEscopo: Record<BpoPerfil['escopo'][number], string> = { pagar: 'contas a pagar', receber: 'contas a receber', conciliacao: 'conciliação', gerencial: 'gerencial' }
+
 /**
- * Ficha BPO da empresa (S08-A06): audit score com motivo, saldo, pendências,
- * ERP e sincronização, caixa contra o mínimo, lotes com o cliente, fila e SLA;
- * editar o perfil (A09), a implantação em passos (A10) e o encerramento (A11).
+ * Ficha BPO da empresa (S08-A06): audit score com motivo (e o integrante que
+ * explica), caixa contra o mínimo, pendências, lotes, fila e SLA; a
+ * implantação em oito passos com a ação de cada um (A10) ou o encerramento
+ * (A11); o perfil BPO inteiro de 10, 3.12 com versões (A09); bancos e ERP
+ * (A07, A08); fornecedores confirmados por segundo canal; histórico da empresa.
  */
-export function FichaEmpresa({ clienteId, onFechar, onIr }: { clienteId: string; onFechar: () => void; onIr: (id: string | null, aba?: string) => void }) {
+export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: string; onFechar: () => void; onIr: (id: string | null, aba?: string) => void; secao?: string }) {
   const e = useEmpresaBpo(clienteId)
   const tPerfil = useTabela('bpo_perfil')
   const perfilBruto = tPerfil.find((p) => p.cliente_id === clienteId)
   const executar = useAcao()
   const confirmar = useConfirmar()
-  const loja = useLoja()
+  const pedir = usePedirS08a()
   const podeEditar = usePode('bpo.perfil.editar', { cliente_id: clienteId })
-  const podeOnboarding = usePode('bpo.onboarding', { cliente_id: clienteId })
   const podeEncerrar = usePode('bpo.encerrar', { cliente_id: clienteId })
   const [editar, setEditar] = useState(false)
   const [conectar, setConectar] = useState<'erp' | 'banco' | null>(null)
+  const corpo = useRef<HTMLDivElement>(null)
+  const irPara = (id: string) => corpo.current?.querySelector(`[data-secao="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  useEffect(() => {
+    if (secao) setTimeout(() => irPara(secao), 250)
+  }, [secao])
   if (!perfilBruto) return null
   const perfil = perfilBruto
   const nome = e?.nome ?? banco.obter('cliente', clienteId)?.nome ?? clienteId
-  const feitos = passosOnboarding.filter((p) => perfil.onboarding[p.id]).length
+  const x = extrasS08a(perfil)
   const implantando = perfil.situacao === 'onboarding' || perfil.situacao === 'paralelo'
-
-  const marcarPasso = (id: string, valor: boolean) => {
-    if (id === 'ativar' && valor && passosOnboarding.slice(0, 7).some((p) => !perfil.onboarding[p.id])) return loja.toastErro('Ative só depois dos sete passos anteriores (o paralelo inclusive).')
-    if (id === 'bancos' && valor && !(e?.bancos.length ?? 0)) return setConectar('banco')
-    if (id === 'erp' && valor && (!e || e.erp.efetiva === 'desconectada')) return setConectar('erp')
-    const onboarding = { ...perfil.onboarding, [id]: valor }
-    const extra: Partial<BpoPerfil> = id === 'paralelo' && valor ? { situacao: 'paralelo', paralelo_ate: '2026-12-18' } : id === 'ativar' && valor ? { situacao: 'ativo', paralelo_ate: null } : {}
-    executar(() => repos.bpo.perfis.atualizar(perfil.id, { onboarding, ...extra }, { ferramenta: 'bpo.onboarding', texto: `${valor ? 'Concluiu' : 'Reabriu'} o passo “${passosOnboarding.find((p) => p.id === id)?.rotulo}” da implantação de ${nome}` }), {
-      sucesso: id === 'ativar' && valor ? `${nome}: serviço BPO ativado` : undefined,
-    })
-  }
+  const saindo = perfil.situacao === 'encerrando' && !!perfil.encerramento
+  const feitos = passosImplantacao.filter((p) => perfil.onboarding[p.id]).length
+  const sla = { ...slaPadrao, ...x.sla_termos }
 
   const encerrar = async () => {
-    const motivo = await confirmar({ titulo: `Encerrar o BPO de ${nome}?`, descricao: 'Abre o offboarding (10, 3.14): concluir o mês, pacote de saída, revogar conexões, apagar o espelho e encerrar o serviço. Nada se apaga sem esses passos; a contabilidade, se houver, continua.', acao: 'Abrir o encerramento', perigo: true, exigirMotivo: true, rotuloMotivo: 'Motivo (vai para o evento)' })
+    const motivo = await confirmar({ titulo: `Encerrar o BPO de ${nome}?`, descricao: 'Abre o offboarding (10, 3.14): concluir o mês, pacote de saída, revogar conexões, apagar o espelho e encerrar o serviço. Nada se apaga sem esses passos; a contabilidade, se houver, continua. Dá para desistir até concluir.', acao: 'Abrir o encerramento', perigo: true, exigirMotivo: true, rotuloMotivo: 'Motivo (vai para o evento)' })
     if (typeof motivo !== 'string') return
-    executar(() => repos.bpo.perfis.atualizar(perfil.id, { situacao: 'encerrando', encerramento: { motivo, pedido_em: agora(), passos: {} } }, { ferramenta: 'bpo.encerrar', texto: `Abriu o encerramento do BPO de ${nome}: ${motivo}` }), { sucesso: 'Encerramento aberto: siga os cinco passos' })
+    executar(() => gravarS08a(perfil.id, (s) => ({ ...s, saida: { ...s.saida, aviso_ate: maisDias(hojeBpo, 30) } }), { situacao: 'encerrando', encerramento: { motivo, pedido_em: agora(), passos: {} } }, { ferramenta: 'bpo.encerrar', texto: `Abriu o encerramento do BPO de ${nome}: ${motivo}` }), { sucesso: 'Encerramento aberto: siga os cinco passos' })
+    setTimeout(() => irPara('ciclo'), 250)
   }
-  const passoSaida = (id: string, v: boolean) => executar(() => repos.bpo.perfis.atualizar(perfil.id, { encerramento: { ...perfil.encerramento!, passos: { ...perfil.encerramento!.passos, [id]: v } } }, { ferramenta: 'bpo.encerrar', texto: `${passosSaida.find((p) => p.id === id)?.rotulo}: ${v ? 'feito' : 'reaberto'}` }))
   const concluirSaida = () =>
     executar(() => {
-      banco.transacao((tx) => {
-        for (const b of banco.ler('bpo_conta_bancaria').filter((x) => x.cliente_id === clienteId)) tx.gravar('bpo_conta_bancaria', { ...b, arquivado_em: agora(), atualizado_em: agora() })
-        const x = banco.ler('bpo_conexao_erp').find((c) => c.cliente_id === clienteId)
-        if (x) tx.gravar('bpo_conexao_erp', { ...x, situacao: 'desconectada', escopo: 'revogada no encerramento', atualizado_em: agora() })
-      })
       const c = banco.obter('cliente', clienteId)
       if (c) repos.clientes.atualizar(c.id, { servicos_contratados: c.servicos_contratados.filter((s) => s !== 'bpo'), extras: { ...c.extras, servicos_definidos: true } }, { texto: `Serviço BPO de ${c.nome} encerrado (o cadastro continua)` })
-      return repos.bpo.perfis.atualizar(perfil.id, { situacao: 'encerrado' }, { ferramenta: 'bpo.encerrar', texto: `BPO de ${nome} encerrado: conexões revogadas, espelho apagado` })
+      return repos.bpo.perfis.atualizar(perfil.id, { situacao: 'encerrado' }, { ferramenta: 'bpo.encerrar', texto: `BPO de ${nome} encerrado: conexões revogadas, espelho apagado, prova guardada` })
     }, { sucesso: `BPO de ${nome} encerrado` })
+
+  const explicar = () =>
+    e &&
+    pedir({
+      integrante: 'i-bpo-conciliacao',
+      titulo: `Explicar a cor de ${nome}`,
+      cliente: nome,
+      inicio: `Vou olhar os critérios da auditoria de ${nome} e dizer o que pesa e o que eu faria.`,
+      etapas: ['Lendo os critérios e os pesos da Configuração', 'Conferindo o ERP, o caixa e as aprovações', 'Separando o que eu faço do que é de vocês'],
+      fim: { texto: explicarAudit(e) },
+    })
+
+  const secoes = secoesFicha.map((s) => (s.id === 'ciclo' ? { ...s, rotulo: saindo ? 'Encerramento' : 'Implantação' } : s)).filter((s) => s.id !== 'ciclo' || implantando || saindo || feitos > 0)
 
   return (
     <Sheet open onOpenChange={(v) => !v && onFechar()}>
-      <SheetContent className="gap-0 overflow-y-auto sm:max-w-xl">
-        <SheetHeader className="px-5 pt-5">
-          <SheetTitle className="text-xl font-light">{nome}</SheetTitle>
+      <SheetContent className="gap-0 overflow-y-auto sm:max-w-2xl">
+        <SheetHeader className="bg-background/95 sticky top-0 z-10 gap-2 px-5 pt-5 pb-3 backdrop-blur">
+          <SheetTitle className="pr-8 text-xl font-light">{nome}</SheetTitle>
           <SheetDescription>
             Ficha BPO · {rotuloSituacaoPerfil[perfil.situacao]} · {perfil.analista_nome === perfil.responsavel_nome ? perfil.responsavel_nome : `${perfil.analista_nome} faz, ${perfil.responsavel_nome} confere`}
           </SheetDescription>
+          <nav aria-label="Seções da ficha" className="-mx-1 flex gap-1 overflow-x-auto pb-0.5">
+            {secoes.map((s) => (
+              <button key={s.id} type="button" onClick={() => irPara(s.id)} className="text-muted-foreground hover:text-foreground hover:bg-sunken shrink-0 cursor-pointer rounded-full px-2.5 py-1 text-xs">
+                {s.rotulo}
+              </button>
+            ))}
+          </nav>
         </SheetHeader>
-        <div className="flex flex-col gap-5 px-5 pt-4 pb-8">
+        <div ref={corpo} className="flex flex-col gap-6 px-5 pt-3 pb-10">
           {e && (
-            <section className="flex flex-col gap-2">
-              <TituloBloco descricao="Critérios fixos com os pesos da Configuração.">Auditoria</TituloBloco>
-              <SeloAudit e={e} onIr={(a) => (onFechar(), onIr(clienteId, a))} />
-              <ul className="flex flex-col gap-1 text-sm">
-                {e.audit.motivos.map((m, i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="bg-muted-foreground mt-2 size-1 shrink-0 rounded-full" />
-                    <span className="flex-1">{m.texto}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {implantando && (
-            <section className="flex flex-col gap-2">
-              <TituloBloco descricao={`${feitos} de ${passosOnboarding.length} passos (10, 3.3).`}>Implantação</TituloBloco>
-              <Passos passos={passosOnboarding.map((p) => p.rotulo)} atual={Math.min(feitos, passosOnboarding.length - 1)} />
-              <ul className="flex flex-col gap-1">
-                {passosOnboarding.map((p) => (
-                  <li key={p.id}>
-                    <label className={cn('hover:bg-raised/50 flex items-start gap-2.5 rounded-[10px] px-1.5 py-1.5 text-sm', podeOnboarding ? 'cursor-pointer' : 'cursor-default')}>
-                      <input type="checkbox" className="accent-foreground mt-0.5 size-4 shrink-0" checked={!!perfil.onboarding[p.id]} disabled={!podeOnboarding} onChange={(ev) => marcarPasso(p.id, ev.target.checked)} aria-label={p.rotulo} />
-                      <span className="min-w-0 flex-1">
-                        <span className={cn('block', perfil.onboarding[p.id] && 'text-muted-foreground line-through')}>{p.rotulo}</span>
-                        <span className="text-muted-foreground block text-xs">{p.detalhe}</span>
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {perfil.situacao === 'encerrando' && perfil.encerramento && (
-            <section className="flex flex-col gap-2">
-              <TituloBloco descricao={`Motivo: ${perfil.encerramento.motivo}`}>Encerramento</TituloBloco>
-              <ul className="flex flex-col gap-1">
-                {passosSaida.map((p) => (
-                  <li key={p.id}>
-                    <label className="hover:bg-raised/50 flex cursor-pointer items-start gap-2.5 rounded-[10px] px-1.5 py-1.5 text-sm">
-                      <input type="checkbox" className="accent-foreground mt-0.5 size-4 shrink-0" checked={!!perfil.encerramento?.passos[p.id]} disabled={!podeEncerrar} onChange={(ev) => passoSaida(p.id, ev.target.checked)} aria-label={p.rotulo} />
-                      <span className={cn(perfil.encerramento?.passos[p.id] && 'text-muted-foreground line-through')}>{p.rotulo}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-              {podeEncerrar && (
-                <Button size="sm" variant="destructive" className="w-fit rounded-full" disabled={passosSaida.some((p) => !perfil.encerramento?.passos[p.id])} onClick={concluirSaida}>
-                  Concluir o encerramento
-                </Button>
-              )}
-            </section>
-          )}
-
-          {e && (
-            <section className="flex flex-col gap-2">
-              <TituloBloco descricao="Espelho do ERP que o cliente já usa (10, 3.0).">ERP e sincronização</TituloBloco>
-              <BlocoErp e={e} />
-            </section>
-          )}
-
-          {e && (
-            <section className="flex flex-col gap-2">
-              <TituloBloco descricao={`Mínimo combinado ${brl(perfil.caixa_minimo)}.`}>Caixa e pendências</TituloBloco>
-              <dl className="divide-border/70 divide-y">
-                <Propriedade rotulo="Saldo nos bancos">
-                  <span className={e.caixa < perfil.caixa_minimo ? 'text-destructive' : undefined}>{brl(e.caixa)}</span>
-                </Propriedade>
-                <Propriedade rotulo="A pagar em aberto">{`${e.contas.filter(contaAberta).length} contas · ${brl(e.contas.filter(contaAberta).reduce((s, c) => s + c.valor, 0))}`}</Propriedade>
-                <Propriedade rotulo="Lotes com o cliente">{e.lotesAbertos.length ? e.lotesAbertos.map((l) => `${brl(l.total)} (expira ${quando(l.expira_em.slice(0, 10))})`).join(' · ') : 'nenhum'}</Propriedade>
-                <Propriedade rotulo="Fila">{`${e.fila.length} itens · ${e.fila.filter((f) => f.bola === 'bpo').length} conosco`}</Propriedade>
-                <Propriedade rotulo="SLA do mês">{`${perfil.sla.mes}% (meta ${perfil.sla.meta}%)`}</Propriedade>
-              </dl>
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" className="rounded-full" onClick={() => (onFechar(), onIr(clienteId, 'aprovacoes'))}>
-                  Aprovações
-                </Button>
-                <Button size="sm" variant="outline" className="rounded-full" onClick={() => (onFechar(), onIr(clienteId, 'fila'))}>
-                  Fila
-                </Button>
-                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => (onFechar(), onIr(clienteId, 'visao'))}>
-                  Visão da empresa
-                </Button>
+            <section data-secao="resumo" className="flex scroll-mt-32 flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <TituloBloco
+                  descricao="Critérios fixos com os pesos da Configuração."
+                  acao={
+                    <Button size="sm" variant="ghost" className="rounded-full" onClick={explicar}>
+                      <SparkleIcon /> Pedir para explicar
+                    </Button>
+                  }
+                >
+                  Auditoria
+                </TituloBloco>
+                <SeloAudit e={e} onIr={(a) => (onFechar(), onIr(clienteId, a))} />
+                <ul className="flex flex-col gap-1 text-sm">
+                  {e.audit.motivos.length === 0 && <li className="text-muted-foreground">Nenhum critério pesou.</li>}
+                  {e.audit.motivos.map((m, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="bg-muted-foreground mt-2 size-1 shrink-0 rounded-full" />
+                      <span className="flex-1">{m.texto}</span>
+                      <span className="text-muted-foreground shrink-0 text-xs tabular-nums">peso {m.peso}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex flex-col gap-2">
+                <TituloBloco descricao={`Mínimo combinado ${brl(perfil.caixa_minimo)}.`}>Caixa e pendências</TituloBloco>
+                <BarraCaixa caixa={e.caixa} minimo={perfil.caixa_minimo} semBanco={e.bancos.length === 0} />
+                <dl className="divide-border/70 divide-y">
+                  <Propriedade rotulo="Saldo nos bancos">
+                    <span className={e.bancos.length && e.caixa < perfil.caixa_minimo ? 'text-destructive' : e.bancos.length ? undefined : 'text-muted-foreground'}>{e.bancos.length ? brl(e.caixa) : 'nenhum banco conectado'}</span>
+                  </Propriedade>
+                  <Propriedade rotulo="A pagar em aberto">{`${e.contas.filter(contaAberta).length} contas · ${brl(e.contas.filter(contaAberta).reduce((s, c) => s + c.valor, 0))}`}</Propriedade>
+                  <Propriedade rotulo="Lotes com o cliente">{e.lotesAbertos.length ? e.lotesAbertos.map((l) => `${brl(l.total)} (expira ${quando(l.expira_em.slice(0, 10))})`).join(' · ') : 'nenhum'}</Propriedade>
+                  <Propriedade rotulo="Fila">{`${e.fila.length} itens · ${e.fila.filter((f) => f.bola === 'bpo').length} conosco · ${e.fila.filter((f) => f.bola === 'cliente').length} com o cliente`}</Propriedade>
+                  <Propriedade rotulo="SLA do mês">{`${perfil.sla.mes}% (meta ${perfil.sla.meta}%)`}</Propriedade>
+                </dl>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" className="rounded-full" onClick={() => (onFechar(), onIr(clienteId, 'aprovacoes'))}>
+                    Aprovações
+                  </Button>
+                  <Button size="sm" variant="outline" className="rounded-full" onClick={() => (onFechar(), onIr(clienteId, 'fila'))}>
+                    Fila
+                  </Button>
+                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => (onFechar(), onIr(clienteId, 'visao'))}>
+                    Visão da empresa
+                  </Button>
+                  <BotaoErp e={e} oque={`a empresa ${nome}`} rotulo />
+                </div>
               </div>
             </section>
           )}
 
-          <section className="flex flex-col gap-2">
+          {(implantando || saindo || feitos > 0) && (
+            <section data-secao="ciclo" className="flex scroll-mt-32 flex-col gap-2">
+              {saindo ? (
+                <>
+                  <TituloBloco descricao={`Motivo: ${perfil.encerramento!.motivo}`}>Encerramento</TituloBloco>
+                  <SaidaBpo e={e} perfil={perfil} nome={nome} onConcluir={concluirSaida} />
+                </>
+              ) : implantando ? (
+                <>
+                  <TituloBloco descricao={`${feitos} de ${passosImplantacao.length} passos (10, 3.3). Cada passo tem a ação dele; a caixa marca o que foi feito fora da plataforma.`}>Implantação</TituloBloco>
+                  <ImplantacaoBpo e={e} perfil={perfil} nome={nome} onConectar={setConectar} onAba={irPara} />
+                </>
+              ) : (
+                <details className="group">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-sm">
+                    <CheckIcon className="text-success size-4" /> Implantação concluída <span className="text-muted-foreground text-xs">· 8 de 8 passos{x.ativado ? ` · ativada por ${x.ativado.por}, ${dataHora(x.ativado.em)}` : ''}</span>
+                  </summary>
+                  <ul className="text-muted-foreground mt-2 flex flex-col gap-0.5 text-xs">
+                    {passosImplantacao.map((p) => (
+                      <li key={p.id} className="flex gap-2">
+                        <CheckIcon className="text-success mt-0.5 size-3.5 shrink-0" /> {p.rotulo}
+                        {x.passos?.[p.id] && ` · ${x.passos[p.id].por}, ${dataHora(x.passos[p.id].em)}`}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </section>
+          )}
+
+          <section data-secao="perfil" className="flex scroll-mt-32 flex-col gap-2">
             <TituloBloco
-              descricao="Perfil BPO da empresa (10, 3.12)."
+              descricao="Perfil BPO da empresa (10, 3.12), versionado."
               acao={
                 podeEditar &&
                 perfil.situacao !== 'encerrado' && (
@@ -312,15 +319,67 @@ export function FichaEmpresa({ clienteId, onFechar, onIr }: { clienteId: string;
               Perfil BPO
             </TituloBloco>
             <dl className="divide-border/70 divide-y">
-              <Propriedade rotulo="Escopo">{perfil.escopo.map((x) => ({ pagar: 'contas a pagar', receber: 'contas a receber', conciliacao: 'conciliação', gerencial: 'gerencial' })[x]).join(', ')}</Propriedade>
-              <Propriedade rotulo="Modo de pagamento">{rotuloModoPagamento[perfil.modo_pagamento]}</Propriedade>
-              <Propriedade rotulo="Responsável">{perfil.responsavel_nome}</Propriedade>
-              <Propriedade rotulo="Analista">{perfil.analista_nome}</Propriedade>
-              <Propriedade rotulo="Meta de SLA">{`${perfil.sla.meta}% no prazo`}</Propriedade>
-              <Propriedade rotulo="Termo de dados">{perfil.termo_aceito_em ? `aceito em ${dataCurta(perfil.termo_aceito_em)}/${perfil.termo_aceito_em.slice(0, 4)}` : 'pendente'}</Propriedade>
-              {perfil.paralelo_ate && <Propriedade rotulo="Paralelo até">{dataCurta(perfil.paralelo_ate)}</Propriedade>}
+              <Propriedade rotulo="Escopo">{perfil.escopo.map((v) => rotuloEscopo[v]).join(', ')}</Propriedade>
+              <Propriedade rotulo="Modo de execução">{e ? `${e.erp.provedor} · ${rotuloModoErp[e.erp.modo]}` : 'ERP ainda não conectado'}</Propriedade>
+              <Propriedade rotulo="Modo de pagamento">{`${rotuloModoPagamento[perfil.modo_pagamento]}${perfil.modo_pagamento === 'M2' && perfil.teto_m2 ? ` · teto ${brl(perfil.teto_m2)}` : ''}`}</Propriedade>
+              <Propriedade rotulo="Alçada">
+                {e?.alcada ? `faixa 1 até ${brl(e.alcada.faixa1)} · faixa 2 até ${brl(e.alcada.faixa2)} · aceita por ${e.alcada.aceito_por ?? 'sócio'}` : 'padrão do plano (faixa 1 até R$ 2.000, faixa 2 até R$ 20.000), sem aceite'}
+                {e?.proposta && <span className="text-muted-foreground block text-xs">proposta de {e.proposta.proposta_por_nome} aguardando o aceite do sócio no app</span>}
+              </Propriedade>
+              <Propriedade rotulo="Responsável (confere)">{perfil.responsavel_nome}</Propriedade>
+              <Propriedade rotulo="Analista (faz)">{perfil.analista_nome}</Propriedade>
+              <Propriedade rotulo="Caixa mínimo">{brl(perfil.caixa_minimo)}</Propriedade>
+              <Propriedade rotulo="SLA">{`meta ${perfil.sla.meta}% no prazo · conta capturada em ${sla.captura_h} h · lote ${sla.lote_h_antes} h antes do vencimento · conciliação até o dia ${sla.conciliacao_dia} · relatório até o dia ${sla.relatorio_dia}`}</Propriedade>
+              <Propriedade rotulo="Janela do lote">{`${perfil.janela.abertura} · ${perfil.janela.dias}`}</Propriedade>
+              <Propriedade rotulo="Termo de dados">{perfil.termo_aceito_em ? `aceito em ${dataCurta(perfil.termo_aceito_em)}/${perfil.termo_aceito_em.slice(0, 4)}${x.termo?.aceito_por ? ` por ${x.termo.aceito_por}` : ''}` : x.termo ? 'enviado, aguardando o aceite' : 'pendente'}</Propriedade>
+              <Propriedade rotulo="Paralelo até">{perfil.paralelo_ate ? dataCurta(perfil.paralelo_ate) : 'fora do paralelo'}</Propriedade>
               <Propriedade rotulo="Bancos">{e?.bancos.map((b) => b.nome).join(', ') || 'nenhum conectado'}</Propriedade>
             </dl>
+            <p className="text-muted-foreground text-xs">Modo de pagamento, alçadas e janela mudam na aba Configuração e só valem com o aceite do sócio no app.</p>
+            {(x.versoes?.length ?? 0) > 0 && (
+              <details className="text-sm">
+                <summary className="text-muted-foreground cursor-pointer text-xs">Versões do perfil ({x.versoes!.length + 1})</summary>
+                <ol className="mt-2 flex flex-col gap-1 text-xs" aria-label="Versões do perfil">
+                  {[...x.versoes!].reverse().map((v) => (
+                    <li key={v.versao} className="flex gap-2">
+                      <span className="text-muted-foreground w-8 shrink-0 tabular-nums">v{v.versao + 1}</span>
+                      <span className="flex-1">{v.resumo}</span>
+                      <span className="text-muted-foreground shrink-0">
+                        {v.por} · {dataHora(v.em)}
+                      </span>
+                    </li>
+                  ))}
+                  <li className="text-muted-foreground flex gap-2">
+                    <span className="w-8 shrink-0 tabular-nums">v1</span> perfil criado na implantação
+                  </li>
+                </ol>
+              </details>
+            )}
+          </section>
+
+          {e && (
+            <section data-secao="conexoes" className="flex scroll-mt-32 flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <TituloBloco descricao="Espelho do ERP que o cliente já usa (10, 3.0).">ERP e sincronização</TituloBloco>
+                <BlocoErp e={e} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <TituloBloco descricao="Só leitura de extrato e saldo; consentimento renovado 30 dias antes de vencer.">Bancos</TituloBloco>
+                <BancosEmpresa e={e} onConectar={() => setConectar('banco')} />
+              </div>
+            </section>
+          )}
+
+          {e && (
+            <section data-secao="fornecedores" className="flex scroll-mt-32 flex-col gap-2">
+              <TituloBloco descricao="Dados bancários só valem confirmados por segundo canal, por uma pessoa.">Fornecedores</TituloBloco>
+              <FornecedoresEmpresa e={e} />
+            </section>
+          )}
+
+          <section data-secao="historico" className="flex scroll-mt-32 flex-col gap-2">
+            <TituloBloco descricao="Tudo o que aconteceu no BPO desta empresa, de quem fez. Nada se apaga.">Histórico</TituloBloco>
+            <HistoricoEmpresa clienteId={clienteId} />
           </section>
 
           {podeEncerrar && perfil.situacao !== 'encerrando' && perfil.situacao !== 'encerrado' && (
@@ -336,32 +395,107 @@ export function FichaEmpresa({ clienteId, onFechar, onIr }: { clienteId: string;
   )
 }
 
-/** Editar perfil BPO da empresa (S08-A09): escopo, modo, responsável, analista, caixa mínimo, SLA, paralelo. */
+/** Caixa contra o mínimo combinado, numa barra (cor com texto, nunca só cor). */
+export function BarraCaixa({ caixa, minimo, semBanco, compacta }: { caixa: number; minimo: number; semBanco?: boolean; compacta?: boolean }) {
+  if (semBanco) return <span className="text-muted-foreground text-xs">sem banco conectado</span>
+  const teto = Math.max(caixa, minimo * 2, 1)
+  const abaixo = caixa < minimo
+  return (
+    <div className={cn('flex flex-col gap-1', compacta && 'gap-0.5')}>
+      <div className="bg-sunken relative h-2 overflow-hidden rounded-full" role="img" aria-label={`Caixa ${brl(caixa)}, mínimo ${brl(minimo)}${abaixo ? ', abaixo do mínimo' : ''}`}>
+        <div className="h-full rounded-full" style={{ width: `${Math.min(100, (caixa / teto) * 100)}%`, background: abaixo ? 'var(--destructive)' : 'var(--success)' }} />
+        <div className="bg-foreground/60 absolute top-0 h-full w-0.5" style={{ left: `${(minimo / teto) * 100}%` }} />
+      </div>
+      {!compacta && (
+        <span className="text-muted-foreground text-xs">
+          {abaixo ? `${brl(minimo - caixa)} abaixo do mínimo` : `${brl(caixa - minimo)} acima do mínimo`}
+        </span>
+      )}
+    </div>
+  )
+}
+
+const ferramentasBpo = /^(bpo\.|erp\.|banco\.|fornecedor\.|conta_pagar\.|conta_receber\.|pagamento|alcada\.|fila\.|rotina\.|conciliacao\.)/
+
+/** Histórico do BPO de uma empresa: os eventos (imutáveis) com quem fez e quando. */
+export function HistoricoEmpresa({ clienteId }: { clienteId: string }) {
+  const tEvento = useTabela('evento')
+  const [todos, setTodos] = useState(false)
+  const lista = useMemo(() => tEvento.filter((ev) => ev.cliente_id === clienteId && (ev.setor_id === 'bpo_financeiro' || ferramentasBpo.test(ev.ferramenta)) && ev.texto).sort((a, b) => b.criado_em.localeCompare(a.criado_em)), [tEvento, clienteId])
+  if (!lista.length) return <p className="text-muted-foreground text-sm">Nada registrado ainda.</p>
+  const visiveis = todos ? lista : lista.slice(0, 8)
+  return (
+    <>
+      <ol className="flex flex-col gap-1.5 text-sm" aria-label="Histórico da empresa">
+        {visiveis.map((ev) => (
+          <li key={ev.id} className="flex gap-3">
+            <span className="text-muted-foreground w-24 shrink-0 text-xs tabular-nums">{dataHora(ev.criado_em)}</span>
+            <span className="min-w-0 flex-1">
+              {ev.texto}
+              {ev.ator_nome && <span className="text-muted-foreground"> · {ev.ator_nome}</span>}
+            </span>
+          </li>
+        ))}
+      </ol>
+      {lista.length > visiveis.length && (
+        <Button size="sm" variant="ghost" className="w-fit rounded-full" onClick={() => setTodos(true)}>
+          Ver tudo ({lista.length})
+        </Button>
+      )}
+    </>
+  )
+}
+
+/** Editar perfil BPO da empresa (S08-A09): escopo, responsável, analista, caixa mínimo, SLA e prazos, paralelo; cada salvar vira uma versão. */
 function EditarPerfil({ perfil, nome, onFechar }: { perfil: BpoPerfil; nome: string; onFechar: () => void }) {
   const equipe = useEquipeBpo()
   const executar = useAcao()
-  const [r, setR] = useState({ escopo: perfil.escopo, responsavel: perfil.responsavel_nome, analista: perfil.analista_nome, caixa: String(perfil.caixa_minimo), meta: String(perfil.sla.meta), paralelo: perfil.paralelo_ate ?? '' })
-  const erroCaixa = !(Number(r.caixa) >= 0) ? 'Informe um valor (0 ou mais).' : undefined
+  const { usuario } = useSessao()
+  const sla0 = { ...slaPadrao, ...extrasS08a(perfil).sla_termos }
+  const [r, setR] = useState({ escopo: perfil.escopo, responsavel: perfil.responsavel_nome, analista: perfil.analista_nome, caixa: String(perfil.caixa_minimo), meta: String(perfil.sla.meta), paralelo: perfil.paralelo_ate ?? '', captura: String(sla0.captura_h), lote: String(sla0.lote_h_antes), conciliacao: String(sla0.conciliacao_dia), relatorio: String(sla0.relatorio_dia) })
+  const erroCaixa = !(Number(r.caixa) >= 0) || r.caixa === '' ? 'Informe um valor (0 ou mais).' : undefined
   const erroMeta = !(Number(r.meta) > 0 && Number(r.meta) <= 100) ? 'Entre 1 e 100.' : undefined
+  const erroHoras = !(Number(r.captura) > 0) || !(Number(r.lote) > 0) ? 'Horas maiores que zero.' : undefined
+  const erroDias = !(Number(r.conciliacao) >= 1 && Number(r.conciliacao) <= 28) || !(Number(r.relatorio) >= 1 && Number(r.relatorio) <= 28) ? 'Dia entre 1 e 28.' : undefined
+  const erroEscopo = r.escopo.length === 0 ? 'Escolha ao menos um serviço.' : undefined
   return (
     <GavetaFormulario
       aberta
       onFechar={onFechar}
       titulo={`Perfil BPO · ${nome}`}
-      descricao="Modo de pagamento e alçadas ficam na Configuração (valem com o aceite do sócio)."
+      descricao="Modo de pagamento e alçadas ficam na Configuração (valem com o aceite do sócio). Cada salvar guarda a versão anterior."
       acao="Salvar"
-      acaoDesabilitada={!!erroCaixa || !!erroMeta || r.escopo.length === 0}
+      largura="lg"
+      acaoDesabilitada={!!erroCaixa || !!erroMeta || !!erroHoras || !!erroDias || !!erroEscopo}
       onAcao={() => {
-        const ok = executar(() => repos.bpo.perfis.atualizar(perfil.id, { escopo: r.escopo, responsavel_nome: r.responsavel, analista_nome: r.analista, caixa_minimo: Number(r.caixa), sla: { ...perfil.sla, meta: Number(r.meta) }, paralelo_ate: r.paralelo || null }, { texto: `Atualizou o perfil BPO de ${nome}` }), { sucesso: 'Perfil BPO salvo' })
+        const mudou: string[] = []
+        if (r.escopo.join() !== perfil.escopo.join()) mudou.push(`escopo: ${r.escopo.map((v) => rotuloEscopo[v]).join(', ')}`)
+        if (r.responsavel !== perfil.responsavel_nome) mudou.push(`responsável: ${r.responsavel}`)
+        if (r.analista !== perfil.analista_nome) mudou.push(`analista: ${r.analista}`)
+        if (Number(r.caixa) !== perfil.caixa_minimo) mudou.push(`caixa mínimo: ${brl(Number(r.caixa))}`)
+        if (Number(r.meta) !== perfil.sla.meta) mudou.push(`meta de SLA: ${r.meta}%`)
+        if (Number(r.captura) !== sla0.captura_h || Number(r.lote) !== sla0.lote_h_antes || Number(r.conciliacao) !== sla0.conciliacao_dia || Number(r.relatorio) !== sla0.relatorio_dia) mudou.push('prazos do SLA')
+        if ((r.paralelo || null) !== (perfil.paralelo_ate ?? null)) mudou.push(r.paralelo ? `paralelo até ${dataCurta(r.paralelo)}` : 'fora do paralelo')
+        if (!mudou.length) return onFechar()
+        const ok = executar(
+          () =>
+            gravarS08a(
+              perfil.id,
+              (s) => ({ ...s, sla_termos: { captura_h: Number(r.captura), lote_h_antes: Number(r.lote), conciliacao_dia: Number(r.conciliacao), relatorio_dia: Number(r.relatorio) }, versoes: [...(s.versoes ?? []), { versao: (s.versoes?.length ?? 0) + 1, em: agoraBpo(), por: usuario.nome, resumo: mudou.join('; ') }] }),
+              { escopo: r.escopo, responsavel_nome: r.responsavel, analista_nome: r.analista, caixa_minimo: Number(r.caixa), sla: { ...perfil.sla, meta: Number(r.meta) }, paralelo_ate: r.paralelo || null },
+              { texto: `Atualizou o perfil BPO de ${nome}: ${mudou.join('; ')}` },
+            ),
+          { sucesso: 'Perfil BPO salvo' },
+        )
         if (ok) onFechar()
       }}
     >
-      <Campo rotulo="Escopo do serviço">
+      <Campo rotulo="Escopo do serviço" erro={erroEscopo}>
         {() => (
           <Fichas
             rotulo="Escopo"
             valores={r.escopo}
-            onMudar={(v) => setR((x) => ({ ...x, escopo: v }))}
+            onMudar={(v) => setR((s) => ({ ...s, escopo: v }))}
             opcoes={[
               { valor: 'pagar', rotulo: 'Contas a pagar' },
               { valor: 'receber', rotulo: 'Contas a receber' },
@@ -371,18 +505,28 @@ function EditarPerfil({ perfil, nome, onFechar }: { perfil: BpoPerfil; nome: str
           />
         )}
       </Campo>
-      <Campo rotulo="Responsável (confere)">{(id) => <CampoEscolha id={id} valor={r.responsavel} onMudar={(v) => setR((x) => ({ ...x, responsavel: v }))} opcoes={equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))} />}</Campo>
-      <Campo rotulo="Analista (faz)" ajuda="Analista igual ao responsável = BPO de uma pessoa: a conferência vai ao Gestor do escritório ou ao cliente.">
-        {(id) => <CampoEscolha id={id} valor={r.analista} onMudar={(v) => setR((x) => ({ ...x, analista: v }))} opcoes={equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))} />}
-      </Campo>
-      <Campo rotulo="Caixa mínimo (R$)" erro={erroCaixa}>
-        {(id) => <CampoTexto id={id} tipo="number" valor={r.caixa} onMudar={(v) => setR((x) => ({ ...x, caixa: v }))} />}
-      </Campo>
-      <Campo rotulo="Meta de SLA (% no prazo)" erro={erroMeta}>
-        {(id) => <CampoTexto id={id} tipo="number" valor={r.meta} onMudar={(v) => setR((x) => ({ ...x, meta: v }))} />}
-      </Campo>
-      <Campo rotulo="Paralelo até" ajuda="Vazio: fora do paralelo.">
-        {(id) => <CampoTexto id={id} tipo="date" valor={r.paralelo} onMudar={(v) => setR((x) => ({ ...x, paralelo: v }))} />}
+      <div className="grid gap-x-3 sm:grid-cols-2">
+        <Campo rotulo="Responsável (confere)">{(id) => <CampoEscolha id={id} valor={r.responsavel} onMudar={(v) => setR((s) => ({ ...s, responsavel: v }))} opcoes={equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))} />}</Campo>
+        <Campo rotulo="Analista (faz)" ajuda="Igual ao responsável = BPO de uma pessoa: a conferência vai ao Gestor ou ao cliente.">
+          {(id) => <CampoEscolha id={id} valor={r.analista} onMudar={(v) => setR((s) => ({ ...s, analista: v }))} opcoes={equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))} />}
+        </Campo>
+        <Campo rotulo="Caixa mínimo (R$)" erro={erroCaixa}>
+          {(id) => <CampoTexto id={id} tipo="number" valor={r.caixa} onMudar={(v) => setR((s) => ({ ...s, caixa: v }))} />}
+        </Campo>
+        <Campo rotulo="Meta de SLA (% no prazo)" erro={erroMeta}>
+          {(id) => <CampoTexto id={id} tipo="number" valor={r.meta} onMudar={(v) => setR((s) => ({ ...s, meta: v }))} />}
+        </Campo>
+        <Campo rotulo="Conta capturada em até (horas)" erro={erroHoras}>
+          {(id) => <CampoTexto id={id} tipo="number" valor={r.captura} onMudar={(v) => setR((s) => ({ ...s, captura: v }))} />}
+        </Campo>
+        <Campo rotulo="Lote enviado antes do vencimento (horas)">{(id) => <CampoTexto id={id} tipo="number" valor={r.lote} onMudar={(v) => setR((s) => ({ ...s, lote: v }))} />}</Campo>
+        <Campo rotulo="Conciliação até o dia" erro={erroDias}>
+          {(id) => <CampoTexto id={id} tipo="number" valor={r.conciliacao} onMudar={(v) => setR((s) => ({ ...s, conciliacao: v }))} />}
+        </Campo>
+        <Campo rotulo="Relatório até o dia">{(id) => <CampoTexto id={id} tipo="number" valor={r.relatorio} onMudar={(v) => setR((s) => ({ ...s, relatorio: v }))} />}</Campo>
+      </div>
+      <Campo rotulo="Paralelo até" ajuda="Vazio: fora do paralelo. O relógio do SLA pausa com o cliente e volta na resposta.">
+        {(id) => <CampoTexto id={id} tipo="date" valor={r.paralelo} onMudar={(v) => setR((s) => ({ ...s, paralelo: v }))} />}
       </Campo>
     </GavetaFormulario>
   )
@@ -437,16 +581,21 @@ export function ConectarGaveta({ tipo, perfil, nome, onFechar }: { tipo: 'erp' |
 }
 
 /** Pôr uma empresa no BPO (S08-A10, primeiro passo): cliente do cadastro, ou um novo (o mesmo cadastro, sem duplicar). */
-export function NovaEmpresaBpo({ aberta, onFechar, onCriada }: { aberta: boolean; onFechar: () => void; onCriada?: (clienteId: string) => void }) {
+export function NovaEmpresaBpo({ aberta, onFechar, onCriada, inicial }: { aberta: boolean; onFechar: () => void; onCriada?: (clienteId: string) => void; /** S08a: cliente já escolhido (vindo de Clientes). */ inicial?: string }) {
   const tCliente = useTabela('cliente')
   const tPerfil = useTabela('bpo_perfil')
   const equipe = useEquipeBpo()
   const executar = useAcao()
   const candidatos = tCliente.filter((c) => !c.arquivado_em && !tPerfil.some((p) => p.cliente_id === c.id && p.situacao !== 'encerrado'))
   const [r, setR] = useState({ cliente: '', nome: '', documento: '', analista: '', responsavel: '', modo: 'M1' as BpoPerfil['modo_pagamento'] })
+  useEffect(() => {
+    if (aberta && inicial) setR((x) => ({ ...x, cliente: inicial }))
+  }, [aberta, inicial])
   const novo = r.cliente === '' || r.cliente === '_novo'
   const erroNome = novo && !r.nome.trim() ? 'Informe a razão social.' : undefined
-  const erroDoc = novo && !r.documento.trim() ? 'Informe o CNPJ.' : undefined
+  const doc = r.documento.replace(/\D/g, '')
+  const duplicado = novo && doc.length >= 11 ? tCliente.find((c) => c.documento.replace(/\D/g, '') === doc) : undefined
+  const erroDoc = novo && !r.documento.trim() ? 'Informe o CNPJ.' : novo && doc.length !== 14 && doc.length !== 11 ? 'CNPJ com 14 dígitos (ou CPF com 11).' : duplicado ? `Já cadastrado: ${duplicado.codigo} · ${duplicado.nome}. Escolha na lista acima (o cadastro é um só).` : undefined
   const analista = r.analista || equipe.find((u) => u.papel !== 'administrador')?.nome || equipe[0]?.nome || ''
   const responsavel = r.responsavel || equipe.find((u) => u.vinculos.some((v) => v.setor === 'bpo_financeiro' && v.modo === 'gestao'))?.nome || equipe[0]?.nome || ''
   return (

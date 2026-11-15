@@ -62,7 +62,7 @@ export class RepositorioContasBpo extends Repositorio<'bpo_conta'> {
     const ctx = op.ctx ?? contextoAtual()
     return this.criar(
       { tipo: 'pagar', etapa: 'capturada', conferencias: [], digitado_por_id: idDoAtor(ctx.ator), digitado_por_nome: nomeDoAtor(ctx.ator), ...dados },
-      { ...op, ferramenta: 'conta_pagar.capturar', texto: `${nomeDoAtor(ctx.ator)} lançou a conta ${dados.contraparte} (${brl(dados.valor)})` },
+      { ...op, ferramenta: 'bpo.conta.capturar', texto: `${nomeDoAtor(ctx.ator)} lançou a conta ${dados.contraparte} (${brl(dados.valor)})` },
     )
   }
 
@@ -101,14 +101,14 @@ export class RepositorioContasBpo extends Repositorio<'bpo_conta'> {
     if (!motivo.trim()) throw new ErroRegra('Cancelar uma conta exige o motivo (nada se apaga).')
     const c = this.exigir(id)
     if (['aprovada', 'liberada', 'paga'].includes(c.etapa)) throw new ErroRegra('Conta aprovada ou paga não se cancela: estorne ou ajuste no ERP.')
-    return this.atualizar(id, { etapa: 'cancelada', motivo }, { ...op, ferramenta: 'conta_pagar.cancelar', texto: `Cancelou a conta ${c.contraparte}: ${motivo}` })
+    return this.atualizar(id, { etapa: 'cancelada', motivo }, { ...op, ferramenta: 'bpo.conta.cancelar', texto: `Cancelou a conta ${c.contraparte}: ${motivo}` })
   }
 
   /** A conciliação confirmou a baixa no extrato. */
   marcarPaga(id: Id, op: OpcoesEscrita = {}) {
     const c = this.exigir(id)
     if (c.etapa !== 'liberada' && c.tipo === 'pagar') throw new ErroRegra('Só conta liberada pelo cliente vira paga (a baixa vem do extrato).')
-    return this.atualizar(id, { etapa: c.tipo === 'pagar' ? 'paga' : 'recebida' }, { ...op, ferramenta: c.tipo === 'pagar' ? 'conciliacao.confirmar' : 'conta_receber.baixar', texto: `Baixa de ${c.contraparte} confirmada no extrato` })
+    return this.atualizar(id, { etapa: c.tipo === 'pagar' ? 'paga' : 'recebida' }, { ...op, ferramenta: c.tipo === 'pagar' ? 'bpo.conciliacao.confirmar' : 'conta_receber.baixar', texto: `Baixa de ${c.contraparte} confirmada no extrato` })
   }
 }
 
@@ -184,7 +184,8 @@ export class RepositorioLotesBpo extends Repositorio<'bpo_lote'> {
     const ficam = l.conta_ids.filter((c) => !fora.includes(c))
     if (!ficam.length) throw new ErroRegra('Tirou todas as contas: recuse o lote, com o motivo.')
     const total = ficam.reduce((s, c) => s + (this.contas().obter(c)?.valor ?? 0), 0)
-    const necessarios = total > this.contas().faixas(l.cliente_id).faixa2 ? 2 : 1
+    // S08c: lote com exceção (fornecedor novo, dados alterados, fracionamento...) vai à aprovação reforçada (10, 3.7, linha "Com exceção").
+    const necessarios = total > this.contas().faixas(l.cliente_id).faixa2 || l.extras?.s08c_excecao ? 2 : 1
     const aprovacoes = [...l.aprovacoes, { nome, quando: agora(), canal }]
     const completo = aprovacoes.length >= necessarios
     const depois = this.atualizar(
@@ -303,10 +304,10 @@ export class RepositorioAlcadasBpo extends Repositorio<'bpo_alcada'> {
     const perfil = this.banco().ler('bpo_perfil').find((x) => x.cliente_id === p.cliente_id)
     if (modo && perfil) this.banco().transacao((tx) => tx.gravar('bpo_perfil', { ...perfil, modo_pagamento: modo, teto_m2: (p.extras?.teto_m2 as number | undefined) ?? perfil.teto_m2 ?? null, atualizado_em: agora() }))
     const cliente = this.banco().obter('cliente', p.cliente_id)
-    const ficha = cliente?.extras?.ficha as { contatos?: { nome: string; alcadaPagamento?: number }[] } | undefined
+    const ficha = cliente?.extras?.ficha as { contatos?: { nome: string; alcadaPagamento?: number; reforcada?: boolean }[] } | undefined
     if (cliente && ficha?.contatos)
       this.banco().transacao((tx) =>
-        tx.gravar('cliente', { ...cliente, atualizado_em: agora(), extras: { ...cliente.extras, ficha: { ...ficha, contatos: ficha.contatos!.map((c) => (p.pessoas[c.nome] !== undefined ? { ...c, alcadaPagamento: p.pessoas[c.nome] || undefined } : c)) } } }),
+        tx.gravar('cliente', { ...cliente, atualizado_em: agora(), extras: { ...cliente.extras, ficha: { ...ficha, contatos: ficha.contatos!.map((c) => aplicarReforcadaS08c(p.extras, c.nome, p.pessoas[c.nome] !== undefined ? { ...c, alcadaPagamento: p.pessoas[c.nome] || undefined } : c)) } } }),
       )
     return depois
   }
@@ -320,6 +321,12 @@ export class RepositorioAlcadasBpo extends Repositorio<'bpo_alcada'> {
   retirar(id: Id, op: OpcoesEscrita = {}) {
     return this.atualizar(id, { situacao: 'retirada' }, { ...op, ferramenta: 'alcada.alterar', texto: 'Proposta de alçadas retirada' })
   }
+}
+
+/** S08c: a proposta de alçada leva também quem entra na aprovação reforçada (`extras.reforcada`); vale com o aceite. */
+function aplicarReforcadaS08c<T extends { reforcada?: boolean }>(extras: Record<string, unknown> | undefined, nome: string, c: T): T {
+  const r = extras?.reforcada as Record<string, boolean> | undefined
+  return r && r[nome] !== undefined ? { ...c, reforcada: r[nome] } : c
 }
 
 /* ---------- Fila: pedidos e pendências, com a bola e o SLA ---------- */
@@ -374,7 +381,7 @@ export function criarReposBpo(b: () => Banco) {
       tabela: 'bpo_conta',
       prefixo: 'bc',
       artigo: 'a conta',
-      ferramentas: { criar: 'conta_pagar.capturar', atualizar: 'conta_pagar.capturar' },
+      ferramentas: { criar: 'bpo.conta.capturar', atualizar: 'bpo.conta.capturar' }, // S08c: nome próprio do BPO (o do Financeiro tem outro setor)
       exclusao: 'proibida',
       motivoExclusaoProibida: 'Conta não se apaga: cancele com motivo, ou estorne (R7).',
       rotulo: (r) => `${r.contraparte} (${brl(r.valor)})`,
@@ -416,7 +423,7 @@ export function criarReposBpo(b: () => Banco) {
       b,
       regras({ tabela: 'bpo_rotina', prefixo: 'br', artigo: 'a rotina', ferramentas: { criar: 'rotina.configurar', atualizar: 'rotina.configurar', excluir: 'rotina.configurar', reordenar: 'rotina.configurar' }, exclusao: 'definitiva', rotulo: (r) => r.nome, alvo: porCliente, validar: (r) => (r.nome.trim() ? null : 'Dê um nome à rotina.') }),
     ),
-    transacoes: new Repositorio(b, regras({ tabela: 'bpo_transacao', prefixo: 'bt', artigo: 'a transação', ferramentas: { criar: 'erp.sincronizar', atualizar: 'conciliacao.confirmar' }, exclusao: 'proibida', rotulo: (r) => r.descricao, alvo: porCliente })),
+    transacoes: new Repositorio(b, regras({ tabela: 'bpo_transacao', prefixo: 'bt', artigo: 'a transação', ferramentas: { criar: 'erp.sincronizar', atualizar: 'bpo.conciliacao.confirmar' }, exclusao: 'proibida', rotulo: (r) => r.descricao, alvo: porCliente })),
     entregas: new Repositorio(b, regras({ tabela: 'bpo_entrega', prefixo: 'be', artigo: 'a entrega', ferramentas: { criar: 'bpo.relatorio_mensal', atualizar: 'bpo.relatorio_mensal' }, exclusao: 'proibida', rotulo: (r) => `${r.tipo} ${r.competencia}`, alvo: porCliente })),
     volumes: new Repositorio(b, regras({ tabela: 'bpo_volume', prefixo: 'bv', artigo: 'o extrato de volume', ferramentas: { criar: 'bpo.volume.contestar', atualizar: 'bpo.volume.contestar' }, exclusao: 'proibida', rotulo: (r) => `volume ${r.competencia}`, alvo: porCliente })),
     subinquilinos: new Repositorio(b, regras({ tabela: 'subinquilino', prefixo: 'sb', artigo: 'o contratante', ferramentas: { criar: 'bpo.contratante.configurar', atualizar: 'bpo.contratante.configurar' }, exclusao: 'proibida', motivoExclusaoProibida: 'Contratante não se apaga: encerre pela saída (BPO-019).', rotulo: (r) => r.nome })),
