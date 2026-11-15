@@ -17,6 +17,7 @@ import { useAparencia } from '@/hooks/useAparencia'
 import { HistoricoPerfil } from '@/telas/painel/anatomia'
 import { DocumentosDaAba } from '@/telas/painel/documentos-aba'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
 /** Cliente e setor da aba aberta: os botões dos widgets agem sobre eles. */
 export const AbaCtx = createContext<{ cliente?: string; setor: SetorIntegrante; clienteId?: string; somenteLeitura?: boolean }>({ setor: 'fiscal' })
@@ -240,29 +241,29 @@ export function AcoesAba({ itens, carteira }: { itens: AcaoCfg[]; carteira?: num
   return (
     <div className="flex flex-col gap-2.5">
       <CartoesPendentes setor={ctx.setor} clienteId={ctx.clienteId} />
-      <div className="flex flex-wrap gap-2">
+      {/* Uma ação, uma forma (QA_INTERFACE.md, X-4): linha com ícone, verbo e objeto, a contagem na carteira e o nível como selo. */}
+      <ul className="divide-border/70 flex flex-col divide-y">
         {itens
           .filter((a) => ctx.cliente || a.nivel !== 'executar com aprovação' || gestor)
-          .map((a) =>
-            a.falta ? (
-              <Tooltip key={a.rotulo} conteudo={`${a.rotulo}: falta ${a.falta}`}>
-                <span>
-                  <Button size="sm" variant="outline" disabled className="rounded-full">
-                    <WarningIcon /> falta {a.falta}
-                  </Button>
+          .map((a) => (
+            <li key={a.rotulo} className="min-w-0">
+              <button
+                type="button"
+                disabled={!!a.falta}
+                onClick={() => executar(a)}
+                title={a.falta ? `${a.rotulo}: falta ${a.falta}` : `${a.rotulo} · ${a.nivel}`}
+                className="hover:bg-accent/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed"
+              >
+                <span className="text-muted-foreground shrink-0 [&_svg]:size-4">{a.falta ? <WarningIcon className="text-warning" /> : iconeNivel[a.nivel]}</span>
+                <span className="min-w-0 grow basis-40">
+                  <span className={cn('block truncate', a.falta && 'text-muted-foreground')}>{a.rotulo}</span>
+                  {carteira ? <span className="text-muted-foreground block truncate text-xs">{carteira} clientes da carteira</span> : null}
                 </span>
-              </Tooltip>
-            ) : (
-              <Button key={a.rotulo} size="sm" variant={a.nivel === 'preparar' ? 'outline' : 'secondary'} className="h-auto flex-col items-start gap-0 rounded-md py-1.5 text-left" onClick={() => executar(a)}>
-                <span className="flex items-center gap-1.5 text-[13px]">
-                  {iconeNivel[a.nivel]} {a.rotulo}
-                  {carteira ? <span className="text-muted-foreground">· {carteira} clientes</span> : null}
-                </span>
-                <span className="text-muted-foreground text-xs font-normal">{a.nivel}</span>
-              </Button>
-            ),
-          )}
-      </div>
+                {a.falta ? <Badge variant="destaque">falta {a.falta}</Badge> : <Badge variant="neutro">{a.nivel}</Badge>}
+              </button>
+            </li>
+          ))}
+      </ul>
     </div>
   )
 }

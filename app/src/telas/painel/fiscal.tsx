@@ -121,7 +121,7 @@ function SimplesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
     <div className="flex h-full flex-col gap-3">
       <MedidorSublimite rotulo="Receita 12 meses × sublimite" usado={s.rbt12} teto={3_600_000} semAviso={tamanho === 'M'} />
       {tamanho !== 'M' && (
-        <dl className="grid grid-cols-2 gap-2 text-sm @md:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-2 text-sm @md:grid-cols-3 [&>:last-child:nth-child(odd)]:col-span-2 @md:[&>:last-child:nth-child(odd)]:col-span-1">
           <Dado rotulo="Fator R" valor={pct(s.fatorR)} detalhe={s.anexo === 'III' || s.anexo === 'V' ? `Anexo ${s.anexo}${s.fatorR >= 0.28 ? ' (≥ 28%)' : ' (< 28%)'}` : 'não se aplica'} />
           <Dado rotulo="Alíquota efetiva" valor={pct(s.aliquota.efetiva, 2)} detalhe={`${s.aliquota.faixa}ª faixa · Anexo ${s.anexo}`} />
           <Dado rotulo={`DAS ${COMPETENCIA}`} valor={brl(s.das)} detalhe="vence 20/11" />

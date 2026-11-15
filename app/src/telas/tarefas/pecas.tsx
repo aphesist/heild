@@ -54,7 +54,7 @@ export function ResponsavelDe({ t }: { t: TarefaE }) {
 /** Filtro em select nativo (teclado e leitor de tela de graça). */
 export function FiltroSelect({ rotulo, valor, onMudar, opcoes, className }: { rotulo: string; valor: string; onMudar: (v: string) => void; opcoes: { valor: string; rotulo: string }[]; className?: string }) {
   return (
-    <label className={cn('hover:bg-accent relative flex h-8 items-center gap-1 rounded-md border px-2 text-xs', className)}>
+    <label className={cn('hover:bg-accent relative flex min-h-8 min-w-0 items-center gap-1 rounded-md border px-2 text-xs', className)}>
       <span className="text-muted-foreground">{rotulo}:</span>
       <select aria-label={rotulo} value={valor} onChange={(e) => onMudar(e.target.value)} className="bg-popover max-w-[9rem] cursor-pointer appearance-none truncate bg-transparent pr-4 font-medium outline-none">
         {opcoes.map((o) => (

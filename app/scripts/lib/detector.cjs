@@ -102,7 +102,8 @@ function detectar(opcoes) {
       const cortaBaixo = el.scrollHeight > el.clientHeight + 2 && s.webkitLineClamp && s.webkitLineClamp !== 'none'
       if (cortaLado || cortaBaixo) {
         if (!reticencias(el)) add('texto-cortado', `cortado sem reticências: ${desc(el)}`, el)
-        else if (!temTitulo(el)) add('texto-cortado', `com reticências e sem título: ${desc(el)}`, el)
+        // Com o título automático instalado (src/lib/titulo-automatico.ts), o texto inteiro aparece ao apontar.
+        else if (!temTitulo(el) && document.documentElement.dataset.tituloAutomatico !== '1') add('texto-cortado', `com reticências e sem título: ${desc(el)}`, el)
         continue
       }
     }
@@ -234,7 +235,16 @@ function detectar(opcoes) {
       }
     }
     // Conteúdo mais largo que a área que só rola para baixo: o que passa some sem aviso.
-    if (/(auto|scroll)/.test(s.overflowY) && /(hidden|clip)/.test(s.overflowX) && el.scrollWidth > el.clientWidth + 2 && el.clientHeight > 120 && visivel(el)) add('rolagem-lateral', `conteúdo ${el.scrollWidth - el.clientWidth}px mais largo que a área: ${desc(el)}`, el)
+    // (A área de toque invisível dos botões, um ::after, aumenta o scrollWidth sem mostrar nada: só conta elemento de verdade fora da área.)
+    if (/(auto|scroll)/.test(s.overflowY) && /(hidden|clip)/.test(s.overflowX) && el.scrollWidth > el.clientWidth + 2 && el.clientHeight > 120 && visivel(el)) {
+      const ab = el.getBoundingClientRect()
+      const fora = [...el.querySelectorAll('*')].find((f) => {
+        if (decorativo(f) || /(absolute|fixed)/.test(cs(f).position)) return false
+        const fb = f.getBoundingClientRect()
+        return fb.width > 0 && fb.height > 0 && fb.right > ab.right + 2 && fb.left < ab.right
+      })
+      if (fora) add('rolagem-lateral', `${Math.round(fora.getBoundingClientRect().right - ab.right)}px escondidos à direita da área: ${desc(fora)}`, el)
+    }
   }
 
   // 4. Alvos de toque (só com toque).
