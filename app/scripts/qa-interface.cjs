@@ -238,7 +238,7 @@ function medir(toque) {
     // Coluna esticada: o filho ocupa a linha toda, mas o conteúdo dele acaba bem antes (vão dentro da coluna ou do card).
     filhos.forEach((k, i) => {
       const kb = rs[i]
-      if (kb.height < 200 || k.tagName === 'ARTICLE') return
+      if (kb.height < 200 || k.tagName === 'ARTICLE' || g.getAttribute('role') === 'grid') return
       const netos = [...k.children].filter((n) => visivel(n) && getComputedStyle(n).position !== 'absolute')
       if (!netos.length) return
       const fimConteudo = Math.max(...netos.map((n) => n.getBoundingClientRect().bottom))
