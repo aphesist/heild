@@ -61,10 +61,11 @@ async function assentar(p) {
         Promise.all(
           document
             .getAnimations()
-            .filter((a) => a.effect?.getComputedTiming?.().iterations !== Infinity)
+            // Só as transições de CSS (a troca de tema anima as cores); as animações longas de enfeite (orbe) não seguram o QA.
+            .filter((a) => typeof CSSTransition !== 'undefined' && a instanceof CSSTransition)
             .map((a) => a.finished.catch(() => {})),
         ),
-        new Promise((r) => setTimeout(r, 1500)),
+        new Promise((r) => setTimeout(r, 800)),
       ]),
     )
     .catch(() => {})
