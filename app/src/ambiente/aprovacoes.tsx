@@ -21,7 +21,7 @@ import { useTabela } from '@/nucleo/react'
 import { repos } from '@/nucleo/repositorios'
 import { definirPainelDaRota, hashParaDestino, useHash } from '@/nucleo/rotas'
 import type { SetorIntegrante } from '@/theme/tipos'
-import { argumentosDaLinha, clienteDaLinha, clienteDoTexto, decideOCliente, EVENTO_ABRIR_APROVACOES, expiraDaLinha, filtroDoParametro, parametroDoFiltro, podeAprovarCartao, setorDaLinha, type FiltroAprovacoes } from './cartoes-aprovacao'
+import { argumentosDaLinha, argumentosParaGuardar, clienteDaLinha, clienteDoTexto, decideOCliente, EVENTO_ABRIR_APROVACOES, expiraDaLinha, filtroDoParametro, parametroDoFiltro, podeAprovarCartao, setorDaLinha, type FiltroAprovacoes } from './cartoes-aprovacao'
 import { useMeusIntegrantes } from './contadores-s01'
 import { useEfeitosCartao } from './efeitos'
 import { useLoja } from './loja'
@@ -166,6 +166,8 @@ export function PainelAprovacoes({ itens, carregando, erro, onTentar, filtro, on
 
   const decidir = (item: ItemAprovacao, d: Decisao, comentario?: string) => {
     onDecidir(item, d, comentario)
+    // Decidido o cartão em foco, a central volta a mostrar o resto.
+    if (emFoco?.cartao.id === item.cartao.id) onFiltro({ ...filtro, cartao: undefined })
     setUltima(`${d === 'recusar' ? 'Recusado' : 'Aprovado'}: ${item.cartao.resumo}.`)
   }
   const aprovarLote = async (setor: SetorIntegrante, lista: ItemAprovacao[]) => {
@@ -180,7 +182,7 @@ export function PainelAprovacoes({ itens, carregando, erro, onTentar, filtro, on
 
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col', className)}>
-      <div className="flex flex-col gap-2 border-b px-4 py-3">
+      <div className={cn('flex flex-col gap-2 border-b px-4 py-3', !itens.length && 'hidden')}>
         <p className="text-sm">
           {visiveis.length === 0 ? 'Nada esperando você' : `${visiveis.length} ${visiveis.length === 1 ? 'cartão espera' : 'cartões esperam'} você`}, de{' '}
           <ValorEditavel rotulo="Cliente" valor={filtro.cliente ?? 'todos'} config={{ tipo: 'entidade', buscar: 'Buscar cliente', opcoes: opcoesCliente, outra: false }} desfazer={false} onMudar={(v) => onFiltro({ ...filtro, cartao: undefined, cliente: v === 'todos' ? undefined : String(v) })} />
@@ -245,7 +247,12 @@ export function PainelAprovacoes({ itens, carregando, erro, onTentar, filtro, on
                   {g.itens.map((i) => (
                     <li key={i.cartao.id} id={`aprovacao-${i.cartao.id}`}>
                       <CartaoAprovacao cartao={i.cartao} comentario onDecidir={(d, c) => decidir(i, d, c)} className={cn('bg-raised', emFoco?.cartao.id === i.cartao.id && 'ring-warning/50 ring-2')} />
-                      {i.clienteId && !filtro.cliente && nomeCliente(i.clienteId) && !i.cartao.resumo.includes(nomeCliente(i.clienteId)!) && <p className="text-muted-foreground mt-1 px-1 text-xs">{nomeCliente(i.clienteId)}</p>}
+                      {(() => {
+                        // O cliente só aparece embaixo quando o cartão não diz qual é.
+                        const nome = i.clienteId && !filtro.cliente ? nomeCliente(i.clienteId) : undefined
+                        const jaDiz = nome && [i.cartao.resumo, ...(i.cartao.argumentos ?? []).map((a) => a.valor)].some((t) => t.includes(nome))
+                        return nome && !jaDiz ? <p className="text-muted-foreground mt-1 px-1 text-xs">{nome}</p> : null
+                      })()}
                     </li>
                   ))}
                 </ul>
@@ -304,6 +311,12 @@ export function CentralAprovacoes() {
     // Cartões ligados (o aviso e o cartão do mesmo contrato) se decidem juntos: o segundo já chega decidido.
     if (repos.cartoes.obter(item.cartao.id)?.decidido_em) return
     try {
+      // O cartão que só existia no chat ganha a linha no banco antes da decisão: o evento e a lição saem com o resumo e o setor certos.
+      if (item.origem === 'chat' && !repos.cartoes.obter(item.cartao.id))
+        repos.cartoes.criar(
+          { id: item.cartao.id, ferramenta: 'aprovacao.decidir', argumentos: {}, resumo_humano: item.cartao.resumo, pedido_por_tipo: 'integrante', pode_aprovar: [], status: 'pendente', expira_em: null, extras: { setor: item.setor, cliente_id: item.clienteId, argumentos_exibidos: argumentosParaGuardar(item.cartao.argumentos ?? []), expira: item.cartao.expiraEm ?? null, lote: item.cartao.lote ?? null } },
+          { ferramenta: 'aprovacao.decidir', texto: '' },
+        )
       efeitos(item.cartao.id, d, { comentario, setor: item.setor })
     } catch (e) {
       loja.toastErro(e instanceof Error ? e.message : 'Não deu para decidir este cartão.')
