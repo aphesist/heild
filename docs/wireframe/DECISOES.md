@@ -1410,3 +1410,12 @@ Formato de cada registro:
 - **Impacto no plano:** nenhum.
 - **Arquivos compartilhados:** `lib/desvio-campo.ts`, `components/ui/formulario.tsx`, `cliente/avisos.tsx`.
 - **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Texto nunca com opacidade; teto nas listas longas; grade de widgets densa
+
+- **Decisão:** (1) registro inativo (desativado, revogado, cancelado, concluído, zerado) e etapa futura ficam no texto suave com os tons em cinza (`text-muted-foreground grayscale`), nunca com `opacity-*` no texto; `text-foreground/60-75` e `text-muted-foreground/60` saíram; a primária usada como texto é `text-primary-text` (garante 4,5:1 nos temas de escritório) e `text-warning-foreground` só sobre o amarelo. (2) Listas longas dentro do widget seguem o teto do tamanho com "Ver todos (N)" (`ListaComTeto`, `TetoDeFilhos`), e a lista publica o total (`data-total`) para o "Ver tudo (N)" do widget mostrar o número de verdade. (3) A grade de widgets empacota denso (um widget menor sobe para o buraco) e os arranjos padrão fecham as seis colunas de cada faixa. (4) Página de duas colunas com alturas diferentes: `items-start` onde o card esticava muito; coluna lateral presa ao topo (`sticky`) ou as duas como pilhas (`DuasPilhas`/`data-pilha`), sem esticar card para fechar vão.
+- **Por quê:** o QA das telas reais achou 294 textos abaixo do AA, quase todos por opacidade ou token trocado, e cards esticados; o dos widgets, "Ver tudo (3)" com 200 itens e vão sob a coluna curta no XL.
+- **Telas e ações:** todas.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `theme/variaveis.ts` (`--primary-text`, camadas da barra lateral e do fim do gradiente na garantia de contraste), `index.css`, `components/kit/{lista-com-teto,duas-pilhas}.tsx`, `components/widgets/{widget,grade}.tsx`, `telas/inicio/widgets-inicio.tsx` (arranjo do Membro).
+- **Situação:** proposta.
