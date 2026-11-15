@@ -90,9 +90,14 @@ export function PushSimulado({ ctx }: { ctx: Ctx }) {
     const canal = canais.includes('push') && acesso.push === 'permitido' ? 'push' : canais.includes('whatsapp') ? 'whatsapp' : null
     if (!canal) return
     setMostrando({ ...a, canal })
+  }, [central, pref, acesso.push])
+  // O aviso some em 5 s. O tempo é do aviso, não da lista: se a lista mudar nesse meio (outro
+  // aviso lido, a sincronização), ele não pode ficar preso na tela.
+  useEffect(() => {
+    if (!mostrando) return
     const t = setTimeout(() => setMostrando(null), 5000)
     return () => clearTimeout(t)
-  }, [central, pref, acesso.push])
+  }, [mostrando])
   if (!mostrando) return null
   const produto = textosDoApp(tema, nomeEscritorio).produto
   return (
