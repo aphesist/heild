@@ -76,3 +76,12 @@ Com autorização do dono, o modo Supabase passou a funcionar de ponta a ponta n
 - **Contas de demonstração:** senhas novas definidas para `demo-andrade@heild.app` e `demo-horizonte@heild.app`; estão só no `app/.env.local` da sessão S00b (fora do git). `app/.env.exemplo` traz a URL e a chave publicável.
 - **Testes:** `scripts/fundacao-fumaca.cjs` passa no modo Supabase (26 de 26) e no local (26 de 26); no local também passam trabalho-simulado-assistente-crm, app-cliente, bpo-modulo e decisoes-8-11. Conferido no Postgres real com as duas contas: cada uma só vê o próprio escritório, inserir no outro é recusado pela RLS, evento não muda nem se apaga, mensagem interna não se apaga.
 - **Como ligar, desligar e restaurar:** `docs/wireframe/ARQUITETURA.md`, seção 9.
+
+## S00c · Restaurar no Supabase (branch `wf-s00c-restaurar`) · 15/11/2026
+
+No HEILD-PROD (`jccwtyeqookthkonbbxn`, sa-east-1), com autorização do dono.
+
+- **Causa:** durante o restaurar e a troca de escritório, a tela que saía continuava gravando, e essas linhas iam para a fila do escritório que estava sendo apagado ou ainda não existia (violação de chave estrangeira). Na semeadura, o supabase-js mandava `NULL` nas colunas que faltavam em alguma linha do lote (ex.: `fixada` da mensagem interna), e a abertura dupla do modo estrito semeava duas vezes, com uma falha deixando inserções no ar enquanto a outra apagava o escritório.
+- **Correção:** o banco não grava nada fora do estado "pronto" e trata o restaurar como uma abertura; o adaptador descarta a fila e os envios em andamento ao restaurar (geração por escritório), semeia esperando todas as tabelas, usa `defaultToNull: false`; abertura repetida do mesmo escritório é reaproveitada.
+- **Testes:** `scripts/fundacao-fumaca.cjs` 26 de 26 duas vezes seguidas no HEILD-PROD, sem nenhuma resposta de erro do Supabase; semeadura limpa dos dois escritórios em cerca de 13 s; modo local 26 de 26; build e typecheck passam. `app-cliente` e `bpo-modulo` falham igual no `wireframe` atual (sem esta mudança), então ficam para as sessões donas.
+- **Contas de demonstração:** senhas novas definidas para `demo-andrade@heild.app` e `demo-horizonte@heild.app` no HEILD-PROD; estão só no `app/.env.local` da sessão S00 (fora do git). As do `.env.local` da coordenação deixaram de valer.

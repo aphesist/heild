@@ -218,6 +218,9 @@ Existe um projeto Supabase da Heild para o wireframe (`rgptcikkxucyysfwarxb`, re
 - Uma operação por vez (a fila de um escritório nunca sai com a conta do outro durante a troca); tabelas em paralelo dentro da operação.
 - Evento e registro de entrega usam "inserir se não existir" (não têm política de update, de propósito). Leitura paginada (1000 por vez) e na ordem de criação.
 - Erro de gravação aparece no console (`[heild] falha ao gravar`) e a alteração continua na fila para a próxima tentativa.
+- Restaurar: o banco sai do estado "pronto" (a tela mostra "Abrindo o escritório") e nenhuma escrita da tela que sai entra na fila; o adaptador descarta na hora a fila e qualquer envio em andamento do escritório (contador de geração), apaga, semeia esperando todas as tabelas terminarem e só então volta. O mesmo vale na troca de escritório.
+- Inserção em lote com `defaultToNull: false`: coluna ausente numa linha fica com o padrão da tabela, não `NULL`.
+- Abrir o mesmo escritório duas vezes ao mesmo tempo (modo estrito do React) reaproveita a abertura em andamento (sem semear em dobro).
 
 **Testar no Supabase:** `VITE_HEILD_BANCO=supabase npx vite --port 6100` e `node scripts/fundacao-fumaca.cjs <pasta>` (o mesmo teste do modo local; termina restaurando o escritório Andrade).
 
