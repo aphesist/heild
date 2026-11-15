@@ -1300,3 +1300,77 @@ Formato de cada registro:
 - **Decisão:** o kit esconde o que a conta não pode (`SePode`); o botão cinza com "por que não posso?" (`mostrarMotivo`) fica para onde o plano pede (03, 9.1) e para a vitrine `#/kit`.
 - **Por quê:** o mapa (1.1) manda esconder; o 03, 9.1 admite o cinza explicado.
 - **Situação:** proposta.
+
+### UI Lab (branch `wf-ui-lab`)
+
+#### 2026-11-15 · UI Lab · Uma primitiva de rolagem, com esmaecido sempre, e uma regra que barra o resto
+
+- **Decisão:** toda área que rola passa por `AreaRolagem` (`components/ui/area-rolagem.tsx`, `eixo="y|x|ambos"`), que põe o esmaecido do topo e do fim (ou dos lados). Cabeçalho fixo dentro da área (`data-cabecalho-fixo`, o `thead` da `Tabela`) faz o esmaecido começar abaixo dele. `scripts/regra-rolagem.cjs` acusa qualquer `overflow-*-auto`/`overflow-scroll` fora da primitiva e roda no `npm run build`. O modal (`DialogContent`) tem altura máxima e rola por dentro; a gaveta tem `SheetCorpo`.
+- **Por quê:** pedido do dono ("nenhum lugar do sistema deve ter scroll cortando de maneira dura"); a "Captura da carteira" cortava a primeira linha seca porque a `Tabela` rolava na própria `div`, sem esmaecido.
+- **Telas e ações:** todas (90 rolagens migradas).
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `index.css`, `lib/esmaecer-rolagem.ts`, `components/ui/{area-rolagem,dialog,sheet}.tsx`, `package.json` (build).
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Lista em colunas e selo que não invade o vizinho
+
+- **Decisão:** lista que é tabela usa `ListaColunas`/`LinhaColunas`/`Celula` (uma grade para cabeçalho e linhas; selo, valor e ação com o tamanho do conteúdo; texto truncado; no estreito, colunas `largo` somem e `abaixo` descem). Coluna de valor feita à mão: `minmax(Nrem,max-content)` ou `min-w-NN`. `Badge` nunca passa do contêiner (trunca, com o texto inteiro no `title`).
+- **Por quê:** a tag "aguard. cliente (2 d)" subia sobre "manual · 2 d" na lista de Tarefas (trilha de 7rem com conteúdo de ~190px e `justify-end`); o mesmo padrão em Contratos, Visão do Financeiro e valores com centavos no BPO.
+- **Telas e ações:** S04-T03 (lista de tarefas), Financeiro, BPO, app do cliente.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `components/kit/linha-colunas.tsx` (novo), `components/ui/badge.tsx`, `index.css`.
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Cenários de dados para ver os widgets reais em todos os estados
+
+- **Decisão:** o UI Lab (`#/lab/ui`) abre o escritório em memória (nunca toca nos dados do navegador) e, com `cenario=`, semeia um escritório `esc-cenario:<nome>` a partir da fotografia do Andrade transformada (`nucleo/semente/cenario.ts`): 0, 1, 3, 15, 50 ou 200 itens nas listas (por cliente e setor, só nos grupos que as telas mostram), texto curto/longo/sem espaço, valores extremos, datas vencidas/hoje/futuras, opcionais ausentes e os estados do domínio misturados (lidos de `entidades.ts`). As fontes fixas (`painel-s03`, `painel`, `painel-abas`) passam por `comCenarioPor`, que fora do Lab devolve o mesmo dado. Serviços falhando e "ver como" sem acesso entram como estados.
+- **Por quê:** pedido do dono ("como ficaria o card Documentos da aba com 15? com 50? com 0?"); o widget real é alimentado pelo cenário, sem cópia.
+- **Telas e ações:** os 142 widgets do Início e do Painel (cliente e carteira).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `nucleo/banco/{index,navegador}.ts` (memória no Lab, com limite), `nucleo/react.tsx` (`escritorioFixo`), `nucleo/semente/index.ts`, `App.tsx`, as três fontes de `src/dados` (só o embrulho na função exportada).
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Contrato de transbordo no próprio widget
+
+- **Decisão:** passou do teto do tamanho, o corpo do widget rola com o esmaecido e o rodapé oferece "Ver tudo (N)", que abre o conteúdo inteiro do widget numa gaveta (no tamanho XL); N é a maior lista do corpo. Lista que precisa de teto por quantidade usa `ListaComTeto` (teto P 3, M 5, G 8, L 5, XL 12; "Ver todos (N)"; virtualização acima de 150 na gaveta).
+- **Por quê:** "nada pode crescer sem limite nem cortar seco"; vale para todo widget de uma vez, sem regra por tela.
+- **Telas e ações:** todos os widgets.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `components/widgets/widget.tsx`, `components/kit/lista-com-teto.tsx` (novo).
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Texto de estado e contraste garantido no tema
+
+- **Decisão:** o tema mapeia os tokens de texto de estado do design system (`erro-texto`, `sucesso-texto`, `atencao-texto`, `destaque-texto` → `text-destructive-text`, `text-success-text`, `text-warning-text`, `text-highlight-text`); a cor de estado cheia fica para ícone e preenchimento. Nos temas de escritório sem esses valores, e no texto suave derivado, o provider leva a cor na direção do texto até 4,5:1 em todas as camadas (`comContraste`). O texto sobre a primária escolhe o maior contraste WCAG. Selo de estado: texto em `texto` e ícone na cor do estado (cores.md), inclusive o de erro. Nada abaixo de 12px fora da hora (277 `text-[11px]` e 26 `text-[10px]` passaram a 12px; o `Contador` também).
+- **Por quê:** o QA mediu milhares de textos abaixo do AA, quase todos por essas raízes (temas Horizonte e Verde Campo, selo vermelho sobre vermelho).
+- **Telas e ações:** todas.
+- **Impacto no plano:** nenhum (aplica o design system).
+- **Arquivos compartilhados:** `theme/{tipos,temas,variaveis}.ts`, `index.css`, `components/ui/badge.tsx`.
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Quebra de palavra, título automático e linhas que quebram
+
+- **Decisão:** a base põe `overflow-wrap: anywhere` no corpo (na tabela, `break-word`). Texto truncado ganha o texto inteiro como título ao apontar (`lib/titulo-automatico.ts`). Em linha `flex-wrap`, o texto é `grow basis-40`, não `flex-1` (83 lugares).
+- **Por quê:** palavra sem espaço vazava de modais e gavetas; centenas de textos truncavam sem título; `flex-1` (base 0) espremia o texto numa coluna enquanto os botões ficavam inteiros (as "Pendências do setor" do print do dono).
+- **Telas e ações:** todas.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `index.css`, `main.tsx`.
+- **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Ações numa forma só; avisos acima do campo de escrever
+
+- **Decisão:** o widget Ações vira uma lista de linhas (ícone, verbo e objeto, contagem na carteira e o nível como selo; o que falta vira selo de atenção) (QA_INTERFACE.md, X-4). Avisos e botão Chat sobem a altura do campo de escrever (`--desvio-campo`, medido por ResizeObserver e removido ao desmontar); no celular, só o aviso mais novo (proposta aprovada da UI-1).
+- **Por quê:** três formas de botão no mesmo widget; o botão Chat e os avisos cobriam o campo do CRM › Conversas.
+- **Telas e ações:** todas as abas do Painel; S05-T01.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** `components/compostos/painel-aba.tsx`, `ambiente/interface.tsx`, `telas/ModuloTela.tsx`, `lib/desvio-campo.ts` (novo).
+- **Situação:** proposta (a das Ações); aceita pela coordenação (a dos avisos).
+
+#### 2026-11-15 · UI Lab · Scripts antigos apagados
+
+- **Decisão:** saem `app-cliente`, `bpo-cenarios`, `bpo-modulo`, `decisoes-8-11` e `servicos-app` (de 08/11, com endereço fixo e o painel da demonstração antigo; falham no começo também no wireframe puro). O que testavam está na suíte: app do cliente no s10; BPO, abas, alçadas e só-BPO nos s08 e s08a a s08d; NFS-e e cancelamento no s07; diagnóstico no s09. O selo de titular do BPO não tem teste próprio: aparece no Lab e no QA das telas. O `qa-interface.cjs` fica (roda em ~2 min; print da página inteira só com `QA_ALTO=1`).
+- **Por quê:** pedido da coordenação (triagem na fase 5).
+- **Telas e ações:** nenhuma.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** aceita pela coordenação.

@@ -9,6 +9,7 @@
 // Uso: app servido em http://localhost:6200/ (npx vite --port 6200 --strictPort) e
 //      node scripts/qa-interface.cjs <pasta-dos-prints> [filtro-de-rota] [larguras]
 //   URL_APP=http://localhost:6100/ muda o endereço; larguras: "1440,390" (padrão: as quatro).
+//   QA_ALTO=1 tira o print da página inteira (mais lento). O QA completo, com mais regras, é o ui-lab-qa.cjs.
 //   Grava <pasta>/qa-interface.json com tudo o que achou e imprime o resumo por largura.
 const { chromium } = require('playwright')
 const fs = require('fs')
@@ -297,7 +298,7 @@ function medir(toque) {
           entrouApp = true
         }
         await p.goto(base + r.rota)
-        await espera(p, 1800)
+        await espera(p, 1200)
         await p.keyboard.press('Escape').catch(() => {})
         await espera(p, 200)
         let achado
@@ -316,12 +317,13 @@ function medir(toque) {
           }
           return maior
         })
-        if (alto > 40) {
+        // Print alto (a página inteira) só com QA_ALTO=1: é o que mais pesa; o padrão é a tela.
+        if (alto > 40 && process.env.QA_ALTO === '1') {
           await p.setViewportSize({ width: v.width, height: Math.min(v.height + alto, 6000) })
           await espera(p, 400)
         }
         await p.screenshot({ path: path.join(out, arquivo) })
-        if (alto > 40) await p.setViewportSize({ width: v.width, height: v.height })
+        if (alto > 40 && process.env.QA_ALTO === '1') await p.setViewportSize({ width: v.width, height: v.height })
         meu[r.rota] = { grupo: r.grupo, arquivo, ...achado }
       }
       if (erros.length) meu._erros = [...new Set(erros)].slice(0, 20)
