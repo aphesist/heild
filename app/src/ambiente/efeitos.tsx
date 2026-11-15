@@ -7,6 +7,7 @@ import { efeitoCartaoS02 } from './agente-s02'
 import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
 import { efeitoS09 } from './efeitos-s09'
 import { efeitoCartaoS10 } from '@/cliente/motor' // S10
+import { efeitoCartaoS08a } from '@/telas/bpo/integrantes-s08a' // S08a
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
@@ -32,6 +33,7 @@ export function useEfeitosCartao() {
     // S09: cartões do Raio-X, da implantação e do envio de documentos (chaves s09-*).
     if (efeitoS09(loja, usuario.nome, cartao, decisao)) return
     if (cartao.startsWith('s10-')) return efeitoCartaoS10(loja, cartao, decisao, usuario.nome, conversaDe) // S10: cartões do app do cliente
+    if (efeitoCartaoS08a(loja, cartao, decisao, usuario.nome)) return // S08a: convite do app preparado na implantação do BPO
     const aprovou = decisao !== 'recusar'
     const quem = usuario.nome
     if (!aprovou && cartao.startsWith('s01-promo')) {
