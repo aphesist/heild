@@ -57,7 +57,8 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
         <header className="flex min-h-6 shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
           <div className="flex min-w-0 flex-[1_1_9rem] items-center gap-2">
             {Icone && <Icone className="text-muted-foreground size-[18px] shrink-0" aria-hidden />}
-            <h3 className="min-w-0 truncate text-sm font-medium" title={def.atividades ? `${def.titulo} · ${def.atividades}` : def.titulo}>
+            {/* No P (um número), o título pode ir a duas linhas: é ele que dá sentido ao número. */}
+            <h3 className={cn('min-w-0 text-sm font-medium', usado === 'P' ? 'line-clamp-2 break-words' : 'truncate')} title={def.atividades ? `${def.titulo} · ${def.atividades}` : def.titulo}>
               {def.titulo}
             </h3>
             {def.atividades && usado !== 'P' && !editando && (
