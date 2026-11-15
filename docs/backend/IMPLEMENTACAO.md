@@ -774,12 +774,12 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
 
 11. **Triagem como conversa** (`GES-TRIAR-REPASSAR` v3, `src/setores/triagem-conversa.ts`). A decisão do Enzo de 15/11/2026: "os clientes odeiam menu e falar com robô; os integrantes devem conversar como pessoas normais no WhatsApp". A pergunta de escolher o setor só vale nos fluxos de chatbot sem IA.
     - **Uma execução por mensagem do cliente**, enquanto a conversa espera triagem no setor de entrada. Sem mensagem nova do cliente, a execução recusa (`SEM_MENSAGEM_NOVA`); conversa já repassada também (`JA_TRIADA`).
-    - **Fora do horário de atendimento:**
+    - **Fora do horário de atendimento** (só com o horário ligado pelo escritório; vem desligado, item seguinte):
       - resposta automática fixa, sem IA, com o horário, com o prefixo `*{Escritório}*`, uma vez por período fechado;
       - nenhuma triagem; a conversa fica na fila com a etiqueta `fora_do_horario`;
       - um job atrasado (`atendimento.triagem_retomar`, gravado na mesma transação) retoma a triagem na primeira hora do expediente, como o integrante de Atendimento, se ninguém tiver assumido a conversa.
 
-      O horário vem de `escritorio.configuracao.horario_atendimento` (`dias`, `inicio`, `fim`), no fuso do escritório. O padrão é de segunda a sexta, das 8h às 18h, porque o plano ainda não fixou o horário (revisão de consistência, D11). Inválido ou ausente vira o padrão.
+      O horário vem de `escritorio.configuracao.horario_atendimento`, no fuso do escritório. **Vem desligado por padrão** (resposta do Enzo de 15/11/2026): sem `ligado: true`, a triagem atende a qualquer hora e não há resposta de fora do horário. Ligado, o padrão sugerido é de segunda a sexta, das 8h às 18h; `dias`, `inicio` e `fim` mudam o padrão, e um valor inválido vira o padrão sugerido. O roteiro de avaliação liga o horário para medir os casos de fora do horário.
     - **Regras, sem modelo, como na v2:**
       - conversa ligada a um setor nos últimos dias (conversa aberta, resposta a envio do escritório em 7 dias, um só setor ativo na carteira) pula a triagem em silêncio;
       - palavra-chave de um setor só repassa com um aviso fixo e natural ("Boa tarde! Vou passar sua mensagem para o pessoal do DP, que cuida disso. Daqui a pouco eles te respondem por aqui.");
@@ -797,7 +797,7 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - **As falas da triagem saem sem cartão** (ferramenta nova `conversa.triagem_responder`, executar, exposta ao cliente), porque só entendem o assunto e encaminham. Qualquer outra mensagem da IA ao cliente continua em `conversa.responder` (irreversível, com cartão). Todas levam `*{integrante} (IA)*`, sem repetir na sequência.
     - **O roteamento** é o da v2 (`conversa.rotear`, resumo escrito pelo sistema também como nota interna, integrante de destino acordado), com a origem e as perguntas em `conversa.extras.triagem`.
     - **Motor:** os passos ganharam `enfileirar` (pg-boss na mesma transação; some com o savepoint na sombra), para o job atrasado. A mudança só acrescenta.
-    - **Fora da v3:** a opção "menu e integrante" da v2 (sugestão por cartão quando o integrante discorda do menu). Com a decisão nova, a triagem pelo integrante não usa menu; se o escritório quiser menu, é o fluxo de chatbot sem IA.
+    - **Fora da v3** (confirmado pelo Enzo): a opção "menu e integrante" da v2 (sugestão por cartão quando o integrante discorda do menu). A triagem pelo integrante não usa menu; se o escritório quiser menu, é o fluxo de chatbot sem IA.
     - **Resultado real** ([`relatorios/triagem-conversa-2026-11-15-real.md`](relatorios/triagem-conversa-2026-11-15-real.md); 25 conversas × 2):
       - Sonnet acertou 50/50 e Haiku 49/50, sem erro crítico; nenhuma fala fora do tom ou do escopo nos dois (0 de 78 e 0 de 81).
       - Perguntas até rotear: média de 0,9 e máximo de 2. Custo por conversa: R$ 0,042 no Sonnet e R$ 0,0026 no Haiku.
@@ -819,6 +819,27 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - As v2 continuam carregadas para as execuções em andamento. A triagem conversando não entra nessa configuração: sai sem aprovação, por ser só triagem.
 
 
+13. **Feedforward e lacunas** (padrão da interface adotado pelo Enzo em 15/11/2026: antes de agir, o integrante mostra o que supôs para a pessoa corrigir; num rascunho, deixa lacuna no que não sabe, em vez de inventar).
+    - **`heild.resposta@2`** (`src/resposta.ts`) acrescenta duas listas. As opções vêm sempre dos dados, nunca de texto do modelo.
+      - `suposicoes[]`: campo, rótulo, valor assumido, tipo (cliente, competência, valor, setor, procedimento, canal, documento, data, quantidade, categoria, texto), as opções que os dados oferecem, a origem (`regra`, `modelo`, `pessoa` ou `pedido`) e a confiança;
+      - `lacunas[]`: id, campo, rótulo, tipo, opções e a posição no texto, onde a lacuna aparece como `[rótulo]`.
+    - **Compatibilidade:** a @1 continua aceita na leitura (`lerResposta` a converte em @2 vazia). `assistente.obter` aceita `formato: 'heild.resposta@1'` para quem ainda lê a versão anterior (`noFormato` tira os campos novos).
+    - **Montadas pelo sistema** (`src/suposicoes.ts`), a partir do estado da execução:
+      - as candidatas que o código leu do documento e o valor decidido ou proposto pelo operário, com a origem e a confiança;
+      - o cliente e o documento do pedido;
+      - no "não consegui", as lacunas: os campos que os validadores apontaram (como a quantidade do DP) ou, sem campo apontado (confiança baixa), os campos da escolha, com as candidatas como opções.
+
+      O destino suposto pelo Assistente vai em `suposicao_de_rota`, ao lado da resposta: a resposta do integrante continua sem reescrever (decisão 4).
+    - **`assistente.prever_suposicoes`** (ler): a prévia do que o integrante vai supor, antes de pedir, enquanto a pessoa digita (com debounce no app).
+      - Mostra o procedimento, o setor, o cliente, o documento, a competência e o valor citados no texto, e o que falta anexar (como lacunas).
+      - Regras primeiro. O roteador barato (Haiku) só entra quando a regra não decide e o texto tem 12 caracteres ou mais; nunca o caro. `usar_modelo: false` fica só nas regras.
+      - Não abre pedido nem execução e não grava evento. O custo do modelo sai da bolsa do roteamento, e o mesmo texto não paga de novo por 60 s (até 500 prévias em memória).
+    - **`assistente.preencher_lacuna`** (executar): a pessoa preenche as lacunas de um rascunho que parou num "não consegui" (pelo pedido ou pela execução).
+      - Os valores entram na proposta do operário, só nos campos do contrato (a confiança não é lacuna e vira 1, porque uma pessoa decidiu).
+      - A execução **retoma do ponto em que parou**, pela edição do "não consegui" no motor: os validadores conferem de novo e o procedimento segue, sem chamar o operário.
+      - Quem preencheu fica no cartão (`decidido_por`, comentário "Lacuna preenchida: …"), com os argumentos editados, e na cadeia.
+    - **Divisão com a B5:** aprovar um cartão de **ato** com argumentos alterados (recalcular o hash, revalidar e registrar quem alterou o quê) e "aprovar executa a ação guardada" ficam com a B5, no executor. A lacuna usa só o cartão "não consegui" do motor.
+
 ### Resultado real (15/11/2026)
 
 Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
@@ -835,17 +856,23 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
 - `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
 - `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
 - `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.
-- `triagem.test.ts` (12, triagem v3):
+- `triagem.test.ts` (13, triagem v3):
   - tom e escopo por regra: menu, lista, jargão de robô, formatação, duas perguntas; valor, prazo, promessa, documento sensível, resposta técnica;
-  - quem fala; horário de atendimento (padrão, fuso, próxima abertura, saudação, configuração inválida vira o padrão);
+  - quem fala; horário de atendimento (desligado por padrão; ligado, o padrão sugerido; fuso, próxima abertura, saudação, configuração inválida);
   - o gabarito de conversas cobre os grupos pedidos, e setor errado é crítico;
   - assunto vago: o integrante pergunta sem cartão, com "(IA)", e repassa ao DP avisando, sem repetir o prefixo; sem mensagem nova do cliente, não faz nada;
   - palavra-chave com aviso fixo e saudação, sem modelo; conversa aberta pula em silêncio;
-  - fora do horário: resposta fixa uma vez só, job atrasado para segunda às 8h, e a triagem roda na primeira hora;
+  - horário desligado (padrão): a mensagem do sábado é triada na hora, sem resposta automática nem job;
+  - horário ligado: fora dele, resposta fixa uma vez só, job atrasado para segunda às 8h, e a triagem roda na primeira hora;
   - cliente irritado vai a uma pessoa, com etiqueta urgente;
   - depois de 3 perguntas, cartão; a pessoa escolhe e o cliente recebe o aviso fixo;
   - mensagem fora do tom escala uma vez e vai ao cartão, sem sair nada;
   - pelo Assistente.
+- `feedforward.test.ts` (5):
+  - a @2 com a lacuna marcada no texto e a posição; a compatibilidade com a @1;
+  - a prévia por regra (sem modelo, sem abrir pedido nem execução, com a lacuna do anexo que falta);
+  - a prévia pelo barato, com cache, sem modelo em texto curto ou com `usar_modelo: false`;
+  - o "não consegui" do DP sem quantidade vira lacuna; preencher retoma, conclui com a quantidade, sem chamar o operário de novo, e registra quem preencheu.
 - `envio.test.ts` (5): todas as categorias começam em cartão e só o Administrador muda, com evento; FAQ em cartão (aprovar grava a mensagem na conversa, com prefixo), em automático (sem cartão, com o revisor) e desligado (nada sai); a guia em automático sai sem cartão, e a categoria de outra mensagem não mexe nela.
 
 ---

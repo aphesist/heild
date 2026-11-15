@@ -9,6 +9,9 @@ export const metasB3: Ferramenta[] = [
   { nome: 'dp.evento.lancar', modulo: 'painel', nivel: 'executar', setor: 'dp', exige_aprovacao: 'se_fora_da_lista' },
   { nome: 'assistente.pedir', modulo: 'agentes', nivel: 'executar', setor: 'geral' },
   { nome: 'assistente.obter', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  // Feedforward e lacunas (padrão da interface, 15/11/2026).
+  { nome: 'assistente.prever_suposicoes', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'assistente.preencher_lacuna', modulo: 'agentes', nivel: 'executar', setor: 'geral' },
   { nome: 'integrante.listar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
   { nome: 'integrante.aprender', modulo: 'agentes', nivel: 'rascunhar', setor: 'geral' },
   // Número compartilhado (04, A.7; API_INTERNA, adendo de 15/11/2026): rotear é interno e reversível.
