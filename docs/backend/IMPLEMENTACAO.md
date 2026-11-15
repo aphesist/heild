@@ -495,6 +495,14 @@ Como o fornecedor real chama o modelo:
 
 O roteiro sai com código 1 se houver **qualquer erro crítico** (critério do dono: o erro custa mais que tudo). O relatório completo fica em `relatorios/agentico-<data>.json`, fora do git. No simulado, a última conferência deu 0 erro crítico, 80% de acerto no CTB-COMPETENCIA-DOC (os 20% restantes foram ao cartão, onde o certo era decidir) e 100% no CTB-ECD-TRANSMITIR. Esses números só provam que o roteiro funciona; os que valem são os do modelo real.
 
+**Primeira rodada real (15/11/2026, autorizada pelo dono):**
+
+- 33 execuções com o Claude (`claude-sonnet-5-5` como operário e escritor);
+- **100% de acerto e zero erro crítico** nos dois procedimentos; os dois casos em que o certo é não decidir pararam no cartão todas as vezes;
+- R$ 0,81 debitados (≈ US$ 0,15), com um custo pela tabela de preços de ≈ US$ 0,09;
+- chamada de modelo com p50 de 1,6 s e p90 de 2,3 a 3,9 s; execução com p50 de 6 s;
+- resumo em [`relatorios/agentico-2026-11-15-real.md`](relatorios/agentico-2026-11-15-real.md).
+
 O gabarito tem dez casos de competência (oito decidíveis e dois em que o certo é **não** decidir) e uma ECD com uma anomalia plantada (adiantamento a sócios que sobe 900%). A frente de IA amplia com casos reais anonimizados e com cartões editados por pessoas (02, 14.2), e é com esse conjunto que roda o piloto pré-registrado (AVALIAÇÃO, 11).
 
 ### O encaixe com a B1 (ligado)

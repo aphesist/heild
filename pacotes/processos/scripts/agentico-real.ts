@@ -30,6 +30,8 @@ if (!simulado && !real) {
   process.exit(2)
 }
 const repeticoes = Math.max(1, Number(process.env.HEILD_AGENTICO_REPETICOES ?? 1))
+/** Rodada pequena para conferir o custo antes do gabarito inteiro: N casos por procedimento. */
+const limiteCasos = Number(process.env.HEILD_AGENTICO_CASOS ?? 0) || Infinity
 
 // No simulado, um operário que acerta os casos decidíveis e hesita nos ambíguos: serve só para conferir o roteiro.
 const demo = new FornecedorDemonstracao()
@@ -83,7 +85,7 @@ const custo = async (id: string) => {
 try {
   for (let rodada = 1; rodada <= repeticoes; rodada++) {
     // CTB-COMPETENCIA-DOC: cada caso num escritório limpo, iniciado pela pessoa (o caminho do evento é o mesmo motor).
-    for (const caso of casosCompetencia) {
+    for (const caso of casosCompetencia.slice(0, limiteCasos)) {
       const s = await semear(admin, { bolsa_centavos: 100_000 })
       await admin`insert into procedimento_config (escritorio_id, procedimento_id, executa_sozinho) values (${s.esc}, 'CTB-COMPETENCIA-DOC', true)`
       const doc = await documentoSimples(admin, s, { tipo: caso.tipo, metadados: { texto_extraido: caso.texto } })
@@ -96,7 +98,7 @@ try {
       linhas.push({ procedimento: 'CTB-COMPETENCIA-DOC', caso: caso.id, rodada, esperado: caso.esperado, obtido, resultado, estado: ex.estado, ...(await custo(execucao_id)), latencia_total_ms: Date.now() - inicio })
     }
     // CTB-ECD-TRANSMITIR: até o cartão (a transmissão exige pessoa; aqui medimos conferência e operário).
-    for (const caso of casosEcd) {
+    for (const caso of casosEcd.slice(0, limiteCasos)) {
       const s = await semear(admin, { bolsa_centavos: 100_000 })
       const doc = await documentoEcd(admin, s, { plantar_adiantamento: true })
       const inicio = Date.now()
