@@ -1,5 +1,5 @@
 import { jwtVerify, SignJWT } from 'jose'
-import { contaParaTela, perfilDeConta, type Contexto, type Perfil } from '@heild/dominio'
+import { contaParaTela, perfilDeConta, rotuloSetorCurto, type Contexto, type Perfil } from '@heild/dominio'
 import { config } from '../config.ts'
 import { noEscritorio, type Sql, type Tx } from '../banco/pg.ts'
 import { ErroApi } from '../executor/erro.ts'
@@ -96,7 +96,7 @@ export async function abrirSessao(sql: Sql, claims: ClaimsToken, integranteId?: 
       if (!config.demonstracao) throw new ErroApi('DEMONSTRACAO_DESLIGADA', { mensagem: 'Integrante só age com o token próprio (orquestrador).' })
       const [i] = await tx`select id, nome_exibido, setor from integrante where id = ${integranteId}`
       if (!i) throw new ErroApi('NAO_ENCONTRADO', { campo: 'X-Heild-Integrante', mensagem: `Não encontrei o integrante ${integranteId}.` })
-      return { claims, perfil, ctx: { ator: { tipo: 'integrante', id: String(i.id), nome: (i.nome_exibido as string) ?? String(i.setor), dono: perfil }, origem: 'chat' } }
+      return { claims, perfil, ctx: { ator: { tipo: 'integrante', id: String(i.id), nome: (i.nome_exibido as string | null) ?? (rotuloSetorCurto as Record<string, string>)[String(i.setor)] ?? String(i.setor), dono: perfil }, origem: 'chat' } }
     }
     return { claims, perfil, ctx: { ator: { tipo: 'pessoa', perfil }, origem: 'tela' } }
   })

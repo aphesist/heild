@@ -61,10 +61,10 @@ describe('sincronização por versão', () => {
   it('desde uma versão, vem só o que mudou (e o que foi excluído)', async () => {
     const tudo = await app.inject({ method: 'GET', url: '/v1/sincronizar', headers: { authorization: `Bearer ${adm}` } })
     const versao = tudo.json().versao as number
-    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and status = 'a_fazer' limit 1`
+    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and status = 'a_fazer' order by id limit 1`
     await ferramenta(app, adm, 'tarefa.atualizar', { tarefa_id: t.id, campos: { titulo: 'Título mudado para o delta' } })
     // Convite pode ser excluído de vez (exclusao: 'definitiva'): a exclusão aparece no delta.
-    const [cv] = await banco()`select id from convite where escritorio_id = 'esc-andrade' limit 1`
+    const [cv] = await banco()`select id from convite where escritorio_id = 'esc-andrade' order by id limit 1`
     if (cv) expect((await operacao(app, adm, { tipo: 'operacao', operacao: 'convites.excluir', argumentos: [cv.id] })).status).toBe(200)
     const delta = (await app.inject({ method: 'GET', url: `/v1/sincronizar?desde=${versao}`, headers: { authorization: `Bearer ${adm}` } })).json()
     expect(delta.tabelas.tarefa.map((x: { id: string }) => x.id)).toEqual([t.id])
@@ -83,7 +83,7 @@ describe('escrita direta da tela (linhas)', () => {
   })
 
   it('linha sem evento: a regra da tabela autoriza e o servidor grava o evento (R2)', async () => {
-    const [cli] = await banco()`select id, nome from cliente where escritorio_id = 'esc-andrade' limit 1`
+    const [cli] = await banco()`select id, nome from cliente where escritorio_id = 'esc-andrade' order by id limit 1`
     const membro = await operacao(app, rafael, { tipo: 'linhas', gravar: [{ tabela: 'cliente', linha: { id: cli.id, nome: 'Nome pela linha' } }], remover: [] })
     // cliente.atualizar é transversal: o Membro pode; o evento sai do servidor.
     expect(membro.status).toBe(200)
@@ -98,7 +98,7 @@ describe('escrita direta da tela (linhas)', () => {
   it('tabela sem repositório e campo inexistente são recusados', async () => {
     const sem = await operacao(app, adm, { tipo: 'linhas', gravar: [{ tabela: 'idempotencia', linha: { id: 'x' } }], remover: [] })
     expect(sem.corpo.codigo).toBe('TABELA_SEM_REGRA')
-    const [cli] = await banco()`select id from cliente where escritorio_id = 'esc-andrade' limit 1`
+    const [cli] = await banco()`select id from cliente where escritorio_id = 'esc-andrade' order by id limit 1`
     const campo = await operacao(app, adm, { tipo: 'linhas', gravar: [{ tabela: 'cliente', linha: { id: cli.id, campo_que_nao_existe: 1 } }], remover: [] })
     expect(campo.status).toBe(400)
     expect(campo.corpo).toMatchObject({ codigo: 'ENTRADA_INVALIDA', campo: 'cliente.campo_que_nao_existe' })

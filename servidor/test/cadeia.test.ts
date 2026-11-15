@@ -57,7 +57,7 @@ describe('na API', () => {
   })
 
   it('adulterar um evento direto no banco (até como superusuário) é descoberto, só naquele escritório', async () => {
-    await ferramenta(app, horizonte, 'tarefa.atualizar', { tarefa_id: (await banco()`select id from tarefa where escritorio_id = 'esc-horizonte' and status = 'a_fazer' limit 1`)[0].id, campos: { prioridade: 'baixa' } })
+    await ferramenta(app, horizonte, 'tarefa.atualizar', { tarefa_id: (await banco()`select id from tarefa where escritorio_id = 'esc-horizonte' and status = 'a_fazer' order by id limit 1`)[0].id, campos: { titulo: `Título único ${Date.now()}` } })
     const [alvo] = await banco()`select id, seq from evento where escritorio_id = 'esc-andrade' and seq = 3`
     await banco().begin(async (tx) => {
       await tx`alter table evento disable trigger so_insercao`

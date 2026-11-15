@@ -1,4 +1,4 @@
-import { banco } from '../banco'
+import { bancoAtual } from '../banco'
 import type { Banco } from '../banco/banco'
 import type { BpoDocumento, BpoEntrega, BpoItemFila, BpoTransacao, ChecagemDocumentoBpo, Id, LeituraDocumentoBpo } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
@@ -219,7 +219,7 @@ export const conciliacaoOperacao = {
    */
   conciliar(id: Id, categoria: string, op: OpcoesEscrita = {}) {
     const ctx = op.ctx ?? contextoAtual()
-    const b = banco
+    const b = bancoAtual()
     const t = repos.bpo.transacoes.obter(id)
     if (!t) throw new ErroRegra('Linha do extrato não encontrada.')
     if (t.situacao === 'conciliada') throw new ErroRegra('Esta linha já foi conciliada.')
@@ -235,7 +235,7 @@ export const conciliacaoOperacao = {
     const t = repos.bpo.transacoes.obter(id)
     if (!t) throw new ErroRegra('Linha do extrato não encontrada.')
     if (baixaDe(t) === 'manual_feita') throw new ErroRegra('A baixa já foi lançada à mão no ERP: estorne lá primeiro.')
-    const { modo, provedor } = modoDe(banco, t.cliente_id)
+    const { modo, provedor } = modoDe(bancoAtual(), t.cliente_id)
     return repos.bpo.transacoes.atualizar(id, { situacao: 'pendente', categoria: null, conciliada_por: null, extras: { ...t.extras, baixa: null } }, { ...op, ctx, ferramenta: 'conciliacao.confirmar', texto: `${nomeDoAtor(ctx.ator)} desfez a conciliação de ${t.descricao}${modo === 'E1' ? ` (estorno da baixa no ${provedor})` : ''}` })
   },
   /** Modo arquivo: a pessoa lançou a baixa no ERP do cliente. Conta no SLA com a marca "manual". */
@@ -244,7 +244,7 @@ export const conciliacaoOperacao = {
     const t = repos.bpo.transacoes.obter(id)
     if (!t) throw new ErroRegra('Linha do extrato não encontrada.')
     if (baixaDe(t) !== 'manual_pendente') throw new ErroRegra('Esta baixa não está para lançar.')
-    const { provedor } = modoDe(banco, t.cliente_id)
+    const { provedor } = modoDe(bancoAtual(), t.cliente_id)
     const depois = repos.bpo.transacoes.atualizar(id, { extras: { ...t.extras, baixa: 'manual_feita', baixa_por: nomeDoAtor(ctx.ator), baixa_em: agoraDemo() } }, { ...op, ctx, ferramenta: 'erp.baixar', texto: `${nomeDoAtor(ctx.ator)} lançou à mão no ${provedor} a baixa de ${t.descricao} (manual, conta no SLA)` })
     resolverPendenciaArquivo(t.cliente_id, ctx)
     return depois
@@ -254,7 +254,7 @@ export const conciliacaoOperacao = {
     const ctx = op.ctx ?? contextoAtual()
     const c = repos.bpo.contas.obter(contaId)
     if (!c) throw new ErroRegra('Conta não encontrada.')
-    const { provedor } = modoDe(banco, c.cliente_id)
+    const { provedor } = modoDe(bancoAtual(), c.cliente_id)
     const depois = repos.bpo.contas.atualizar(contaId, { lancar_no_erp: false, extras: { ...c.extras, lancada_no_erp_por: nomeDoAtor(ctx.ator), lancada_no_erp_em: agoraDemo() } }, { ...op, ctx, ferramenta: 'erp.lancar', texto: `${nomeDoAtor(ctx.ator)} lançou à mão no ${provedor} a conta ${c.contraparte} (${brl(c.valor)})` })
     resolverPendenciaArquivo(c.cliente_id, ctx)
     return depois
@@ -270,9 +270,9 @@ export const conciliacaoOperacao = {
 
 /** Quando não resta nada para lançar à mão, a pendência "lançar baixas" da fila se resolve sozinha (com evento). */
 function resolverPendenciaArquivo(clienteId: Id, ctx: Contexto) {
-  const resta = banco.ler('bpo_transacao').some((t) => t.cliente_id === clienteId && baixaDe(t) === 'manual_pendente') || banco.ler('bpo_conta').some((c) => c.cliente_id === clienteId && c.lancar_no_erp && c.etapa !== 'cancelada')
+  const resta = bancoAtual().ler('bpo_transacao').some((t) => t.cliente_id === clienteId && baixaDe(t) === 'manual_pendente') || bancoAtual().ler('bpo_conta').some((c) => c.cliente_id === clienteId && c.lancar_no_erp && c.etapa !== 'cancelada')
   if (resta) return
-  for (const f of banco.ler('bpo_item_fila').filter((x) => x.cliente_id === clienteId && x.situacao === 'aberto' && x.tipo === 'pendencia' && x.codigo === 'FIN-004')) repos.bpo.fila.atualizar(f.id, { situacao: 'resolvido' }, { ctx, ferramenta: 'fila.atualizar', texto: `Resolvido: ${f.texto} (todas as baixas lançadas no ERP)` })
+  for (const f of bancoAtual().ler('bpo_item_fila').filter((x) => x.cliente_id === clienteId && x.situacao === 'aberto' && x.tipo === 'pendencia' && x.codigo === 'FIN-004')) repos.bpo.fila.atualizar(f.id, { situacao: 'resolvido' }, { ctx, ferramenta: 'fila.atualizar', texto: `Resolvido: ${f.texto} (todas as baixas lançadas no ERP)` })
 }
 
 /* ---------- Fechamento do mês e relatório gerencial ---------- */
@@ -306,17 +306,17 @@ export interface PassoFechamento {
   secao: string
 }
 
-const entregaDe = (clienteId: Id, competencia: string, tipo: BpoEntrega['tipo']) => banco.ler('bpo_entrega').find((x) => x.cliente_id === clienteId && x.competencia === competencia && x.tipo === tipo)
+const entregaDe = (clienteId: Id, competencia: string, tipo: BpoEntrega['tipo']) => bancoAtual().ler('bpo_entrega').find((x) => x.cliente_id === clienteId && x.competencia === competencia && x.tipo === tipo)
 export const rascunhoDe = (e?: BpoEntrega) => (e?.extras?.dre as RascunhoGerencial | undefined) ?? null
 
 export const fechamentoOperacao = {
   /** Conferência antes de fechar: mesma regra na tela e na escrita. */
   passos(clienteId: Id, competencia: string): PassoFechamento[] {
     const fim = fimDaCompetencia(competencia)
-    const trans = banco.ler('bpo_transacao').filter((t) => t.cliente_id === clienteId && t.data <= fim)
+    const trans = bancoAtual().ler('bpo_transacao').filter((t) => t.cliente_id === clienteId && t.data <= fim)
     const semConciliar = trans.filter((t) => t.situacao === 'pendente').length
     const paraLancar = trans.filter((t) => baixaDe(t) === 'manual_pendente').length
-    const aConferir = banco.ler('bpo_conta').filter((c) => c.cliente_id === clienteId && c.tipo === 'pagar' && c.etapa === 'capturada' && c.vencimento <= fim).length
+    const aConferir = bancoAtual().ler('bpo_conta').filter((c) => c.cliente_id === clienteId && c.tipo === 'pagar' && c.etapa === 'capturada' && c.vencimento <= fim).length
     const rel = entregaDe(clienteId, competencia, 'relatorio')
     const rasc = !!rascunhoDe(rel) || !!rel?.extras?.rascunho
     const aprovado = !!rel?.extras?.aprovado_em || rel?.situacao === 'enviado'
@@ -353,13 +353,13 @@ export const fechamentoOperacao = {
     if (ctx.ator.tipo !== 'pessoa') throw new ErroRegra('Fechar o mês é de uma pessoa (o integrante prepara, o Gestor fecha).')
     const falta = fechamentoOperacao.passos(clienteId, competencia).find((p) => !p.ok)
     if (falta) throw new ErroRegra(`Ainda não dá para fechar: ${falta.texto.toLowerCase()}.`)
-    const cliente = banco.obter('cliente', clienteId)
+    const cliente = bancoAtual().obter('cliente', clienteId)
     const contabil = (cliente?.servicos_contratados ?? []).includes('contabil')
     const f = entregaDe(clienteId, competencia, 'fechamento')
     const dados = { situacao: 'enviado' as const, enviado_em: agoraDemo(), enviado_por: nomeDoAtor(ctx.ator) }
     const texto = contabil ? `bpo.mes_fechado: ${nomeDoAtor(ctx.ator)} fechou ${competencia} de ${cliente?.nome}; os lançamentos já classificados foram ao setor Contábil` : `${nomeDoAtor(ctx.ator)} fechou ${competencia} de ${cliente?.nome}; fechamento enviado ao contador da empresa`
     const depois = f ? repos.bpo.entregas.atualizar(f.id, { ...dados, extras: { ...f.extras, reaberto: null } }, { ...op, ctx, ferramenta: 'bpo.fechamento.executar', texto }) : repos.bpo.entregas.criar({ cliente_id: clienteId, competencia, tipo: 'fechamento', ...dados }, { ...op, ctx, ferramenta: 'bpo.fechamento.executar', texto })
-    if (contabil) banco.transacao((tx) => registrarEvento(tx, ctx, { nome: 'bpo.mes_fechado', ferramenta: 'bpo.fechamento.executar', texto: `Lançamentos de ${competencia} de ${cliente?.nome} entregues ao Contábil, já classificados (sem redigitar)`, cliente_id: clienteId, setor_id: 'contabil', resultado_ref: depois.id }))
+    if (contabil) bancoAtual().transacao((tx) => registrarEvento(tx, ctx, { nome: 'bpo.mes_fechado', ferramenta: 'bpo.fechamento.executar', texto: `Lançamentos de ${competencia} de ${cliente?.nome} entregues ao Contábil, já classificados (sem redigitar)`, cliente_id: clienteId, setor_id: 'contabil', resultado_ref: depois.id }))
     return depois
   },
 
@@ -392,4 +392,10 @@ export function criarDocumentosBpo(b: () => Banco) {
 }
 
 /** Documentos do BPO (S08b): `documentosBpo.receber`, `.registrarLeitura`, `.lancar`, `.anexar`, `.descartar`. */
-export const documentosBpo = criarDocumentosBpo(() => banco)
+export const documentosBpo = criarDocumentosBpo(() => bancoAtual())
+
+/**
+ * As operações da S08b que vivem fora de `repos` (backend): o servidor as registra como
+ * operações (`documentosBpo.lancar`, `filaOperacao.comentar`...) e o adaptador `api` as captura.
+ */
+export const operacoesS08b = { documentosBpo, filaOperacao, conciliacaoOperacao, fechamentoOperacao }
