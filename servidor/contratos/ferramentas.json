@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "b1df6286aefc5598",
+  "catalogo_hash": "b5d0b83ef12aac87",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -51,7 +51,8 @@
         "NAO_ENCONTRADO",
         "JA_DECIDIDO",
         "SO_PESSOA_DECIDE"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "aprovacao_listar",
@@ -114,7 +115,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "assinatura_atualizar",
@@ -225,7 +227,109 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "assistente_obter",
+      "nome": "assistente.obter",
+      "description": "Estado e resposta padrão de um pedido feito ao Assistente (só de quem pediu).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pedido_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "pedido_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "assistente_pedir",
+      "nome": "assistente.pedir",
+      "description": "Pede ao Assistente: ele roteia ao integrante do setor e devolve a resposta padrão dele, sem reescrever.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "texto": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "anexos": {
+            "type": "object",
+            "properties": {
+              "cliente_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "documento_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "exercicio": {
+                "type": "string",
+                "pattern": "^\\d{4}$"
+              },
+              "competencia": {
+                "type": "string",
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+              }
+            },
+            "additionalProperties": false
+          },
+          "chave_idempotencia": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "texto"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "atendimento_faq_responder",
@@ -265,7 +369,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cartao_atualizar",
@@ -325,7 +430,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cartao_criar",
@@ -488,7 +594,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "carteira_cliente_criar",
@@ -574,7 +681,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "carteira_cliente_excluir",
@@ -616,7 +724,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "EXCLUSAO_PROIBIDA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_arquivar",
@@ -659,7 +768,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_atualizar",
@@ -767,7 +877,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_criar",
@@ -898,7 +1009,8 @@
       "x-heild-erros": [
         "CAMPO_OBRIGATORIO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_desarquivar",
@@ -935,7 +1047,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_fundir",
@@ -979,7 +1092,8 @@
       "x-heild-exposta-mcp": false,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_listar",
@@ -1055,7 +1169,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_mudar_estado",
@@ -1109,7 +1224,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_obter",
@@ -1154,7 +1270,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "contabil_documento_classificar_competencia",
@@ -1192,7 +1309,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "contabil_ecd_conferir_e_transmitir",
@@ -1235,7 +1353,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "conversa_interna_atualizar",
@@ -1306,7 +1425,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "conversa_interna_criar",
@@ -1412,7 +1532,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "convite_atualizar",
@@ -1538,7 +1659,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "convite_criar",
@@ -1653,7 +1775,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "convite_excluir",
@@ -1695,7 +1818,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "EXCLUSAO_PROIBIDA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "dp_evento_classificar_e_lancar",
@@ -1735,7 +1859,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "escritorio_atualizar",
@@ -1901,7 +2026,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "evento_listar",
@@ -1989,7 +2115,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "excecao_tela_atualizar",
@@ -2111,7 +2238,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "excecao_tela_criar",
@@ -2213,7 +2341,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "excecao_tela_excluir",
@@ -2255,7 +2384,76 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "EXCLUSAO_PROIBIDA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "execucao_obter",
+      "nome": "execucao.obter",
+      "description": "Estado compacto de uma execução de procedimento (para retomar sem transcript).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "execucao_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "execucao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "execucao_retomar",
+      "nome": "execucao.retomar",
+      "description": "Retoma do último passo gravado uma execução que falhou ou parou por orçamento.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "execucao_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "execucao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "fiscal_caixa_postal_triar",
@@ -2295,7 +2493,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "fiscal_guia_conferir_e_enviar",
@@ -2335,7 +2534,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "identidade_atualizar",
@@ -2419,7 +2619,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "identidade_criar",
@@ -2510,7 +2711,124 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "integrante_aprender",
+      "nome": "integrante.aprender",
+      "description": "Propõe guardar na memória do setor a correção que uma pessoa fez num cartão \"não consegui\" (vira cartão para quem gere).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "execucao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "execucao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "rascunhar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "integrante_listar",
+      "nome": "integrante.listar",
+      "description": "Os integrantes dos setores: o que cada um faz, procedimentos, limites e papéis de modelo.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor": {
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "memoria_propor",
+      "nome": "memoria.propor",
+      "description": "Propõe mudar a memória do setor; vira cartão para Gestor ou Administrador (decisão 6).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor": {
+            "type": "string"
+          },
+          "chave": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "valor": {},
+          "motivo": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 280
+          }
+        },
+        "required": [
+          "setor",
+          "chave",
+          "valor",
+          "motivo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "rascunhar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "mensagem_interna_atualizar",
@@ -2576,7 +2894,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "mensagem_interna_editar",
@@ -2620,7 +2939,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "SO_AUTOR_EDITA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "mensagem_interna_enviar",
@@ -2690,7 +3010,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CAMPO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "mensagem_interna_listar",
@@ -2741,7 +3062,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "notificacao_criar",
@@ -2791,22 +3113,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": [
-                  "societario",
-                  "fiscal",
-                  "notas",
-                  "dp",
-                  "contabil",
-                  "consultor",
-                  "gestao_atendimento",
-                  "financeiro_escritorio",
-                  "bpo_financeiro",
-                  "bpo",
-                  "pf",
-                  "terceiro_setor",
-                  "nichos",
-                  "ciclo_vida"
-                ]
+                "maxLength": 60
               },
               {
                 "type": "null"
@@ -2863,6 +3170,21 @@
             "type": "string",
             "maxLength": 2000
           },
+          "lida_por": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "extras": {
             "anyOf": [
               {
@@ -2905,7 +3227,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "notificacao_ler",
@@ -2949,7 +3272,8 @@
       "x-heild-exposta-mcp": false,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "notificacao_ler_todas",
@@ -2996,7 +3320,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": false,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_atualizar",
@@ -3106,7 +3431,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_cancelar",
@@ -3150,7 +3476,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "MOTIVO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_criar",
@@ -3283,7 +3610,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_listar",
@@ -3357,7 +3685,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_reordenar",
@@ -3397,7 +3726,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": false,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "participacao_atualizar",
@@ -3469,7 +3799,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "participacao_criar",
@@ -3547,7 +3878,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "pessoa_atualizar",
@@ -3640,7 +3972,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "pessoa_criar",
@@ -3723,7 +4056,39 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "procedimento_listar",
+      "nome": "procedimento.listar",
+      "description": "O que o setor sabe fazer sozinho: procedimentos, versão e operação.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "setor_atualizar",
@@ -3830,7 +4195,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "setor_criar",
@@ -3925,7 +4291,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "societario_alteracao_triar",
@@ -3965,7 +4332,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_aguardar_cliente",
@@ -4003,7 +4371,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_aguardar_terceiro",
@@ -4041,7 +4410,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_arquivar",
@@ -4084,7 +4454,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_atualizar",
@@ -4154,11 +4525,19 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                    "pattern": "^(\\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\\/\\d{4})$"
                   },
                   {
                     "type": "null"
                   }
+                ]
+              },
+              "quem_conclui": {
+                "type": "string",
+                "enum": [
+                  "pessoa",
+                  "agente_sozinho",
+                  "agente_prepara_pessoa_conclui"
                 ]
               },
               "checklist": {
@@ -4265,7 +4644,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_cancelar",
@@ -4310,7 +4690,8 @@
         "NAO_ENCONTRADO",
         "TAREFA_FINAL",
         "MOTIVO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_concluir",
@@ -4348,7 +4729,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_criar",
@@ -4399,7 +4781,7 @@
           },
           "competencia": {
             "type": "string",
-            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            "pattern": "^(\\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\\/\\d{4})$"
           },
           "prazo_interno": {
             "type": "string",
@@ -4607,7 +4989,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CAMPO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_desarquivar",
@@ -4644,7 +5027,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_enviar_revisao",
@@ -4682,7 +5066,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_iniciar",
@@ -4720,7 +5105,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_listar",
@@ -4773,7 +5159,7 @@
           },
           "competencia": {
             "type": "string",
-            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            "pattern": "^(\\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\\/\\d{4})$"
           },
           "responsavel_id": {
             "type": "string",
@@ -4816,7 +5202,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_obter",
@@ -4861,7 +5248,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_reatribuir",
@@ -4913,7 +5301,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_reordenar",
@@ -4953,7 +5342,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tela_esquecer",
@@ -4987,7 +5377,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": false,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tela_lembrar",
@@ -5023,7 +5414,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": false,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "usuario_atualizar",
@@ -5178,7 +5570,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "usuario_criar",
@@ -5291,7 +5684,55 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "validador_executar",
+      "nome": "validador.executar",
+      "description": "Roda validadores do domínio sobre dados montados (para o planejador de exceção conferir).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "validadores": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dados": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "validadores",
+          "dados"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "versao_perfil_atualizar",
@@ -5373,7 +5814,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "versao_perfil_criar",
@@ -5544,7 +5986,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "vinculo_setor_atualizar",
@@ -5629,7 +6072,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "VERSAO_DESATUALIZADA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "vinculo_setor_criar",
@@ -5726,7 +6170,8 @@
         "CAMPO_OBRIGATORIO",
         "ID_EM_USO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "vinculo_setor_excluir",
@@ -5768,7 +6213,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "EXCLUSAO_PROIBIDA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     }
   ]
 }

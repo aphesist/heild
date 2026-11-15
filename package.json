@@ -16,6 +16,7 @@
     "typecheck": "npm run typecheck -w @heild/servidor && npm run typecheck -w @heild/processos && npm run typecheck -w @heild/integrantes",
     "test:b2": "npm test -w @heild/processos",
     "test:b3": "npm test -w @heild/integrantes",
-    "lint": "app/node_modules/.bin/oxlint -c app/.oxlintrc.json pacotes/integrantes/src pacotes/integrantes/testes pacotes/integrantes/scripts pacotes/processos/src"
+    "lint": "app/node_modules/.bin/oxlint -c app/.oxlintrc.json --deny-warnings pacotes/integrantes/src pacotes/integrantes/testes pacotes/integrantes/scripts pacotes/processos/src pacotes/dominio/src servidor/src servidor/test app/src/nucleo/banco app/src/nucleo/permissoes/leitura.ts app/src/nucleo/permissoes/ferramentas-entidade.ts app/src/nucleo/consulta.ts",
+    "contratos:conferir": "npm run contratos -w @heild/servidor && git diff --exit-code -- servidor/contratos"
   }
 }

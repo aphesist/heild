@@ -1,11 +1,15 @@
 import { registrarFerramentaTipada, type NomeTabela, type Repositorio } from '@heild/dominio'
 import {
   bossNaTransacao,
+  configDemonstracao,
   criarProcessos,
   envelopeParaHttp,
+  ferramentasDoMotor,
   FornecedorDemonstracao,
   ligacaoDosProcedimentos,
+  type BaseExtensao,
   type ContextoExec,
+  type DefinicaoFerramenta,
   type Processos,
 } from '@heild/processos'
 import { extensaoIntegrantes, procedimentosDosIntegrantes } from '@heild/integrantes'
@@ -79,3 +83,16 @@ export const contextoDaSessao = (escritorio_id: string, ctx: { ator: ContextoExe
 })
 
 export { envelopeParaHttp }
+
+/**
+ * As ferramentas do motor (B2) e do Assistente (B3) servidas pela rota `/v1/ferramentas/{nome}`,
+ * só as DEFINIÇÕES (nome, versão, esquema, descrição, exposição), sem banco: o mesmo código do
+ * registro, com as dependências de execução vazias (nada aqui executa). É o que entra no
+ * OpenAPI, no esquema das ferramentas (formato do `tools/list` do MCP) e no retrato dos contratos.
+ */
+export function definicoesDoMotor(): DefinicaoFerramenta[] {
+  const vazio = null as never
+  const base = { sql: vazio, boss: vazio, eventos: vazio, motor: vazio, registro: vazio, fornecedor: new FornecedorDemonstracao(), modelos: configDemonstracao, modo: 'api' } as unknown as BaseExtensao
+  const extensao = extensaoIntegrantes()
+  return [...ferramentasDoMotor(vazio, vazio, vazio), ...(extensao.ferramentas?.(base) ?? [])]
+}
