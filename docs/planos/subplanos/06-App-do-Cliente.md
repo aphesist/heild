@@ -689,3 +689,9 @@ Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S10) e `entregas/S10.md
 ### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
 
 - **App do cliente como webapp no piloto, com as lojas depois:** comunicada pela coordenação do wireframe em 15/11/2026 como decisão do Enzo; **ainda sem registro em documento de branch** (a confirmar no próximo documento que tratar do tema). O catálogo de APIs já prevê o push web (PWA, VAPID), que no iOS só funciona com o app instalado na tela ([`../apis/CATALOGO_CONTABIL.md`](../apis/CATALOGO_CONTABIL.md)).
+
+---
+
+## Adendo: envio ao cliente configurável por categoria (15/11/2026)
+
+Esclarecimento do Enzo de 15/11/2026, transmitido pela coordenação. As "categorias liberadas" de 7.2 seguem o modo que o escritório escolhe por categoria: aprovação no cartão (padrão), envio automático da mensagem padronizada ou desligado. A mensagem chega ao cliente no mesmo fio, no app ou no WhatsApp. Desenho no [subplano 02](02-Time-de-Agentes.md), adendo "Envio ao cliente: configurável por categoria".

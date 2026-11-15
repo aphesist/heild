@@ -925,3 +925,7 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação. Nas palavras del
 - **Aprovar um cartão executa a ação guardada** (Fundações 6.4): o clique em aprovar faz a transferência, o envio ou o que o cartão descreve; o irreversível pede uma confirmação antes.
 
 Respostas do Enzo de 15/11/2026 (mais tarde), que revêem a P2 de A.9 na parte da triagem pelo integrante: a P1 (quem passa pelo menu) continua valendo só para o chatbot.
+
+### A.11 Envio ao cliente configurável por categoria (15/11/2026)
+
+Esclarecimento do Enzo de 15/11/2026, transmitido pela coordenação. As "categorias liberadas" de 8.1, 8.3 e GES-062 passam a ter três modos, por categoria: **aprovação no cartão** (padrão; aprovar envia pelo CRM, na conversa), **envio automático** da mensagem padronizada, ou **desligado**. A triagem conversando (A.10) segue sem aprovação; o que não é padronizado segue sempre com aprovação (proposta). Desenho no [subplano 02](02-Time-de-Agentes.md), adendo "Envio ao cliente: configurável por categoria".
