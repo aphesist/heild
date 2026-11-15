@@ -6,7 +6,7 @@
 
 - **Base e branch.** Cada sessão parte do branch `wireframe` e trabalha no seu: `wf-s01-inicio`, `wf-s02-painel-a`, `wf-s03-painel-b`, `wf-s04-painel-c`, `wf-s05-crm-interna`, `wf-s06-timesheet`, `wf-s07-financeiro`, `wf-s08-bpo`, `wf-s09-arquivos-config`, `wf-s10-app-cliente`, `wf-s11-juridico`. A coordenação integra no `wireframe`.
 - **Antes de começar:** ler `CLAUDE.md`, `app/README.md`, a seção da sessão no `MAPA_DE_TELAS.md` (com as seções 0 e 1 do mapa) e a seção da sessão aqui.
-- **Commits** em português, pequenos, em nome do dono e sem co-autoria nem menção a agente ou modelo: `git -c user.name=sundenlast -c user.email=126630868+sundenlast@users.noreply.github.com commit ...`.
+- **Commits** em português, pequenos, em nome do dono e sem co-autoria nem menção a agente ou modelo: `git -c user.name=aphesist -c user.email=126630868+aphesist@users.noreply.github.com commit ...`.
 - **Design system:** tokens do tema (`src/theme/`), camadas nomeadas, sombras nomeadas, `<heild-logo>`; nenhuma cor solta; claro e escuro com o mesmo cuidado; nada inventado (sem clientes reais, números de uso ou depoimentos). Mudança de marca não é feita aqui.
 - **Antes de cada push:** `cd app && npm run typecheck` sem erro e o app abrindo (`npm run app`). Teste novo de ponta a ponta vai em arquivo novo `app/scripts/sNN-<assunto>.cjs`; não editar os scripts existentes.
 - **Simulação:** IA e APIs só simuladas (mapa, seção 1.6 e 1.7). Estado novo guardado com `usePersistente` e chave com o prefixo da sessão (`s05:interna:conversas`), sem alterar o redutor da loja.
