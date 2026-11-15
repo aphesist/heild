@@ -115,7 +115,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
       etapas: ['Achando o contato que recebe o assunto', 'Conferindo o hash do arquivo', 'Montando a mensagem'],
       seg: 0.8,
       texto: `Preparei o envio de ${d.nome} ao contato do assunto. Aprove para eu mandar.`,
-      cartao: { acao: { tipo: 'documento.enviar_cliente', docId: d.doc?.id ?? d.id, nome: d.nome, cliente: ctx.cliente, setor: ctx.setor }, resumo: `Enviar ${d.nome} ao cliente`, argumentos: [['Arquivo', d.nome], ['Hash', d.hash]] },
+      cartao: { acao: { tipo: 'documento.enviar_cliente', docId: d.doc?.id ?? d.id, nome: d.nome, cliente: ctx.cliente, setor: ctx.setor, canal: 'app' }, resumo: `Enviar ${d.nome} ao cliente`, argumentos: [['Arquivo', d.nome], { rotulo: 'Canal', valor: rotuloCanal.app, campo: 'canal', bruto: 'app', editavel: { tipo: 'escolha', opcoes: Object.entries(rotuloCanal).map(([valor, rotulo]) => ({ valor, rotulo })), outra: false } }, ['Hash', d.hash]] },
     })
   const forcar = (d: Linha) => {
     if (!d.doc) return
@@ -333,11 +333,15 @@ function GavetaOrigem({ d, onFechar }: { d: Linha; onFechar: () => void }) {
 }
 
 /** S02-A07: aprovado o envio, fica no registro de entrega (o contato do assunto recebe). */
+/** Por onde o documento chega ao cliente; o cartão deixa trocar antes de aprovar. */
+const rotuloCanal = { app: 'App do cliente', whatsapp: 'WhatsApp', email: 'E-mail' }
+
 registrarExecutor('documento.enviar_cliente', (acao, { loja, quem }) => {
   const docId = String(acao.docId)
   const nome = String(acao.nome)
   const doc = loja.documentos.find((d) => d.id === docId)
   if (doc) loja.ajustarDocumento(docId, { entregas: [...(doc.entregas ?? []), { quem: String(acao.cliente ?? 'cliente'), acao: 'enviado', quando: new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }] })
-  loja.registrar(quem, `Aprovou o envio de ${nome} a ${String(acao.cliente ?? 'cliente')}`)
-  loja.toast(`${nome} enviado ao cliente. O registro de entrega acompanha quando abrir.`)
+  const canal = rotuloCanal[String(acao.canal ?? 'app') as keyof typeof rotuloCanal] ?? rotuloCanal.app
+  loja.registrar(quem, `Aprovou o envio de ${nome} a ${String(acao.cliente ?? 'cliente')} (${canal})`)
+  loja.toast(`${nome} enviado ao cliente (${canal}). O registro de entrega acompanha quando abrir.`)
 })

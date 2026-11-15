@@ -6,6 +6,7 @@ import { useSessao } from '@/ambiente/sessao'
 import { EstadoErro, SeloDemonstracao, useConfirmar } from '@/components/kit'
 import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor } from '@/components/ui/formulario'
 import { ddmm, HOJE_DEMO, itensDeObrigacao } from '@/dados/obrigacoes-setor'
+import { textoDoValor } from '@/components/kit/valor-editavel'
 import { banco } from '@/nucleo/banco'
 import type { Cliente, EstadoCiclo, Regime, VersaoPerfil } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
@@ -173,7 +174,7 @@ export function GavetaVersionar({ cliente, inicial, motivoInicial, onFechar }: {
           etapas: ['Conferindo a mudança com o cadastro', 'Simulando o efeito no calendário de obrigações'],
           seg: 0.9,
           texto: `Preparei a versão nova do perfil de ${cliente.nome} a partir de ${ddmm(vigencia)}: ${diff.map(([c, a, b]) => `${c} ${a} → ${b}`).join('; ')}. Aprovado, eu regero as obrigações futuras não iniciadas.`,
-          cartao: { acao: { tipo: 'cliente.versionar_perfil', clienteId: cliente.id, regime, uf, cnaes: novos, vigencia, motivo }, resumo: 'Versionar o perfil', argumentos: [...diff.map(([c, a, b]) => [c, `${a} → ${b}`] as [string, string]), ['Vigente de', ddmm(vigencia)], ['Motivo', motivo]] },
+          cartao: { acao: { tipo: 'cliente.versionar_perfil', clienteId: cliente.id, regime, uf, cnaes: novos, vigencia, motivo }, resumo: 'Versionar o perfil', argumentos: [...diff.map(([c, a, b]) => [c, `${a} → ${b}`] as [string, string]), { rotulo: 'Vigente de', valor: textoDoValor({ tipo: 'data' }, vigencia), campo: 'vigencia', bruto: vigencia, editavel: { tipo: 'data' } }, { rotulo: 'Motivo', valor: motivo, campo: 'motivo', bruto: motivo, editavel: { tipo: 'texto', validar: (t: string) => (t.trim().length < 3 ? 'Diga o motivo em poucas palavras' : null) } }] },
         })
         onFechar()
       }}

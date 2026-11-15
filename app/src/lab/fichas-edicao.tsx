@@ -1,6 +1,7 @@
 import { BabyIcon, BuildingsIcon, CakeIcon, FishIcon, ForkKnifeIcon, LeafIcon, PawPrintIcon, PizzaIcon, TreeIcon, WhatsappLogoIcon, EnvelopeSimpleIcon, DeviceMobileIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { Caixa } from '@/components/compostos/blocos'
+import { CartaoAprovacao } from '@/components/compostos/cartoes-chat'
 import { CampoComSuposicoes, FaixaSuposicoes, RascunhoComLacunas, ResumoSuposicoes, ValorEditavel, type ConfigValor, type LinhaSuposicao, type ParteRascunho, type QualquerValor } from '@/components/kit'
 import * as exemplo from '@/dados/exemplo'
 import { suporDoTexto, type CampoSuposicao, type Suposicao } from '@/lib/suposicoes'
@@ -149,12 +150,21 @@ function FichaLacunas({ p }: { p: ParamsLab }) {
         <RascunhoComLacunas partes={partes} valores={valores} onPreencher={(id, v) => setValores((x) => ({ ...x, [id]: v }))} onContinuar={() => {}} />
       </Caixa>
       <Caixa>
-        <p className="text-muted-foreground text-xs">Cartão de aprovação com argumentos editáveis</p>
-        <p className="text-sm leading-7">
-          Enviar para <ValorEditavel rotulo="Cliente" valor="c2" config={{ tipo: 'entidade', opcoes: exemplo.clientes.map((c) => ({ valor: c.id, rotulo: c.nome, detalhe: c.documento, icone: BuildingsIcon })) }} onMudar={() => {}} /> por{' '}
-          <ValorEditavel rotulo="Canal" valor="whatsapp" config={{ tipo: 'escolha', opcoes: [{ valor: 'whatsapp', rotulo: 'WhatsApp', icone: WhatsappLogoIcon }, { valor: 'email', rotulo: 'e-mail', icone: EnvelopeSimpleIcon }, { valor: 'app', rotulo: 'app do cliente', icone: DeviceMobileIcon }], outra: false }} onMudar={() => {}} /> a{' '}
-          <ValorEditavel rotulo="Documento" valor="das" config={{ tipo: 'escolha', opcoes: [{ valor: 'das', rotulo: 'DAS 10/2026' }, { valor: 'holerites', rotulo: 'holerites 10/2026' }], outra: false }} onMudar={() => {}} />.
-        </p>
+        <p className="text-muted-foreground text-xs">Cartão de aprovação: o argumento sublinhado se corrige ali mesmo e muda a assinatura</p>
+        <CartaoAprovacao
+          cartao={{
+            tipo: 'aprovacao',
+            id: 'lab-aprovacao-edicao',
+            resumo: 'Enviar DAS 10/2026 ao cliente',
+            expiraEm: 'expira em 1 dia',
+            argumentos: [
+              { rotulo: 'Cliente', valor: exemplo.clientes[1]?.nome ?? 'Cliente', campo: 'cliente', bruto: exemplo.clientes[1]?.id, editavel: { tipo: 'entidade', buscar: 'Buscar cliente ou CNPJ', opcoes: exemplo.clientes.map((c) => ({ valor: c.id, rotulo: c.nome, detalhe: c.documento, icone: BuildingsIcon })), outra: false } },
+              { rotulo: 'Canal', valor: 'WhatsApp', campo: 'canal', bruto: 'whatsapp', editavel: { tipo: 'escolha', opcoes: [{ valor: 'whatsapp', rotulo: 'WhatsApp', icone: WhatsappLogoIcon }, { valor: 'email', rotulo: 'E-mail', icone: EnvelopeSimpleIcon }, { valor: 'app', rotulo: 'App do cliente', icone: DeviceMobileIcon }], outra: false } },
+              { rotulo: 'Vencimento', valor: '20/11/2026', campo: 'vencimento', bruto: '2026-11-20', editavel: { tipo: 'data' } },
+              { rotulo: 'Hash', valor: 'a91f3c2' },
+            ],
+          }}
+        />
       </Caixa>
     </div>
   )

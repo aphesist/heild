@@ -226,7 +226,7 @@ export function AcoesAba({ itens, carteira }: { itens: AcaoCfg[]; carteira?: num
         etapas: ctx.cliente ? ['Lendo o cadastro e a competência', `Preparando: ${a.rotulo.toLowerCase()}`] : [`Separando os ${clientes.length} clientes`, `Preparando um item por cliente: ${a.rotulo.toLowerCase()}`, 'Montando o lote para aprovar'],
         seg: 0.9,
         texto: ctx.cliente ? `Preparei “${a.rotulo}” para ${alvo}. Confere e aprova para eu executar.` : `Preparei “${a.rotulo}” em lote: ${clientes.length} clientes, um item por cliente. Dá para aprovar o lote todo de uma vez.`,
-        cartao: { acao: { tipo: 'acao.aba', rotulo: a.rotulo, clientes, setor: ctx.setor }, resumo: ctx.cliente ? a.rotulo : `${a.rotulo} · lote de ${clientes.length} clientes`, argumentos: [['Nível', a.nivel], ...(ctx.cliente ? [] : ([['Clientes', clientes.join(', ')]] as [string, string][]))] },
+        cartao: { acao: { tipo: 'acao.aba', rotulo: a.rotulo, clientes, setor: ctx.setor }, resumo: ctx.cliente ? a.rotulo : `${a.rotulo} · lote de ${clientes.length} clientes`, argumentos: [['Nível', a.nivel], ...(ctx.cliente ? [] : [{ rotulo: 'Clientes', valor: clientes.join(', '), campo: 'clientes', bruto: clientes, editavel: { tipo: 'multipla' as const, opcoes: clientes.map((c) => ({ valor: c, rotulo: c })), outra: false } }])] },
       })
       return
     }
