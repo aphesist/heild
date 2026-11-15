@@ -734,3 +734,17 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | --- | --- | --- | --- |
 | C2-23 Certificação digital como serviço | Depois | SOC-201 e GES-205 da fase 5 para a 3; 03, 6.1 (Certificados); 09 (faturamento) | Societário e Financeiro do escritório |
 | C2-25 Comanda digital de serviço extra | Agora | 03, 7.2 (detalhe da tarefa: marcar extra); 05 (horas do extra); 09 (fatura, fase 3) | Do setor |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S07) e `app/supabase/migrations/20261114180000_s07_financeiro.sql`, propostas.
+
+- **Alçada em três degraus (novo; completa 6.1).** A política financeira do wireframe tem `limite_gestor` (R$ 5 mil) e `limite_dois_aprovadores` (R$ 10 mil): acima do segundo, a conta só é agendada com a aprovação de um segundo sócio ("1 de 2"). Recomendação: aceitar como parâmetro da política, editável pelo Administrador.
+- **Regras.** Reajuste em dois cartões (cartas com aditivo "comunicado"; depois a aplicação na data-base); comanda de serviço extra (C2-25) vira serviço avulso com proposta ao cliente por cartão, e sem aceite não fatura; certificado como serviço (C2-23) é item de avulsos, fase 3; ausências e "não era esta" não mexem em fatura, só no custo-hora; vencimento do contrato entre os dias 1 e 28; encerrar contrato é da trilha de saída.
+- **Modelo (diferenças de 3.1).** "Plano de contas gerencial" virou `categoria_gerencial`; Orçamento, Regra de remuneração e Apuração ainda não existem; entra `cenario_caixa`; a conta a pagar guarda `fornecedor` como texto (o plano pede `fornecedor_id`, Pessoa `terceiro`); `conta_bancaria`, `lancamento` e `conta_pagar` já têm `titular_tipo` e `titular_cliente_id`, como pede o 10, 3.12; nunca apagar em 17 das 20 tabelas.

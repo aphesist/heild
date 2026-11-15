@@ -2,15 +2,18 @@
 
 **Centralizados aqui em 15/11/2026.** Esta pasta é a fonte da verdade dos planos do produto, que antes ficavam no repositório de trabalho `DGM-RAG-Contabil` (agora só histórico). As pesquisas estão em [`../pesquisa/`](../pesquisa/).
 
-Acréscimos de 14 e 15/11/2026, além do índice herdado abaixo:
+Acréscimos de 14 e 15/11/2026, além do índice herdado abaixo. **Toda mudança de plano entra com adendo datado no documento afetado e uma linha em [ATUALIZACOES.md](ATUALIZACOES.md)** (regra do `CLAUDE.md`).
 
 | Documento | O que é |
 | --- | --- |
+| [ATUALIZACOES.md](ATUALIZACOES.md) | **Registro das mudanças de plano** (data, fonte, o que mudou, documentos atualizados) e as divergências que precisam do Enzo. A consolidação de 15/11/2026 trouxe para cá o que estava espalhado nos branches (integrantes, backend, APIs, reasoning engine, protótipo, site, design system e wireframe), com adendo datado em cada plano afetado |
+| [raciocinio/](raciocinio/README.md) | **O raciocínio do Consultor (reasoning engine):** quatro camadas, base no tempo, cascata de nove etapas, confiança e abstenção, base municipal com cobertura C0 a C4, melhoria pelo laço inspirado na DGM; resumo dos planos e da apresentação de 9/11/2026 |
+| [apis/](apis/README.md) | **Plano de APIs do pacote Contábil** (vindo do branch `wf-backend-apis`): catálogo das 60 APIs externas com preço e risco, API interna por setor para o frontend e os agentes, ordem de implementação com custos, e as perguntas Q1 a Q10 (pendentes) |
 | [backend/](backend/) | Desenho do backend real: stack (TypeScript no Node 24 com Fastify; Python só em workers de documento), hospedagem (AWS São Paulo com Fargate; Supabase em São Paulo), acesso agêntico por setor, arquitetura e migração do wireframe, perguntas respondidas |
 | [integrantes/](integrantes/) | Pesquisa de orquestração dos integrantes (Grok Bot, Openbot, agentes.chat), avaliação contra o contraprova, modelo de custo e as decisões do Enzo (integrante compartilhado por setor, procedimento por processo, Sonnet como padrão de operário, piloto automatizado com margem de 3 pontos) |
 | [Plano_Base_Legislacao_Municipal.md](Plano_Base_Legislacao_Municipal.md) | Base legal municipal e estadual, blocos e pacotes de base legal, revisão pela IA (v0.4, 9/11/2026) |
 | [Plano_Redes_Sociais.md](Plano_Redes_Sociais.md) | Plano das redes sociais da Heild |
-| Wireframe interativo | O mapa de telas, a divisão das sessões, as decisões e as entregas ficam no branch [`wireframe`](../../../../tree/wireframe/docs/wireframe), junto do código |
+| Wireframe interativo | O mapa de telas, a divisão das sessões, as decisões e as entregas ficam no branch [`wireframe`](../../../../tree/wireframe/docs/wireframe), junto do código. As decisões que mudam o produto (até 15/11/2026, inclusive as sessões S08a a S08d) estão nos adendos de 15/11/2026 dos planos; o modelo de dados real está no adendo do subplano 01 |
 
 ---
 

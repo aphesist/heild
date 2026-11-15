@@ -1431,3 +1431,21 @@ Cota de IA ponderada pelo modelo e franquia por documentos (JU-04, 7). A calcula
 ## Adendo: comunicação interna (14/11/2026)
 
 A comunicação interna ([subplano 11](subplanos/11-Comunicacao-Interna.md)) entra na plataforma, sem preço próprio. Premissa de custo: R$ 0,20 a R$ 1,00 por usuário por mês **[a medir]**, dentro da linha do Painel; ainda **não** está em `parametros.json` nem na calculadora (entra quando houver medição ou se o Enzo pedir).
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Integrantes, backend e APIs (15/11/2026)
+
+- **Quem paga o integrante (decisão 5 do Enzo, [`integrantes/DECISOES.md`](integrantes/DECISOES.md)).** O custo de modelo do integrante compartilhado sai, por padrão, da **bolsa do setor**; como opção, a execução é roteada a uma pessoa do setor, que pode pagar pelo plano dela. Isso **diverge** da regra deste estudo de que o consumo de um integrante é debitado do usuário dono dele (6.1 e 6.8) e faz da bolsa compartilhada, hoje opcional (6.8), , o caminho padrão para o trabalho proativo. O preço da bolsa por setor não foi feito: ver D3 em [`ATUALIZACOES.md`](ATUALIZACOES.md).
+- **Custo de IA por tarefa sobe (decisão 3).** Com Sonnet como operário no lugar do modelo barato, as linhas de evento e job que supunham modelo barato (3.2 e 3.3) ficam subestimadas. Refazer depois do piloto com [`integrantes/modelo_de_custo.py`](integrantes/modelo_de_custo.py).
+- **API dos conectores ([`apis/CATALOGO_CONTABIL.md`](apis/CATALOGO_CONTABIL.md) e [`apis/ORDEM_DE_IMPLEMENTACAO.md`](apis/ORDEM_DE_IMPLEMENTACAO.md), branch `wf-backend-apis`).** O custo provável de API pago pela plataforma ficou em R$ 3,00 por cliente com 10 escritórios, R$ 1,88 com 100 e R$ 1,29 com 1.000, contra os R$ 3,62 por cliente deste estudo (3.10). A queda vem do modelo A do SERPRO (Q2, pendente): sem ele, vale a conta deste estudo. O SERPRO também cobra as respostas 403, o que justifica a regra de conferir a procuração antes de consultar (Q3).
+- **WhatsApp:** o repasse a custo continua (Q5 recomenda manter, sem margem, com aviso a 80% de um teto definido pelo escritório). Tarifas desde 01/10/2026: serviço R$ 0,035 depois de 1.000 grátis por número; utilidade cobrada também dentro da janela de 24 h.
+- **Infraestrutura do backend ([`backend/HOSPEDAGEM.md`](backend/HOSPEDAGEM.md)).** AWS sa-east-1 com Supabase em São Paulo: ~US$ 200 por mês no piloto. A KMS por escritório (US$ 1 por mês) segue dentro dos R$ 8 já contados.
+
+### Wireframe: tela Assinatura (14/11/2026)
+
+A tela Assinatura do wireframe (branch `wireframe`, `docs/wireframe/DECISOES.md`, S09) mostra o App do cliente incluído e dois complementos pagos, marca branca e app na loja (exige marca branca), o que confere com a v0.9. O valor da marca branca na tela (R$ 290 por mês) é de demonstração e diverge dos R$ 150 deste estudo: vale o estudo, e o wireframe deve ler `parametros.json`. Sem o complemento, o escritório monta e vê o rascunho do tema, mas não publica, não usa domínio nem remetente próprios.

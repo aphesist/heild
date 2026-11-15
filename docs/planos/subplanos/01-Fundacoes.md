@@ -1058,7 +1058,7 @@ F1 e F2 são pré-requisito de tudo. F3 a F6 e F7 a F9 avançam em paralelo depo
 | P11 | Quem aprova quando o dono do integrante não tem o nível? | **Respondido:** Gestor do setor, Administrador sempre; e o integrante faz sozinho tudo o que o mapa marca como "agente faz sozinho" no setor, sem pedir (3.3). |
 | P12 | Segundo fator obrigatório para quem? | **Respondido (segue a hipótese):** Administrador; opcional para os demais (2.5). |
 | P13 | Token do MCP interno pode ser "do escritório"? | **Respondido (segue a hipótese):** Não; sempre ligado a um usuário, com escopo igual ou menor (6.3). |
-| P14 | Memória do escritório por setor: o Administrador revisa antes ou depois de valer? | **Respondido (segue a hipótese):** Depois; vale ao escrever, com `revisado_por_admin_em` (9). |
+| P14 | Memória do escritório por setor: o Administrador revisa antes ou depois de valer? | **Respondido (segue a hipótese):** Depois; vale ao escrever, com `revisado_por_admin_em` (9). **Revista em 15/11/2026** pela decisão 6 do Enzo: só muda por proposta aprovada. |
 | P15 | Mesmo arquivo (NF-e entre dois clientes do escritório)? | **Respondido (segue a hipótese; caso raro, sem prioridade):** Um registro de bytes, dois Documentos no índice (4.11, 7.6). |
 | P16 | Responsável por setor é versionado com o perfil ou tabela própria? | **Respondido:** padrão é um responsável geral por setor (pode ser a mesma conta em vários); responsável por cliente é opcional, para escritórios grandes, e fica no perfil versionado quando usado. No perfil versionado (4.2); separar se mudar muito. |
 
@@ -1317,3 +1317,38 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | C2-07 Nome de quem atende nas mensagens | Agora | 04 (Conversas; tema H4); 01 (mensagem) | Gestão e Atendimento |
 | C2-08 E-mail enviado vira registro sozinho | Agora | 08 (conector de e-mail, pasta de enviados); 04; 01, 7 (pasta do cliente) (ampliado: lê tudo, entrada e enviados, com anexos) | Gestão e Atendimento |
 | C2-26 Perfil de apoio (recepção) | Agora | Fundações 3.4 e 3.5 (exceção); 03, 9.3 | Geral |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Backend real: stack decidido (15/11/2026)
+
+Fonte: [`../backend/`](../backend/) (branch `wf-backend-stack`, `docs/backend/`), decisões P1 a P10 aceitas pelo Enzo em 15/11/2026 ([`../backend/PERGUNTAS.md`](../backend/PERGUNTAS.md)). Este subplano dizia ser "anterior à escolha de stack"; a escolha agora existe:
+
+- **Linguagem e serviços:** TypeScript no Node 24 com Fastify para a API, o servidor MCP e os workers; Python só em workers de documento; Rust só para um ponto quente medido (P1).
+- **Banco e hospedagem:** Supabase Postgres em São Paulo (sa-east-1), plano Pro no piloto, com RLS, pgvector e Auth com MFA; API e workers na AWS sa-east-1 com ECS Fargate desde o piloto (P2, P3). Projetos novos `heild-homologacao` e `heild-producao` em São Paulo; o projeto atual do wireframe (us-east-1) fica para a demonstração e o site (P4).
+- **Escrita só pela API (P5; completa 3 e 11).** Em produção, a Data API (PostgREST) fica fechada e o navegador fala só com a API, que roda a mesma função `autorizar` da tela. Hoje, no wireframe, a RLS só separa escritórios.
+- **Registro de leituras (P6; completa a resposta de P6 deste subplano).** As leituras vão numa tabela própria, seladas por lote, 90 dias no banco e depois em arquivo frio no S3; a cadeia de hash das escritas continua síncrona por escritório.
+- **Chave por escritório (P7; confirma 7 e o 08, 2.2).** Uma chave KMS por escritório, a rever com ~300 escritórios. O A3 não roda no servidor; o que exige A3 vai por certificado em nuvem com a pessoa autorizando (P8).
+- **Motor de procedimentos (completa 4 e 6).** Entidades novas `procedimento`, `execucao` (com `responsavel_id` e `pagador`), `passo_execucao` e `chamada_modelo`, filas no próprio Postgres (pg-boss) e o runner de operários ([`../backend/AGENTICO.md`](../backend/AGENTICO.md), 4).
+- **Ordem de construção (completa 12).** F0 a F4 e F7 levam o piloto (2 escritórios, 20 contas) a ~37 semanas-pessoa, ~4,5 meses com 2 pessoas; o sistema inteiro, ~53 sp, ~6,5 meses ([`../backend/ARQUITETURA.md`](../backend/ARQUITETURA.md), 7). Com o Integra Contador no piloto, ~40 sp, ~5 meses ([`../apis/PERGUNTAS.md`](../apis/PERGUNTAS.md), Q1, pendente).
+
+### Integrantes: memória do setor (15/11/2026)
+
+A resposta de **P14** ("vale ao escrever, com `revisado_por_admin_em`") foi **revista** pela decisão 6 do Enzo ([`../integrantes/DECISOES.md`](../integrantes/DECISOES.md)): a memória do escritório por setor só muda por proposta aprovada (`memoria.propor`, cartão para Gestor ou Administrador). O registro antigo fica como histórico.
+
+### Modelo de dados real do wireframe (14/11/2026)
+
+Fontes: branch `wireframe`, `app/supabase/migrations/` (`20261114120000_fundacoes.sql`, `20261114180000_s06_timesheet.sql`, `_s07_financeiro.sql`, `_s08_bpo.sql`), `app/supabase/README.md`, `app/src/theme/TEMAS-ESCRITORIOS.md` e branch `wireframe`, `docs/wireframe/DECISOES.md`.
+
+- **76 tabelas** (30 das Fundações, 11 do Timesheet, 20 do Financeiro, 15 do BPO). Colunas comuns `escritorio_id`, `id`, `criado_em`, `atualizado_em`, `arquivado_em`, `ordem` e `extras`; chave `(escritorio_id, id)`; **sem chaves estrangeiras** (só índices); RLS forçada só por escritório (setor, papel, carteira e nível ficam na função `autorizar`); gatilhos de só inserção em `evento` e `registro_entrega` e de nunca apagar em `mensagem_interna` e no dinheiro. Só a migração das Fundações estava aplicada (projeto us-east-1); as do Timesheet, do Financeiro e do BPO constavam como "não aplicadas" nas entregas.
+- **Onde diverge deste subplano:** `assinatura` mantém `dono_tipo = subinquilino` (o adendo 23 o eliminou) e não tem `pacotes_area`; `setor` sem `pacote_area`; `cliente` com `regime` e `servicos_contratados` na raiz e o ciclo do BPO em `extras` (o adendo 23 pede estado por serviço); `tarefa` sem `bola`, `visibilidade`, `bloqueada_por`, `recorrencia_id` e `criterio_conclusao`; `notificacao` com uma linha para vários destinatários (aqui, uma por destinatário); `evento` sem as colunas de cadeia de hash, custo e correlação (já pedidas no [STACK](../backend/STACK.md), 3.3); `integrante` com `usuario_dono_id` (o modelo por pessoa, revisto pela decisão 1 de 15/11/2026). Tabelas a mais: `registro_tela` (chave e valor por tela) e `nota_emitida`.
+- **Entidades deste subplano que ainda vivem em `registro_tela`, sem tabela:** grupo econômico, conta de cliente, credencial e certificado, procuração, conector, conexão e execução, job agendado, memória, gatilho, preferência de notificação, configuração local; e as pedidas pelos subplanos 03 e 06 (processo de legalização, licença, comunicação oficial, contrato de prestação, admissão, rescisão, CCT, processo recorrente, molde de trilha, dispositivo e link para terceiro). Cada uma vira tabela, com migração nova, na fase do backend que a usa (F1 grupo econômico e conta de cliente; F3 job, memória e gatilho; F4 conector e credencial; F5 leitura interna; F6 DP e Gestão).
+- **Comunicação interna (novo neste subplano; pedido do 11, 8.1).** `conversa_interna` (tipo pessoal, grupo, canal_setor, canal_geral; nome, setor, criada_por), `participacao` (entrou_em, saiu_em) e `mensagem_interna` (autor, corpo, responde_a, fixada, editada_em, versões), com gatilho que recusa apagar. Pedidos: colunas próprias para menções, citações, anexos, áudio, autor integrante e tarefa criada (hoje em `extras`); tabela de leitura (`lido_ate` por pessoa e conversa); versões numa tabela só de inserção no servidor.
+- **Tema (completa 10).** Além de `logo_completa_ref` (tema de fábrica, adendo do Desenho), as versões para fundo escuro `logotipo_ref_escuro` e `logo_completa_ref_escuro`; sem a escura, vale a clara. Os temas Condesp e Requinte (marcas reais) são só do wireframe.
+- **Obrigação com `regra_multa`** (JSON com tipo, base, mínimo e referência a `calculo.multa_juros`), para o calendário mostrar a multa ao arrastar o prazo; sem regra, "multa não calculada".
+- **Papéis do cliente (proposta, S02).** `leitura` entra em `papel_cliente`; "sem acesso" é a linha fechada (`vigente_ate`); "aprovador" é o rótulo de tela de `socio` na linha `bpo_financeiro`.
+- **Entrada e convite (proposta, S09).** Recuperar senha por código de 6 números (30 min), senha de 8 caracteres com um número, outras sessões caem; convite com termo da equipe (mensagens internas não se apagam, tempo por cliente, integrantes agem em nome da pessoa, LGPD); Recepção, Supervisão e Direção como modelos de convite.

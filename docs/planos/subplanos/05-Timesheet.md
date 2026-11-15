@@ -323,6 +323,8 @@ Em todo gráfico de horas o integrante é **série separada**, cor própria do t
 
 ### 8.1 Esqueleto
 
+> **Revisto em 15/11/2026:** a ordem das abas passou a ser Meu tempo · Confirmações · Equipe · Rentabilidade (wireframe, 14/11/2026, decisão delegada pelo Enzo). Ver o adendo "consolidação dos planos" no fim deste documento.
+
 Item lateral **Timesheet** (Painel 2.0), abas internas **Meu tempo · Equipe · Rentabilidade · Confirmações**. Colaborador vê Meu tempo e Confirmações; Gestor vê as quatro, para os setores que gere; Administrador vê tudo. O cliente selecionado filtra as quatro abas; "Todos" mostra a carteira.
 
 **Filtros comuns** (Equipe e Rentabilidade): setor, cliente ou grupo, atividade (subárea e ID), pessoa ou integrante, período (dia, semana, mês, competência, intervalo), confiança, origem. Persistem por aba (`usuario.preferencias.filtros_por_aba`).
@@ -674,3 +676,24 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | Item | Quando | Onde entra | Integrante |
 | --- | --- | --- | --- |
 | C2-25 Comanda digital de serviço extra | Agora | 03, 7.2 (detalhe da tarefa: marcar extra); 05 (horas do extra); 09 (fatura, fase 3) | Do setor |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (Coordenação e S06) e `app/supabase/migrations/20261114180000_s06_timesheet.sql`.
+
+- **Ordem das abas [Enzo delegou] (substitui 8.1):** Meu tempo · **Confirmações** · Equipe · Rentabilidade. O contador de Confirmações conta os itens pendentes da pessoa.
+- **Quem vê o custo-hora (proposta, diverge de 8.4).** No wireframe, o **valor** do custo-hora só o Administrador vê e edita; o Gestor com Gestão ou Financeiro vê horas, custo total e margem, com a nota "custo-hora definido pelo Administrador". Recomendação: aceitar (o valor por hora revela a folha).
+- **Competência corrente e deficitário (proposta).** A competência fechada lê o fechamento; a corrente, as sessões até hoje, com honorário proporcional aos dias úteis. O wireframe marca deficitário quando a margem é negativa no mês **e** em pelo menos um dos dois anteriores, mais estrito que "2 dos últimos 3" (8.4). Recomendação: a do wireframe, que não acusa quem já melhorou.
+- **Regras de sessão (proposta).** Intervalo de almoço na configuração do módulo (padrão 12:00 a 13:00), fora do "sem classificação"; só a pessoa confirma, corrige, divide e contesta o próprio tempo; quem contestou não decide a própria contestação; o Gestor não altera o tempo de ninguém; sessão sem tarefa no Painel nasce com a atividade em branco para a pessoa classificar (diverge do 01, 5.4, regra 1, que usa a atividade padrão da ferramenta).
+- **Modelo (completa 12.2).** Onze tabelas: `sessao_trabalho`, `item_confirmacao`, `ausencia`, `custo_hora`, `vinculo_extensao`, `pulso_portal`, `portal_extensao`, `conector_core`, `equivalencia_core`, `duracao_padrao` e `fechamento_timesheet` (foto mensal por cliente). Nada se apaga: confirmar, corrigir e dividir criam sessão nova, e a anterior recebe `substituida_por`.
+
+### Linha do dia e integrante compartilhado (10 e 15/11/2026)
+
+- **Linha do dia (completa 7.3).** A escala da linha do dia cobre as sessões humanas **e** o trabalho dos integrantes no período e no filtro escolhidos: com filtro de cliente, o trabalho do agente pode estar fora das sessões visíveis e mesmo assim aparece. O agente fica numa faixa à parte, com a dica "agente · hora · o que fez · minutos de máquina", e nunca soma com as horas humanas. Fonte: branch `prototipo`, `app/src/telas/timesheet/graficos.tsx` (commit "Timesheet: a linha do dia cobre também o trabalho dos integrantes", 10/11/2026).
+- **"Os seus integrantes" (aberto).** Com o integrante compartilhado por setor ([`../integrantes/DECISOES.md`](../integrantes/DECISOES.md), decisões 1 e 5), a sessão de integrante deixa de ter um `usuario_dono_id` natural (7.1) e "o tempo de máquina dos seus integrantes" do Meu tempo (7.3) fica sem definição. A execução do backend já grava `responsavel_id` e `pagador` ([`../backend/AGENTICO.md`](../backend/AGENTICO.md), 4.6). Proposta, a confirmar com o Enzo: Meu tempo mostra as execuções que a pessoa pediu, aprovou ou de que é responsável; Equipe mostra as do setor, inclusive as de gatilho e de job; o custo em Rentabilidade sai do pagador.

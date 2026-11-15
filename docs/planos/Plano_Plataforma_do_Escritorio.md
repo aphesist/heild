@@ -612,3 +612,20 @@ O [cruzamento](Cruzamento_Painel_do_Leandro.md) e a [lista de decisão](Lista_de
 - **Comunicação interna** (pedido do Enzo): conversas pessoais, grupos, canal de cada setor e canal geral, quase como um Microsoft Teams, **sem possibilidade de excluir mensagens** (editar guarda o histórico). Faz parte da plataforma comum, para todos os pacotes. Desenho no [subplano 11](subplanos/11-Comunicacao-Interna.md).
 - **Aba Obrigações:** compartilhada, mas dinâmica por setor: cada setor vê as suas obrigações e o seu integrante; quem tem vários setores, o Gestor e o Administrador escolhem ver um, vários ou todos. Cada aba de setor tem o bloco "Obrigações do setor". Detalhe no adendo do [subplano 03](subplanos/03-Painel.md).
 - **Nome:** o setor continua **Societário** ("Legal" e "Legalização" são sinônimos na busca e na IA).
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Nomes comerciais, item Clientes e posicionamento (8/11/2026)
+
+- **Nomes comerciais (completa DA-02, regra 6).** O site usa **Heild Contábil** e **Heild BPO**, sobre a mesma plataforma e o mesmo cadastro (branch `site`, `app/src/site/paginas.ts`); o DA-02 previa "{nome} BPO Financeiro". O modo BPO entre escritórios não tem página. Ver D2 em [ATUALIZACOES.md](ATUALIZACOES.md).
+- **Item Clientes (contradição interna do DA-02.1).** O item 9 diz "só no BPO puro"; o item 10, "para quem não tem o Painel, em qualquer cenário". O protótipo segue o item 10 (branch `prototipo`, `app/PLANO.md`, "A barra lateral da Marina"). Recomendação: adotar o item 10 e corrigir o item 9, a U4 do 03 e a linha de 00, 9.2. Ver D4.
+- **A Heild ao lado do core (esclarece 3.4 e 8.2).** O `PRODUCT.md` do branch `design-system` e a frase "um sistema no lugar de vinte" do site dão a entender que a Heild substitui o Domínio. Pelo plano, escrituração, apuração, folha e SPED ficam no core; a Heild substitui as ferramentas de gestão, atendimento, prazos, captura e financeiro (HubStrom, Conexa, Acessórias e afins). A correção é dos branches `design-system` e `site`.
+
+### Wireframe interativo (14/11/2026)
+
+- **Comunicação interna pelo botão Chat** (decisão do Enzo, branch `wireframe`, `docs/wireframe/DECISOES.md`, Coordenação): abas Equipe e Integrantes, sem item na barra lateral; detalhe no 11, seção 6.
+- **A regra do titular foi duplicada no BPO.** O wireframe cumpre a regra no Financeiro do escritório (`titular_tipo` em conta bancária, lançamento e conta a pagar), mas o BPO usa tabelas próprias (`bpo_conta`, `bpo_conta_bancaria`, `bpo_transacao`). A regra "mesmo componente, contexto diferente" continua valendo; o ajuste está no 10 e é pré-requisito da fase F6 do backend (D8 em [ATUALIZACOES.md](ATUALIZACOES.md)).

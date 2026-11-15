@@ -672,3 +672,16 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | C2-02 Simulados de rescisão | Agora | 03, 6.5 (bloco "Simulados"); 06 (pedido de simulado no app); 04 (régua) | DP |
 | C2-10 Biblioteca de passo a passo para o cliente | Só a ideia | SOC-101 (biblioteca de modelos); 06 (publicação no app) | Gestão e Atendimento |
 | C2-14 Declaração de faturamento assinada pelo contador | Agora | 03, 6.6 (Relatórios ao cliente, junto do DECORE); 06 (pedido padronizado); D-16 (assinatura) | Contábil |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S10) e `entregas/S10.md`, hipóteses da sessão.
+
+- Depois de 5 códigos errados, bloqueio de 15 minutos com aviso ao escritório; pedido de permissão de push só depois do primeiro toque; o sócio pede ao escritório para convidar outra pessoa (GES-104); contestar um serviço deixa só aquela linha da fatura em espera; revisão anual de acessos aparece ao sócio até ele responder; franquia de exemplo do Consultor da empresa de 40 perguntas por mês **[premissa]**.
+- **Conferência no envio (completa 4).** O envio de pendência aceita foto com recorte e vários arquivos; o integrante confere na hora e devolve com o motivo quando não serve ("o arquivo é de setembro; precisamos de outubro"); só então vem o "recebido", com recibo (protocolo, hora, hash). "Não tenho isso" pede justificativa. O pedido tem formulário por tipo, com campos obrigatórios, para 14 tipos limitados ao papel.

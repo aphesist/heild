@@ -965,3 +965,39 @@ Decididos na [Lista de decisão do painel do Leandro](../Lista_de_Decisao_Painel
 | Itens | O que entra |
 | --- | --- |
 | D-11, D-13 | O leitor de extratos robusto e as regras aprendidas por favorecido servem à leitura de extrato do BPO. |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `app/supabase/migrations/20261114180000_s08_bpo.sql`, `docs/wireframe/DECISOES.md` (S07 e S08) e `entregas/S08.md`.
+
+- **Dois modelos para o mesmo dinheiro (diverge de 3.12).** O BPO criou `bpo_conta` (a pagar e a receber), `bpo_conta_bancaria`, `bpo_transacao` e `bpo_fornecedor`, enquanto o Financeiro já pôs titular em `conta_bancaria`, `lancamento` e `conta_pagar` para o BPO usar. Vale 3.12 (um componente, com titular); a unificação é pré-requisito da fase F6 do backend. Ficam próprias do pacote: perfil, conexão de ERP, lote, alçada, configuração, rotina, entrega, volume e convidado. D8 em [../ATUALIZACOES.md](../ATUALIZACOES.md).
+- **A fila não é Tarefa (diverge do 01, adendo 23).** `bpo_item_fila` tem `bola`, `visibilidade`, SLA e `faltando`, fora da Tarefa, o que a tira do Timesheet, do calendário e da busca. Recomendação: levar esses campos para a Tarefa e fazer da fila uma visão das tarefas dos setores `bpo` e `bpo_financeiro`. Também em D8.
+- **Subinquilino simplificado (diverge de 4.1).** Os clientes finais do contratante são uma lista dentro de `subinquilino`, sem `subinquilino_id` nas outras tabelas; o backend modela o segundo nível como 4.1 manda.
+- **Audit score (completa 5.2, pesos de partida a validar no piloto).** Treze critérios: peso 10, vencido sem aprovação; peso 8, credencial do ERP vencida, sincronização atrasada, caixa abaixo do mínimo; peso 5, conciliação atrasada há mais de dois dias, SLA abaixo da meta, lote recusado; peso 3, cartão que vence hoje, fornecedor novo ou alterado, ERP em modo arquivo com baixas para lançar, conector com aviso; peso 2, consentimento do Open Finance a vencer em 30 dias, empresa em paralelo. Soma 3 ou mais é "atenção"; 8 ou mais, "agir hoje".
+- **Modo e lote.** Trocar o modo de pagamento cria proposta de alçada, e o modo só muda com o aceite do sócio no app; M3 aparece descrito e desligado. Tirar contas do lote recalcula a faixa; recusa devolve com motivo; lote expirado nunca paga.
+
+### Prazo do fechamento sugerido pelo site (8/11/2026)
+
+O site promete "Fechamento à contabilidade: até o dia 7" (branch `site`, `app/src/site/SecoesBpo.tsx`). Pelo plano, o SLA é configurável por empresa ("relatório até o dia W"). Adota-se o dia 7 do mês seguinte só como **padrão sugerido**, editável por empresa; o site deve dizer "até o dia combinado". O site também mostra como certos o extrato pelo Open Finance (o plano diz "Open Finance ou OFX") e o pagamento por API no modo M2 (banco com API utilizável por terceiro **[a confirmar]**): ver D9 em [../ATUALIZACOES.md](../ATUALIZACOES.md).
+
+### Sessões S08a a S08d do wireframe (14 e 15/11/2026, ainda fora do branch `wireframe`)
+
+Fontes: branches `wf-s08a-bpo-visao`, `wf-s08b-bpo-operacao`, `wf-s08c-bpo-aprovacoes` e `wf-s08d-bpo-gestao`, `docs/wireframe/DECISOES.md` e `docs/wireframe/entregas/S08a.md` a `S08d.md`. Ainda não integrados ao branch `wireframe`; todos os registros são **propostas** da sessão, nenhum decidido pelo Enzo.
+
+- **Encerramento (3.14).** Abrir o encerramento (Administrador, com motivo) marca aviso prévio de **30 dias [hipótese]**; os cinco passos têm ação, e apagar o espelho só libera depois de revogar banco e ERP; "Desistir do encerramento" volta ao ativo e fica no histórico. Concluir tira o serviço BPO; o cadastro continua ("BPO encerrado", com "Pôr no BPO").
+- **Lote com exceção (3.7).** Fornecedor novo, dados bancários alterados, valor 30% acima da média, duplicidade suspeita, fracionamento e pessoa física sobem de faixa: o lote pede duas aprovações mesmo abaixo da faixa 2. Fornecedor novo ou alterado só entra em lote com os dados confirmados por segundo canal (canal, contato e dados conferidos).
+- **Alçada da pessoa do BPO (3.9).** O Gestor do BPO define até quanto cada pessoa confere (`pode_conferir_ate`); a alçada da empresa ganha limite por dia e por mês e revisão anual, e o limite diário trava o envio de lote que o ultrapassa.
+- **M2 acima do teto (3.4).** Lote com alguma conta acima do teto do M2 vai como M1 (o cliente libera no banco), com aviso.
+- **Crédito de SLA (4.3 e 3.14).** O Gestor do BPO classifica cada desvio como do BPO ou do cliente; com SLA abaixo da meta e algum desvio do BPO, crédito de **1% do honorário do BPO por ponto abaixo da meta, até 10% [hipótese, a validar no contrato modelo]**, avisado ao Financeiro para a próxima fatura.
+- **Auditoria de qualidade (BPO-013).** Amostra de três contas do mês por pessoa; divergência vira item interno da fila com prazo de dois dias.
+- **Extrato de volume (7.2 e 5.4).** Enviado ao app com **três dias úteis [hipótese]** para contestar; aceitar vira glosa, recusar exige motivo. Diverge da linha "só a fatura" da tabela 5.4 para o cliente do BPO; a sessão seguiu 7.2 (ver antes de pagar). O excedente vira `servico_avulso` do Financeiro (origem `faixa`), na fatura única; aditivo de faixa é proposta ao Financeiro (7.3).
+- **O que o BPO conta na assinatura (9.1).** A empresa passa a contar a partir do paralelo (em implantação ainda não) **[hipótese]**, com os valores de teste de 9.1.
+- **Contratante (4.6).** Entra em sete passos (contrato, acordo LGPD e suboperadores, empresas importadas em bloco, credenciais, pendências, responsável técnico convidado, um mês em paralelo) e só ativa com todos; sai em seis passos e nunca se apaga.
+- **Revisão do responsável técnico (4.4).** Estado próprio (preparando, com o RT, ajuste pedido, aprovada), com resumo e hash da entrega; na transferência parcial, transmitir só libera com a revisão aprovada.
+- **Operação (S08b).** Documentos que chegam viram entidade própria (`bpo_documento`, nova); a fila ordena por risco e marca a bola parada; o Membro abre a fila em "só as minhas"; o fechamento do mês fica nas Rotinas, com o rascunho do Gerencial.

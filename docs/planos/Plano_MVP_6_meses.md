@@ -1,5 +1,7 @@
 # Plano de desenvolvimento (6 meses) e lançamento
 
+> **Revisto em 15/11/2026:** a plataforma é construída por 2 pessoas no backend (decisão de 15/11/2026), com piloto em ~4,5 a 5 meses; este cronograma e estes preços ficam como histórico do assistente (D1). Ver o adendo "consolidação dos planos" no fim deste documento.
+
 Rascunho para aprovação, 4/11/2026. Os números vêm de `pesquisa/modelo/modelo_lancamento.py`, e o detalhamento está na pesquisa 08. **[PREMISSA A CONFIRMAR]** marca o que não vem do plano, das pesquisas ou das premissas aprovadas.
 
 ## Premissas
@@ -223,3 +225,28 @@ Alugar para sempre não é sustentável. O objetivo é ter GPUs próprias, compr
   - LGPD: controle físico de acesso e registro, com as perguntas dos clientes processadas no Brasil.
   - Entra o custo de colocation no lugar da conta de luz doméstica.
 - **Crescimento depois disso:** 1 placa a mais a cada cerca de 3 GEX de carga. Um segundo host só para redundância quando houver 2 ou mais placas próprias.
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [ATUALIZACOES.md](ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Backend real e equipe (15/11/2026)
+
+Este plano (4/11/2026) supunha só o fundador com agente de programação, o assistente legal como produto e teto de R$ 10 mil. Depois dele, o produto virou a plataforma do escritório (Desenho do Sistema e subplanos 01 a 11), e em 15/11/2026 o Enzo aceitou o desenho do backend ([`backend/PERGUNTAS.md`](backend/PERGUNTAS.md)):
+
+- **Equipe (P10):** 2 pessoas fixas de TypeScript no backend até o piloto; o orquestrador dos integrantes fica com a frente de IA. **Substitui a premissa "só o fundador"** para a construção da plataforma.
+- **Infraestrutura:** AWS sa-east-1 (ECS Fargate) com Supabase em São Paulo desde o piloto, ~US$ 200 por mês (P2). Os degraus de infraestrutura e a GPU alugada deste plano continuam valendo só para a frente de IA (recuperação, reranker, DGM).
+- **Prazo do piloto:** ~4,5 meses com 2 pessoas para 2 escritórios e 20 contas (Painel, tarefas, Arquivos, cartões, cofre, captura de DF-e e NFS-e, motor de procedimentos com dois procedimentos de referência); ~5 meses com o Integra Contador ([`apis/PERGUNTAS.md`](apis/PERGUNTAS.md), Q1, pendente); sistema inteiro ~6,5 meses ([`backend/ARQUITETURA.md`](backend/ARQUITETURA.md), 7).
+- O cronograma M1 a M6 e os preços por pergunta deste plano ficam como histórico do assistente; o cronograma da plataforma é o do backend, e os preços, os do [Estudo de precificação](Estudo_de_Precificacao_por_Modulo.md). Ver D1 em [`ATUALIZACOES.md`](ATUALIZACOES.md).
+
+### Correções do raciocínio e do Plano Municipal (9/11/2026)
+
+Fontes: [Plano Municipal](Plano_Base_Legislacao_Municipal.md), seções 13 e 25; branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/src/dados.js` (slides 13, 26 e 27).
+
+- **Cascata:** a arquitetura de produção é a de nove etapas do subplano 07 (3.1); árvore de temas (RAPTOR) e política Search-R1 ficam atrás de chave até vencerem no benchmark.
+- **Base legal:** estadual nas 27 UFs; municipal pelos municípios fáceis e sob demanda, com nível de cobertura C0 a C4; janela de 10 anos no federal e 5 no estadual e no municipal (substitui "SP, MG, PR, SC e RS" e "capitais e aqueles onde os escritórios do grupo têm clientes").
+- **OCR:** "não há OCR relevante" não vale para atos municipais antigos, digitalizados em imagem (a própria Fase de ingestão já previa OCR aberto para PDF digitalizado).
+- **Critério do M3:** em vez da auditoria humana de 100 dispositivos, acerto de pelo menos 98% contra o ouro reservado, com a cobertura do ouro publicada (revisão pela IA, decisão de 9/11/2026).
+- **DGM:** os "3 ciclos DGM enxutos" passam a ser o laço inspirado na DGM (uma rodada da DGM original custou cerca de US$ 22 mil), em dois laços fora da produção: Consultor e ingestão.

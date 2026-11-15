@@ -156,6 +156,8 @@ Segunda busca (Search-R1) e DGM atrás de chave; até lá, regra fixa: segunda r
 
 ### 3.2 Contrato de `legal.consultar`
 
+> **Revisto em 15/11/2026:** o grau de confiança passa a ser o menor entre afirmações, certeza da versão e cobertura (C0 a C4), com `cobertura_local` na saída; o exemplo do fator R cita o parágrafo errado (correção de 9/11/2026). Ver o adendo "consolidação dos planos" no fim deste documento.
+
 `legal.consultar(pergunta, data_de_referencia, perfil_do_cliente?, escopo)` · ler · custo cara · `exposta_ao_cliente` só com `escopo = explicar`.
 
 | Entrada | Descrição |
@@ -333,6 +335,8 @@ Tabelas nacionais (Simples, INSS, IRRF, Selic, salário mínimo, reforma) e loca
 
 ### 5.4 Catálogo inicial
 
+> **Revisto em 15/11/2026:** a base de `calculo.folha_12m` é o § 24 do art. 18 da LC 123, não o § 5º-J; `calculo.fator_r` escolhe a norma pela atividade e tem a janela nova desde 01/01/2027 (LC 214/2025, art. 517). Ver o adendo "consolidação dos planos" no fim deste documento.
+
 "Cliente" = `cliente_id`; a função lê o que precisa pelo M2. Fase = quando entra.
 
 | # | Função | Entradas | Resultado | Tabelas e regras | Atividades | Fase |
@@ -454,6 +458,8 @@ O modelo principal escreve com marcas inline: `O DAS de outubro é R$ 2.648,70 [
 | Terceira falha na sessão | Entrega parcial, `integrante.limite_passos`, painel de avaliação |
 
 ### 7.4 Mensagens de abstenção
+
+> **Revisto em 15/11/2026:** a abstenção sem base local usa o texto C0 aprovado pelo Enzo em 9/11/2026 (Plano Municipal, 8.2). Ver o adendo "consolidação dos planos" no fim deste documento.
 
 | Situação | Texto (modelo do tema, editável) |
 | --- | --- |
@@ -730,3 +736,39 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | C2-15 Pesquisas do IBGE (PAC e PAS) | Agora | 07 (regras de obrigação, eventual); 03, 6.2 | Contábil |
 | C2-16 DMED no calendário | Agora | 07 (regras de obrigação por CNAE); 03, 6.2 | Fiscal |
 | C2-22 Taxa anual de licença municipal | Agora | 03, 6.1 e 6.4 (central de guias); 07 (regra anual por município) | Societário |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Integrantes e backend (15/11/2026)
+
+Fontes: [`../integrantes/DECISOES.md`](../integrantes/DECISOES.md) (branch `wf-integrantes-pesquisa`) e [`../backend/AGENTICO.md`](../backend/AGENTICO.md) (branch `wf-backend-stack`).
+
+- **M4 Ação como procedimento.** As ações repetitivas do M4 rodam, por padrão, como procedimento por processo no motor do backend (passos em código, operários com contrato, validadores e cartão), com o planejador de modelo só na exceção (decisão 2). A verificação determinística deste subplano vira serviço de validadores chamado pelos passos.
+- **Modelos por papel.** O roteador segue regras primeiro, modelo barato depois e modelo caro só no ambíguo (decisão 4). Nos procedimentos, Sonnet operário, Sonnet escritor e Opus revisor; Haiku como operário só por contrato, quando o piloto provar (decisão 3).
+- **Dado de cliente no fornecedor de modelos ([`../apis/PERGUNTAS.md`](../apis/PERGUNTAS.md), Q7, pendente).** Recomendação do plano de APIs: mandar só o que o contrato do passo pede, com CPF e CNPJ mascarados e nomes trocados por ids quando o passo não precisar deles, sob DPA e retenção mínima, enquanto se pede a confirmação de processamento no Brasil.
+- **Fontes da vigilância do M1 ([`../apis/CATALOGO_CONTABIL.md`](../apis/CATALOGO_CONTABIL.md), 8; Q8, pendente).** Conferido em 15/11/2026: o LexML barrou acesso automatizado com verificação antirrobô e o INLABS do DOU estava em manutenção. A vigilância diária do Consultor não pode depender deles sem acesso formal (Senado e Imprensa Nacional) ou um agregador comercial.
+
+### O raciocínio do Consultor e o Plano Municipal (9/11/2026)
+
+Fontes: branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/src/dados.js` (33 slides, 9/11/2026), resumidos em [../raciocinio/README.md](../raciocinio/README.md); [Plano Municipal](../Plano_Base_Legislacao_Municipal.md) v0.4, seções 8, 13 e 14; branch `prototipo`, `app/src/dados/simulacao.ts` (commit "Fator R da Clínica Sorriso: a citação certa para odontologia", 9/11/2026).
+
+- **Fator R por atividade (corrige 3.2, 5.4 e o exemplo B de 8.3).** `calculo.fator_r` escolhe a norma pela atividade: as do § 5º-I vão ao Anexo III com folha de 28% ou mais (§ 5º-J); as dos incisos XVI, XVIII, XIX, XX e XXI do § 5º-B e as do § 5º-D vão ao Anexo V com folha abaixo de 28% (§ 5º-M, I e II). Odontologia é o § 5º-B, XX, com o § 5º-M, I, desde 01/01/2018 (LC 155/2016); de 2015 a 2017 estava no § 5º-I, III, Anexo VI. **O que entra na folha é o § 24** (remunerações, pró-labore, CPP e FGTS), com os §§ 25 e 26, não o § 5º-J: corrigir a coluna de `calculo.folha_12m` e a afirmação t1 do exemplo B. Slides 13 e 17.
+- **Janela do fator R em 2027.** As tabelas de `calculo.fator_r` e `calculo.folha_12m` têm duas versões: até 31/12/2026, os 12 meses anteriores ao período de apuração (§ 5º-K); desde 01/01/2027, os 12 meses antecedentes ao mês anterior ao do período (LC 214/2025, art. 517, com efeitos pelo art. 544, III). O exemplo de 3.2, com data de 2027, precisa da segunda. Fonte: `pesquisa-redes-sociais/notas/fatos-legais-verificados.md`.
+- **Fusão das buscas (3.1, etapa 4).** BM25 e multivetorial em paralelo, fundidos pela posição (reciprocal rank fusion). Slide 16.
+- **Grau de confiança (substitui 3.2, "o menor grau entre as afirmações principais").** É o menor entre o grau das afirmações, a certeza da versão citada (limiares do Plano Municipal, 13.3) e o nível de cobertura do ente (C0 a C4). A saída de `legal.consultar` ganha `cobertura_local`; o rótulo aparece no cartão de citação e, quando limita a conclusão, na primeira linha. Os níveis C0 a C4 não se confundem com os níveis de maturidade N0 a N4 do JU-04. Sem tabela local, o M3 devolve "alíquota municipal fora da base", nunca um padrão; o parâmetro da NFS-e Nacional aparece como parâmetro, não como lei (Municipal, 14.1). Slide 25.
+- **Texto da abstenção sem base local (substitui a linha "Fonte local fora da base" de 7.4).** Vale o texto C0 aprovado pelo Enzo em 9/11/2026 (Municipal, 8.2): "Sem base local. Ainda não tenho a legislação de {ente} sobre {domínio}. Respondo pela regra federal; {ente} pode ter regra própria. Já pedi a inclusão." Slides 21 e 25.
+- **Modos (8.1).** Em todos os modos valem a mesma base, a mesma verificação e a mesma abstenção; na vigilância, o predicado que escolhe clientes afetados inclui a data do fato (norma nova só alcança fato posterior), como no JU-04, 4.1. Slide 19.
+- **Benchmark (9.1).** Casos-semente, conferidos na fonte em 9/11/2026: fator R da odontologia antes e depois de 01/01/2018 (e a janela de 2027); retenção de PIS, Cofins e CSLL antes e depois de 22/06/2015 (Lei 10.833/2003, art. 31, § 3º); horas de trajeto antes e depois de 11/11/2017; aposentadoria com requisitos antes de 13/11/2019; ISS fora da base local. A métrica de abstenção pune os dois erros porque avaliação que dá nota ao chute ensina o modelo a chutar (Kalai et al., arXiv 2509.04664). Branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/README.md`.
+- **Laço da DGM (9.4).** Ficam trancados também o ouro e as funções de medida. É um laço inspirado na DGM (uma rodada da original custou cerca de US$ 22 mil), não a DGM inteira; há um segundo laço, o da ingestão (Municipal, 15). A lista editável diverge entre o Plano do Assistente, este subplano e a apresentação: D6 em [../ATUALIZACOES.md](../ATUALIZACOES.md). Slides 30 e 31.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/DECISOES.md` (S02 e S03), propostas.
+
+- **Prazo de ciência.** O wireframe usa 10 dias do recebimento para toda caixa postal. **Vale este plano**: o prazo vem de `calculo.prazo_ciencia` por tipo de DTE (federal 15 dias, DTE-SN 45, estaduais 10, conforme o 08); o wireframe deve ser corrigido.
+- **Alerta de distribuição acima de R$ 50 mil (completa `calculo.retiradas_socio`).** Aviso uma vez por sócio e mês quando a distribuição passa de R$ 50 mil (Lei 15.270/2025), com a retenção de 10% e o DARF até o dia 20 do mês seguinte **[vencimento a confirmar na norma]**.
+- **Regras de obrigação com setor dono.** A semente do wireframe traz cada regra com `gera_tarefa_para_setor` (EFD-Reinf, GIA-SP, DeSTDA, PIS/Cofins, ISS, DAS-MEI, DEFIS, DMED, ECF, IBGE, taxa de licença, conselho, manifestação, entrega das guias); cada ocorrência é uma Tarefa `origem = obrigacao`. Serve de lista inicial para a base de regras.

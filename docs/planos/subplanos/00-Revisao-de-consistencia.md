@@ -589,3 +589,14 @@ Fixos do Jurídico (valores de teste, IA fazendo calendário e encarregado): R$ 
 - **Itens C2 aprovados** distribuídos em adendos nos subplanos 01 a 09; o C2-08 foi ampliado: o conector de e-mail lê tudo (entrada, enviados e anexos), como o painel do Leandro.
 - **Comunicação interna:** subplano 11 novo; sem exclusão de mensagens; ponto de LGPD marcado para revisão jurídica.
 - **Protótipo no repositório Heild:** aba Obrigações e comunicação interna ainda não refletidas; este repositório não tem acesso de escrita ao Heild.
+
+## 16. Consolidação dos planos (15/11/2026)
+
+A consolidação de 15/11/2026 trouxe para os planos as decisões e desenhos mais novos que estavam nos branches do Heild (integrantes, backend, APIs, reasoning engine, protótipo, site, design system e wireframe). O registro completo, com as divergências que ficaram para o Enzo, está em [../ATUALIZACOES.md](../ATUALIZACOES.md). Sobre as divergências antigas desta revisão:
+
+- **D13** (ordem do Timesheet) está **fechada**: Meu tempo · Confirmações · Equipe · Rentabilidade (decisão da coordenação do wireframe a pedido do Enzo, 14/11/2026).
+- **D1** continua aberta: o wireframe mantém CRM, Arquivos, Timesheet (branch `wireframe`, `app/src/telas/modulos.ts`).
+- **P10 do 02 e P14 das Fundações** (memória do setor "vale ao escrever") foram **revistas** pela decisão 6 do Enzo (15/11/2026): só muda por proposta aprovada.
+- **"Cada pessoa tem os próprios integrantes"** (adendo do UI lab do 02) foi **revista** pela decisão 1 (15/11/2026): integrante compartilhado por setor, com execução isolada por pedido.
+
+Divergências novas abertas pelo wireframe e pelas outras fontes: D1 a D10 de [../ATUALIZACOES.md](../ATUALIZACOES.md). As menores seguem a recomendação até resposta: lead fechado em `aceito` (wireframe pula para `em_implantacao`), ciência tácita de 10 dias no wireframe (vale o 08), custo-hora visível só ao Administrador, alçada do Financeiro em três degraus, Configurações com oito abas.

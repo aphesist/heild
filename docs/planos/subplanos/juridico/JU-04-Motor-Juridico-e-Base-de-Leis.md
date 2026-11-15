@@ -106,6 +106,8 @@ Cada função entra com seu módulo e passa pelo gate do contábil: suíte de ga
 
 ### 2.7 Abstenção ampliada
 
+> **Revisto em 15/11/2026:** o texto de "fato fora da base" passa a ser o C0 do Plano Municipal (8.2). Ver o adendo "consolidação dos planos" no fim deste documento.
+
 Toda abstenção mostra **o que foi pesquisado** e a cobertura. Tipos novos:
 
 | Tipo | Quando | Texto (editável) |
@@ -139,6 +141,8 @@ Camadas de J4: **L0** normas, **L1** enunciados, súmulas e teses, **L2** jurisp
 **Núcleo N0**, em todo pacote: CF e emendas, LINDB, Estatuto e Código de Ética **[texto a confirmar]**, regras processuais comuns (CPC, CPP, CLT processual, Lei 9.099), súmulas vinculantes e repercussão geral, calendário forense e índices.
 
 ### 3.2 Os 19 módulos: corpus mínimo e fonte
+
+> **Revisto em 15/11/2026:** pela decisão do Enzo na v0.4 do Plano Municipal (9/11/2026), a base é feita de 30 blocos que os pacotes dividem, não de 19 módulos estanques. Ver o adendo "consolidação dos planos" no fim deste documento.
 
 Ordem de J9 (% de advogados por área principal). Volumes são ordens de grandeza **[a confirmar na ingestão]**.
 
@@ -612,3 +616,22 @@ Resposta: **segue a hipótese em todas as perguntas** (tabela de perguntas para 
   7. **Contrato:** a entidade de cláusulas e vigência (consultivo) se chama *Contrato*; o de honorários é *Contrato de honorários* (JU-05) e não colide.
   8. **Avisos com datas diferentes:** vale a mais cedo, com pergunta ao advogado; o motor mostra a origem do número ("lido no texto" ou "sugerido"), não porcentagem de confiança.
   9. **Antes de usar casos reais:** parecer de advogado especializado (sigilo, LGPD, termos, responsabilidade, seguro) e modo sombra de algumas semanas sem alerta real.
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../../ATUALIZACOES.md](../../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### O raciocínio do Consultor e o Plano Municipal (9/11/2026)
+
+Fontes: branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/src/dados.js` (9/11/2026), resumidos em [../../raciocinio/README.md](../../raciocinio/README.md); [Plano Municipal](../../Plano_Base_Legislacao_Municipal.md) v0.4, seções 4, 6, 8, 13 e 25.
+
+- **Blocos e pacotes (substitui 3.2 a 3.4, decisão do Enzo na v0.4 do Plano Municipal).** A base deixa de ser dividida em 19 módulos estanques: é feita de 30 blocos construídos e revisados uma vez e vendida em pacotes que dividem blocos (Municipal, 6). Cada pacote usa um bloco inteiro ou a fatia que cita. Onde este subplano diz "módulo de lei", leia "pacote"; os pacotes A, B e C de 3.4 precisam ser refeitos sobre a matriz bloco × pacote (Municipal, 6.4). O preço está em D7 de [../../ATUALIZACOES.md](../../ATUALIZACOES.md). Slide 28.
+- **Revisão pela IA (diverge de 3.5 e 6.5).** A decisão de 9/11/2026 tira as pessoas da conferência da base. A "auditoria amostral" e o especialista que audita "a amostra da base" entram em conflito com ela; o papel do especialista está em D7 de [../../ATUALIZACOES.md](../../ATUALIZACOES.md) (recomendação: ele sai da conferência da base e fica no gabarito em duplo cego, no piloto, nas peças e nas fórmulas). Slide 26.
+- **Janela do federal (diverge de 3.5).** O Plano Municipal decidiu 10 anos no federal; este subplano pede o diploma central "desde a origem"; os exemplos da apresentação (ato de 2015 pelo CPC/1973, contrato desde 2013 no Tema 23) caem fora de 10 anos. D5 em [../../ATUALIZACOES.md](../../ATUALIZACOES.md).
+- **Abstenção "Fato fora da base" (substitui o texto de 2.7).** Vale o texto C0 do Plano Municipal (8.2): "Sem base local. Ainda não tenho a legislação de {ente} sobre {domínio}. Respondo pela regra federal; {ente} pode ter regra própria. Já pedi a inclusão." Os níveis de cobertura C0 a C4 não se confundem com os níveis de maturidade N0 a N4 de 3.1.
+- **Querido Diário (correção 5 da seção 25).** "Cerca de 350 cidades em 2024" (3.5) passa a cerca de 520 em 2026 (522 pela OKBR; 527 por terceiro, 30/09/2026; Municipal, 4.2).
+- **Exemplos conferidos na fonte para o gabarito (2.1 e 6.2).** Horas de trajeto (CLT, art. 58, § 2º, nas redações da Lei 10.243/2001 e da Lei 13.467/2017, corte em 11/11/2017); prazo processual (CPC/1973, art. 178, contínuo; CPC/2015, art. 219, dias úteis, desde 18/03/2016); precedente vigente hoje (Tema 23 do TST, 25/11/2024); divergência real: a base do ITBI numa compra de 2026, entre o Tema 1.113 do STJ (24/02/2022, RE pendente) e a LC 227/2026 (CTN, art. 38, §§ 1º a 4º). Branch `claude/zealous-wright-fvok37`, `apresentacoes/raciocinio/README.md`, "Conferido na fonte". As "três datas" daqui (fato, ato, hoje) não são as três datas de cada versão do Plano de Ingestão (publicação, vigência, eficácia).
+- **OAB (5.7).** Os itens 2.2, 3.1 e 3.2 da Recomendação 001/2024 do CFOAB foram lidos no PDF oficial e conferem; as demais numerações seguem a confirmar. Slide 23.
+- **Números do problema (6.3).** O artigo de Stanford (Magesh et al., arXiv 2405.20362) aparece com duas faixas: 17% a 33% de respostas com alucinação (apresentação) e 17% a 34% de incorretas ou mal fundamentadas (aqui); conferir no artigo antes de usar fora. Outros dados: 2.286 decisões no mundo trataram de conteúdo inventado por IA, 41 no Brasil (banco de Damien Charlotin, 9/11/2026); no ALCE (EMNLP 2023), metade das respostas dos melhores modelos não tinha suporte completo nas citações. Slide 6.

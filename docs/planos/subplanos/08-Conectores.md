@@ -677,3 +677,25 @@ Decididos no [cruzamento com o segundo escritório](../Cruzamento_Levantamento_S
 | C2-01 Kit de rescisão | Agora | 03, 6.5 (Rescisão); 02, 3.2 (DP); 08 (FGTS Digital e Empregador Web, robô com certificado) | DP |
 | C2-03 Boletos de sindicato, convênio e seguro de vida | Agora | 03, 6.5 (Guias, holerites, pagamento); 02, 3.2 (gatilho do dia 25); 08 (robô de portal, depois) | DP |
 | C2-08 E-mail enviado vira registro sozinho | Agora | 08 (conector de e-mail, pasta de enviados); 04; 01, 7 (pasta do cliente) (ampliado: lê tudo, entrada e enviados, com anexos) | Gestão e Atendimento |
+
+---
+
+## Adendo: consolidação dos planos (15/11/2026)
+
+Decisões e desenhos mais novos que este documento, achados nos branches do Heild e trazidos para os planos na consolidação de 15/11/2026 (registro em [../ATUALIZACOES.md](../ATUALIZACOES.md)). Cada item cita a fonte. Onde um item substitui o texto acima, o texto acima fica como histórico e vale o que está aqui; o que ainda depende do Enzo vem marcado com o número da divergência (D1 a D10) daquele registro.
+
+### Plano de APIs do Contábil (15/11/2026)
+
+Fonte: [`../apis/`](../apis/) (branch `wf-backend-apis`, `docs/apis/`), desenho de 15/11/2026; perguntas Q1 a Q10 ainda sem resposta do Enzo.
+
+- **Catálogo:** 60 APIs, serviços e caminhos sem API no Contábil, em 9 grupos (21 públicos e gratuitos, 10 públicos e pagos, 18 contratuais, 11 sem API). SERPRO (Integra Contador e Consulta CNPJ) e InfoSimples somam ~90% do custo de API pago pela plataforma.
+- **Correções de preço conferidas na fonte em 15/11/2026 (completam 10.1):** o SERPRO cobra o mês inteiro pela faixa atingida (não é cascata) e **cobra também as respostas 403**; a InfoSimples começa em R$ 0,22; a mensagem de serviço do WhatsApp custa R$ 0,035 desde 01/10/2026, com 1.000 grátis por número, e a de utilidade passou a ser cobrada também dentro da janela de 24 h.
+- **Regras novas propostas:** nenhuma chamada paga sem a procuração conferida no dia anterior pelos eventos gratuitos (Q3); cache das consultas pagas (situação fiscal 24 h, certidão até vencer, CNPJ 30 dias), com "consultar de novo agora" só por pessoa e com motivo (Q4); modelo A do SERPRO, a Heild como contratante única e cada escritório assinando o termo (Q2).
+- **Limites que mudam o desenho:** DF-e bloqueia o CNPJ por 1 h no erro 656 e aceita 20 consultas por hora; eSocial aceita 10 downloads por dia por empregador e nenhum do dia 1 ao 7; eventos do Integra, 1.000 por dia.
+- **Piloto:** liga cinco APIs (distribuição de DF-e, ADN, Consulta CNPJ, Integra Contador e SES). Certidões e DTE estaduais (InfoSimples) ficam para logo depois (Q6); WhatsApp na F5, depois do piloto (P9 do backend).
+- **Cores:** a entrada no Domínio exige a Heild como parceira da Thomson Reuters; pedir já, com o arquivo de troca como caminho padrão (Q9).
+- **Custo de API pago pela plataforma (provável):** ~R$ 25 por mês no piloto, R$ 3,00 por cliente com 10 escritórios, R$ 1,88 com 100 e R$ 1,29 com 1.000, abaixo dos R$ 3,62 por cliente do estudo de precificação.
+
+### Wireframe interativo (14/11/2026)
+
+Fonte: branch `wireframe`, `docs/wireframe/entregas/S09.md` e `DECISOES.md` (S09). A aba Configurações › Conectores tem 27 conectores em oito famílias; estados ativo, somente leitura, erro de credencial, certificado vencido, fora do ar, limite, CAPTCHA, sem resposta, pausado pelo teto e não conectado, cada um com frase e destino; cofre com e-CNPJ do escritório, rotação e revogação com motivo (pausa os conectores e avisa); saúde das rotinas (D-38), custo por conector e por cliente. **Teto de custo:** salvar um teto abaixo do já gasto pausa na hora os conectores pagos; subir o teto retoma. O `conector_core` do Timesheet (Alterdata, Domínio, Questor, Contmatic) ficou fora da família Conector deste subplano e deve entrar nela no backend.
