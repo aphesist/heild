@@ -140,3 +140,24 @@ Números de `qa-interface.cjs` (67 rotas por largura). **Antes** é a versão de
 - **`vazio` zera:** nenhum widget fica com mais da metade do corpo vazio, em nenhuma largura. Era o que o esticamento produzia.
 - **`buraco` sobe um pouco, e o que sobe é visível de propósito.** Os 12 de 1440 do antes eram todos fora da grade de widgets; o vão da grade ficava escondido dentro dos cards esticados (era o `vazio`). Depois, os mesmos 12 continuam, nenhum achado é célula vazia no meio da grade de widgets, e entram quatro fins desalinhados de mais de uma célula na última faixa (P-9), que a ordem do arranjo padrão corrige. Por tipo: (a) fora da grade de widgets, colunas e cards esticados das telas com `Caixa` (T-1, T-2, F-1, F-2, F-4, B-2, B-4, B-6, B-7, A-1 a A-3, A-5), que a base não mexe porque cada tela tem sua composição; (b) na grade de widgets, os fins desalinhados (I-5, P-9); (c) P-4, um vão dentro de um widget.
 - **`texto`, `rolagem` e `toque` restantes:** A-4 (1024), C-1 e F-3 (768) e o campo de P-5 (768), todos por tela.
+
+## 5. Sessão UI-2 (Timesheet, Financeiro, BPO): pausada
+
+**15/11/2026 · branch `wf-ui-2`.** Pausada a pedido do coordenador: antes das correções por tela vem o UI Lab (componentes em todos os estados). Estado até a pausa:
+
+**Feito (commits neste branch):**
+
+- **X-1 e X-2** em `telas/timesheet`, `telas/financeiro` e `telas/bpo`: nenhum `rounded-[NNpx]` e nenhum `weight="duotone"`. Regra usada: 20px → `rounded-cartao`; diálogo 24px → `rounded-xl`; bloco 14 a 18px → `rounded-lg`; item 10 a 12px → `rounded-md`; 6px → `rounded-sm`; amostra e barra de gráfico 3 a 4px → `rounded-xs` (o token pequeno do Tailwind, que não está na escala do tema: decidir no UI Lab se fica ou se pede token ao design system).
+- **F-3:** KPIs do Financeiro (Visão, Cobranças, Conciliação, Resultado) em `grid-cols-2 md:grid-cols-3 lg:grid-cols-5`: o "R$ 154.730" não vaza mais em 768. O `Numero` (compartilhado) não foi tocado.
+- **T-1:** "O que os meus integrantes fizeram" saiu da lateral para a coluna larga, sob o dia (números em 4 colunas, lista em 2); a lateral fica com Cronômetro, Extensão e Contestações, `lg:sticky lg:top-0 lg:self-start`.
+- **T-2:** lateral das Confirmações `lg:sticky lg:top-0 lg:self-start`.
+- **T-3:** Equipe: "A captura está melhorando?" ao lado de "Por que a cobertura não é maior?" de `lg` a `xl`. Rentabilidade: "De onde vem o custo?" e "Em que setores" lado a lado de `lg` a `xl`.
+- **T-4:** "Lançar tempo" uma vez só, no cabeçalho de Meu tempo (abre a gaveta). O card da lateral virou "Cronômetro" (só iniciar e parar); a "Semana manual" perdeu o botão "Lançar" do cabeçalho (os `+` por dia continuam).
+
+**Não feito (descoberto, para depois do UI Lab):**
+
+- **F-1, F-2, F-4** (desenhado, não aplicado): Cobranças em duas pilhas `items-start` (Devedores + Régua | Recebimentos sem cobrança + Notas) e, no Lote, abaixo de `xl` o cartão de aprovação em cima (`order-first`) e o "O que mudou" embaixo; Resultado em duas pilhas (Fechamento, Orçado × realizado, Repasse | Custo-hora, Sócios, Cenários); Visão geral em duas pilhas (Precisa de você + Clientes que pedem atenção | Caixa 90 dias, Vencidas por idade, Receita por setor), sem o `flex-1` de "Vencidas por idade".
+- **B-1 a B-7:** não começados. Contagem do `qa-interface.cjs` nas rotas do grupo antes de tudo: 1440 = 4 buracos; 1024 = 8 buracos; 768 = 1 rolagem, 1 texto, 3 buracos; 390 = 0. Achados do BPO: Rotinas c2 (colunas do checklist com 136 a 248px vazios), Configuração (Contas a Receber esticado, 240 a 340px), Visão 1024 (Precisa de decisão, 324px), Aprovações c2 1024 (Contas a Pagar, 84px).
+- O script não pega T-1 (vão sob a coluna larga, ao lado de uma lateral mais alta): confira no print.
+- Padrão que se repete e pede componente no UI Lab: "duas colunas de `Caixa` com alturas diferentes" (Timesheet, Financeiro, BPO). Um componente de página com duas pilhas e lateral opcional `sticky` resolveria F-1, F-2, F-4, B-2, B-4, B-6 de uma vez.
+- Não rodados ainda: build, suíte completa e prints de depois.
