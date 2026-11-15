@@ -61,7 +61,7 @@
 | Estado vazio | saber que não há nada e o que fazer | o menor que o widget aceita | — | uma célula; frase e ação no centro |
 
 - Widget declara só os tamanhos que fazem sentido em `tamanhos`; o arranjo padrão escolhe pela tarefa (uma fila de trabalho merece G; uma lista de três relatórios, M).
-- Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; lista longa leva `max-h-[60vh] overflow-y-auto` na lista, não no card inteiro.
+- Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; lista longa vai numa `<AreaRolagem className="max-h-[60vh]">`, não no card inteiro.
 
 ## 4. Largura inteira: só quando o conteúdo pede
 
@@ -109,6 +109,15 @@ O que a sessão de tela faz quando ainda sobra vão no meio:
 - **Quebra:** frases quebram (`break-words`, `text-pretty`); títulos equilibrados (`text-balance`); códigos longos sem espaço (CNPJ, chave, e-mail) `break-all` ou `truncate`.
 - **Botão:** o rótulo quebra em vez de vazar (`button.tsx`).
 - **Números:** `tabular-nums` em toda coluna, total e KPI (a `Tabela` já põe na tabela inteira).
+- **Palavra sem espaço** (CNPJ, chave, e-mail) quebra em vez de vazar: a base põe `overflow-wrap: anywhere` no corpo (na tabela, `break-word`: a coluna alarga primeiro). **[QA]**
+- **Quem trunca tem título:** `Linha`, `Celula texto=`, `Badge`, `ListItem`, `Passos` e o título do widget põem o `title` sozinhos; à mão, `truncate` sempre com `title`. **[QA]**
+- **Linha que quebra** (`flex flex-wrap`): o texto é `min-w-0 grow basis-40` (base de 10rem), nunca `flex-1` (base 0), senão os botões nunca descem e o texto vira uma coluna de três palavras. **[QA]**
+
+### Lista em colunas e selo **[QA]**
+
+- Lista que é tabela (tarefas, contratos, cobranças) usa `ListaColunas` + `LinhaColunas` + `Celula` (`components/kit/linha-colunas.tsx`): uma grade só para cabeçalho e linhas. `largura: 'fluida'` para o texto (trunca), `'conteudo'` para selo, valor e ação (a trilha cresce com o conteúdo e nada invade o vizinho), `'NNrem'` só para texto que trunca. Abaixo da quebra do contêiner, `largo` some e `abaixo` desce para a linha de baixo.
+- Coluna de valor ou selo em grade feita à mão: `minmax(Nrem,max-content)`, nunca `Nrem` seco; em flex, `min-w-NN shrink-0 whitespace-nowrap`, nunca `w-NN`.
+- `Badge` nunca passa da largura do contêiner: sem lugar, trunca e mostra o selo inteiro no `title`. Selo de estado: fundo do estado a 15%, texto em `texto`, ícone na cor do estado (cores.md), inclusive o de erro.
 - Nada abaixo de 12px fora da hora da mensagem (11px). Nada em caixa alta.
 - Nenhum texto passa da borda do card ou da tela; corte só com reticências.
 
@@ -134,7 +143,10 @@ Nunca um card em branco, nem enquanto carrega.
 
 ## 10. Rolagem
 
-- A página não rola de lado em nenhuma largura **[QA]**. Rolagem horizontal só em faixa declarada (`overflow-x-auto` + `snap-x`, ou `data-rolagem-horizontal`): abas, kanban, tabela larga no tablet. Toda faixa assim leva `esmaecer-lados`: a borda esmaece 24px quando há mais conteúdo para aquele lado.
+- **Toda rolagem passa pela primitiva `AreaRolagem`** (`components/ui/area-rolagem.tsx`), `eixo="y"` (padrão), `"x"` ou `"ambos"`: o topo e o fim (ou os lados) esmaecem quando há conteúdo para aquele lado; parado, nada é cortado. A regra `scripts/regra-rolagem.cjs` (no `npm run build`) acusa qualquer `overflow-auto`, `overflow-x-auto`, `overflow-y-auto` ou `overflow-scroll` fora dela. **[QA]**
+- **Cabeçalho fixo dentro da área** (o `thead` da `Tabela`, o cabeçalho preso de uma gaveta): marque com `data-cabecalho-fixo`; o esmaecido do topo começa abaixo dele e a primeira linha não é cortada seca. A `Tabela` rola nas duas direções (`eixo="ambos"`).
+- Modal (`DialogContent`) tem altura máxima e o conteúdo rola por dentro; gaveta usa `SheetCorpo` (ou `GavetaFormulario`/`GavetaLarga`) entre o cabeçalho e o rodapé.
+- A página não rola de lado em nenhuma largura **[QA]**. Rolagem horizontal só em faixa declarada (`<AreaRolagem eixo="x">`, com `snap-x` no kanban): abas, kanban, tabela larga no tablet.
 - Rolagem interna só em: corpo do widget acima do teto, coluna do kanban, tabela com cabeçalho fixo, chat. Nunca duas rolagens verticais aninhadas visíveis ao mesmo tempo.
 - O botão flutuante Chat não cobre o fim da tela (`md:pb-24` na área de rolagem).
 
@@ -155,3 +167,5 @@ URL_APP=http://localhost:6300/ node scripts/qa-interface.cjs /caminho/dos/prints
 ```
 
 O script percorre todas as rotas nas quatro larguras, salva um print alto de cada uma e grava `qa-interface.json` com o que achou em cada categoria: `rolagem`, `texto`, `toque`, `vazio` (widget com mais da metade do corpo vazio), `buraco` (célula vazia no meio da grade de widgets, ou vão sob card fora dela). Olhe também o print: o script não vê hierarquia nem ordem.
+
+**UI Lab e QA por componente.** O `#/lab/ui` mostra cada componente em todos os estados, quantidades de itens, comprimentos de texto, tamanhos, temas, larguras e densidades, e as páginas destas regras. O `scripts/ui-lab-qa.cjs` percorre o Lab por pares e as rotas reais em quatro variantes, com o detector de `scripts/lib/detector.cjs` (texto cortado, texto espremido, sobreposição, rolagem sem esmaecido, rolagem lateral, toque, contraste AA, vão, conteúdo fora do card). Como rodar e a contagem: `UI_LAB_QA.md`.

@@ -8,6 +8,7 @@
 //   contraste              texto abaixo do AA (4,5:1; 3:1 no texto grande)
 //   vao                    widget com mais da metade vazia, célula vazia no meio da grade, card vazio
 //   fora-do-card           texto, botão ou selo que passa da borda do card
+//   texto-espremido        numa linha flex, o texto vira coluna estreita enquanto os vizinhos ficam inteiros
 // Cada achado: { regra, detalhe, caixa: [x, y, largura, altura] }.
 
 /* eslint-disable */
@@ -126,6 +127,27 @@ function detectar(opcoes) {
       if (!cortado) add('fora-do-card', `texto fora da tela: ${desc(el)}`, el)
     }
   }
+  // Texto espremido: numa linha flex, o texto vira uma coluna estreita (três linhas ou mais em menos de 7em)
+  // enquanto os vizinhos ficam inteiros; o certo é os vizinhos descerem de linha.
+  for (const el of comTexto) {
+    if (!visivel(el)) continue
+    const pai = el.closest('div, li, section, article, header, footer, button, label, a')
+    const linha = pai && pai.parentElement
+    if (!linha) continue
+    const sl = cs(linha)
+    if (!/flex/.test(sl.display) || /column/.test(sl.flexDirection) || linha.children.length < 2) continue
+    const r = document.createRange()
+    const topos = new Set()
+    for (const n of el.childNodes) {
+      if (n.nodeType !== 3 || !n.textContent.trim()) continue
+      r.selectNodeContents(n)
+      for (const q of r.getClientRects()) if (q.width > 1) topos.add(Math.round(q.top))
+    }
+    const largura = el.getBoundingClientRect().width
+    const em = parseFloat(cs(el).fontSize) || 14
+    if (topos.size >= 3 && largura < em * 7 && (el.textContent || '').trim().split(/\s+/).length >= 3) add('texto-espremido', `${topos.size} linhas em ${Math.round(largura)}px: ${desc(el)}`, el)
+  }
+
   // Botões, selos e campos que passam da borda do card.
   for (const el of document.body.querySelectorAll('button, a[href], input, select, textarea, [data-slot="badge"], img')) {
     if (decorativo(el) || !visivel(el)) continue
@@ -383,6 +405,6 @@ function detectar(opcoes) {
   return achados
 }
 
-const regras = ['texto-cortado', 'sobreposicao', 'rolagem-sem-esmaecido', 'rolagem-lateral', 'toque', 'contraste', 'vao', 'fora-do-card']
+const regras = ['texto-cortado', 'texto-espremido', 'sobreposicao', 'rolagem-sem-esmaecido', 'rolagem-lateral', 'toque', 'contraste', 'vao', 'fora-do-card']
 
 module.exports = { detectar, regras }
