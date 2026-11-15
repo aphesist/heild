@@ -445,7 +445,8 @@ function detectar(opcoes) {
   }
   for (const g of document.body.querySelectorAll('[style*="grid-auto-rows"]')) {
     const s = cs(g)
-    if (s.display !== 'grid' || !visivel(g)) continue
+    // A vitrine do Lab força todos os widgets num tamanho só (os que não aceitam ficam no mais próximo): buraco ali é da vitrine.
+    if (s.display !== 'grid' || !visivel(g) || g.closest('[data-vitrine]')) continue
     const cols = s.gridTemplateColumns.split(' ').filter((x) => /px$/.test(x)).map(parseFloat)
     const linhas = s.gridTemplateRows.split(' ').filter((x) => /px$/.test(x)).map(parseFloat)
     if (cols.length < 2 || linhas.length < 2) continue

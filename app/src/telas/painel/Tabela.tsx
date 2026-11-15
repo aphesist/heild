@@ -43,7 +43,8 @@ export function Linha({ inicio, titulo, detalhe, fim, className }: { inicio?: Re
           </span>
         )}
       </span>
-      {fim}
+      {/* O fim (selo, valor, ação) fica com no máximo 60% da linha: o título nunca some. */}
+      {fim && <span className="flex max-w-[60%] min-w-0 shrink-0 items-center justify-end gap-3">{fim}</span>}
     </li>
   )
 }

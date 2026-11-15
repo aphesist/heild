@@ -142,14 +142,14 @@ export function FichaWidgetsDaAba({ p }: { p: ParamsLab }) {
 
 function AbaInicio({ t }: { t: TamanhoWidget }) {
   const catalogo = useCatalogoInicio()
-  return <GradeWidgets key={`inicio:${t}`} chave={`lab:aba:inicio:${t}`} catalogo={catalogo} padrao={catalogo.map((d) => ({ id: d.id, tamanho: tamanhoValido(d, t) }))} />
+  return <div data-vitrine><GradeWidgets key={`inicio:${t}`} chave={`lab:aba:inicio:${t}`} catalogo={catalogo} padrao={catalogo.map((d) => ({ id: d.id, tamanho: tamanhoValido(d, t) }))} /></div>
 }
 
 function AbaPainel({ abaId, versao, t }: { abaId: string; versao: 'cliente' | 'carteira'; t: TamanhoWidget }) {
   const { catalogo, cliente, setor } = useCatalogoPainel(abaId, versao)
   return (
     <AbaCtx.Provider value={{ cliente: cliente?.nome, setor, clienteId: cliente?.id, somenteLeitura: false }}>
-      <GradeWidgets key={`${abaId}:${versao}:${t}`} chave={`lab:aba:${abaId}:${versao}:${t}`} catalogo={catalogo} padrao={catalogo.map((d) => ({ id: d.id, tamanho: tamanhoValido(d, t) }))} />
+      <div data-vitrine><GradeWidgets key={`${abaId}:${versao}:${t}`} chave={`lab:aba:${abaId}:${versao}:${t}`} catalogo={catalogo} padrao={catalogo.map((d) => ({ id: d.id, tamanho: tamanhoValido(d, t) }))} /></div>
     </AbaCtx.Provider>
   )
 }
