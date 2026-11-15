@@ -29,3 +29,9 @@
 - **Hoje:** o README do design system pede Phosphor "no peso regular". A barra lateral do app usa duotone no item inativo e preenchido no ativo (`barra-lateral.tsx`), o que veio do desenho da navegação.
 - **No app:** os componentes base passaram para o peso regular; a barra lateral ficou como está, porque o preenchido marca o destino atual.
 - **Proposta:** escrever a exceção no design system: na navegação principal, regular no inativo e preenchido no ativo (sem duotone). Se aprovado, a barra troca o duotone pelo regular.
+
+## 6. Texto suave sobre o fundo rebaixado
+
+- **Hoje:** `cores.md` dá o `texto-suave` para texto secundário em qualquer camada. O QA do UI Lab (`app/scripts/ui-lab-qa.cjs`, regra de contraste) mede o par `texto-suave` × `rebaixada` (o fundo de hover, de item selecionado e de selo neutro) entre **4,0 e 4,4:1** no claro da Heild: abaixo do AA (4,5:1) por pouco. Nas outras camadas (fundo, superfície, elevada) passa.
+- **No app (sem mudar a marca):** onde o texto secundário fica sobre o rebaixado de forma estável (item selecionado da lista de integrantes), o texto passa a `texto`. No hover (passageiro) e nos temas de escritório, o provider já leva o texto suave dos temas sem esse valor até 4,5:1 em todas as camadas; o da Heild é o do design system e não foi mexido.
+- **Proposta:** escurecer um passo o `texto-suave` do claro (para passar de 4,5:1 também no `rebaixada`), ou escrever em `cores.md` que texto secundário sobre `rebaixada` usa `texto`. A primeira resolve em todo lugar; a segunda pede cuidado de quem desenha. **Pergunta ao dono antes de mexer** (é token de marca).
