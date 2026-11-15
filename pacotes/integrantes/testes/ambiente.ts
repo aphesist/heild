@@ -130,8 +130,9 @@ export const RESPOSTAS_SIMULADAS: Record<string, (e: any) => unknown> = {
     const t = normal(conteudo(e.trecho))
     const achados: [RegExp, string][] = [[/tributo|nota para|imposto|\bdas\b|guia/, 'fiscal'], [/contrat|empregado|receber pelo sistema|folha|ferias/, 'dp'], [/cidade|endereco|dono/, 'societario'], [/resultado|lucro|registram/, 'contabil'], [/mensalidade|sabado/, 'gestao_atendimento']]
     const setores = [...new Set(achados.filter(([r]) => r.test(t)).map(([, s]) => s))]
-    if (!setores.length) return { setor: 'gestao_atendimento', misto: false, confianca: 0.3, motivo: 'Sem assunto claro.' }
-    return { setor: setores[0], misto: setores.length > 1, confianca: 0.95, motivo: 'Assunto da conversa.' }
+    if (!setores.length) return { setor: 'gestao_atendimento', alternativa: null, misto: false, confianca: 0.3, motivo: 'Sem assunto claro.' }
+    // "talvez" simula a faixa incerta (entre 0,6 e 0,8).
+    return { setor: setores[0], alternativa: setores[1] ?? null, misto: setores.length > 1, confianca: /talvez/.test(t) ? 0.7 : 0.95, motivo: 'Assunto da conversa.' }
   },
   'assistente.rotear': (e: { pedido: unknown; opcoes: { id: string; descricao: string }[] }) => {
       const t = normal(conteudo(e.pedido))

@@ -1,7 +1,7 @@
 {
-  "data": "2026-11-15T06:18:11.225Z",
+  "data": "2026-11-15T06:59:37.786Z",
   "modo": "anthropic",
-  "gabarito": "ampliado 400cb685b82ef7ce",
+  "gabarito": "ampliado 9b53418fde2b6ed2",
   "configuracao": {
     "modelos": {
       "operario": "claude-sonnet-5-5",
@@ -20,24 +20,24 @@
       "ges.triagem.classificar"
     ]
   },
-  "duracao_s": 106,
-  "gasto_centavos": 58.4427,
-  "gasto_usd": 0.1082,
+  "duracao_s": 213,
+  "gasto_centavos": 84.8875,
+  "gasto_usd": 0.1572,
   "parou": null,
   "resumo_sonnet": {
     "porSetor": [
       {
         "setor": "gestao_atendimento",
-        "execucoes": 60,
+        "execucoes": 84,
         "acerto_pct": 100,
         "erro_critico": 0,
         "cartao_desnecessario": 0,
         "falha": 0,
-        "chamadas_por_execucao": 0.57,
-        "centavos_total": 47.5643,
-        "centavos_por_execucao": 0.7927,
-        "latencia_p50_ms": 3445,
-        "latencia_p90_ms": 6325,
+        "chamadas_por_execucao": 0.6,
+        "centavos_total": 80.9136,
+        "centavos_por_execucao": 0.9633,
+        "latencia_p50_ms": 7848,
+        "latencia_p90_ms": 9379,
         "erro_integrante_pct": 0,
         "erro_pessoa_pct": 0,
         "margem_pontos": 0,
@@ -46,43 +46,35 @@
     ],
     "porPapel": [
       {
-        "papel": "escritor",
-        "modelos": "claude-sonnet-5-5",
-        "chamadas": 4,
-        "centavos_total": 5.8525,
-        "latencia_p50_ms": 1494,
-        "latencia_p90_ms": 1534
-      },
-      {
         "papel": "operario",
         "modelos": "claude-sonnet-5-5",
-        "chamadas": 30,
-        "centavos_total": 41.7118,
-        "latencia_p50_ms": 1668,
-        "latencia_p90_ms": 2457
+        "chamadas": 50,
+        "centavos_total": 80.9136,
+        "latencia_p50_ms": 1831,
+        "latencia_p90_ms": 3599
       }
     ],
     "total": {
-      "execucoes": 60,
+      "execucoes": 84,
       "acerto_pct": 100,
       "erro_critico": 0,
-      "centavos_total": 47.5643
+      "centavos_total": 80.9136
     }
   },
   "resumo_haiku": {
     "porSetor": [
       {
         "setor": "gestao_atendimento",
-        "execucoes": 60,
+        "execucoes": 84,
         "acerto_pct": 100,
         "erro_critico": 0,
         "cartao_desnecessario": 0,
         "falha": 0,
         "chamadas_por_execucao": 0.6,
-        "centavos_total": 10.8784,
-        "centavos_por_execucao": 0.1813,
-        "latencia_p50_ms": 3461,
-        "latencia_p90_ms": 17331,
+        "centavos_total": 3.9739,
+        "centavos_por_execucao": 0.0473,
+        "latencia_p50_ms": 7346,
+        "latencia_p90_ms": 7974,
         "erro_integrante_pct": 0,
         "erro_pessoa_pct": 0,
         "margem_pontos": 0,
@@ -91,42 +83,34 @@
     ],
     "porPapel": [
       {
-        "papel": "escritor",
-        "modelos": "claude-sonnet-5-5",
-        "chamadas": 6,
-        "centavos_total": 8.8258,
-        "latencia_p50_ms": 1661,
-        "latencia_p90_ms": 1931
-      },
-      {
         "papel": "operario",
         "modelos": "claude-haiku-5-5",
-        "chamadas": 30,
-        "centavos_total": 2.0526,
-        "latencia_p50_ms": 1433,
-        "latencia_p90_ms": 1584
+        "chamadas": 50,
+        "centavos_total": 3.9739,
+        "latencia_p50_ms": 1446,
+        "latencia_p90_ms": 1721
       }
     ],
     "total": {
-      "execucoes": 60,
+      "execucoes": 84,
       "acerto_pct": 100,
       "erro_critico": 0,
-      "centavos_total": 10.8784
+      "centavos_total": 3.9739
     }
   },
   "portoes": [
     {
       "contrato": "ges.triagem.classificar",
       "liberado": true,
-      "motivo": "Haiku igualou o Sonnet em 60 casos, sem erro crítico.",
-      "acerto_sonnet": 60,
-      "acerto_haiku": 60,
+      "motivo": "Haiku igualou o Sonnet em 84 casos, sem erro crítico.",
+      "acerto_sonnet": 84,
+      "acerto_haiku": 84,
       "erro_critico_haiku": 0,
       "casos_piores": [],
-      "escaladas_sonnet": 4,
-      "escaladas_haiku": 6,
-      "centavos_sonnet": 47.5643,
-      "centavos_haiku": 10.8784,
+      "escaladas_sonnet": 0,
+      "escaladas_haiku": 0,
+      "centavos_sonnet": 80.9136,
+      "centavos_haiku": 3.9739,
       "configuracao": {
         "ges.triagem.classificar": {
           "operario": "claude-haiku-5-5"
@@ -140,6 +124,206 @@
   "roteamento_por_grupo": {},
   "linhas": [
     {
+      "caso": "tri-ctx-aberta",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf2a66aa8c46d4c5fa4a65cbf072adc1f",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6371,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-aberta",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex699d852a9c514917b6f8ceac2ab2ea2e",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6420,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-aberta-antes-da-palavra",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exae21c1ad71f543dba2460c7686680443",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6460,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-aberta-antes-da-palavra",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exe984b342386e4581bda458634bdf7bec",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6385,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-carteira-unica",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excc2fc35321d043c987aa8f763dbcc4ff",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6421,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-carteira-unica",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excebe1f4e59104839b5e3da7282d31ffe",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6365,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-carteira-varias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4123b588892342f2b81bc862364a1f66",
+      "estado": "concluida",
+      "centavos": 1.62864,
+      "latencia_ms": 9463,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.62864:3131"
+      ]
+    },
+    {
+      "caso": "tri-ctx-carteira-varias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exde6ea4222b694870a52ae135ea6c361c",
+      "estado": "concluida",
+      "centavos": 1.62324,
+      "latencia_ms": 8365,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.62324:1858"
+      ]
+    },
+    {
+      "caso": "tri-ctx-envio-antigo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc23a5797d3f24ee68094e0533e6ff70e",
+      "estado": "concluida",
+      "centavos": 1.61352,
+      "latencia_ms": 11428,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.61352:5136"
+      ]
+    },
+    {
+      "caso": "tri-ctx-envio-antigo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1edd9e4a34bc43b7975f951a1f445985",
+      "estado": "concluida",
+      "centavos": 1.59732,
+      "latencia_ms": 7867,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.59732:1416"
+      ]
+    },
+    {
+      "caso": "tri-ctx-envio-recente",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbaf7f8898b6245469a5d952e58c1e62b",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6387,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-envio-recente",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex9b46c1d9528544978f514f8894d2bae9",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6386,
+      "chamadas": []
+    },
+    {
       "caso": "tri-desconhecido-impostos",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
@@ -149,10 +333,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex25acea86616e4e0bba8e22efb480de41",
+      "execucao_id": "ex3169cdc7862446bfbe3a2678fc12ec2d",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3362,
+      "latencia_ms": 6360,
       "chamadas": []
     },
     {
@@ -165,10 +349,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exdeb0caec64924eac91fad776b40ed115",
+      "execucao_id": "exbf1709e56a1d4f3bb04f9a1cd1ba0c55",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3445,
+      "latencia_ms": 6450,
       "chamadas": []
     },
     {
@@ -176,18 +360,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exfd98cfb653fc4323b1a3b28cd8d50506",
-      "estado": "cancelada",
-      "centavos": 2.77776,
-      "latencia_ms": 5907,
+      "execucao_id": "ex38097194ee5e43a2ba66d1d5bea07962",
+      "estado": "concluida",
+      "centavos": 1.58976,
+      "latencia_ms": 8447,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.3446:1401",
-        "escritor:claude-sonnet-5-5:1.43316:1416"
+        "operario:claude-sonnet-5-5:1.58976:1996"
       ]
     },
     {
@@ -195,18 +378,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex2dde5d4c416f459ca54c50da25b6d01b",
-      "estado": "cancelada",
-      "centavos": 2.79936,
-      "latencia_ms": 6436,
+      "execucao_id": "ex157cc8c56e6c45099cf824e6728ee662",
+      "estado": "concluida",
+      "centavos": 1.57896,
+      "latencia_ms": 7834,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.3554:2121",
-        "escritor:claude-sonnet-5-5:1.44396:1461"
+        "operario:claude-sonnet-5-5:1.57896:1565"
       ]
     },
     {
@@ -219,10 +401,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex58693d17ae514e50a4251f263c0279c6",
+      "execucao_id": "exe481451c8b1746f1b41cef3d5921cc58",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3387,
+      "latencia_ms": 6370,
       "chamadas": []
     },
     {
@@ -235,10 +417,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exf6d17ba530554005a5a83739a29c5a4b",
+      "execucao_id": "ex7ae1acd8e25449ad9542d0e540c4f4d8",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3335,
+      "latencia_ms": 6418,
       "chamadas": []
     },
     {
@@ -246,64 +428,72 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
+      "esperado": "gestao_atendimento>dp",
+      "obtido": "gestao_atendimento>dp",
       "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
+      "pessoa": "gestao_atendimento>dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex34e9ea6eee474c589448d04767aa9d24",
+      "execucao_id": "ex613b735aea0c43649d2fde409fd80338",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3399,
-      "chamadas": []
+      "centavos": 1.5552,
+      "latencia_ms": 10962,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.5552:4481"
+      ]
     },
     {
       "caso": "tri-menu-atendimento",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
+      "esperado": "gestao_atendimento>dp",
+      "obtido": "gestao_atendimento>dp",
       "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
+      "pessoa": "gestao_atendimento>dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex0c8da70758c04855b691b1cba6d41415",
+      "execucao_id": "excc7bb2e829ca4b99833c8d8291ee62d6",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3377,
-      "chamadas": []
+      "centavos": 1.5552,
+      "latencia_ms": 8912,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.5552:2608"
+      ]
     },
     {
       "caso": "tri-menu-contra-texto",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "contabil",
-      "obtido": "contabil",
+      "esperado": "contabil>fiscal",
+      "obtido": "contabil>fiscal",
       "resultado": "acerto",
-      "pessoa": "contabil",
+      "pessoa": "contabil>fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex812ac4a49e284e8a97980c31c9462199",
+      "execucao_id": "ex6ce7870857874176b3ab6dc0960a251b",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3398,
-      "chamadas": []
+      "centavos": 1.55844,
+      "latencia_ms": 7959,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.55844:1682"
+      ]
     },
     {
       "caso": "tri-menu-contra-texto",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "contabil",
-      "obtido": "contabil",
+      "esperado": "contabil>fiscal",
+      "obtido": "contabil>fiscal",
       "resultado": "acerto",
-      "pessoa": "contabil",
+      "pessoa": "contabil>fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex2389fd9a52194ab68cada4458d218f55",
+      "execucao_id": "exbcddf05d66cb4002bdd89a6fc71d9106",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3360,
-      "chamadas": []
+      "centavos": 1.55844,
+      "latencia_ms": 7930,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.55844:1679"
+      ]
     },
     {
       "caso": "tri-menu-dp",
@@ -315,10 +505,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex747ef34c53b64337a8834846ca8552c2",
+      "execucao_id": "ex0e0b9ace20ee458d8d81113ad8c1cc31",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3409,
+      "latencia_ms": 6374,
       "chamadas": []
     },
     {
@@ -331,10 +521,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex01aecd4754654419b22d243c51d55499",
+      "execucao_id": "exd4044c31d5744fe4bde9bd6cdba01850",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3363,
+      "latencia_ms": 6448,
       "chamadas": []
     },
     {
@@ -347,11 +537,13 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex99b363ba3d634cbf94a9f4be0d61352d",
+      "execucao_id": "exae58c4d52ec944e7990ed638cf3161b3",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3428,
-      "chamadas": []
+      "centavos": 1.62108,
+      "latencia_ms": 8350,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.62108:2036"
+      ]
     },
     {
       "caso": "tri-menu-fiscal",
@@ -363,11 +555,13 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex310ffa90e58a4ebb8632f280c18eeca1",
+      "execucao_id": "exa1e3c7a52764440e9819ab17da2294a9",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3477,
-      "chamadas": []
+      "centavos": 1.62108,
+      "latencia_ms": 7977,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.62108:1757"
+      ]
     },
     {
       "caso": "tri-menu-societario",
@@ -379,11 +573,13 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exb0e43178eed4431d8362a49678df8b58",
+      "execucao_id": "exa146fd74bf7046af8e0ca64affa4ac44",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3402,
-      "chamadas": []
+      "centavos": 1.6254,
+      "latencia_ms": 7914,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.6254:1714"
+      ]
     },
     {
       "caso": "tri-menu-societario",
@@ -395,28 +591,30 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex4086855251c24a4e811864cca6614fc6",
+      "execucao_id": "ex0d3fda60aeb74292a5cd9ed8fad91495",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3367,
-      "chamadas": []
+      "centavos": 1.6092,
+      "latencia_ms": 7433,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.6092:1994"
+      ]
     },
     {
       "caso": "tri-misto-das-ferias",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exa7a40374512c443ca2d6d2cc9fbdac86",
-      "estado": "cancelada",
-      "centavos": 1.41156,
-      "latencia_ms": 3947,
+      "execucao_id": "ex7fd469dd579c4ffc87259a496476b0a1",
+      "estado": "concluida",
+      "centavos": 1.59732,
+      "latencia_ms": 9939,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.41156:1840"
+        "operario:claude-sonnet-5-5:1.59732:3599"
       ]
     },
     {
@@ -424,17 +622,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex3e9f1c1799ee477eaa8ae0a1af01720f",
-      "estado": "cancelada",
-      "centavos": 1.41156,
-      "latencia_ms": 3443,
+      "execucao_id": "exa35083b2ad2b44969dc32450eb80100f",
+      "estado": "concluida",
+      "centavos": 1.62972,
+      "latencia_ms": 8462,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.41156:1602"
+        "operario:claude-sonnet-5-5:1.62972:1956"
       ]
     },
     {
@@ -442,17 +640,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex0f55193b4a214919bbd766aa10cbd6b7",
-      "estado": "cancelada",
-      "centavos": 1.41372,
-      "latencia_ms": 3475,
+      "execucao_id": "ex564fe05aae8049fca661dd6574eeb9ed",
+      "estado": "concluida",
+      "centavos": 1.70316,
+      "latencia_ms": 7968,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.41372:1323"
+        "operario:claude-sonnet-5-5:1.70316:1577"
       ]
     },
     {
@@ -460,17 +658,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exb380b2771a1547c88be1fcfee6dd0777",
-      "estado": "cancelada",
-      "centavos": 1.41372,
-      "latencia_ms": 3425,
+      "execucao_id": "ex84b511fe17d743f98bad826669cf9624",
+      "estado": "concluida",
+      "centavos": 1.71936,
+      "latencia_ms": 7974,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.41372:1545"
+        "operario:claude-sonnet-5-5:1.71936:1857"
       ]
     },
     {
@@ -478,17 +676,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex289aa244a3014107a8f37c647ed02ba5",
-      "estado": "cancelada",
-      "centavos": 1.38132,
-      "latencia_ms": 3362,
+      "execucao_id": "exba5323e195874c8ba4513812103c8167",
+      "estado": "concluida",
+      "centavos": 1.65348,
+      "latencia_ms": 8469,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.38132:1668"
+        "operario:claude-sonnet-5-5:1.65348:1913"
       ]
     },
     {
@@ -496,17 +694,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exd4eb7c2fa62b481ca400208f3a446a59",
-      "estado": "cancelada",
-      "centavos": 1.38672,
-      "latencia_ms": 3900,
+      "execucao_id": "exb8669b864022445db905f811b0856f8f",
+      "estado": "concluida",
+      "centavos": 1.59408,
+      "latencia_ms": 8404,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.38672:2151"
+        "operario:claude-sonnet-5-5:1.59408:1753"
       ]
     },
     {
@@ -514,17 +712,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex7a08c99d662c4630b9e61a2ecbd570ba",
-      "estado": "cancelada",
-      "centavos": 1.39968,
-      "latencia_ms": 3395,
+      "execucao_id": "exe198cbdf0b8c457f965e9532e480c3f4",
+      "estado": "concluida",
+      "centavos": 1.63404,
+      "latencia_ms": 8874,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.39968:1495"
+        "operario:claude-sonnet-5-5:1.63404:2810"
       ]
     },
     {
@@ -532,17 +730,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex9cd89bc1e99b49df8eeba23afda6e961",
-      "estado": "cancelada",
-      "centavos": 1.39968,
-      "latencia_ms": 3486,
+      "execucao_id": "ex7ae18e12b42c49668a699023ec92e454",
+      "estado": "concluida",
+      "centavos": 1.65024,
+      "latencia_ms": 7848,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.39968:1507"
+        "operario:claude-sonnet-5-5:1.65024:1491"
       ]
     },
     {
@@ -555,12 +753,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex541cbcaeaf1d4070970a734f26f74b5d",
+      "execucao_id": "exff93226bb26048b38b6f74b1bee8498e",
       "estado": "concluida",
-      "centavos": 1.39104,
-      "latencia_ms": 4916,
+      "centavos": 1.5822,
+      "latencia_ms": 7959,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.39104:1860"
+        "operario:claude-sonnet-5-5:1.5822:1968"
       ]
     },
     {
@@ -573,12 +771,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exc3d7c1e76d6349e9a601fbde14b951cd",
+      "execucao_id": "exe53b3ad5f11049a897b4affc179a94e9",
       "estado": "concluida",
-      "centavos": 1.39644,
-      "latencia_ms": 4966,
+      "centavos": 1.6038,
+      "latencia_ms": 7894,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.39644:1460"
+        "operario:claude-sonnet-5-5:1.6038:1510"
       ]
     },
     {
@@ -591,12 +789,12 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex4380218e586f438b8435d5eb66d8598c",
+      "execucao_id": "exaafd146830dd4781a707336cfe21a594",
       "estado": "concluida",
-      "centavos": 1.45152,
-      "latencia_ms": 6325,
+      "centavos": 1.71288,
+      "latencia_ms": 7417,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.45152:2457"
+        "operario:claude-sonnet-5-5:1.71288:1593"
       ]
     },
     {
@@ -609,12 +807,12 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex3c85943f8ea3401fb708a5a69ffaf665",
+      "execucao_id": "exf8880eb40ebf4e72a708e556d3725b82",
       "estado": "concluida",
-      "centavos": 1.48932,
-      "latencia_ms": 5467,
+      "centavos": 1.66968,
+      "latencia_ms": 7856,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.48932:2432"
+        "operario:claude-sonnet-5-5:1.66968:1466"
       ]
     },
     {
@@ -627,13 +825,12 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exd84c51b263204644af561507f33f35fa",
+      "execucao_id": "ex149002213c7543f98e1a171a778e0019",
       "estado": "concluida",
-      "centavos": 2.88144,
-      "latencia_ms": 7947,
+      "centavos": 1.6308,
+      "latencia_ms": 7914,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.40184:1858",
-        "escritor:claude-sonnet-5-5:1.4796:1534"
+        "operario:claude-sonnet-5-5:1.6308:1470"
       ]
     },
     {
@@ -646,13 +843,12 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exb3aa66061f4240509430ff86476a4cde",
+      "execucao_id": "exe26169ea78ec4c6fa0a63e3916c854a7",
       "estado": "concluida",
-      "centavos": 2.9084399999999997,
-      "latencia_ms": 7365,
+      "centavos": 1.6308,
+      "latencia_ms": 7918,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.41264:1485",
-        "escritor:claude-sonnet-5-5:1.4958:1494"
+        "operario:claude-sonnet-5-5:1.6308:1558"
       ]
     },
     {
@@ -665,12 +861,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exf0726d09ba1d4d4eb956e256c20a3572",
+      "execucao_id": "exa10069f17e274bb190279889c72b3e67",
       "estado": "concluida",
-      "centavos": 1.38132,
-      "latencia_ms": 6349,
+      "centavos": 1.64268,
+      "latencia_ms": 9377,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.38132:2852"
+        "operario:claude-sonnet-5-5:1.64268:2909"
       ]
     },
     {
@@ -683,12 +879,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex19c4ad314cb848af9af474b88a0c8e53",
+      "execucao_id": "ex117b000e506042cf8501e8ccdc83e482",
       "estado": "concluida",
-      "centavos": 1.35972,
-      "latencia_ms": 4857,
+      "centavos": 1.64268,
+      "latencia_ms": 11893,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.35972:1530"
+        "operario:claude-sonnet-5-5:1.64268:5043"
       ]
     },
     {
@@ -701,12 +897,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex1e76e7e5718444efa94a2e31ad545f97",
+      "execucao_id": "ex9f2be09336d14af8b7987169ccbb2872",
       "estado": "concluida",
-      "centavos": 1.31436,
-      "latencia_ms": 4896,
+      "centavos": 1.55412,
+      "latencia_ms": 8412,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.31436:1419"
+        "operario:claude-sonnet-5-5:1.55412:1831"
       ]
     },
     {
@@ -719,12 +915,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exde39a73af55c480cb8d49ea460c605c0",
+      "execucao_id": "ex08ac5e3ca2aa470db762e9ef58a09fc1",
       "estado": "concluida",
-      "centavos": 1.31976,
-      "latencia_ms": 5840,
+      "centavos": 1.53252,
+      "latencia_ms": 7835,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.31976:2163"
+        "operario:claude-sonnet-5-5:1.53252:1833"
       ]
     },
     {
@@ -737,12 +933,12 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex119b5ffbb18f43aeb9f718e86d497617",
+      "execucao_id": "exc3c8b9d026a24ee6b0a4fde253bf810b",
       "estado": "concluida",
-      "centavos": 1.38672,
-      "latencia_ms": 5397,
+      "centavos": 1.68048,
+      "latencia_ms": 9410,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.38672:1854"
+        "operario:claude-sonnet-5-5:1.68048:2687"
       ]
     },
     {
@@ -755,12 +951,12 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex8170d2bb472749da9fa5ed321c19392e",
+      "execucao_id": "ex876552214d57438bb7fac1da4a22e20a",
       "estado": "concluida",
-      "centavos": 1.40832,
-      "latencia_ms": 4947,
+      "centavos": 1.67508,
+      "latencia_ms": 7903,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.40832:1640"
+        "operario:claude-sonnet-5-5:1.67508:1728"
       ]
     },
     {
@@ -773,12 +969,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex6fbab093482c4f63a404559e65e47442",
+      "execucao_id": "ex9718f764b77144989f36e989ffface95",
       "estado": "concluida",
-      "centavos": 1.38132,
-      "latencia_ms": 5847,
+      "centavos": 1.65888,
+      "latencia_ms": 9374,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.38132:2271"
+        "operario:claude-sonnet-5-5:1.65888:2804"
       ]
     },
     {
@@ -791,12 +987,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exa60057277c1c44f1abe61a543cc2e43d",
+      "execucao_id": "ex21c3a2e5649f45d589638f948e9980df",
       "estado": "concluida",
-      "centavos": 1.35972,
-      "latencia_ms": 4356,
+      "centavos": 1.66428,
+      "latencia_ms": 8440,
       "chamadas": [
-        "operario:claude-sonnet-5-5:1.35972:1421"
+        "operario:claude-sonnet-5-5:1.66428:1715"
       ]
     },
     {
@@ -809,198 +1005,198 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exa517ac941a464d54924a5662ef441fd2",
+      "execucao_id": "ex17b4ff901cef458b8c9d70b653960c56",
       "estado": "concluida",
-      "centavos": 1.39428,
+      "centavos": 1.61244,
+      "latencia_ms": 9344,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.61244:2622"
+      ]
+    },
+    {
+      "caso": "tri-modelo-resultado",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "contabil",
+      "obtido": "contabil",
+      "resultado": "acerto",
+      "pessoa": "contabil",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3c23cfb27fef47a99f56af78e6a269e9",
+      "estado": "concluida",
+      "centavos": 1.61244,
+      "latencia_ms": 9937,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.61244:3589"
+      ]
+    },
+    {
+      "caso": "tri-modelo-sabado",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "gestao_atendimento",
+      "obtido": "gestao_atendimento",
+      "resultado": "acerto",
+      "pessoa": "gestao_atendimento",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3df47d7504d34602b06f2319d92fa404",
+      "estado": "concluida",
+      "centavos": 1.59084,
+      "latencia_ms": 7909,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.59084:1384"
+      ]
+    },
+    {
+      "caso": "tri-modelo-sabado",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "gestao_atendimento",
+      "obtido": "gestao_atendimento",
+      "resultado": "acerto",
+      "pessoa": "gestao_atendimento",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8a483e2121ef4ab7839542c53c3c5094",
+      "estado": "concluida",
+      "centavos": 1.59084,
+      "latencia_ms": 7877,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.59084:1363"
+      ]
+    },
+    {
+      "caso": "tri-modelo-tributo-venda",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1a7d821945994084bc1685b450cf876a",
+      "estado": "concluida",
+      "centavos": 1.59948,
+      "latencia_ms": 9379,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.59948:2639"
+      ]
+    },
+    {
+      "caso": "tri-modelo-tributo-venda",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3ca15ea2e9594a579bf6174a8775f495",
+      "estado": "concluida",
+      "centavos": 1.64808,
+      "latencia_ms": 11416,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.64808:4876"
+      ]
+    },
+    {
+      "caso": "tri-palavra-admissao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex385b96c8201e42d8b3c6cd6bd393a359",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6337,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-admissao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excf060dad2ad74604af32a783557b3d16",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 5324,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-balancete",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "contabil",
+      "obtido": "contabil",
+      "resultado": "acerto",
+      "pessoa": "contabil",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0ea2bff5e8b44490aa14ef8581ae9798",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6377,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-balancete",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "contabil",
+      "obtido": "contabil",
+      "resultado": "acerto",
+      "pessoa": "contabil",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exabc37be874f34d44aebaa3c2181c221a",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 5368,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-contrato-social",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "societario",
+      "obtido": "societario",
+      "resultado": "acerto",
+      "pessoa": "societario",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa62a450a050747829905c2e2b3c90215",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 7384,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-contrato-social",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "societario",
+      "obtido": "societario",
+      "resultado": "acerto",
+      "pessoa": "societario",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb8647fdb97444b70a6ddca1c8f8a48ca",
+      "estado": "concluida",
+      "centavos": 0,
       "latencia_ms": 5841,
-      "chamadas": [
-        "operario:claude-sonnet-5-5:1.39428:2348"
-      ]
-    },
-    {
-      "caso": "tri-modelo-resultado",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "contabil",
-      "obtido": "contabil",
-      "resultado": "acerto",
-      "pessoa": "contabil",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex99aa45826fa2488da58bb2f6c5fa3976",
-      "estado": "concluida",
-      "centavos": 1.38348,
-      "latencia_ms": 5353,
-      "chamadas": [
-        "operario:claude-sonnet-5-5:1.38348:1546"
-      ]
-    },
-    {
-      "caso": "tri-modelo-sabado",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
-      "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "exed7fffc5ec8948e59187a5d3439a2bac",
-      "estado": "concluida",
-      "centavos": 1.37808,
-      "latencia_ms": 4901,
-      "chamadas": [
-        "operario:claude-sonnet-5-5:1.37808:1557"
-      ]
-    },
-    {
-      "caso": "tri-modelo-sabado",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
-      "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex9bebfdb38b7b4ad1be4144355f34227f",
-      "estado": "concluida",
-      "centavos": 1.37808,
-      "latencia_ms": 6340,
-      "chamadas": [
-        "operario:claude-sonnet-5-5:1.37808:2787"
-      ]
-    },
-    {
-      "caso": "tri-modelo-tributo-venda",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "fiscal",
-      "obtido": "fiscal",
-      "resultado": "acerto",
-      "pessoa": "fiscal",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex96c458de43644d959cdb2712ac9b995d",
-      "estado": "concluida",
-      "centavos": 1.39752,
-      "latencia_ms": 5854,
-      "chamadas": [
-        "operario:claude-sonnet-5-5:1.39752:2411"
-      ]
-    },
-    {
-      "caso": "tri-modelo-tributo-venda",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "fiscal",
-      "obtido": "fiscal",
-      "resultado": "acerto",
-      "pessoa": "fiscal",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex6437050c81d54b8cb7104147fbb47d43",
-      "estado": "concluida",
-      "centavos": 1.40832,
-      "latencia_ms": 4859,
-      "chamadas": [
-        "operario:claude-sonnet-5-5:1.40832:1468"
-      ]
-    },
-    {
-      "caso": "tri-palavra-admissao",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "dp",
-      "obtido": "dp",
-      "resultado": "acerto",
-      "pessoa": "dp",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex16b022cb02b944188bd16187243c97b1",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3309,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-admissao",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "dp",
-      "obtido": "dp",
-      "resultado": "acerto",
-      "pessoa": "dp",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex0d8b122028e94c6c87881c9488544031",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3482,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-balancete",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "contabil",
-      "obtido": "contabil",
-      "resultado": "acerto",
-      "pessoa": "contabil",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "exceb4eb8f69664c6baab725f31e27ce88",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3443,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-balancete",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "contabil",
-      "obtido": "contabil",
-      "resultado": "acerto",
-      "pessoa": "contabil",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex5ec09c2769fe41dda90f01c4276a4779",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3325,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-contrato-social",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "societario",
-      "obtido": "societario",
-      "resultado": "acerto",
-      "pessoa": "societario",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "exe9546312f4514341bdde41a17738c74b",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3356,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-contrato-social",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "societario",
-      "obtido": "societario",
-      "resultado": "acerto",
-      "pessoa": "societario",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex66ec31e003fd4a6c9f85dcb95566c346",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3364,
       "chamadas": []
     },
     {
@@ -1013,10 +1209,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex70a936ecd9774f2db9f0cbb644511ff6",
+      "execucao_id": "exc3eca70503154d7883e289a156eff0af",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3395,
+      "latencia_ms": 7410,
       "chamadas": []
     },
     {
@@ -1029,10 +1225,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exb974bd5f77ff45a787b14f86d12a92f6",
+      "execucao_id": "ex97d6fc88ccd14767a2decb61b1700122",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3484,
+      "latencia_ms": 6477,
       "chamadas": []
     },
     {
@@ -1045,10 +1241,10 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex31053e5b032f4cdbb1f37e9656e9937f",
+      "execucao_id": "exd68bb78d82b34fd4ba51c8d64844954c",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3360,
+      "latencia_ms": 6904,
       "chamadas": []
     },
     {
@@ -1061,10 +1257,10 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exd9692cba56f949cfbb2c711e732e35c5",
+      "execucao_id": "exfc06d53a625647b2ad1905e827b6171c",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3365,
+      "latencia_ms": 6325,
       "chamadas": []
     },
     {
@@ -1077,10 +1273,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exc2a43ba2b0564ed6a7f3be4973fd4057",
+      "execucao_id": "ex9dca26567c0d40688116a81a6762b270",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3360,
+      "latencia_ms": 7383,
       "chamadas": []
     },
     {
@@ -1093,10 +1289,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex64c7513cdf3d4e92a3a2918546a728be",
+      "execucao_id": "ex250189408b7e45a6ba59e7adb043693c",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3332,
+      "latencia_ms": 5836,
       "chamadas": []
     },
     {
@@ -1109,10 +1305,10 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex0df47f7f3fb44574a7225c2411d0cf40",
+      "execucao_id": "exbd07dc2b53a54559928edc57c676d379",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3342,
+      "latencia_ms": 7384,
       "chamadas": []
     },
     {
@@ -1125,10 +1321,10 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex8d66167aebb64b429483d225ffa55d51",
+      "execucao_id": "ex542b5a3bca7a4bb6adf7fc2d3f535247",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3366,
+      "latencia_ms": 5889,
       "chamadas": []
     },
     {
@@ -1141,10 +1337,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex85618a5a31d34dac9281aa1bffb7ad9b",
+      "execucao_id": "exe917e062b3b84be08d29e5d1c4f017dd",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3328,
+      "latencia_ms": 7383,
       "chamadas": []
     },
     {
@@ -1157,15 +1353,423 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex92c2ed773445494e90fb9b84cdd019d1",
+      "execucao_id": "ex012ef532a6e245278f3987f0757f2cf5",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3356,
+      "latencia_ms": 5433,
       "chamadas": []
+    },
+    {
+      "caso": "tri-perg-nome",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex4ca1eef8d5634215bafd50e81e913977",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 5895,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-nome",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excbf442076ec447d9b941b39461e8906e",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6471,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-numero",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2cfb596851ca4234b8f8a957a78292a1",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6323,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-numero",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excd7dd5de4b7f487bab193a55c9624af8",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 5912,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-segunda",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0b3368e8a1c548078b148def708ec368",
+      "estado": "concluida",
+      "centavos": 1.6524,
+      "latencia_ms": 8335,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.6524:1820"
+      ]
+    },
+    {
+      "caso": "tri-perg-segunda",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex45fe41d7e4554af996e37a6c79519de4",
+      "estado": "concluida",
+      "centavos": 1.6146,
+      "latencia_ms": 7972,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.6146:1586"
+      ]
+    },
+    {
+      "caso": "tri-perg-sem-acordo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "sem_acordo",
+      "obtido": "sem_acordo",
+      "resultado": "acerto",
+      "pessoa": "sem_acordo",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex92bc9ca1f56d451b995e5a7f0e51c618",
+      "estado": "concluida",
+      "centavos": 1.61568,
+      "latencia_ms": 8357,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.61568:2320"
+      ]
+    },
+    {
+      "caso": "tri-perg-sem-acordo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "sem_acordo",
+      "obtido": "sem_acordo",
+      "resultado": "acerto",
+      "pessoa": "sem_acordo",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbb5bbd7308c7463e98534e4a7ae1c057",
+      "estado": "concluida",
+      "centavos": 1.58868,
+      "latencia_ms": 7951,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.58868:1708"
+      ]
+    },
+    {
+      "caso": "tri-resp-misto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1b2ac957c4cf4cc29ff7a046d0a597a5",
+      "estado": "cancelada",
+      "centavos": 1.59192,
+      "latencia_ms": 3418,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.59192:1599"
+      ]
+    },
+    {
+      "caso": "tri-resp-misto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exfeafa2312004451d9c91b9d4de09661f",
+      "estado": "cancelada",
+      "centavos": 1.62972,
+      "latencia_ms": 3453,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.62972:1550"
+      ]
+    },
+    {
+      "caso": "tri-resp-vago",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex2f4ab1b7be844d26b0d50cc67a8e2e61",
+      "estado": "cancelada",
+      "centavos": 1.58976,
+      "latencia_ms": 3465,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.58976:1384"
+      ]
+    },
+    {
+      "caso": "tri-resp-vago",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3b1ab64e17db47069947c5f635846f5b",
+      "estado": "cancelada",
+      "centavos": 1.57896,
+      "latencia_ms": 3432,
+      "chamadas": [
+        "operario:claude-sonnet-5-5:1.57896:1426"
+      ]
     }
   ],
   "linhas_haiku": [
     {
+      "caso": "tri-ctx-aberta",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex50e68df2ce5347b59ec7e4c69f189134",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6459,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-aberta",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex8324a3fd7dc44a8ca798c99aadc4986a",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6335,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-aberta-antes-da-palavra",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exc292b1bf6f994977bb1486414944e48c",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6459,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-aberta-antes-da-palavra",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex864612ceb6ba485e86ad1f3945d015b7",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6343,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-carteira-unica",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3f5d0fd81d264afb96ccb5e522af44a1",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6434,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-carteira-unica",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex80fad7c2493a41139e2c8b7da6800336",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 5858,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-carteira-varias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exd22d5f7348644dc7bf5c66d3e0ed8c76",
+      "estado": "concluida",
+      "centavos": 0.079002,
+      "latencia_ms": 8359,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.079002:1894"
+      ]
+    },
+    {
+      "caso": "tri-ctx-carteira-varias",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex032c3939a1c54ad0b409624984be86a8",
+      "estado": "concluida",
+      "centavos": 0.078192,
+      "latencia_ms": 7853,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078192:1680"
+      ]
+    },
+    {
+      "caso": "tri-ctx-envio-antigo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa7fc53e0e2b54127a20462ad96cce20b",
+      "estado": "concluida",
+      "centavos": 0.079866,
+      "latencia_ms": 7935,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.079866:1726"
+      ]
+    },
+    {
+      "caso": "tri-ctx-envio-antigo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf6065a54c4ec4c2cbdff71c9bca27812",
+      "estado": "concluida",
+      "centavos": 0.078786,
+      "latencia_ms": 7927,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078786:1514"
+      ]
+    },
+    {
+      "caso": "tri-ctx-envio-recente",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3577deeb28214b0d8bb76bfa3a934ac2",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6344,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-ctx-envio-recente",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb14581af2c084605ba159452b15d683b",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6422,
+      "chamadas": []
+    },
+    {
       "caso": "tri-desconhecido-impostos",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
@@ -1175,10 +1779,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex519a329b31c1455ba31cfae18680e028",
+      "execucao_id": "exae1a9dc852f14c6383f466bdca77e0d1",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3351,
+      "latencia_ms": 6392,
       "chamadas": []
     },
     {
@@ -1191,10 +1795,10 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex2f142141af714ab6bd770d78589119c9",
+      "execucao_id": "ex014f67dcc2b04d5c91484e4f66507ddf",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3403,
+      "latencia_ms": 6333,
       "chamadas": []
     },
     {
@@ -1202,18 +1806,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exeb876d1259334b36b1c0086478836b05",
-      "estado": "cancelada",
-      "centavos": 1.5265799999999998,
-      "latencia_ms": 5450,
+      "execucao_id": "exa39b9a961afb430085270fcdb2cef8c0",
+      "estado": "concluida",
+      "centavos": 0.077868,
+      "latencia_ms": 7393,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.06642:1018",
-        "escritor:claude-sonnet-5-5:1.46016:1633"
+        "operario:claude-haiku-5-5:0.077868:1088"
       ]
     },
     {
@@ -1221,18 +1824,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exdba23c1fb5c449abb952dd32d5e7c90f",
-      "estado": "cancelada",
-      "centavos": 1.50174,
-      "latencia_ms": 5337,
+      "execucao_id": "ex5c384cb4d7b349c688feb79e565db3b9",
+      "estado": "concluida",
+      "centavos": 0.078678,
+      "latencia_ms": 7331,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.06858:1090",
-        "escritor:claude-sonnet-5-5:1.43316:1661"
+        "operario:claude-haiku-5-5:0.078678:1050"
       ]
     },
     {
@@ -1245,10 +1847,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exbc00489362dc482b88abbcc9443abd06",
+      "execucao_id": "ex12ef4a80e6084d51a9c835b6f1816e3e",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3332,
+      "latencia_ms": 6416,
       "chamadas": []
     },
     {
@@ -1261,10 +1863,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex331cf77ff2ff464ba67a4523dfdb396a",
+      "execucao_id": "ex721c6c20e9294fc3aa00046e642b49c6",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3330,
+      "latencia_ms": 6331,
       "chamadas": []
     },
     {
@@ -1272,64 +1874,72 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
+      "esperado": "gestao_atendimento>dp",
+      "obtido": "gestao_atendimento>dp",
       "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
+      "pessoa": "gestao_atendimento>dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex6f8604af89c14ec7b7093e3b857d5298",
+      "execucao_id": "ex3cb7fb8b3104447a9925c51cf29680e3",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 17336,
-      "chamadas": []
+      "centavos": 0.07668,
+      "latencia_ms": 8377,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.07668:1779"
+      ]
     },
     {
       "caso": "tri-menu-atendimento",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
+      "esperado": "gestao_atendimento>dp",
+      "obtido": "gestao_atendimento>dp",
       "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
+      "pessoa": "gestao_atendimento>dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex549db976f421433d82a0974c716438fb",
+      "execucao_id": "exd49370230ec74fa88b502e91d6b4ec30",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3480,
-      "chamadas": []
+      "centavos": 0.07668,
+      "latencia_ms": 7921,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.07668:1401"
+      ]
     },
     {
       "caso": "tri-menu-contra-texto",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "contabil",
-      "obtido": "contabil",
+      "esperado": "contabil>fiscal",
+      "obtido": "contabil>fiscal",
       "resultado": "acerto",
-      "pessoa": "contabil",
+      "pessoa": "contabil>fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex7650496cfd584f8fa87480e2d163b0a1",
+      "execucao_id": "exfcef97cd810b4a5b8bbb6ca881427f1b",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 17334,
-      "chamadas": []
+      "centavos": 0.077922,
+      "latencia_ms": 8377,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.077922:1615"
+      ]
     },
     {
       "caso": "tri-menu-contra-texto",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "contabil",
-      "obtido": "contabil",
+      "esperado": "contabil>fiscal",
+      "obtido": "contabil>fiscal",
       "resultado": "acerto",
-      "pessoa": "contabil",
+      "pessoa": "contabil>fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex36718ca910a84e81bcd6d84437207a97",
+      "execucao_id": "ex670ec3e442e546f886010bd4f3c086e2",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3339,
-      "chamadas": []
+      "centavos": 0.078192,
+      "latencia_ms": 7890,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078192:1583"
+      ]
     },
     {
       "caso": "tri-menu-dp",
@@ -1341,10 +1951,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex78de903bd1b94e96ae76108913efb897",
+      "execucao_id": "ex31f376fe11e8429aa0be837e370f53f6",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 17332,
+      "latencia_ms": 6346,
       "chamadas": []
     },
     {
@@ -1357,10 +1967,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex03b0f927c6fd4cddad5a6d3fd0846cf1",
+      "execucao_id": "ex07e4485b62574e06b5efe1a8bfc75860",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3341,
+      "latencia_ms": 6344,
       "chamadas": []
     },
     {
@@ -1373,11 +1983,13 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex8b9346bb9f604254867f4c0df5c753ed",
+      "execucao_id": "exb9fc726991014551afc4b821c7d77230",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 17333,
-      "chamadas": []
+      "centavos": 0.078894,
+      "latencia_ms": 7846,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078894:1641"
+      ]
     },
     {
       "caso": "tri-menu-fiscal",
@@ -1389,11 +2001,13 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex959757700f00492b8b15e1c812de81c2",
+      "execucao_id": "ex160347af82b24da0b661b35f02ee4a27",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3419,
-      "chamadas": []
+      "centavos": 0.078894,
+      "latencia_ms": 7977,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078894:1439"
+      ]
     },
     {
       "caso": "tri-menu-societario",
@@ -1405,11 +2019,13 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex117fb1ed7e6444a0abc3a2adfcd584e8",
+      "execucao_id": "exb69feba0430e4d47b98eb8968adf6b42",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 17336,
-      "chamadas": []
+      "centavos": 0.07641,
+      "latencia_ms": 7833,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.07641:1421"
+      ]
     },
     {
       "caso": "tri-menu-societario",
@@ -1421,28 +2037,30 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "excba87638259c455fabff3a0840326bd8",
+      "execucao_id": "exeb2f4d7dbf5b4c5d8e254826262fef8b",
       "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3339,
-      "chamadas": []
+      "centavos": 0.07641,
+      "latencia_ms": 6894,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.07641:697"
+      ]
     },
     {
       "caso": "tri-misto-das-ferias",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex58d1691c9c7e4d97a3bf50011e37c9f5",
-      "estado": "cancelada",
-      "centavos": 0.070578,
-      "latencia_ms": 3333,
+      "execucao_id": "ex7981c644f90f46aa8eaa23d009fd7ab2",
+      "estado": "concluida",
+      "centavos": 0.081486,
+      "latencia_ms": 7974,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.070578:1459"
+        "operario:claude-haiku-5-5:0.081486:1717"
       ]
     },
     {
@@ -1450,17 +2068,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exbcda8bf63f78416bb1f23ec67a797430",
-      "estado": "cancelada",
-      "centavos": 0.067608,
-      "latencia_ms": 3411,
+      "execucao_id": "ex5eabb88d32eb4274b5c2bef8fb312c7b",
+      "estado": "concluida",
+      "centavos": 0.080676,
+      "latencia_ms": 7458,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.067608:1449"
+        "operario:claude-haiku-5-5:0.080676:748"
       ]
     },
     {
@@ -1468,17 +2086,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exc6b5abb0f2d54143aa401b82bb057851",
-      "estado": "cancelada",
-      "centavos": 0.069876,
-      "latencia_ms": 3354,
+      "execucao_id": "ex9d0b7a40f10e493d9c22bcee3815bff0",
+      "estado": "concluida",
+      "centavos": 0.082188,
+      "latencia_ms": 7412,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.069876:1449"
+        "operario:claude-haiku-5-5:0.082188:1013"
       ]
     },
     {
@@ -1486,17 +2104,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exc1b9c1e871ba432e9276643d95dbf9e6",
-      "estado": "cancelada",
-      "centavos": 0.072036,
-      "latencia_ms": 3379,
+      "execucao_id": "ex8a7a868e2a0f4dee8bbeba2964805959",
+      "estado": "concluida",
+      "centavos": 0.082188,
+      "latencia_ms": 7473,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.072036:1461"
+        "operario:claude-haiku-5-5:0.082188:1007"
       ]
     },
     {
@@ -1504,17 +2122,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex743dc2a2c9334ddeae39191813dfc6d4",
-      "estado": "cancelada",
-      "centavos": 0.066906,
-      "latencia_ms": 3354,
+      "execucao_id": "exc06cca1e52614b85916be720b3f0685b",
+      "estado": "concluida",
+      "centavos": 0.080244,
+      "latencia_ms": 7848,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.066906:1443"
+        "operario:claude-haiku-5-5:0.080244:1546"
       ]
     },
     {
@@ -1522,17 +2140,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex82bb319d2d3f44739a16838ad3504037",
-      "estado": "cancelada",
-      "centavos": 0.067446,
-      "latencia_ms": 3434,
+      "execucao_id": "exa5677099d32049e5819947bcc307273a",
+      "estado": "concluida",
+      "centavos": 0.080514,
+      "latencia_ms": 7950,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.067446:1337"
+        "operario:claude-haiku-5-5:0.080514:1462"
       ]
     },
     {
@@ -1540,17 +2158,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex674a8fddfd3945058839483385919e52",
-      "estado": "cancelada",
-      "centavos": 0.068364,
-      "latencia_ms": 2834,
+      "execucao_id": "exafb4724c78754376b1d8b7cc0b5b7055",
+      "estado": "concluida",
+      "centavos": 0.080622,
+      "latencia_ms": 7870,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068364:1058"
+        "operario:claude-haiku-5-5:0.080622:1497"
       ]
     },
     {
@@ -1558,17 +2176,17 @@
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "cartao",
-      "obtido": "cartao",
+      "esperado": "pergunta",
+      "obtido": "pergunta",
       "resultado": "acerto",
-      "pessoa": "cartao",
+      "pessoa": "pergunta",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex401dfb89b9b64506969f9a6ebe3caab7",
-      "estado": "cancelada",
-      "centavos": 0.068094,
-      "latencia_ms": 2890,
+      "execucao_id": "ex53e274aa099d4811b160bf5d8fc91105",
+      "estado": "concluida",
+      "centavos": 0.078732,
+      "latencia_ms": 8369,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068094:942"
+        "operario:claude-haiku-5-5:0.078732:1990"
       ]
     },
     {
@@ -1581,12 +2199,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex2f4e05b078cb424496fd16b90b9a1834",
+      "execucao_id": "ex2bb5270054ed4806b5663181791a03b9",
       "estado": "concluida",
-      "centavos": 0.067122,
-      "latencia_ms": 4394,
+      "centavos": 0.08019,
+      "latencia_ms": 7436,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.067122:965"
+        "operario:claude-haiku-5-5:0.08019:1119"
       ]
     },
     {
@@ -1599,12 +2217,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex0088e87bc0f4475cab7973553c1ba4d0",
+      "execucao_id": "exc2b989b4702f4119a5606a3802ad2005",
       "estado": "concluida",
-      "centavos": 0.065772,
-      "latencia_ms": 4468,
+      "centavos": 0.07938,
+      "latencia_ms": 7346,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.065772:1095"
+        "operario:claude-haiku-5-5:0.07938:912"
       ]
     },
     {
@@ -1617,12 +2235,12 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex9ab68b6241754eea9a80e97c8551547b",
+      "execucao_id": "exe13bf8ba754443a98efb8a09725149c3",
       "estado": "concluida",
-      "centavos": 0.070686,
-      "latencia_ms": 5414,
+      "centavos": 0.082134,
+      "latencia_ms": 7943,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.070686:1644"
+        "operario:claude-haiku-5-5:0.082134:1625"
       ]
     },
     {
@@ -1635,12 +2253,12 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex1972bfc8e95e4855a831a87012434456",
+      "execucao_id": "exfe650a0bb4054e7683a34d229b692ad9",
       "estado": "concluida",
-      "centavos": 0.070416,
-      "latencia_ms": 4425,
+      "centavos": 0.082674,
+      "latencia_ms": 6939,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.070416:1114"
+        "operario:claude-haiku-5-5:0.082674:780"
       ]
     },
     {
@@ -1653,12 +2271,12 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exab043935a7284f1e9363f751668037b6",
+      "execucao_id": "ex5abd5fad0e3c475e88deb646fe51ff63",
       "estado": "concluida",
-      "centavos": 0.069012,
-      "latencia_ms": 4417,
+      "centavos": 0.08073,
+      "latencia_ms": 7960,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.069012:915"
+        "operario:claude-haiku-5-5:0.08073:1526"
       ]
     },
     {
@@ -1671,12 +2289,12 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exa76ef0e8234240c8bb708d4f6c5f4cb3",
+      "execucao_id": "ex7e065e02784d4bccac5578c97b548663",
       "estado": "concluida",
-      "centavos": 0.069012,
-      "latencia_ms": 4867,
+      "centavos": 0.08073,
+      "latencia_ms": 7912,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.069012:1575"
+        "operario:claude-haiku-5-5:0.08073:1433"
       ]
     },
     {
@@ -1689,12 +2307,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exaf4630a43db6433da72b5c04491e27ab",
+      "execucao_id": "exed975a81a2f34524aa8911d190064c9e",
       "estado": "concluida",
-      "centavos": 0.069876,
-      "latencia_ms": 4918,
+      "centavos": 0.081594,
+      "latencia_ms": 7844,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.069876:1449"
+        "operario:claude-haiku-5-5:0.081594:1595"
       ]
     },
     {
@@ -1707,12 +2325,12 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex6e892f7604fb449b8ecb0204dfdbe209",
+      "execucao_id": "exccb2ee3663c54552b1e0c066d9d18345",
       "estado": "concluida",
-      "centavos": 0.070956,
-      "latencia_ms": 4870,
+      "centavos": 0.081054,
+      "latencia_ms": 7959,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.070956:1461"
+        "operario:claude-haiku-5-5:0.081054:1417"
       ]
     },
     {
@@ -1725,12 +2343,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex6527452099b04f87b15ee5d06ccbc680",
+      "execucao_id": "exe3f8b2cb97d2473482befb0a7442139b",
       "estado": "concluida",
-      "centavos": 0.067068,
-      "latencia_ms": 4415,
+      "centavos": 0.079056,
+      "latencia_ms": 7917,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.067068:1343"
+        "operario:claude-haiku-5-5:0.079056:1645"
       ]
     },
     {
@@ -1743,12 +2361,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exa6f9914af320415e98470320feea2f3d",
+      "execucao_id": "ex3193ccb4d63042e8b620e074ffec8af9",
       "estado": "concluida",
-      "centavos": 0.067068,
-      "latencia_ms": 4450,
+      "centavos": 0.078516,
+      "latencia_ms": 8376,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.067068:943"
+        "operario:claude-haiku-5-5:0.078516:1721"
       ]
     },
     {
@@ -1761,13 +2379,12 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex945ce152e56c4e75a6e5714a5eb58749",
+      "execucao_id": "ex7b8b957da99f4c02a0875356d8dc5591",
       "estado": "concluida",
-      "centavos": 1.598076,
-      "latencia_ms": 7372,
+      "centavos": 0.078354,
+      "latencia_ms": 6925,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068796:1453",
-        "escritor:claude-sonnet-5-5:1.52928:1627"
+        "operario:claude-haiku-5-5:0.078354:873"
       ]
     },
     {
@@ -1780,13 +2397,12 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex741274f5cc3144a38514ace5f8d6023a",
+      "execucao_id": "exfde67400527e4c9380d7ba9e39f6a4a2",
       "estado": "concluida",
-      "centavos": 1.560276,
-      "latencia_ms": 7452,
+      "centavos": 0.078354,
+      "latencia_ms": 7440,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068796:1433",
-        "escritor:claude-sonnet-5-5:1.49148:1596"
+        "operario:claude-haiku-5-5:0.078354:1065"
       ]
     },
     {
@@ -1799,12 +2415,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exeefb2d67234548e78d58e12a3af75c42",
+      "execucao_id": "ex2672b70da6e4477fadcc9dadf3d52e16",
       "estado": "concluida",
-      "centavos": 0.066096,
-      "latencia_ms": 5414,
+      "centavos": 0.078354,
+      "latencia_ms": 8344,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.066096:1584"
+        "operario:claude-haiku-5-5:0.078354:1591"
       ]
     },
     {
@@ -1817,12 +2433,12 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "excdb8a1e98e404de79c460bc6c260b18b",
+      "execucao_id": "ex973c2001bdad4f2487aca77e2412b548",
       "estado": "concluida",
-      "centavos": 0.066636,
-      "latencia_ms": 4347,
+      "centavos": 0.078894,
+      "latencia_ms": 7351,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.066636:965"
+        "operario:claude-haiku-5-5:0.078894:967"
       ]
     },
     {
@@ -1835,13 +2451,12 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exad752d5f010c4bbfa8a179ed02a6b955",
+      "execucao_id": "exb9d7f4ca7f6143cfbaea526c84eac6c8",
       "estado": "concluida",
-      "centavos": 1.524744,
-      "latencia_ms": 7914,
+      "centavos": 0.081702,
+      "latencia_ms": 8344,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068904:1506",
-        "escritor:claude-sonnet-5-5:1.45584:1806"
+        "operario:claude-haiku-5-5:0.081702:1719"
       ]
     },
     {
@@ -1854,13 +2469,12 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex5f0916340b99464587e0b2c7cfa59074",
+      "execucao_id": "ex23b8fcd188d849d190e4db7d65ccaea7",
       "estado": "concluida",
-      "centavos": 1.524744,
-      "latencia_ms": 7342,
+      "centavos": 0.079002,
+      "latencia_ms": 7436,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068904:1577",
-        "escritor:claude-sonnet-5-5:1.45584:1931"
+        "operario:claude-haiku-5-5:0.079002:1037"
       ]
     },
     {
@@ -1873,12 +2487,12 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex57d9bc64ef6e40b09d431caf4deb1ecd",
+      "execucao_id": "ex8ae25e0416a448c68f5e2844da1dc22f",
       "estado": "concluida",
-      "centavos": 0.068904,
-      "latencia_ms": 4416,
+      "centavos": 0.079272,
+      "latencia_ms": 7967,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068904:1043"
+        "operario:claude-haiku-5-5:0.079272:1525"
       ]
     },
     {
@@ -1891,12 +2505,12 @@
       "resultado": "acerto",
       "pessoa": "gestao_atendimento",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex0a1b0f2e07f84c8eb0397e70184d0302",
+      "execucao_id": "exedbe1b77d304435892fe32e1a931918f",
       "estado": "concluida",
-      "centavos": 0.065664,
-      "latencia_ms": 4339,
+      "centavos": 0.079272,
+      "latencia_ms": 7877,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.065664:1009"
+        "operario:claude-haiku-5-5:0.079272:1446"
       ]
     },
     {
@@ -1909,12 +2523,12 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exeea7888748444e90b423e34dc86e479d",
+      "execucao_id": "exd05d3a9257174d7bbd146d8e3eb2ac0f",
       "estado": "concluida",
-      "centavos": 0.068526,
-      "latencia_ms": 5419,
+      "centavos": 0.080244,
+      "latencia_ms": 7847,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068526:1698"
+        "operario:claude-haiku-5-5:0.080244:1499"
       ]
     },
     {
@@ -1927,12 +2541,12 @@
       "resultado": "acerto",
       "pessoa": "fiscal",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex5bb18be112b94a80a54806d715effa74",
+      "execucao_id": "ex0b5425eddba944859b2cb3f4ef3b2031",
       "estado": "concluida",
-      "centavos": 0.068526,
-      "latencia_ms": 4358,
+      "centavos": 0.080244,
+      "latencia_ms": 7873,
       "chamadas": [
-        "operario:claude-haiku-5-5:0.068526:950"
+        "operario:claude-haiku-5-5:0.080244:1624"
       ]
     },
     {
@@ -1945,10 +2559,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exc57debeae77f442795d6e57bf837f3a7",
+      "execucao_id": "exfea87f88deb24a2697d80917433490c9",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3435,
+      "latencia_ms": 6345,
       "chamadas": []
     },
     {
@@ -1961,10 +2575,10 @@
       "resultado": "acerto",
       "pessoa": "dp",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex7b58c794fdf545dbb8199a7ecb972bd1",
+      "execucao_id": "ex8274f58ce28445578fe4c30620a270cf",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3421,
+      "latencia_ms": 6335,
       "chamadas": []
     },
     {
@@ -1977,10 +2591,10 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exa72ce9f0a333464081a9fd5a94bcad7d",
+      "execucao_id": "ex799e34300873444fa58880790acdd644",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3430,
+      "latencia_ms": 6345,
       "chamadas": []
     },
     {
@@ -1993,10 +2607,10 @@
       "resultado": "acerto",
       "pessoa": "contabil",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex27689512850047f28a859bc70aafd989",
+      "execucao_id": "exe09ec7cf237c41039851da0c4d8362ac",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3461,
+      "latencia_ms": 6396,
       "chamadas": []
     },
     {
@@ -2009,10 +2623,10 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "excc949d4cd76545428b1385d494d2961d",
+      "execucao_id": "ex1167e84f6a434b3caaaf36aaeb638485",
       "estado": "concluida",
       "centavos": 0,
-      "latencia_ms": 3438,
+      "latencia_ms": 6879,
       "chamadas": []
     },
     {
@@ -2025,171 +2639,379 @@
       "resultado": "acerto",
       "pessoa": "societario",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exbf1ad20ad4464800b55a15ab4d5c4fbf",
+      "execucao_id": "exb6dbb63f51484be08f1dc786334b82de",
       "estado": "concluida",
       "centavos": 0,
+      "latencia_ms": 6366,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-das",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex1a020e5af36d4f7b886701b2b0159116",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6879,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-das",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex963fad7a7dca4f80a3bdddd39f62c684",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6417,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-extrato",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "contabil",
+      "obtido": "contabil",
+      "resultado": "acerto",
+      "pessoa": "contabil",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa86c4c1ebca3413e95bcedb495eb4b3e",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6880,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-extrato",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "contabil",
+      "obtido": "contabil",
+      "resultado": "acerto",
+      "pessoa": "contabil",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex04b141b225ca412f88258e822a3ab89e",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6437,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-holerite",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3b5ff819449647359f54d44cff77f7be",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6881,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-holerite",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex05c7b9271bb2465b9c6813f9a9c01a4b",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6454,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-honorarios",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "gestao_atendimento",
+      "obtido": "gestao_atendimento",
+      "resultado": "acerto",
+      "pessoa": "gestao_atendimento",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exb862046f3a5a4e71acc0cce8ece15ced",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6882,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-honorarios",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "gestao_atendimento",
+      "obtido": "gestao_atendimento",
+      "resultado": "acerto",
+      "pessoa": "gestao_atendimento",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "excfcc50dfbdf44f2b94b9fda24fbfeb66",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6406,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-intimacao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex549bce731b324854930fbced80bcf073",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6880,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-palavra-intimacao",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exf740eec66e83483e9ed92cf4807d4acf",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6333,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-nome",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex35358a4f530c4a8786d7c76d72ff4dd4",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6398,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-nome",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "fiscal",
+      "obtido": "fiscal",
+      "resultado": "acerto",
+      "pessoa": "fiscal",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa2589b327217490da803dbf0893a0f3f",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6447,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-numero",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex52f5322c0b3e44c096ef1282f529c4d9",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 6397,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-numero",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "dp",
+      "obtido": "dp",
+      "resultado": "acerto",
+      "pessoa": "dp",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex7b0a33544f914e179b009eae1ac1c908",
+      "estado": "concluida",
+      "centavos": 0,
+      "latencia_ms": 5924,
+      "chamadas": []
+    },
+    {
+      "caso": "tri-perg-segunda",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exa0749c5944b844d9a4b078dbe6bf179d",
+      "estado": "concluida",
+      "centavos": 0.07911,
+      "latencia_ms": 7945,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.07911:1138"
+      ]
+    },
+    {
+      "caso": "tri-perg-segunda",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "pergunta",
+      "obtido": "pergunta",
+      "resultado": "acerto",
+      "pessoa": "pergunta",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex0aff529a3d974427a29aa22664c3a6e2",
+      "estado": "concluida",
+      "centavos": 0.07938,
+      "latencia_ms": 7366,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.07938:1059"
+      ]
+    },
+    {
+      "caso": "tri-perg-sem-acordo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "sem_acordo",
+      "obtido": "sem_acordo",
+      "resultado": "acerto",
+      "pessoa": "sem_acordo",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "exbbeb1669897148be931cc93d2d7febf6",
+      "estado": "concluida",
+      "centavos": 0.078624,
+      "latencia_ms": 7371,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078624:1013"
+      ]
+    },
+    {
+      "caso": "tri-perg-sem-acordo",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "sem_acordo",
+      "obtido": "sem_acordo",
+      "resultado": "acerto",
+      "pessoa": "sem_acordo",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex3122abb2109740a3b054a27465b56f9e",
+      "estado": "concluida",
+      "centavos": 0.078894,
+      "latencia_ms": 7410,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.078894:981"
+      ]
+    },
+    {
+      "caso": "tri-resp-misto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 1,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex83a7327adb52421fb75573b8b545e48d",
+      "estado": "cancelada",
+      "centavos": 0.081486,
+      "latencia_ms": 2360,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.081486:741"
+      ]
+    },
+    {
+      "caso": "tri-resp-misto",
+      "setor": "gestao_atendimento",
+      "procedimento": "GES-TRIAR-REPASSAR",
+      "rodada": 2,
+      "esperado": "cartao",
+      "obtido": "cartao",
+      "resultado": "acerto",
+      "pessoa": "cartao",
+      "resultado_pessoa": "acerto",
+      "execucao_id": "ex745be62362f14eb7ba5fb45cb793ce95",
+      "estado": "cancelada",
+      "centavos": 0.081756,
       "latencia_ms": 3340,
-      "chamadas": []
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.081756:1491"
+      ]
     },
     {
-      "caso": "tri-palavra-das",
+      "caso": "tri-resp-vago",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 1,
-      "esperado": "fiscal",
-      "obtido": "fiscal",
+      "esperado": "cartao",
+      "obtido": "cartao",
       "resultado": "acerto",
-      "pessoa": "fiscal",
+      "pessoa": "cartao",
       "resultado_pessoa": "acerto",
-      "execucao_id": "exbce2457d534545a29117ac18eaa86383",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 17331,
-      "chamadas": []
+      "execucao_id": "ex9f4299dbb4c5472f8052836b1164e5f8",
+      "estado": "cancelada",
+      "centavos": 0.077868,
+      "latencia_ms": 2922,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.077868:997"
+      ]
     },
     {
-      "caso": "tri-palavra-das",
+      "caso": "tri-resp-vago",
       "setor": "gestao_atendimento",
       "procedimento": "GES-TRIAR-REPASSAR",
       "rodada": 2,
-      "esperado": "fiscal",
-      "obtido": "fiscal",
+      "esperado": "cartao",
+      "obtido": "cartao",
       "resultado": "acerto",
-      "pessoa": "fiscal",
+      "pessoa": "cartao",
       "resultado_pessoa": "acerto",
-      "execucao_id": "ex6f3c81bb41dc4bea9aef48dfdafe852a",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3416,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-extrato",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "contabil",
-      "obtido": "contabil",
-      "resultado": "acerto",
-      "pessoa": "contabil",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "exc76e6de130d34fd682cfd20d9f765375",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3439,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-extrato",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "contabil",
-      "obtido": "contabil",
-      "resultado": "acerto",
-      "pessoa": "contabil",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex91fd96dd54bc4a048a5827ac0b7a924f",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3350,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-holerite",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "dp",
-      "obtido": "dp",
-      "resultado": "acerto",
-      "pessoa": "dp",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex79719d9226044eb3a413af4549211a8b",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3439,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-holerite",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "dp",
-      "obtido": "dp",
-      "resultado": "acerto",
-      "pessoa": "dp",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "exf9508fd4d37f4b2693954c0e06eb41a4",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3460,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-honorarios",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
-      "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex6e1e90bceef0434187d6b3812de03109",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3434,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-honorarios",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "gestao_atendimento",
-      "obtido": "gestao_atendimento",
-      "resultado": "acerto",
-      "pessoa": "gestao_atendimento",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex2884557a267a4e52adb752dc4bd4456b",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3334,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-intimacao",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 1,
-      "esperado": "fiscal",
-      "obtido": "fiscal",
-      "resultado": "acerto",
-      "pessoa": "fiscal",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex3f0b669ab9e9474b917292c06bf5fd60",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3434,
-      "chamadas": []
-    },
-    {
-      "caso": "tri-palavra-intimacao",
-      "setor": "gestao_atendimento",
-      "procedimento": "GES-TRIAR-REPASSAR",
-      "rodada": 2,
-      "esperado": "fiscal",
-      "obtido": "fiscal",
-      "resultado": "acerto",
-      "pessoa": "fiscal",
-      "resultado_pessoa": "acerto",
-      "execucao_id": "ex8d22fd3e1efe450bbf232da4e19017d7",
-      "estado": "concluida",
-      "centavos": 0,
-      "latencia_ms": 3332,
-      "chamadas": []
+      "execucao_id": "exa69482b24a8549348f9e42e2c8f82428",
+      "estado": "cancelada",
+      "centavos": 0.077868,
+      "latencia_ms": 2936,
+      "chamadas": [
+        "operario:claude-haiku-5-5:0.077868:908"
+      ]
     }
   ],
   "rotas": {}

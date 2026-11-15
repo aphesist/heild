@@ -11,6 +11,10 @@ export const metasB3: Ferramenta[] = [
   { nome: 'assistente.obter', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
   { nome: 'integrante.listar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
   { nome: 'integrante.aprender', modulo: 'agentes', nivel: 'rascunhar', setor: 'geral' },
+  // Número compartilhado (04, A.7; API_INTERNA, adendo de 15/11/2026): rotear é interno e reversível.
+  { nome: 'conversa.rotear', modulo: 'crm', nivel: 'executar', setor: 'alvo' },
+  // Só registra a sugestão do integrante que diverge do menu (evento `conversa.triagem_divergir`).
+  { nome: 'conversa.triagem_divergir', modulo: 'crm', nivel: 'executar', setor: 'alvo' },
 ]
 
 /** As ferramentas transversais do motor (B2), com os mesmos metadados do registro dela. */
