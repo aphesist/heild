@@ -1000,8 +1000,8 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação: com um número d
 | Forma | **Procedimento por processo** (decisão 2): passos em código, um operário com contrato e validadores, sem loop livre |
 | Roteamento em cascata (decisão 4) | (1) **Regras, sem modelo:** conversa aberta, resposta a envio do escritório nos últimos 7 dias, cliente com um só setor ativo, palavras-chave do fluxo; se uma regra decide, roteia e acaba. (2) **Modelo barato** (classe `operario`): lê a mensagem e o cadastro mínimo (`identidade.resolver`, `contexto.carregar`) e devolve setor, assunto, cliente e confiança. (3) **Modelo caro só no ambíguo:** dois setores com confiança próxima ou cliente com várias empresas sem pista; antes do caro, a primeira opção é perguntar |
 | Saída no formato padrão (decisão 4) | `{cliente_id, pessoa_id, setor_destino, integrante_destino, assunto, tipo (operacional, técnica, comercial, documento), urgencia, confianca, resumo, perguntas}`. O resumo tem até três linhas, com os identificadores preservados (CNPJ, competência, guia), e vai como nota interna no topo da conversa de destino. O Assistente e o integrante de destino usam o resumo sem reescrevê-lo |
-| O que faz com a saída | Confiança ≥ 0,8: `conversa.rotear` ao setor, com o resumo, e acorda o integrante do setor (gatilho 6). Entre 0,6 e 0,8: roteia, marca "triagem incerta" e deixa a correção em um clique para quem assumir. Abaixo de 0,6: pergunta |
-| Quando pergunta | **Ao cliente**, se a conversa ainda não tem responsável: uma pergunta fechada com duas ou três opções ("É sobre: 1. a folha de outubro · 2. a nota de serviço?"), por modelo do tema. **À pessoa**, por cartão, se a conversa já tem responsável. No máximo duas perguntas ao cliente por conversa; depois disso, vai ao setor de entrada padrão com a etiqueta `triagem_sem_acordo` |
+| O que faz com a saída | **Revisto em 15/11/2026, mais tarde (ver o fim deste adendo): a triagem passou a ser conversada, sem pergunta fechada nem limiares.** Texto anterior: confiança ≥ 0,8: `conversa.rotear` ao setor, com o resumo, e acorda o integrante do setor (gatilho 6). Entre 0,6 e 0,8: roteia, marca "triagem incerta" e deixa a correção em um clique para quem assumir. Abaixo de 0,6: pergunta |
+| Quando pergunta | **Revisto (ver o fim deste adendo).** Texto anterior: **ao cliente**, se a conversa ainda não tem responsável: uma pergunta fechada com duas ou três opções ("É sobre: 1. a folha de outubro · 2. a nota de serviço?"), por modelo do tema. **À pessoa**, por cartão, se a conversa já tem responsável. No máximo duas perguntas ao cliente por conversa; depois disso, vai ao setor de entrada padrão com a etiqueta `triagem_sem_acordo` |
 | Divergência com o menu | Só na opção `menu_e_integrante`: se o cliente escolheu um setor no menu, **vale a escolha dele**; o integrante só deixa o cartão "Parece ser do {setor}. Transferir?" a quem atende, com confiança ≥ 0,8, e grava `conversa.triagem_divergir` (04, A.5) |
 | Identificação | Toda mensagem do integrante ao cliente no número compartilhado sai com o prefixo *{Nome do integrante} (IA)*, por exemplo "*Integrante de Atendimento (IA)*" (04, A.6) |
 | Nível e limites | `conversa.rotear` e a nota de resumo são **executar** (internos e reversíveis: a pessoa desfaz em um clique). Mensagem ao cliente só por modelo do tema, na categoria liberada pelo Administrador (GES-062); fora dela, cartão. Nunca entrega dado da empresa a número não confirmado (04, 5.2). Limites por execução e por dia como os outros trabalhos (4.7 e 12.2) |
@@ -1009,3 +1009,18 @@ Decisão do Enzo de 15/11/2026, transmitida pela coordenação: com um número d
 | Avaliação | Entra no piloto automatizado (decisão 7): casos com gabarito de setor, modo sombra contra o roteamento que a pessoa fez, e as métricas de acerto de setor, perguntas por conversa, correções em um clique e divergências com o menu |
 
 **A pessoa faz o mesmo pela conversa:** os botões de repassar e transferir (04, 4.3) continuam; no número compartilhado, transferir mantém o número do cliente (04, A.6).
+
+### Triagem conversando, como uma pessoa (15/11/2026, mais tarde)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação: "os clientes odeiam menu e falar com robô". Substitui as linhas "O que faz com a saída" e "Quando pergunta" acima, e a pergunta fechada com opções; o desenho completo está no subplano 04, A.10.
+
+| Item | Desenho |
+| --- | --- |
+| Como pergunta | Conversando no WhatsApp como uma pessoa: pergunta natural, **uma por vez**, sem menu nem lista de opções, até ter certeza razoável de quem é e do assunto. O passo do procedimento continua com regras primeiro; quando a regra não decide, o integrante conversa. Proposta: a conversa na classe `escritor` (escreve ao cliente) e a classificação no `operario` (decisão 3) |
+| Quando repassa | Com certeza razoável: `conversa.rotear` ao setor e ao integrante certos, com o resumo no formato padrão, e **avisa o cliente** de para quem passou |
+| Escopo | Só triagem: não responde dúvida técnica, não dá número, valor nem prazo, não promete. Assunto delicado vai a uma pessoa na hora |
+| Aprovação | As mensagens de triagem saem **sem aprovação**; as demais mensagens da IA ao cliente continuam com cartão |
+| Identificação | Prefixo "*Integrante de Atendimento (IA)*" em todas as mensagens |
+| Fora do horário | Resposta automática fixa, sem IA, com o horário de trabalho; nenhuma triagem até abrir o expediente |
+| Custo | Mais caro que a pergunta fechada (cada troca chama o modelo); aceito pelo Enzo; bolsa do setor de Gestão e Atendimento |
+| Cartão de divergência | "Parece ser do X. Transferir?" vai ao atendente da conversa; sem atendente, a quem aprova no setor. Aprovar executa a transferência guardada |

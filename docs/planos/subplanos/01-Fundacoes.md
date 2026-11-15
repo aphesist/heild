@@ -1356,3 +1356,15 @@ Fontes: branch `wireframe`, `app/supabase/migrations/` (`20261114120000_fundacoe
 ### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
 
 Fonte: [`../apis/ARMAZENAMENTO.md`](../apis/ARMAZENAMENTO.md) e [`../apis/PERGUNTAS.md`](../apis/PERGUNTAS.md) (branch `wf-backend-apis`, 15/11/2026). **Os arquivos ficam no armazenamento de cada escritório** (completa 7): a Heild guarda índice, texto, miniaturas e cópias de vida curta; conectores padrão (Google Drive, OneDrive e SharePoint, Dropbox, Box, S3 compatível, WebDAV, SFTP) e agente local em Go para servidor próprio. **Dado completo ao fornecedor de modelos**, sem máscara, sob DPA, sem treino e com retenção mínima (Q7).
+
+---
+
+## Adendo: contas da equipe, diretório e cartão que executa (15/11/2026)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação.
+
+- **Duas formas de criar a conta de quem é da equipe (completa 2.4):**
+  1. **Convite por e-mail**, como em 2.4.
+  2. **Criação manual pelo Administrador, só com o e-mail**, sem envio de e-mail: o sistema gera um **código de uso único, válido por 48 horas**, que o Administrador entrega à pessoa por fora (pessoalmente ou por mensagem). No primeiro acesso, a pessoa entra com o e-mail e o código e define a senha (e o segundo fator, quando obrigatório, 2.5). O código fica guardado só como hash, vence em 48 h e pode ser gerado de novo pelo Administrador; cada geração e o uso gravam evento (`conta.codigo_acesso.gerar`, `conta.codigo_acesso.usar`). Serve para o escritório que não quer depender de e-mail ou para a pessoa sem acesso ao e-mail no primeiro dia.
+- **A lista da equipe é visível a todos (completa 3 e 4.1),** como o diretório do Teams: nome, foto, cargo, setores, papel e contato de trabalho de cada pessoa do escritório. **Continuam restritos a Gestor e Administrador:** custo-hora, salário, timesheet individual e avaliações (05, 8.4; o adendo de 15/11/2026 do 05 propõe ainda que o valor do custo-hora fique só com o Administrador).
+- **Aprovar um cartão executa a ação guardada (6.4):** o cartão guarda a ferramenta e os argumentos; aprovar executa essa ação (`aprovacao.decidir`), sem novo passo. O irreversível (enviar, transmitir, pagar, assinar) mostra uma confirmação antes de executar.
