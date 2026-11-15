@@ -15,6 +15,7 @@
 - **Margem lateral:** `px-4 sm:px-5` na área de rolagem da tela (16px no celular, nunca menos).
 - **Colunas da grade de widgets** saem da largura do contêiner, não da janela (célula de no mínimo ~150px): < 600 → 2; < 980 → 4; < 1320 → 6; acima → 8 (`colunasPara`, `components/widgets/grade.tsx`).
 - **Grade de cards fora dos widgets:** sempre `grid gap-4` com colunas por faixa e `minmax(0,1fr)`: `grid gap-4 sm:grid-cols-2 lg:grid-cols-3`. Nada de `flex` com larguras fixas para dispor cards lado a lado.
+- **Grade sem colunas na faixa atual** (o celular de `grid lg:grid-cols-2`) tem uma coluna `minmax(0,1fr)` por padrão (base em `index.css`): nunca cresce até o conteúdo mais largo nem empurra a página para o lado.
 
 ## 2. Espaçamento (tokens do design system, base 4px)
 
@@ -43,7 +44,8 @@ A grade de widgets tem células de altura fixa (`--celula-widget`, 156px; 136px 
 | Chat / pedir ao integrante | M ou G | não | a conversa vai para a gaveta do chat; no card, só as sugestões |
 | Área de trabalho (calendário, quadro, tabela grande) | XL com `larguraTotal` | **sim** | `linhasMinimas` 3 ou 4; rola por dentro |
 
-- `larguraTotal: true` (em `DefWidget`) faz o widget ocupar a linha inteira em qualquer faixa; `linhasMinimas` dá a altura mínima em células. Use para o que é trabalho (arrastar, comparar colunas), não para listas.
+- `larguraTotal: true` (em `DefWidget`) faz o widget, no tamanho XL, ocupar a linha inteira em qualquer faixa; `linhasMinimas` dá a altura mínima em células no XL. Use para o que é trabalho (arrastar, comparar colunas), não para listas. Hoje: Kanban do fechamento (Contábil) e Calendário (Visão geral).
+- O corpo do widget rola só na vertical (`overflow-x-hidden`); conteúdo largo (tabela) traz a própria faixa horizontal (`Tabela` do Painel já traz).
 - No celular, L e XL viram 2 colunas e dobram a altura (o conteúdo largo quebra em vez de vazar).
 - Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; card de lista longa leva `max-h-[60vh] overflow-y-auto` na lista, não no card inteiro.
 
@@ -77,6 +79,7 @@ A grade de widgets tem células de altura fixa (`--celula-widget`, 156px; 136px 
 ## 8. Toque e celular **[QA]**
 
 - **Menu inferior** (< 768px, decidido): Início, Tarefas, Pendências, Chat, Mais. O conteúdo sobe a altura do menu (`ALTURA_MENU_INFERIOR`).
+- **Campos:** com ponteiro grosso, campo de texto e seleção têm no mínimo 44px de altura; caixa e rádio nativos, 24px (WCAG 2.5.8), com o rótulo (`label`) completando o alvo.
 - **Alvo de toque ≥ 44px.** Com ponteiro grosso (`@media (pointer: coarse)`), todo botão, aba, rádio, caixa e item de menu ganha uma área de toque invisível centrada de no mínimo 44px (`--alvo-toque`, em `index.css`): o desenho não muda, o dedo acerta. Controle novo não precisa fazer nada; quem desenha um alvo próprio (`div` clicável) usa `button` ou `role="button"`.
 - Ações principais no celular: botões de pelo menos `size="default"`, decisão em um toque; edição e configuração "no computador" (`SoLeituraNoCelular`).
 - Ícone sem texto sempre com `aria-label`.

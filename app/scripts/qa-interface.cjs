@@ -104,6 +104,8 @@ function medir(toque) {
     if (fora(el) || el.closest('svg')) continue
     const nos = [...el.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim())
     if (!nos.length || !visivel(el)) continue
+    // Texto só para leitor de tela (sr-only) não aparece.
+    if (el.closest('.sr-only') || el.getBoundingClientRect().width <= 1 || getComputedStyle(el).clipPath !== 'none' || getComputedStyle(el).clip !== 'auto') continue
     const range = document.createRange()
     let tl = Infinity
     let tr = -Infinity
@@ -139,6 +141,10 @@ function medir(toque) {
       }
       a = a.parentElement
     }
+    // Fora da tela só conta se nada no caminho até a página corta (faixa com rolagem própria, card com overflow).
+    if (!problema && !cortado) {
+      for (let b = a; b && b !== document.body; b = b.parentElement) if (!/visible/.test(getComputedStyle(b).overflowX)) cortado = true
+    }
     if (!problema && !cortado && (tr > W + 1 || tl < -1)) problema = `vaza da tela: ${desc(el)}`
     if (problema && !vistos.has(problema)) {
       vistos.add(problema)
@@ -172,7 +178,9 @@ function medir(toque) {
         w = Math.max(w, b.width - n(cs.left) - n(cs.right))
         h = Math.max(h, b.height - n(cs.top) - n(cs.bottom))
       }
-      if (w < 43.5 || h < 43.5) r.toque.push(`${Math.round(w)}×${Math.round(h)} ${desc(el)}`)
+      // Caixa e rádio nativos: 24px bastam (WCAG 2.5.8) quando não há rótulo maior em volta.
+      const minimo = el.type === 'checkbox' || el.type === 'radio' ? 23.5 : 43.5
+      if (w < minimo || h < minimo) r.toque.push(`${Math.round(w)}×${Math.round(h)} ${desc(el)}`)
     }
   }
 
@@ -235,7 +243,9 @@ function medir(toque) {
       if (!netos.length) return
       const fimConteudo = Math.max(...netos.map((n) => n.getBoundingClientRect().bottom))
       const vao = kb.bottom - parseFloat(getComputedStyle(k).paddingBottom) - fimConteudo
-      if (vao > 96 && vao > kb.height * 0.25) r.buraco.push(`${Math.round(vao)}px vazios no fim de ${ehCard(k) ? 'card esticado' : 'coluna'} ${desc(k)}`)
+      // Card esticado até a altura da linha é o padrão (mesma altura); só conta quando sobra muito.
+      const card = ehCard(k)
+      if (card ? vao > 160 && vao > kb.height * 0.35 : vao > 96 && vao > kb.height * 0.25) r.buraco.push(`${Math.round(vao)}px vazios no fim de ${card ? 'card esticado' : 'coluna'} ${desc(k)}`)
     })
     // Célula vazia no meio (grade de widgets): mede por faixas de 1 coluna × 1 linha.
     const linhas = cs.gridTemplateRows.split(' ').filter((x) => /px$/.test(x)).map(parseFloat)
@@ -271,6 +281,7 @@ function medir(toque) {
       const ctx = await b.newContext({ viewport: { width: v.width, height: v.height }, ...(v.toque ? { hasTouch: true, isMobile: true } : {}) })
       const p = await ctx.newPage()
       p.setDefaultTimeout(8000)
+      p.setDefaultNavigationTimeout(90000)
       const erros = []
       p.on('pageerror', (e) => erros.push(e.message))
       await p.goto(base)
