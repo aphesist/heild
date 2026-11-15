@@ -2,7 +2,7 @@ import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, cl
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable'
 import { ArrowCounterClockwiseIcon, CheckIcon, PencilSimpleIcon, PlusIcon } from '@phosphor-icons/react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { usePreferencia } from '@/hooks/usePreferencia'
@@ -24,11 +24,14 @@ function colunasPara(largura: number) {
 
 function useColunas() {
   const ref = useRef<HTMLDivElement>(null)
-  const [medida, setMedida] = useState({ colunas: 6, largura: 0 })
+  const [medida, setMedida] = useState({ colunas: 6, largura: 0, celula: 156 })
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const medir = () => setMedida((m) => (m.largura === el.clientWidth ? m : { colunas: colunasPara(el.clientWidth), largura: el.clientWidth }))
+    const medir = () => {
+      const celula = parseFloat(getComputedStyle(el).getPropertyValue('--celula-widget')) || 156
+      setMedida((m) => (m.largura === el.clientWidth && m.celula === celula ? m : { colunas: colunasPara(el.clientWidth), largura: el.clientWidth, celula }))
+    }
     medir()
     const ro = new ResizeObserver(medir)
     ro.observe(el)
@@ -47,7 +50,7 @@ function useColunas() {
 function useAlturas(ref: React.RefObject<HTMLDivElement | null>, chaveLayout: string) {
   const [alturas, setAlturas] = useState<ReadonlyMap<string, number>>(() => new Map())
   const medir = useRef<() => void>(() => {})
-  medir.current = () => {
+  function medirAgora() {
     const grade = ref.current
     if (!grade) return
     const itens = [...grade.querySelectorAll<HTMLElement>(':scope > [data-item-grade]')]
@@ -78,8 +81,11 @@ function useAlturas(ref: React.RefObject<HTMLDivElement | null>, chaveLayout: st
     }
     setAlturas((ant) => (ant.size === novo.size && [...novo].every(([k, v]) => ant.get(k) === v) ? ant : novo))
   }
-  // A cada render (itens, tamanhos, colunas): medir antes de pintar.
-  useLayoutEffect(() => medir.current())
+  // A cada render (itens, tamanhos, colunas): atualiza a medida e mede antes de pintar.
+  useLayoutEffect(() => {
+    medir.current = medirAgora
+    medirAgora()
+  })
   useEffect(() => {
     const grade = ref.current
     if (!grade) return
@@ -156,7 +162,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
   const [editando, setEditando] = useState(false)
   const [galeria, setGaleria] = useState(false)
   const [ativo, setAtivo] = useState<string | null>(null)
-  const { ref, colunas, largura } = useColunas()
+  const { ref, colunas, largura, celula } = useColunas()
   const reduzir = useReducedMotion()
   const toqueLongo = useToqueLongo(() => setEditando(true))
 
@@ -175,7 +181,6 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
 
   const defDe = (id: string) => catalogo.find((d) => d.id === id)!
   const alturas = useAlturas(ref, `${colunas}`)
-  const celula = ref.current ? parseFloat(getComputedStyle(ref.current).getPropertyValue('--celula-widget')) || 156 : 156
   const mpc = modulosPorCelula(celula)
   // Colunas que a largura mínima do conteúdo pede (kanban, calendário da semana): a largura inteira só quando o conteúdo precisa.
   const colunasMinimas = new Map<string, number>()
@@ -185,7 +190,10 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
     for (const d of catalogo) if (d.larguraMinima) colunasMinimas.set(d.id, Math.ceil((d.larguraMinima * rem + VAO_PX) / (larguraColuna + VAO_PX)))
   }
   // Posição explícita de cada widget: tamanho pelo conteúdo, vãos fechados pela ordem e pelo empacotamento (o mesmo no modo edição).
-  const posicoes = arranjar(itens.map((i) => ({ ...i, def: defDe(i.id) })), colunas, { alturas, colunasMinimas, modulosPorCelula: mpc })
+  // O arranjo só muda quando muda o que ele lê (itens, tamanhos, alturas, colunas): não refaz a cada render.
+  const assinatura = JSON.stringify([itens, colunas, mpc, [...alturas], [...colunasMinimas]])
+  // oxlint-disable-next-line react-hooks/exhaustive-deps
+  const posicoes = useMemo(() => arranjar(itens.map((i) => ({ ...i, def: defDe(i.id) })), colunas, { alturas, colunasMinimas, modulosPorCelula: mpc }), [assinatura])
   const ocultos = catalogo.filter((d) => !itens.some((i) => i.id === d.id))
 
   // Troca de lugar ao vivo enquanto arrasta; a grade reflui e o motion anima.

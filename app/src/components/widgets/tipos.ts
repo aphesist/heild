@@ -115,7 +115,8 @@ export interface Medidas {
  * 2. cada widget vai para o primeiro lugar livre, de cima para baixo e da
  *    esquerda para a direita, na ordem da lista (a ordem é a prioridade da
  *    tarefa; o que vem depois e cabe num vão de cima sobe para ele, como o
- *    `grid-auto-flow: dense`);
+ *    `grid-auto-flow: dense`); numa janela de três, vai primeiro o que deixa
+ *    menos buraco (ninguém anda mais que duas posições);
  * 3. o widget que tem mais conteúdo do que o teto mostra (ele pede) desce
  *    para o espaço livre logo abaixo dele, até a altura que pede;
  * 4. acerto de faixa: se sob um widget sobra no máximo meia célula até o
@@ -125,67 +126,117 @@ export interface Medidas {
  * Nenhum widget cresce para o lado para fechar vão.
  */
 export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWidget }[], colunas: number, medidas: Medidas = {}): Map<string, Posicao> {
-  const grade: (string | null)[][] = []
-  const linha = (r: number) => (grade[r] ??= Array<string | null>(colunas).fill(null))
-  const livre = (r: number, c: number) => c >= 0 && c < colunas && linha(r)[c] === null
-  const marcar = (p: Omit<Posicao, 'efetivo'>, id: string | null) => {
-    for (let r = p.linha; r < p.linha + p.linhas; r++) for (let c = p.coluna; c < p.coluna + p.colunas; c++) linha(r)[c] = id
-  }
   const mpc = medidas.modulosPorCelula ?? modulosPorCelula()
   // Meia célula: o quanto se dá a mais a quem passa pouco do teto e o quanto um widget desce para alinhar o fundo.
   const meia = Math.floor(mpc / 2)
-  const pos = new Map<string, Omit<Posicao, 'efetivo'>>()
-  const pede = new Map<string, number>()
-  for (const it of itens) {
+  // 1. Largura e altura de cada um.
+  const medidos = itens.map((it) => {
     const v = vao(it.tamanho, colunas, it.def, medidas.colunasMinimas?.get(it.id), mpc)
-    const w = Math.min(v.colunas, colunas)
     const medida = medidas.alturas?.get(it.id)
     const teto = medida !== undefined && medida <= v.linhas + meia ? medida : v.linhas
     const h = medida === undefined ? v.linhas : Math.max(mpc, Math.min(teto, medida))
-    if (medida !== undefined) pede.set(it.id, medida)
-    for (let r = 0; !pos.has(it.id); r++) {
-      for (let c = 0; c + w <= colunas; c++) {
-        let cabe = true
-        for (let rr = r; rr < r + h && cabe; rr++) for (let cc = c; cc < c + w && cabe; cc++) cabe = livre(rr, cc)
-        if (cabe) {
-          const p = { coluna: c, linha: r, colunas: w, linhas: h }
-          pos.set(it.id, p)
-          marcar(p, it.id)
-          break
-        }
-      }
-    }
+    return { id: it.id, w: Math.min(v.colunas, colunas), h, pede: medida ?? 0 }
+  })
+  // 2. Empacotamento na ordem, com uma janela de três: entre o próximo e os dois seguintes, vai primeiro o que deixa menos buraco.
+  const postos = empacotar(medidos, colunas, mpc)
+  const pos = new Map(postos.map((p) => [p.id, p]))
+  const livre = (c: number, y0: number, y1: number, menos?: string) => {
+    for (const p of postos) if (p.id !== menos && c >= p.coluna && c < p.coluna + p.colunas && y0 < p.linha + p.linhas && y1 > p.linha) return false
+    return true
   }
-  const ultima = Math.max(0, ...[...pos.values()].map((p) => p.linha + p.linhas))
-  const linhaDeBaixoLivre = (p: Omit<Posicao, 'efetivo'>) => {
-    const r = p.linha + p.linhas
+  const ultima = Math.max(0, ...postos.map((p) => p.linha + p.linhas))
+  const linhaDeBaixoLivre = (p: Retangulo, extra = 0) => {
+    const r = p.linha + p.linhas + extra
     if (r >= ultima) return false
-    for (let c = p.coluna; c < p.coluna + p.colunas; c++) if (!livre(r, c)) return false
+    for (let c = p.coluna; c < p.coluna + p.colunas; c++) if (!livre(c, r, r + 1)) return false
     return true
   }
   // 3. Quem pede mais do que mostra desce para o espaço livre logo abaixo.
-  for (const it of itens) {
-    const p = pos.get(it.id)!
-    while ((pede.get(it.id) ?? 0) > p.linhas && linhaDeBaixoLivre(p)) {
-      p.linhas++
-      marcar(p, it.id)
-    }
+  for (const m of medidos) {
+    const p = pos.get(m.id)!
+    while (m.pede > p.linhas && linhaDeBaixoLivre(p)) p.linhas++
   }
   // 4. Acerto de faixa: até meia célula de sobra sob o widget vira altura dele.
-  for (const it of itens) {
-    const p = pos.get(it.id)!
+  for (const m of medidos) {
+    const p = pos.get(m.id)!
     let sobra = 0
-    while (sobra <= meia && linhaDeBaixoLivre({ ...p, linhas: p.linhas + sobra })) sobra++
-    if (sobra === 0 || sobra > meia) continue
-    p.linhas += sobra
-    marcar(p, it.id)
+    while (sobra <= meia && linhaDeBaixoLivre(p, sobra)) sobra++
+    if (sobra > 0 && sobra <= meia) p.linhas += sobra
   }
   const final = new Map<string, Posicao>()
   for (const it of itens) {
     const p = pos.get(it.id)!
-    final.set(it.id, { ...p, efetivo: tamanhoQueCabe(it.def, p.colunas, it.tamanho) })
+    final.set(it.id, { coluna: p.coluna, linha: p.linha, colunas: p.colunas, linhas: p.linhas, efetivo: tamanhoQueCabe(it.def, p.colunas, it.tamanho) })
   }
   return final
+}
+
+interface Retangulo {
+  id: string
+  coluna: number
+  linha: number
+  colunas: number
+  linhas: number
+}
+
+/** Primeiro lugar livre (de cima para baixo, da esquerda para a direita) para um bloco w × h entre os já postos. */
+function primeiroLivre(postos: Retangulo[], colunas: number, w: number, h: number) {
+  const ys = [...new Set([0, ...postos.map((p) => p.linha + p.linhas)])].sort((a, b) => a - b)
+  const ocupa = (c: number, y0: number, y1: number) => postos.some((p) => c >= p.coluna && c < p.coluna + p.colunas && y0 < p.linha + p.linhas && y1 > p.linha)
+  for (const y of ys)
+    for (let c = 0; c + w <= colunas; c++) {
+      let cabe = true
+      for (let cc = c; cc < c + w && cabe; cc++) cabe = !ocupa(cc, y, y + h)
+      if (cabe) return { coluna: c, linha: y }
+    }
+  return { coluna: 0, linha: ys[ys.length - 1] ?? 0 }
+}
+
+/** Área vazia acima do fundo de cada coluna (o buraco no meio; a sobra do fim não conta). */
+function buracos(postos: Retangulo[], colunas: number) {
+  let vazio = 0
+  for (let c = 0; c < colunas; c++) {
+    const daColuna = postos.filter((p) => c >= p.coluna && c < p.coluna + p.colunas)
+    if (!daColuna.length) continue
+    const fundo = Math.max(...daColuna.map((p) => p.linha + p.linhas))
+    vazio += fundo - daColuna.reduce((s, p) => s + p.linhas, 0)
+  }
+  return vazio
+}
+
+/**
+ * Empacota na ordem da lista, com uma janela de três: antes de pôr o próximo,
+ * experimenta as ordens possíveis dele e dos dois seguintes e põe primeiro o
+ * que leva ao menor buraco. Empate fica com a ordem original. Assim a
+ * prioridade se mantém (ninguém anda mais que duas posições) e um widget largo
+ * não deixa um vão que um menor, logo depois, fecharia.
+ */
+function empacotar(medidos: { id: string; w: number; h: number }[], colunas: number, mpc: number): Retangulo[] {
+  const postos: Retangulo[] = []
+  const restantes = [...medidos]
+  const por = (lista: Retangulo[], m: { id: string; w: number; h: number }) => {
+    const l = primeiroLivre(lista, colunas, m.w, m.h)
+    lista.push({ id: m.id, coluna: l.coluna, linha: l.linha, colunas: m.w, linhas: m.h })
+  }
+  const ordens = (n: number): number[][] => (n <= 1 ? [[0]] : n === 2 ? [[0, 1], [1, 0]] : [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]])
+  while (restantes.length) {
+    const janela = restantes.slice(0, 3)
+    let melhor = 0
+    let menor = Infinity
+    for (const ordem of ordens(janela.length)) {
+      const teste = [...postos]
+      for (const i of ordem) por(teste, janela[i])
+      // Trocar de ordem só vale se fecha pelo menos um quarto de célula de buraco.
+      const custo = buracos(teste, colunas) + (ordem[0] === 0 ? 0 : mpc / 4)
+      if (custo < menor) {
+        menor = custo
+        melhor = ordem[0]
+      }
+    }
+    por(postos, janela[melhor])
+    restantes.splice(restantes.indexOf(janela[melhor]), 1)
+  }
+  return postos
 }
 
 /**
