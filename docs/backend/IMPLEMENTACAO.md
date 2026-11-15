@@ -1059,6 +1059,10 @@ Depois, pela API de gestão ou no painel:
 
 **Segunda execução (15/11/2026, push do #43):** parou no início do teste de vazamento, com o login do `app_api` recusado pelo pooler (28P01). O preparo trocava a senha do `app_api` a cada execução, e o Supavisor guarda a senha de cada usuário por um tempo: a primeira execução entrou porque o pooler ainda não conhecia o `app_api`; a segunda já encontrou a senha anterior guardada. Correção: a senha é derivada do segredo do administrador (HMAC, mascarada, nunca gravada), o preparo tenta entrar com ela e só a troca se o login falhar, esperando até 2 min o pooler aceitar. Junto, o passo da fumaça ganhou `set -o pipefail` e passou a exigir o `tudo certo` do fim: sem `shell: bash` explícito o Actions roda `bash -e` sem pipefail, e o `tee` escondeu a queda do script na primeira execução (que saiu verde mesmo parando na fumaça).
 
+**Terceira execução (15/11/2026, push do #44):** o preparo trocou a senha uma última vez (a primeira com a senha derivada) e o pooler aceitou; `isolamento` (10/10) e `sincronizar` (12/12) passaram contra o projeto, e o `fluxo` caiu no `beforeAll` com o login da demonstração em erro interno, 1 min depois da troca. Leitura: algum nó do pooler ainda guardava a senha anterior. Com a senha estável, não se repetiu.
+
+**E1 cumprida (15/11/2026).** Execução 43719789389 (push do #45 no `backend`), contra o HEILD-BACKEND pelo pooler de São Paulo: o preparo não precisou trocar a senha (3 s); o teste de vazamento em modo remoto passou inteiro (`isolamento`, `sincronizar` e `fluxo`, 5 min); a API subiu como `app_api` apontada para o projeto, o app no modo `api`, e a fumaça do wireframe passou nas 26 verificações e terminou em `tudo certo` (4,5 min), já com `pipefail` e exigindo o `tudo certo` (o verde não é falso). Capturas e resultado no artefato `e1-nuvem` da execução. Com isso, os dois itens do critério da E1 que dependiam do projeto (o vazamento pela API e a fumaça no modo `api` contra o projeto novo) estão cumpridos, e o workflow segue rodando a cada push no `backend`.
+
 **Ponto de desempenho para medir na E9:** a fila de gravações do app envia uma escrita por vez, e cada uma faz cerca de 15 idas ao banco; com latência alta (a API longe do banco) a tela fica lenta e o recarregar espera a fila. Em produção a API fica em sa-east-1, ao lado do banco, e isso some quase todo, mas fica para medir na E9, com a ideia de agrupar comandos em lote (um pedido com vários comandos, aplicados em ordem, cada um com a sua chave de idempotência) sem perder a ordem nem a idempotência.
 
 ### Desvios do desenho, e por quê
@@ -1080,7 +1084,7 @@ Depois, pela API de gestão ou no painel:
 
 ### O que falta (depois da B5)
 
-- **Projeto HEILD-BACKEND:** migrações, semente, gancho de token e Data API desligada já aplicados. Falta rodar a fumaça e o vazamento pela API onde houver conexão Postgres com ele (o resto do critério da E1).
+- **Projeto HEILD-BACKEND:** migrações, semente, gancho de token e Data API desligada aplicados; vazamento e fumaça pela API contra ele passam no CI (`backend-nuvem.yml`): **E1 cumprida** em 15/11/2026.
 - **Retomada do cartão do executor da B1:** o cartão que o executor cria quando um integrante pede algo que exige aprovação ainda não roda o comando guardado quando a pessoa aprova (encaixe 4 da B1). Os cartões de execução da B2 já retomam. É o que falta para o s08b (abaixo).
 - **Fluxo de convite pelo Supabase Auth:** quem aceita o convite cria o login e a linha de `conta_auth`. Hoje a ligação é feita por quem administra (é o que o s09 esbarra).
 - Os pontos de tela que ainda leem evento e mensagem interna inteiros, nas telas das fases seguintes.
