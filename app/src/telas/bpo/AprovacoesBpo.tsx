@@ -65,7 +65,10 @@ export function AprovacoesBpoTela({ empresa }: PropsBpo) {
   const prontas = lista.filter((e) => e.contas.some((c) => c.etapa === 'conferida' || c.etapa === 'em_lote'))
   const lotes = lista.flatMap((e) => e.lotes.map((l) => ({ e, l })))
   const abertos = lotes.filter(({ l }) => l.situacao === 'aguardando' || l.situacao === 'parcial')
-  const lotesVistos = (filtroLotes === 'abertos' ? abertos : filtroLotes === 'decididos' ? lotes.filter(({ l }) => !(l.situacao === 'aguardando' || l.situacao === 'parcial')) : lotes).sort((a, b) => b.l.criado_em.localeCompare(a.l.criado_em))
+  // Em andamento: tudo que ainda pede algo (aprovação, liberar no banco, conferir a baixa, refazer). Encerrados: expirados e liberados já pagos.
+  const encerrado = ({ e, l }: { e: EmpresaVista; l: BpoLote }) => l.situacao === 'expirado' || (l.situacao === 'liberado' && l.conta_ids.filter((id) => !l.removidos.includes(id)).every((id) => e.contas.find((c) => c.id === id)?.etapa === 'paga'))
+  const emAndamento = lotes.filter((x) => !encerrado(x))
+  const lotesVistos = (filtroLotes === 'abertos' ? emAndamento : filtroLotes === 'decididos' ? lotes.filter(encerrado) : lotes).sort((a, b) => b.l.criado_em.localeCompare(a.l.criado_em))
   const comCliente = abertos.reduce((s, { l }) => s + l.total, 0)
   const vencendoSem = lista.flatMap((e) => e.contas.filter((c) => ['capturada', 'conferida', 'em_lote', 'aguardando_cliente'].includes(c.etapa) && diasAte(c.vencimento) <= 1))
   const conferidas = lista.flatMap((e) => e.contas.filter((c) => c.etapa === 'conferida' && !motivoNaoEntraNoLote(c, e)).map((c) => ({ e, c })))
@@ -203,15 +206,15 @@ export function AprovacoesBpoTela({ empresa }: PropsBpo) {
             valor={filtroLotes}
             onMudar={setFiltroLotes}
             opcoes={[
-              { valor: 'abertos', rotulo: `Aguardando (${abertos.length})` },
-              { valor: 'decididos', rotulo: `Decididos (${lotes.length - abertos.length})` },
+              { valor: 'abertos', rotulo: `Em andamento (${emAndamento.length})` },
+              { valor: 'decididos', rotulo: `Encerrados (${lotes.length - emAndamento.length})` },
               { valor: 'todos', rotulo: 'Todos' },
             ]}
           />
         </div>
         {lotesVistos.length === 0 ? (
           <Caixa>
-            <EstadoVazio compacto icone={StackIcon} titulo={filtroLotes === 'abertos' ? 'Nenhum lote aguardando o cliente' : 'Nenhum lote aqui'} descricao="Quando o Gestor manda um lote, ele vira cartão no app do cliente e aparece aqui, com o escalonamento e a trilha." />
+            <EstadoVazio compacto icone={StackIcon} titulo={filtroLotes === 'abertos' ? 'Nenhum lote em andamento' : 'Nenhum lote aqui'} descricao="Quando o Gestor manda um lote, ele vira cartão no app do cliente e aparece aqui, com o escalonamento e a trilha." />
           </Caixa>
         ) : (
           <div className={lotesVistos.length >= 3 ? 'grid gap-4 lg:grid-cols-2 xl:grid-cols-3' : lotesVistos.length === 2 ? 'grid gap-4 lg:grid-cols-2' : 'grid gap-4'}>
