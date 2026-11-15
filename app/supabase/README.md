@@ -2,7 +2,7 @@
 
 O wireframe guarda os dados no navegador por padrão. A mesma camada de dados
 (`src/nucleo`) roda sobre o Supabase trocando só o adaptador. O projeto da
-Heild para o wireframe já existe (`rgptcikkxucyysfwarxb`) com a migração
+Heild para o wireframe já existe (`jccwtyeqookthkonbbxn`, HEILD-PROD, São Paulo) com a migração
 aplicada e duas contas de demonstração; **como ligar, desligar e restaurar está
 em `docs/wireframe/ARQUITETURA.md`, seção 9**. O passo a passo abaixo serve
 para montar outro projeto do zero.

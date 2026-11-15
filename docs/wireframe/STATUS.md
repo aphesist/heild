@@ -69,7 +69,7 @@ Aberto: https://github.com/aphesist/heild/pull/1 (de `wf-s00-fundacao` para `wir
 
 ## S00b · Supabase ligado (branch `wf-s00b-supabase`) · 14/11/2026
 
-Com autorização do dono, o modo Supabase passou a funcionar de ponta a ponta no projeto `rgptcikkxucyysfwarxb` (migração aplicada pela coordenação; nenhuma migração nova foi necessária).
+Com autorização do dono, o modo Supabase passou a funcionar de ponta a ponta no projeto `rgptcikkxucyysfwarxb` (antigo, nos EUA, já excluído; hoje o wireframe usa o HEILD-PROD, `jccwtyeqookthkonbbxn`) (migração aplicada pela coordenação; nenhuma migração nova foi necessária).
 
 - **Adaptador** (`app/src/nucleo/banco/supabase.ts`): fila local que garante a gravação ao recarregar; uma operação por vez; evento e registro de entrega por "inserir se não existir"; leitura paginada e ordenada; uma conta de demonstração por escritório, com troca automática ao trocar de escritório.
 - **Correções que valem também no modo local:** o evento nascia sem `escritorio_id` (o banco agora preenche toda linha com o escritório aberto); ids de mensagem do CRM repetidos entre conversas (`m1`, `m2`...) passaram a ser prefixados pela conversa (`cv1:m1`). Bancos locais antigos: use "Resetar o ambiente" para pegar a semente nova.

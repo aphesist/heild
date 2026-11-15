@@ -199,7 +199,7 @@ Quem não está logado vê a entrada e, depois de entrar, cai no endereço pedid
 
 ### Supabase: ligar, desligar e restaurar
 
-Existe um projeto Supabase da Heild para o wireframe (`rgptcikkxucyysfwarxb`, região us-east-1) com a migração `app/supabase/migrations/20261114120000_fundacoes.sql` aplicada: 30 tabelas, todas com RLS forçada pelo escritório do JWT. Duas contas de demonstração em Auth, uma por escritório de exemplo: `demo-andrade@heild.app` (`esc-andrade`) e `demo-horizonte@heild.app` (`esc-horizonte`). As senhas não estão no repositório: pergunte à coordenação ou defina outras (passo 3 abaixo).
+Existe um projeto Supabase da Heild para o wireframe (`jccwtyeqookthkonbbxn` (HEILD-PROD), região sa-east-1) com a migração `app/supabase/migrations/20261114120000_fundacoes.sql` aplicada: 30 tabelas, todas com RLS forçada pelo escritório do JWT. Duas contas de demonstração em Auth, uma por escritório de exemplo: `demo-andrade@heild.app` (`esc-andrade`) e `demo-horizonte@heild.app` (`esc-horizonte`). As senhas não estão no repositório: pergunte à coordenação ou defina outras (passo 3 abaixo).
 
 **Ligar** (o modo local continua o padrão e roda sem rede):
 
