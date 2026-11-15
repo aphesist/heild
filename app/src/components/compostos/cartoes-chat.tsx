@@ -193,11 +193,11 @@ export function CartaoTabela({ cartao, onVerNaAba, className }: { cartao: Por<'t
 export function CartaoDocumento({ cartao, onAbrir, onBaixar, onVer, className }: { cartao: Por<'documento'>; onAbrir?: () => void; onBaixar?: () => void; /** Abre o documento no visualizador. */ onVer?: () => void; className?: string }) {
   const Icone = cartao.especie === 'guia' ? ReceiptIcon : FileTextIcon
   return (
-    <div className={cn(casca, 'flex-row items-center gap-4', className)}>
+    <div className={cn(casca, 'flex-row flex-wrap items-center gap-4', className)}>
       <span className="bg-sunken flex size-11 shrink-0 items-center justify-center rounded-[14px]">
         <Icone weight="duotone" className="text-muted-foreground size-6" />
       </span>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 basis-40">
         {onVer ? (
           <button type="button" onClick={onVer} className="block max-w-full cursor-pointer truncate text-left text-sm font-medium underline-offset-2 hover:underline">
             {cartao.nome}
@@ -212,7 +212,7 @@ export function CartaoDocumento({ cartao, onAbrir, onBaixar, onVer, className }:
           {cartao.pago != null && <Badge variant={cartao.pago ? 'sucesso' : 'outline'}>{cartao.pago ? 'paga' : 'não paga'}</Badge>}
         </div>
       </div>
-      <span className="flex shrink-0 gap-1">
+      <span className="ml-auto flex shrink-0 flex-wrap justify-end gap-1">
         {onVer && (
           <Button size="sm" variant="ghost" onClick={onVer}>
             Abrir

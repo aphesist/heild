@@ -262,7 +262,7 @@ function CartaoComunicado({ c, onResultado }: { c: Comunicado; onResultado: () =
           <UsersIcon className="size-4" /> {c.destinatarios} destinatários · {c.status === 'agendado' ? `sai ${c.quando}` : 'modelo aguardando a Meta'}
         </p>
       )}
-      <div className="text-muted-foreground flex items-center gap-2 text-xs">
+      <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
         <code className="text-[11px]">{c.modelo}</code>
         <span className="ml-auto">{c.quando}</span>
         {c.status === 'enviado' && (

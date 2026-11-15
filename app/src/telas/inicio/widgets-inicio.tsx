@@ -199,6 +199,9 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
       descricao: 'Tarefas e obrigações por prazo interno, com o setor de cada uma; filtros e reprogramar',
       icone: CalendarBlankIcon,
       tamanhos: ['G', 'XL'],
+      // No XL, área de trabalho: a semana inteira na largura toda, com três células de altura.
+      larguraTotal: true,
+      linhasMinimas: 3,
       acao: <LinkWidget destino={{ modulo: 'painel', aba: 'obrigacoes' }}>Abrir</LinkWidget>,
       conteudo: (t) => (
         <div className="flex h-full min-h-0 flex-col gap-2">
@@ -233,7 +236,8 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
             {doCalendario.length === 0 ? (
               <EstadoVazio compacto icone={CalendarBlankIcon} titulo="Nenhuma tarefa nesta semana" descricao="Gere o calendário de dezembro em Painel › Obrigações." />
             ) : (
-              <Calendario tarefas={doCalendario} filtros={filtros} semFiltros visao={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} onReprogramar={reprogramar} />
+              // A chave recomeça o calendário quando o widget muda de largura (no celular, abre no dia).
+              <Calendario key={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} tarefas={doCalendario} filtros={filtros} semFiltros visao={cabe(t, { colunas: 4 }) ? 'semana' : 'dia'} onReprogramar={reprogramar} />
             )}
           </div>
         </div>
