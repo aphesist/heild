@@ -59,7 +59,7 @@ export function ProgressoTrabalho({ trabalho: t, compacto, className }: { trabal
       {!compacto && (
         <ol className="flex flex-col gap-1.5 text-sm">
           {t.etapas.map((e, i) => (
-            <li key={e} className={cn('flex items-center gap-2 transition-colors duration-300', i > atual && 'text-muted-foreground/60', i < atual && 'text-muted-foreground')}>
+            <li key={e} className={cn('flex items-center gap-2 transition-colors duration-300', i > atual && 'text-muted-foreground', i < atual && 'text-muted-foreground')}>
               <span className="grid size-4 shrink-0 place-items-center">
                 {i < atual ? (
                   <CheckIcon className="text-success entra-check size-4" weight="bold" />

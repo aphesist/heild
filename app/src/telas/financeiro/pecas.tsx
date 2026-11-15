@@ -211,7 +211,7 @@ export function FilaContasPagar({
                   {c.alcada && c.situacao === 'a_aprovar' && ` · ${c.alcada}`}
                 </span>
                 {c.alerta && (
-                  <span className="text-warning-foreground flex items-center gap-1 text-xs">
+                  <span className="text-warning-text flex items-center gap-1 text-xs">
                     <WarningIcon className="text-warning size-3.5" weight="fill" /> {c.alerta}
                   </span>
                 )}

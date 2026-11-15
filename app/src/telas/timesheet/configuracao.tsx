@@ -306,7 +306,7 @@ export function Dominios({ admin, onFechar }: { admin: boolean; onFechar: () => 
     >
       <ul className="flex flex-col gap-2">
         {lista.map((d) => (
-          <li key={d.id} className={cn('bg-sunken flex items-start gap-3 rounded-lg px-3 py-2.5', d.situacao === 'desligado' && 'opacity-60')}>
+          <li key={d.id} className={cn('bg-sunken flex items-start gap-3 rounded-lg px-3 py-2.5', d.situacao === 'desligado' && 'text-muted-foreground grayscale')}>
             <div className="min-w-0 flex-1 text-sm">
               <div className="font-medium">{d.portal}</div>
               <code className="text-muted-foreground block truncate text-xs">{d.dominio}</code>

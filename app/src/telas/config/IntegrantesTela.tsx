@@ -88,7 +88,7 @@ export function IntegrantesTela() {
             {padrao.map((p) => {
               const t = aparencia({ setor: p.setor })
               return (
-                <li key={p.setor} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', !p.ligado && 'opacity-60')}>
+                <li key={p.setor} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', !p.ligado && 'text-muted-foreground grayscale')}>
                   <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={30} cutucavel={false} extras={false} />
                   <span className="min-w-0 grow basis-40">
                     <span className="block text-sm font-medium">{t.nome}</span>
@@ -166,7 +166,7 @@ export function IntegrantesTela() {
           <TituloBloco descricao="O que os integrantes aprenderam e vale para todos do setor. Já está valendo; você confirma ou apaga.">Memória do escritório para revisar</TituloBloco>
           <ul className="divide-border/70 flex flex-col divide-y">
             {memoria.map((m) => (
-              <li key={m.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', m.decisao && 'opacity-60')}>
+              <li key={m.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', m.decisao && 'text-muted-foreground grayscale')}>
                 <BrainIcon className="text-muted-foreground size-5 shrink-0" />
                 <span className="min-w-0 grow basis-40 text-sm">
                   <span className="block">{m.regra}</span>

@@ -153,7 +153,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
             <EnvelopeSimpleIcon className="size-3" /> {item.daCaixa === 'enviado' ? 'enviado pela caixa do setor, fora do sistema · registrado pelo integrante' : 'lido da caixa do setor pelo integrante'}
           </div>
         )}
-        {item.texto && <p className={cn('whitespace-pre-wrap', item.apagada && 'line-through opacity-60')}>{negritoWhatsApp(item.texto)}</p>}
+        {item.texto && <p className={cn('whitespace-pre-wrap', item.apagada && 'line-through text-muted-foreground grayscale')}>{negritoWhatsApp(item.texto)}</p>}
         {item.apagada && <p className="text-muted-foreground text-xs">apagada pelo cliente no WhatsApp · o texto original fica guardado</p>}
         {item.editadaDe && (
           <p className="text-muted-foreground border-foreground/10 border-t pt-1.5 text-xs">

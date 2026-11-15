@@ -120,7 +120,7 @@ export function SecaoPagar({ e, onEscolher }: { e: EmpresaVista; onEscolher: Ir 
                       {c.conferencias.length > 0 && ` · conferiu ${c.conferencias.map((x) => x.nome).join(' e ')}`}
                     </span>
                     {c.alerta && (
-                      <span className="text-warning-foreground flex items-center gap-1 text-xs">
+                      <span className="text-warning-text flex items-center gap-1 text-xs">
                         <WarningIcon weight="fill" className="text-warning-text shrink-0" /> {c.alerta}
                       </span>
                     )}
@@ -353,7 +353,7 @@ export function SecaoConciliacao({ e }: { e: EmpresaVista }) {
                     <span className="block truncate">{b.nome}</span>
                     <span className="text-muted-foreground block text-xs">
                       {b.via === 'open_finance' ? 'Open Finance' : b.via === 'api_banco' ? 'API do banco' : b.via === 'ofx' ? 'arquivo OFX' : 'lançado à mão'} · lido {dataHora(b.saldo_em)}
-                      {vence !== null && <span className={cn(vence <= 30 && 'text-warning-foreground')}> · consentimento até {dataCurta(b.consentimento_ate)}</span>}
+                      {vence !== null && <span className={cn(vence <= 30 && 'text-warning-text')}> · consentimento até {dataCurta(b.consentimento_ate)}</span>}
                     </span>
                   </span>
                   <span className={cn('tabular-nums', b.saldo < 0 && 'text-destructive-text')}>{brl(b.saldo)}</span>

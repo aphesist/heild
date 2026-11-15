@@ -271,7 +271,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
                     <span className="flex items-center gap-1.5 text-xs">
                       <IconeCanal canal={c.canal} className="text-muted-foreground" />
                       <span className={cn('min-w-0 flex-1 truncate', c.naoLidas ? 'text-foreground' : 'text-muted-foreground')}>{loja.estado.digitando[c.id] ? <em className="text-success-text not-italic">digitando…</em> : c.previa}</span>
-                      {c.naoLidas ? <span className="bg-destructive text-background flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums">{c.naoLidas}</span> : null}
+                      {c.naoLidas ? <span className="bg-destructive text-destructive-foreground flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums">{c.naoLidas}</span> : null}
                     </span>
                     <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
                       <span className={cn(!c.responsavel && c.status !== 'resolvida' && 'text-warning-text font-medium')}>{c.responsavel ?? (c.status === 'resolvida' ? '' : 'sem responsável')}</span>

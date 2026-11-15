@@ -72,7 +72,7 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
                       const fechado = i.situacao !== 'pendente' && i.situacao !== 'marcado'
                       const temSugestao = !!(i.sugestao?.cliente_id || i.sugestao?.atividade_id)
                       return (
-                        <li key={i.id} className={cn('flex flex-col gap-2 px-2 py-3 xl:flex-row xl:items-center', fechado && 'opacity-60')} data-item={i.id}>
+                        <li key={i.id} className={cn('flex flex-col gap-2 px-2 py-3 xl:flex-row xl:items-center', fechado && 'text-muted-foreground grayscale')} data-item={i.id}>
                           <div className="flex min-w-0 flex-1 items-start gap-3">
                             {!fechado ? (
                               <input type="checkbox" aria-label={`Marcar ${hm(i.inicio)}`} className="accent-foreground mt-1 size-4 shrink-0" checked={i.situacao === 'marcado'} disabled={!temSugestao} onChange={(ev) => executar(() => repos.itensConfirmacao.marcar(i.id, ev.target.checked))} />

@@ -280,12 +280,12 @@ function LinhaConferir({ e, c, mostrarEmpresa, marcado, onMarcar }: { e: Empresa
           </span>
         )}
         {excecoes.map((x) => (
-          <span key={x.tipo} className="text-warning-foreground flex items-center gap-1 text-xs">
+          <span key={x.tipo} className="text-warning-text flex items-center gap-1 text-xs">
             <WarningIcon className="text-warning size-3.5 shrink-0" weight="fill" /> sobe de faixa: {x.texto}
           </span>
         ))}
         {c.alerta && !excecoes.length && (
-          <span className="text-warning-foreground flex items-center gap-1 text-xs">
+          <span className="text-warning-text flex items-center gap-1 text-xs">
             <WarningIcon className="text-warning size-3.5" weight="fill" /> {c.alerta}
           </span>
         )}
@@ -389,7 +389,7 @@ function ProximoLote({ e, mostrarEmpresa }: { e: EmpresaVista; mostrarEmpresa: b
                   vence {quando(c.vencimento)} · conferiu {c.conferencias.map((x) => x.nome).join(' e ')}
                   {c.alerta && ` · ${c.alerta}`}
                 </span>
-                {bloqueio && <span className="text-warning-foreground block text-xs">{bloqueio}</span>}
+                {bloqueio && <span className="text-warning-text block text-xs">{bloqueio}</span>}
               </span>
               <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
               {c.etapa === 'em_lote' ? (
@@ -436,8 +436,8 @@ function ProximoLote({ e, mostrarEmpresa }: { e: EmpresaVista; mostrarEmpresa: b
               )}
             </span>
             {e.caixa - total < 0 && <span className="text-destructive-text block text-xs">O saldo não cobre o lote: o cliente vê o aviso no cartão.</span>}
-            {modo.motivo && <span className="text-warning-foreground block text-xs">{modo.motivo}</span>}
-            {foraSla && <span className="text-warning-foreground block text-xs">Sai com menos de {regrasSlaDe(e).lote_antes_h} h antes do vencimento: conta como desvio do SLA.</span>}
+            {modo.motivo && <span className="text-warning-text block text-xs">{modo.motivo}</span>}
+            {foraSla && <span className="text-warning-text block text-xs">Sai com menos de {regrasSlaDe(e).lote_antes_h} h antes do vencimento: conta como desvio do SLA.</span>}
             {limite && <span className="text-destructive-text block text-xs">{limite}</span>}
             {faltaQuem && <span className="text-destructive-text block text-xs">A reforçada pede duas pessoas e a ficha tem {podem.length}: marque mais um aprovador na Configuração (vale com o aceite do sócio).</span>}
           </span>
@@ -528,7 +528,7 @@ function CartaoLote({ l, e, mostrarEmpresa }: { l: BpoLote; e: EmpresaVista; mos
                 vence {quando(i.vencimento)} · {i.etapa === 'paga' ? 'paga (baixa no extrato)' : e.fornecedores.find((f) => f.nome === i.contraparte)?.risco === 'recorrente' ? 'OK (recorrente)' : 'conferida'}
               </span>
               {i.alerta && (
-                <span className="text-warning-foreground flex items-start gap-1 text-xs">
+                <span className="text-warning-text flex items-start gap-1 text-xs">
                   <WarningIcon className="text-warning mt-0.5 size-3.5 shrink-0" weight="fill" /> {i.alerta}
                 </span>
               )}

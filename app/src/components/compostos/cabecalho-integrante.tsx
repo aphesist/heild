@@ -47,7 +47,7 @@ export function CabecalhoIntegrante({ integrante: it, contexto, limite, onPausar
   }
   return (
     <header className={cn('flex items-center gap-3 sm:gap-4', className)}>
-      <span className={cn('shrink-0', pausado && 'opacity-60 grayscale')}>
+      <span className={cn('shrink-0', pausado && 'text-muted-foreground grayscale grayscale')}>
         <Orb cor={t.cor} corOlhos={t.corOlhos} estado={pausado ? 'dormindo' : it.estado} tamanho={largo ? 52 : 40} modo="follow" animado sombra espelho={{ id: it.id, papel: 'cabecalho' }} />
       </span>
       <div className="min-w-0 flex-1">

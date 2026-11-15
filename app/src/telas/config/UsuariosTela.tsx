@@ -83,7 +83,7 @@ export function UsuariosTela() {
           </TituloBloco>
           <ul className="divide-border/70 flex flex-col divide-y">
             {visiveis.map((u) => (
-              <li key={u.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3', u.situacao === 'desativado' && 'opacity-60')}>
+              <li key={u.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3', u.situacao === 'desativado' && 'text-muted-foreground grayscale')}>
                 <span className="bg-sunken flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   {u.nome
                     .split(' ')

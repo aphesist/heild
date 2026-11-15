@@ -258,7 +258,7 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
                     className={cn(
                       'bg-surface hover:bg-raised shadow-contorno flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
                       conta?.id === u.id && 'bg-raised ring-foreground/25 ring-1',
-                      u.situacao === 'desativado' && 'opacity-70',
+                      u.situacao === 'desativado' && 'text-muted-foreground grayscale',
                     )}
                   >
                     <Avatar nome={u.nome} />

@@ -210,7 +210,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                   {achados.map((a) => {
                     const d = rx.decisoes[a.id]
                     return (
-                      <li key={a.id} data-achado={a.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-2 py-3', d && 'opacity-70')}>
+                      <li key={a.id} data-achado={a.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-2 py-3', d && 'text-muted-foreground grayscale')}>
                         {podeDecidir && !d ? <CaixaSelecao marcado={sel.marcado(a.id)} onMudar={(intervalo) => sel.alternar(a.id, intervalo)} rotulo={`Marcar ${a.pasta}`} /> : <span className="w-[18px]" />}
                         <FolderSimpleIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
                         <span className="min-w-0 flex-1 basis-64">

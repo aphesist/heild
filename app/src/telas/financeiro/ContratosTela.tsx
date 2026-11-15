@@ -401,7 +401,7 @@ function DetalheContrato({ fin, c, podeEditar, onFechar, onEditar }: { fin: Fin;
       {aba === 'itens' && (
         <ul className="divide-border/70 flex flex-col divide-y text-sm">
           {historicoItens.map((i) => (
-            <li key={i.id} className={cn('grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 py-2', i.vigente_ate && 'opacity-50')}>
+            <li key={i.id} className={cn('grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 py-2', i.vigente_ate && 'text-muted-foreground grayscale')}>
               <span className="min-w-0">
                 <span className="block">
                   {i.descricao} <span className="text-muted-foreground">· {servicos[i.servico].rotulo}</span>

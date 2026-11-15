@@ -267,7 +267,7 @@ function Emissor({ ctx }: { ctx: Ctx }) {
           <div key={n.numero} className="flex flex-col gap-1.5 text-sm">
             <div className="flex items-center gap-2">
               <span className="min-w-0 flex-1">
-                <span className={cn('block', n.situacao === 'cancelada' && 'line-through opacity-60')}>
+                <span className={cn('block', n.situacao === 'cancelada' && 'line-through text-muted-foreground grayscale')}>
                   NFS-e {n.numero} · {brl(n.valor)}
                 </span>
                 <span className="text-muted-foreground block text-xs">

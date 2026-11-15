@@ -169,7 +169,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
       {lista.length === 0 && <EstadoVazio compacto icone={BellIcon} titulo="Nada por aqui" descricao="Quando o escritório mandar algo, aparece aqui e no aparelho." />}
       <div className="flex flex-col gap-1.5">
         {lista.map((a) => (
-          <div key={a.id} className={cn('bg-surface shadow-cartao flex flex-col gap-1 rounded-lg px-3 py-2.5', a.silenciado && 'opacity-70')}>
+          <div key={a.id} className={cn('bg-surface shadow-cartao flex flex-col gap-1 rounded-lg px-3 py-2.5', a.silenciado && 'text-muted-foreground grayscale')}>
             <button
               type="button"
               className="flex cursor-pointer items-start gap-2 text-left"

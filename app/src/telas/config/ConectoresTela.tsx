@@ -470,7 +470,7 @@ function Cofre() {
               const sit = situacaoPelaValidade(c)
               const dias = diasAte(c.validade)
               return (
-                <li key={c.id} data-credencial={c.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-2 py-3', sit === 'revogada' && 'opacity-60')}>
+                <li key={c.id} data-credencial={c.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-2 py-3', sit === 'revogada' && 'text-muted-foreground grayscale')}>
                   {c.tipo.includes('procuracao') ? <ShieldCheckIcon className="text-muted-foreground size-5 shrink-0" /> : c.tipo === 'ecnpj_escritorio' || c.tipo === 'a1_cliente' ? <CertificateIcon className="text-muted-foreground size-5 shrink-0" /> : <KeyIcon className="text-muted-foreground size-5 shrink-0" />}
                   <span className="min-w-0 flex-1 basis-60">
                     <span className="flex flex-wrap items-center gap-1.5 text-sm font-medium">

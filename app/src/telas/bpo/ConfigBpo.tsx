@@ -184,7 +184,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
                   aria-checked={atual}
                   disabled={!podeAlcada || m === 'M3' || atual}
                   onClick={() => (m === 'M2' ? setModo({ m, teto: String(e.perfil.teto_m2 ?? 10_000) }) : void proporModo(m))}
-                  className={cn('flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm disabled:cursor-default', m === 'M3' && 'opacity-60', atual ? 'bg-raised shadow-contorno' : 'hover:bg-sunken/60')}
+                  className={cn('flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm disabled:cursor-default', m === 'M3' && 'text-muted-foreground grayscale', atual ? 'bg-raised shadow-contorno' : 'hover:bg-sunken/60')}
                 >
                   <span className={cn('mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border', atual && 'border-foreground')}>{atual && <span className="bg-foreground size-2 rounded-full" />}</span>
                   <span className="min-w-0 flex-1">
@@ -430,7 +430,7 @@ function PropostaAlcadas({ e, onFechar, usuario }: { e: EmpresaVista; onFechar: 
           </label>
         </div>
       ))}
-      {marcadas < 2 && contatos.length > 0 && <p className="text-warning-foreground text-xs">A aprovação reforçada pede duas pessoas marcadas; hoje {marcadas === 1 ? 'há uma' : 'não há nenhuma'}. Lotes acima da faixa 2 ficam sem quem aprove.</p>}
+      {marcadas < 2 && contatos.length > 0 && <p className="text-warning-text text-xs">A aprovação reforçada pede duas pessoas marcadas; hoje {marcadas === 1 ? 'há uma' : 'não há nenhuma'}. Lotes acima da faixa 2 ficam sem quem aprove.</p>}
     </GavetaFormulario>
   )
 }

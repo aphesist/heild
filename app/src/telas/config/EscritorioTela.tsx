@@ -88,7 +88,7 @@ export function EscritorioTela() {
                   onClick={() => setSetorEd(s)}
                   className={cn(
                     'hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-0.5 rounded-md px-2 py-2.5 text-left text-sm sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]',
-                    !s.ativo && 'opacity-60',
+                    !s.ativo && 'text-muted-foreground grayscale',
                   )}
                 >
                   <span className="font-medium">

@@ -466,7 +466,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
             <ol className="flex flex-wrap gap-2">
               {primeiros.map((p, i) => (
                 <li key={p.id} className="min-w-[12rem] flex-1">
-                  <div className={cn('bg-raised flex h-full items-center gap-2 rounded-md px-3 py-2 text-sm', p.feito && 'opacity-60')}>
+                  <div className={cn('bg-raised flex h-full items-center gap-2 rounded-md px-3 py-2 text-sm', p.feito && 'text-muted-foreground grayscale')}>
                     {p.feito ? <CheckCircleIcon className="text-success size-5 shrink-0" weight="fill" /> : <span className="bg-sunken flex size-5 shrink-0 items-center justify-center rounded-full text-xs tabular-nums">{i + 1}</span>}
                     <button type="button" onClick={() => nav.irPara(p.destino)} className="min-w-0 flex-1 cursor-pointer truncate text-left underline-offset-2 hover:underline">
                       {p.rotulo}

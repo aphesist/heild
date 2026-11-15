@@ -92,7 +92,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
           </header>
           <ul className="grid gap-3 lg:grid-cols-2">
             {reguas.map((r) => (
-              <li key={r.id} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4', !r.ativa && 'opacity-70')}>
+              <li key={r.id} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4', !r.ativa && 'text-muted-foreground grayscale')}>
                 <div className="flex items-start gap-3">
                   <button type="button" onClick={() => r.id !== 'r6' && setEditando(r)} className="min-w-0 flex-1 cursor-pointer text-left disabled:cursor-default" disabled={r.id === 'r6'}>
                     <h3 className="flex items-center gap-1.5 text-sm font-medium">

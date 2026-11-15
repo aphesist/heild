@@ -282,7 +282,7 @@ export function ListaRegua({ politica, editavel, onEditar }: { politica: Politic
       {[...politica.regua]
         .sort((a, b) => a.dias - b.dias)
         .map((p) => (
-          <li key={p.id} className={cn('flex items-start gap-3 rounded-md px-2 py-1.5 text-sm', !p.ativo && 'opacity-50')}>
+          <li key={p.id} className={cn('flex items-start gap-3 rounded-md px-2 py-1.5 text-sm', !p.ativo && 'text-muted-foreground grayscale')}>
             <span className="bg-sunken w-12 shrink-0 rounded-full py-0.5 text-center text-xs font-medium tabular-nums">{rotuloDia(p.dias)}</span>
             <span className="min-w-0 flex-1">
               <span className="block">
@@ -457,7 +457,7 @@ export function PlanoContas({ onFechar }: Fechar) {
                       aria-pressed={c.ativa}
                       title={c.ativa ? 'Desativar' : 'Reativar'}
                       onClick={() => executar(() => repos.categoriasGerenciais.atualizar(c.id, { ativa: !c.ativa }, { texto: `Categoria ${c.nome} ${c.ativa ? 'desativada' : 'reativada'}` }))}
-                      className={cn('bg-sunken/70 hover:bg-raised cursor-pointer rounded-full px-3 py-1 text-xs', !c.ativa && 'line-through opacity-50')}
+                      className={cn('bg-sunken/70 hover:bg-raised cursor-pointer rounded-full px-3 py-1 text-xs', !c.ativa && 'line-through text-muted-foreground grayscale')}
                     >
                       {c.codigo} {c.nome}
                     </button>
@@ -487,7 +487,7 @@ export function PlanoContas({ onFechar }: Fechar) {
         <>
           <ul className="divide-border/70 flex flex-col divide-y">
             {fin.centros.map((c) => (
-              <li key={c.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !c.ativo && 'opacity-50')}>
+              <li key={c.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !c.ativo && 'text-muted-foreground grayscale')}>
                 <span className="min-w-0 grow basis-40">
                   <span className="block">{c.nome}</span>
                   <span className="text-muted-foreground block text-xs">{c.tipo === 'setor' ? 'setor fixo' : c.tipo === 'carteira_de_socio' ? 'carteira de sócio' : c.tipo}</span>
@@ -565,7 +565,7 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
     <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo="Tabela de avulsos" descricao="O preço do escritório por atividade do catálogo (GES-002). O integrante usa para propor o serviço fora do contrato; sem aceite, não fatura." acao="Fechar" onAcao={onFechar}>
       <ul className="divide-border/70 flex flex-col divide-y">
         {fin.tabelaAvulsos.map((t) => (
-          <li key={t.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !t.ativo && 'opacity-50')}>
+          <li key={t.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !t.ativo && 'text-muted-foreground grayscale')}>
             <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs">{t.atividade_id}</span>
             <span className="min-w-0 grow basis-40">
               <span className="block">{t.nome}</span>

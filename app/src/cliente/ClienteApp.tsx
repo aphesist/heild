@@ -171,7 +171,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
           </button>
           <button type="button" aria-label={`Notificações${naoLidos ? ` (${naoLidos} não lidas)` : ''}`} onClick={() => ir('avisos')} className="hover:bg-sunken relative cursor-pointer rounded-full p-2">
             <BellIcon className="size-5" weight={tela === 'avisos' ? 'fill' : 'regular'} />
-            {naoLidos > 0 && <span className="bg-destructive text-background absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs tabular-nums">{naoLidos > 9 ? '9+' : naoLidos}</span>}
+            {naoLidos > 0 && <span className="bg-destructive text-destructive-foreground absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs tabular-nums">{naoLidos > 9 ? '9+' : naoLidos}</span>}
           </button>
         </header>
 

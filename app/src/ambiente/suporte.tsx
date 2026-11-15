@@ -405,7 +405,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
               </div>
             )}
             {secao === 'equipe' && (
-              <p className={cn('flex items-center gap-1.5 text-xs', foraHorario ? 'text-warning-foreground' : 'text-muted-foreground')}>
+              <p className={cn('flex items-center gap-1.5 text-xs', foraHorario ? 'text-warning-text' : 'text-muted-foreground')}>
                 <ClockIcon className="size-3.5" />
                 {foraHorario ? `Fora do horário (${HORARIO}): deixe a mensagem, respondemos amanhã a partir das 8h.` : `Equipe online agora · ${HORARIO} · resposta em cerca de 5 min`}
               </p>

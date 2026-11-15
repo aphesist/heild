@@ -129,7 +129,7 @@ function LinhaDocumento({ d, e, mostrarEmpresa, lendo, onLer, onRevisar, onEscol
         {l && (
           <span className="mt-1 block text-xs">
             {l.fornecedor} · <span className="tabular-nums">{brl(l.valor, true)}</span> · vence {dataCurta(l.vencimento)} · {l.categoria}
-            {l.confianca === 'baixa' && <span className="text-warning-foreground"> · leitura incerta</span>}
+            {l.confianca === 'baixa' && <span className="text-warning-text"> · leitura incerta</span>}
             {d.lido_por && <span className="text-muted-foreground"> · lido por {d.lido_por}</span>}
           </span>
         )}

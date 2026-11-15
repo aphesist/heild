@@ -351,7 +351,13 @@ function detectar(opcoes) {
     if (cor[3] === 0) continue
     // Opacidade do elemento e dos ancestrais (até o fundo) clareia o texto.
     let op = 1
-    for (let a = el; a && a !== document.body; a = a.parentElement) op *= parseFloat(cs(a).opacity)
+    let animando = false
+    for (let a = el; a && a !== document.body; a = a.parentElement) {
+      op *= parseFloat(cs(a).opacity)
+      // Opacidade em linha abaixo de 1 é a de uma animação de entrada (Motion): mede depois, não no meio.
+      if (a.style && a.style.opacity !== '' && parseFloat(a.style.opacity) < 1) animando = true
+    }
+    if (animando) continue
     const { bases, camadas } = fundos(el)
     let pior = Infinity
     for (const base of bases) {

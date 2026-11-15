@@ -105,7 +105,7 @@ export function FilaBpoTela({ empresa, onEscolher }: PropsBpo) {
             type="button"
             aria-pressed={atalho === r.id}
             onClick={() => setAtalho((a) => (a === r.id ? null : r.id))}
-            className={cn('bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors', atalho === r.id && 'ring-foreground/40 ring-2', r.n === 0 && 'opacity-60')}
+            className={cn('bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors', atalho === r.id && 'ring-foreground/40 ring-2', r.n === 0 && 'text-muted-foreground grayscale')}
           >
             <Badge variant={r.n ? r.tom : 'outline'} className="tabular-nums">
               {r.n}
@@ -213,7 +213,7 @@ export function FilaBpoTela({ empresa, onEscolher }: PropsBpo) {
                   <span className="text-muted-foreground text-xs">
                     {e.nome} · {rotuloBola[f.bola]} · {quando(f.prazo)}
                   </span>
-                  <span className={cn('text-xs', s.tom === 'erro' ? 'text-destructive-text' : s.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>{s.texto}</span>
+                  <span className={cn('text-xs', s.tom === 'erro' ? 'text-destructive-text' : s.tom === 'atencao' ? 'text-warning-text' : 'text-muted-foreground')}>{s.texto}</span>
                 </button>
               )
             }}
@@ -355,9 +355,9 @@ function ItemFila({ e, f, eventos, risco, mostrarEmpresa, menu, onAbrir, onEscol
           {f.detalhe && ` · ${f.detalhe}`}
           {notas > 0 && ` · ${notas} anotaç${notas > 1 ? 'ões' : 'ão'}`}
         </span>
-        <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>
+        <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-text' : 'text-muted-foreground')}>
           {sla.texto}
-          {parada && <span className="text-warning-foreground"> · bola parada há {textoHoras(parada)}</span>}
+          {parada && <span className="text-warning-text"> · bola parada há {textoHoras(parada)}</span>}
           {risco && <span className="text-muted-foreground"> · risco: {risco}</span>}
         </span>
       </button>
@@ -481,7 +481,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
               <span className="text-muted-foreground text-xs">desde {dataHora(bolaDesde(f, eventos))}</span>
               {parada && <Badge variant="destaque">bola parada há {textoHoras(parada)}</Badge>}
             </div>
-            <p className={cn('text-sm', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-foreground' : undefined)}>{sla.texto}</p>
+            <p className={cn('text-sm', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-text' : undefined)}>{sla.texto}</p>
             <dl className="text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
               <div>
                 <dt>Responsável</dt>

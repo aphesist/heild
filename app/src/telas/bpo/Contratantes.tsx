@@ -641,7 +641,7 @@ function FilaContratante({ c }: { c: ContratanteVista }) {
                     {f.cliente_final} · {rotuloDepto[f.departamento ?? ''] ?? f.departamento} · {f.codigo} · {f.responsavel_nome}
                     {f.detalhe && ` · ${f.detalhe}`}
                   </span>
-                  <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>
+                  <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-text' : 'text-muted-foreground')}>
                     {sla.texto}
                     {f.prazo_legal && ` · prazo legal ${quando(f.prazo_legal)}`}
                     {typeof f.extras?.cobrado_em === 'string' && ` · cobrado pelo Atendimento ${dataHora(f.extras.cobrado_em)}`}

@@ -308,7 +308,7 @@ function Permissoes() {
                 <span>CRM: {p.abas.crm?.join(', ')} · Timesheet: {p.abas.timesheet?.join(', ')}</span>
                 <span>Financeiro: {p.abas.financeiro?.join(', ') || 'não vê'}</span>
                 {sel.excecoes.map((x) => (
-                  <span key={x.id} className="text-warning-foreground">
+                  <span key={x.id} className="text-warning-text">
                     Exceção: {x.efeito} {x.tela} ({x.motivo})
                   </span>
                 ))}

@@ -396,7 +396,7 @@ function ConfigurarRotinas({ e, onFechar }: { e: EmpresaVista; onFechar: () => v
         rotuloDe={(r) => r.nome}
         onReordenar={(ids) => executar(() => repos.bpo.rotinas.reordenar(ids))}
         render={(r) => (
-          <div className={cn('bg-sunken/50 flex flex-wrap items-center gap-2 rounded-md px-2 py-1.5 text-sm', !r.ativa && 'opacity-60')}>
+          <div className={cn('bg-sunken/50 flex flex-wrap items-center gap-2 rounded-md px-2 py-1.5 text-sm', !r.ativa && 'text-muted-foreground grayscale')}>
             <span className="min-w-0 flex-1 basis-48">
               <EdicaoEmLinha valor={r.nome} rotulo="Nome da rotina" onSalvar={(v) => void executar(() => repos.bpo.rotinas.atualizar(r.id, { nome: v }), { sucesso: 'Rotina renomeada' })} />
               <span className="text-muted-foreground block text-xs">
