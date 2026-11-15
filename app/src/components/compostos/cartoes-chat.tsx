@@ -6,10 +6,14 @@ import { useEfeitosCartao } from '@/ambiente/efeitos'
 import { clientePorNome, integranteDoSetor, useFluxos } from '@/ambiente/fluxos'
 import { usePedirIntegrante } from '@/ambiente/pedir'
 import { useLoja, useNavegacao } from '@/ambiente/loja'
+import { useSessao } from '@/ambiente/sessao'
+import { ValorEditavel, textoDoValor, type QualquerValor } from '@/components/kit/valor-editavel'
+import { banco } from '@/nucleo/banco'
+import { repos } from '@/nucleo/repositorios'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Orb } from '@/components/ui/orb'
-import type { Cartao } from '@/dados/tipos'
+import type { ArgumentoCartao, Cartao } from '@/dados/tipos'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
@@ -25,11 +29,46 @@ type Por<T extends Cartao['tipo']> = Extract<Cartao, { tipo: T }>
 
 const casca = 'bg-card flex flex-col gap-3 rounded-xl border p-4'
 
-/** Cartão de aprovação (Fundações 6.4): resumo, argumentos, sim / editar / não, expira em. */
-export function CartaoAprovacao({ cartao, onDecidir, semEditar, className }: { cartao: Por<'aprovacao'>; onDecidir?: (d: Decisao) => void; semEditar?: boolean; className?: string }) {
+/** Assinatura curta dos argumentos (FNV-1a): muda quando a pessoa corrige um argumento. */
+function assinatura(args: ArgumentoCartao[]): string {
+  let h = 0x811c9dc5
+  for (const ch of JSON.stringify(args.map((a) => [a.rotulo, a.bruto ?? a.valor]))) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193) >>> 0
+  return h.toString(16).padStart(8, '0').slice(0, 7)
+}
+
+/**
+ * Cartão de aprovação (Fundações 6.4; fase 6): resumo, argumentos, aprovar ou
+ * recusar, expira em. Os argumentos ligados a um campo da ação são editáveis no
+ * próprio cartão (ValorEditavel): a correção muda a ação guardada no cartão, a
+ * assinatura dos argumentos muda e a alteração fica registrada; aprovar depois
+ * de corrigir vale como "aprovado com edição". Não há mais "Editar e aprovar".
+ */
+export function CartaoAprovacao({ cartao, onDecidir, className }: { cartao: Por<'aprovacao'>; onDecidir?: (d: Decisao) => void; semEditar?: boolean; className?: string }) {
   const loja = useLoja()
+  const { usuario } = useSessao()
   const [local, setDecidido] = useState<Decisao | null>(null)
   const decidido = (loja.estado.decisoes[cartao.id] as Decisao | undefined) ?? local
+  const [args, setArgs] = useState<ArgumentoCartao[]>(cartao.argumentos ?? [])
+  const [alteracoes, setAlteracoes] = useState<{ rotulo: string; de: string; para: string }[]>([])
+  const original = assinatura(cartao.argumentos ?? [])
+  const atual = assinatura(args)
+  const corrigir = (i: number, v: QualquerValor) => {
+    const a = args[i]
+    if (!a.editavel || !a.campo) return
+    const texto = textoDoValor(a.editavel, v)
+    const novos = args.map((x, k) => (k === i ? { ...x, valor: texto, bruto: v } : x))
+    const alteracao = { rotulo: a.rotulo, de: a.valor, para: texto }
+    setArgs(novos)
+    setAlteracoes((xs) => [...xs.filter((x) => x.rotulo !== a.rotulo), { ...alteracao, de: xs.find((x) => x.rotulo === a.rotulo)?.de ?? a.valor }])
+    // A ação guardada no cartão muda junto: aprovar (aqui, no sino ou na Visão geral) executa o corrigido.
+    const linha = banco.obter('cartao_aprovacao', cartao.id)
+    if (linha)
+      repos.cartoes.atualizar(
+        cartao.id,
+        { argumentos: { ...(linha.argumentos as Record<string, unknown>), [a.campo]: v }, extras: { ...linha.extras, alteracoes: [...((linha.extras?.alteracoes as unknown[]) ?? []), { ...alteracao, por: usuario.nome, em: new Date().toISOString() }], assinatura_argumentos: assinatura(novos) } },
+        { texto: `${usuario.nome} alterou “${a.rotulo}” de ${a.valor} para ${texto} antes de aprovar: ${cartao.resumo}` },
+      )
+  }
   return (
     <div data-cartao-pendente={!decidido || undefined} className={cn(casca, !decidido && 'border-warning/60', className)}>
       <div className="flex items-start gap-2">
@@ -40,25 +79,32 @@ export function CartaoAprovacao({ cartao, onDecidir, semEditar, className }: { c
         </div>
         {cartao.expiraEm && !decidido && <span className="text-muted-foreground shrink-0 text-xs">{cartao.expiraEm}</span>}
       </div>
-      {cartao.argumentos && (
-        <dl className="bg-muted/60 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-lg px-3 py-2 text-xs">
-          {cartao.argumentos.map((a) => (
+      {args.length > 0 && (
+        <dl className="bg-muted/60 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-1 rounded-lg px-3 py-2 text-xs">
+          {args.map((a, i) => (
             <div key={a.rotulo} className="contents">
               <dt className="text-muted-foreground">{a.rotulo}</dt>
-              <dd className="font-medium tabular-nums">{a.valor}</dd>
+              <dd className="min-w-0 font-medium tabular-nums">{a.editavel && a.campo && !decidido ? <ValorEditavel rotulo={a.rotulo} valor={a.bruto ?? a.valor} config={a.editavel} formatar={() => args[i].valor} desfazer={false} onMudar={(v) => corrigir(i, v)} /> : a.valor}</dd>
             </div>
           ))}
         </dl>
+      )}
+      {alteracoes.length > 0 && (
+        <p className="text-muted-foreground text-xs" aria-live="polite">
+          Você corrigiu {alteracoes.map((x) => `${x.rotulo.toLowerCase()} (${x.de} → ${x.para})`).join(', ')}. Assinatura dos argumentos: <code className="font-mono">{original}</code> → <code className="font-mono">{atual}</code>.
+        </p>
       )}
       {decidido ? (
         <ResultadoDecisao decisao={decidido} />
       ) : (
         <BotoesDecisao
           lote={cartao.lote}
-          semEditar={semEditar}
+          semEditar
+          rotuloAprovar={alteracoes.length ? 'Aprovar com a correção' : undefined}
           onDecidir={(d) => {
-            if (d !== 'editar_e_aprovar') setDecidido(d)
-            onDecidir?.(d)
+            const final: Decisao = d === 'aprovar' && alteracoes.length ? 'editar_e_aprovar' : d
+            setDecidido(final)
+            onDecidir?.(final)
           }}
         />
       )}

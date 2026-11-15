@@ -115,12 +115,27 @@ export interface ColunaTabela {
   alinhamento?: 'esquerda' | 'direita'
 }
 
+/**
+ * Argumento do cartão de aprovação. Com `campo` e `editavel`, é editável no
+ * próprio cartão (fase 6): a correção muda esse campo da ação guardada no
+ * cartão, recalcula a assinatura dos argumentos e fica registrada.
+ */
+export interface ArgumentoCartao {
+  rotulo: string
+  valor: string
+  /** Campo da ação (`cartao_aprovacao.argumentos`) que este argumento muda. */
+  campo?: string
+  editavel?: import('@/components/kit/valor-editavel').ConfigValor
+  /** O valor como a ação guarda (id do cliente, número), quando difere do texto. */
+  bruto?: import('@/components/kit/valor-editavel').QualquerValor
+}
+
 export type Cartao =
   | {
       tipo: 'aprovacao'
       id: string
       resumo: string
-      argumentos?: { rotulo: string; valor: string }[]
+      argumentos?: ArgumentoCartao[]
       expiraEm?: string
       lote?: number
     }

@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { banco } from '@/nucleo/banco'
 import { repos } from '@/nucleo/repositorios'
 import { nomeDoSetor, type FimFluxo } from '@/dados/simulacao'
-import type { Cartao } from '@/dados/tipos'
+import type { ArgumentoCartao, Cartao } from '@/dados/tipos'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { integranteDoSetor } from './fluxos'
 import { useLoja, type Destino } from './loja'
@@ -144,7 +144,8 @@ export interface PedidoTrabalhoS02 {
   /** Faz sozinho: a mudança acontece ao terminar, em nome do integrante. */
   aoTerminar?: () => void
   /** Prepara: deixa o cartão de aprovação ao terminar. */
-  cartao?: { acao: AcaoS02; resumo: string; argumentos?: [string, string][]; expira?: string; podeAprovar?: string[] }
+  /** Os argumentos podem ser pares [rótulo, valor] ou, para corrigir no próprio cartão, `ArgumentoCartao` com o `campo` da ação. */
+  cartao?: { acao: AcaoS02; resumo: string; argumentos?: ([string, string] | ArgumentoCartao)[]; expira?: string; podeAprovar?: string[] }
   /** Cartões extra no fim (documento, tabela). */
   cartoes?: Cartao[]
   /** Mensagem ao cliente pelo CRM (só em ação já aprovada). */
@@ -186,7 +187,7 @@ export function useAgenteS02() {
           },
           { ferramenta: 'aprovacao.decidir', texto: `${nomeDoSetor(p.setor)} preparou para aprovar: ${p.cartao.resumo}${p.cliente ? ` · ${p.cliente}` : ''}` },
         )
-        cartoes.push({ tipo: 'aprovacao', id, resumo: `${p.cartao.resumo}${p.cliente ? ` · ${p.cliente}` : ''}`, argumentos: [...(p.cartao.argumentos ?? []), ['Pedido por', usuario.nome]].map(([rotulo, valor]) => ({ rotulo, valor })), expiraEm: p.cartao.expira ?? 'expira em 2 dias' })
+        cartoes.push({ tipo: 'aprovacao', id, resumo: `${p.cartao.resumo}${p.cliente ? ` · ${p.cliente}` : ''}`, argumentos: [...(p.cartao.argumentos ?? []), ['Pedido por', usuario.nome] as [string, string]].map((a) => (Array.isArray(a) ? { rotulo: a[0], valor: a[1] } : a)), expiraEm: p.cartao.expira ?? 'expira em 2 dias' })
       }
       loja.iniciarTrabalho({
         id: `s02-${p.titulo}`,
