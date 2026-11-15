@@ -57,6 +57,8 @@ const tipos: TipoDocumento[] = ['guia', 'holerite', 'folha', 'balancete', 'contr
 
 interface Linha extends DocumentoAba {
   doc?: Documento
+  /** Na carteira: de qual cliente é o documento. */
+  cliente?: string
   semOrigem?: boolean
 }
 
@@ -89,10 +91,15 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
   const [entregas, setEntregas] = useState<Linha | null>(null)
   const [origem, setOrigem] = useState<Linha | null>(null)
   const itens: Linha[] = useMemo(() => {
-    if (!ctx.clienteId) return fixos
+    // Carteira: os documentos do setor de todos os clientes, com o nome de cada um (antes ficava sempre vazio).
+    if (!ctx.clienteId) {
+      const nomeDe = new Map(loja.clientes.map((c) => [c.id, c.nome]))
+      const daCarteira = loja.documentos.filter((d) => (setorDoTipo[d.tipo] ?? []).includes(ctx.setor))
+      return daCarteira.length ? daCarteira.map((d) => ({ ...paraLinha(d), cliente: d.clienteId ? nomeDe.get(d.clienteId) : undefined })) : fixos
+    }
     const reais = loja.documentos.filter((d) => d.clienteId === ctx.clienteId && (setorDoTipo[d.tipo] ?? []).includes(ctx.setor))
     return reais.length ? reais.map(paraLinha) : fixos
-  }, [loja.documentos, ctx.clienteId, ctx.setor, fixos])
+  }, [loja.documentos, loja.clientes, ctx.clienteId, ctx.setor, fixos])
   const fila = itens.filter((d) => d.semOrigem)
 
   const abrir = (d: Linha) => {
@@ -162,6 +169,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm">{d.nome}</span>
                   <span className="text-muted-foreground block truncate text-xs">
+                    {d.cliente && `${d.cliente} · `}
                     {d.competencia} · {d.origem} · {d.enviadoPor}
                   </span>
                 </span>
@@ -200,6 +208,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
                     <div className="min-w-0">
                       <div className="truncate">{d.nome}</div>
                       <div className="text-muted-foreground text-xs">
+                        {d.cliente && `${d.cliente} · `}
                         {d.tipo} · <code>{d.hash}</code>
                       </div>
                     </div>

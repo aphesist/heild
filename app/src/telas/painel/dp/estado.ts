@@ -3,6 +3,7 @@ import { useLoja } from '@/ambiente/loja'
 import { dpDe } from '@/dados/painel'
 import { repos } from '@/nucleo/repositorios'
 import { useTabela } from '@/nucleo/react'
+import { comCenarioPor } from '@/nucleo/semente/cenario'
 import { criarCartaoS04, type DadosCartaoS04 } from '@/telas/tarefas/cartoes'
 import { HOJE_ISO } from '@/telas/tarefas/modelo'
 
@@ -117,7 +118,8 @@ function inicial(clienteId: string): EstadoDP {
   }
 }
 
-export const lerDP = (clienteId: string): EstadoDP => ({ ...inicial(clienteId), ...((repos.telas.obter(chave(clienteId))?.valor as Partial<EstadoDP>) ?? {}) })
+// O estado inicial passa pelo cenário do UI Lab (fora do Lab, é o próprio).
+export const lerDP = (clienteId: string): EstadoDP => ({ ...comCenarioPor(`dp:inicial:${clienteId}`, () => inicial(clienteId)), ...((repos.telas.obter(chave(clienteId))?.valor as Partial<EstadoDP>) ?? {}) })
 export const gravarDP = (clienteId: string, f: (e: EstadoDP) => Partial<EstadoDP>) => {
   const atual = lerDP(clienteId)
   repos.telas.lembrar(chave(clienteId), { ...atual, ...f(atual) })

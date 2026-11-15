@@ -37,6 +37,8 @@ export interface PendenciaSetor {
   cobrancas: number
   /** Pendência de terceiro (órgão), em vez do cliente. */
   orgao?: string
+  /** Na carteira: de qual cliente é a pendência. */
+  cliente?: string
 }
 
 export interface DocumentoAba {

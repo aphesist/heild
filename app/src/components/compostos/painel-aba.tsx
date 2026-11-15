@@ -126,14 +126,14 @@ export function PendenciasAba({ itens: todos, compacto }: { itens: PendenciaSeto
   // Recebidas ficam guardadas (sobrevivem à troca de aba e ao recarregar) por cliente e setor.
   const [recebidas, setRecebidas] = usePersistente<string[]>(`s02:pendencias:recebidas:${ctx.clienteId ?? 'carteira'}:${ctx.setor}`, [])
   const itens = todos.filter((p) => !recebidas.includes(p.id))
-  const cobrar = (p: PendenciaSetor) => ctx.cliente && fluxos.cobrar({ cliente: ctx.cliente, setor: ctx.setor, texto: '', assunto: p.item.toLowerCase(), tarefa: p.id.startsWith('t') ? p.id : undefined })
+  const cobrar = (p: PendenciaSetor) => (p.cliente ?? ctx.cliente) && fluxos.cobrar({ cliente: (p.cliente ?? ctx.cliente)!, setor: ctx.setor, texto: '', assunto: p.item.toLowerCase(), tarefa: p.id.startsWith('t') ? p.id : undefined })
   const receber = (p: PendenciaSetor) => {
     setRecebidas((xs) => [...xs, p.id])
     if (p.id.startsWith('t')) loja.atualizarTarefa(p.id, { status: 'em_andamento' })
-    loja.registrar(usuario.nome, `Marcou como recebida: ${p.item}${ctx.cliente ? ` (${ctx.cliente})` : ''}`)
+    loja.registrar(usuario.nome, `Marcou como recebida: ${p.item}${(p.cliente ?? ctx.cliente) ? ` (${p.cliente ?? ctx.cliente})` : ''}`)
     loja.toastDesfazer(`${p.item}: recebida. A tarefa volta a andar.`, () => setRecebidas((xs) => xs.filter((x) => x !== p.id)))
   }
-  if (!itens.length) return <VazioWidget>Nenhuma pendência deste setor.</VazioWidget>
+  if (!itens.length) return <VazioWidget>{ctx.cliente ? 'Nada esperando este cliente neste setor.' : 'Nenhum cliente com pendência neste setor.'} Quando uma tarefa fica aguardando o cliente, ela aparece aqui para cobrar.</VazioWidget>
   if (compacto)
     return (
       <ul className="flex flex-col gap-1">
@@ -142,6 +142,7 @@ export function PendenciasAba({ itens: todos, compacto }: { itens: PendenciaSeto
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm">{p.item}</span>
               <span className="text-muted-foreground block truncate text-xs">
+                {p.cliente && !ctx.cliente && `${p.cliente} · `}
                 {p.orgao ? `aguardando ${p.orgao}` : 'aguardando cliente'} · {p.desde}
               </span>
             </span>
@@ -169,6 +170,7 @@ export function PendenciasAba({ itens: todos, compacto }: { itens: PendenciaSeto
           <div className="min-w-0 grow basis-40">
             <div className="text-sm">{p.item}</div>
             <div className="text-muted-foreground text-xs">
+              {p.cliente && !ctx.cliente && `${p.cliente} · `}
               {p.orgao ? `aguardando ${p.orgao}` : 'aguardando cliente'} · {p.desde}
               {!p.orgao && ` · ${p.cobrancas} ${p.cobrancas === 1 ? 'cobrança' : 'cobranças'}`}
             </div>

@@ -15,7 +15,11 @@ import type { CtxAba } from './tipos'
  */
 /** Pendências do cliente: a ficha detalhada da Metalúrgica; dos outros, as tarefas paradas esperando o cliente. */
 function pendenciasDe(aba: CtxAba['aba'], cliente: CtxAba['cliente'], tarefas: Tarefa[]): PendenciaSetor[] {
-  if (!cliente) return []
+  // Carteira: as pendências de todos os clientes do setor, com o nome de cada um (antes ficava sempre vazio).
+  if (!cliente)
+    return tarefas
+      .filter((t) => t.setor === aba.setor && t.status === 'aguardando_cliente' && t.cliente)
+      .map((t) => ({ id: t.id, item: t.titulo, cliente: t.cliente, desde: t.diasAguardando ? `há ${t.diasAguardando} ${t.diasAguardando === 1 ? 'dia' : 'dias'}` : 'hoje', cobrancas: 1 }))
   if (cliente.id === 'c1') return aba.pendencias
   return tarefas
     .filter((t) => t.cliente === cliente.nome && t.setor === aba.setor && t.status === 'aguardando_cliente')
