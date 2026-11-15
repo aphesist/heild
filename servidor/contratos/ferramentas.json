@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "e57330ebe36465bd",
+  "catalogo_hash": "8d020d399f04b7a9",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -115,6 +115,46 @@
       "x-heild-erros": [
         "CURSOR_INVALIDO"
       ]
+    },
+    {
+      "name": "atendimento_faq_responder",
+      "nome": "atendimento.faq.responder",
+      "description": "Liga a mensagem do cliente a uma pergunta frequente e, com cartão aprovado, responde com o texto aprovado da base.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "documento_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "documento_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
     },
     {
       "name": "cliente_arquivar",
@@ -586,6 +626,46 @@
       "x-heild-erros": []
     },
     {
+      "name": "dp_evento_classificar_e_lancar",
+      "nome": "dp.evento.classificar_e_lancar",
+      "description": "Transforma o pedido do cliente num evento de folha conferido e lança na competência.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "documento_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "documento_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
+    },
+    {
       "name": "evento_listar",
       "nome": "evento.listar",
       "description": "Linha do tempo: eventos do escritório (mais novos primeiro), por cliente, setor ou ferramenta.",
@@ -662,6 +742,86 @@
       "x-heild-erros": [
         "CURSOR_INVALIDO"
       ]
+    },
+    {
+      "name": "fiscal_caixa_postal_triar",
+      "nome": "fiscal.caixa_postal.triar",
+      "description": "Classifica a mensagem do e-CAC e registra o prazo que ela dá.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "documento_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "documento_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
+    },
+    {
+      "name": "fiscal_guia_conferir_e_enviar",
+      "nome": "fiscal.guia.conferir_e_enviar",
+      "description": "Confere a guia (tributo, competência e valor contra a apuração) e, com cartão aprovado, envia ao cliente.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "documento_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "documento_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
     },
     {
       "name": "mensagem_interna_editar",
@@ -971,6 +1131,46 @@
       "x-heild-erros": [
         "CURSOR_INVALIDO"
       ]
+    },
+    {
+      "name": "societario_alteracao_triar",
+      "nome": "societario.alteracao.triar",
+      "description": "Classifica o pedido de alteração contratual e abre o processo de legalização quando exige Junta.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "documento_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "documento_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
     },
     {
       "name": "tarefa_aguardar_cliente",

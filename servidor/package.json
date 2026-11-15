@@ -24,7 +24,8 @@
     "postgres": "^3.4.9",
     "zod": "^4.6.7",
     "@heild/dominio": "0.1.0",
-    "@heild/processos": "0.1.0"
+    "@heild/processos": "0.1.0",
+    "@heild/integrantes": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

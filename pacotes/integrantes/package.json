@@ -15,7 +15,8 @@
     "lint": "oxlint -c ../../app/.oxlintrc.json src testes scripts",
     "test": "vitest run",
     "banco": "HEILD_PG_BANCO=heild_b3 bash ../processos/scripts/banco.sh",
-    "avaliar": "tsx scripts/avaliar.ts"
+    "avaliar": "tsx scripts/avaliar.ts",
+    "worker": "tsx scripts/worker.ts"
   },
   "dependencies": {
     "@heild/dominio": "0.1.0",
