@@ -13,7 +13,8 @@ import {
 import { abrirSessao, emitirToken, verificarToken, type Sessao } from './auth/sessao.ts'
 import { config } from './config.ts'
 import { noEscritorio, sqlApi, type Sql } from './banco/pg.ts'
-import { fotografiaDoEscritorio, semearEscritorio } from './banco/semear.ts'
+import { semearEscritorio } from './banco/semear.ts'
+import { sincronizar } from './executor/sincronizar.ts'
 import { lerCadeia } from './executor/cadeia.ts'
 import { ErroApi, erroDeEntrada } from './executor/erro.ts'
 import { executar, traduzir } from './executor/executor.ts'
@@ -119,9 +120,20 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
 
   app.get('/v1/sincronizar', async (req) => {
     const s = await sessao(req)
-    const q = z.object({ desde: z.coerce.number().int().min(0).optional() }).strict().safeParse(req.query)
+    const q = z
+      .object({
+        desde: z.coerce.number().int().min(0).optional(),
+        // `classes=1,2` (padrão). A classe 3 não existe aqui: é por consulta paginada (useConsulta).
+        classes: z
+          .string()
+          .regex(/^[12](,[12])?$/, 'classes: 1, 2 ou 1,2 (a classe 3 é por consulta).')
+          .transform((c) => [...new Set(c.split(',').map(Number))] as (1 | 2)[])
+          .optional(),
+      })
+      .strict()
+      .safeParse(req.query)
     if (!q.success) throw erroDeEntrada(q.error.issues)
-    return noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => fotografiaDoEscritorio(tx, q.data.desde))
+    return noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => sincronizar(tx, s, { desde: q.data.desde, classes: q.data.classes }))
   })
 
   /* ---------- Escrita: operações de repositório (adaptador `api` do app) ---------- */
@@ -240,7 +252,7 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     const s = await sessao(req)
     return noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, async (tx) => {
       const r = await semearEscritorio(tx, s.claims.escritorio_id)
-      return { ...r, ...(await fotografiaDoEscritorio(tx)) }
+      return { ...r, ...(await sincronizar(tx, s)) }
     })
   })
 

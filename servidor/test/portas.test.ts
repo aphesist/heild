@@ -69,7 +69,8 @@ describe('sincronização por versão', () => {
     const delta = (await app.inject({ method: 'GET', url: `/v1/sincronizar?desde=${versao}`, headers: { authorization: `Bearer ${adm}` } })).json()
     expect(delta.tabelas.tarefa.map((x: { id: string }) => x.id)).toEqual([t.id])
     expect(delta.tabelas.cliente).toEqual([])
-    expect(delta.tabelas.evento.length).toBeGreaterThan(0)
+    // Evento é classe 3 (B5): nunca vem no sincronizar; a tela lê por consulta paginada.
+    expect(delta.tabelas.evento).toBeUndefined()
     if (cv) expect(delta.removidas).toContainEqual({ tabela: 'convite', id: cv.id })
     expect(delta.versao).toBeGreaterThan(versao)
   })
