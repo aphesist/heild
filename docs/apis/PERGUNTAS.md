@@ -17,11 +17,20 @@
 | Q9 | **Parceria com a Thomson Reuters** para a entrada no Domínio | Sim, já | **Só depois do piloto.** No piloto, arquivo de troca |
 | Q10 | **MCP para terceiros** antes do piloto? | Só depois do piloto | **Avaliar, com recorte.** Se abrir, é para **assistentes de IA** (Claude, ChatGPT, Copilot) e **ferramentas do escritório** (Microsoft 365 e Google Workspace). **n8n, Make e Zapier ficam de fora:** o CRM já engloba o e-mail, e o integrante cria a tarefa a partir dele. Seção 10 da [`API_INTERNA.md`](API_INTERNA.md): recomendação de **incluir antes do piloto** o OAuth 2.1 e o MCP remoto para Claude, ChatGPT e Copilot Studio (~3,5 sp), só leitura e propostas aprovadas por pessoa |
 
+## Decisões posteriores do mesmo dia (15/11/2026)
+
+| Tema | Decisão |
+| --- | --- |
+| Pluggy | Fora do piloto; volta depois como módulo à parte ([`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md), 2.4) |
+| Forma do piloto | **Em bloco**: todos os setores dos dois escritórios testam tudo de uma vez. A alternativa em ondas foi descartada. O calendário é uma sequência de entregas com critério de pronto, e o prazo depende do caminho crítico externo ([`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md), 2.1 a 2.3) |
+| SERPRO no piloto | Preço normal da loja (com até 10 clientes, faixa 1 em qualquer modelo) |
+| WhatsApp não oficial | Aprovado como desenhado (WAHA); o escritório aceita o risco e a responsabilidade pelo banimento por mau uso numa cláusula no contrato e num aceite dentro do sistema, registrado como evento ([`WHATSAPP.md`](WHATSAPP.md), 4.1) |
+| INLABS | O Enzo faz o cadastro quando a manutenção acabar |
+
 ## Pendências que ficam com o dono
 
 | Pendência | Origem |
 | --- | --- |
-| Falar com o comercial do SERPRO sobre o modelo A (a Heild contrata, cada escritório assina o termo) | Q2 |
-| Pedir parecer jurídico sobre a exposição da Heild como fornecedora da integração não oficial do WhatsApp, e revisar o aviso de risco do contrato | Q5 · [`WHATSAPP.md`](WHATSAPP.md), 4 |
-| Criar o cadastro do INLABS, pelo formulário seguro, para o conector do DOU | Q8 |
-| Decidir entre o piloto em bloco (~9 meses com 2 pessoas) e o mesmo piloto em ondas, que começa em ~5,5 meses | Q6 · [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md), 2.1 |
+| Falar com o comercial do SERPRO sobre o modelo A (a Heild contrata, cada escritório assina o termo). Só mudaria o modelo em grande escala; **no piloto, preço normal da loja** | Q2 |
+| Revisão jurídica recomendada (não trava o piloto) do texto da cláusula de aceite do WhatsApp não oficial | Q5 · [`WHATSAPP.md`](WHATSAPP.md), 4.1 |
+| Fazer o cadastro no INLABS quando a manutenção acabar; o Administrador da Heild digita o login na tela de integrações da plataforma, e ele fica no cofre | Q8 · [`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md), 8 |

@@ -6,7 +6,7 @@
 - mensagens em massa também podem ir por ela, com o risco de banimento explicado ao escritório na venda;
 - a **API oficial da Meta** só entra quando o escritório quiser envios em massa grandes, contratada e paga por ele.
 
-Este documento compara as opções, recomenda uma e lista os riscos com franqueza. **A decisão continua sendo do dono.** Pesquisa de 15/11/2026 em fontes oficiais e nos repositórios; o que não foi confirmado está marcado.
+Este documento compara as opções, recomenda uma e lista os riscos com franqueza. **Decisão do dono (15/11/2026): aprovado como desenhado, com o WAHA.** O escritório só precisa concordar e assumir a responsabilidade pelo banimento por mau uso, pela cláusula de aceite da seção 4.1. Pesquisa de 15/11/2026 em fontes oficiais e nos repositórios; o que não foi confirmado está marcado.
 
 ## Resumo
 
@@ -111,17 +111,31 @@ Aplicadas pelo sistema, não deixadas à pessoa. As que vêm da documentação d
 | --- | --- | --- | --- |
 | **Termos da Meta** | Uso fora dos Termos do WhatsApp e da Política Business; a Meta pode suspender ou banir o número a qualquer momento, sem aviso nem recurso garantido | Perfil receptivo, ritmo, opt-in | O uso continua fora dos termos |
 | **Número banido** | O escritório perde o número com que os clientes falam; o histórico no celular pode ficar inacessível; os clientes passam a ver o número como inválido | Histórico guardado na Heild (CRM); aviso no app e no e-mail com o canal alternativo; número reserva cadastrado | Recuperar o número depende da Meta |
-| **Exposição da Heild** | A Heild opera a infraestrutura que viola os termos de um terceiro; a Meta já processou desenvolvedores de apps não oficiais (caso HeyMods, 2022, por roubo de contas e spam; não achamos ação contra Baileys, WAHA ou Evolution); risco de reputação se um escritório usar para spam | Contrato com o escritório, limites de envio, opt-in obrigatório, registro de quem enviou o quê | O risco jurídico residual é da Heild como fornecedora; precisa de parecer |
+| **Exposição da Heild** | A Heild opera a infraestrutura que viola os termos de um terceiro (aceito pelo dono em 15/11/2026); a Meta já processou desenvolvedores de apps não oficiais (caso HeyMods, 2022, por roubo de contas e spam; não achamos ação contra Baileys, WAHA ou Evolution); risco de reputação se um escritório usar para spam | Contrato com o escritório, limites de envio, opt-in obrigatório, registro de quem enviou o quê | O risco jurídico residual é da Heild como fornecedora; precisa de parecer |
 | **Vazamento da sessão** | Quem tem os dados da sessão lê e envia como o escritório, sem QR novo, até o aparelho ser desvinculado | Banco separado e cifrado, rede fechada, chave no Secrets Manager, rotação ao primeiro sinal, botão "desconectar" | — |
 | **Quebra por mudança do WhatsApp** | O atendimento para por horas ou dias | Duas engines; monitor de saúde; app e e-mail como canal de contingência | Dias sem WhatsApp são possíveis |
 | **LGPD** | Mensagens de clientes guardadas e processadas pela Heild e pelo fornecedor de modelos | Já previsto no CRM: DPA, retenção, registro | — |
 | **Política de IA da Meta** | Respostas automáticas por IA no WhatsApp estão em discussão (política da Meta e inquérito do CADE, 08, 7.1) | Integrante prepara, pessoa envia | — |
 
-**Antes de vender:** parecer jurídico sobre a exposição da Heild como fornecedora (recomendado; não feito).
+**Revisão jurídica recomendada** do texto da cláusula abaixo e da exposição da Heild como fornecedora. Não trava o piloto (decisão do dono de 15/11/2026).
 
-### Aviso de risco para o contrato (rascunho, a revisar pelo jurídico)
+### 4.1 Cláusula de aceite
 
-> **WhatsApp por integração não oficial.** O Contratante declara ciência de que a integração com o WhatsApp oferecida pela Heild no plano padrão usa conexão não oficial com o WhatsApp Web, que não é autorizada pela Meta e está em desacordo com os Termos de Serviço do WhatsApp. Em consequência, (i) a Meta pode, a qualquer momento e sem aviso, restringir, suspender ou banir o número conectado, inclusive de forma definitiva; (ii) a Heild não garante a disponibilidade da integração, que pode parar quando o WhatsApp mudar; (iii) o risco de banimento aumenta com o envio de mensagens em massa, para contatos que não pediram para receber mensagens ou com conteúdo repetido; (iv) o Contratante é responsável por obter e registrar o consentimento dos destinatários e por respeitar os pedidos de descadastro. A Heild mantém o histórico das conversas na plataforma, mas não responde pela perda do número nem pelo conteúdo armazenado no aparelho. Para envios em massa ou para quem não aceitar esses riscos, a Heild oferece a integração com a API oficial do WhatsApp Business, contratada e paga pelo Contratante diretamente à Meta.
+A mesma cláusula vale em dois lugares:
+
+1. **No contrato** com o escritório, como cláusula própria.
+2. **Dentro do sistema, ao ligar o WhatsApp:** antes de mostrar o QR, a tela Configurações › CRM › Números exibe o texto inteiro, com a caixa "Li e aceito, em nome do escritório", habilitada só para o Administrador. Sem o aceite, o QR não aparece.
+
+Registro do aceite:
+
+- A ferramenta `whatsapp_web.aceitar_risco` (nível `executar`, só Administrador, irreversível no sentido de que não se desfaz; um novo aceite substitui) grava o evento `whatsapp_web.risco_aceito` na cadeia de eventos, com `usuario_id`, `escritorio_id`, versão e hash do texto, data e hora do servidor, IP e agente do navegador.
+- **Mudou o texto, muda a versão:** o número segue funcionando por 30 dias, com aviso no sino do Administrador, até o novo aceite. Sem novo aceite, a sessão é pausada (não apagada).
+- A tela de Números mostra quem aceitou, quando e qual versão. O aceite aparece na exportação do escritório (LGPD) e na auditoria.
+- Aceite por integrante não existe: a ferramenta não entra em recorte de agente.
+
+**Texto da cláusula** (versão 1, revisão jurídica recomendada):
+
+> **WhatsApp por integração não oficial.** O Contratante declara ciência de que a integração com o WhatsApp oferecida pela Heild no plano padrão usa conexão não oficial com o WhatsApp Web, que não é autorizada pela Meta e está em desacordo com os Termos de Serviço do WhatsApp. Em consequência, (i) a Meta pode, a qualquer momento e sem aviso, restringir, suspender ou banir o número conectado, inclusive de forma definitiva; (ii) a Heild não garante a disponibilidade da integração, que pode parar quando o WhatsApp mudar; (iii) o risco de banimento aumenta com o envio de mensagens em massa, para contatos que não pediram para receber mensagens ou com conteúdo repetido; (iv) o Contratante é responsável por obter e registrar o consentimento dos destinatários e por respeitar os pedidos de descadastro. (v) o Contratante assume a responsabilidade pelo banimento ou restrição do número decorrente de mau uso, em especial envio em massa, envio sem consentimento ou descumprimento das boas práticas de envio que o sistema aplica e informa. A Heild mantém o histórico das conversas na plataforma, mas não responde pela perda do número nem pelo conteúdo armazenado no aparelho. Para envios em massa ou para quem não aceitar esses riscos, a Heild oferece a integração com a API oficial do WhatsApp Business, contratada e paga pelo Contratante diretamente à Meta. O aceite desta cláusula no sistema, pelo Administrador do Contratante, fica registrado com data, hora e versão do texto.
 
 ---
 
