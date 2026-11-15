@@ -355,7 +355,7 @@ export function CartaoAgente({ agenteId, onRevogado }: { agenteId: string; onRev
           <Button size="sm" variant="ghost" className="h-7 rounded-full" onClick={() => setEditando(true)}>
             Pastas compartilhadas
           </Button>
-          <Button size="sm" variant="ghost" className="text-destructive h-7 rounded-full" disabled={revogando} onClick={() => void revogar()}>
+          <Button size="sm" variant="ghost" className="text-destructive-text h-7 rounded-full" disabled={revogando} onClick={() => void revogar()}>
             <ProhibitIcon /> Revogar dispositivo
           </Button>
         </span>
