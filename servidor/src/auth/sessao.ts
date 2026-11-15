@@ -1,4 +1,4 @@
-import { jwtVerify, SignJWT } from 'jose'
+import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify, SignJWT, type JWTPayload } from 'jose'
 import { contaParaTela, perfilDeConta, rotuloSetorCurto, type Contexto, type Perfil } from '@heild/dominio'
 import { config } from '../config.ts'
 import { noEscritorio, type Sql, type Tx } from '../banco/pg.ts'
@@ -8,15 +8,25 @@ import { ErroApi } from '../executor/erro.ts'
  * Sessão: quem chama e de que escritório. O escritório vem SÓ do token (R3), nunca da URL
  * ou do corpo.
  *
- * No B1 o token é o de demonstração (HS256, assinado por esta API, `POST /v1/auth/demonstracao`).
- * Em produção é o JWT do Supabase Auth (ES256, verificado pelo JWKS), com o mesmo
- * `app_metadata.escritorio_id`: trocar é trocar `verificarToken`, o resto não muda.
+ * Dois emissores (B5):
+ *  - produção: o JWT do Supabase Auth (ES256 ou RS256), verificado pelo JWKS do projeto,
+ *    com emissor `<projeto>/auth/v1` e público `authenticated`. O escritório, a conta e o
+ *    tipo vêm de `app_metadata`, gravado pelo gancho de token em SQL
+ *    (`heild_interno.gancho_token`, migração da B5) a partir de `conta_auth`. O Administrador
+ *    só entra com o segundo fator (`aal2`; `HEILD_MFA_PAPEIS`).
+ *  - demonstração (só com HEILD_DEMONSTRACAO=1): o token HS256 que esta API assina em
+ *    `POST /v1/auth/demonstracao`, no mesmo formato de claims.
  */
 
 export type TipoSessao = 'equipe' | 'cliente'
 
 export interface ClaimsToken {
+  /** A conta no domínio: o id do usuário (equipe) ou `cliente:<id>` (app do cliente). */
   sub: string
+  /** O id do login no Supabase Auth (auth.users), quando o token é de produção. */
+  auth_sub?: string
+  /** Nível de garantia da autenticação: `aal2` quando passou pelo segundo fator. */
+  aal?: 'aal1' | 'aal2'
   escritorio_id: string
   tipo: TipoSessao
   /** Só no app do cliente: o cliente e o nome da pessoa. */
@@ -49,19 +59,74 @@ export async function emitirToken(c: Omit<ClaimsToken, 'sid'>, horas = 12): Prom
   return { token, expira_em: new Date(exp * 1000).toISOString() }
 }
 
+/** Chaves do projeto Supabase (o jose guarda e renova sozinho; só busca de novo com `kid` desconhecido). */
+let jwks: { url: string; conjunto: ReturnType<typeof createRemoteJWKSet> } | null = null
+function chavesSupabase() {
+  const url = config.supabaseJwksUrl ?? (config.supabaseUrl ? `${config.supabaseUrl}/auth/v1/.well-known/jwks.json` : null)
+  if (!url) return null
+  if (jwks?.url !== url) jwks = { url, conjunto: createRemoteJWKSet(new URL(url), { cooldownDuration: 30_000, cacheMaxAge: 600_000, timeoutDuration: 5_000 }) }
+  return jwks.conjunto
+}
+
+/** Token verificado fica em memória até o `exp` (STACK 5): o pedido seguinte não refaz a criptografia. */
+const verificados = new Map<string, { claims: ClaimsToken; exp: number }>()
+const MAX_VERIFICADOS = 5_000
+
+function lembrar(token: string, claims: ClaimsToken, exp: number | undefined) {
+  if (!exp) return
+  if (verificados.size >= MAX_VERIFICADOS) verificados.delete(verificados.keys().next().value!)
+  verificados.set(token, { claims, exp })
+}
+
+/** Claims do Supabase → claims da sessão. O que manda é `app_metadata`, que só o servidor do Auth grava. */
+function claimsDoSupabase(p: JWTPayload): ClaimsToken {
+  const meta = (p.app_metadata ?? {}) as Record<string, unknown>
+  const escritorio = typeof meta.escritorio_id === 'string' && meta.escritorio_id ? meta.escritorio_id : null
+  const tipo = meta.tipo === 'cliente' ? 'cliente' : meta.tipo === 'equipe' || meta.tipo === undefined ? 'equipe' : null
+  const conta = tipo === 'cliente' ? (typeof meta.cliente_id === 'string' ? meta.cliente_id : null) : typeof meta.usuario_id === 'string' ? meta.usuario_id : null
+  if (!escritorio || !tipo || !conta || !p.sub) throw new ErroApi('CONTA_SEM_VINCULO')
+  const aal = p.aal === 'aal2' ? 'aal2' : 'aal1'
+  const sid = typeof p.session_id === 'string' ? p.session_id : `sb-${p.sub}`
+  return tipo === 'cliente'
+    ? { sub: `cliente:${conta}`, auth_sub: p.sub, aal, escritorio_id: escritorio, tipo, cliente_id: conta, nome: typeof meta.nome === 'string' ? meta.nome : undefined, sid }
+    : { sub: conta, auth_sub: p.sub, aal, escritorio_id: escritorio, tipo, sid }
+}
+
 export async function verificarToken(autorizacao: string | undefined): Promise<ClaimsToken> {
   if (!autorizacao?.startsWith('Bearer ')) throw new ErroApi('SEM_SESSAO')
+  const token = autorizacao.slice(7)
+  const guardado = verificados.get(token)
+  if (guardado) {
+    if (guardado.exp * 1000 > Date.now()) return guardado.claims
+    verificados.delete(token)
+  }
   try {
-    const { payload } = await jwtVerify(autorizacao.slice(7), chave(), { issuer: EMISSOR, algorithms: ['HS256'] })
-    const escritorio = typeof payload.escritorio_id === 'string' ? payload.escritorio_id : null
-    const tipo = payload.tipo === 'cliente' ? 'cliente' : payload.tipo === 'equipe' ? 'equipe' : null
-    if (!payload.sub || !escritorio || !tipo || typeof payload.sid !== 'string') throw new Error('claims incompletas')
-    return { sub: payload.sub, escritorio_id: escritorio, tipo, cliente_id: (payload.cliente_id as string | null) ?? null, nome: payload.nome as string | undefined, sid: payload.sid }
+    const alg = decodeProtectedHeader(token).alg
+    if (alg === 'HS256') {
+      // Token de demonstração: só existe com a demonstração ligada (PADROES, API8).
+      if (!config.demonstracao) throw new ErroApi('SESSAO_INVALIDA', { mensagem: 'Token de demonstração não vale fora do ambiente local.' })
+      const { payload } = await jwtVerify(token, chave(), { issuer: EMISSOR, algorithms: ['HS256'] })
+      const escritorio = typeof payload.escritorio_id === 'string' ? payload.escritorio_id : null
+      const tipo = payload.tipo === 'cliente' ? 'cliente' : payload.tipo === 'equipe' ? 'equipe' : null
+      if (!payload.sub || !escritorio || !tipo || typeof payload.sid !== 'string') throw new Error('claims incompletas')
+      const claims: ClaimsToken = { sub: payload.sub, escritorio_id: escritorio, tipo, cliente_id: (payload.cliente_id as string | null) ?? null, nome: payload.nome as string | undefined, sid: payload.sid, aal: payload.aal === 'aal2' ? 'aal2' : 'aal1' }
+      lembrar(token, claims, payload.exp)
+      return claims
+    }
+    const chaves = chavesSupabase()
+    if (!chaves || !config.supabaseUrl) throw new ErroApi('SESSAO_INVALIDA', { mensagem: 'A API não tem um projeto Supabase configurado (HEILD_SUPABASE_URL).' })
+    const { payload } = await jwtVerify(token, chaves, { issuer: `${config.supabaseUrl}/auth/v1`, audience: 'authenticated', algorithms: ['ES256', 'RS256'], clockTolerance: 5 })
+    const claims = claimsDoSupabase(payload)
+    lembrar(token, claims, payload.exp)
+    return claims
   } catch (e) {
     if (e instanceof ErroApi) throw e
     throw new ErroApi('SESSAO_INVALIDA')
   }
 }
+
+/** Esvazia o cache de tokens verificados (testes). */
+export const esquecerTokens = () => verificados.clear()
 
 /** Monta o perfil da conta a partir do banco, pela mesma função que a sessão do app usa. */
 export async function carregarPerfil(tx: Tx, usuarioId: string): Promise<Perfil | null> {
@@ -92,6 +157,9 @@ export async function abrirSessao(sql: Sql, claims: ClaimsToken, integranteId?: 
     }
     const perfil = await carregarPerfil(tx, claims.sub)
     if (!perfil) throw new ErroApi('CONTA_INATIVA')
+    // MFA onde o desenho pede: o Administrador só usa a API com o segundo fator (aal2).
+    if (config.mfaPapeis.includes(perfil.papel) && claims.aal !== 'aal2' && !(config.demonstracao && claims.auth_sub === undefined))
+      throw new ErroApi('EXIGE_MFA', { mensagem: 'Entre com o segundo fator (código do aplicativo autenticador) para continuar.' })
     if (integranteId) {
       if (!config.demonstracao) throw new ErroApi('DEMONSTRACAO_DESLIGADA', { mensagem: 'Integrante só age com o token próprio (orquestrador).' })
       const [i] = await tx`select id, nome_exibido, setor from integrante where id = ${integranteId}`

@@ -17,6 +17,16 @@ export const config = {
   nomeBanco,
   /** Segredo do token de demonstração (HS256). Em produção o token é o JWT do Supabase Auth (ES256, JWKS). */
   segredoToken: env.HEILD_SEGREDO_TOKEN ?? 'segredo-local-de-desenvolvimento-nao-usar-fora-daqui',
+  /**
+   * Autenticação de produção: o JWT do Supabase Auth (ES256/RS256), verificado pelo JWKS do
+   * projeto. `HEILD_SUPABASE_URL` é a URL do projeto (https://<ref>.supabase.co, ou a stack
+   * local do `supabase start`); o emissor esperado é `<url>/auth/v1` e o público,
+   * `authenticated`. `HEILD_SUPABASE_JWKS_URL` troca o endereço das chaves (testes).
+   */
+  supabaseUrl: env.HEILD_SUPABASE_URL ? env.HEILD_SUPABASE_URL.replace(/\/$/, '') : null,
+  supabaseJwksUrl: env.HEILD_SUPABASE_JWKS_URL ?? null,
+  /** Papéis que só entram com o segundo fator (`aal2`). O desenho pede o Administrador (STACK 3.2, PADROES API2). */
+  mfaPapeis: (env.HEILD_MFA_PAPEIS ?? 'administrador').split(',').map((x) => x.trim()).filter(Boolean),
   /** Liga login por papel, restaurar demonstração e o cabeçalho de integrante simulado. */
   demonstracao: (env.HEILD_DEMONSTRACAO ?? '1') === '1',
   /** Origens aceitas pelo CORS (o Vite do app). */
