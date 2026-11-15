@@ -1,6 +1,6 @@
 # API interna da Heild: o que o frontend e os agentes chamam (pacote Contábil)
 
-**Versão 0.1 · 15/11/2026 · desenho, nada implementado.** Branch `wf-backend-apis`, sobre o `wf-backend-stack`. Escopo: **só o pacote Contábil** (setores Societário, Fiscal, Notas, DP, Contábil, Consultoria, mais Gestão e os módulos que o Contábil usa). BPO e Jurídico ficam fora; onde uma ferramenta já existe no wireframe para o BPO, ela só é citada.
+**Versão 0.2 · 15/11/2026 · desenho, nada implementado.** A 0.2 aplica as respostas do dono: WhatsApp não oficial como padrão, e-mail virando tarefa pelo integrante (`email.triar`) e a seção 10 sobre abrir o MCP a assistentes de IA e ao Microsoft 365 e Google Workspace. Branch `wf-backend-apis`, sobre o `wf-backend-stack`. Escopo: **só o pacote Contábil** (setores Societário, Fiscal, Notas, DP, Contábil, Consultoria, mais Gestão e os módulos que o Contábil usa). BPO e Jurídico ficam fora; onde uma ferramenta já existe no wireframe para o BPO, ela só é citada.
 
 Este documento **não repete** o contrato que já está decidido em [`../backend/AGENTICO.md`](../backend/AGENTICO.md) (executor, ferramenta como unidade, procedimentos, MCP na borda, atores, cartão). Ele usa esse contrato para dizer **quais** ferramentas e grupos de endpoint existem, por setor, e **como** cada uma se comporta para o agente gastar pouco e errar pouco. As APIs externas que estão por trás das ferramentas de conector estão em [`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md); a ordem de construção, em [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md).
 
@@ -12,7 +12,7 @@ Fontes: catálogo de ferramentas do wireframe (`app/src/nucleo/permissoes/ferram
 2. **Três camadas por setor:** operações de processo (uma por procedimento: o agente chama uma vez e o motor faz os passos), contexto e resolução (leituras feitas para o agente) e operações de entidade (as 235 de hoje, para tela e para o planejador de exceção).
 3. **O recorte de um integrante do Fiscal tem 31 ferramentas**, não 235 (seção 5.4). O maior recorte do Contábil fica em ~9 mil tokens de esquema, abaixo do limite de ~10 mil em que vale ligar busca de ferramentas.
 4. **Toda resposta para agente é compacta:** totais, até 20 linhas, `ha_mais`, cursor, ids, nenhum texto livre que o modelo precise reescrever. Teto declarado por ferramenta e medido no CI.
-5. **Erro acionável sempre:** `codigo` estável, `campo`, `mensagem` para a pessoa e `acao_sugerida` com ferramenta e entrada prontas. 42 códigos comuns na seção 2.4.
+5. **Erro acionável sempre:** `codigo` estável, `campo`, `mensagem` para a pessoa e `acao_sugerida` com ferramenta e entrada prontas. 44 códigos comuns na seção 2.4.
 6. **Idempotência obrigatória** em todo `executar` (cabeçalho `Idempotency-Key`), com chave derivada automaticamente no motor de procedimentos. Repetir é seguro; mudar os argumentos com a mesma chave é 409.
 7. **`validar_apenas: true`** em toda ferramenta `rascunhar` e `executar`: o agente sabe que vai falhar antes de tentar, sem efeito e sem custo externo.
 8. **Ids, nunca nomes:** toda ação recebe `cliente_id`; nome vira id só por `cliente.resolver`, que devolve `AMBIGUO` com candidatos quando há dúvida.
@@ -23,6 +23,7 @@ Fontes: catálogo de ferramentas do wireframe (`app/src/nucleo/permissoes/ferram
 13. **Ciência e irreversíveis sempre com cartão:** abrir caixa postal, DTE ou intimação, transmitir, enviar ao cliente, manifestar, mandar lote ao core. O agente nunca recebe `executar` direto nessas.
 14. **O app do cliente é a única superfície pública:** 46 ferramentas `exposta_ao_cliente` no Contábil, todas filtradas pelos clientes e áreas da pessoa, com limite de taxa mais baixo e sem MCP.
 15. **Lacunas do catálogo do wireframe:** cerca de 68 ferramentas novas (operações de processo, contexto e conector) entram no `pacotes/dominio`; a lista está na seção 8.
+16. **MCP aberto (seção 10):** antes do piloto, OAuth 2.1 e MCP remoto para Claude, ChatGPT e Copilot Studio (~3,5 sp), só leitura e propostas aprovadas por pessoa; o agente do Microsoft 365 Copilot e o complemento do Google Workspace durante o piloto, se um escritório usar. Sem n8n, Make ou Zapier.
 
 ---
 
@@ -109,7 +110,7 @@ Códigos comuns (cada ferramenta declara os seus além destes):
 | Pré-requisito do processo | `FALTA_DOCUMENTO`, `FALTA_EXTRATO`, `FALTA_FOLHA`, `FALTA_RECEITA`, `FALTA_PROCURACAO`, `FALTA_CERTIFICADO`, `PERFIL_INCOMPLETO`, `DIVERGENCIA_NAO_RESOLVIDA` |
 | Validação | `VALIDADOR_FALHOU` (com `detalhes.validador`), `PARTIDAS_NAO_FECHAM`, `VALOR_NAO_CONFERE`, `SEM_ORIGEM` |
 | Idempotência e limites | `CHAVE_REUSADA` (409), `LIMITE_TAXA` (429), `TETO_CUSTO` (a conexão chegou a 100%), `ORCAMENTO_ESGOTADO` (do integrante ou da execução) |
-| Externo | `CREDENCIAL` (vencida, revogada, sem serviço autorizado), `INDISPONIVEL` (com `tentar_de_novo_em`), `LIMITE_EXTERNO` (ex.: 656 da DF-e, 10 downloads/dia do eSocial), `ESQUEMA_EXTERNO`, `CAPTCHA`, `DA_CIENCIA` (a capacidade dá ciência e precisa de cartão) |
+| Externo | `CREDENCIAL` (vencida, revogada, sem serviço autorizado), `INDISPONIVEL` (com `tentar_de_novo_em`), `LIMITE_EXTERNO` (ex.: 656 da DF-e, 10 downloads/dia do eSocial), `ESQUEMA_EXTERNO`, `CAPTCHA`, `DA_CIENCIA` (a capacidade dá ciência e precisa de cartão), `OPT_OUT` (o contato pediu para não receber), `NUMERO_RESTRITO` (sinal 463 ou 475 do WhatsApp; pausa contatos novos) |
 
 Para o agente, a regra é simples: com `acao_sugerida`, chama a sugestão ou leva à pessoa; com `tentar_de_novo_em`, não tenta antes; com `VALIDADOR_FALHOU`, escala uma vez (AVALIAÇÃO 7.2); nos demais, cartão "não consegui, falta X".
 
@@ -172,7 +173,7 @@ Valem para todos os setores e entram em todos os recortes.
 
 | Ferramenta | Nível | Exposição | Entrada → saída (compacta) | Por que existe |
 | --- | --- | --- | --- | --- |
-| `cliente.resolver` | ler | equipe, agente | `{texto}` → `[{cliente_id, nome, cnpj_mascarado, confianca}]` ou `AMBIGUO` | Cliente errado é o erro mais grave; ação só aceita id |
+| `cliente.resolver` | ler | equipe, agente | `{texto}` → `[{cliente_id, nome, cnpj, confianca}]` ou `AMBIGUO` | Cliente errado é o erro mais grave; ação só aceita id |
 | `pessoa.resolver` / `identidade.resolver` | ler | equipe, agente | Número, e-mail, CPF ou nome → pessoa, contas, conversa aberta | Mesma regra para pessoa |
 | `contexto.carregar` | ler | agente | `{cliente_id, processo, competencia, orcamento_tokens}` → blocos em ordem fixa com id e hash: perfil na data, pendências, últimos 10 eventos do processo, execuções abertas, memória relevante | Uma chamada em vez de cinco; cortada pelo orçamento; pronta para cache |
 | `cliente.perfil_em` | ler | equipe, agente | `{cliente_id, data}` → versão do perfil | Regime, CNAE, UF, IE e IM na data certa |
@@ -353,7 +354,7 @@ O CRM inteiro é da fase F5; aqui só o que o Contábil usa para falar com o cli
 | Ferramenta | Nível | Expos. | Observação |
 | --- | --- | --- | --- |
 | `conversa.rascunhar_resposta` | rascunhar | E, A | Nova; o integrante prepara, a pessoa envia |
-| `conversa.responder` | executar, cartão para integrante | E, A, C | Irreversível; fora da janela de 24 h só com modelo aprovado (`MODELO_OBRIGATORIO`) |
+| `conversa.responder` | executar, cartão para integrante | E, A, C | Irreversível. Pela integração não oficial (padrão, [`WHATSAPP.md`](WHATSAPP.md)), o worker aplica ritmo e opt-out (`OPT_OUT`, `NUMERO_RESTRITO` com `tentar_de_novo_em`); pela Cloud API oficial, fora da janela de 24 h só com modelo aprovado (`MODELO_OBRIGATORIO`) |
 | `mensagem.enviar_modelo` | executar | E, A | Nova; régua e avisos ("sua guia saiu"), categoria utilidade |
 | `conversa.listar`, `conversa.obter` (com `resumo`), `canal.saude` | ler | E, A | Corpo da mensagem só sob demanda |
 | `email.triar` (processo; nova) | executar | A | **E-mail vira tarefa pelo integrante, não por automação externa:** a mensagem que entra na caixa do setor (conector de e-mail do escritório) vira Mensagem no CRM; o integrante de Gestão e Atendimento classifica (operário barato com contrato), liga ao cliente por `identidade.resolver`, guarda os anexos com `documento.registrar` e cria a tarefa (`tarefa.criar`, origem `email`) no setor certo. Em caso de dúvida, cartão. Vale também para o e-mail enviado, que vira registro (C2-08) |
@@ -431,7 +432,7 @@ Cada método de serviço simulado vira uma ferramenta de conector que roda no wo
 | `openFinance.conectar`, `.transacoes` | `banco.consentimento_convidar`, `banco.transacoes_desde` | `open_finance.convidar`, `extrato.importar` | API-19 | Pluggy (fase 3) |
 | `ocr.ler(documento)` | `documento.ocr` (fila `documento.ocr`) | `notas.registrar_nfse_municipal`, `documento.classificar` | API-01 (parte) | Worker Python ou fornecedor [a decidir] |
 | `transcricao.transcrever(audio)` | `mensagem.transcrever` | CRM, chat | API-02 | Fornecedor de fala [a decidir] |
-| `whatsapp.enviar`, `.janelaAberta` | `whatsapp.enviar`, `whatsapp.janela` | `conversa.responder`, `mensagem.enviar_modelo` | API-03 | WhatsApp Cloud API |
+| `whatsapp.enviar`, `.janelaAberta` | `whatsapp_web.enviar`, `whatsapp_web.sessao_saude` (padrão); `whatsapp_cloud.enviar`, `whatsapp_cloud.janela` (escritório com a oficial) | `conversa.responder`, `mensagem.enviar_modelo` | API-03, API-04 | WAHA auto-hospedado; WhatsApp Cloud API |
 | `email.enviar` | `email.enviar` | idem | API-05 | Gmail, Graph, SES |
 | `assinatura.enviar` / `conferenciaAssinatura.conferir` | `assinatura.enviar`, `assinatura.status`, `assinatura.validar_icp` | `contrato.enviar_assinatura`, `relatorio.enviar`, `contabil.assinatura.conferir` | API-22 | ZapSign, Clicksign, D4Sign; validador ICP |
 | `armazenamento.listar`, `.enviar`, `.link`; `arvore.ler` | `nuvem.listar_delta`, `nuvem.enviar`, `nuvem.link`, `nuvem.ler_arvore` | Arquivos, Raio-X | API-24 | Drive, Graph, S3, WebDAV, SFTP |
@@ -469,10 +470,10 @@ Ajustes nas que já existem:
 
 1. Assistente encaminha ao Fiscal (regra ou classificador barato; frente de IA).
 2. Integrante chama `cliente.resolver({texto: "Padaria Pão Quente"})` → um candidato, confiança 0,98 → `cliente_id = c203`.
-3. Chama `guia.enviar_ao_contato({cliente_id: "c203", competencia: "2026-10", tributo: "DAS", validar_apenas: true})` → `validado` sem erros (guia existe, contato com WhatsApp, janela fechada, modelo de utilidade aprovado).
+3. Chama `guia.enviar_ao_contato({cliente_id: "c203", competencia: "2026-10", tributo: "DAS", validar_apenas: true})` → `validado` sem erros (guia existe, contato com WhatsApp, sem opt-out, número sem restrição).
 4. Chama de novo sem `validar_apenas` → `aguardando_aprovacao` com `cartao_id` e `resumo_humano` "Enviar o DAS de outubro (R$ 1.284,10, vence 20/11) a Ana, pelo WhatsApp".
 5. Responde com `integrante.responder`: duas frases + o cartão do sistema. Nenhum número digitado pelo modelo.
-6. A pessoa aprova; o executor envia (`whatsapp.enviar`, R$ 0,035 de utilidade), grava evento, o cartão some.
+6. A pessoa aprova; o executor envia pela integração do escritório (`whatsapp_web.enviar`, sem custo por mensagem; ou R$ 0,035 de utilidade pela Cloud API), grava evento, o cartão some.
 
 Total: 3 ferramentas, ~1,2 mil tokens de resultados. Sem a operação de processo, seriam `documento.listar` + `identidade.resolver` + `conversa.rascunhar` + `conversa.responder`, com 4 a 6 mil tokens e quatro pontos de erro.
 

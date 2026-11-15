@@ -7,4 +7,6 @@
 | [`CATALOGO_CONTABIL.md`](CATALOGO_CONTABIL.md) | Todas as APIs externas do Contábil, por grupo: uso, classe, quem paga, preço com fonte e data, limites, credencial, risco, alternativa e o que o wireframe simula. **Começa por um resumo de 15 linhas** |
 | [`API_INTERNA.md`](API_INTERNA.md) | A API da plataforma por setor: operações de processo, contexto e entidade; audiências (app, equipe, agentes, serviço); erro acionável, idempotência, paginação, limites, versionamento; o mapa de `app/src/servicos` para ferramentas de conector |
 | [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md) | O que pedir já (contratos, credenciais, prazos), o que cada fase do backend entrega de API, e o custo mensal no piloto e com 10, 100 e 1.000 escritórios |
-| [`PERGUNTAS.md`](PERGUNTAS.md) | Dez decisões para o dono, cada uma com a recomendação |
+| [`WHATSAPP.md`](WHATSAPP.md) | A integração não oficial com o WhatsApp Web (opções comparadas, recomendação, boas práticas contra banimento, riscos e o aviso para o contrato) e onde a API oficial ainda entra |
+| [`EXTENSAO.md`](EXTENSAO.md) | A extensão de navegador: escopo da v1, candidatos, arquitetura MV3, permissões, distribuição, privacidade, fase e testes do piloto |
+| [`PERGUNTAS.md`](PERGUNTAS.md) | Dez decisões para o dono, com a recomendação e a resposta de 15/11/2026, e as pendências que ficam com ele |
