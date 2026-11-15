@@ -1,6 +1,6 @@
 # Arquitetura do backend real
 
-**Versão 0.1 · 15/11/2026 · desenho.** Os serviços, o caminho de um pedido da tela e de um agente, a implantação e a migração do wireframe para o backend real em fases. As decisões de stack estão em [`STACK.md`](STACK.md), a hospedagem em [`HOSPEDAGEM.md`](HOSPEDAGEM.md) e o contrato das ferramentas em [`AGENTICO.md`](AGENTICO.md).
+**Versão 0.2 · 15/11/2026 · desenho.** Os serviços, o caminho de um pedido da tela e de um agente, a implantação e a migração do wireframe para o backend real em fases. A versão 0.2 acrescenta o motor de procedimentos e o runner de operários, que a avaliação dos integrantes pede ao backend (`docs/integrantes/AVALIACAO.md`, seção 9, no branch `wf-integrantes-pesquisa`). As decisões de stack estão em [`STACK.md`](STACK.md), a hospedagem em [`HOSPEDAGEM.md`](HOSPEDAGEM.md) e o contrato das ferramentas em [`AGENTICO.md`](AGENTICO.md).
 
 ## 1. Os serviços
 
@@ -17,7 +17,8 @@ flowchart LR
     ALB["ALB + TLS"]
     subgraph ECS["ECS Fargate (ARM)"]
       API["api (TypeScript)<br/>HTTP /v1/ferramentas · MCP · SSE<br/>executor + autorizar"]
-      WK["worker (TypeScript)<br/>despachante · conectores · documentos<br/>selagem · notificações"]
+      WK["worker (TypeScript)<br/>motor de procedimentos · despachante<br/>conectores · documentos · selagem"]
+      OPS["operarios (TypeScript)<br/>runner dos passos de modelo<br/>contrato · esquema · orçamento"]
       PY["worker-py (Python)<br/>OCR · PDF · extratos"]
       COF["cofre (TypeScript)<br/>único com kms:Decrypt"]
     end
@@ -34,6 +35,7 @@ flowchart LR
   end
 
   EXT["Órgãos e fornecedores<br/>Integra, SEFAZ, ADN, eSocial,<br/>Meta, bancos, nuvens"]
+  LLM["Fornecedor de modelos<br/>(escolha da frente de IA)"]
 
   WEB -- login --> AUTH
   APP -- login --> AUTH
@@ -51,18 +53,21 @@ flowchart LR
   COF --> S3C
   WK -- "raiz diária" --> S3A
   WK --> EXT
+  OPS -- "pega jobs operario.executar" --> PG
+  OPS -- "saída em esquema estrito" --> LLM
   EXT -- webhooks --> ALB
-  API & WK & COF & PY --> CW
+  API & WK & OPS & COF & PY --> CW
   API -. JWKS .-> AUTH
 ```
 
 | Serviço | Responsabilidade | Escala |
 | --- | --- | --- |
 | `api` | Ferramentas por HTTP e MCP, executor, `autorizar`, SSE de mudanças, webhooks de entrada, emissão do token de integrante, `/v1/sessao`, `/v1/sincronizar` | Horizontal, sem estado (o cache de perfil é por processo e invalidado por evento) |
-| `worker` | Filas `coletor.*`, `documento.processar`, `notificacao.entregar`, `selagem.*`; o **despachante** de eventos para gatilhos; agenda (cron) | Horizontal; concorrência limitada por escritório e por órgão |
+| `worker` | **Motor de procedimentos** (fila `procedimento.passo`: passos determinísticos, validadores, escalada, consolidação de lote, retomada após cartão ou espera externa); filas `coletor.*`, `documento.processar`, `notificacao.entregar`, `selagem.*`; o **despachante** de eventos para gatilhos e procedimentos; agenda (cron) | Horizontal; concorrência limitada por escritório e por órgão |
+| `operarios` | **Runner dos passos de modelo** (fila `operario.executar`): monta a entrada só com o contrato, chama o modelo com saída em esquema estrito, valida, confere o orçamento antes de cada chamada e grava `chamada_modelo` ([`AGENTICO.md`](AGENTICO.md), 4.3). É a mesma imagem do `worker`, como serviço separado: só ele tem a chave do fornecedor de modelos, e ele escala pela fila | Horizontal; limite por escritório e por fornecedor |
 | `worker-py` | Fila `documento.ocr` e `documento.extrato`; devolve o resultado chamando a ferramenta pela API interna | Escala com a fila; mínimo 0 no piloto |
 | `cofre` | Guardar, validar, girar e revogar credenciais; assinar XML e abrir TLS mútuo para o worker; destruir a chave do escritório na saída | 1 a 3 tarefas; papel de IAM e grupo de segurança próprios |
-| Orquestrador | O loop dos integrantes (02) e os motores (07). **Fora deste desenho**; liga-se pelos seis encaixes do [`AGENTICO.md`](AGENTICO.md), seção 10 | Da outra frente |
+| Orquestrador | O Assistente (porta e rota), a conversa dos integrantes, o planejador de exceção e os motores (07). **Fora deste desenho**; liga-se pelos sete encaixes do [`AGENTICO.md`](AGENTICO.md), seção 12. Os procedimentos e os operários rodam no backend | Da outra frente |
 
 O frontend é estático (o build do Vite): S3 + CloudFront, com os domínios de marca branca do escritório (Fundações 10; API-28) atendidos pelo CloudFront com certificados do ACM. O CORS da API aceita os domínios cadastrados no tema.
 
@@ -99,39 +104,48 @@ Tempo esperado: de 5 a 15 ms de servidor e banco na mesma região, mais a rede d
 
 ## 3. O caminho de um agente
 
-Exemplo: chegam 12 NF-e da Empresa X; o integrante de Notas confere e prepara a manifestação.
+Exemplo: chegam 12 NF-e da Empresa X. O procedimento de conferência de notas de entrada (Notas) roda sem nenhum modelo caro; o integrante só aparece se houver algo para a pessoa decidir.
 
 ```mermaid
 sequenceDiagram
   autonumber
   participant W as worker (coletor DF-e)
   participant P as Postgres
-  participant D as despachante (worker)
-  participant O as Orquestrador (outra frente)
+  participant D as despachante
+  participant M as motor de procedimentos
+  participant OP as operarios (modelo barato)
+  participant O as Orquestrador (frente de IA)
   participant A as api
-  participant G as Gestora (tela)
+  participant G as Gestora (tela/chat)
 
-  W->>A: (em processo) documento.registrar ×12, origem = job
-  A->>P: documentos + 12 eventos documento.registrar (cadeia) + job processar
+  W->>P: documento.registrar ×12 (executor, origem = job) + eventos com cadeia
   D->>P: lê a cauda de evento (cursor)
-  D->>D: casa com o gatilho do integrante de Notas · deduplica · agrupa "12 documentos da Empresa X"<br/>autorizar(dono, ler) · checagem sem modelo
-  D->>P: enfileira item "evento" na fila do integrante (causado_por_evento_id)
-  O->>A: POST /v1/interno/fila/integrantes/pegar
-  A-->>O: item {integrante_id, usuario_dono_id, motivo, eventos}
-  O->>A: POST /v1/interno/integrantes/{id}/token
-  A-->>O: token de integrante (15 min)
-  O->>A: POST /v1/ferramentas/documento.listar (token do integrante)
-  O->>A: POST /v1/ferramentas/manifestacao.confirmar (irreversível)
-  A->>A: autorizar(integrante ∩ dono) → aprovação exigida
-  A->>P: cartão de aprovação + evento aguardando_aprovacao
-  A-->>O: 202 {cartao_id, resumo_humano}
-  O->>A: integrante.sessao.fechar {custo, passos}
-  A--)G: SSE: cartão novo (alta)
-  G->>A: POST /v1/ferramentas/aprovacao.decidir {cartao_id, aprovar}
-  A->>A: confere pode_aprovar · executa manifestacao.confirmar com os argumentos guardados
-  A->>W: job coletor.manifestar (na mesma transação)
-  W->>W: pede ao cofre: assinar o evento XML com o A1 do cliente · envia à SEFAZ
+  D->>D: casa com o gatilho "notas de entrada" · deduplica · agrupa por cliente<br/>autorizar(dono, ler) · checagem sem modelo (há nota sem conferência?)
+  D->>M: inicia a execução NFE-023 v2 {cliente_id, documentos[12]} (estado no banco)
+  M->>M: passos determinísticos: NCM, CST e CFOP contra regras e tabelas · fornecedor no cadastro · nota fria (consulta)
+  M->>OP: operario.executar ×3 (só as 3 linhas que as regras não resolveram), contrato fechado
+  OP-->>M: {classificacao, confianca, motivo} validado pelo esquema
+  M->>M: validadores (esquema, regra, origem) · 1 falha → escala uma vez ao escritor com a falha
+  M->>A: (em processo) manifestacao.confirmar com execucao_id → irreversível → cartão
+  A->>P: cartão + evento aguardando_aprovacao · execução em aguardando_cartao
+  M->>P: item execucao_concluida na fila do integrante de Notas
+  O->>A: pegar → execucao_concluida {execucao_id, resultado compacto, cartão}
+  O->>A: integrante.responder: texto curto + cartoes do sistema (tabela das 12 notas, cartão)
+  A--)G: SSE: mensagem do integrante + cartão (alta)
+  G->>A: aprovacao.decidir {cartao_id, aprovar}
+  A->>M: retoma a execução: job coletor.manifestar (mesma transação)
+  M->>M: pede ao cofre que assine o evento XML com o A1 do cliente · envia à SEFAZ · execução concluída
 ```
+
+O que essa forma economiza, contra um integrante que planeja tudo com o modelo caro:
+
+- 9 das 12 notas saem só de regra.
+- As outras 3 vão a um operário barato com contexto mínimo.
+- O modelo escritor vê só o resultado compacto para redigir duas frases.
+- A tabela e os números do chat são cartões gerados pelo sistema, sem nenhum dígito escrito pelo modelo.
+- Se o orquestrador cair no meio, a execução continua: o estado está no banco.
+
+Quando a pessoa pede algo pelo chat ("confere as notas de outubro da Empresa X"), o caminho é o mesmo a partir do passo 4. O Assistente encaminha ao integrante de Notas, que chama a operação de processo `notas.conferir_entrada(cliente_id, competencia)`, e o motor faz o resto.
 
 ## 4. Implantação
 
@@ -139,7 +153,7 @@ sequenceDiagram
 | --- | --- |
 | Contas AWS | Duas, numa AWS Organization: `producao` e `nao-producao` (dev e homologação). O custo é zero e protege produção de erro em teste |
 | Supabase | Projetos em sa-east-1: `heild-homologacao` (Pro pequeno) e `heild-producao`. Branches por PR no CI. O projeto atual em us-east-1 fica para a demonstração do wireframe e do site até ser desligado |
-| Infraestrutura | AWS CDK em TypeScript, num pacote `infra/` do monorepo: VPC (sub-redes públicas, grupos de segurança fechados), ECS cluster, 4 serviços, ALB + ACM, ECR, S3 (documentos, cofre, âncora com Object Lock), KMS, Secrets Manager, CloudWatch e alarmes |
+| Infraestrutura | AWS CDK em TypeScript, num pacote `infra/` do monorepo: VPC (sub-redes públicas, grupos de segurança fechados), ECS cluster, 5 serviços (`api`, `worker`, `operarios`, `worker-py`, `cofre`), ALB + ACM, ECR, S3 (documentos, cofre, âncora com Object Lock), KMS, Secrets Manager, CloudWatch e alarmes |
 | Deploy | GitHub Actions com OIDC → testes, `typecheck`, contratos, teste de vazamento contra um branch do Supabase → imagem → migração (compatível com a versão anterior) → *rolling update* do ECS. Volta: imagem anterior |
 | Configuração | Variáveis por ambiente no CDK; segredos no Secrets Manager; nenhuma credencial de cliente fora do cofre |
 | Desenvolvimento local | Supabase CLI (Postgres e Auth em Docker), as migrações de `app/supabase/migrations`, `api` e `worker` com recarga, carga de demonstração pela ferramenta `demonstracao.restaurar` (só nesse ambiente) |
@@ -236,17 +250,18 @@ Estimativa em **semanas-pessoa** (sp), para um time de 2 pessoas de TypeScript, 
 | **F0 · Fundação do servidor** | Monorepo e `pacotes/dominio` extraído (o frontend passa a importar dele, sem mudar comportamento). Projeto Supabase em sa-east-1 com as migrações e os ajustes do [`STACK.md`](STACK.md) 3.3 (escrita fechada, cadeia, `versao`, idempotência). Executor, `autorizar` no servidor, `/v1/sessao`, verificação de JWT. CDK, CI/CD, OpenTelemetry. Teste de vazamento entre escritórios (Fundações 11) | — | 5 |
 | **F1 · Núcleo pela API** | Adaptador `api` (classes, delta, SSE) e repositórios do frontend como clientes de ferramenta. `useConsulta` nos 25 a 30 pontos. Geração de OpenAPI e do esquema das ferramentas. Data API fechada no projeto novo | `escritorios`, `assinaturas`, `setores`, `usuarios`, `vinculos`, `excecoes`, `carteiras`, `convites`, `pessoas`, `identidades`, `clientes`, `versoesPerfil`, `obrigacoes`, `tarefas`, `cartoes`, `notificacoes`, `conversasInternas`, `participacoes`, `mensagensInternas`, `telas`; `eventos` (só leitura paginada) | 8 |
 | **F2 · Documentos e arquivos** | S3 com KMS, upload por URL pré-assinada, `documento.registrar` com hash no worker, registro de entrega, pastas visíveis (7.8), `worker-py` com OCR | `documentos`, `entregas` | 5 |
-| **F3 · Filas, despachante e encaixe dos integrantes** | pg-boss, despachante de gatilhos, token de integrante, fila e pulso, `aprovacao.decidir` de ponta a ponta, servidor MCP com recortes por setor, tokens de serviço | `integrantes`, `mensagensIntegrante`, `filas`, `cartoes` (decisão) | 5 |
+| **F3 · Filas, procedimentos e encaixe dos integrantes** | pg-boss, despachante de gatilhos. **Motor de procedimentos** (`execucao`, `passo_execucao`, retomada, lote, espera, cartão) e **runner de operários** (contrato, esquema estrito, orçamento, `chamada_modelo`). Validadores como serviço, `contexto.carregar`, `cliente.resolver`, visão compacta, `validar_apenas`, erros acionáveis. **Dois procedimentos de referência com casos de gabarito** (conferência de notas de entrada e CTB-004), com os contratos da frente de IA. Token de integrante, fila e pulso, `aprovacao.decidir` de ponta a ponta, MCP com recortes por setor, tokens de serviço | `integrantes`, `mensagensIntegrante`, `filas`, `cartoes` (decisão) e as entidades novas de procedimento e execução | 9 |
 | **F4 · Cofre e primeiros conectores** | Serviço `cofre` (KMS, A1 pelo app, `credencial.usar`), framework de conector (execução, cursor, retentativa, fila morta, teto de custo, 08 2.1 a 2.4), **DF-e distribuição e NFS-e Nacional (ADN)**, consulta de CNPJ | `notas` e as entidades novas de conector, conexão, execução e credencial | 7 |
 | **F7 · Endurecimento para o piloto** | Carga (o roteiro da `poc/` contra a API real), restauração de backup ensaiada, runbook, exportação do escritório (LGPD), revisão de segurança, âncora diária | — | 3 |
-| **Piloto pronto** (2 escritórios, 20 contas) | | | **~33 sp ≈ 4 meses com 2 pessoas** |
+| **Piloto pronto** (2 escritórios, 20 contas) | | | **~37 sp ≈ 4,5 meses com 2 pessoas** |
 | F5 · CRM, WhatsApp e e-mail | Webhooks da Meta, envio com aprovação, `conversa.*`, `mensagem.*`, e-mail de entrada e saída | `conversas`, `mensagens`, `leads` | 6 |
 | F6 · Timesheet, Financeiro e BPO | Sessões de trabalho a partir dos eventos (5.4), cobrança (Asaas ou Efí), NFS-e do escritório, conciliação, BPO com ERPs | `s06-timesheet` (sessões, confirmações, ausências, custo-hora, extensão, cores, equivalências, durações, fechamentos), `financeiro`, `bpo` | 10 |
-| **Total até o sistema inteiro** | | | **~49 sp ≈ 6 meses com 2 pessoas** |
+| **Total até o sistema inteiro** | | | **~53 sp ≈ 6,5 meses com 2 pessoas** |
 
 Sobre a ordem:
 
 - **F0 e F1 primeiro, sem atalhos**: são a regra R1 e R8 de pé. Ligar conector antes de ter executor e evento seria refazer.
-- **F4 antes de F5** porque a captura de notas sem configurar nada (08, 13.4) é o valor que o contador vê primeiro e não depende do WhatsApp. **Se o piloto precisar do CRM com WhatsApp desde o começo, F5 entra antes de F7, e o piloto vai a ~39 sp** ([`PERGUNTAS.md`](PERGUNTAS.md), P9).
+- **F4 antes de F5** porque a captura de notas sem configurar nada (08, 13.4) é o valor que o contador vê primeiro e não depende do WhatsApp. **Se o piloto precisar do CRM com WhatsApp desde o começo, F5 entra antes de F7, e o piloto vai a ~43 sp (≈ 5,5 meses)** ([`PERGUNTAS.md`](PERGUNTAS.md), P9).
 - **Os módulos de S06 a S08 (Timesheet, Financeiro, BPO) já têm tabelas e repositórios no wireframe.** Eles seguem o mesmo molde de F1, por isso a estimativa por repositório é menor.
-- **O que não está na conta:** o orquestrador e os motores de IA (outra frente), os demais conectores do 08 (Integra Contador, eSocial, Reinf, cores, bancos), o pacote Jurídico e o app nativo.
+- **F3 cresceu de 5 para 9 sp na versão 0.2.** O motor de procedimentos, os validadores e o contexto mínimo são o que mais baixa erro e custo dos agentes (AVALIAÇÃO, 6 e 9), então entram antes do piloto. Cada procedimento novo depois dos dois de referência custa de 0,5 a 2 sp, conforme os passos e os casos de gabarito, e entra junto com o módulo que o usa.
+- **O que não está na conta:** o orquestrador, os contratos e prompts dos operários e os motores de IA (outra frente), os procedimentos além dos dois de referência, os demais conectores do 08 (Integra Contador, eSocial, Reinf, cores, bancos), o pacote Jurídico e o app nativo.

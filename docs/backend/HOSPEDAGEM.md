@@ -112,6 +112,8 @@ US$ por mês, **sem o armazenamento de documentos**: S3 Standard-IA a US$ 22,60 
 | Em reais (R$ 7,97 / R$ 5,69) | R$ 1.570 / R$ 1.120 | R$ 3.690 / R$ 2.630 | R$ 9.650 / R$ 6.890 | R$ 66 a 80 mil / R$ 47 a 57 mil |
 | Por escritório | — | ~US$ 46 | ~US$ 12 | ~US$ 8 a 10 |
 
+O serviço `operarios`, que roda os passos de modelo dos procedimentos ([`AGENTICO.md`](AGENTICO.md), 4.3), cabe na linha dos workers TypeScript: é espera de rede. **O custo dos modelos de IA não está nesta tabela**; é da frente de IA e do estudo de precificação.
+
 Leituras da tabela:
 
 1. **O piloto custa um pouco mais que a premissa do estudo de precificação** (R$ 1.200 de infraestrutura no degrau 0): R$ 1,1 mil a R$ 1,6 mil, conforme o câmbio. A partir de 100 escritórios, o custo por escritório (~R$ 70 a 100) fica perto da premissa provável do estudo (R$ 25 + R$ 0,60 por cliente, ou R$ 85 no escritório médio).
@@ -170,7 +172,7 @@ psql "$URL" -c '\timing on' -c 'select 1' -c 'select 1' -c 'select 1'
 
 | Fase | O que muda |
 | --- | --- |
-| **Agora (piloto)** | Projeto Supabase novo em sa-east-1, Pro + Small. AWS sa-east-1: ECS Fargate ARM com `api` (2 tarefas), `worker` (1), `worker-py` (mínimo 0), `cofre` (1); ALB; S3 (documentos, cofre, âncora com Object Lock); KMS; CloudWatch; CDK; GitHub Actions |
+| **Agora (piloto)** | Projeto Supabase novo em sa-east-1, Pro + Small. AWS sa-east-1: ECS Fargate ARM com `api` (2 tarefas), `worker` (1, com o motor de procedimentos), `operarios` (1, os passos de modelo), `worker-py` (mínimo 0), `cofre` (1); ALB; S3 (documentos, cofre, âncora com Object Lock); KMS; CloudWatch; CDK; GitHub Actions |
 | **10 escritórios** | PITR de 7 dias; Supabase Medium; `worker-py` sempre ligado; ensaio trimestral de restauração |
 | **100 escritórios** | Supabase XL; escala automática da API por CPU e da fila por idade do item mais velho; WAF no ALB; Team se algum contrato pedir SOC 2; eventos de leitura passando a Parquet no S3 |
 | **1.000 escritórios** | Réplica de leitura (relatórios, M2, sincronização), SQS nas filas quentes, Savings Plans; **decisão Supabase × Aurora/RDS** com os números reais de egress, IOPS e alta disponibilidade; GPU do reranker na mesma VPC (frente de IA) |

@@ -1,6 +1,6 @@
 # Stack do backend da Heild
 
-**Versão 0.1 · 15/11/2026 · desenho, nada em produção.** Responde a quatro pedidos do Enzo:
+**Versão 0.2 · 15/11/2026 · desenho, nada em produção.** Responde a quatro pedidos do Enzo:
 
 - "quero um backend rápido, performático, que funcione bem com alto volume de dados. Rust seria o ideal?";
 - "acredito que consigo passar pro Supabase de São Paulo";
@@ -18,14 +18,14 @@ Os documentos irmãos são [`HOSPEDAGEM.md`](HOSPEDAGEM.md), [`AGENTICO.md`](AGE
 5. **Python entra só em workers de documento:** OCR, leitura de PDF e extrato, e o que a frente de IA pedir. Rust fica de reserva, para um ponto quente medido, ligado pelo napi-rs. Go é o segundo colocado honesto.
 6. **Banco: Supabase Postgres em São Paulo (sa-east-1), plano Pro no piloto.** Usamos Postgres, RLS, pgvector e o Auth com MFA. Não usamos a Data API (PostgREST) no navegador, nem Edge Functions, Storage, Realtime ou o Vault para certificados.
 7. **Segurança, uma falha a fechar:** hoje o navegador grava direto nas tabelas, e a RLS só separa escritórios. Qualquer conta logada pula setor, carteira e papel pelo PostgREST. Em produção, só a API escreve.
-8. **Filas: no próprio Postgres (pg-boss).** O job é enfileirado na mesma transação do efeito e do evento. Isso aguenta os cerca de 3 milhões de jobs por dia de 1.000 escritórios; filas quentes vão para o SQS quando a medição mandar.
+8. **Filas e procedimentos: no próprio Postgres (pg-boss), com um motor de procedimentos próprio por cima.** É ali que rodam os processos padronizados dos integrantes: passos em código, operários baratos com contrato e validadores ([`AGENTICO.md`](AGENTICO.md), 4). O job é enfileirado na mesma transação do efeito e do evento. Isso aguenta os cerca de 3 milhões de jobs por dia de 1.000 escritórios; filas quentes vão para o SQS quando a medição mandar.
 9. **Cache:** nenhum Redis no começo. O perfil materializado da sessão fica em memória e é invalidado pelos eventos `conta.*`.
 10. **Documentos:** S3 em São Paulo, com chave por escritório e URL pré-assinada; a API nunca passa bytes. **Busca:** texto com `tsvector` em português mais `pg_trgm`, e vetor com pgvector HNSW no mesmo banco, filtrado pelo escritório antes da busca.
 11. **Eventos:** cadeia de hash síncrona por escritório, medida em cerca de 4 mil gravações por segundo. Os eventos de leitura vão numa tabela à parte, selados por lote, e uma raiz diária vai para um bucket com Object Lock.
 12. **Cofre:** serviço separado com AWS KMS e envelope por escritório; o texto cifrado fica fora do banco da aplicação. O A3 não roda no servidor: usa certificado em nuvem, com a pessoa presente.
 13. **Observabilidade:** OpenTelemetry em tudo, logs no CloudWatch em São Paulo, erros no Sentry sem dados pessoais e métricas de negócio lidas dos próprios eventos.
 14. **Hospedagem: AWS sa-east-1 com ECS Fargate ARM**, a cerca de 1 a 3 ms do Supabase de São Paulo. O Railway não tem região no Brasil e ficaria a ~114 ms por ida e volta. O piloto sai por cerca de US$ 200 por mês, com o Supabase ([`HOSPEDAGEM.md`](HOSPEDAGEM.md)).
-15. **Migração:** as telas seguem chamando `repos.*` e `useTabela`; muda o que está embaixo delas. De 25 a 30 leituras de tabelas volumosas passam para consulta paginada. O piloto fica pronto em cerca de 4 meses com 2 pessoas ([`ARQUITETURA.md`](ARQUITETURA.md)).
+15. **Migração:** as telas seguem chamando `repos.*` e `useTabela`; muda o que está embaixo delas. De 25 a 30 leituras de tabelas volumosas passam para consulta paginada. O piloto fica pronto em cerca de 4,5 meses com 2 pessoas ([`ARQUITETURA.md`](ARQUITETURA.md)).
 
 ---
 
@@ -92,6 +92,7 @@ Por que Node e não Bun: o Bun foi 31% melhor no misto e usou 40% menos memória
 | Despachante de eventos, jobs, conectores (Integra, DF-e, NFS-e, eSocial, WhatsApp, bancos, nuvens) | TypeScript | São espera de rede e regra de negócio; usam as mesmas ferramentas e o mesmo executor |
 | Cofre de credenciais | TypeScript, **processo e papel de IAM separados** | Isolamento: só ele chama o `kms:Decrypt`; a linguagem é a mesma para não criar uma terceira |
 | Assinatura XML (NF-e, eventos, DPS, eSocial, Reinf) | TypeScript (xml-crypto + node-forge); **ACBrLib por FFI como reserva** | Os casos da fase 1 são poucos e conhecidos. Se a cobertura crescer (NFS-e municipais fora do padrão, CT-e, MDF-e), a ACBrLib cobre mais e com manutenção da comunidade brasileira |
+| Motor de procedimentos e runner dos operários (passos de modelo com contrato, esquema estrito e orçamento) | TypeScript, serviços `worker` e `operarios` | Os procedimentos usam as mesmas ferramentas, validadores e esquemas Zod do pacote de domínio; só o `operarios` tem a chave do fornecedor de modelos |
 | OCR, leitura de PDF escaneado, extrato em PDF, classificação de documento | **Python** (worker de fila) | Onde o ecossistema Python é muito melhor (PyMuPDF, docling, PaddleOCR). Fala com o resto só pela fila e devolve resultado tipado; não acessa o banco por fora do executor |
 | Reranker e base legal (M1) | Fica com a frente de IA | Fora deste desenho; o encaixe está no [`AGENTICO.md`](AGENTICO.md), seção 10 |
 | Rust | **Nenhum agora** | Gatilho para usar: um ponto quente medido em produção, como a leitura de arquivos SPED de centenas de MB ou a verificação em massa da cadeia de eventos, em que o TypeScript passe de 50% da CPU de um worker. Entra como módulo nativo (napi-rs) chamado pelo worker em TypeScript, sem serviço novo |
@@ -231,7 +232,9 @@ Regras:
 - O worker executa **ferramentas** pelo mesmo executor, com `origem = job` (R1); nunca grava direto.
 - O worker Python lê a fila `documento.ocr` e devolve o resultado chamando `documento.registrar_leitura` pela API interna.
 
-**Quando passar para o SQS:** quando a fila consumir mais de ~15% da CPU do banco ou passar de ~500 jobs por segundo sustentados. Passam as filas quentes e sem transação, como `notificacao.entregar` e a captura bruta; o *outbox* continua no Postgres. Para fluxos longos com espera humana (o cartão que leva 48 h), o estado fica no próprio cartão e na sessão do integrante (6.4), sem motor de workflow. O Temporal só se a frente de IA pedir execução durável de passos.
+**Quando passar para o SQS:** quando a fila consumir mais de ~15% da CPU do banco ou passar de ~500 jobs por segundo sustentados. Passam as filas quentes e sem transação, como `notificacao.entregar` e a captura bruta; o *outbox* continua no Postgres. Os fluxos longos ficam num **motor de procedimentos próprio**, pequeno, sobre estas mesmas filas: um job por passo, com o estado de cada execução em tabelas do domínio (`execucao`, `passo_execucao`), *checkpoint* antes de avançar e retomada depois de cartão (48 h) ou espera de órgão. A avaliação dos integrantes pede ao backend procedimentos por processo, validadores e a fila dos operários baratos ([`AGENTICO.md`](AGENTICO.md), seção 4).
+
+O motor é próprio, e não o Temporal, porque o estado precisa ser dado do domínio: visível na tela e nas ferramentas, sob RLS e na mesma transação do evento. Também não pede cluster novo para um time pequeno. Se o motor crescer além do previsto, a próxima opção é uma biblioteca de execução durável sobre Postgres, e não um cluster.
 
 ## 5. Cache
 
