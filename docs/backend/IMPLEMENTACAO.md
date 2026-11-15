@@ -949,6 +949,8 @@ Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), um por vez, com a sem
 | `s09-arquivos-config` | 47 ok, 1 falha | 47 ok, 1 falha | **A mesma da B1, aceita pelo desenho:** a pessoa convidada (situação "convidado") aceita o convite e a tela grava em nome dela; a API não entra com conta inativa. No produto, aceitar o convite é o fluxo do Supabase Auth, que cria o login e a linha de `conta_auth` |
 | `s10-app-cliente` | 41 ok | **41 ok** | |
 
+**Depois da integração no `backend` (33761ed, com a triagem v2 do #36):** typecheck e lint sem aviso, retrato dos contratos em dia, 124 + 38 + 62 testes, a fumaça (26 ok) e os scripts como na tabela. O s10 falhou uma vez em três no A43 por tempo do script: o Pix simulado responde em 600 a 1400 ms, e o script esperava 1200 ms fixos. Agora ele espera o código aparecer, e passou três vezes seguidas.
+
 **O que as rodadas acharam e foi corrigido:**
 
 - **Campos legítimos que o esquema ainda não aceitava,** trazidos do que a tela grava e dos `check` do banco: competência MM/AAAA, origem da tarefa, `quem_conclui` e `conversa_id` editáveis, `lida_por` e o setor livre do aviso, `ultimo_acesso` na criação da conta, o cartão que nasce pendente.
