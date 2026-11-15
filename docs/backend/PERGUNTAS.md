@@ -1,8 +1,10 @@
 # Perguntas para o Enzo
 
-**15/11/2026.** São dez decisões que só o dono pode tomar. Cada uma traz a recomendação e onde ela está explicada. Enquanto não houver resposta, o desenho segue a recomendação.
+**15/11/2026.** São dez decisões que só o dono pode tomar. Cada uma traz a recomendação e onde ela está explicada.
 
-| # | Pergunta | Recomendação | Onde |
+**Decidido em 15/11/2026.** O Enzo respondeu: "sobre o backend, vamos seguir a recomendação". **P1 a P10 seguem a recomendação da tabela.**
+
+| # | Pergunta | Recomendação (decidida em 15/11/2026) | Onde |
 | --- | --- | --- | --- |
 | P1 | **Linguagem.** Você pensou em Rust. A medição mostrou Rust e Go com 2 vezes a vazão do Node por núcleo, mas com 1.000 escritórios isso economiza só uns US$ 400 por mês (~4% da infraestrutura). Em troca, as regras de permissão e de negócio, que já existem em TypeScript no wireframe, teriam de ser reescritas. Fechamos TypeScript (Node) no núcleo, Python só nos workers de documento e Rust só se um ponto quente medido pedir? | **Sim.** Go seria a segunda opção; Rust não compensa para este caso | [`STACK.md`](STACK.md), 2 · [`poc/`](poc/README.md) |
 | P2 | **Hospedagem.** O Railway não tem região no Brasil: cada ida ao banco levaria ~114 ms, e uma ferramenta faz de 3 a 6. Rodamos na AWS em São Paulo desde o piloto (~US$ 200 por mês com o Supabase, mesma região do banco, KMS e S3 juntos) ou no Fly.io em São Paulo no piloto (~US$ 85 por mês) para mudar para a AWS depois? | **AWS sa-east-1 (ECS Fargate) desde o piloto.** A diferença é de ~US$ 115 por mês e evita uma mudança de 1 a 2 semanas-pessoa | [`HOSPEDAGEM.md`](HOSPEDAGEM.md), 4 e 8 |

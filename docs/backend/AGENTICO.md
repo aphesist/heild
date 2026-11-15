@@ -1,6 +1,6 @@
 # O backend acessível por agentes, organizado por setores
 
-**Versão 0.2 · 15/11/2026 · desenho.** Como cada operação da Heild vira uma ferramenta tipada que a tela, o chat, os integrantes, o app do cliente e qualquer cliente MCP chamam do mesmo jeito, com a mesma autorização e a mesma trilha. Também mostra como o backend **hospeda os procedimentos por processo** que fazem os agentes errarem pouco e gastarem pouco.
+**Versão 0.3 · 15/11/2026 · desenho.** Como cada operação da Heild vira uma ferramenta tipada que a tela, o chat, os integrantes, o app do cliente e qualquer cliente MCP chamam do mesmo jeito, com a mesma autorização e a mesma trilha. Também mostra como o backend **hospeda os procedimentos por processo** que fazem os agentes errarem pouco e gastarem pouco.
 
 **Não desenha os integrantes** (modelos, prompts, rota do Assistente, política de memória): isso é da frente de IA. A recomendação dela está em `docs/integrantes/AVALIACAO.md`, no branch `wf-integrantes-pesquisa`. Aqui fica o encaixe (seção 12).
 
@@ -113,7 +113,7 @@ export const ctb004 = definirProcedimento({
     deterministico('candidatas', (s, f) => f.plano_contas.candidatas(s.pendentes, { max: 12 })),
     operario('escolher_conta', {
       contrato: 'ctb004.escolher_conta@2',          // prompt versionado: da frente de IA
-      classe: 'barato', raia: 'linha', paralelo: 10,
+      classe: 'operario', raia: 'linha', paralelo: 10,
       recebe: (s, linha) => ({ linha, candidatas: s.candidatas[linha.id] }),   // só isto; contexto vazio
       devolve: z.object({ conta_id: Id, confianca: z.number().min(0).max(1), motivo: z.string().max(140) }).strict(),
       ferramentas: [],                                // operário não chama ferramenta aqui
@@ -144,7 +144,7 @@ O estado de cada processo fica no banco, não no contexto do agente (AVALIAÇÃO
 | --- | --- |
 | `procedimento_versao` (da plataforma) | `id`, `versao`, `hash` da definição, `publicado_em`, resultado dos testes. Gravada no deploy; uma execução sempre aponta para a versão que rodou |
 | `procedimento_config` | Por escritório: ativo, "executa sozinho" (Fundações 4.6), limite de custo por execução |
-| `execucao` | `procedimento_id`, `versao`, `entrada`, `estado` (`pendente`, `executando`, `aguardando_externo`, `aguardando_cartao`, `concluida`, `falhou`, `cancelada`), `passo_atual`, ator que pediu, `causado_por_evento_id`, `tarefa_id`, `cliente_id`, orçamento e gasto, chave de idempotência |
+| `execucao` | `procedimento_id`, `versao`, `entrada`, `estado` (`pendente`, `executando`, `aguardando_externo`, `aguardando_cartao`, `concluida`, `falhou`, `cancelada`), `passo_atual`, ator que pediu, `responsavel_id`, `pagador` (bolsa do setor ou pessoa, seção 4.6), prioridade, `causado_por_evento_id`, `tarefa_id`, `cliente_id`, orçamento e gasto, chave de idempotência |
 | `passo_execucao` | Ordem, nome, tipo, tentativa, estado, saída **compacta**, resultado dos validadores, custo, início, fim, `evento_id` |
 | `chamada_modelo` | Contrato e versão, modelo, tokens de entrada, saída e cache, centavos, latência, `saida_valida`, erro de validação. É o que alimenta o piloto pré-registrado (AVALIAÇÃO, 11) e a medição contínua de erro e custo |
 
@@ -169,7 +169,7 @@ Um motor de workflow genérico guarda o estado em tabelas opacas e pede cluster 
 Os passos `operario`, `escrever` e `revisar` rodam num **runner de operários do backend** (worker TypeScript, fila `operario.executar`). A frente de IA decide o **conteúdo**:
 
 - o prompt de cada contrato, versionado e guardado em `pacotes/contratos-ia`;
-- o modelo de cada classe (barato, escritor, revisor);
+- o modelo de cada classe (`operario`, `escritor`, `revisor`; o padrão decidido está na seção 4.6);
 - a política de revisão.
 
 O backend garante a **execução**:
@@ -178,7 +178,7 @@ O backend garante a **execução**:
 | --- | --- |
 | Contrato fechado | O runner monta a entrada só com o que `recebe` devolve. Sem histórico, memória ou transcript. Ferramentas: nenhuma ou só `ler` da lista do contrato |
 | Saída estruturada | Chamada ao modelo com saída em esquema estrito (o `devolve` vira JSON Schema); a resposta passa pelo Zod antes de qualquer outra coisa. Inválida → `saida_valida = false` e escalada; nunca "tenta de novo às cegas" mais de uma vez |
-| Orçamento | Conferido **antes** de cada chamada: por execução (`orcamento` do procedimento), por integrante por dia (02, 4.7) e por escritório. Estourou → o passo para, a execução registra `parcial` e cria cartão |
+| Orçamento | Conferido **antes** de cada chamada: por execução (`orcamento` do procedimento), por integrante por dia (02, 4.7), pelo saldo da bolsa do setor ou do plano do responsável (seção 4.6) e por escritório. Estourou → o passo para, a execução registra `parcial` e cria cartão |
 | Custo e origem | Cada chamada grava `chamada_modelo` e entra no `custo` do evento do passo |
 | Cache | O prompt do contrato vem em ordem estável (instrução fixa → esquema → entrada); a versão do contrato entra na chave |
 | Paralelismo | Por raia, com limite por escritório e por fornecedor de modelo |
@@ -202,6 +202,27 @@ Também ficam expostos como ferramenta `validador.executar(nome, dados)`, para o
 2. Mudar passo, validador ou contrato sobe a `versao`. Execuções em andamento terminam na versão em que começaram.
 3. Cartão editado por pessoa vira candidato a caso novo (02, 14.2), revisado antes de entrar.
 4. Pedido sem procedimento é exceção registrada (o planejador da frente de IA usa o recorte `excecao`). Se o tipo de pedido se repetir, vira procedimento (AVALIAÇÃO, 7.2).
+
+### 4.6 O integrante compartilhado: uma execução isolada por pedido
+
+Decisão do Enzo (15/11/2026, `docs/integrantes/DECISOES.md`): o integrante é **compartilhado por setor**, e o contexto de uma pessoa nunca se mistura com o de outra. Para o backend, isso significa:
+
+| Regra | Como o backend garante |
+| --- | --- |
+| **O compartilhado é a configuração, não o contexto** | O que é do setor: nome, procedimentos, ferramentas do recorte, regras e memória do setor (tabela com RLS). Nada disso é um "agente vivo" com conversa acumulada |
+| **Cada pedido roda numa execução própria** | Cada pedido de pessoa, cada evento e cada job abre a sua `execucao` (ou a sua sessão de integrante, na conversa sem procedimento), com o contexto daquela conversa, daquele cliente e daquela tarefa, carregado por `contexto.carregar`. Uma execução não lê o transcript nem os passos de outra. Vinte pessoas ao mesmo tempo são vinte execuções paralelas |
+| **Fila com prioridade e limite por setor** | A fila do motor ordena por prioridade: pedido de pessoa no chat, depois evento, depois job em segundo plano (02, 7.1: jobs só quando ocioso). O limite de execuções simultâneas vale por setor e por escritório (configurável; padrão de partida: 10 por setor). Um limite de itens em segundo plano por pessoa impede que uma só tome a fila. O excedente espera na fila, com a posição visível na tela |
+| **Efeito sem conflito** | Não há trava global. Há trava curta por `(setor, cliente, processo)` só nos passos com efeito, além da chave de idempotência: duas pessoas pedindo a mesma guia do mesmo cliente não geram dois envios |
+| **Memória do setor muda só por proposta aprovada** (decisão 6) | Dentro de uma execução, a memória do setor é só leitura. Aprender algo para todos gera `memoria.propor` (cartão para Gestor ou Administrador); a preferência de uma pessoa fica na memória privada dela, que só entra nas execuções dela |
+
+**Modelos por papel** (decisão 3). O contrato de cada passo declara a **classe** (`operario`, `escritor`, `revisor`); o modelo de cada classe é configuração da frente de IA, registrada em cada `chamada_modelo`. O padrão decidido é **Sonnet como operário, Sonnet como escritor e Opus como revisor**. O Haiku entra como operário **só por contrato, quando o piloto provar que ele não erra naquele passo**: é uma chave por contrato, ligada com a evidência do piloto (`chamada_modelo` compara modelos no mesmo contrato).
+
+**Quem paga** (decisão 5). Por padrão, o custo de modelo de uma execução sai da **bolsa do setor**:
+
+- O runner debita cada `chamada_modelo` da bolsa `(escritório, setor, mês)`, e o orçamento confere o saldo antes de cada chamada.
+- Como opção, antes de iniciar uma execução vinda de evento ou job, o integrante pode perguntar **"Para quem quer rotear esta atividade?"**. A ferramenta `integrante.perguntar_responsavel` cria um cartão de escolha com as pessoas do setor que têm acesso ao integrante.
+- A pessoa escolhida passa a ser a responsável pela execução: recebe os cartões de aprovação, e o custo pode sair do plano dela, se o escritório configurar assim.
+- A execução grava `pagador` (`bolsa_setor` ou `usuario_id`) e `responsavel_id`.
 
 ## 5. Feito para o agente errar pouco e gastar pouco
 
@@ -382,8 +403,8 @@ A recomendação da frente de IA é: Assistente geral como porta, integrante com
 | **Assistente** (porta: regras → classificador barato → encaminha, sem reescrever) | Frente de IA | Serviço do orquestrador; chama `procedimento.*`, operações de processo e `contexto.carregar` pela API |
 | **Integrante do setor** (identidade, programa, memória do setor, fila) | Frente de IA (comportamento); backend (entidades, fila, memória com RLS) | Orquestrador para conversar; motor do backend para fazer |
 | **Procedimento do processo** (o "orquestrador do setor") | Backend (motor, passos determinísticos, validadores) com a frente de IA (contratos e prompts dos passos de modelo) | **Motor de procedimentos do backend** (seção 4) |
-| **Operários baratos** | Frente de IA (contratos, modelo da classe) | **Runner de operários do backend** (seção 4.3) |
-| **Escritor e revisor sobre o compacto** | Frente de IA (política: Sonnet na rotina, Opus no risco) | Runner do backend, como passo do procedimento |
+| **Operários** (Sonnet por padrão; Haiku por contrato quando o piloto provar) | Frente de IA (contratos, modelo da classe) | **Runner de operários do backend** (seção 4.3) |
+| **Escritor e revisor sobre o compacto** | Frente de IA (decidido: Sonnet escritor, Opus revisor) | Runner do backend, como passo do procedimento |
 | **Planejador de exceção** (pedido sem procedimento) | Frente de IA | Orquestrador, com o recorte `excecao` e os mesmos validadores (`validador.executar`) |
 | **Cartão de aprovação** | Backend | Executor |
 | **Memória** | Frente de IA (política); backend (tabela com RLS, `memoria.*`) | Backend |
