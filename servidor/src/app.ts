@@ -21,6 +21,8 @@ import { ler } from './executor/leitura.ts'
 import { operacoes, tabelasComRepositorio } from './executor/operacoes.ts'
 import { gerarOpenApi, catalogoHash } from './contratos.ts'
 import { consumir, LIMITES } from './limites.ts'
+import { contextoDaSessao, envelopeParaHttp, operacoesDeProcesso } from './b2.ts'
+import type { Processos } from '@heild/processos'
 
 /**
  * A API (AGENTICO 8). Uma porta de escrita só: `POST /v1/ferramentas/{nome}` (ferramentas
@@ -38,8 +40,9 @@ declare module 'fastify' {
 
 const ChaveIdempotencia = z.string().min(8).max(200).regex(/^[A-Za-z0-9_.:-]+$/)
 
-export function criarApp(opcoes: { sql?: Sql; logs?: boolean } = {}): FastifyInstance {
+export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Processos | null } = {}): FastifyInstance {
   const sql = opcoes.sql ?? sqlApi()
+  const b2 = opcoes.processos ?? null
   const app = Fastify({
     logger: opcoes.logs === false ? false : { level: config.logs, redact: ['req.headers.authorization', 'req.headers["idempotency-key"]'] },
     bodyLimit: 2 * 1024 * 1024,
@@ -137,17 +140,38 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean } = {}): FastifyIns
 
   /* ---------- Ferramentas tipadas (agentes, MCP na B2, integradores) ---------- */
 
-  app.get('/v1/ferramentas', async () => ({
-    catalogo_hash: catalogoHash(),
-    ferramentas: ferramentasTipadas
-      .map((f) => ({ nome: f.nome, versao: f.versao, tipo: f.tipo, descricao_modelo: f.descricao_modelo, exposta_mcp: f.exposta_mcp, erros: f.erros, entrada: z.toJSONSchema(f.entrada, { io: 'input' }) }))
-      .sort((a, b) => a.nome.localeCompare(b.nome)),
-  }))
+  app.get('/v1/ferramentas', async () => {
+    const tipadas = ferramentasTipadas.map((f) => ({ nome: f.nome, versao: f.versao, tipo: f.tipo as string, descricao_modelo: f.descricao_modelo, exposta_mcp: f.exposta_mcp, erros: f.erros as string[], entrada: z.toJSONSchema(f.entrada, { io: 'input' }) }))
+    const nomes = new Set(tipadas.map((f) => f.nome))
+    // Ferramentas do motor (B2) servidas pela mesma rota: execucao.obter, execucao.retomar, procedimento.listar...
+    const doMotor = b2
+      ? b2.registro
+          .listar({ escritorio_id: '', origem: 'tela', ator: { tipo: 'sistema' } }, {})
+          .filter((d) => !nomes.has(d.nome))
+          .map((d) => ({ nome: d.nome, versao: d.versao, tipo: 'motor', descricao_modelo: d.descricao_modelo, exposta_mcp: d.exposta_mcp, erros: [] as string[], entrada: z.toJSONSchema(d.entrada, { io: 'input' }) }))
+      : []
+    return { catalogo_hash: catalogoHash(), ferramentas: [...tipadas, ...doMotor].sort((a, b) => a.nome.localeCompare(b.nome)) }
+  })
 
   app.post('/v1/ferramentas/:nome', async (req, rep) => {
     const { nome } = req.params as { nome: string }
     const s = await sessao(req)
     if (nome === 'auditoria.verificar_cadeia') return responder(rep, await verificar(sql, s))
+    if (b2) {
+      const ctxB2 = contextoDaSessao(s.claims.escritorio_id, s.ctx)
+      // Cartão de execução (ou de memória do setor): quem decide é o motor da B2, que retoma a execução.
+      if (nome === 'aprovacao.decidir') {
+        const corpo = (req.body ?? {}) as Record<string, unknown>
+        const cartaoId = typeof corpo.cartao_id === 'string' ? corpo.cartao_id : ''
+        const [c] = await noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => tx`select execucao_id, tipo from cartao_aprovacao where id = ${cartaoId}`)
+        if (c && (c.execucao_id || c.tipo === 'memoria')) {
+          const decisao = ({ aprovado: 'aprovar', recusado: 'recusar', editado_e_aprovado: 'editar' } as Record<string, string>)[String(corpo.decisao)] ?? corpo.decisao
+          return responder(rep, envelopeParaHttp(await b2.registro.chamar(ctxB2, 'aprovacao.decidir', { ...corpo, decisao })))
+        }
+      } else if (!ferramentaTipada(nome) && b2.registro.definicao(nome)) {
+        return responder(rep, envelopeParaHttp(await b2.registro.chamar(ctxB2, nome, req.body ?? {})))
+      }
+    }
     const f = ferramentaTipada(nome)
     if (!f) throw new ErroApi('FERRAMENTA_DESCONHECIDA', { campo: 'nome', mensagem: `Não existe a ferramenta ${nome}.` })
     const bruto = (req.body ?? {}) as Record<string, unknown>
@@ -159,6 +183,11 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean } = {}): FastifyIns
     const chamada = f.chamada(entrada.data as never)
     const comando: ComandoValidado = { tipo: 'operacao', operacao: chamada.operacao, argumentos: chamada.argumentos, ids: [] }
     const r = await executar(sql, { sessao: s, comando, chave: chaveDe(req), validarApenas: !!validarApenas, rotulo: f.nome, confiavel: true, entradaOriginal: entradaBruta })
+    // Operação de processo: o efeito foi pedir o job; a execução segue no worker (202, AGENTICO 8).
+    if (operacoesDeProcesso.has(f.nome) && r.status === 200) {
+      const c = r.corpo as { dados: { execucao_id: string; estado: string }; evento_id: string | null }
+      return responder(rep, { status: 202, repetida: r.repetida, corpo: { resultado: 'em_execucao', execucao_id: c.dados.execucao_id, estado: c.dados.estado, evento_id: c.evento_id } })
+    }
     return responder(rep, r)
   })
 

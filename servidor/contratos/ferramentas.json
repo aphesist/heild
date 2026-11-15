@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "ac9140665746a745",
+  "catalogo_hash": "b80366b979eaa26a",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -503,6 +503,87 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO"
       ]
+    },
+    {
+      "name": "contabil_documento_classificar_competencia",
+      "nome": "contabil.documento.classificar_competencia",
+      "description": "Define o mês de competência de um documento recebido, por regra ou escolha conferida.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "documento_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "documento_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
+    },
+    {
+      "name": "contabil_ecd_conferir_e_transmitir",
+      "nome": "contabil.ecd.conferir_e_transmitir",
+      "description": "Confere a ECD do exercício e, com cartão aprovado por uma pessoa, transmite. Devolve o recibo.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exercicio": {
+            "type": "string",
+            "pattern": "^\\d{4}$"
+          },
+          "documento_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "cliente_id",
+          "exercicio",
+          "documento_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": []
     },
     {
       "name": "evento_listar",

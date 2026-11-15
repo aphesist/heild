@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@heild/dominio': path.resolve(import.meta.dirname, '../pacotes/dominio/src/index.ts'),
+      '@heild/processos': path.resolve(import.meta.dirname, '../pacotes/processos/src/index.ts'),
       '@': path.resolve(import.meta.dirname, '../app/src'),
     },
   },

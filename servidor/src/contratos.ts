@@ -3,6 +3,8 @@ import path from 'node:path'
 import { z } from 'zod'
 import { canonizar, catalogo, ferramentaDoCatalogo, ferramentasTipadas, PedidoOperacao, RespostaErro, RespostaOk, RespostaValidado, sha256Hex, nomeExposto, type FerramentaTipada } from '@heild/dominio'
 import { operacoes } from './executor/operacoes.ts'
+// As operações de processo da B2 entram no catálogo na carga deste módulo (mesma fonte dos contratos).
+import './b2.ts'
 
 /**
  * Contratos gerados de uma fonte só (AGENTICO 7): o Zod das ferramentas tipadas e do

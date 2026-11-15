@@ -326,3 +326,282 @@ O que a B2 recebe pronto, e como se liga:
 - **B2:** fila (pg-boss), motor de procedimentos, runner de operários, MCP, token de integrante, retomada depois do cartão e `aprovacao.decidir` executando o comando aprovado.
 - **Conectores** (sessão futura): cofre, DF-e, NFS-e e consulta de CNPJ.
 - **Produção:** JWT do Supabase com JWKS e MFA, OpenTelemetry, limites de taxa, hospedagem ([`HOSPEDAGEM.md`](HOSPEDAGEM.md)), projeto Supabase em São Paulo com esta migração e a Data API desligada.
+
+---
+
+## B2 · Motor de procedimentos, fila, operários e MCP
+
+**15/11/2026 · branch `be2-processos` → `backend`.** Tudo local: o mesmo Postgres da B1 (porta 54329), pg-boss no próprio banco e Node 24. Nenhum modelo de verdade é chamado e nenhum conector real existe: o operário de demonstração é determinístico e respeita o contrato, e o órgão é simulado nos testes. A B2 foi feita **sobre o `be1-api`** (trazido para o branch): usa o papel `api_executor`, a cadeia de hash do evento e o pacote `@heild/dominio`.
+
+### Resumo
+
+1. **Motor durável próprio sobre o Postgres** (`pacotes/processos`). O estado de cada processo é dado do domínio, em `execucao` e `passo_execucao`, sob RLS. Cada passo é um job do pg-boss com chave `(execução, passo, tentativa)`. O resultado é gravado **antes** de avançar, e o próximo job entra **na mesma transação** do checkpoint, do efeito e do evento. Uma queda retoma do último passo gravado.
+2. **Procedimento é código**, não um modelo planejando. Os passos são tipados: `deterministico`, `operario`, `validar`, `aprovacao`, `externo`, `efeito` e `concluir`. Entrada e saída têm esquema estrito, e o procedimento é versionado com hash da definição em `procedimento_versao`.
+3. **Nenhum ato que a regra exija aprovação sai sem cartão humano.** Isso tem três barreiras:
+   - na definição: procedimento com efeito irreversível sem um passo de aprovação `sempre` da mesma ferramenta nem compila;
+   - na execução: antes de sair, o motor confere **no banco** que há um cartão desta execução e desta ferramenta, decidido por uma pessoa, com o hash exato dos argumentos que vão sair;
+   - na decisão: só uma pessoa decide, só quem está em `pode_aprovar`, com `autorizar` conferido de novo na hora. O integrante nunca decide.
+4. **Validação determinística antes do modelo.** Os validadores são serviço (`validadores/`), com custo zero de modelo. Regra dura que falha encerra a execução sem chamar modelo. A saída de operário passa pelo esquema do contrato e pelos validadores. Na falha, a execução escala **uma vez** ao escritor, com a falha anexada; se falhar de novo, vira cartão "não consegui", e a resposta da pessoa passa pelos mesmos validadores.
+5. **Nada duplicado.** Garantido por:
+   - idempotência por chave e por pedido igual em andamento: duas pessoas pedindo a mesma coisa recebem a mesma execução;
+   - trava curta por `(setor, cliente, processo)`, só no efeito;
+   - `efeito_externo` com chave natural: reservado antes de chamar o órgão, confirmado depois e consultado antes de qualquer reenvio;
+   - `chamada_modelo` única por chave: retentativa não debita duas vezes.
+6. **Fila com prioridade e limites:** chat > evento > job. Limite por escritório (padrão 30), por setor (padrão 10) e de segundo plano por pessoa (padrão 3), configuráveis em `limite_execucao`. A posição na fila aparece em `execucao.obter`.
+7. **Despachante:** o evento enfileira o despacho na mesma transação. O despachante casa o evento com um `gatilho`, roda a checagem sem modelo e inicia o procedimento **direto**. O integrante só é acordado com `execucao_concluida` (em `item_fila`) quando há algo a dizer.
+8. **Runner de operários com contrato:** contexto vazio, só a entrada do contrato, com o conteúdo de fora envelopado como dado. O orçamento é conferido e **reservado antes** de cada chamada: o da execução e o saldo da bolsa do setor, ou da pessoa responsável se o escritório configurar. O acerto é feito pelo custo real, e cada chamada gera `chamada_modelo`. O fornecedor real entra pela interface `FornecedorModelo`.
+9. **Servidor MCP por escritório** (`/mcp` e `/mcp/setor/{codigo}`, Streamable HTTP, sem sessão): uma fachada fina das mesmas ferramentas, com a autorização de quem é dono do token. O escritório vem do token. Decidir cartão **não** é exposto por MCP.
+10. **Testes:** 38 testes da B2 contra Postgres real, com workers de verdade e uma queda real de worker. As 59 da B1 continuam verdes com a migração da B2 junto.
+
+### Como rodar
+
+Pré-requisitos e instalação: os mesmos da B1 (`npm install` na raiz, `cd app && npm install`, Node 24, Postgres 16).
+
+```bash
+cd pacotes/processos
+npm run banco        # sobe o Postgres da B1 e aplica as migrações no banco heild_b2 (--recriar zera)
+npm run demo         # o CTB-ECD-TRANSMITIR de ponta a ponta, impresso passo a passo
+```
+
+`npm run demo` mostra os passos gravados, a chamada de modelo com o débito da bolsa, o cartão e a transmissão depois da aprovação. Mostra também a cadeia de eventos da execução.
+
+Para usar o motor de outro serviço (a API da B1, um worker), use:
+
+```ts
+import { criarProcessos, FornecedorDemonstracao, rotasMcp } from '@heild/processos'
+const b2 = await criarProcessos({ url, fornecedor, conectores: { sped }, aguardar_ms: 5000 })
+await b2.iniciarWorkers()                 // filas procedimento.passo, operario.executar, execucao.admitir, evento.despachar...
+await rotasMcp(app, b2.registro, autenticar)  // autenticar(req) → ContextoExec (token de serviço ou de integrante)
+```
+
+| Variável | Padrão | Para quê |
+| --- | --- | --- |
+| `DATABASE_URL` | `postgres://postgres@127.0.0.1:54329/heild_b2` | Banco da B2 (os testes usam `heild_b2_teste`, recriado a cada rodada) |
+| `HEILD_TX_CONSULTA` / `HEILD_TX_TRAVA` / `HEILD_TX_OCIOSO` | `5s` / `3s` / `10s` (os do PADROES.md) | `statement_timeout`, `lock_timeout` e `idle_in_transaction_session_timeout` de cada transação do motor |
+| `HEILD_LOG_FILA` | vazio | Mostra os erros do pg-boss no console |
+
+### Como testar
+
+```bash
+npm run test:b2       # na raiz (ou npm test em pacotes/processos); recria heild_b2_teste
+npm run typecheck     # servidor + B2
+npm test              # a suíte da B1, com a migração da B2 aplicada
+```
+
+| Arquivo em `pacotes/processos/testes/` | O que prova |
+| --- | --- |
+| `ecd.test.ts` (13) | CTB-ECD-TRANSMITIR. **Validação barra antes do modelo:** partidas que não fecham, CNPJ de outro cliente e saldo que não fecha param em `conferir`, com zero `chamada_modelo`, zero chamada ao fornecedor e zero cartão, e o integrante é acordado com a falha. **Aprovação obrigatória:** mesmo com "executa sozinho" ligado, o ato irreversível pede cartão. Quem não está no cartão, outro setor e o integrante recebem `negado`. A transmissão sai com os argumentos exatos aprovados, uma vez, e o evento aponta o cartão. A cadeia de hash do escritório confere. **Recusa** encerra sem transmitir. **Cartão adulterado no banco** (decidido por integrante, ou argumento trocado) não transmite (`SEM_APROVACAO`). **Retomada:** falha do conector antes e depois de o envio chegar dá um envio só (consulta pela chave). Recusa do órgão para a execução; `execucao.retomar` volta ao passo sem repetir os anteriores. **Duas pessoas:** o mesmo pedido vira uma execução; a mesma chave com outra entrada é `IDEMPOTENCIA_CONFLITO`; duas execuções aprovadas ao mesmo tempo para o mesmo cliente e exercício dão um envio só. Sem conta atípica, nenhum modelo é chamado. **Escalada:** o operário que erra escala ao escritor com a falha; se o escritor também errar, vira cartão "não consegui". **Orçamento:** sem saldo na bolsa, nenhuma chamada; a execução fica `parcial` com cartão para quem gere o setor e continua depois de aprovado. **Resposta do órgão fora do esquema:** `ESQUEMA_EXTERNO`, sem registrar entrega, com o efeito reservado para a retomada consultar antes de reenviar |
+| `competencia.test.ts` (8) | CTB-COMPETENCIA-DOC disparado por evento. Uma nota com data de emissão é classificada por regra, sem modelo, sem cartão e sem acordar o integrante. Evento entregue duas vezes abre uma execução só. Um recibo sem data estruturada vai ao operário com contexto vazio (texto envelopado como dado), a escolha fica entre as candidatas e o integrante é avisado. Competência inventada é barrada, escala e acaba no cartão; a pessoa decide. Com competência fechada, vai direto ao cartão, sem modelo. Sem "executa sozinho", pede cartão. "Para quem quer rotear?": a pessoa escolhida vira responsável e o custo sai do plano dela. Vinte documentos de uma vez dão vinte execuções isoladas, cada uma com o seu resultado |
+| `fila.test.ts` (5) | Limite por setor com posição na fila. Chat na frente de evento, evento na frente de job. Limite de segundo plano por pessoa. RLS: outro escritório não lê nem grava. Pessoa sem o setor não inicia, e a tentativa fica na trilha |
+| `retomada.test.ts` (1) | **Queda real:** o worker morre no meio da chamada ao modelo e outro sobe. O pg-boss reentrega o job, e a execução continua do passo gravado: cada passo é concluído uma vez, há uma `chamada_modelo` e a reserva de orçamento é reaproveitada (sem débito em dobro) |
+| `mcp.test.ts` (5) | Sem token, 401. `tools/list` só traz o que a pessoa pode, em ordem fixa, com esquema estrito, e sem `aprovacao.decidir`. O recorte por setor. `tools/call` inicia pelo mesmo motor, com idempotência e erro por campo. Outro escritório não vê a execução. O integrante inicia, mas o cartão vai para quem gere o setor |
+| `definicao.test.ts` (6) | O que o CI recusaria: irreversível sem cartão `sempre` da mesma ferramenta, entrada aberta, validador desconhecido, escalada sem operário. Procedimento que muda sem subir a versão não publica. Validadores rodam fora do procedimento com o mesmo código. Memória do setor muda só por proposta aprovada por quem gere. O fornecedor real só liga pela variável de ambiente |
+
+### Como funciona
+
+#### Onde mora cada coisa
+
+```
+pacotes/processos/                  @heild/processos
+  src/motor/definicao.ts            definirProcedimento: passos tipados e as regras de definição
+  src/motor/motor.ts                o motor: iniciar, admitir, executar passo, operário, externo, cartões, retomar, obter
+  src/operarios/contrato.ts         definirContrato (recebe e devolve estritos, classe, teto de saída)
+  src/operarios/fornecedor.ts       FornecedorModelo, ConfigModelos (modelo por classe e por contrato, preços) e o operário de demonstração
+  src/operarios/orcamento.ts        reservar antes / acertar depois; bolsa do setor ou da pessoa
+  src/validadores/                  registro, rodarValidadores e os validadores do Contábil
+  src/procedimentos/contabil/       ecd.ts (CTB-ECD-TRANSMITIR) e competencia-documento.ts (CTB-COMPETENCIA-DOC)
+  src/fila.ts                       filas e enfileirar(tx): o job na transação do efeito
+  src/eventos.ts                    PortaEventos: evento na cadeia da B1 + despacho na mesma transação
+  src/despachante.ts                evento → gatilho → procedimento direto
+  src/ferramentas.ts                registro das ferramentas da B2 e envelope (interface mínima, ver o encaixe)
+  src/mcp.ts                        servidor MCP e rotas Fastify
+  src/memoria.ts                    memoria.propor / decisão
+  scripts/banco.sh, scripts/demo.ts
+app/supabase/migrations/20261115210000_b2_processos.sql
+```
+
+#### O motor, passo a passo
+
+1. **Iniciar** (`motor.iniciar(ctx, procedimento, entrada, opções)`). O motor:
+   - valida a entrada pelo Zod estrito e autoriza a operação de processo com a função `autorizar`;
+   - com chave de idempotência já usada, devolve a mesma execução (com outra entrada, é conflito);
+   - com pedido igual em andamento, devolve o que já existe;
+   - grava a `execucao` como `pendente`, com ator, solicitante, responsável, pagador, prioridade pela origem, orçamento e a memória do setor congelada;
+   - grava o evento e enfileira a admissão, na mesma transação.
+2. **Admitir.** Sob trava do escritório, conta o que está rodando por setor e por pessoa e admite por prioridade e ordem de chegada. Cada execução admitida recebe o job do passo 0.
+3. **Passo.** O job traz `(execução, passo, tentativa)`. O motor trava a linha da execução; se o ponteiro já andou, o job é obsoleto e não faz nada. Por tipo de passo:
+   - `deterministico`: código com a transação sob RLS;
+   - `operario`: grava o passo como `aguardando`, muda a execução para `aguardando_operario` e enfileira `operario.executar`;
+   - `validar`: roda todos os validadores (a pessoa vê todos os erros, não só o primeiro); se falhar, encerra, escala ou cria o cartão "não consegui";
+   - `aprovacao`: cria o cartão com os argumentos exatos, o hash, o resumo escrito pelo sistema com números do dado e os cartões visuais. `por_regra` dispensa o cartão só se a lista do escritório liberar e a ferramenta não exigir aprovação;
+   - `efeito`: confere o cartão no banco, trava `(setor, cliente, processo)` e grava efeito e evento, com checkpoint e próximo job na mesma transação;
+   - `externo`: em três fases. (a) Na transação: confere o cartão, trava e reserva `efeito_externo` pela chave natural; se já foi confirmado, não sai de novo. (b) Fora da transação: chama o conector, consultando antes pela chave se for retentativa, e valida a resposta pelo esquema do passo. (c) Na transação: confirma, grava o evento com `aprovacao_id`, o checkpoint e o próximo passo;
+   - `concluir`: valida a saída pelo esquema, grava o evento com o custo e acorda o integrante se houver resumo.
+4. **Erros.**
+   - Erro de regra, de permissão ou de entrada não se repete: a execução fica `falhou` com o código, e o integrante é acordado.
+   - Falha técnica ou passageira fica anotada em `execucao.erro` e volta ao pg-boss, que repete com espera crescente. Esgotadas as tentativas, a fila morta marca `FALHA_TECNICA`.
+   - `execucao.retomar` (quem pediu, o responsável ou quem gere o setor) volta ao último passo gravado.
+5. **Cartões** (`aprovacao.decidir`), por tipo:
+   - `aprovacao`: aprovar, editar (revalida pelo esquema e pelos validadores) ou recusar (cancela);
+   - `nao_consegui`: a pessoa fornece a saída do passo, conferida pelo contrato e depois pelos validadores;
+   - `orcamento`: aprovar continua do mesmo passo;
+   - `escolha_responsavel`: define o responsável e o pagador;
+   - `memoria`: grava na memória do setor;
+   - cartão vencido expira pelo job `cartao.expirar`.
+
+#### O banco (migração `20261115210000_b2_processos.sql`, depois da B1)
+
+- **Tabelas novas:**
+  - `procedimento_versao` (da plataforma), `procedimento_config`, `limite_execucao`, `execucao`, `passo_execucao`;
+  - `chamada_modelo`, `reserva_orcamento`, `bolsa_setor`, `efeito_externo`;
+  - `entrega_obrigacao`, `competencia_contabil` (para os procedimentos de referência);
+  - `memoria_setor` e `gatilho`.
+- **Colunas novas nas Fundações:**
+  - `cartao_aprovacao.execucao_id`, `argumentos_hash`, `tipo` e `opcoes`;
+  - `item_fila.execucao_id`, `prioridade`, `causado_por_evento_id` e `resumo`;
+  - `evento.execucao_id` e `custo`.
+- **Segunda barreira:**
+  - passo concluído e efeito confirmado não mudam;
+  - `chamada_modelo` e `entrega_obrigacao` são só de inserção;
+  - a bolsa nunca fica negativa (check), e o débito é condicional ao saldo;
+  - o gasto de uma execução não passa do orçamento (check);
+  - uma entrega por cliente, obrigação e período.
+- **RLS:** todas as tabelas novas têm RLS forçada por escritório. A escrita vem do `api_executor`, pelos privilégios padrão da B1.
+- **Índices:** fila de pendentes por prioridade, execuções rodando por setor, execuções por cliente e itens pendentes do integrante.
+
+#### Os dois procedimentos de referência
+
+| | CTB-ECD-TRANSMITIR | CTB-COMPETENCIA-DOC |
+| --- | --- | --- |
+| Operação | `contabil.ecd.conferir_e_transmitir` | `contabil.documento.classificar_competencia` |
+| Disparo | Pessoa (chat, tela, MCP) ou integrante | Evento `documento.criar` (o que o repositório de documentos grava) → gatilho, direto no motor |
+| Determinístico | Carrega o arquivo lido, confere CNPJ, exercício, partidas, saldos por conta, 12 competências fechadas e entrega repetida; separa as contas atípicas | Campo de competência, data de emissão de nota e período informado; candidatas extraídas do texto |
+| Operário | `ctb.ecd.apontar_atencao@1`: aponta, entre as atípicas, o que olhar (sem número) | `ctb.competencia.escolher@1`: escolhe entre as candidatas; só quando a regra não resolve |
+| Validadores | `apontamentos_nas_candidatas`, `texto_sem_numero` | `competencia_nas_candidatas`, `confianca_minima:0.9`, `competencia_nao_futura`, `competencia_aberta` |
+| Aprovação | `contabil.ecd_ecf.transmitir`, **sempre** (irreversível) | `documento.classificar`, por regra (lista do escritório) |
+| Efeito | Transmissão pelo conector `sped` (simulado), chave `ECD:{cliente}:{exercício}`; recibo em `entrega_obrigacao`; conclui a tarefa | Grava a competência no documento, com a origem (regra, modelo ou pessoa) |
+
+### Teste agêntico real (pronto para ligar com a chave)
+
+O roteiro `scripts/agentico-real.ts` roda os dois procedimentos de referência com o **modelo de verdade** no lugar do operário simulado. Ele mede três coisas contra o gabarito `testes/gabarito/contabil.ts`:
+
+- **acerto**, contado assim:
+  - acerto;
+  - erro crítico: classificou errado, ou não apontou a anomalia plantada;
+  - cartão desnecessário: foi ao cartão num caso que dava para decidir;
+  - falha;
+- **custo**, em centavos de real, somado de `chamada_modelo`;
+- **latência**, com p50 e p90, por execução e por chamada.
+
+O simulado continua o padrão de todos os testes. Nada liga sem a variável de ambiente, e a chave nunca está no código.
+
+```bash
+cd pacotes/processos && npm run banco
+npm run agentico -- --simulado      # confere o roteiro sem chave (operário de demonstração)
+
+# com o modelo real (gasta dinheiro: cerca de 15 a 25 chamadas por rodada)
+HEILD_IA_FORNECEDOR=anthropic HEILD_DOLAR_REAIS=5.40 ANTHROPIC_API_KEY=... npm run agentico
+```
+
+| Variável | Para quê |
+| --- | --- |
+| `HEILD_IA_FORNECEDOR=anthropic` | Liga o `FornecedorAnthropic` (`src/operarios/anthropic.ts`). Sem ela, o roteiro recusa rodar sem `--simulado` |
+| `ANTHROPIC_API_KEY` | Lida pelo SDK oficial (`@anthropic-ai/sdk`) no ambiente do serviço `operarios`. Um perfil de `ant auth login` também serve |
+| `HEILD_DOLAR_REAIS` | Cotação para converter o custo em reais (obrigatória: o orçamento e a bolsa são em centavos de real) |
+| `HEILD_IA_ESFORCO_OPERARIO` / `_ESCRITOR` / `_REVISOR` | Esforço por classe (padrões `low`, `medium` e `high`). A escolha final é da frente de IA |
+| `HEILD_AGENTICO_REPETICOES` | Quantas rodadas por caso, para medir a variância |
+
+Como o fornecedor real chama o modelo:
+
+- **Modelos pela decisão 3 do dono:** `claude-sonnet-5-5` como operário e escritor, `claude-opus-5-5` como revisor. Os preços de tabela são convertidos pela cotação. Trocar o modelo de um contrato é configuração (`porContrato`).
+- **Saída estruturada pelo próprio esquema Zod do contrato** (`betaZodOutputFormat`), e o runner valida de novo.
+- **A instrução fixa vai no `system`** (prefixo estável), e só a entrada do contrato vai no `user`, com o conteúdo de fora envelopado como dado.
+- **Fallback de recusa do lado do servidor ligado** (`fallbacks: "default"`). Recusa ou corte por `max_tokens` vira saída nula: o validador barra e o motor escala ou cria o cartão.
+- **O pedido sai com 4× o teto de saída do contrato**, para o raciocínio adaptativo. A **reserva de orçamento conta o mesmo valor** (`multiplicadorSaida`).
+  - Se o orçamento de um procedimento não comportar o custo real, a execução para em `parcial`, e o roteiro mostra isso como `falha`. É o sinal para revisar o `orcamento` do procedimento com o número medido.
+
+O roteiro sai com código 1 se houver **qualquer erro crítico** (critério do dono: o erro custa mais que tudo). O relatório completo fica em `relatorios/agentico-<data>.json`, fora do git. No simulado, a última conferência deu 0 erro crítico, 80% de acerto no CTB-COMPETENCIA-DOC (os 20% restantes foram ao cartão, onde o certo era decidir) e 100% no CTB-ECD-TRANSMITIR. Esses números só provam que o roteiro funciona; os que valem são os do modelo real.
+
+**Primeira rodada real (15/11/2026, autorizada pelo dono):**
+
+- 33 execuções com o Claude (`claude-sonnet-5-5` como operário e escritor);
+- **100% de acerto e zero erro crítico** nos dois procedimentos; os dois casos em que o certo é não decidir pararam no cartão todas as vezes;
+- R$ 0,81 debitados (≈ US$ 0,15), com um custo pela tabela de preços de ≈ US$ 0,09;
+- chamada de modelo com p50 de 1,6 s e p90 de 2,3 a 3,9 s; execução com p50 de 6 s;
+- resumo em [`relatorios/agentico-2026-11-15-real.md`](relatorios/agentico-2026-11-15-real.md).
+
+O gabarito tem dez casos de competência (oito decidíveis e dois em que o certo é **não** decidir) e uma ECD com uma anomalia plantada (adiantamento a sócios que sobe 900%). A frente de IA amplia com casos reais anonimizados e com cartões editados por pessoas (02, 14.2), e é com esse conjunto que roda o piloto pré-registrado (AVALIAÇÃO, 11).
+
+### O encaixe com a B1 (ligado)
+
+A B2 roda **dentro da API da B1** e pelo **executor dela**. O pedido de processo segue este caminho:
+
+```
+POST /v1/ferramentas/contabil.ecd.conferir_e_transmitir   (Idempotency-Key)
+  → executor da B1: Zod, autorizar (a mesma da tela), idempotência
+  → operação procedimentos.CTB-ECD-TRANSMITIR.iniciar: pedirJob('procedimento.iniciar') + evento do pedido
+  → na MESMA transação: idempotência, evento na cadeia e job no pg-boss
+  → 202 { resultado: 'em_execucao', execucao_id }
+worker da B2 → abre a execução com esse id → passos → cartão
+POST /v1/ferramentas/aprovacao.decidir → motor da B2 retoma → transmissão → eventos na mesma cadeia
+```
+
+| Peça da B1 | O que a B2 ligou |
+| --- | --- |
+| `enfileirarNaTransacao` (`servidor/src/executor/jobs.ts`) | Com a fila ligada (`ligarFila`), cada `pedirJob` vai para o pg-boss pela mesma conexão e o mesmo commit (`bossNaTransacao`). Sem fila ligada, continua recusando a transação inteira |
+| Eventos gravados pelo executor | `despacharEventos` (chamado em `aplicar`, depois da cadeia) enfileira o despacho de cada evento, na mesma transação. Os gatilhos da B2 veem os eventos das telas. O teste prova com um `documentos.criar` pela API |
+| Catálogo tipado (`@heild/dominio`) | `registrarFerramentaTipada`, que é só acréscimo. Cada procedimento vira uma ferramenta de escrita e entra em `/v1/ferramentas`, no OpenAPI e em `servidor/contratos/`. A operação de servidor que ela chama fica no registro de operações. Os dois são feitos em `servidor/src/b2.ts` |
+| `aprovacao.decidir` | Na rota, o cartão com `execucao_id` (ou de memória do setor) vai ao motor da B2, que confere a pessoa e o `pode_aprovar` e retoma a execução. O vocabulário da B1 (`aprovado`, `recusado`, `editado_e_aprovado`) é aceito. Os outros cartões seguem o executor da B1 |
+| Ferramentas do motor | `execucao.obter`, `execucao.retomar`, `procedimento.listar`, `validador.executar` e `memoria.propor` são servidas pela mesma rota `/v1/ferramentas/{nome}`, com a sessão da B1 e o envelope do AGENTICO 8 |
+| Banco | O pg-boss do processo da API conecta como `app_api` no modo produtor: só enfileira, sem criar esquema, migrar ou supervisionar. O worker, dono do esquema `pgboss`, concede só DML na fila ao `api_executor` e ao `app_api` (`concederFila`). Os gatilhos de imutabilidade da B2 respeitam a restauração da demonstração (`heild.restaurando`) |
+
+Para rodar tudo junto localmente:
+
+```bash
+npm run preparar -w @heild/servidor      # banco heild com a semente (B1)
+npm run worker -w @heild/processos       # worker da B2: filas, passos, operários, despachante
+npm run dev                              # API da B1 com a fila ligada (sem worker, sobe sem as operações de processo)
+```
+
+O teste `servidor/test/b2-ponta-a-ponta.test.ts`, na suíte da B1, roda a API (login `app_api`, pg-boss produtor) e o worker da B2 lado a lado. Ele prova:
+
+- as operações de processo no catálogo, no OpenAPI e na lista de ferramentas;
+- **o caminho inteiro:**
+  - 202 com o id;
+  - o evento do pedido na cadeia;
+  - a repetição pela mesma chave, que devolve a mesma execução;
+  - o cartão só para a pessoa (o integrante recebe 403);
+  - a aprovação pela API e uma transmissão só, com o `aprovacao_id` no evento;
+  - `auditoria.verificar_cadeia` conferindo os eventos da B1 e da B2 juntos;
+- pessoa sem o setor recebe 403 na hora, sem execução;
+- um documento criado pela API acorda o gatilho da B2, que classifica a competência sem modelo e com `causado_por_evento_id`.
+
+Ainda mínimos, para trocar quando a B1 entregar o equivalente:
+
+- `carregarPerfil` (`src/contexto.ts`), que deve passar a usar `perfilDeConta`;
+- `autorizarFerramenta` (`src/dominio.ts`) para as ferramentas da B2 fora do catálogo do wireframe;
+- o token de integrante de 15 minutos no MCP.
+
+### Desvios do desenho, e por quê
+
+| Desenho | Na B2 | Por quê / quando muda |
+| --- | --- | --- |
+| Lote: um job por raia e consolidação por contador (AGENTICO 4.2) | Não implementado; um operário por passo | Os dois procedimentos de referência não precisam. Entra com o primeiro procedimento de lote (fechamento, extratos) |
+| Passos `escrever` e `revisar` (modelo caro sobre o compacto) | Não há tipo próprio. A escalada usa a classe `escritor` no mesmo contrato | Os contratos, os prompts e a política de revisão são da frente de IA. O runner já escolhe o modelo pela classe |
+| Serviço `operarios` separado, com a chave do fornecedor (ARQUITETURA 1) | Fila própria (`operario.executar`), no mesmo processo nos testes | Basta subir só o consumidor dessa fila em outro processo. Não há chave ainda |
+| Admissão retoma a vaga depois do cartão | Execução aprovada volta direto a `executando`, sem passar de novo pela fila | Simplicidade: o cartão já foi uma espera humana. Rever se a carga mostrar disputa |
+| Bolsa do plano da pessoa | Linha `bolsa_setor` com setor `pessoa:{usuario_id}` | Não há tabela de plano ainda. O pagador e o débito já são os definitivos |
+| Idempotência guardada por chave | Guarda a chave de quem abriu a execução. Um pedido igual em andamento, com outra chave, recebe a mesma execução, mas essa outra chave não fica guardada | Uma tabela de chaves por execução resolve. O efeito continua protegido pela chave natural |
+| Motor conecta como superusuário nos testes | O pg-boss cria o próprio esquema; o domínio roda como `api_executor` por transação | Em produção, um login próprio do worker, dono do esquema `pgboss`, que só assume `api_executor` |
+| Limite de taxa por ator e timeouts de HTTP (PADROES.md, API4) | As rotas MCP da B2 só fixam o corpo em 2 MB | O limite de taxa e os timeouts de HTTP são do app da B1, que monta as rotas (`limites.ts`). Os tetos do banco (5 s, 3 s e 10 s), a validação da resposta externa (API10), o cartão no fluxo sensível (API6), o trabalho longo na fila e a RLS em toda tabela nova já seguem o [`PADROES.md`](PADROES.md) |
+
+### O que falta (depois da B2)
+
+- Pôr no OpenAPI as ferramentas do motor (`execucao.*`, `procedimento.listar`, `validador.executar`, `memoria.propor`). Hoje elas aparecem em `GET /v1/ferramentas` e respondem pela rota, mas não estão no retrato dos contratos.
+- Montar o MCP (`rotasMcp`) no app da B1, com o token de serviço e o de integrante dela.
+- Token de integrante (15 minutos) e fila do integrante com espera longa e pulso (`/v1/interno/fila/integrantes/pegar`): a fila já existe em `item_fila`, mas falta a rota.
+- SSE do progresso da execução (`ProgressoTrabalho`).
+- `contexto.carregar` e `cliente.resolver`.
+- Lote por raias. Casos de gabarito por procedimento, com cartões editados virando casos.
+- Rodar o teste agêntico real com a chave e ajustar os orçamentos dos procedimentos pelo custo medido. Prompts, modelo final por classe e política de revisão (frente de IA). Conectores reais e cofre (sessão futura).
+- Medir sob carga: vazão da admissão e dos passos, e a disputa no elo da cadeia com muitos eventos por escritório.
