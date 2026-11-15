@@ -22,6 +22,7 @@ O desenho que entra no design system está na proposta 7 de [PROPOSTAS_DESIGN_SY
   - a vigência e o motivo da versão do perfil;
   - a regra proposta (cartão de regra);
   - as contas do lote no app do cliente.
+- **Central de aprovações.** Painel lateral global aberto pelo botão "Aprovações" ao lado do sino (folha inteira no celular): tudo o que espera a decisão da pessoa, por setor e cliente, com o mesmo cartão (corrigir no lugar, Aprovar, Recusar) e um comentário opcional que vira lição do integrante. O "Editar e aprovar" que sobrava no sino e no aviso da Home virou "Corrigir", que abre a central no cartão. Link: `?aprovacoes=todas`, `setor:fiscal`, `cliente:c1` ou o id do cartão. A decisão está em [DECISOES.md](DECISOES.md) (UI Lab › Fase 6).
 - **Telas.**
   - Configurações: escritório, setores, notificações, tema, domínios, remetente, integrantes padrão, modelos de texto e de documento, nome no WhatsApp, assinatura e limites.
   - CRM: horário de atendimento, SLA e réguas de comunicados.
