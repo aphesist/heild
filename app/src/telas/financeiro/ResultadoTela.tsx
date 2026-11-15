@@ -87,7 +87,7 @@ export function ResultadoTela() {
       <CartoesDaAba fin={fin} aba="resultado" />
 
       <Caixa>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           <Numero valor={brl(indicadores.mrr)} rotulo="receita recorrente" detalhe={`+${indicadores.mrrVar.toLocaleString('pt-BR')}% no mês`} />
           <Numero valor={indicadores.clientes} rotulo="clientes" detalhe={`${indicadores.entradas} entraram · ${indicadores.saidas} saiu`} />
           <Numero valor={brl(indicadores.ticket)} rotulo="ticket médio" />
@@ -384,7 +384,7 @@ function Distribuir({ resultado, onFechar }: { resultado: number; onFechar: () =
           />
         )}
       </Campo>
-      <ul className="bg-sunken/60 flex flex-col gap-1.5 rounded-[14px] p-3 text-sm">
+      <ul className="bg-sunken/60 flex flex-col gap-1.5 rounded-lg p-3 text-sm">
         <li className="text-muted-foreground flex justify-between gap-3 text-xs">
           <span>Memória: resultado {brl(resultado)} − reserva {reserva}%</span>
           <span className="tabular-nums">{brl(distribuivel)}</span>

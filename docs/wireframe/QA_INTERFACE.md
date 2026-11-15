@@ -150,3 +150,24 @@ Números de `qa-interface.cjs` (67 rotas por largura). **Antes** é a versão de
 - **Feito, sem conferir:** P-9 (`painel/padroes.ts`): Gestão com `relatorios:M` antes de `fase3`; DP carteira com `relatorios:M` antes de `acoes`. Falta medir em 1440 e 1024 (e Societário com cliente e P-10 não foram mexidos).
 - **Descoberto:** em 1024 o campo de resposta do CRM › Conversas tem mais de 160px de altura, então o botão Chat com `acima` (`bottom-40`) o cobre (C-2). Em `Toasts` (`ambiente/interface.tsx`), o contêiner fica em `bottom-4` (celular `bottom-20`) sem saber do campo, e mostra todas as notificações da fila (I-4).
 - **Proposta aprovada pelo coordenador, para o Lab** (mudança em componente compartilhado): (1) `Toasts` mostra só a mais nova no celular (< 640) e fica em `bottom: calc(var(--desvio-campo, 0px) + 1rem)` (no celular, somado aos 80px acima do menu inferior); (2) `--desvio-campo` é posta no `documentElement` pela tela com campo de escrever no canto (CRM › Conversas), medida por ResizeObserver, sem salto ao medir, removida ao desmontar e ao trocar de rota; (3) `GavetaChat acima` usa o mesmo `calc` no lugar de `bottom-36 sm:bottom-40`, e a lista de mensagens ganha `pb` da altura do botão. O botão Chat não some no CRM (decisão de coordenação). Respeitar movimento reduzido.
+
+## 6. Sessão UI-2 (Timesheet, Financeiro, BPO): pausada
+
+**15/11/2026 · branch `wf-ui-2`.** Pausada a pedido do coordenador: antes das correções por tela vem o UI Lab (componentes em todos os estados). Estado até a pausa:
+
+**Feito (commits neste branch):**
+
+- **X-1 e X-2** em `telas/timesheet`, `telas/financeiro` e `telas/bpo`: nenhum `rounded-[NNpx]` e nenhum `weight="duotone"`. Regra usada: 20px → `rounded-cartao`; diálogo 24px → `rounded-xl`; bloco 14 a 18px → `rounded-lg`; item 10 a 12px → `rounded-md`; 6px → `rounded-sm`; amostra e barra de gráfico 3 a 4px → `rounded-xs` (o token pequeno do Tailwind, que não está na escala do tema: decidir no UI Lab se fica ou se pede token ao design system).
+- **F-3:** KPIs do Financeiro (Visão, Cobranças, Conciliação, Resultado) em `grid-cols-2 md:grid-cols-3 lg:grid-cols-5`: o "R$ 154.730" não vaza mais em 768. O `Numero` (compartilhado) não foi tocado.
+- **T-1:** "O que os meus integrantes fizeram" saiu da lateral para a coluna larga, sob o dia (números em 4 colunas, lista em 2); a lateral fica com Cronômetro, Extensão e Contestações, `lg:sticky lg:top-0 lg:self-start`.
+- **T-2:** lateral das Confirmações `lg:sticky lg:top-0 lg:self-start`.
+- **T-3:** Equipe: "A captura está melhorando?" ao lado de "Por que a cobertura não é maior?" de `lg` a `xl`. Rentabilidade: "De onde vem o custo?" e "Em que setores" lado a lado de `lg` a `xl`.
+- **T-4:** "Lançar tempo" uma vez só, no cabeçalho de Meu tempo (abre a gaveta). O card da lateral virou "Cronômetro" (só iniciar e parar); a "Semana manual" perdeu o botão "Lançar" do cabeçalho (os `+` por dia continuam).
+
+**Não feito (descoberto, para depois do UI Lab):**
+
+- **F-1, F-2, F-4** (desenhado, não aplicado): Cobranças em duas pilhas `items-start` (Devedores + Régua | Recebimentos sem cobrança + Notas) e, no Lote, abaixo de `xl` o cartão de aprovação em cima (`order-first`) e o "O que mudou" embaixo; Resultado em duas pilhas (Fechamento, Orçado × realizado, Repasse | Custo-hora, Sócios, Cenários); Visão geral em duas pilhas (Precisa de você + Clientes que pedem atenção | Caixa 90 dias, Vencidas por idade, Receita por setor), sem o `flex-1` de "Vencidas por idade".
+- **B-1 a B-7:** não começados. Contagem do `qa-interface.cjs` nas rotas do grupo antes de tudo: 1440 = 4 buracos; 1024 = 8 buracos; 768 = 1 rolagem, 1 texto, 3 buracos; 390 = 0. Achados do BPO: Rotinas c2 (colunas do checklist com 136 a 248px vazios), Configuração (Contas a Receber esticado, 240 a 340px), Visão 1024 (Precisa de decisão, 324px), Aprovações c2 1024 (Contas a Pagar, 84px).
+- O script não pega T-1 (vão sob a coluna larga, ao lado de uma lateral mais alta): confira no print.
+- Padrão que se repete e pede componente no UI Lab: "duas colunas de `Caixa` com alturas diferentes" (Timesheet, Financeiro, BPO). Um componente de página com duas pilhas e lateral opcional `sticky` resolveria F-1, F-2, F-4, B-2, B-4, B-6 de uma vez.
+- Não rodados ainda: build, suíte completa e prints de depois.

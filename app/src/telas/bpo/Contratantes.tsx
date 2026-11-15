@@ -339,7 +339,7 @@ export function ConversaContratante({ c, lado, nome }: { c: ContratanteVista; la
       <AreaRolagem as="ol" className="flex max-h-64 flex-col gap-2" aria-label={`Conversa com ${lado === 'bpo' ? c.nome : 'a equipe'}`}>
         {msgs.length === 0 && <li className="text-muted-foreground text-sm">Nenhuma mensagem ainda.</li>}
         {msgs.map((m) => (
-          <li key={m.id} className={cn('flex max-w-[85%] flex-col rounded-[14px] px-3 py-2 text-sm', m.de === lado ? 'bg-primary text-primary-foreground self-end' : 'bg-sunken self-start')}>
+          <li key={m.id} className={cn('flex max-w-[85%] flex-col rounded-lg px-3 py-2 text-sm', m.de === lado ? 'bg-primary text-primary-foreground self-end' : 'bg-sunken self-start')}>
             <span className={cn('text-[11px]', m.de === lado ? 'opacity-80' : 'text-muted-foreground')}>
               {m.nome} · {dataHora(m.quando)}
             </span>
@@ -724,7 +724,7 @@ function CalendarioEntregas({ contratantes, mae }: { contratantes: ContratanteVi
           {dias.map((d) => {
             const itens = contratantes.flatMap((c) => c.fila.filter((f) => f.prazo === d || f.prazo_legal === d).map((f) => ({ c, f })))
             return (
-              <li key={d} className={cn('flex gap-3 rounded-[12px] px-2 py-1.5 text-sm', d === hojeBpo && 'bg-sunken/60')}>
+              <li key={d} className={cn('flex gap-3 rounded-md px-2 py-1.5 text-sm', d === hojeBpo && 'bg-sunken/60')}>
                 <span className="text-muted-foreground w-16 shrink-0 text-xs">{quando(d)}</span>
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   {itens.length === 0 && <span className="text-muted-foreground text-xs">—</span>}
@@ -763,7 +763,7 @@ function RevisoesContratante({ c, onPortal }: { c: ContratanteVista; onPortal: (
           <EyeIcon /> Ver como o responsável técnico
         </Button>
       </CabecalhoBpo>
-      <Regra icone={<LockSimpleIcon weight="duotone" />}>Transmitir sem a revisão registrada do responsável técnico fica bloqueado (NBC PG 01, item 5 c). A revisão é tarefa de risco alto, com o resumo do que mudou, ligada à entrega por hash.</Regra>
+      <Regra icone={<LockSimpleIcon />}>Transmitir sem a revisão registrada do responsável técnico fica bloqueado (NBC PG 01, item 5 c). A revisão é tarefa de risco alto, com o resumo do que mudou, ligada à entrega por hash.</Regra>
       {!rt && <Regra>Este contratante ainda não tem responsável técnico ativo: convide em Configuração.</Regra>}
       {revisoes.length === 0 ? (
         <EstadoVazio compacto titulo="Nenhuma revisão pendente" />

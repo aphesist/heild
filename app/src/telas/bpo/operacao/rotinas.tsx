@@ -123,7 +123,7 @@ function ItemRotina({ e, r, onIr }: { e: EmpresaVista; r: BpoRotina; onIr?: () =
   const marcar = useMarcar()
   return (
     <li className="flex items-start gap-1">
-      <label className="hover:bg-raised/50 flex min-w-0 flex-1 cursor-pointer items-start gap-2.5 rounded-[10px] px-1.5 py-1.5 text-sm">
+      <label className="hover:bg-raised/50 flex min-w-0 flex-1 cursor-pointer items-start gap-2.5 rounded-md px-1.5 py-1.5 text-sm">
         <input type="checkbox" checked={!!r.feita_em} onChange={(ev) => marcar(e, r, ev.target.checked)} className="accent-foreground mt-0.5 size-4 shrink-0" aria-label={`${r.nome} · ${e.nome}`} />
         <span className="min-w-0 flex-1">
           <span className={cn('block', r.feita_em && 'text-muted-foreground line-through')}>{r.nome}</span>
@@ -221,14 +221,14 @@ function Calendario({ e }: { e: EmpresaVista }) {
               aria-pressed={dia === d.dia}
               aria-label={`${d.rotulo} ${d.dia}: ${itens.length} itens`}
               onClick={() => setDia(dia === d.dia ? null : d.dia)}
-              className={cn('bg-sunken/50 flex min-w-0 cursor-pointer flex-col gap-1 rounded-[12px] p-1.5 text-left', d.dia === hoje && 'ring-foreground/20 ring-1', dia === d.dia && 'ring-foreground/50 ring-2')}
+              className={cn('bg-sunken/50 flex min-w-0 cursor-pointer flex-col gap-1 rounded-md p-1.5 text-left', d.dia === hoje && 'ring-foreground/20 ring-1', dia === d.dia && 'ring-foreground/50 ring-2')}
             >
               <span className="text-muted-foreground px-0.5 text-[11px]">
                 {d.rotulo} {d.dia}
               </span>
               {itens.slice(0, 5).map((x) => (
                 <Tooltip key={x.id} conteudo={`${x.c} · ${x.t}`}>
-                  <span className="bg-surface flex min-w-0 items-center gap-1 rounded-[6px] px-1 py-0.5 text-[11px]">
+                  <span className="bg-surface flex min-w-0 items-center gap-1 rounded-sm px-1 py-0.5 text-[11px]">
                     <span className="size-1.5 shrink-0 rounded-full" style={{ background: x.cor }} />
                     <span className="truncate">{x.t.split(' ').slice(0, 3).join(' ')}</span>
                   </span>
@@ -343,7 +343,7 @@ function RotinasCarteira({ empresas, onEscolher, onSecao }: { empresas: EmpresaV
           <ul className="grid gap-x-4 gap-y-0.5 md:grid-cols-2">
             {pendentesHoje.map(({ e, r }) => (
               <li key={r.id}>
-                <label className="hover:bg-raised/50 flex cursor-pointer items-start gap-2.5 rounded-[10px] px-1.5 py-1.5 text-sm">
+                <label className="hover:bg-raised/50 flex cursor-pointer items-start gap-2.5 rounded-md px-1.5 py-1.5 text-sm">
                   <input type="checkbox" checked={false} onChange={() => marcar(e, r, true)} className="accent-foreground mt-0.5 size-4 shrink-0" aria-label={`${r.nome} · ${e.nome}`} />
                   <span className="min-w-0 flex-1">
                     <span className="block">{r.nome}</span>
@@ -396,7 +396,7 @@ function ConfigurarRotinas({ e, onFechar }: { e: EmpresaVista; onFechar: () => v
         rotuloDe={(r) => r.nome}
         onReordenar={(ids) => executar(() => repos.bpo.rotinas.reordenar(ids))}
         render={(r) => (
-          <div className={cn('bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[12px] px-2 py-1.5 text-sm', !r.ativa && 'opacity-60')}>
+          <div className={cn('bg-sunken/50 flex flex-wrap items-center gap-2 rounded-md px-2 py-1.5 text-sm', !r.ativa && 'opacity-60')}>
             <span className="min-w-0 flex-1 basis-48">
               <EdicaoEmLinha valor={r.nome} rotulo="Nome da rotina" onSalvar={(v) => void executar(() => repos.bpo.rotinas.atualizar(r.id, { nome: v }), { sucesso: 'Rotina renomeada' })} />
               <span className="text-muted-foreground block text-xs">

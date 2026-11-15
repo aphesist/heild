@@ -215,7 +215,7 @@ function GavetaRevisarDocumento({ d, e, onFechar }: { d: BpoDocumento; e: Empres
       {l.banco && <p className="text-muted-foreground text-xs">Dados bancários no documento: {l.banco}</p>}
       <ul className="flex flex-col gap-1.5">
         {checagens.map((c) => (
-          <li key={c.tipo} className={cn('rounded-[12px] px-3 py-2 text-xs', c.tipo === 'ok' ? 'bg-success/10' : c.tipo === 'duplicidade' || c.tipo === 'dados_bancarios' ? 'bg-destructive/10' : 'bg-warning/10')}>
+          <li key={c.tipo} className={cn('rounded-md px-3 py-2 text-xs', c.tipo === 'ok' ? 'bg-success/10' : c.tipo === 'duplicidade' || c.tipo === 'dados_bancarios' ? 'bg-destructive/10' : 'bg-warning/10')}>
             {c.texto}
           </li>
         ))}

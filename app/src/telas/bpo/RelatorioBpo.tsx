@@ -33,9 +33,9 @@ export function resumoPadraoEmpresa(e: EmpresaVista) {
 
 function Folha({ marca, sigla, titulo, sub, estilo, children, rodape }: { marca: string; sigla: string; titulo: string; sub: string; estilo?: React.CSSProperties; children: ReactNode; rodape?: ReactNode }) {
   return (
-    <div style={estilo} className="bg-background text-foreground flex flex-col gap-4 rounded-[18px] p-4 sm:p-5" aria-label={`Folha do relatório: ${titulo}`}>
+    <div style={estilo} className="bg-background text-foreground flex flex-col gap-4 rounded-lg p-4 sm:p-5" aria-label={`Folha do relatório: ${titulo}`}>
       <div className="border-border/70 flex items-center gap-3 border-b pb-3">
-        <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-[10px] text-sm font-medium" aria-hidden>
+        <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-md text-sm font-medium" aria-hidden>
           {sigla}
         </span>
         <span className="min-w-0 flex-1">
@@ -92,7 +92,7 @@ export function RelatorioEmpresa({ e, entrega, aberto, onFechar, podeFechar, onF
   const marca = escritorio?.razao_social || escritorio?.nome_fantasia || 'Escritório'
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface max-h-[92dvh] rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
+      <DialogContent className="bg-surface max-h-[92dvh] rounded-xl border-0 p-4 sm:max-w-2xl sm:p-5">
         <DialogHeader>
           <DialogTitle className="text-lg font-normal">Relatório de {rotuloCompetencia(entrega?.competencia ?? COMPETENCIA_FECHAR)} · {e.nome}</DialogTitle>
           <DialogDescription>{enviado ? `Enviado ${dataHora(entrega?.enviado_em)} por ${entrega?.enviado_por}: está no app e em Arquivos › Entregáveis › BPO financeiro.` : 'Rascunho do Gerencial. Revise o resumo; nada sai ao cliente antes de uma pessoa fechar.'}</DialogDescription>
@@ -192,7 +192,7 @@ export function RelatorioContratante({ c, entrega, aberto, onFechar, podeFechar,
   const competencia = entrega?.competencia ?? COMPETENCIA_FECHAR
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface max-h-[92dvh] rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
+      <DialogContent className="bg-surface max-h-[92dvh] rounded-xl border-0 p-4 sm:max-w-2xl sm:p-5">
         <DialogHeader>
           <DialogTitle className="text-lg font-normal">Relatório de {rotuloCompetencia(competencia)} · {c.nome}</DialogTitle>
           <DialogDescription>{enviado ? `Enviado ${dataHora(entrega?.enviado_em)} por ${entrega?.enviado_por}. Sai com a marca de ${c.nome}, nunca com a do BPO.` : 'Rascunho. Sai com a marca do contratante, nunca com a do BPO.'}</DialogDescription>

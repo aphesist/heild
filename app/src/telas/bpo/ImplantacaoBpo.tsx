@@ -86,7 +86,7 @@ export function ImplantacaoBpo({ e, perfil, nome, onConectar, onAba }: { e?: Emp
           const info = x.passos?.[p.id]
           const abertoAqui = aberto === p.id
           return (
-            <li key={p.id} className={cn('rounded-[14px] transition-colors', abertoAqui ? 'bg-sunken/60' : 'hover:bg-raised/50')}>
+            <li key={p.id} className={cn('rounded-lg transition-colors', abertoAqui ? 'bg-sunken/60' : 'hover:bg-raised/50')}>
               <div className="flex items-start gap-2.5 px-2 py-2">
                 <input type="checkbox" className="accent-foreground mt-0.5 size-4 shrink-0 cursor-pointer disabled:cursor-default" checked={feito} disabled={!pode} onChange={(ev) => marcar(p.id, ev.target.checked, { nota: ev.target.checked ? 'marcado como feito' : undefined })} aria-label={p.rotulo} />
                 <button type="button" className="min-w-0 flex-1 cursor-pointer text-left" onClick={() => setAberto(abertoAqui ? null : p.id)} aria-expanded={abertoAqui} aria-label={`Passo ${i + 1}: ${p.rotulo}`}>
@@ -506,7 +506,7 @@ function PassoParalelo({ e, perfil, nome, feito, pode, onConcluir }: { e?: Empre
     <div className="flex flex-col gap-2">
       <p className="text-muted-foreground text-xs">Em paralelo até {dataCurta(perfil.paralelo_ate)}: o BPO prepara, o cliente ainda paga.</p>
       {c ? (
-        <div className="bg-raised/60 flex flex-col gap-1.5 rounded-[12px] p-3 text-xs">
+        <div className="bg-raised/60 flex flex-col gap-1.5 rounded-md p-3 text-xs">
           <span className="text-sm">
             {c.iguais} de {c.preparadas} iguais · o cliente pagou {c.pagas_pelo_cliente}
           </span>
@@ -640,7 +640,7 @@ export function SaidaBpo({ e, perfil, nome, onConcluir }: { e?: EmpresaVista; pe
         {passosSaida.map((p) => {
           const feito = !!enc.passos[p.id]
           return (
-            <li key={p.id} className="hover:bg-raised/50 flex flex-col gap-1.5 rounded-[10px] px-1.5 py-1.5 text-sm">
+            <li key={p.id} className="hover:bg-raised/50 flex flex-col gap-1.5 rounded-md px-1.5 py-1.5 text-sm">
               <label className="flex cursor-pointer items-start gap-2.5">
                 <input type="checkbox" className="accent-foreground mt-0.5 size-4 shrink-0" checked={feito} disabled={!pode} onChange={(ev) => marcar(p.id, ev.target.checked)} aria-label={p.rotulo} />
                 <span className="min-w-0 flex-1">

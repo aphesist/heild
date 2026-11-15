@@ -61,7 +61,7 @@ export function SecaoFechamento({ e, onSecao, onEscolher }: { e: EmpresaVista; o
         </TituloBloco>
         {fechado && fch && <p className="text-sm">Fechado por {fch.enviado_por} em {dataHora(fch.enviado_em)}.</p>}
         {!fechado && reaberto && (
-          <p className="bg-warning/10 rounded-[12px] px-3 py-2 text-sm">
+          <p className="bg-warning/10 rounded-md px-3 py-2 text-sm">
             Reaberto por {reaberto.por} em {dataHora(reaberto.em)}: {reaberto.motivo}
           </p>
         )}

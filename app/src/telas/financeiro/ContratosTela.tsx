@@ -316,7 +316,7 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
                 <button
                   type="button"
                   onClick={() => setAberto(c.id)}
-                  className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(10rem,max-content)_minmax(8rem,max-content)]"
+                  className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-md px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(10rem,max-content)_minmax(8rem,max-content)]"
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{c.cliente}</span>
@@ -424,7 +424,7 @@ function DetalheContrato({ fin, c, podeEditar, onFechar, onEditar }: { fin: Fin;
       {aba === 'aditivos' && (
         <ul className="flex flex-col gap-2 text-sm">
           {aditivos.map((a) => (
-            <li key={a.id} className="bg-sunken/50 rounded-[14px] px-3 py-2">
+            <li key={a.id} className="bg-sunken/50 rounded-lg px-3 py-2">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">v{a.versao_para}</span>
                 <span className="min-w-0 grow basis-40">{a.resumo}</span>
@@ -558,7 +558,7 @@ function EditarContrato({ fin, contrato, clienteId, onFechar }: { fin: Fin; cont
           {diff.length ? (
             <ul className="flex flex-col gap-1.5 text-sm">
               {diff.map((d) => (
-                <li key={d.campo} className="bg-sunken/50 grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-[12px] px-3 py-2">
+                <li key={d.campo} className="bg-sunken/50 grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-md px-3 py-2">
                   <span>{d.campo}</span>
                   <span className="tabular-nums">
                     <span className="text-muted-foreground line-through">{d.antes}</span> → <strong className="font-medium">{d.depois}</strong>
@@ -581,7 +581,7 @@ function EditarContrato({ fin, contrato, clienteId, onFechar }: { fin: Fin; cont
           <section className="flex flex-col gap-2">
             <h3 className="text-sm font-medium">Serviços (linhas da fatura)</h3>
             {itens.map((i, k) => (
-              <div key={i.key} className="bg-sunken/50 grid grid-cols-[1fr_auto] gap-2 rounded-[14px] p-3 sm:grid-cols-[minmax(0,1fr)_9rem_7rem_auto]">
+              <div key={i.key} className="bg-sunken/50 grid grid-cols-[1fr_auto] gap-2 rounded-lg p-3 sm:grid-cols-[minmax(0,1fr)_9rem_7rem_auto]">
                 <CampoTexto valor={i.descricao} onMudar={(v) => muda(i.key, { descricao: v })} placeholder="Descrição (ex.: Folha)" aria-label={`Descrição do item ${k + 1}`} />
                 <span className="sm:hidden" />
                 <CampoEscolha rotulo={`Serviço do item ${k + 1}`} valor={i.servico} onMudar={(v) => muda(i.key, { servico: v })} opcoes={(Object.keys(servicos) as ServicoContrato[]).map((x) => ({ valor: x, rotulo: servicos[x].rotulo }))} />
@@ -683,7 +683,7 @@ function ExtrasAFaturar({ fin, podeEditar, onRegistrar }: { fin: Fin; podeEditar
       {comandasSemAvulso.length > 0 && (
         <ul className="flex flex-col gap-2">
           {comandasSemAvulso.map((t) => (
-            <li key={t.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+            <li key={t.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm">
               <ClipboardTextIcon className="text-muted-foreground size-4 shrink-0" />
               <span className="min-w-0 grow basis-40">
                 <span className="block">
@@ -1025,7 +1025,7 @@ function CampanhaReajuste({ fin, onFechar, onEnviado }: { fin: Fin; onFechar: ()
           <Interruptor ligado={acima} onMudar={setAcima} rotulo="Propor acima do índice para quem dá prejuízo" detalhe="Usa a Rentabilidade do Timesheet (S06): horas medidas × custo-hora contra o honorário." />
           <ul className="flex flex-col gap-2">
             {alvo.map((x) => (
-              <li key={x.c.id} className="bg-sunken/50 flex flex-wrap items-center gap-3 rounded-[14px] px-3 py-2 text-sm">
+              <li key={x.c.id} className="bg-sunken/50 flex flex-wrap items-center gap-3 rounded-lg px-3 py-2 text-sm">
                 <span className="min-w-0 grow basis-40">
                   <span className="block font-medium">{x.c.cliente}</span>
                   <span className="text-muted-foreground block text-xs">margem {x.m === undefined ? 'sem medição' : `${x.m}%`} · hoje {brl(x.c.total)}</span>

@@ -136,7 +136,7 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
           </div>
 
           {gestor && (
-            <div className="flex min-w-0 flex-col gap-4">
+            <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
               <Caixa>
                 <Pergunta>Arquivos sem pessoa</Pergunta>
                 <p className="text-muted-foreground -mt-1 text-xs">A nuvem não disse quem salvou. Atribua e a pessoa confirma (“foi você?”).</p>

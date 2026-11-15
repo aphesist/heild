@@ -268,28 +268,31 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                 Manual × automático das horas registradas: {minTotal ? Math.round((minManual / minTotal) * 100) : 0}% lançado à mão no período. Muito manual costuma ser captura fraca (extensão desligada, tarefa não aberta), não falta da pessoa.
               </p>
             </Caixa>
-            <Caixa>
-              <Pergunta>A captura está melhorando? (% das horas por semana)</Pergunta>
-              {semanas.length ? <ColunasEmpilhadas unidade="%" altura={120} dados={semanas} /> : <p className="text-muted-foreground text-sm">Sem semanas com dados.</p>}
-              <Legenda itens={['automatica', 'confirmada', 'estimada']} />
-            </Caixa>
-            <Caixa>
-              <Pergunta>Por que a cobertura não é maior?</Pergunta>
-              {diagnostico.length ? (
-                <ul className="flex flex-col gap-2 text-sm">
-                  {diagnostico.map((d) => (
-                    <li key={d.item} className="flex items-start gap-2">
-                      <WarningIcon weight={d.impacto === 'alto' ? 'fill' : 'regular'} className="text-warning mt-0.5 size-4 shrink-0" />
-                      <span className="min-w-0 flex-1">{d.item}</span>
-                      <span className="text-muted-foreground shrink-0 text-xs">{d.impacto}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground text-sm">Nada a apontar neste filtro.</p>
-              )}
-              <p className="text-muted-foreground text-xs">É diagnóstico da captura, não falta das pessoas.</p>
-            </Caixa>
+            {/* T-3: de lg a xl a coluna é a tela inteira; o gráfico de três semanas fica ao lado do diagnóstico. */}
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-1">
+              <Caixa>
+                <Pergunta>A captura está melhorando? (% das horas por semana)</Pergunta>
+                {semanas.length ? <ColunasEmpilhadas unidade="%" altura={120} dados={semanas} /> : <p className="text-muted-foreground text-sm">Sem semanas com dados.</p>}
+                <Legenda itens={['automatica', 'confirmada', 'estimada']} />
+              </Caixa>
+              <Caixa>
+                <Pergunta>Por que a cobertura não é maior?</Pergunta>
+                {diagnostico.length ? (
+                  <ul className="flex flex-col gap-2 text-sm">
+                    {diagnostico.map((d) => (
+                      <li key={d.item} className="flex items-start gap-2">
+                        <WarningIcon weight={d.impacto === 'alto' ? 'fill' : 'regular'} className="text-warning mt-0.5 size-4 shrink-0" />
+                        <span className="min-w-0 flex-1">{d.item}</span>
+                        <span className="text-muted-foreground shrink-0 text-xs">{d.impacto}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted-foreground text-sm">Nada a apontar neste filtro.</p>
+                )}
+                <p className="text-muted-foreground text-xs">É diagnóstico da captura, não falta das pessoas.</p>
+              </Caixa>
+            </div>
             <Caixa>
               <Pergunta
                 acao={

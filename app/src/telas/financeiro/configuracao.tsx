@@ -88,7 +88,7 @@ export function ConectarProvedor({ onFechar, troca }: Fechar & { troca?: boolean
       {passo === 0 && (
         <>
           {politica && politica.provedor.nome !== 'a escolher' && (
-            <p className="bg-sunken/60 rounded-[14px] px-3 py-2 text-sm">
+            <p className="bg-sunken/60 rounded-lg px-3 py-2 text-sm">
               Hoje: <strong className="font-medium">{politica.provedor.nome}</strong> · {politica.provedor.convenio} · {politica.provedor.autorizacoes_pix} autorizações de Pix Automático
             </p>
           )}
@@ -109,7 +109,7 @@ export function ConectarProvedor({ onFechar, troca }: Fechar & { troca?: boolean
             )}
           </Campo>
           <Campo rotulo={tipo === 'banco' ? 'Banco conveniado' : 'Gateway'}>{(id) => <CampoEscolha id={id} valor={prov} onMudar={setProv} opcoes={opcoes.map((x) => ({ valor: x, rotulo: x }))} />}</Campo>
-          <div className="bg-sunken/60 grid grid-cols-2 gap-2 rounded-[14px] p-3 text-xs sm:grid-cols-4">
+          <div className="bg-sunken/60 grid grid-cols-2 gap-2 rounded-lg p-3 text-xs sm:grid-cols-4">
             {['Boleto', 'Pix', 'Pix Automático', 'Crédito'].map((r, i) => (
               <span key={r}>
                 <span className="text-muted-foreground block">{r}</span>
@@ -176,7 +176,7 @@ export function ConectarProvedor({ onFechar, troca }: Fechar & { troca?: boolean
           )}
         </div>
       )}
-      {passo === 4 && <p className="bg-success/10 rounded-[14px] px-3 py-2.5 text-sm">Ao concluir, as cobranças do próximo ciclo ({rotuloCompetencia(PROXIMA_COMPETENCIA)}) já saem por {prov}.{troca && migrar ? ' As autorizações de Pix Automático são levadas; você acompanha em Cobranças.' : ''}</p>}
+      {passo === 4 && <p className="bg-success/10 rounded-lg px-3 py-2.5 text-sm">Ao concluir, as cobranças do próximo ciclo ({rotuloCompetencia(PROXIMA_COMPETENCIA)}) já saem por {prov}.{troca && migrar ? ' As autorizações de Pix Automático são levadas; você acompanha em Cobranças.' : ''}</p>}
     </GavetaFormulario>
   )
 }
@@ -282,7 +282,7 @@ export function ListaRegua({ politica, editavel, onEditar }: { politica: Politic
       {[...politica.regua]
         .sort((a, b) => a.dias - b.dias)
         .map((p) => (
-          <li key={p.id} className={cn('flex items-start gap-3 rounded-[12px] px-2 py-1.5 text-sm', !p.ativo && 'opacity-50')}>
+          <li key={p.id} className={cn('flex items-start gap-3 rounded-md px-2 py-1.5 text-sm', !p.ativo && 'opacity-50')}>
             <span className="bg-sunken w-12 shrink-0 rounded-full py-0.5 text-center text-xs font-medium tabular-nums">{rotuloDia(p.dias)}</span>
             <span className="min-w-0 flex-1">
               <span className="block">
@@ -419,7 +419,7 @@ export function ConectarConta({ onFechar, renovar }: Fechar & { renovar?: string
         </div>
       )}
       {etapa === 'Contas' && <Campo rotulo="O que trazer">{() => <Fichas rotulo="Contas" valores={contas} onMudar={setContas} opcoes={['conta corrente PJ', 'cartão empresarial'].map((x) => ({ valor: x, rotulo: x }))} />}</Campo>}
-      {etapa === 'Pronto' && <p className="bg-success/10 rounded-[14px] px-3 py-2.5 text-sm">{conta ? `Consentimento renovado: ${conta.nome} volta a atualizar 4 vezes ao dia.` : `${banco} conectado. Os últimos 90 dias de extrato entram para conciliar; daqui em diante, atualiza 4 vezes ao dia.`}</p>}
+      {etapa === 'Pronto' && <p className="bg-success/10 rounded-lg px-3 py-2.5 text-sm">{conta ? `Consentimento renovado: ${conta.nome} volta a atualizar 4 vezes ao dia.` : `${banco} conectado. Os últimos 90 dias de extrato entram para conciliar; daqui em diante, atualiza 4 vezes ao dia.`}</p>}
     </GavetaFormulario>
   )
 }
@@ -545,7 +545,7 @@ export function Alcadas({ onFechar }: Fechar) {
       <Campo rotulo="Acima disso, o Administrador. Dois aprovadores (Administrador + segundo sócio) acima de (R$)" erro={erro}>
         {(id) => <CampoTexto id={id} valor={dois} onMudar={setDois} />}
       </Campo>
-      <ul className="bg-sunken/60 flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+      <ul className="bg-sunken/60 flex flex-col gap-1 rounded-lg p-3 text-sm">
         <li>até {brl(g)}: Gestor com o setor Financeiro (ou o Administrador)</li>
         <li>até {brl(d)}: Administrador</li>
         <li>acima de {brl(d)}: Administrador e segundo sócio</li>
@@ -598,7 +598,7 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
         <PlusIcon /> Preço
       </Button>
       {ed && (
-        <div className="bg-sunken/50 flex flex-col gap-3 rounded-[16px] p-3">
+        <div className="bg-sunken/50 flex flex-col gap-3 rounded-lg p-3">
           <div className="grid grid-cols-[7rem_1fr] gap-3">
             <Campo rotulo="Atividade">{(id) => <CampoTexto id={id} valor={ed.atividade_id} onMudar={(v) => setEd({ ...ed, atividade_id: v.toUpperCase() })} placeholder="SOC-031" />}</Campo>
             <Campo rotulo="Nome">{(id) => <CampoTexto id={id} valor={ed.nome} onMudar={(v) => setEd({ ...ed, nome: v })} />}</Campo>
@@ -695,7 +695,7 @@ export function ImportarFinanceiro({ onFechar }: Fechar) {
       {passo === 0 && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {origensImportacao.map((o) => (
-            <button key={o} type="button" aria-pressed={origem === o} onClick={() => setOrigem(o)} className={cn('cursor-pointer rounded-[14px] px-3 py-3 text-left text-sm', origem === o ? 'bg-raised shadow-cartao ring-foreground/30 ring-2' : 'bg-sunken/60')}>
+            <button key={o} type="button" aria-pressed={origem === o} onClick={() => setOrigem(o)} className={cn('cursor-pointer rounded-lg px-3 py-3 text-left text-sm', origem === o ? 'bg-raised shadow-cartao ring-foreground/30 ring-2' : 'bg-sunken/60')}>
               {o}
             </button>
           ))}
@@ -737,7 +737,7 @@ export function ImportarFinanceiro({ onFechar }: Fechar) {
           <Campo rotulo="Competência da virada" ajuda="Daí em diante, as cobranças saem daqui. Os títulos já emitidos na origem seguem lá até a baixa.">
             {(id) => <CampoEscolha id={id} valor={virada} onMudar={setVirada} opcoes={['2026-12', '2027-01', '2027-02'].map((x) => ({ valor: x, rotulo: rotuloCompetencia(x) }))} />}
           </Campo>
-          <p className="bg-sunken/60 rounded-[14px] px-3 py-2.5 text-sm">Na véspera, o integrante Financeiro prepara a lista de recorrências a encerrar no {origem}; você confirma e ele encerra.</p>
+          <p className="bg-sunken/60 rounded-lg px-3 py-2.5 text-sm">Na véspera, o integrante Financeiro prepara a lista de recorrências a encerrar no {origem}; você confirma e ele encerra.</p>
         </>
       )}
     </GavetaFormulario>
@@ -814,7 +814,7 @@ export function ExportarFin({ onFechar, inicial = 'contratos' }: Fechar & { inic
         )}
       </Campo>
       {pronto && (
-        <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-success/10 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
           <DownloadSimpleIcon className="size-4" /> {pronto}
         </p>
       )}

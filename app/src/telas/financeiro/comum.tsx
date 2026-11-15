@@ -64,7 +64,7 @@ export function CabecalhoFin({ titulo, sub, status, children, exportar = 'contra
         </div>
       </div>
       {fin && t && (
-        <div className="bg-surface shadow-cartao flex min-h-19 w-full items-center gap-3 rounded-[20px] p-3 lg:w-80">
+        <div className="bg-surface shadow-cartao flex min-h-19 w-full items-center gap-3 rounded-cartao p-3 lg:w-80">
           <Orb cor={t.cor} corOlhos={t.corOlhos} estado={fin.estado} tamanho={40} animado modo="wander" cutucavel={false} />
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium">{t.nome}</div>
@@ -189,7 +189,7 @@ export function SeloSituacao({ s, className }: { s: SituacaoTela; className?: st
 
 /** Aviso curto dentro de um bloco. */
 export function Nota({ children, tom = 'neutro', className }: { children: ReactNode; tom?: 'neutro' | 'alerta' | 'ok'; className?: string }) {
-  return <p className={cn('rounded-[14px] px-3 py-2 text-sm', tom === 'alerta' ? 'bg-warning/10' : tom === 'ok' ? 'bg-success/10' : 'bg-sunken/60', className)}>{children}</p>
+  return <p className={cn('rounded-lg px-3 py-2 text-sm', tom === 'alerta' ? 'bg-warning/10' : tom === 'ok' ? 'bg-success/10' : 'bg-sunken/60', className)}>{children}</p>
 }
 
 /** Pergunta que abre cada bloco (como no Timesheet). */
@@ -214,7 +214,7 @@ export function BarrasReais({ dados }: { dados: { nome: string; h: number }[] })
       {dados.map((d) => (
         <li key={d.nome} className="grid grid-cols-[minmax(0,8rem)_1fr_minmax(7.5rem,max-content)] items-center gap-3 text-sm">
           <span className="truncate">{d.nome}</span>
-          <span className="h-3 rounded-r-[4px]" style={{ width: `${(d.h / max) * 100}%`, background: 'color-mix(in oklab, var(--foreground) 55%, transparent)' }} title={`${d.nome}: ${brl(d.h)}`} />
+          <span className="h-3 rounded-r-xs" style={{ width: `${(d.h / max) * 100}%`, background: 'color-mix(in oklab, var(--foreground) 55%, transparent)' }} title={`${d.nome}: ${brl(d.h)}`} />
           <span className="text-right tabular-nums">
             {brl(d.h)} <span className="text-muted-foreground text-xs">{Math.round((d.h / total) * 100)}%</span>
           </span>

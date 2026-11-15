@@ -109,7 +109,7 @@ export function VisaoFinTela() {
       </CabecalhoFin>
 
       <Caixa>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           <Numero valor={brl(mrr)} rotulo="receita recorrente (MRR)" detalhe={`${fin.contratos.length + agregado.clientes} contratos`} />
           <Numero valor={`${churn}%`} rotulo="churn no mês" detalhe={`${encerrados} saída(s)`} />
           <Numero valor={`${inadimplencia.toFixed(1).replace('.', ',')}%`} rotulo="inadimplência" detalhe={`${vencidas.length} fatura(s) vencida(s)`} />

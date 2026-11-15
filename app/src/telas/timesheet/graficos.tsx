@@ -30,7 +30,7 @@ export function estiloConfianca(c: Confianca): { className: string; style?: CSSP
 
 export function Amostra({ c, className }: { c: Confianca; className?: string }) {
   const e = estiloConfianca(c)
-  return <span className={cn('inline-block size-3 shrink-0 rounded-[3px]', e.className, className)} style={e.style} aria-hidden />
+  return <span className={cn('inline-block size-3 shrink-0 rounded-xs', e.className, className)} style={e.style} aria-hidden />
 }
 
 export function Legenda({ itens, extra }: { itens: Confianca[]; extra?: ReactNode }) {
@@ -81,7 +81,7 @@ export function LinhaDoDia({ linhas, agente, onAbrir, rotulo }: { linhas: LinhaD
                 type="button"
                 onClick={() => onAbrir?.(l)}
                 aria-label={`${hm(l.inicio)} a ${hm(l.fim)}, ${rotulo(l)}, ${rotuloConfianca[c]}`}
-                className={cn('absolute inset-y-0 cursor-pointer rounded-[4px] transition-opacity hover:opacity-80', e.className, fora && 'ring-warning ring-2 ring-inset', l.tipo === 'sessao' && l.s.ao_vivo && 'animate-pulse')}
+                className={cn('absolute inset-y-0 cursor-pointer rounded-xs transition-opacity hover:opacity-80', e.className, fora && 'ring-warning ring-2 ring-inset', l.tipo === 'sessao' && l.s.ao_vivo && 'animate-pulse')}
                 style={{ ...e.style, left: `calc(${pos(minDoDia(l.inicio))}% + 1px)`, width: `max(4px, calc(${pos(minDoDia(l.fim)) - pos(minDoDia(l.inicio))}% - 2px))` }}
               />
             </Tooltip>
@@ -125,7 +125,7 @@ export function ColunasEmpilhadas({ dados, unidade = 'min', altura = 150, onClic
               <span className="flex w-full max-w-12 flex-col-reverse gap-[2px]" style={{ height: (tot / max) * altura }}>
                 {d.partes.map((p, i) => {
                   const e = estiloConfianca(p.c)
-                  return p.v ? <span key={p.c} className={cn('w-full group-hover:opacity-85', e.className, i === d.partes.findLastIndex((x) => x.v) && 'rounded-t-[4px]')} style={{ ...e.style, height: `${(p.v / tot) * 100}%` }} /> : null
+                  return p.v ? <span key={p.c} className={cn('w-full group-hover:opacity-85', e.className, i === d.partes.findLastIndex((x) => x.v) && 'rounded-t-xs')} style={{ ...e.style, height: `${(p.v / tot) * 100}%` }} /> : null
                 })}
               </span>
             </Tooltip>
@@ -158,7 +158,7 @@ export function LinhasEmpilhadas({ dados, unidade = 'h', onClicar }: { dados: Pi
               <span className="flex h-4 gap-[2px]" style={{ width: `${(tot / max) * 100}%` }}>
                 {d.partes.map((p, i) => {
                   const e = estiloConfianca(p.c)
-                  return p.v ? <span key={p.c} className={cn(e.className, i === d.partes.length - 1 && 'rounded-r-[4px]')} style={{ ...e.style, width: `${(p.v / tot) * 100}%` }} /> : null
+                  return p.v ? <span key={p.c} className={cn(e.className, i === d.partes.length - 1 && 'rounded-r-xs')} style={{ ...e.style, width: `${(p.v / tot) * 100}%` }} /> : null
                 })}
               </span>
             </Tooltip>
@@ -188,7 +188,7 @@ export function Barras({ dados, unidade = 'h', destacar, onClicar }: { dados: { 
             <span className={cn('truncate', d.nome === 'outros' || d.nome === 'interno' ? 'text-muted-foreground' : '', destacar === d.nome && 'font-medium')}>{d.nome}</span>
           )}
           <Tooltip conteudo={`${d.nome}: ${d.h} ${unidade}`}>
-            <span className="h-3 rounded-r-[4px]" style={{ width: `${(d.h / max) * 100}%`, background: `color-mix(in oklab, var(--foreground) ${destacar === d.nome ? 78 : d.nome === 'outros' || d.nome === 'interno' ? 25 : 55}%, transparent)` }} />
+            <span className="h-3 rounded-r-xs" style={{ width: `${(d.h / max) * 100}%`, background: `color-mix(in oklab, var(--foreground) ${destacar === d.nome ? 78 : d.nome === 'outros' || d.nome === 'interno' ? 25 : 55}%, transparent)` }} />
           </Tooltip>
           <span className="text-right tabular-nums">
             {String(d.h).replace('.', ',')} {unidade}
@@ -208,12 +208,12 @@ export function Divergente({ dados, selecionado, onSelecionar }: { dados: { nome
     <ul className="flex flex-col gap-1">
       {dados.map((d) => (
         <li key={d.nome}>
-          <button type="button" onClick={() => onSelecionar?.(d.nome)} className={cn('grid w-full cursor-pointer grid-cols-[minmax(0,8rem)_1fr_1fr_minmax(7.5rem,max-content)] sm:grid-cols-[minmax(0,13rem)_1fr_1fr_minmax(0,9rem)] items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm', selecionado === d.nome ? 'bg-raised shadow-cartao' : 'hover:bg-sunken/60')}>
+          <button type="button" onClick={() => onSelecionar?.(d.nome)} className={cn('grid w-full cursor-pointer grid-cols-[minmax(0,8rem)_1fr_1fr_minmax(7.5rem,max-content)] sm:grid-cols-[minmax(0,13rem)_1fr_1fr_minmax(0,9rem)] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm', selecionado === d.nome ? 'bg-raised shadow-cartao' : 'hover:bg-sunken/60')}>
             <span className={cn('truncate', selecionado === d.nome && 'font-medium')}>{d.nome}</span>
             <span className="flex h-4 justify-end border-r" style={{ borderColor: 'color-mix(in oklab, var(--foreground) 35%, transparent)' }}>
-              {d.valor < 0 && <span className="bg-destructive/75 h-full rounded-l-[4px]" style={{ width: `${(Math.abs(d.valor) / max) * 100}%` }} />}
+              {d.valor < 0 && <span className="bg-destructive/75 h-full rounded-l-xs" style={{ width: `${(Math.abs(d.valor) / max) * 100}%` }} />}
             </span>
-            <span className="flex h-4">{d.valor >= 0 && <span className="bg-success/75 h-full rounded-r-[4px]" style={{ width: `${(d.valor / max) * 100}%` }} />}</span>
+            <span className="flex h-4">{d.valor >= 0 && <span className="bg-success/75 h-full rounded-r-xs" style={{ width: `${(d.valor / max) * 100}%` }} />}</span>
             <span className="text-right text-xs tabular-nums">
               <span className={cn('font-medium', d.valor < 0 && 'text-destructive')}>
                 {brl(d.valor)} ({d.pct > 0 ? '+' : d.pct < 0 ? '−' : ''}

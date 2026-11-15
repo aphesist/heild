@@ -163,7 +163,8 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
                         </div>
                       )}
                     </Caixa>
-                    <div className="flex flex-col gap-4">
+                    {/* T-3: de lg a xl, custo e setores lado a lado sob a margem; no xl, em pilha ao lado dela. */}
+                    <div className="grid gap-4 lg:grid-cols-2 lg:items-start xl:flex xl:flex-col">
                       <Caixa>
                         <Pergunta
                           acao={
@@ -181,7 +182,7 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
                             ['Custo do período', brl(escolhido.custo)],
                             ['Honorário', escolhido.honorario != null ? brl(escolhido.honorario) : 'não informado'],
                           ].map(([k, v]) => (
-                            <div key={k} className="bg-sunken rounded-[12px] px-3 py-2">
+                            <div key={k} className="bg-sunken rounded-md px-3 py-2">
                               <dt className="text-muted-foreground text-[11px]">{k}</dt>
                               <dd className="font-medium tabular-nums">{v}</dd>
                             </div>
@@ -206,7 +207,7 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
               </>
             )}
 
-            <Faixa icone={<ScalesIcon weight="duotone" className="text-warning size-5 shrink-0" />}>
+            <Faixa icone={<ScalesIcon className="text-warning size-5 shrink-0" />}>
               <strong className="font-medium">Valor-hora de cobrança: {brl(ts.cfg.valor_hora_cobranca)}</strong> · distinto do custo-hora, é o preço da hora nas pré-faturas por hora (pacote Jurídico). O Gestor e o advogado veem; {ts.temJuridico ? 'filtre pelo chip Jurídico para ver as horas cobráveis.' : 'aparece no chip de pacote quando o Jurídico estiver contratado.'}
             </Faixa>
           </>

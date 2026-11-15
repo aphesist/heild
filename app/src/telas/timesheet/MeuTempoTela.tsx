@@ -113,7 +113,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
 
         {!termo && (
           <Faixa
-            icone={<ShieldCheckIcon weight="duotone" className="text-warning size-5 shrink-0" />}
+            icone={<ShieldCheckIcon className="text-warning size-5 shrink-0" />}
             acao={
               <Button size="sm" className="rounded-full" onClick={() => setModal('termo')}>
                 Ler e aceitar
@@ -146,7 +146,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                   extra={
                     <>
                       <li className="flex items-center gap-1.5">
-                        <span className="ring-warning size-3 rounded-[3px] ring-2 ring-inset" /> fora da jornada
+                        <span className="ring-warning size-3 rounded-xs ring-2 ring-inset" /> fora da jornada
                       </li>
                       <li className="flex items-center gap-1.5">
                         <span className="h-1.5 w-4 rounded-full" style={{ background: aparencia({ setor: 'fiscal' }).cor }} /> agente (série à parte)
@@ -301,10 +301,42 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                 </Caixa>
               </>
             )}
+
+            {/* T-1: os integrantes vão para a coluna larga, sob o dia; a lateral fica com cronômetro, extensão e contestações. */}
+            <Caixa>
+              <Pergunta>O que os meus integrantes fizeram {dia === HOJE_TS ? 'hoje' : 'no dia'}?</Pergunta>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <Numero valor={`${Math.round(maquina)} min`} rotulo="de máquina" />
+                <Numero valor={fmtHoras(poupadas)} rotulo="poupadas (estim.)" />
+                <Numero valor={`${limitesIa.cincoHoras}%`} rotulo="do limite de 5 h" />
+                <Numero valor={`${limitesIa.seteDias}%`} rotulo="do limite de 7 dias" />
+              </div>
+              <ul className="grid gap-x-6 gap-y-2 md:grid-cols-2">
+                {agente.map((a) => {
+                  const t = aparencia({ setor: a.setor_id as never })
+                  return (
+                    <li key={a.id} className="flex items-start gap-2.5 text-sm">
+                      <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={22} cutucavel={false} extras={false} />
+                      <span className="min-w-0 flex-1">
+                        {t.nome}: {a.rotulo}
+                        <span className="text-muted-foreground block text-xs tabular-nums">
+                          {hm(a.inicio)} · {Math.round((a.custo?.maquina_seg ?? 0) / 60)} min de máquina
+                        </span>
+                      </span>
+                      <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Abrir o chat de ${t.nome}`} onClick={() => nav.irPara({ modulo: 'inicio', aba: 'time', integrante: a.ator_id })}>
+                        <ChatCircleIcon />
+                      </Button>
+                    </li>
+                  )
+                })}
+                {!agente.length && <li className="text-muted-foreground text-sm md:col-span-2">Nada neste dia.</li>}
+              </ul>
+              <p className="text-muted-foreground text-xs">Série separada: nunca soma com as suas horas. Você vê o % do limite, nunca tokens nem custo.</p>
+            </Caixa>
           </div>
 
-          <div className="flex min-w-0 flex-col gap-4">
-            <Cronometro clienteId={clienteId} onLancar={() => setLancar({ cliente_id: clienteId ?? undefined, dia: vista === 'dia' ? dia : HOJE_TS })} />
+          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
+            <Cronometro clienteId={clienteId} />
             <Caixa>
               <Pergunta acao={vinculada ? <Badge variant={pausada ? 'outline' : 'sucesso'}>{pausada ? `pausada ${pausada}` : 'ativa'}</Badge> : <Badge variant="outline">não vinculada</Badge>}>Extensão</Pergunta>
               {vinculada ? (
@@ -379,36 +411,6 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
               )}
             </Caixa>
 
-            <Caixa>
-              <Pergunta>O que os meus integrantes fizeram {dia === HOJE_TS ? 'hoje' : 'no dia'}?</Pergunta>
-              <div className="grid grid-cols-2 gap-4">
-                <Numero valor={`${Math.round(maquina)} min`} rotulo="de máquina" />
-                <Numero valor={fmtHoras(poupadas)} rotulo="poupadas (estim.)" />
-                <Numero valor={`${limitesIa.cincoHoras}%`} rotulo="do limite de 5 h" />
-                <Numero valor={`${limitesIa.seteDias}%`} rotulo="do limite de 7 dias" />
-              </div>
-              <ul className="flex flex-col gap-2">
-                {agente.map((a) => {
-                  const t = aparencia({ setor: a.setor_id as never })
-                  return (
-                    <li key={a.id} className="flex items-start gap-2.5 text-sm">
-                      <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={22} cutucavel={false} extras={false} />
-                      <span className="min-w-0 flex-1">
-                        {t.nome}: {a.rotulo}
-                        <span className="text-muted-foreground block text-xs tabular-nums">
-                          {hm(a.inicio)} · {Math.round((a.custo?.maquina_seg ?? 0) / 60)} min de máquina
-                        </span>
-                      </span>
-                      <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Abrir o chat de ${t.nome}`} onClick={() => nav.irPara({ modulo: 'inicio', aba: 'time', integrante: a.ator_id })}>
-                        <ChatCircleIcon />
-                      </Button>
-                    </li>
-                  )
-                })}
-                {!agente.length && <li className="text-muted-foreground text-sm">Nada neste dia.</li>}
-              </ul>
-              <p className="text-muted-foreground text-xs">Série separada: nunca soma com as suas horas. Você vê o % do limite, nunca tokens nem custo.</p>
-            </Caixa>
           </div>
         </div>
       </div>

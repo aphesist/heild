@@ -140,7 +140,7 @@ export function AprovacoesBpoTela({ empresa }: PropsBpo) {
         )}
       </CabecalhoBpo>
 
-      <Regra icone={<ShieldCheckIcon weight="duotone" />}>
+      <Regra icone={<ShieldCheckIcon />}>
         <span className="text-foreground">Nenhum pagamento sai sem uma aprovação humana registrada.</span> Pagar e transferir nunca viram automáticos: o integrante prepara, a equipe confere (quem digitou não confere) e o cliente aprova no app. Vencido sem aprovação só gera alerta.
       </Regra>
 
@@ -420,7 +420,7 @@ function ProximoLote({ e, mostrarEmpresa }: { e: EmpresaVista; mostrarEmpresa: b
         })}
       </ul>
       {noLote.length > 0 && (
-        <div className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+        <div className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm">
           <span className="min-w-0 flex-1 basis-60">
             Lote: {noLote.length} conta{noLote.length > 1 ? 's' : ''} · <span className="tabular-nums">{brl(total)}</span>
             <span className="text-muted-foreground block text-xs">
@@ -653,7 +653,7 @@ function TrilhaLote({ l, e, onFechar }: { l: BpoLote; e: EmpresaVista; onFechar:
   let anterior = '00000000'
   return (
     <Dialog open onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-lg">
+      <DialogContent className="bg-surface rounded-xl border-0 p-5 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-normal">Trilha · {l.titulo}</DialogTitle>
           <DialogDescription>

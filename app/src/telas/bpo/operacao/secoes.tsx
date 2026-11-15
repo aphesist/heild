@@ -87,7 +87,7 @@ export function SecaoPagar({ e, onEscolher }: { e: EmpresaVista; onEscolher: Ir 
           Contas a pagar
         </TituloBloco>
         {e.erp.efetiva === 'credencial_vencida' && (
-          <Regra icone={<WarningIcon weight="duotone" />}>
+          <Regra icone={<WarningIcon />}>
             A credencial do {e.erp.provedor} venceu: a captura parou até o cliente autorizar de novo.{' '}
             <button type="button" className="text-foreground cursor-pointer underline underline-offset-2" onClick={() => onEscolher(e.clienteId, 'carteira')}>
               Pedir nova autorização
@@ -348,7 +348,7 @@ export function SecaoConciliacao({ e }: { e: EmpresaVista }) {
               const vence = b.consentimento_ate ? diasAte(b.consentimento_ate) : null
               return (
                 <li key={b.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                  <BankIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
+                  <BankIcon className="text-muted-foreground size-5 shrink-0" />
                   <span className="min-w-0 flex-1 basis-48">
                     <span className="block truncate">{b.nome}</span>
                     <span className="text-muted-foreground block text-xs">

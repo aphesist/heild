@@ -50,7 +50,7 @@ export function CabecalhoBpo({ titulo, sub, status, integrante = 'i-bpo', childr
     <header className="grid grid-cols-1 gap-x-4 gap-y-3 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_auto_1fr] lg:gap-y-0">
       <h1 className="text-2xl font-light tracking-tight sm:text-3xl lg:col-start-1 lg:row-start-1">{titulo}</h1>
       {bpo && t && (
-        <div className="bg-surface shadow-cartao flex min-h-19 w-full items-center gap-3 rounded-[20px] p-3 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start">
+        <div className="bg-surface shadow-cartao flex min-h-19 w-full items-center gap-3 rounded-cartao p-3 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start">
           <Orb cor={t.cor} corOlhos={t.corOlhos} estado={bpo.estado} tamanho={40} animado modo="wander" cutucavel={false} />
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium">{t.nome}</div>
@@ -97,7 +97,7 @@ export function SeloAudit({ e, compacto, onIr }: { e: EmpresaVista; compacto?: b
 export function DialogoAudit({ e, aberto, onFechar, onIr }: { e: EmpresaVista; aberto: boolean; onFechar: () => void; onIr?: (aba: string) => void }) {
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-md">
+      <DialogContent className="bg-surface rounded-xl border-0 p-5 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg font-normal">
             <CircleIcon weight="fill" className="size-3" style={{ color: corAudit[e.audit.cor] }} /> {e.nome}: {rotuloCor[e.audit.cor]}
@@ -180,8 +180,8 @@ export function BotaoErp({ e, oque, rotulo }: { e: EmpresaVista; oque: string; r
 /** Faixa com a regra que vale em toda a tela (B3, segregação). */
 export function Regra({ icone, children }: { icone?: ReactNode; children: ReactNode }) {
   return (
-    <p className="bg-sunken/60 text-muted-foreground flex items-start gap-2 rounded-[16px] px-4 py-3 text-sm">
-      <span className="text-foreground mt-0.5 shrink-0 [&_svg]:size-5">{icone ?? <InfoIcon weight="duotone" />}</span>
+    <p className="bg-sunken/60 text-muted-foreground flex items-start gap-2 rounded-lg px-4 py-3 text-sm">
+      <span className="text-foreground mt-0.5 shrink-0 [&_svg]:size-5">{icone ?? <InfoIcon />}</span>
       <span>{children}</span>
     </p>
   )
