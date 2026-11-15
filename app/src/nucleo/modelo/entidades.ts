@@ -879,6 +879,49 @@ export interface BpoConfiguracao extends Registro {
   limiar_vermelho: number
   teto_whatsapp: number
 }
+/* ---------- S08b · Documentos que chegam à fila do BPO (10, 3.5: captura e leitura) ---------- */
+
+/** O que o integrante de Contas a Pagar leu do documento (`conta_pagar.ler_documento`, rascunhar). */
+export interface LeituraDocumentoBpo {
+  fornecedor: string
+  documento?: string | null
+  valor: number
+  vencimento: Data
+  codigo_barras?: string | null
+  banco?: string | null
+  categoria: string
+  confianca: 'alta' | 'baixa'
+}
+
+/** Checagem da captura (10, 3.5): duplicidade, fornecedor novo, dados bancários diferentes, valor fora do padrão. */
+export interface ChecagemDocumentoBpo {
+  tipo: 'duplicidade' | 'fornecedor_novo' | 'dados_bancarios' | 'valor_fora_padrao' | 'ok'
+  texto: string
+}
+
+/**
+ * Documento que chegou ao BPO (boleto, nota, comprovante) pelo app, WhatsApp,
+ * e-mail ou DDA: o integrante lê e checa; uma pessoa lança a conta (ou o
+ * integrante, quando a leitura é segura e nada chamou atenção), anexa a um
+ * pedido da fila ou descarta com motivo. Nada se apaga (R7).
+ */
+export interface BpoDocumento extends Registro {
+  cliente_id: Id
+  nome_arquivo: string
+  tipo_documento: 'boleto' | 'nota' | 'comprovante' | 'outro'
+  canal: 'app' | 'whatsapp' | 'email' | 'dda'
+  remetente: string
+  recebido_em: DataHora
+  situacao: 'recebido' | 'lido' | 'lancado' | 'anexado' | 'descartado'
+  leitura?: LeituraDocumentoBpo | null
+  checagens: ChecagemDocumentoBpo[]
+  lido_por?: string | null
+  fila_id?: Id | null
+  conta_id?: Id | null
+  lancado_por?: string | null
+  motivo?: string | null
+}
+
 /* ---------- S07: Financeiro do escritório (tipos em ./financeiro.ts) ---------- */
 
 import type { ContratoHonorarios, ItemContrato, Aditivo, ItemTabelaAvulsos, ServicoAvulso, DespesaAdiantada, LoteFaturamento, Cobranca, Parcela, Recebimento, NotaServicoEscritorio, ContaBancaria, Lancamento, ContaPagarFin, CentroCusto, CategoriaGerencial, RegraCategorizacao, FechamentoFinanceiro, PoliticaFinanceira, CenarioCaixa } from './financeiro'
@@ -966,6 +1009,8 @@ export interface Tabelas {
   fechamento_financeiro: FechamentoFinanceiro
   politica_financeira: PoliticaFinanceira
   cenario_caixa: CenarioCaixa
+  // S08b
+  bpo_documento: BpoDocumento
 }
 
 export type NomeTabela = keyof Tabelas
@@ -1050,6 +1095,8 @@ export const nomesTabelas: NomeTabela[] = [
   'fechamento_financeiro',
   'politica_financeira',
   'cenario_caixa',
+  // S08b · documentos capturados pela fila do BPO
+  'bpo_documento',
 ]
 
 /** Dados de uma linha para criar: o banco preenche id, escritório e datas. */

@@ -14,6 +14,7 @@ import { sementeS02 } from './s02'
 import { sementeS06 } from './s06'
 import { sementeS03 } from './s03'
 import { sementeS08 } from './s08'
+import { sementeS08b } from './s08b'
 import { sementeS07Andrade } from './s07'
 
 export const ID_ANDRADE = 'esc-andrade'
@@ -119,6 +120,7 @@ export function sementeAndrade(): Fotografia {
   sementeS06({ clientes: foto.cliente, tarefas: foto.tarefa, usuarios: foto.usuario }, add, 'andrade') // S06: Timesheet
   sementeS08(foto, add) // S08: o BPO como entidades (empresas, contas, lotes, fila, contratantes)
   sementeS07Andrade(foto, add) // S07: Financeiro do escritório
+  sementeS08b(foto, add) // S08b: documentos chegando, baixas do modo arquivo e itens novos da fila do BPO
   return foto
 }
 
