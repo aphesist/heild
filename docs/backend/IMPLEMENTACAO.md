@@ -798,6 +798,11 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
     - **O roteamento** é o da v2 (`conversa.rotear`, resumo escrito pelo sistema também como nota interna, integrante de destino acordado), com a origem e as perguntas em `conversa.extras.triagem`.
     - **Motor:** os passos ganharam `enfileirar` (pg-boss na mesma transação; some com o savepoint na sombra), para o job atrasado. A mudança só acrescenta.
     - **Fora da v3:** a opção "menu e integrante" da v2 (sugestão por cartão quando o integrante discorda do menu). Com a decisão nova, a triagem pelo integrante não usa menu; se o escritório quiser menu, é o fluxo de chatbot sem IA.
+    - **Resultado real** ([`relatorios/triagem-conversa-2026-11-15-real.md`](relatorios/triagem-conversa-2026-11-15-real.md); 25 conversas × 2):
+      - Sonnet acertou 50/50 e Haiku 49/50, sem erro crítico; nenhuma fala fora do tom ou do escopo nos dois (0 de 78 e 0 de 81).
+      - Perguntas até rotear: média de 0,9 e máximo de 2. Custo por conversa: R$ 0,042 no Sonnet e R$ 0,0026 no Haiku.
+      - O portão do Haiku bloqueou por um caso claro em que ele fez uma pergunta a mais: a conversa fica no Sonnet (`modelos.ts`, `CONVERSA_NO_SONNET`).
+      - A rodada custou R$ 4,89 (≈ US$ 0,91) de US$ 10.
     - **Uma chamada por troca, e não duas.** O plano propõe a conversa na classe `escritor` e a classificação no `operario`. A v3 faz as duas coisas numa chamada só (o contrato devolve a ação, o setor, a confiança e a fala), porque separar dobraria a latência e o custo de cada troca. O modelo da conversa é configurável por contrato, como os outros. O Sonnet e o Haiku foram medidos no gabarito de conversas (resultado abaixo); o escritor da escalada é sempre o Sonnet.
     - A v2 continua carregada (`src/setores/triagem.ts`, mesmo hash publicado) para as execuções em andamento; a operação inicia a v3.
 
