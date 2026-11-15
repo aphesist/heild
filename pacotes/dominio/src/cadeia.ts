@@ -76,3 +76,24 @@ export function verificarCadeia(
 }
 
 export { hexToBytes }
+
+/**
+ * Selo dos lotes do registro de leituras (STACK 8; P6 das Fundações): as leituras não
+ * entram na cadeia do evento (seriam 10 a 20 vezes mais travas), vão em lotes, e cada lote
+ * é selado com o hash do anterior, por escritório.
+ *
+ *   selo(n) = SHA-256( selo(n-1) ‖ "heild-leitura-v1\n" ‖ canônico(leituras do lote n, em ordem) )
+ *   selo(0) = SHA-256( "heild-leitura-v1:" ‖ escritorio_id )
+ */
+export const CAMPOS_LEITURA = ['lido_em', 'ator_tipo', 'ator_id', 'sessao_auth_id', 'ferramenta', 'tabela', 'ids', 'quantidade', 'filtros'] as const
+export type LeituraDoLote = { [K in (typeof CAMPOS_LEITURA)[number]]?: unknown }
+
+export const geneseDasLeituras = (escritorioId: string): Uint8Array => sha256Bytes(`heild-leitura-v1:${escritorioId}`)
+
+export function seloDoLote(anterior: Uint8Array, leituras: LeituraDoLote[]): Uint8Array {
+  const corpo = new TextEncoder().encode(`heild-leitura-v1\n${canonizar(leituras.map((l) => Object.fromEntries(CAMPOS_LEITURA.map((c) => [c, l[c] ?? null]))))}`)
+  const junto = new Uint8Array(anterior.length + corpo.length)
+  junto.set(anterior, 0)
+  junto.set(corpo, anterior.length)
+  return sha256Bytes(junto)
+}

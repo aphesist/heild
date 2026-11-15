@@ -29,6 +29,7 @@ import { colunasDe, prepararLinha } from './colunas.ts'
 import { ErroApi } from './erro.ts'
 import { despacharEventos, enfileirarNaTransacao } from './jobs.ts'
 import { aplicarLinhas } from './linhas.ts'
+import { invalidarEscritorio, TABELAS_DO_PERFIL } from '../auth/cache-perfil.ts'
 import { limparArgumentos, operacoes } from './operacoes.ts'
 
 /**
@@ -72,7 +73,7 @@ export async function executar(sql: Sql, p: Pedido): Promise<Resultado> {
   try {
     if (!p.validarApenas && !p.chave) throw new ErroApi('FALTA_CHAVE_IDEMPOTENCIA', { campo: 'Idempotency-Key' })
     const hashArgumentos = sha256Hex(canonizar({ rotulo: p.rotulo, entrada: p.entradaOriginal }))
-    return await noEscritorio(sql, claims, async (tx) => {
+    const r = await noEscritorio(sql, claims, async (tx): Promise<Resultado> => {
       if (p.chave && !p.validarApenas) {
         const novo = await tx`insert into idempotencia (escritorio_id, chave, ferramenta, hash_argumentos, usuario_id)
           values (${esc}, ${p.chave}, ${p.rotulo}, ${hashArgumentos}, ${p.sessao.claims.sub}) on conflict do nothing returning chave`
@@ -109,6 +110,10 @@ export async function executar(sql: Sql, p: Pedido): Promise<Resultado> {
       if (p.chave) await tx`update idempotencia set status_http = 200, resposta = ${tx.json(corpo as never)} where escritorio_id = ${esc} and chave = ${p.chave}`
       return { status: 200, corpo }
     })
+    // Escrita numa tabela do perfil: o cache desta instância sai já (as outras, pela cauda).
+    const linhas = (r.corpo as { linhas?: Record<string, unknown> } | null)?.linhas
+    if (linhas && Object.keys(linhas).some((t) => TABELAS_DO_PERFIL.has(t))) invalidarEscritorio(esc)
+    return r
   } catch (e) {
     const erro = traduzir(e)
     if (p.validarApenas && erro.status !== 500 && erro.status !== 401) {

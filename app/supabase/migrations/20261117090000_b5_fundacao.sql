@@ -116,7 +116,7 @@ $$;
 -- 3. Registro de leituras -----------------------------------------------------------------
 
 create table public.evento_leitura (
-  escritorio_id text not null,
+  escritorio_id text not null references public.escritorio (id) on delete cascade,
   id bigint generated always as identity,
   lido_em timestamptz not null,
   lote bigint not null,

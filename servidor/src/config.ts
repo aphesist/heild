@@ -32,6 +32,15 @@ export const config = {
   /** Origens aceitas pelo CORS (o Vite do app). */
   origens: (env.HEILD_ORIGENS ?? 'http://localhost:6100,http://127.0.0.1:6100,http://localhost:5173').split(','),
   logs: env.HEILD_LOGS ?? 'info',
+  /** Validade do perfil em cache (ms). 0 desliga (os testes de regra leem o banco a cada pedido). */
+  cachePerfilMs: Number(env.HEILD_CACHE_PERFIL_MS ?? 300_000),
+  /** Intervalo da leitura da cauda de mudanças (SSE e invalidação do cache), em ms (ARQUITETURA 6.3: 250 a 500). */
+  fluxoMs: Number(env.HEILD_FLUXO_MS ?? 400),
+  /** Conexões de SSE abertas ao mesmo tempo por conta (API4). */
+  fluxoPorConta: Number(env.HEILD_FLUXO_POR_CONTA ?? 5),
+  /** Registro de leituras: tamanho máximo do lote e intervalo de gravação (STACK 8: até 500 ou a cada 2 s). */
+  leituraLote: Number(env.HEILD_LEITURA_LOTE ?? 500),
+  leituraMs: Number(env.HEILD_LEITURA_MS ?? 2_000),
   /** Tetos (ms). O pedido HTTP inteiro, cada consulta, a espera por trava e a transação parada. */
   tempoPedidoMs: Number(env.HEILD_TEMPO_PEDIDO_MS ?? 15_000),
   pgTempoConsultaMs: Number(env.HEILD_PG_TEMPO_CONSULTA_MS ?? 5_000),
