@@ -7,3 +7,4 @@
   Nunca adicione linhas `Co-Authored-By` ou `Claude-Session`.
 - Mudança de marca vai no branch `design-system`; do sistema, no `prototipo`; do site, no `site`; do hub, no `main`.
 - Siga o design system (`design-system/README.md` no branch `design-system`): tokens no lugar de valores soltos, `<heild-logo>` no lugar da logo redesenhada, nada inventado.
+- Mudança de plano (decisão do dono, desenho novo) vai para `docs/planos` no `main`, com adendo datado no fim do documento afetado e entrada em `docs/planos/ATUALIZACOES.md`. Documentos de trabalho em outros branches citam o plano e não o substituem.

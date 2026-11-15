@@ -1,0 +1,196 @@
+# Catálogo das APIs do pacote Contábil
+
+**Versão 0.1 · 15/11/2026 · desenho.** Branch `wf-backend-apis`. Todas as APIs externas que o pacote Contábil da Heild usa (BPO e Jurídico fora), com o que a Heild faz com cada uma, quem contrata e paga, preço com fonte e data, limites, credencial, risco, alternativa e o que o wireframe simula hoje. A API da própria plataforma está em [`API_INTERNA.md`](API_INTERNA.md); a ordem de contratação e construção, com custos, em [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md); as decisões, em [`PERGUNTAS.md`](PERGUNTAS.md).
+
+## Resumo em 15 linhas
+
+1. **60 APIs, serviços e caminhos sem API** no Contábil, em 9 grupos: 21 públicos e gratuitos, 10 públicos e pagos, 18 contratuais (credencial do escritório ou do cliente) e 11 sem API (assistido ou agregador).
+2. **O que custa dinheiro de verdade são duas linhas: SERPRO (Integra Contador e Consulta CNPJ) e InfoSimples.** Somam ~90% do custo de API que a plataforma paga. Captura de notas (DF-e, ADN), eSocial, EFD-Reinf, Calculadora RFB e BCB custam zero.
+3. **Preços conferidos na fonte em 15/11/2026.** Correções sobre os planos: WhatsApp de serviço passou a custar R$ 0,035 em 01/10/2026 (com 1.000 grátis por número); InfoSimples começa em R$ 0,22, não R$ 0,20; o SERPRO cobra o mês inteiro pela faixa atingida (não é cascata) e **cobra também as respostas 403**.
+4. **Integra Contador é o coração e não tem substituto:** contrato online com e-CNPJ, chaves em até 10 minutos, ambiente de demonstração. Eventos de atualização (`/Monitorar`) são grátis, 1.000 requisições por dia.
+5. **Captura de notas sem o cliente configurar nada:** ADN (NFS-e) com procuração e e-CNPJ do escritório [a confirmar em PoC], web services de RS e SC para contabilistas, autXML; o A1 do cliente só onde nada disso cobre.
+6. **Limites que mudam o desenho:** DF-e bloqueia o CNPJ por 1 h no erro 656 e aceita 20 consultas/hora por chave ou NSU; eSocial aceita 10 downloads por dia por empregador e **nenhum do dia 1 ao 7**; eventos do Integra, 1.000/dia.
+7. **Ciência é irreversível:** abrir a caixa postal do e-CAC, um DTE estadual ou o DET inicia prazo. Listar sem abrir é a regra; abrir, só com cartão.
+8. **Sem API (assistido na v1):** e-CAC fora do Integra (PER/DCOMP, Regularize), FGTS Digital, DET, ReceitanetBX, transmissão de IRPF. Nenhum robô na primeira versão (decisão P5 do 08).
+9. **Cores contábeis:** Domínio só recebe (API de entrada para parceiro), Alterdata tem ePlugin por token do escritório, Questor tem SYN, Contmatic só arquivo. Preços não públicos.
+10. **WhatsApp e e-mail:** Cloud API da Meta direto (verificação até 14 dias úteis), custo repassado ao escritório; e-mail pelo Gmail e Graph do escritório ou pelo SES em São Paulo (US$ 0,10 por mil).
+11. **Bancos:** OFX e CSV no começo (grátis); Open Finance pela Pluggy (R$ 2.500/mês, até 500 conexões) só na fase 3 e como módulo à parte.
+12. **Base legal:** LexML bloqueia acesso automatizado com verificação antirrobô e o INLABS do DOU estava em manutenção; precisam de contato formal antes de virar dependência.
+13. **Fornecedor de modelos:** Opus 5.5 US$ 4/20, Sonnet 5.5 US$ 2/10, Haiku 5.5 US$ 0,10/0,50 por milhão de tokens; processamento no Brasil [a confirmar]. Os agentes ficam fora deste plano.
+14. **Custo de API pago pela plataforma (provável):** ~R$ 25/mês no piloto (R$ 125 com certidões), ~R$ 3 mil com 10 escritórios, ~R$ 19 mil com 100 e ~R$ 129 mil com 1.000 (R$ 3,00, 1,88 e 1,29 por cliente), abaixo dos R$ 3,62 por cliente que o estudo de precificação usa.
+15. **Para pedir já:** contrato SERPRO (Integra e CNPJ), conta InfoSimples com DPA, verificação Meta Business, parceria Domínio e PoC do ADN com procuração. Detalhe em [`ORDEM_DE_IMPLEMENTACAO.md`](ORDEM_DE_IMPLEMENTACAO.md).
+
+---
+
+## Como ler as tabelas
+
+**Classe**
+
+| Sigla | Quer dizer |
+| --- | --- |
+| **G** | Pública e gratuita |
+| **P** | Pública e paga (a plataforma assina e paga por uso) |
+| **K** | Contratual ou privada, com credencial do escritório ou do cliente (a conta é deles) |
+| **R** | Sem API: assistido (tarefa com passo a passo), agregador, ou robô só depois de parecer e dor medida |
+
+**Quem paga:** Plataforma (entra no preço do módulo até o teto de 130% do uso provável; acima, consumo a custo + 20%, estudo de precificação 3.11) · Escritório (conta dele com o fornecedor, ou repasse) · Cliente (serviço extra no app).
+
+**Fonte e data:** "conferido 15/11" = conferido na página oficial nesta data (cópia das páginas no histórico da pesquisa). "08, 06/11" = valor do subplano 08, pesquisado em 06/11/2026 e não reconferido. "[a confirmar]" = não confirmado em fonte.
+
+**Wireframe:** código do catálogo de APIs simuladas (`MAPA_DE_TELAS.md`, 1.7) e o serviço em `app/src/servicos` que a implementação real precisa respeitar (mesma interface, `Resultado<T>`).
+
+**Telas:** ações do mapa (S02-Axx etc.). Ferramentas internas que usam cada API estão na seção 7 da [`API_INTERNA.md`](API_INTERNA.md).
+
+---
+
+## 1. Governo federal
+
+| API | O que a Heild faz (telas e ações) | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Integra Contador** (SERPRO/RFB): Simples (PGDAS-D, DAS, DEFIS), MEI, DCTFWeb e MIT, Sicalc, caixa postal, SITFIS, PAGTOWEB, parcelamentos, procurações, PNRCONTADOR | Fiscal: caixa postal sem ciência (S03-A01), abrir com cartão (S03-A02), situação fiscal (S03-A03), PGDAS-D (S03-A05 a A07), DAS ao cliente (S03-A08), DCTFWeb (S03-A09), DARF (S03-A10), pagamento de guia (S03-A11), recálculo (S03-A12), parcelamentos (S03-A13). Societário: confirmar procuração (S02-A26). Obrigações: recibos (S02-A45) | P | Plataforma (modelo A: um contrato, termo por escritório [aceitação do SERPRO a confirmar]; modelo B, cada escritório, como reserva) | Por faixa mensal, **o volume do mês inteiro paga o preço da faixa atingida**. Consulta: 1–300 R$ 0,24 · 301–1.000 0,21 · 1.001–3.000 0,18 · 3.001–7.000 0,16 · 7.001–15.000 0,14 · 15.001–23.000 0,11 · 23.001–30.000 0,09 · >30.000 0,06. Emissão: 1–500 0,32 · 501–5.000 0,29 · 5.001–10.000 0,26 · 10.001–15.000 0,22 · 15.001–25.000 0,19 · 25.001–35.000 0,16 · 35.001–50.000 0,12 · >50.000 0,08. Declaração: 1–100 0,40 · 101–500 0,36 · 501–1.000 0,32 · 1.001–3.000 0,28 · 3.001–5.000 0,24 · 5.001–8.000 0,20 · 8.001–10.000 0,16 · >10.000 0,12. Pós-pago, sem adesão. **Respostas 200, 202 e 403 são cobradas**; `/Apoiar` e `/Monitorar` grátis (loja.serpro.gov.br/integracontador e FAQ do API Center, conferido 15/11) | Eventos de atualização: 1.000 requisições/dia por evento, lote de 1.000 contribuintes, resultado guardado 20 min, HTTP 429 ao estourar; procuração vigente em D-1. Token do termo vale até a meia-noite do dia seguinte. Limite geral de requisições [a confirmar] | e-CNPJ do contratante (assina o contrato); termo de autorização XML assinado pelo escritório; **procuração eletrônica (Autorização de Acesso) de cada cliente** | Alto: catálogo trimestral (15/10/2026); 403 cobrado faz consulta sem procuração custar dinheiro; dependência única | Fila guarda o pedido; aviso em 24 h; tarefas de contingência em 72 h (D-assistido no e-CAC); retomada automática | API-06, API-07 · `integraContador` (`situacaoFiscal`, `transmitir`, `emitirGuia`, `caixaPostal`), `sicalc.recalcular`, `cadastros.procuracoes` em `governo.ts`, `s03.ts`, `cadastros.ts` |
+| **e-CAC sem API** (PER/DCOMP, DIRBI, Regularize/PGFN, opção e exclusão do Simples, e-BEF) | Fiscal: tarefa com checklist e link (S03-A04, S03-A15) | R | — | — | Portal com login gov.br ou certificado | Certificado + procuração | Robô no e-CAC para o que o Integra cobre é proibido pelo desenho (08, 8.3) | Já é assistido | API-07 · nenhum serviço (tarefa) |
+| **DCTFWeb e MIT** | Fiscal: conferir e transmitir (S03-A09); Obrigações: recibo (S02-A45) | P (pelo Integra) | Plataforma | Declaração e Consulta do Integra (acima) | Os do Integra | Procuração do cliente | Médio | Assistido no e-CAC | API-06 · `integraContador.transmitir` |
+| **eSocial** (envio de lotes, consulta, download de eventos) | DP: S-2200 (S04-A04), eventos (S04-A08), CAT (S04-A12); Obrigações: recibos | G | — | Gratuito (Manual do Desenvolvedor v1.16, gov.br/esocial, conferido 15/11) | Lote de 50 eventos. **Download e consulta: 10 acessos/dia por empregador, sem paralelismo, vedados do dia 1 ao 7 de cada mês** (MOD v1.16, conferido 15/11) | Envio: qualquer certificado ICP (do escritório como transmissor); download: empregador ou procurador | Médio: XSD novos em 23/11/2026, 14/12/2026 e 18/01/2027 | Fila; envio pelo core do escritório como reserva | API-08 · nenhum serviço ainda (S04 usa simulação local) |
+| **EFD-Reinf** (envio assíncrono, consulta de lote, recibo) | Fiscal: conferir Reinf (S03-A09), trimestre travado (S03-A20); Contábil (trava D-15) | G | — | Gratuito | Só assíncrono desde a v2.7; limites publicados [a confirmar] | e-CNPJ do contribuinte ou procurador | Médio: manual v2.8 | Fila; envio pelo core | API-09 · `reinf` (`fechar`, `consultar`) em `s03.ts` |
+| **Distribuição de DF-e** (NF-e e CT-e: `distNSU`, `consNSU`, `consChNFe`, manifestação) | Notas: captura (S02-A54), saúde no cabeçalho (S02-A55), manifestar (S02-A58), lacuna (S02-A59); captura retroativa de 90 dias ao receber o A1 | G | — | Gratuito | Lotes de 50; só os últimos 90 dias; **erro 656 bloqueia o CNPJ por 1 h** (repetir sem documentos novos ou sem usar o `ultNSU`, ou mais de **20 consultas/hora por chave ou NSU**); consultar antes de 1 h zera a contagem; 60 dias sem consulta interrompem o NSU (NT 2014.002 v1.40, conferido 15/11) | A1 do cliente (CNPJ base) para entradas; e-CNPJ do escritório quando está no autXML | Médio: CNPJ alfanumérico; nunca duas aplicações no mesmo CNPJ (desligar o SIEG) | Cursor não avança; upload de XML e e-mail de XML como complemento | API-10 · nenhum serviço ainda (`telas/painel/notas.tsx` simula) |
+| **NFS-e Nacional: ADN** (distribuição `GET /DFe/{NSU}`, eventos) | Notas: captura de NFS-e (S02-A54); ISS retido para o Fiscal | G | — | Gratuito (Guia das APIs do ADN, gov.br/nfse, conferido 15/11) | Limite de requisições não publicado [a confirmar]; produção restrita para teste | A1 do cliente (mesmo CNPJ raiz) ou **procuração + e-CNPJ do escritório desde 01/11/2026 [a confirmar em PoC]** | Alto: produto novo, completude por capital não testada, queda em jun/2026 | Conector `nfse_municipal` (PDF e XML pelo app); integrador Focus por município | API-11 · `nfse` em `financeiro.ts` (só emissão hoje) |
+| **NFS-e Nacional: Sefin e Emissor Nacional** (emissão por DPS, cancelamento) | Notas: emitir a pedido do cliente (S02-A66); app: emitir NFS-e (S10-A58); Financeiro: honorários (API-21) | G | — (a nota é do cliente ou do escritório) | Gratuito | [a confirmar]; o Simples emite só pelo Emissor Nacional desde 01/11/2026 | e-CNPJ ou A1 do prestador | Alto: leiaute de cancelamento e substituição por município [a confirmar] | Focus NFe (R$ 0,11 a 0,125 por documento) ou Asaas (R$ 0,49) | API-11, API-21 · `nfse.emitir`, `nfse.cancelar` em `financeiro.ts` |
+| **Consulta CNPJ: dados abertos da RFB** (arquivo mensal) | Societário: cadastrar pelo CNPJ (S02-A19), conferir com a Receita (S02-A22); importação inicial | G | — | Gratuito; endereço novo `arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9`, pastas até 2026-10 (conferido 15/11; o endereço antigo dá 404) | Atualização mensal (até ~45 dias de atraso) | Nenhuma | Médio: o endereço já mudou uma vez | SERPRO Consulta CNPJ | API-12 · `cadastros.consultarCnpj` em `cadastros.ts` |
+| **SERPRO Consulta CNPJ** (Básica, QSA, Empresa) e **Consulta CPF** | Societário: CNPJ novo ou alteração recente que o arquivo mensal ainda não tem; QSA para pessoas | P | Plataforma | Por faixa (volume inteiro na faixa atingida). CNPJ 1–999: Básica R$ 0,6591, QSA 0,8683, Empresa 1,1717; 1.000–9.999: 0,5649 / 0,7428 / 1,0148; 10.000–49.999: 0,3557 / 0,5963 / 0,8265; 16 faixas até ≥ 30 mi (0,025 / 0,067 / 0,108). CPF 1–999 R$ 0,6591 (loja.serpro.gov.br/consultacnpj e /consultacpf, conferido 15/11) | Demonstração com CNPJs fictícios; trial do CPF [a confirmar] | Contrato SERPRO (e-CNPJ da plataforma) | Baixo | Dados abertos + BrasilAPI | API-12 · `cadastros.consultarCnpj` |
+| **BrasilAPI** (`/api/cnpj/v1/{cnpj}`) | Reserva da consulta de CNPJ | G | — | Gratuito (projeto comunitário; testado 15/11) | Limite não publicado [a confirmar]; sem SLA | Nenhuma | Médio: comunitário, sem contrato | SERPRO | API-12 |
+| **Simples Nacional e MEI** (PGDAS-D, DAS, DEFIS, PGMEI, CCMEI, DASN-SIMEI) | Fiscal: S03-A05 a A08; app: guia paga (S10-A11) | P (pelo Integra) | Plataforma | Os do Integra | Opção e exclusão seguem por portal (R) | Procuração do cliente | Médio | Assistido no portal do Simples | API-06 · `integraContador` |
+| **Certidões federais** (CND RFB/PGFN, CRF/FGTS, CNDT) | Fiscal: emitir (S03-A14); app: certidões (S10-A60) | R (agregador) | Plataforma; serviço extra do cliente no app | InfoSimples: preço base + adicional (RFB +0,04; PGFN +0,10; Caixa FGTS +0,06; TST CNDT +0,04; conferido 15/11); SITFIS explica a positiva (2 Emissões do Integra) | CAPTCHA nos portais | Nenhuma | Baixo | Pessoa emite no portal (C-captcha com humano, nunca resolvedor automático) | API-13 · `certidoes.emitir` em `governo.ts` |
+| **Calculadora de Tributos RFB** (CBS, IBS, IS, split payment, Simples) | Consultoria: simular a reforma (S03-A49); conferir o nosso cálculo contra o oficial | G | — | **API pública (Swagger) e versão offline 5.0.2 para baixar**, sem preço nem cadastro visível (piloto-cbs.tributos.gov.br, conferido 15/11) | Termos e limites [a confirmar]; muda sem aviso | Nenhuma | Alto: versão e base mudam; gravar `versaoApp` e `versaoDb` | Rodar a offline em contêiner próprio (preferida) | API-15 · `calculadoraReforma.simular` em `s03.ts` |
+| **BCB SGS e PTAX** (Selic, IPCA, IGP-M, câmbio) | Obrigações: multa estimada (S02-A46); Fiscal: recálculo; Financeiro: reajuste | G | — | Gratuito (08, 06/11) | Baixos | Nenhuma | Baixo | Cache das séries; reprocessa no dia seguinte | API-16 · `indices.acumulado` em `cobranca.ts` |
+| **FGTS Digital, DET e Empregador Web** | DP: kit de rescisão (S04-A14), notificação do DET (S04-A18), GFD | R | — | — | Sem API pública; DET "só listar" seria robô com certificado | e-CNPJ + perfil de procurador | Alto (robô) | **Assistido na v1**: analista emite, a plataforma lê o PDF e entrega; perguntar ao MTE sobre API de parceiros | API-17 · nenhum serviço |
+| **ReceitanetBX e PGE** (ECD, ECF, IRPF) | Contábil: transmitir ECD e ECF (S03-A39); Fiscal: IRPF (S03-A19) | R | — | — | Programas desktop da RFB | Certificado | Médio | Assistido; recibo lido do core ou do upload | API-07 · nenhum serviço |
+
+## 2. Estados e municípios
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Web services de NF-e para contabilistas: Sefaz-RS e SEF-SC** | Notas: emitidas **e destinadas** de clientes do RS e de SC sem A1 do cliente (S02-A56) | G | — | Gratuito (08, 06/11) | RS: o cliente autoriza no e-CAC estadual e o contabilista aceita; SC: contabilista vinculado; NFC-e de SC em teste desde 15/04/2026, pode ser encerrado | e-CNPJ do escritório | Médio: a Sefaz-RS barrou alguns A3 | A1 do cliente pela distribuição nacional | API-10 · nenhum serviço |
+| **SAE-NFC-e (Sefaz-SP)** | Notas: NFC-e de varejo em SP | G | — | Gratuito (08, 06/11) | — | e-CNPJ do próprio contribuinte (A1 do cliente) | Médio | Agregador ou PDV | API-10 |
+| **DTE estaduais** (DEC SP, DT-e SIARE MG, DT-e PR, DTEC SC; DTE RS sem agregador) | Fiscal: listar mensagens sem abrir (S03-A01), abrir com cartão (S03-A02); ciência tácita em 10 dias | R (agregador) | Plataforma | Pela InfoSimples, adicional R$ 0 (08, 06/11) | **Se listar der ciência, o conector para**: pergunta aberta à InfoSimples; até a resposta, a primeira semana de cada escritório roda com aprovação do Gestor | **A1 do cliente enviado ao agregador a cada chamada** (termo com "consultas por fornecedor" + DPA) | Alto: certificado de cliente em terceiro (LGPD) | Leitura manual com lembrete diário (D-assistido); RS sempre assistido na v1 | API-14 · `consultasLocais` em `governo.ts` |
+| **NFS-e municipais fora do padrão nacional** | Notas: registrar NFS-e de prefeitura sem ADN (S02-A64) | R | Escritório (integrador, se houver volume) | Na v1, só upload de PDF ou XML (grátis). Integrador Focus NFe: Solo R$ 94,90 (100 docs, R$ 0,11 adicional), Growth R$ 572 (4.000 docs, R$ 0,125 adicional), município novo R$ 199 em até 15 dias (focusnfe.com.br/precos, conferido 15/11) | Lista de municípios fora do ADN mantida pela plataforma (nas 5 UFs, só 2 não estavam ativos em 28/09/2026) | Login ou certificado na prefeitura (integrador) | Médio | Upload pelo app; e-mail de XML | API-11 · nenhum serviço |
+| **Certidões estaduais e municipais** (Sefaz, PGE-SP, capitais) | Fiscal: emitir (S03-A14); app: certidões | R (agregador) | Plataforma; serviço extra do cliente no app | InfoSimples: preço base + R$ 0,04 a 0,08 (08, 06/11) | MG e PGE-SP pedem login ou certificado | Nenhuma na maioria | Baixo | Pessoa emite no portal | API-13 · `certidoes.emitir` |
+| **Sintegra, CCC** | Societário: situação cadastral; Notas: fornecedor irregular | R (agregador) | Plataforma | InfoSimples: R$ 0 a 0,10 adicional (08, 06/11) | CCC: A1 ou login | — | Baixo | Consulta manual | API-14 |
+| **JUCESP e REDESIM** (viabilidade, fichas) | Societário: processo de legalização (S02-A31, S02-A32) | R | Plataforma | InfoSimples: + R$ 0,08 (08, 06/11) | Protocolo + login ou certificado | — | Médio | Assistido com checklist | API-14 · nenhum serviço |
+| **InfoSimples** (o agregador de todas as linhas acima) | Tudo o que é R neste grupo e as certidões federais | P | Plataforma (conta única, pré-paga) | Cascata mensal: **R$ 0,22** (1–500) → 0,18 (501–2.000) → 0,16 (2.001–5.000) → 0,15 (5.001–10.000) → 0,13 (10.001–30.000) → 0,11 (30.001–50.000) → 0,10 (50.001–80.000) → 0,08 (80.001–100.000) → **0,06** (>100.000); adicionais de R$ 0,02 a 0,18 por tipo; franquia mínima R$ 100/mês; crédito de teste R$ 100 por 30 dias; "nada consta" é cobrado (infosimples.com/consultas/precos e `pricing-rules.json` de 12/11/2026, conferido 15/11) | Pré-pago (Pix ou boleto); pós-pago sob consulta | Token da conta; A1 do cliente nas capacidades de DTE | Alto: fornecedor único para DTE; recebe certificado de cliente | Sem DPA assinado, as capacidades que enviam A1 ficam desligadas; certidões caem para o portal | API-13, API-14 · `consultasLocais`, `certidoes` |
+
+## 3. Bancos e pagamentos
+
+No Contábil, banco serve para **conciliação** (extrato do cliente). A cobrança de honorários (Pix, boleto) é do Financeiro do escritório e entra aqui só porque o app do cliente mostra a fatura.
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **OFX, CSV, planilha e PDF de extrato** (leitor próprio) | Contábil: importar extrato (S03-A26), classificar (S03-A24); app: enviar pendência (S10-A10) | G | — | R$ 0 (OFX e CSV no worker TypeScript; PDF escaneado no worker Python) | — | Nenhuma | Baixo | — | API-19 · `leitorExtratos.ler` em `s03.ts` |
+| **Open Finance pela Pluggy** | Contábil: consentimento (S03-A25), transações por cursor diário, "o que foi isto?" | K | Plataforma assina; **cobrado do escritório como módulo à parte** (estudo 3.7) | Dados: **a partir de R$ 2.500/mês com até 500 conexões ativas**; excedente por requisição (preço não publicado); teste de 15 dias em produção; sandbox (pluggy.ai/pricing, conferido 15/11) | Consentimento vence (aviso 30 dias antes) | Consentimento do representante da PJ | Médio: piso alto; consentimento expira | OFX pelo app | API-19 · `openFinance` em `financeiro.ts` |
+| **Belvo** | Alternativa à Pluggy | K | idem | Launch US$ 1.000/mês (página em inglês) ou R$ 1.500/mês (página em português, que diz ser exclusivo de instituições de crédito [condição a confirmar]) (belvo.com, conferido 15/11) | — | idem | Médio | Pluggy | API-19 |
+| **API Pix (padrão BCB) e API de cobrança do banco do escritório** (Inter, Itaú, Bradesco, Santander, BB, Sicoob, Sicredi) | App: ver e pagar fatura (S10-A42, S10-A43), Pix Automático (S10-A44); baixa automática | K | Escritório (convênio dele) | Tarifa do convênio do escritório. Inter: integração da API Pix gratuita, boletos sem tarifa, sandbox; tarifa por Pix recebido pela API [a confirmar] (inter.co, conferido 15/11) | Certificado mTLS por banco (Inter: 1 ano) | Credencial e certificado do banco do escritório, no cofre | Médio: webhooks de Bradesco, Santander e Sicredi [a confirmar] | CNAB de remessa e retorno (qualquer banco) | API-20 · `cobranca`, `pix`, `bancos` em `cobranca.ts` e `financeiro.ts` |
+| **Asaas** | Cobrança para o escritório sem convênio | K | Escritório | Boleto ou Pix recebido R$ 1,59 (R$ 0,79 por 3 meses para novos); NFS-e R$ 0,49 (asaas.com/precos-e-taxas, conferido 15/11) | — | Token do escritório | Baixo | Efí ou banco | API-20 |
+| **Efí** | Idem | K | Escritório | Boleto R$ 3,45; Pix pela API 1,19%; Pix Automático R$ 3,50 (sejaefi.com.br/tarifas, conferido 15/11) | — | Token e certificado | Baixo | Asaas ou banco | API-20 |
+| **CNAB** (remessa e retorno) | Reserva da cobrança | G | Escritório | R$ 0 de API | Sem baixa em tempo real | Nenhuma | Baixo | — | API-20 |
+
+## 4. Comunicação
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **WhatsApp Cloud API (Meta)**, com coexistência pelo Embedded Signup | Fiscal: DAS ao cliente (S03-A08), cobrar guia (S03-A11); Societário: cobrar pendência (S02-A04); Contábil: cobrar faltantes (S03-A23), perguntar ao cliente (S03-A28); DP: variáveis da folha (S04-A05); app: código de login | K | Escritório (número dele; **custo repassado**, estudo 1.1); a plataforma integra como provedora de tecnologia | Por mensagem entregue, em BRL desde 01/10/2026: marketing **R$ 0,3217**; utilidade **R$ 0,035** (também dentro da janela de 24 h); autenticação **R$ 0,035**; serviço **R$ 0,035, com 1.000 grátis por mês por número**; receber é grátis; desconto de 5% a 25% na utilidade acima de 250 mil/mês (developers.facebook.com/docs/whatsapp/pricing e planilha BRL, conferido 15/11) | 250 → 2.000 → 10 mil → 100 mil → ilimitado contatos únicos em 24 h por portfólio; texto livre só na janela de 24 h; fora dela, modelo aprovado. Verificação da empresa: até 14 dias úteis; modelo: até 24 h (conferido 15/11). Conta em BRL obrigatória até 30/06/2027; app precisa abrir a cada 14 dias na coexistência | Conta Meta Business verificada, número por setor, token de sistema no cofre, forma de pagamento no Billing Hub | Alto: política de IA da Meta e inquérito do CADE; mudança de preço já aconteceu em 10/2026 | E-mail e app (push); BSP (360dialog, Gupshup) se a verificação travar | API-03, API-04 · `whatsapp` (`enviar`, `janelaAberta`) em `mensageria.ts` |
+| **E-mail do escritório: Gmail API e Microsoft Graph (e IMAP/SMTP)** | Caixa por setor no CRM; e-mail enviado vira registro (C2-08); anexos para a pasta do cliente (S03 bloco de documentos) | K | Escritório (conta dele) | Sem custo por chamada dentro das cotas (Graph: só `assignSensitivityLabel` é medida; Gmail [a confirmar]) (learn.microsoft.com, conferido 15/11) | Graph: 130 mil requisições a cada 10 s por app; Gmail: cotas por projeto [a confirmar] | OAuth do escritório ou da pessoa | Médio: verificação do app no Google para escopos restritos [prazo a confirmar] | SES para envio; IMAP para leitura | API-05 · `email.enviar` em `mensageria.ts` |
+| **AWS SES (sa-east-1)** | Envio transacional da plataforma: convites, código do app, avisos, régua quando o escritório não liga a própria caixa | P | Plataforma | US$ 0,10 por 1.000 e-mails + US$ 0,12/GB de anexo; disponível em sa-east-1 (aws.amazon.com/ses/pricing, conferido 15/11) | Começa em sandbox; saída por pedido à AWS [prazo a confirmar] | Chave IAM (Secrets Manager) | Baixo | Outro provedor transacional | API-05, API-27 |
+| **Push web (PWA)** | App: avisos agrupados (S10-A64) | G | — | R$ 0 (Web Push com VAPID) | iOS só com o app instalado na tela | Chaves VAPID | Baixo | E-mail e WhatsApp | API-27 |
+| **Transcrição de áudio** | Áudio do WhatsApp e do chat vira texto | P | Plataforma | ≈ R$ 0,015 a 0,02 por minuto (08, 06/11; fornecedor a decidir) | — | Chave do fornecedor | Médio: dado de voz sai para o fornecedor | Pessoa ouve o áudio | API-02 · `transcricao.transcrever` em `conteudo.ts` |
+
+## 5. Assinatura eletrônica
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Ciência simples na plataforma** (`documento.assinar_ciencia`) | App: assinar ciência (S10-A22); termos, balancetes, autorizações | G (próprio) | — | R$ 0 | — | Login do app | Baixo | — | — |
+| **ZapSign** | Societário: contrato (S02-A30); DP: contrato de experiência (S04-A03), termo de ciência (S04-A17); Contábil: fila de assinatura (S03-A36) | K | Escritório | Plano **Equipe** (inclui API): R$ 69,90/mês no mensal com 20 docs; R$ 49,90/mês no anual; R$ 119,90 com 80 docs (zapsign.com.br/precos, conferido 15/11) | Por documento no plano | Token do escritório | Baixo | Outro provedor pela mesma interface | API-22 · `assinatura.enviar` em `documentos.ts` |
+| **Clicksign** | Idem | K | Escritório | Start R$ 69/mês, 20 docs, com API; excedente R$ 2,40 a 3,00 (clicksign.com/planos, conferido 15/11) | — | Token | Baixo | idem | API-22 |
+| **D4Sign** | Idem | K | Escritório | Só o Profissional (R$ 79,90) tem API (d4sign.com.br, conferido 15/11; mensal ou anual e franquia [a confirmar]) | — | Token | Baixo | idem | API-22 |
+| **Validador ICP-Brasil** (conferir assinatura no PDF devolvido) | Contábil e Arquivos: conferir assinatura (S09-A17) | G | — | Biblioteca própria (cadeia ICP pública); validador do ITI como referência [a confirmar uso por API] | — | Nenhuma | Baixo | Conferência manual | API-22 · `conferenciaAssinatura.conferir` em `s03.ts` |
+| **Certificado em nuvem (A3): Bird ID, VIDaaS** | Assinar o que exige A3 com a pessoa autorizando no cartão (decisão do dono: A3 por certificado em nuvem) | K | Escritório ou pessoa | Bird ID: R$ 34,90/mês, R$ 149,90/ano; API para terceiros pelo padrão DOC-ICP-17.01 (birdid.com.br, conferido 15/11). VIDaaS [a confirmar: site não abriu] | Validade do token de sessão [a confirmar] | Conta do titular no PSC | Médio | Assinatura assistida no computador da pessoa | API-29 (parte) |
+
+## 6. Armazenamento
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **AWS S3 (sa-east-1)** com SSE-KMS por escritório | Backend `plataforma` de Arquivos (S09-T01); upload por URL pré-assinada; guarda de XML | P | Plataforma (opcional ao escritório, por GB) | Standard-IA US$ 0,0221/GB-mês; Deep Archive US$ 0,0032 (01, 4.2; HOSPEDAGEM) | — | Papel IAM | Baixo | Réplica e backup | API-24 · `armazenamento` em `documentos.ts` |
+| **AWS KMS** | Cofre de credenciais e chave por escritório | P | Plataforma | US$ 1 por chave por mês (STACK 9; decisão do dono: chave por escritório) | — | Papel IAM só do `cofre` | Baixo | — | API-29 · `cofre` em `conectores.ts` |
+| **Google Drive API** (Shared Drive do escritório) | Arquivos com a nuvem do escritório; Raio-X da pasta antiga (S09-A63) | K | Escritório (a nuvem é dele) | Sem custo no uso padrão; cota em unidades: 1 milhão/min por projeto, 325 mil/min por usuário (listagem = 100 unidades), 1 TB/dia de egress; **cobrança anunciada para quem exceder a cota "ainda em 2026"** (developers.google.com/workspace/drive/api/guides/limits, conferido 15/11) | Escopos `drive` e `drive.metadata.readonly` são restritos: exigem verificação do app e avaliação de segurança [prazo e custo a confirmar] | OAuth do Administrador | Médio: cota por projeto é compartilhada por todos os escritórios | Varredura diária retoma do cursor | API-24 · `armazenamento`, `arvore.ler` |
+| **Microsoft Graph (OneDrive, SharePoint)** | Idem, para escritórios Microsoft | K | Escritório | Sem custo por chamada para arquivos (learn.microsoft.com/graph/metered-api-list, conferido 15/11) | 130 mil requisições/10 s por app; limites do SharePoint [a confirmar] | OAuth (Graph) | Baixo | idem | API-24 |
+| **S3 compatível, WebDAV, SFTP** (NAS e servidor do escritório) | Pasta do core indexada (artefatos do timesheet, guias geradas pelo core) | K | Escritório | R$ 0 de API | Varredura a cada 15 min; sem notificação | `chave_nuvem` (chave SSH preferida) | Médio: a plataforma não entra na rede do escritório | Upload manual | API-24 |
+
+## 7. Cores contábeis
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Domínio / Onvio (Thomson Reuters): API de entrada** | Notas: lote de XML ao core (S02-A62); Contábil: lançamentos (S03-A33); DP: rubricas (S04-A07) | K | Plataforma se cadastra como parceira; o escritório gera **uma chave por empresa** no Onvio Gestão | Sem custo de chave (08, 06/11); condições de parceria [preço não público] | Fila de 60 dias; Agente de Comunicação precisa estar ativo no servidor do escritório | Chave por empresa no cofre | Alto: concorrente controla o acesso; **saída (tarefas, Portal do Cliente) sem API** | Arquivo de troca: TXT de lançamentos, relatório de produtividade em Excel (`core.importar_relatorio`) | API-18 · `coreContabil.enviarLote` em `s03.ts`, `cores` em `timesheet.ts` |
+| **Alterdata ePlugin** | Documentos e certidões do core para a pasta do cliente; empresas; admissão, férias, rescisão, movimentos; recálculo de DAS; tarefas para o timesheet | K | Escritório (pacote **eContador Master**) | [preço não público] (08, 06/11) | Recálculo de DAS: 1 por empresa/dia; demais limites [a negociar] | Token do escritório gerado no eContador | Médio: sem início nem horas por tarefa, sem upload de XML | Pasta e relatório | API-18 · `cores.testarToken`, `cores.lerAgora` |
+| **Questor SYN** | Entrada de lançamentos, entradas, saídas, pagamentos | K | Escritório | [preço não público] | 2 requisições/s; homologação e produção | Credencial do escritório | Médio | Arquivo | API-18 |
+| **Contmatic** (sem API pública) | Pasta "Busca XML" e relatórios do Phoenix | R | Escritório | R$ 0 (arquivo) | Só arquivo | — | Médio | — | API-18 |
+| **SCI, Fortes** | Cadastrar como parceira; arquivo (SPED, TXT) até lá | R | Escritório | [preço não público] | — | — | Médio | Arquivo | API-18 |
+| **Migração das ferramentas antigas** (SIEG `/ContarXmls`, Acessórias, Gestta, Nibo) | Notas: paridade com o SIEG enquanto a migração estiver aberta; histórico como somente leitura | K | Escritório (a conta antiga é dele) | R$ 0 de API | Usadas uma vez | Token ou exportação do escritório | Baixo | Planilha | API-30 · `importacaoFinanceiro` em `cobranca.ts` |
+
+## 8. Base legal
+
+O índice legal (M1) é da frente de IA. Estas são as fontes de onde ele e a vigilância diária do Consultor leem.
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **DOU: INLABS e Base de Dados de Publicações** (in.gov.br) | Consultoria: vigilância diária às 7h (S03-A47), `legislacao.publicar`; base do M1 | G | — | Gratuito [a confirmar: o INLABS estava em "Manutenção Programada" e o in.gov.br não respondeu em 15/11] | [a confirmar] | Cadastro no INLABS [a confirmar] | Alto: fonte única para o diário federal | Leitura do PDF diário; agregador comercial de legislação | API-01 (cascata legal) |
+| **LexML** (Senado) | Normas federais e estaduais com URN estável para citação `[t-…]` | G | — | Gratuito, dados abertos (projeto.lexml.gov.br) | **O endpoint SRU devolveu verificação antirrobô ao acesso automatizado em 15/11** | Nenhuma | Alto para uso automatizado | Dados abertos do Senado em lote; Planalto | — |
+| **Diários estaduais e municipais**, Planalto, CONFAZ, CGSN | Vigilância por UF e município do cliente; convênios ICMS; resoluções do Simples | G | — | Gratuito | Formatos diferentes por diário; sem API na maioria | Nenhuma | Médio | Coleta por arquivo com versão | — |
+| **Domicílio Judicial Eletrônico** (CNJ) | Societário: listar comunicações sem dar ciência (S02-A33) | G | — | Gratuito [a confirmar API para terceiros] | Ciência por leitura | Certificado ou gov.br da empresa | Médio | Lembrete para a pessoa consultar | API-32 (parte) · `cadastros.domicilioJudicial` |
+
+## 9. Fornecedor de modelos de IA
+
+Só como fornecedor: os integrantes (orquestração, prompts, escolha de modelo por papel) são da frente de IA. O backend chama o fornecedor apenas pelo serviço `operarios` (AGENTICO 4.3), com a chave no Secrets Manager.
+
+| API | O que a Heild faz | Classe | Contrata / paga | Preço (fonte, data) | Limites e bloqueios | Credencial | Risco | Se cair | Wireframe |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Anthropic Claude API** | Passos de modelo dos procedimentos (operário, escritor, revisor), Assistente, Consultor (`legal.consultar`), classificação de documento | P | Plataforma; entra nos planos de IA por usuário (estudo 6.8) | Por milhão de tokens: **Opus 5.5** US$ 4 entrada, US$ 0,20 leitura de cache, US$ 20 saída; **Sonnet 5.5** US$ 2, US$ 0,10, US$ 10; **Haiku 5.5** US$ 0,10 e US$ 0,50 de saída até 100 mil tokens de prompt (US$ 0,50/2,50 acima) (tabela da documentação da Anthropic em cache de 03/11/2026; estudo de precificação 3.1). Câmbio do estudo: R$ 7,97 | Limites de taxa por organização; parâmetro de geografia de inferência existe (`inference_geo`), **processamento no Brasil não confirmado [a confirmar]** | Chave de API no Secrets Manager, só no serviço `operarios` | Alto (LGPD): dado de cliente sai do Brasil; política de retenção a contratar | Outra família de modelo pela mesma interface do runner; procedimento cai para cartão "não consegui" | API-01 · `ia` em `ia.ts` |
+| **Leitura de documentos (OCR)** | Guias, extratos em PDF, NFS-e municipal em PDF | G (próprio) ou P | Plataforma | Worker Python com PaddleOCR ou Tesseract: só infraestrutura; serviço gerenciado com processamento no Brasil [a decidir com teste de qualidade] | — | — | Médio | Pessoa digita os campos | API-01 · `ocr.ler` em `conteudo.ts` |
+
+---
+
+## 10. Contagem por classe
+
+| Grupo | G | P | K | R | Total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Governo federal | 9 | 4 | 0 | 4 | 17 |
+| Estados e municípios | 2 | 1 | 0 | 5 | 8 |
+| Bancos e pagamentos | 2 | 0 | 5 | 0 | 7 |
+| Comunicação | 1 | 2 | 2 | 0 | 5 |
+| Assinatura | 2 | 0 | 4 | 0 | 6 |
+| Armazenamento | 0 | 2 | 3 | 0 | 5 |
+| Cores | 0 | 0 | 4 | 2 | 6 |
+| Base legal | 4 | 0 | 0 | 0 | 4 |
+| Modelos e OCR | 1 | 1 | 0 | 0 | 2 |
+| **Total** | **21** | **10** | **18** | **11** | **60** |
+
+Cada linha é um uso, não um fornecedor: o Integra aparece também em DCTFWeb e Simples, e a InfoSimples em certidões, DTE, Sintegra e Juntas.
+
+## 11. O que o wireframe simula e falta simular
+
+| Código | Serviço em `app/src/servicos` | Situação para o Contábil |
+| --- | --- | --- |
+| API-06 | `integraContador`, `sicalc`, `cadastros.procuracoes` | Existe. **Falta** separar `caixaPostal` em listar e abrir (abrir dá ciência) e o estado `403 cobrado` |
+| API-08 | — | **Falta** serviço `esocial` (envio, consulta, download com 10/dia e bloqueio do dia 1 ao 7) |
+| API-09 | `reinf` | Existe |
+| API-10 | — | **Falta** serviço `dfe` (distribuição, manifestação, erro 656 com espera de 1 h) |
+| API-11 | `nfse` | Existe só emissão; **falta** distribuição do ADN |
+| API-12 | `cadastros.consultarCnpj` | Existe |
+| API-13, API-14 | `certidoes`, `consultasLocais` | Existem; **falta** `dte.listar` e `dte.abrir` |
+| API-15, API-16 | `calculadoraReforma`, `indices` | Existem |
+| API-17 | — | Fica sem serviço (assistido) |
+| API-18 | `coreContabil`, `cores` | Existem |
+| API-19 | `leitorExtratos`, `openFinance`, `bancos` | Existem |
+| API-03, API-05 | `whatsapp`, `email` | Existem; **falta** o preço de serviço (R$ 0,035 após 1.000 grátis) no simulador de custo, se houver |
+| API-22 | `assinatura`, `conferenciaAssinatura` | Existem |
+| API-24, API-29 | `armazenamento`, `arvore`, `cofre`, `conectores` | Existem |
+| API-01, API-02 | `ia`, `ocr`, `transcricao` | Existem; `ia` não vira conector (é o runner e o orquestrador) |
+
+Os estados de erro simulados que o mapa pede (conector fora do ar, credencial vencida, limite, CAPTCHA, timeout) passam a ter nome fixo, igual aos códigos de erro da API interna (`INDISPONIVEL`, `CREDENCIAL`, `LIMITE_EXTERNO`, `CAPTCHA`, `DA_CIENCIA`), para a tela tratar o real e o simulado do mesmo jeito.
