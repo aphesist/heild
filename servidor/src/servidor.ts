@@ -10,3 +10,14 @@ app
     app.log.error(e)
     process.exit(1)
   })
+
+// Desliga com calma: para de aceitar, termina o que está em andamento e fecha o pool.
+for (const sinal of ['SIGTERM', 'SIGINT'] as const) {
+  process.once(sinal, () => {
+    app.log.info(`${sinal}: desligando`)
+    app
+      .close()
+      .then(() => import('./banco/pg.ts').then((m) => m.fecharConexoes()))
+      .finally(() => process.exit(0))
+  })
+}

@@ -20,6 +20,7 @@ import { executar, traduzir } from './executor/executor.ts'
 import { ler } from './executor/leitura.ts'
 import { operacoes, tabelasComRepositorio } from './executor/operacoes.ts'
 import { gerarOpenApi, catalogoHash } from './contratos.ts'
+import { consumir, LIMITES } from './limites.ts'
 
 /**
  * A API (AGENTICO 8). Uma porta de escrita só: `POST /v1/ferramentas/{nome}` (ferramentas
@@ -39,7 +40,21 @@ const ChaveIdempotencia = z.string().min(8).max(200).regex(/^[A-Za-z0-9_.:-]+$/)
 
 export function criarApp(opcoes: { sql?: Sql; logs?: boolean } = {}): FastifyInstance {
   const sql = opcoes.sql ?? sqlApi()
-  const app = Fastify({ logger: opcoes.logs === false ? false : { level: config.logs }, bodyLimit: 8 * 1024 * 1024 })
+  const app = Fastify({
+    logger: opcoes.logs === false ? false : { level: config.logs, redact: ['req.headers.authorization', 'req.headers["idempotency-key"]'] },
+    bodyLimit: 2 * 1024 * 1024,
+    requestTimeout: config.tempoPedidoMs,
+    connectionTimeout: config.tempoPedidoMs,
+    keepAliveTimeout: 72_000,
+    genReqId: () => `rq${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+  })
+
+  // Cabeçalhos de segurança e o id do pedido em toda resposta (correlação com o log).
+  app.addHook('onSend', async (req, rep) => {
+    rep.header('X-Content-Type-Options', 'nosniff')
+    rep.header('Cache-Control', 'no-store')
+    rep.header('X-Request-Id', req.id)
+  })
 
   // CORS só para as origens do app local (o navegador fala com a API).
   app.addHook('onRequest', async (req, rep) => {
@@ -63,6 +78,8 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean } = {}): FastifyIns
 
   const sessao = async (req: FastifyRequest): Promise<Sessao> => {
     const claims = await verificarToken(req.headers.authorization)
+    const espera = consumir(`${claims.tipo}:${claims.escritorio_id}:${claims.sub}`, claims.tipo === 'cliente' ? LIMITES.cliente : LIMITES.equipe)
+    if (espera) throw new ErroApi('LIMITE_TAXA', { detalhes: { tentar_de_novo_em: espera } })
     const integrante = typeof req.headers['x-heild-integrante'] === 'string' ? req.headers['x-heild-integrante'] : undefined
     return abrirSessao(sql, claims, integrante)
   }
@@ -159,6 +176,8 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean } = {}): FastifyIns
 
   app.post('/v1/auth/demonstracao', async (req) => {
     if (!config.demonstracao) throw new ErroApi('DEMONSTRACAO_DESLIGADA')
+    const espera = consumir(`login:${req.ip}`, LIMITES.login)
+    if (espera) throw new ErroApi('LIMITE_TAXA', { detalhes: { tentar_de_novo_em: espera } })
     const corpo = z
       .object({
         escritorio_id: z.string().min(1).max(80),
