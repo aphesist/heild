@@ -44,7 +44,7 @@ export const ModoEdicao: StoryObj = {
   ),
 }
 
-/** Grade completa personalizável: clique em "Editar painel" (ou segure um widget). */
+/** Grade completa personalizável: arraste pela alça (ou segure um widget no toque); "Organizar" é o modo por teclado. */
 export const Grade: StoryObj = {
   render: () => (
     <GradeWidgets

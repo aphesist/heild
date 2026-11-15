@@ -84,7 +84,7 @@ function Grade() {
     tamanhos: ['P', 'M', 'G', 'L', 'XL'],
     conteudo: (tam) => (
       <p className="text-muted-foreground text-sm">
-        {tam} · {dimensoes[tam].rotulo}: {dimensoes[tam].colunas} coluna(s) de largura; teto de {dimensoes[tam].linhas} célula(s). A altura é a do conteúdo.
+        {tam === 'P' ? `P · ${dimensoes.P.rotulo}` : `${tam} · ${dimensoes[tam].rotulo}: ${dimensoes[tam].colunas} colunas de largura; teto de ${dimensoes[tam].linhas} célula(s). A altura é a do conteúdo.`}
       </p>
     ),
   }))

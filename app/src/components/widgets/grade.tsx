@@ -249,10 +249,11 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
     antes.current = { salvo, ordem: ordemDe(itens) }
     setAtivo(String(e.active.id))
     // Pegou com o dedo: retorno tátil curto e as alças daquele widget à mostra depois de soltar.
-    if (typeof TouchEvent !== 'undefined' && e.activatorEvent instanceof TouchEvent) {
+    const dedo = (typeof TouchEvent !== 'undefined' && e.activatorEvent instanceof TouchEvent) || (e.activatorEvent instanceof PointerEvent && e.activatorEvent.pointerType === 'touch')
+    if (dedo && !editando) {
       setLevantado(String(e.active.id))
       navigator.vibrate?.(10)
-    } else if (e.activatorEvent instanceof PointerEvent && e.activatorEvent.pointerType === 'touch') setLevantado(String(e.active.id))
+    }
   }
 
   // Troca de lugar ao vivo enquanto arrasta; a grade reflui e o motion anima.
