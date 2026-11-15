@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from './sheet'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
+import { useDesvioCampo } from '@/lib/desvio-campo'
 
 /**
  * Kit de formulário do sistema: a gaveta de cadastro e edição e os campos.
@@ -36,6 +37,7 @@ export function GavetaFormulario({
   secundaria?: ReactNode
   largura?: 'md' | 'lg'
 }) {
+  const refRodape = useDesvioCampo<HTMLElement>()
   return (
     <Sheet open={aberta} onOpenChange={(v) => !v && onFechar()}>
       {/* Abre com o foco na gaveta, não no primeiro campo (senão o valor aparece todo selecionado). */}
@@ -58,7 +60,8 @@ export function GavetaFormulario({
           }}
         >
           <AreaRolagem className="flex flex-1 flex-col gap-5 p-4">{children}</AreaRolagem>
-          <footer className="flex items-center gap-2 border-t p-3">
+          {/* O rodapé empurra os avisos e o botão Chat para cima (--desvio-campo): nada cobre a ação principal. */}
+          <footer ref={refRodape} className="flex items-center gap-2 border-t p-3">
             {secundaria}
             <Button type="button" variant="ghost" className="ml-auto rounded-full" onClick={onFechar}>
               Cancelar
