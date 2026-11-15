@@ -256,7 +256,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
                         <span className="bg-warning h-full" style={{ width: `${p.pct}%` }} />
                       </span>
                       <span className="text-right text-xs tabular-nums">
-                        <span className={cn('font-medium', p.pct > 30 && 'text-warning')}>{p.pct}%</span> <span className="text-muted-foreground">· {fmtHoras(p.manual)}</span>
+                        <span className={cn('font-medium', p.pct > 30 && 'text-warning-text')}>{p.pct}%</span> <span className="text-muted-foreground">· {fmtHoras(p.manual)}</span>
                       </span>
                     </li>
                   ))}

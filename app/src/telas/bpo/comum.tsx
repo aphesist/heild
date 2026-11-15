@@ -136,8 +136,8 @@ export function SeloErp({ e }: { e: EmpresaVista }) {
   const ruim = e.erp.efetiva === 'atrasada' || e.erp.efetiva === 'credencial_vencida' || e.erp.efetiva === 'desconectada'
   const aviso = !ruim && !!e.erp.aviso
   return (
-    <span title={e.erp.aviso} className={cn('bg-sunken inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-xs', ruim ? 'text-destructive' : 'text-muted-foreground')}>
-      {ruim || aviso ? <WarningIcon className={cn('size-3.5 shrink-0', aviso && 'text-warning')} weight="fill" /> : <PlugsConnectedIcon className="size-3.5 shrink-0" />}
+    <span title={e.erp.aviso} className={cn('bg-sunken inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-xs', ruim ? 'text-destructive-text' : 'text-muted-foreground')}>
+      {ruim || aviso ? <WarningIcon className={cn('size-3.5 shrink-0', aviso && 'text-warning-text')} weight="fill" /> : <PlugsConnectedIcon className="size-3.5 shrink-0" />}
       <span className="truncate">
         <span className={ruim ? undefined : 'text-foreground'}>{e.erp.provedor}</span> · {aviso ? `${e.erp.saude?.rotulo.toLowerCase()}` : rotuloSituacaoErp[e.erp.efetiva]}
         {e.erp.modo !== 'E3' && e.erp.ultima_sincronizacao && ` · ${dataHora(e.erp.ultima_sincronizacao)}`}

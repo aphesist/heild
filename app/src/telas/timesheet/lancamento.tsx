@@ -172,7 +172,7 @@ export function LancarTempo({ inicial = {}, editar, onFechar }: { inicial?: Cont
       {!erroTempo && <p className="text-muted-foreground -mt-2 text-xs tabular-nums">{hm(inicioIso)}–{hm(fimIso)} · {fmtH(duracaoMin({ inicio: inicioIso, fim: fimIso }))}</p>}
       <Campo rotulo="Descrição (opcional)">{(id) => <CampoArea id={id} linhas={2} valor={descricao} onMudar={setDescricao} />}</Campo>
       <Interruptor ligado={faturavel} onMudar={setFaturavel} rotulo="Faturável" detalhe="Entra nas horas cobráveis (valor-hora de cobrança e serviço extra). Interno nunca é faturável." />
-      {erroQue && escolha !== '' && <p className="text-destructive text-sm">{erroQue}</p>}
+      {erroQue && escolha !== '' && <p className="text-destructive-text text-sm">{erroQue}</p>}
       {!editar && cruzam.length > 0 && (
         <div className="bg-warning/10 flex flex-col gap-2 rounded-lg px-3 py-2.5 text-sm" data-testid="ts-sobreposicao">
           <span className="flex items-start gap-2">

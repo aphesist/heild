@@ -24,7 +24,7 @@ function Linhas({ n = 3, larguras = ['100%', '92%', '78%'] }: { n?: number; larg
 
 function Tabela({ linhas }: { linhas: [string, string][] }) {
   return (
-    <table className="w-full text-[11px]">
+    <table className="w-full text-xs">
       <tbody>
         {linhas.map(([a, b]) => (
           <tr key={a} className="border-b border-black/10">
@@ -98,9 +98,9 @@ function Conteudo({ d }: { d: Documento }) {
       return (
         <>
           <p className="text-[13px] font-semibold">{d.nome.replace(/\.\w+$/, '')}</p>
-          <p className="text-[11px] text-black/60">Partes: {x.partes ?? cliente?.nome}</p>
+          <p className="text-xs text-black/60">Partes: {x.partes ?? cliente?.nome}</p>
           <Linhas n={9} larguras={['100%', '96%', '99%', '88%', '100%', '72%']} />
-          <span className="mt-6 flex justify-between text-[10px] text-black/50">
+          <span className="mt-6 flex justify-between text-xs text-black/50">
             <span className="w-2/5 border-t border-black/30 pt-1">Contratante</span>
             <span className="w-2/5 border-t border-black/30 pt-1">Contratada</span>
           </span>
@@ -131,8 +131,8 @@ export function PaginaDocumento({ d, className }: { d: Documento; className?: st
     <div className={cn('mx-auto flex aspect-[1/1.414] w-full max-w-[560px] flex-col gap-3 bg-white p-[7%] text-black shadow-[0_1px_2px_rgba(0,0,0,.12),0_12px_32px_-12px_rgba(0,0,0,.35)]', className)}>
       <header className="flex items-center gap-2 border-b border-black/10 pb-2">
         <span className="font-heading text-lg leading-none font-semibold tracking-tighter">{tema.sigla}</span>
-        <span className="text-[11px] text-black/60">{tema.nome_produto}</span>
-        <span className="ml-auto text-right text-[10px] text-black/50">
+        <span className="text-xs text-black/60">{tema.nome_produto}</span>
+        <span className="ml-auto text-right text-xs text-black/50">
           {cliente ? cliente.nome : 'Documento do escritório'}
           {d.competencia && <span className="block">{d.competencia}</span>}
         </span>
@@ -306,7 +306,7 @@ export function VisualizadorDocumento({ d, onFechar, acoes }: { d: Documento; on
                 <section className="flex flex-col gap-2">
                   <h3 className="text-sm font-medium">Assinatura do contador</h3>
                   {d.s09?.assinatura ? (
-                    <p className={d.s09.assinatura.resultado === 'valida' ? 'flex items-start gap-1.5 text-sm' : 'text-destructive flex items-start gap-1.5 text-sm'}>
+                    <p className={d.s09.assinatura.resultado === 'valida' ? 'flex items-start gap-1.5 text-sm' : 'text-destructive-text flex items-start gap-1.5 text-sm'}>
                       {d.s09.assinatura.resultado === 'valida' ? <SealCheckIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" /> : <WarningIcon className="mt-0.5 size-4 shrink-0" />}
                       <span>
                         {d.s09.assinatura.detalhe} <span className="text-muted-foreground text-xs">· conferido {d.s09.assinatura.quando}</span>

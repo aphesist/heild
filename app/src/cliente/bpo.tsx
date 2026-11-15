@@ -194,7 +194,7 @@ function CartaoLoteApp({ l, ctx }: { l: LoteApp; ctx: Ctx }) {
                   vence {quando(i.vencimento)} · {e?.fornecedores.find((f) => f.nome === i.fornecedor)?.risco === 'recorrente' ? 'OK (fornecedor recorrente)' : 'conferido pelo escritório'}
                 </span>
                 {i.alerta && (
-                  <span className="text-warning-foreground flex items-start gap-1 text-xs">
+                  <span className="text-warning-text flex items-start gap-1 text-xs">
                     <WarningIcon className="text-warning mt-0.5 size-3.5 shrink-0" weight="fill" /> {i.alerta}
                   </span>
                 )}
@@ -496,7 +496,7 @@ export function CaixaApp({ ctx }: { ctx: Ctx }) {
       <Bloco titulo="Quanto tem hoje">
         <span className="font-heading text-2xl font-light tabular-nums">{brl(e.caixa)}</span>
         {e.caixa < e.perfil.caixa_minimo && (
-          <span className="text-warning-foreground flex items-center gap-1 text-xs">
+          <span className="text-warning-text flex items-center gap-1 text-xs">
             <WarningIcon className="text-warning size-3.5" weight="fill" /> abaixo do mínimo combinado ({brl(e.perfil.caixa_minimo)})
           </span>
         )}
@@ -530,7 +530,7 @@ export function CaixaApp({ ctx }: { ctx: Ctx }) {
               <button type="button" className="flex cursor-pointer items-center gap-2 text-left" onClick={() => setAberto((x) => (x === d.id ? null : d.id))} aria-expanded={aberto === d.id}>
                 <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{d.nome}</span>
-                {novos.has(d.id) && <span className="bg-warning/20 rounded-full px-2 py-0.5 text-[11px]">novo</span>}
+                {novos.has(d.id) && <span className="bg-warning/20 rounded-full px-2 py-0.5 text-xs">novo</span>}
               </button>
               {aberto === d.id && (
                 <span className="bg-sunken/60 text-muted-foreground flex flex-col gap-1.5 rounded-md px-3 py-2 text-xs">

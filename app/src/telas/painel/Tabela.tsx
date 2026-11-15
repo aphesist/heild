@@ -52,7 +52,7 @@ export function Linha({ inicio, titulo, detalhe, fim, className }: { inicio?: Re
 export function Numero({ valor, legenda, alerta }: { valor: ReactNode; legenda: ReactNode; alerta?: boolean }) {
   return (
     <div className="flex h-full flex-col justify-end">
-      <span className={cn('font-heading text-4xl font-light tabular-nums', alerta && 'text-warning')}>{valor}</span>
+      <span className={cn('font-heading text-4xl font-light tabular-nums', alerta && 'text-warning-text')}>{valor}</span>
       <span className="text-muted-foreground text-xs">{legenda}</span>
     </div>
   )
@@ -61,16 +61,16 @@ export function Numero({ valor, legenda, alerta }: { valor: ReactNode; legenda: 
 /** Ícone de situação (ok, atenção, erro, neutro), igual em todas as abas. */
 export function IconeSituacao({ s, className }: { s: Situacao; className?: string }) {
   const c = cn('size-4 shrink-0', className)
-  if (s === 'ok') return <CheckIcon weight="bold" className={cn(c, 'text-success')} aria-label="ok" />
-  if (s === 'atencao') return <WarningIcon weight="fill" className={cn(c, 'text-warning')} aria-label="atenção" />
-  if (s === 'erro') return <XCircleIcon weight="fill" className={cn(c, 'text-destructive')} aria-label="erro" />
+  if (s === 'ok') return <CheckIcon weight="bold" className={cn(c, 'text-success-text')} aria-label="ok" />
+  if (s === 'atencao') return <WarningIcon weight="fill" className={cn(c, 'text-warning-text')} aria-label="atenção" />
+  if (s === 'erro') return <XCircleIcon weight="fill" className={cn(c, 'text-destructive-text')} aria-label="erro" />
   return <MinusIcon className={cn(c, 'text-muted-foreground')} aria-label="sem prazo" />
 }
 
 /** Dias até vencer: vermelho vencido, âmbar até 30 dias. */
 export function Dias({ dias }: { dias: number }) {
   return (
-    <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-xs whitespace-nowrap tabular-nums', dias < 0 ? 'bg-destructive/12 text-destructive' : dias <= 30 ? 'bg-warning/15' : 'bg-sunken text-muted-foreground')}>
+    <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-xs whitespace-nowrap tabular-nums', dias < 0 ? 'bg-destructive/12 text-foreground' : dias <= 30 ? 'bg-warning/15' : 'bg-sunken text-muted-foreground')}>
       {dias < 0 ? `vencido há ${-dias} ${dias === -1 ? 'dia' : 'dias'}` : `${dias} dias`}
     </span>
   )

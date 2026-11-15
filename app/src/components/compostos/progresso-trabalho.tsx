@@ -48,7 +48,7 @@ export function ProgressoTrabalho({ trabalho: t, compacto, className }: { trabal
         </div>
         <span className="grid shrink-0 justify-items-end text-xs">
           <span className={cn('text-muted-foreground tabular-nums transition-opacity duration-300 [grid-area:1/1]', concluido && 'opacity-0')}>{Math.round(pct * 100)}%</span>
-          <span className={cn('text-success flex items-center gap-1 font-medium transition-[opacity,translate] duration-500 [grid-area:1/1]', concluido ? 'opacity-100' : 'translate-y-1 opacity-0')}>
+          <span className={cn('text-success-text flex items-center gap-1 font-medium transition-[opacity,translate] duration-500 [grid-area:1/1]', concluido ? 'opacity-100' : 'translate-y-1 opacity-0')}>
             <CheckIcon className="size-4" weight="bold" /> Concluído
           </span>
         </span>

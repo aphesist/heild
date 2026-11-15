@@ -431,7 +431,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
               ajuda.map((m, i) => (
                 <div key={i} className={cn('max-w-[88%] rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
                   {m.de === 'ajuda' && (
-                    <span className="text-muted-foreground mb-0.5 flex items-center gap-1 text-[11px]">
+                    <span className="text-muted-foreground mb-0.5 flex items-center gap-1 text-xs">
                       <QuestionIcon className="size-3" /> Ajuda do sistema
                     </span>
                   )}
@@ -503,7 +503,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
                       {m.de === 'equipe' && <Avatar nome="Mariana Suporte" tamanho="sm" />}
                       <div className={cn('rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background' : 'bg-surface shadow-cartao')}>
                         {m.texto}
-                        <span className="mt-0.5 block text-right text-[10px] opacity-60">{m.hora}</span>
+                        <span className="mt-0.5 block text-right text-xs opacity-60">{m.hora}</span>
                       </div>
                     </div>
                   ),
@@ -726,7 +726,7 @@ function BlocoFaq({
             <QuestionIcon /> Perguntar ao assistente: “{busca.slice(0, 40)}”
           </Button>
         )}
-        <p className="text-muted-foreground text-[11px]">Primeiro as perguntas frequentes (não contam no limite), depois o assistente e, se precisar, a equipe.</p>
+        <p className="text-muted-foreground text-xs">Primeiro as perguntas frequentes (não contam no limite), depois o assistente e, se precisar, a equipe.</p>
       </div>
     </details>
   )

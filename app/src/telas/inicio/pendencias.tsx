@@ -59,7 +59,7 @@ export function ListaPendencias({ clienteNome, limite, className, compacta }: { 
         <li key={g.cliente} className="flex flex-col gap-1.5 border-b py-3 last:border-0">
           <div className="flex items-baseline justify-between gap-2">
             <span className="truncate text-sm font-medium">{g.cliente}</span>
-            <span className={cn('shrink-0 text-xs', g.dias >= 5 ? 'text-warning font-medium' : 'text-muted-foreground')}>{g.dias ? `há ${g.dias} ${g.dias === 1 ? 'dia' : 'dias'}` : 'hoje'}</span>
+            <span className={cn('shrink-0 text-xs', g.dias >= 5 ? 'text-warning-text font-medium' : 'text-muted-foreground')}>{g.dias ? `há ${g.dias} ${g.dias === 1 ? 'dia' : 'dias'}` : 'hoje'}</span>
           </div>
           <ul className="flex flex-col gap-1">
             {g.itens.map((t) => {

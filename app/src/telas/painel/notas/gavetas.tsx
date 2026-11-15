@@ -210,7 +210,7 @@ export function GavetaRegistrarNfse({ clienteId, onFechar }: { clienteId: string
               </div>
             ))}
           </dl>
-          {lido.campos.tipo !== 'nfse' && <p className="text-warning text-xs">Isto não parece uma NFS-e ({lido.campos.tipo}). Confira o arquivo antes de registrar.</p>}
+          {lido.campos.tipo !== 'nfse' && <p className="text-warning-text text-xs">Isto não parece uma NFS-e ({lido.campos.tipo}). Confira o arquivo antes de registrar.</p>}
         </div>
       )}
     </GavetaFormulario>
@@ -254,7 +254,7 @@ export function GavetaAbrirZip({ clienteId, onFechar }: { clienteId: string; onF
                 <FileZipIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate">{certo}</span>
-                  {certo !== i && <span className="text-muted-foreground block truncate text-[11px]">no zip: {i}</span>}
+                  {certo !== i && <span className="text-muted-foreground block truncate text-xs">no zip: {i}</span>}
                 </span>
               </label>
             </li>

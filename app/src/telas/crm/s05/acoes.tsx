@@ -340,7 +340,7 @@ export function SimulacaoAtendimento({ aberto, onFechar }: { aberto: boolean; on
         {falas.length === 0 && <li className="text-muted-foreground m-auto text-center text-xs">Escreva como um cliente escreveria. Ex.: "Manda a segunda via do DAS?", "Quanto custa a contabilidade?"</li>}
         {falas.map((f, i) => (
           <li key={i} className={cn('flex max-w-[85%] flex-col gap-1', f.de === 'cliente' ? 'self-start' : 'self-end items-end')}>
-            <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
+            <span className="text-muted-foreground flex items-center gap-1 text-xs">
               {f.de === 'integrante' && (
                 <span className="inline-flex size-4">
                   <Orb cor={t.cor} tamanho={16} extras={false} cutucavel={false} />
@@ -350,7 +350,7 @@ export function SimulacaoAtendimento({ aberto, onFechar }: { aberto: boolean; on
             </span>
             <span className={cn('rounded-[16px] px-3 py-2 text-sm', f.de === 'cliente' ? 'bg-raised shadow-contorno' : 'bg-secondary text-secondary-foreground')}>{f.texto}</span>
             {f.nota && (
-              <Badge variant="outline" className="text-[10px]">
+              <Badge variant="outline" className="text-xs">
                 <ShieldWarningIcon /> {f.nota}
               </Badge>
             )}

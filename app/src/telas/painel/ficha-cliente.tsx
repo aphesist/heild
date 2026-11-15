@@ -183,7 +183,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
                     </Campo>
                   </div>
                   {e.contato && (
-                    <p className="text-warning flex items-center gap-1 text-xs">
+                    <p className="text-warning-text flex items-center gap-1 text-xs">
                       <WarningIcon className="size-3.5" /> {e.contato}
                     </p>
                   )}
@@ -206,7 +206,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
                     </div>
                   )}
                   {editaFicha && (
-                    <Button type="button" size="sm" variant="ghost" className="text-destructive w-fit self-end rounded-full" onClick={() => setContatos((xs) => xs.filter((_, k) => k !== i))}>
+                    <Button type="button" size="sm" variant="ghost" className="text-destructive-text w-fit self-end rounded-full" onClick={() => setContatos((xs) => xs.filter((_, k) => k !== i))}>
                       Tirar contato
                     </Button>
                   )}
@@ -269,7 +269,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
               {catalogoServicos.map((sv) => (
                 <div key={sv.id} className="flex items-center gap-2">
                   <span className="min-w-0 flex-1 text-sm">
-                    {sv.nome} <span className="text-muted-foreground text-[11px]">· fase {sv.fase}</span>
+                    {sv.nome} <span className="text-muted-foreground text-xs">· fase {sv.fase}</span>
                   </span>
                   {gere ? (
                     <div className="w-32 shrink-0">
@@ -461,8 +461,8 @@ function ResumoRelacao({ clienteId, nome, pacotes }: { clienteId: string; nome: 
           { r: 'pacotes', v: pacotes.length },
         ].map((x) => (
           <div key={x.r} className="bg-sunken flex flex-col rounded-[14px] px-3 py-2">
-            <span className={cn('font-heading text-2xl font-light tabular-nums', x.alerta && 'text-destructive')}>{x.v}</span>
-            <span className="text-muted-foreground text-[11px]">{x.r}</span>
+            <span className={cn('font-heading text-2xl font-light tabular-nums', x.alerta && 'text-destructive-text')}>{x.v}</span>
+            <span className="text-muted-foreground text-xs">{x.r}</span>
           </div>
         ))}
       </div>
@@ -481,7 +481,7 @@ function ResumoRelacao({ clienteId, nome, pacotes }: { clienteId: string; nome: 
                   <ArrowSquareOutIcon />
                 </Button>
               ) : (
-                <span className="text-muted-foreground w-9 text-center text-[11px]" title="Setor que você não tem: só a contagem">só nº</span>
+                <span className="text-muted-foreground w-9 text-center text-xs" title="Setor que você não tem: só a contagem">só nº</span>
               )}
             </li>
           ))}
@@ -529,7 +529,7 @@ function ResumoRelacao({ clienteId, nome, pacotes }: { clienteId: string; nome: 
                     <span className="flex-1">
                       {f.competencia} · {brl(f.valor)}
                     </span>
-                    <span className={cn('rounded-full px-2 py-0.5 text-[11px]', f.situacao === 'vencida' ? 'bg-destructive/12 text-destructive' : 'bg-sunken text-muted-foreground')}>
+                    <span className={cn('rounded-full px-2 py-0.5 text-xs', f.situacao === 'vencida' ? 'bg-destructive/12 text-foreground' : 'bg-sunken text-muted-foreground')}>
                       {f.situacao === 'vencida' ? `vencida há ${f.diasAtraso ?? 0} d` : f.situacao === 'em_acordo' ? 'em acordo' : `vence ${f.vencimento}`}
                     </span>
                   </li>

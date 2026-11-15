@@ -237,7 +237,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                           {f.cliente_final} · {f.codigo} · prazo legal {quando(f.prazo_legal ?? f.prazo)}
                         </span>
                         <span className="text-xs">{(f.extras?.resumo as string | undefined) ?? f.detalhe}</span>
-                        {typeof f.extras?.hash === 'string' && <span className="text-muted-foreground text-[11px]">entrega ligada pelo hash {f.extras.hash}</span>}
+                        {typeof f.extras?.hash === 'string' && <span className="text-muted-foreground text-xs">entrega ligada pelo hash {f.extras.hash}</span>}
                         {pendente && rt ? (
                           <div className="flex flex-col gap-2">
                             <CampoTexto aria-label="Comentário da revisão" valor={ajuste[f.id] ?? ''} onMudar={(v) => setAjuste((x) => ({ ...x, [f.id]: v }))} placeholder="Comentário (obrigatório para pedir ajuste)" />

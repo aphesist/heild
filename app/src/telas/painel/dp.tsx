@@ -410,8 +410,8 @@ function Esocial({ id, t }: { id: string; t: TamanhoWidget }) {
       <div className="grid h-full grid-cols-3 items-end gap-2">
         {(['aceito', 'rejeitado', 'pendente'] as const).map((s) => (
           <div key={s} className="flex flex-col">
-            <span className={cn('font-heading text-2xl font-light tabular-nums', s === 'rejeitado' && 'text-destructive')}>{e.esocial.filter((x) => x.situacao === s).length}</span>
-            <span className="text-muted-foreground text-[11px]">{s === 'aceito' ? 'aceitos' : s === 'rejeitado' ? 'rejeitados' : 'pendentes'}</span>
+            <span className={cn('font-heading text-2xl font-light tabular-nums', s === 'rejeitado' && 'text-destructive-text')}>{e.esocial.filter((x) => x.situacao === s).length}</span>
+            <span className="text-muted-foreground text-xs">{s === 'aceito' ? 'aceitos' : s === 'rejeitado' ? 'rejeitados' : 'pendentes'}</span>
           </div>
         ))}
       </div>
@@ -517,7 +517,7 @@ function Guias({ id, t }: { id: string; t: TamanhoWidget }) {
             />
           ))}
         </Lista>
-        <p className="text-muted-foreground text-[11px]">
+        <p className="text-muted-foreground text-xs">
           O DP emite sozinho pelo robô de portal quando o boleto libera <SeloDemonstracao fonte="robô de portal" />
         </p>
       </div>
@@ -576,7 +576,7 @@ function Ferias({ id, t }: { id: string; t: TamanhoWidget }) {
                 <label className="flex items-center gap-1">
                   <input type="checkbox" checked={abono} onChange={(ev) => setAbono(ev.target.checked)} /> abono (1/3)
                 </label>
-                <span className={cn(inicio > '2026-12-28' ? 'text-destructive' : 'text-muted-foreground')}>{inicio > '2026-12-28' ? 'depois do limite: férias em dobro' : 'sem risco de dobra'}</span>
+                <span className={cn(inicio > '2026-12-28' ? 'text-destructive-text' : 'text-muted-foreground')}>{inicio > '2026-12-28' ? 'depois do limite: férias em dobro' : 'sem risco de dobra'}</span>
                 <Button type="submit" size="sm" className="h-7 rounded-full">
                   Programar e avisar o cliente
                 </Button>

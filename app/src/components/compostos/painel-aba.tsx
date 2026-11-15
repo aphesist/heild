@@ -71,7 +71,7 @@ export function CabecalhoAba({
             <dl className="mt-3 flex flex-wrap gap-2">
               {perfil.map((c) => (
                 <div key={c.rotulo} className={cn('bg-surface shadow-contorno rounded-md px-3 py-2', c.alerta && 'ring-warning/50 ring-1')}>
-                  <dt className="text-muted-foreground text-[11px]">{c.rotulo}</dt>
+                  <dt className="text-muted-foreground text-xs">{c.rotulo}</dt>
                   <dd className="flex items-center gap-1 text-sm font-medium">
                     {c.alerta && <WarningIcon weight="fill" className="text-warning size-3.5" aria-label="atenção" />}
                     {c.valor}
@@ -258,7 +258,7 @@ export function AcoesAba({ itens, carteira }: { itens: AcaoCfg[]; carteira?: num
                   {iconeNivel[a.nivel]} {a.rotulo}
                   {carteira ? <span className="text-muted-foreground">· {carteira} clientes</span> : null}
                 </span>
-                <span className="text-muted-foreground text-[11px] font-normal">{a.nivel}</span>
+                <span className="text-muted-foreground text-xs font-normal">{a.nivel}</span>
               </Button>
             ),
           )}
@@ -404,7 +404,7 @@ export function MedidorSublimite({ usado, teto, rotulo, semAviso }: { usado: num
 /** Selo de etapa feita ou não (enviada, lida, paga; dados, documentos, ASO...). */
 export function Selo({ feito, alerta, children }: { feito: boolean; alerta?: boolean; children: ReactNode }) {
   return (
-    <span className={cn('flex w-fit items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] whitespace-nowrap', feito ? 'bg-success/15' : alerta ? 'bg-warning/15 text-foreground' : 'bg-sunken text-muted-foreground')}>
+    <span className={cn('flex w-fit items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs whitespace-nowrap', feito ? 'bg-success/15' : alerta ? 'bg-warning/15 text-foreground' : 'bg-sunken text-muted-foreground')}>
       {feito && <CheckIcon weight="bold" className="text-success size-3" />}
       {!feito && alerta && <WarningIcon weight="fill" className="text-warning size-3" />}
       {children}
@@ -416,7 +416,7 @@ export function Selo({ feito, alerta, children }: { feito: boolean; alerta?: boo
 export function Contagem({ dias, rotulo }: { dias: number; rotulo: string }) {
   const urgente = dias <= 3
   return (
-    <span className={cn('flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums whitespace-nowrap', urgente ? 'bg-destructive/12 text-destructive' : 'bg-sunken')}>
+    <span className={cn('flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums whitespace-nowrap', urgente ? 'bg-destructive/12 text-foreground' : 'bg-sunken')}>
       <ClockCounterClockwiseIcon className="size-3.5 -scale-x-100" />
       {dias === 0 ? 'vence hoje' : `${dias} ${dias === 1 ? 'dia' : 'dias'}`} · {rotulo}
     </span>

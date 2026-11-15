@@ -19,14 +19,14 @@ function StatusEntrega({ entrega }: { entrega?: Entrega }) {
   if (!entrega) return null
   if (entrega === 'falhou')
     return (
-      <span className="text-destructive flex items-center gap-0.5">
+      <span className="text-destructive-text flex items-center gap-0.5">
         <WarningCircleIcon className="size-3.5" /> falhou
       </span>
     )
   const Icone = entrega === 'enviada' ? CheckIcon : ChecksIcon
   return (
     <Tooltip conteudo={entrega}>
-      <Icone className={cn('size-3.5', entrega === 'lida' && 'text-success')} aria-label={entrega} />
+      <Icone className={cn('size-3.5', entrega === 'lida' && 'text-success-text')} aria-label={entrega} />
     </Tooltip>
   )
 }
@@ -42,13 +42,13 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
   if (item.tipo === 'dia')
     return (
       <div className="flex justify-center py-1">
-        <span className="bg-sunken text-muted-foreground rounded-full px-3 py-0.5 text-[11px]">{item.texto}</span>
+        <span className="bg-sunken text-muted-foreground rounded-full px-3 py-0.5 text-xs">{item.texto}</span>
       </div>
     )
 
   if (item.tipo === 'marco')
     return (
-      <div className="text-muted-foreground flex items-center gap-3 text-[11px]">
+      <div className="text-muted-foreground flex items-center gap-3 text-xs">
         <span className="bg-border h-px flex-1" />
         <span className="text-center">
           {item.texto} · {item.hora}
@@ -62,7 +62,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
       <div className="bg-warning/10 mx-auto flex w-full max-w-[90%] gap-2.5 rounded-[14px] px-3 py-2 text-sm">
         <NotePencilIcon weight="duotone" className="text-warning mt-0.5 size-4 shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="text-muted-foreground text-[11px]">
+          <div className="text-muted-foreground text-xs">
             nota interna · {item.autor} · {item.hora} · nunca sai para o cliente
           </div>
           <p>{item.texto}</p>
@@ -104,7 +104,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
   // Mensagem movida para outra conversa (S05-A16): fica o registro, sem o conteúdo repetido.
   if (item.movidaPara)
     return (
-      <div className="text-muted-foreground flex items-center gap-2 self-start text-[11px]">
+      <div className="text-muted-foreground flex items-center gap-2 self-start text-xs">
         <IconeCanal canal={item.canal} /> mensagem de {item.autor ?? 'cliente'} ({item.hora}) movida para {item.movidaPara}
       </div>
     )
@@ -114,7 +114,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
   const t = item.de === 'integrante' && item.setor ? aparencia({ setor: item.setor }) : undefined
   return (
     <div className={cn('flex flex-col gap-1', doCliente ? 'items-start' : 'items-end')}>
-      <div className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
+      <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
         {t && <Orb cor={t.cor} corOlhos={t.corOlhos} tamanho={16} cutucavel={false} extras={false} />}
         {item.de === 'auto' && <GearSixIcon className="size-3.5" />}
         <span>{item.de === 'auto' ? `mensagem automática · modelo ${item.modelo}` : item.de === 'integrante' ? `${t?.nome ?? item.autor} (integrante)` : (item.autor ?? 'cliente')}</span>
@@ -149,14 +149,14 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
           </div>
         )}
         {item.daCaixa && (
-          <div className="text-muted-foreground -mt-1 flex items-center gap-1 text-[11px]">
+          <div className="text-muted-foreground -mt-1 flex items-center gap-1 text-xs">
             <EnvelopeSimpleIcon className="size-3" /> {item.daCaixa === 'enviado' ? 'enviado pela caixa do setor, fora do sistema · registrado pelo integrante' : 'lido da caixa do setor pelo integrante'}
           </div>
         )}
         {item.texto && <p className={cn('whitespace-pre-wrap', item.apagada && 'line-through opacity-60')}>{negritoWhatsApp(item.texto)}</p>}
-        {item.apagada && <p className="text-muted-foreground text-[11px]">apagada pelo cliente no WhatsApp · o texto original fica guardado</p>}
+        {item.apagada && <p className="text-muted-foreground text-xs">apagada pelo cliente no WhatsApp · o texto original fica guardado</p>}
         {item.editadaDe && (
-          <p className="text-muted-foreground border-foreground/10 border-t pt-1.5 text-[11px]">
+          <p className="text-muted-foreground border-foreground/10 border-t pt-1.5 text-xs">
             editada pelo cliente · antes: <span className="line-through">{item.editadaDe}</span>
           </p>
         )}
@@ -178,13 +178,13 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
         ))}
       </div>
       {!doCliente && item.de !== 'auto' && (
-        <div className="text-muted-foreground flex flex-wrap items-center justify-end gap-1 text-[11px]">
+        <div className="text-muted-foreground flex flex-wrap items-center justify-end gap-1 text-xs">
           por {rotuloCanal[item.canal]} <StatusEntrega entrega={item.entrega} />
           {item.anexos?.length ? <Farol item={item} onReenviar={onReenviar} /> : null}
         </div>
       )}
       {item.devolvido && (
-        <div className="text-destructive flex items-center gap-1.5 text-[11px]">
+        <div className="text-destructive-text flex items-center gap-1.5 text-xs">
           <WarningCircleIcon className="size-3.5" /> e-mail voltou: {item.devolvido}
           {onReenviar && (
             <button type="button" className="text-primary cursor-pointer underline-offset-2 hover:underline" onClick={() => onReenviar(item.id)}>

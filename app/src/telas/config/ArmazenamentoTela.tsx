@@ -115,7 +115,7 @@ export function ArmazenamentoTela() {
             <ul className="grid gap-2.5 md:grid-cols-3">
               {semCliente.map((p, i) => (
                 <li key={p.pasta} className="flex min-w-0 flex-col gap-1">
-                  <label htmlFor={`sem-cliente-${i}`} className="text-muted-foreground truncate font-mono text-[11px]">
+                  <label htmlFor={`sem-cliente-${i}`} className="text-muted-foreground truncate font-mono text-xs">
                     {p.pasta}
                   </label>
                   <CampoEscolha id={`sem-cliente-${i}`} valor={p.escolha} onMudar={(v) => setSemCliente((xs) => xs.map((x, k) => (k === i ? { ...x, escolha: v } : x)))} opcoes={opcoesCliente} />
@@ -141,7 +141,7 @@ export function ArmazenamentoTela() {
                       type="button"
                       onClick={() => alternar(i)}
                       aria-pressed={p.visivel}
-                      className={cn('flex shrink-0 cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-[11px]', p.visivel ? 'bg-success/15' : 'bg-sunken text-muted-foreground')}
+                      className={cn('flex shrink-0 cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-xs', p.visivel ? 'bg-success/15' : 'bg-sunken text-muted-foreground')}
                     >
                       {p.visivel ? <EyeIcon className="size-3.5" /> : <EyeSlashIcon className="size-3.5" />}
                       {p.visivel ? (p.herdada ? 'visível (herda)' : 'visível') : 'privada'}
@@ -168,7 +168,7 @@ export function ArmazenamentoTela() {
                     className="hover:bg-sunken/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-col rounded-md px-2 py-2 text-left text-sm"
                   >
                     <span>{d.tipo}</span>
-                    <span className="text-muted-foreground font-mono text-[11px]">
+                    <span className="text-muted-foreground font-mono text-xs">
                       {d.setor} → {d.pasta}
                     </span>
                   </button>
@@ -279,7 +279,7 @@ function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConec
         {passos.map((p, i) => (
           <li key={p} className="flex min-w-0 flex-1 flex-col gap-1">
             <span className={cn('h-1.5 rounded-full', i < passo ? 'bg-success' : i === passo ? 'bg-foreground' : 'bg-sunken')} />
-            <span className={cn('truncate text-[11px]', i === passo ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
+            <span className={cn('truncate text-xs', i === passo ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
           </li>
         ))}
       </ol>

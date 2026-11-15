@@ -232,7 +232,7 @@ export function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: {
             <span className="font-mono">{t.atividade_id}</span> {nomeCurtoAtividade(t.atividade_id)}
           </span>
         </Celula>
-        <Celula coluna={colunasTarefas[3]} className={cn('text-xs tabular-nums', atrasadaE(t) ? 'text-destructive font-medium' : 'text-muted-foreground')}>
+        <Celula coluna={colunasTarefas[3]} className={cn('text-xs tabular-nums', atrasadaE(t) ? 'text-destructive-text font-medium' : 'text-muted-foreground')}>
           {diaMes(t.prazo_interno)}
           {t.prazo_legal && t.prazo_legal !== t.prazo_interno ? ` · ${diaMes(t.prazo_legal)}` : ''}
         </Celula>

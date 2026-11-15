@@ -158,7 +158,7 @@ export function CartoesDaAba({ fin, aba, todas }: { fin: Fin; aba?: string; toda
             cartao={{ tipo: 'aprovacao', id: c.id, resumo: c.resumo_humano, argumentos: (c.extras?.argumentos_tela as { rotulo: string; valor: string }[]) ?? [], expiraEm: c.expira_em ? `expira em ${Math.max(1, Math.round((Date.parse(c.expira_em) - Date.parse('2026-11-18T12:00:00Z')) / 864e5))} dias` : undefined }}
             onDecidir={(d) => efeitos(c.id, d)}
           />
-          <span className="text-muted-foreground px-2 text-[11px]">quem decide: {c.extras?.alcada === 'administrador' ? 'Administrador' : 'Gestor do Financeiro (na alçada) ou Administrador'}</span>
+          <span className="text-muted-foreground px-2 text-xs">quem decide: {c.extras?.alcada === 'administrador' ? 'Administrador' : 'Gestor do Financeiro (na alçada) ou Administrador'}</span>
         </div>
       ))}
     </section>

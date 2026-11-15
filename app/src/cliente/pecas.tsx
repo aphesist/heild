@@ -46,7 +46,7 @@ const pontoDoTom: Record<Tom, string> = { ok: 'bg-success', atencao: 'bg-warning
 /** Rótulo de estado: sempre texto e cor (nunca só cor). */
 export function Selo({ tom = 'neutro', children, className }: { tom?: Tom; children: ReactNode; className?: string }) {
   return (
-    <span className={cn('bg-sunken inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] whitespace-nowrap', className)}>
+    <span className={cn('bg-sunken inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', className)}>
       <span className={cn('size-1.5 rounded-full', pontoDoTom[tom])} aria-hidden />
       {children}
     </span>
@@ -130,7 +130,7 @@ export function Campo({ rotulo, valor, onMudar, tipo = 'text', placeholder, ajud
     <label className="flex flex-col gap-1">
       <span className="text-muted-foreground text-xs">{rotulo}</span>
       <input aria-label={rotulo} type={tipo} value={valor} onChange={(e) => onMudar(e.target.value)} placeholder={placeholder} inputMode={inputMode} autoFocus={autoFocus} className={cn(classeCampo, erro && 'ring-destructive ring-2')} />
-      {erro ? <span className="text-destructive text-xs">{erro}</span> : ajuda ? <span className="text-muted-foreground text-[11px]">{ajuda}</span> : null}
+      {erro ? <span className="text-destructive-text text-xs">{erro}</span> : ajuda ? <span className="text-muted-foreground text-xs">{ajuda}</span> : null}
     </label>
   )
 }
@@ -194,7 +194,7 @@ export function CamposForm({ campos, form }: { campos: CampoForm[]; form: Return
         c.tipo === 'escolha' ? (
           <div key={c.id} className="flex flex-col gap-1">
             <Escolha rotulo={c.rotulo + (c.obrigatorio ? '' : ' (opcional)')} valor={form.valores[c.id] ?? ''} onMudar={(v) => form.definir(c.id, v)} opcoes={c.opcoes ?? []} />
-            {form.erroDe(c) && <span className="text-destructive text-xs">{form.erroDe(c)}</span>}
+            {form.erroDe(c) && <span className="text-destructive-text text-xs">{form.erroDe(c)}</span>}
           </div>
         ) : (
           <Campo
@@ -264,7 +264,7 @@ export function QrFicticio({ codigo, tamanho = 132 }: { codigo: string; tamanho?
 export function Faixa({ tom = 'neutro', icone, children, acao }: { tom?: Tom; icone?: ReactNode; children: ReactNode; acao?: ReactNode }) {
   return (
     <div className={cn('bg-sunken flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm', tom === 'atencao' && 'shadow-contorno')}>
-      {icone && <span className={cn('mt-0.5 shrink-0 [&_svg]:size-4', tom === 'erro' ? 'text-destructive' : tom === 'atencao' ? 'text-warning' : tom === 'ok' ? 'text-success' : 'text-muted-foreground')}>{icone}</span>}
+      {icone && <span className={cn('mt-0.5 shrink-0 [&_svg]:size-4', tom === 'erro' ? 'text-destructive-text' : tom === 'atencao' ? 'text-warning-text' : tom === 'ok' ? 'text-success-text' : 'text-muted-foreground')}>{icone}</span>}
       <span className="min-w-0 flex-1">{children}</span>
       {acao}
     </div>

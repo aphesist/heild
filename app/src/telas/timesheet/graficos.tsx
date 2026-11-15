@@ -97,7 +97,7 @@ export function LinhaDoDia({ linhas, agente, onAbrir, rotulo }: { linhas: LinhaD
           ))}
         </div>
       )}
-      <div className="text-muted-foreground relative h-4 text-[11px] tabular-nums">
+      <div className="text-muted-foreground relative h-4 text-xs tabular-nums">
         {horas.filter((_, i) => i % passo === 0).map((h) => (
           <span key={h} className="absolute -translate-x-1/2" style={{ left: `${((h - ini) / (fim - ini)) * 100}%` }}>
             {String(h).padStart(2, '0')}
@@ -120,7 +120,7 @@ export function ColunasEmpilhadas({ dados, unidade = 'min', altura = 150, onClic
         const tot = d.partes.reduce((s, p) => s + p.v, 0)
         return (
           <button key={d.rotulo} type="button" disabled={!onClicar} onClick={() => onClicar?.(d.rotulo)} className="group flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-1 disabled:cursor-default">
-            <span className="text-muted-foreground text-[11px] tabular-nums">{fmt(tot)}</span>
+            <span className="text-muted-foreground text-xs tabular-nums">{fmt(tot)}</span>
             <Tooltip conteudo={d.partes.filter((p) => p.v).map((p) => `${rotuloConfianca[p.c]} ${fmt(p.v)}`).join(' · ')}>
               <span className="flex w-full max-w-12 flex-col-reverse gap-[2px]" style={{ height: (tot / max) * altura }}>
                 {d.partes.map((p, i) => {
@@ -129,7 +129,7 @@ export function ColunasEmpilhadas({ dados, unidade = 'min', altura = 150, onClic
                 })}
               </span>
             </Tooltip>
-            <span className="text-muted-foreground text-[11px]">{d.rotulo}</span>
+            <span className="text-muted-foreground text-xs">{d.rotulo}</span>
           </button>
         )
       })}
@@ -215,7 +215,7 @@ export function Divergente({ dados, selecionado, onSelecionar }: { dados: { nome
             </span>
             <span className="flex h-4">{d.valor >= 0 && <span className="bg-success/75 h-full rounded-r-xs" style={{ width: `${(d.valor / max) * 100}%` }} />}</span>
             <span className="text-right text-xs tabular-nums">
-              <span className={cn('font-medium', d.valor < 0 && 'text-destructive')}>
+              <span className={cn('font-medium', d.valor < 0 && 'text-destructive-text')}>
                 {brl(d.valor)} ({d.pct > 0 ? '+' : d.pct < 0 ? '−' : ''}
                 {Math.abs(d.pct)}%)
               </span>
@@ -253,7 +253,7 @@ export function Linha12({ valores, rotulos, marcos = [], sufixo = '%' }: { valor
           <rect key={i} x={x(i) - (W - pad * 2) / (valores.length - 1) / 2} y={0} width={(W - pad * 2) / (valores.length - 1)} height={H} fill="transparent" onMouseEnter={() => setHover(i)} />
         ))}
       </svg>
-      <div className="text-muted-foreground flex justify-between px-1 text-[11px]">
+      <div className="text-muted-foreground flex justify-between px-1 text-xs">
         {rotulos.map((r) => (
           <span key={r}>{r}</span>
         ))}
@@ -287,7 +287,7 @@ export function Capacidade({ dados }: { dados: { nome: string; usadas: number; d
               <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(pct, 100)}%`, background: acima ? 'var(--warning)' : 'color-mix(in oklab, var(--foreground) 65%, transparent)' }} />
             </span>
             <span className="text-right text-xs tabular-nums">
-              <span className={cn('font-medium', acima && 'text-warning')}>{pct}%</span>
+              <span className={cn('font-medium', acima && 'text-warning-text')}>{pct}%</span>
               <span className="text-muted-foreground"> · {d.usadas}/{d.disponivel} h</span>
               {d.ausencia > 0 && <span className="text-muted-foreground block">−{d.ausencia} h de ausência</span>}
             </span>

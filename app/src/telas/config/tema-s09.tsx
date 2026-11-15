@@ -49,7 +49,7 @@ export function EstadoComplemento() {
 function Miniatura({ t, modo }: { t: Tema; modo: ModoCor }) {
   return (
     <span style={variaveisCss(t, modo) as CSSProperties} className={cn('from-background to-background-end flex h-14 flex-1 flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b p-1.5', modo === 'escuro' && 'dark')}>
-      <span className="text-foreground text-[10px] font-semibold" style={{ fontFamily: t.tokens.fonte_titulo }}>
+      <span className="text-foreground text-xs font-semibold" style={{ fontFamily: t.tokens.fonte_titulo }}>
         {t.sigla}
       </span>
       <span className="flex gap-1">

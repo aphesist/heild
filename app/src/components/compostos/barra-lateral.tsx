@@ -110,7 +110,7 @@ export function BarraLateral({ itens, ativo, onTrocar, usuario, configuracoes, a
               <div className="text-muted-foreground text-xs">
                 {usuario.papel} · {usuario.setores.join(', ')}
               </div>
-              <div className="text-muted-foreground mt-1 text-[11px]">Papel e setores são editados pelo Administrador.</div>
+              <div className="text-muted-foreground mt-1 text-xs">Papel e setores são editados pelo Administrador.</div>
             </div>
             {alternarModo && (
               <ItemMenu onClick={alternarModo} icone={modo === 'escuro' ? <Sun /> : <Moon />}>

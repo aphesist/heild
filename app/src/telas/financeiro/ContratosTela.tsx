@@ -600,7 +600,7 @@ function EditarContrato({ fin, contrato, clienteId, onFechar }: { fin: Fin; cont
                 Total: <strong className="font-medium tabular-nums">{brl(total)}</strong>/mês
               </span>
             </span>
-            {erros && <p className="text-destructive text-xs">{erros}</p>}
+            {erros && <p className="text-destructive-text text-xs">{erros}</p>}
           </section>
           <div className="grid grid-cols-2 gap-3">
             <Campo rotulo="Vencimento">{(id) => <CampoEscolha id={id} valor={dia} onMudar={setDia} opcoes={[5, 10, 15, 20, 25].map((x) => ({ valor: String(x), rotulo: `dia ${x}` }))} />}</Campo>

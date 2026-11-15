@@ -451,7 +451,7 @@ function ModoLeitura({ ctx, total }: { ctx: Ctx; total: number }) {
           <CheckCircleIcon className="text-success size-4" weight="fill" /> {res.nome}: {res.arquivos} arquivos, {res.formato}. <SeloDemonstracao fonte={res.fonte} />
         </p>
       )}
-      <p className="text-muted-foreground flex items-center gap-1 text-[11px]">
+      <p className="text-muted-foreground flex items-center gap-1 text-xs">
         <WarningIcon className="size-3" /> Você pode pedir a portabilidade ao novo escritório a qualquer momento.
       </p>
     </Bloco>

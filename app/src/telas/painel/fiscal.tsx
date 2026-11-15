@@ -160,9 +160,9 @@ function SimplesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
 function Dado({ rotulo, valor, detalhe }: { rotulo: string; valor: ReactNode; detalhe?: string }) {
   return (
     <div className="bg-raised min-w-0 rounded-[12px] px-3 py-2">
-      <dt className="text-muted-foreground truncate text-[11px]">{rotulo}</dt>
+      <dt className="text-muted-foreground truncate text-xs">{rotulo}</dt>
       <dd className="truncate font-medium tabular-nums">{valor}</dd>
-      {detalhe && <dd className="text-muted-foreground truncate text-[11px]">{detalhe}</dd>}
+      {detalhe && <dd className="text-muted-foreground truncate text-xs">{detalhe}</dd>}
     </div>
   )
 }
@@ -201,14 +201,14 @@ function CaixasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
   if (tamanho === 'P')
     return (
       <div className="flex h-full flex-col justify-end">
-        <span className={cn('font-heading text-4xl font-light tabular-nums', novas.length && 'text-warning')}>{novas.length}</span>
+        <span className={cn('font-heading text-4xl font-light tabular-nums', novas.length && 'text-warning-text')}>{novas.length}</span>
         <span className="text-muted-foreground text-xs">{novas.length === 1 ? 'mensagem não aberta' : 'mensagens não abertas'}</span>
       </div>
     )
   return (
     <div className="flex flex-col gap-2">
       <SaudeConectores ids={['integra_contador', 'dte_estadual']} />
-      <p className="text-muted-foreground text-[11px]">Lidas pelo Fiscal hoje às 06:00 (rotina diária). Listar e resumir nunca dá ciência.</p>
+      <p className="text-muted-foreground text-xs">Lidas pelo Fiscal hoje às 06:00 (rotina diária). Listar e resumir nunca dá ciência.</p>
       {!f.caixas.length && <Vazio>Nenhuma mensagem nova nas caixas postais.</Vazio>}
       <ul className="flex flex-col gap-2">
         {f.caixas.map((m) => {
@@ -337,7 +337,7 @@ function SituacaoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanh
         <BotaoNivel compacto nivel="executar" ferramenta="fiscal.situacao.consultar" setor="fiscal" onClick={gerar}>
           Gerar agora
         </BotaoNivel>
-        <span className="text-muted-foreground text-[11px]">{estado.situacaoEm ? `consultado ${estado.situacaoEm} · comparado com a consulta anterior` : 'última consulta hoje 06:10 (rotina)'}</span>
+        <span className="text-muted-foreground text-xs">{estado.situacaoEm ? `consultado ${estado.situacaoEm} · comparado com a consulta anterior` : 'última consulta hoje 06:10 (rotina)'}</span>
         {fonte && <SeloDemonstracao fonte={fonte} />}
       </div>
     </div>
@@ -402,7 +402,7 @@ function DeclaracoesBloco({ cliente }: { cliente: Cliente }) {
                   </BotaoNivel>
                 )}
               </div>
-              {falha && !recibo && <p className="text-destructive text-xs">Última tentativa falhou: {falha}. Peça de novo.</p>}
+              {falha && !recibo && <p className="text-destructive-text text-xs">Última tentativa falhou: {falha}. Peça de novo.</p>}
               {pend && !recibo && <CartaoPendente id={pend} />}
             </li>
           )
@@ -481,12 +481,12 @@ function ApuracoesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Taman
                 <tr key={x.id} className={cn(Math.abs(dif) > 0.5 && 'bg-warning/5')}>
                   <td className="py-1.5 pr-2">
                     <div>{x.item}</div>
-                    <div className="text-muted-foreground text-[11px]">{x.origem}</div>
+                    <div className="text-muted-foreground text-xs">{x.origem}</div>
                   </td>
                   <td className="py-1.5 pr-2 text-right tabular-nums">{brl(x.apurado)}</td>
                   <td className="py-1.5 pr-2 text-right tabular-nums">
                     {brl(x.declarado)}
-                    {Math.abs(dif) > 0.5 && <div className="text-warning text-[11px]">diferença {brl(dif)}</div>}
+                    {Math.abs(dif) > 0.5 && <div className="text-warning-text text-xs">diferença {brl(dif)}</div>}
                   </td>
                   <td className="py-1.5 text-right whitespace-nowrap">
                     {Math.abs(dif) > 0.5 ? (
@@ -538,7 +538,7 @@ function ConferenciaBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tam
             <li key={x.id} className="flex items-center gap-2 text-sm">
               {Math.abs(dif) > 0.5 ? <WarningIcon weight="fill" className="text-warning size-4 shrink-0" aria-label="diferença" /> : <CheckIcon weight="bold" className="text-success size-4 shrink-0" aria-label="confere" />}
               <span className="min-w-0 flex-1 truncate">{x.rotulo}</span>
-              <span className={cn('text-xs tabular-nums', Math.abs(dif) > 0.5 ? 'text-warning' : 'text-muted-foreground')}>{Math.abs(dif) > 0.5 ? `dif. ${brl(dif)}` : 'confere'}</span>
+              <span className={cn('text-xs tabular-nums', Math.abs(dif) > 0.5 ? 'text-warning-text' : 'text-muted-foreground')}>{Math.abs(dif) > 0.5 ? `dif. ${brl(dif)}` : 'confere'}</span>
             </li>
           )
         })}
@@ -645,7 +645,7 @@ function GuiasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWi
         ].map((x) => (
           <div key={x.r} className="flex flex-col">
             <span className="font-heading text-2xl font-light tabular-nums">{x.v}</span>
-            <span className="text-muted-foreground text-[11px]">{x.r}</span>
+            <span className="text-muted-foreground text-xs">{x.r}</span>
           </div>
         ))}
       </div>
@@ -662,12 +662,12 @@ function GuiasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWi
             <tr key={g.id} className={cn(vencida && 'bg-destructive/5')}>
               <td className="py-1.5 pr-2">
                 {g.tributo} <span className="text-muted-foreground text-xs">{g.competencia}</span>
-                {g.eventual && <div className="text-muted-foreground text-[11px]">eventual: só sai com imposto (D-23)</div>}
-                {g.licenca && <div className="text-muted-foreground text-[11px]">taxa anual de licença (C2-22)</div>}
-                {g.recalculo && <div className="text-[11px]">recalculada: {brl(g.recalculo.total)} até {ddmm(g.recalculo.novoVencimento)} · {g.recalculo.memoria[0]}</div>}
+                {g.eventual && <div className="text-muted-foreground text-xs">eventual: só sai com imposto (D-23)</div>}
+                {g.licenca && <div className="text-muted-foreground text-xs">taxa anual de licença (C2-22)</div>}
+                {g.recalculo && <div className="text-xs">recalculada: {brl(g.recalculo.total)} até {ddmm(g.recalculo.novoVencimento)} · {g.recalculo.memoria[0]}</div>}
               </td>
               <td className="py-1.5 pr-2 text-right tabular-nums">{g.valor > 0 ? brl(g.valor) : 'sem imposto'}</td>
-              <td className={cn('py-1.5 pr-2 tabular-nums', vencida && 'text-destructive')}>{ddmm(g.vencimento)}</td>
+              <td className={cn('py-1.5 pr-2 tabular-nums', vencida && 'text-destructive-text')}>{ddmm(g.vencimento)}</td>
               <td className="py-1.5 pr-2">
                 {g.valor > 0 ? (
                   <span className="flex flex-wrap gap-1">
@@ -715,7 +715,7 @@ function GuiasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWi
           </BotaoNivel>
         )
       )}
-      <p className="text-muted-foreground text-[11px]">Gatilhos: “guia vence sem pagamento” cobra pela régua às 08:00; “pagamento informado” no app baixa a guia sozinho.</p>
+      <p className="text-muted-foreground text-xs">Gatilhos: “guia vence sem pagamento” cobra pela régua às 08:00; “pagamento informado” no app baixa a guia sozinho.</p>
     </div>
   )
 }
@@ -727,7 +727,7 @@ function ParcelamentosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: T
     const atrasadas = f.parcelamentos.reduce((t, x) => t + x.atrasadas, 0)
     return (
       <div className="flex h-full flex-col justify-end">
-        <span className={cn('font-heading text-4xl font-light tabular-nums', atrasadas && 'text-warning')}>{atrasadas}</span>
+        <span className={cn('font-heading text-4xl font-light tabular-nums', atrasadas && 'text-warning-text')}>{atrasadas}</span>
         <span className="text-muted-foreground text-xs">{atrasadas === 1 ? 'parcela atrasada' : 'parcelas atrasadas'}</span>
       </div>
     )
@@ -739,7 +739,7 @@ function ParcelamentosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: T
           <span className="block truncate">{x.modalidade}</span>
           <span className="text-muted-foreground flex flex-wrap gap-x-2 text-xs">
             {x.pagas} de {x.total} pagas · {brl(x.parcela)}/mês ·{' '}
-            <span className={cn(x.atrasadas && 'text-warning font-medium')}>
+            <span className={cn(x.atrasadas && 'text-warning-text font-medium')}>
               {x.atrasadas} atrasada{x.atrasadas === 1 ? '' : 's'} ({x.risco})
             </span>
           </span>
@@ -1143,7 +1143,7 @@ function CarteiraFiscal() {
           <tr key={l.c.id} className="hover:bg-sunken/50 cursor-pointer" onClick={() => fluxos.feito(`Escolha ${l.c.nome} no seletor de cliente para ver a aba Fiscal dele.`)}>
             <td className="py-1.5 pr-2">
               <div>{l.c.nome}</div>
-              <div className="text-muted-foreground text-[11px]">{l.c.regime}</div>
+              <div className="text-muted-foreground text-xs">{l.c.regime}</div>
             </td>
             <td className="py-1.5 pr-2">
               {!l.principal ? (
@@ -1163,11 +1163,11 @@ function CarteiraFiscal() {
             <td className="py-1.5 pr-2 text-center text-xs tabular-nums">
               {l.guias.filter((g) => g.enviada).length}/{l.guias.filter((g) => g.lida).length}/{l.guias.filter((g) => g.paga).length}
             </td>
-            <td className={cn('py-1.5 text-center tabular-nums', l.novas && 'text-warning font-medium')}>{l.novas || '·'}</td>
+            <td className={cn('py-1.5 text-center tabular-nums', l.novas && 'text-warning-text font-medium')}>{l.novas || '·'}</td>
           </tr>
         ))}
       </Tabela>
-      <p className="text-muted-foreground text-[11px]">Cada cliente do lote vira uma linha do cartão: aprovar todos ou tirar um a um.</p>
+      <p className="text-muted-foreground text-xs">Cada cliente do lote vira uma linha do cartão: aprovar todos ou tirar um a um.</p>
     </div>
   )
 }
@@ -1186,14 +1186,14 @@ function GuiasCarteira({ tamanho }: { tamanho: TamanhoWidget }) {
       <div className={cn('grid h-full grid-cols-4 gap-2', tamanho === 'M' ? 'items-end' : 'content-start')}>
         {(['enviadas', 'lidas', 'pagas', 'vencidas'] as const).map((k) => (
           <div key={k} className="flex flex-col">
-            <span className={cn('font-heading text-2xl font-light tabular-nums', k === 'vencidas' && t(k) > 0 && 'text-destructive')}>{t(k)}</span>
-            <span className="text-muted-foreground text-[11px]">{k}</span>
+            <span className={cn('font-heading text-2xl font-light tabular-nums', k === 'vencidas' && t(k) > 0 && 'text-destructive-text')}>{t(k)}</span>
+            <span className="text-muted-foreground text-xs">{k}</span>
           </div>
         ))}
         {tamanho === 'G' && (
           <ul className="col-span-4 mt-2 flex flex-col gap-1 text-xs">
             {linhas.filter((l) => l.vencidas).map((l) => (
-              <li key={l.c.id} className="text-destructive">
+              <li key={l.c.id} className="text-destructive-text">
                 {l.c.nome}: {l.vencidas} vencida(s)
               </li>
             ))}
@@ -1209,7 +1209,7 @@ function GuiasCarteira({ tamanho }: { tamanho: TamanhoWidget }) {
           <td className="py-1.5 pr-2 text-right tabular-nums">{l.enviadas}</td>
           <td className="py-1.5 pr-2 text-right tabular-nums">{l.lidas}</td>
           <td className="py-1.5 pr-2 text-right tabular-nums">{l.pagas}</td>
-          <td className={cn('py-1.5 text-right tabular-nums', l.vencidas && 'text-destructive font-medium')}>{l.vencidas || '·'}</td>
+          <td className={cn('py-1.5 text-right tabular-nums', l.vencidas && 'text-destructive-text font-medium')}>{l.vencidas || '·'}</td>
         </tr>
       ))}
     </Tabela>
@@ -1226,7 +1226,7 @@ function CaixasCarteira({ tamanho }: { tamanho: TamanhoWidget }) {
   if (tamanho === 'P')
     return (
       <div className="flex h-full flex-col justify-end">
-        <span className={cn('font-heading text-4xl font-light tabular-nums', itens.length && 'text-warning')}>{itens.length}</span>
+        <span className={cn('font-heading text-4xl font-light tabular-nums', itens.length && 'text-warning-text')}>{itens.length}</span>
         <span className="text-muted-foreground text-xs">não abertas na carteira</span>
       </div>
     )
@@ -1262,7 +1262,7 @@ function CampanhaCarteira() {
           </li>
         )
       })}
-      <li className="text-muted-foreground text-[11px]">Na temporada (março a maio), a Visão geral mostra a campanha. O envio é sempre de uma pessoa.</li>
+      <li className="text-muted-foreground text-xs">Na temporada (março a maio), a Visão geral mostra a campanha. O envio é sempre de uma pessoa.</li>
     </ul>
   )
 }

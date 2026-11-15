@@ -183,7 +183,7 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
                             ['Honorário', escolhido.honorario != null ? brl(escolhido.honorario) : 'não informado'],
                           ].map(([k, v]) => (
                             <div key={k} className="bg-sunken rounded-md px-3 py-2">
-                              <dt className="text-muted-foreground text-[11px]">{k}</dt>
+                              <dt className="text-muted-foreground text-xs">{k}</dt>
                               <dd className="font-medium tabular-nums">{v}</dd>
                             </div>
                           ))}

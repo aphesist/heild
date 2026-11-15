@@ -130,11 +130,11 @@ export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, de
           </Tooltip>
           <div className="flex min-w-0 items-center gap-1.5">
             {ditado.ouvindo && (
-              <span className="text-destructive flex items-center gap-1.5 text-xs" aria-live="polite">
+              <span className="text-destructive-text flex items-center gap-1.5 text-xs" aria-live="polite">
                 <span className="bg-destructive size-2 animate-pulse rounded-full" /> ouvindo
               </span>
             )}
-            {ditado.erro && !ditado.ouvindo && <span className="text-destructive truncate text-xs">{ditado.erro}</span>}
+            {ditado.erro && !ditado.ouvindo && <span className="text-destructive-text truncate text-xs">{ditado.erro}</span>}
             {acessorio}
             <Tooltip conteudo={dicaMic}>
               <span>

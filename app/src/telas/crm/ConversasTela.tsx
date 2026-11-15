@@ -80,14 +80,14 @@ function Prazo({ c, compacto }: { c: ConversaCrm; compacto?: boolean }) {
     icone = <HourglassIcon className="size-3" />
   } else if (c.prazoMin < 0) {
     texto = compacto ? `−${-c.prazoMin} min` : `estourou há ${-c.prazoMin} min`
-    classe = 'bg-destructive/12 text-destructive'
+    classe = 'bg-destructive/12 text-foreground'
     icone = <WarningIcon weight="fill" className="size-3" />
   } else {
     texto = c.prazoMin < 60 ? `${c.prazoMin} min` : `${Math.floor(c.prazoMin / 60)} h`
     if (c.prazoMin <= 15) classe = 'bg-warning/15 text-foreground'
   }
   return (
-    <span className={cn('inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums whitespace-nowrap', classe)}>
+    <span className={cn('inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums whitespace-nowrap', classe)}>
       {icone}
       {texto}
     </span>
@@ -182,7 +182,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
                   )}
                 >
                   {r}
-                  <span className={cn('tabular-nums', id === 'sem' && porVisao.sem.length ? 'text-destructive' : 'text-muted-foreground')}>{porVisao[id].length}</span>
+                  <span className={cn('tabular-nums', id === 'sem' && porVisao.sem.length ? 'text-destructive-text' : 'text-muted-foreground')}>{porVisao[id].length}</span>
                 </button>
               ))}
             </div>
@@ -226,7 +226,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
                 </Menu>
               )}
             </div>
-            <div className="text-muted-foreground flex items-center justify-between px-1 text-[11px]">
+            <div className="text-muted-foreground flex items-center justify-between px-1 text-xs">
               {clienteId ? (
                 <button
                   type="button"
@@ -269,11 +269,11 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
                     </span>
                     <span className="flex items-center gap-1.5 text-xs">
                       <IconeCanal canal={c.canal} className="text-muted-foreground" />
-                      <span className={cn('min-w-0 flex-1 truncate', c.naoLidas ? 'text-foreground' : 'text-muted-foreground')}>{loja.estado.digitando[c.id] ? <em className="text-success not-italic">digitando…</em> : c.previa}</span>
-                      {c.naoLidas ? <span className="bg-destructive text-background flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold tabular-nums">{c.naoLidas}</span> : null}
+                      <span className={cn('min-w-0 flex-1 truncate', c.naoLidas ? 'text-foreground' : 'text-muted-foreground')}>{loja.estado.digitando[c.id] ? <em className="text-success-text not-italic">digitando…</em> : c.previa}</span>
+                      {c.naoLidas ? <span className="bg-destructive text-background flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums">{c.naoLidas}</span> : null}
                     </span>
-                    <span className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
-                      <span className={cn(!c.responsavel && c.status !== 'resolvida' && 'text-warning font-medium')}>{c.responsavel ?? (c.status === 'resolvida' ? '' : 'sem responsável')}</span>
+                    <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                      <span className={cn(!c.responsavel && c.status !== 'resolvida' && 'text-warning-text font-medium')}>{c.responsavel ?? (c.status === 'resolvida' ? '' : 'sem responsável')}</span>
                       <span className="ml-auto">{rotuloStatus[c.status]}</span>
                     </span>
                   </button>
@@ -751,7 +751,7 @@ function Conversa({
         <div className="mx-auto flex max-w-3xl flex-col gap-3">
           {c.resumo && (
             <div className="bg-sunken/70 rounded-[14px] px-3 py-2 text-sm">
-              <button type="button" onClick={() => setResumoAberto((v) => !v)} className="text-muted-foreground flex w-full cursor-pointer items-center gap-1.5 text-[11px]">
+              <button type="button" onClick={() => setResumoAberto((v) => !v)} className="text-muted-foreground flex w-full cursor-pointer items-center gap-1.5 text-xs">
                 <SparkleIcon className="size-3.5" /> Resumo (gerado) <CaretDownIcon className={cn('ml-auto size-3 transition-transform', !resumoAberto && '-rotate-90')} />
               </button>
               {resumoAberto && <p className="mt-1">{c.resumo}</p>}
@@ -886,7 +886,7 @@ function Conversa({
               )}
 
               {cnpjErrado && (
-                <div role="alert" className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-[14px] px-3 py-2 text-xs">
+                <div role="alert" className="bg-destructive/10 text-foreground flex items-start gap-2 rounded-[14px] px-3 py-2 text-xs">
                   <WarningIcon weight="fill" className="mt-0.5 size-4 shrink-0" />
                   <span>
                     Envio bloqueado: {anexo} é de {lojaConv.clientes.find((k) => k.id === anexoDoc?.clienteId)?.nome} ({lojaConv.clientes.find((k) => k.id === anexoDoc?.clienteId)?.documento}), não de {c.cliente} ({lojaConv.clientes.find((k) => k.id === c.clienteId)?.documento}). Troque o anexo.
@@ -894,7 +894,7 @@ function Conversa({
                 </div>
               )}
               {modo === 'responder' && cfgAtend.assinatura.modo !== 'desligado' && (
-                <span className="text-muted-foreground px-1.5 text-[11px]">sai assinada: {assinar('…', eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura).replace(/\n/g, ' ').replace(/\*/g, '')}</span>
+                <span className="text-muted-foreground px-1.5 text-xs">sai assinada: {assinar('…', eu, rotuloSetor[c.setor] ?? '', cfgAtend.assinatura).replace(/\n/g, ' ').replace(/\*/g, '')}</span>
               )}
               <textarea
                 value={texto}
@@ -1142,7 +1142,7 @@ function Bloco({ titulo, acao, children }: { titulo: string; acao?: ReactNode; c
   return (
     <section className="flex flex-col gap-1.5">
       <header className="flex items-center gap-2">
-        <h3 className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">{titulo}</h3>
+        <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">{titulo}</h3>
         {acao && <span className="ml-auto">{acao}</span>}
       </header>
       {children}

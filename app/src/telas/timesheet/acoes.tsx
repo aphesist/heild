@@ -177,7 +177,7 @@ export function DetalheLinha({ linha, onFechar }: { linha: LinhaDia; onFechar: (
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <Amostra c={c} /> {rotuloConfianca[c]}
         {s && <span className="text-muted-foreground">· origem: {rotuloOrigem(s)}</span>}
-        {s?.fora_da_jornada && <span className="text-warning">· fora da jornada</span>}
+        {s?.fora_da_jornada && <span className="text-warning-text">· fora da jornada</span>}
         {extra && (
           <Badge variant="outline">
             <TagIcon /> serviço extra (C2-25)
@@ -473,7 +473,7 @@ export function ProporReajuste({ r, custoHora, onFechar }: { r: LinhaRent; custo
           ['Variáveis (agentes, serviços)', brl(r.variaveis)],
         ].map(([k, v]) => (
           <div key={k} className="bg-sunken rounded-md px-3 py-2">
-            <dt className="text-muted-foreground text-[11px]">{k}</dt>
+            <dt className="text-muted-foreground text-xs">{k}</dt>
             <dd className="font-medium tabular-nums">{v}</dd>
           </div>
         ))}

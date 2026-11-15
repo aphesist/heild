@@ -36,7 +36,7 @@ export function Mais({ ctx, onSair }: { ctx: Ctx; onSair: () => void }) {
         .map(([id, rotulo, I, , n]) => (
           <button key={id} type="button" onClick={() => ctx.ir(id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
             <I className="size-5" /> <span className="flex-1">{rotulo}</span>
-            {!!n && <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px] tabular-nums">{n}</span>}
+            {!!n && <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-xs tabular-nums">{n}</span>}
           </button>
         ))}
       {ativos.length > 0 && <p className="text-muted-foreground mt-2 px-1 text-xs font-medium">Seus serviços</p>}

@@ -209,7 +209,7 @@ export function TemaTela() {
                         />
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm">{c.rotulo}</span>
-                          <span className="text-muted-foreground block truncate text-[11px]">
+                          <span className="text-muted-foreground block truncate text-xs">
                             {valor} · {c.ajuda}
                           </span>
                         </span>
@@ -219,11 +219,11 @@ export function TemaTela() {
                 })}
               </ul>
               <div className="flex flex-col gap-1 text-xs">
-                <span className={cTexto >= 4.5 ? 'text-muted-foreground' : 'text-destructive'}>
+                <span className={cTexto >= 4.5 ? 'text-muted-foreground' : 'text-destructive-text'}>
                   {cTexto >= 4.5 ? <CheckCircleIcon className="text-success mr-1 inline size-3.5" /> : <WarningIcon className="mr-1 inline size-3.5" />}
                   Texto sobre o fundo: {cTexto.toFixed(1).replace('.', ',')}:1 {cTexto >= 4.5 ? '(legível)' : '(abaixo de 4,5:1: difícil de ler)'}
                 </span>
-                <span className={cPrim >= 4.5 ? 'text-muted-foreground' : 'text-warning'}>
+                <span className={cPrim >= 4.5 ? 'text-muted-foreground' : 'text-warning-text'}>
                   {cPrim >= 4.5 ? <CheckCircleIcon className="text-success mr-1 inline size-3.5" /> : <WarningIcon className="mr-1 inline size-3.5" />}
                   Texto do botão sobre a primária: {cPrim.toFixed(1).replace('.', ',')}:1
                 </span>
@@ -308,7 +308,7 @@ export function TemaTela() {
                         <Orb cor={(modo === 'escuro' && i.avatar.cor_escuro) || i.avatar.cor} corOlhos={i.avatar.cor_olhos} tamanho={26} cutucavel={false} extras={false} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm">{i.nome}</span>
-                          <span className="text-muted-foreground block truncate text-[11px]">{rotuloSetor[s] ?? (s === 'financeiro_escritorio' ? 'Financeiro' : s)}</span>
+                          <span className="text-muted-foreground block truncate text-xs">{rotuloSetor[s] ?? (s === 'financeiro_escritorio' ? 'Financeiro' : s)}</span>
                         </span>
                       </button>
                     </li>
@@ -467,7 +467,7 @@ function Previa({ tema, modo }: { tema: Tema; modo: ModoCor }) {
     <section aria-label="Prévia do tema" style={vars} className={modo === 'escuro' ? 'dark' : undefined}>
       <div className="from-background to-background-end text-foreground overflow-hidden rounded-cartao bg-gradient-to-b p-3 shadow-cartao" style={{ fontFamily: tema.tokens.fonte_texto }}>
         <div className="flex gap-3">
-          <div className="from-sidebar to-sidebar-end hidden w-28 shrink-0 flex-col gap-1 rounded-lg bg-gradient-to-b p-2 text-[11px] sm:flex">
+          <div className="from-sidebar to-sidebar-end hidden w-28 shrink-0 flex-col gap-1 rounded-lg bg-gradient-to-b p-2 text-xs sm:flex">
             <span className="mb-1 px-1.5 text-base font-semibold">{tema.sigla}</span>
             {['Início', 'Painel', 'CRM', 'Timesheet'].map((m, i) => (
               <span key={m} className={i === 1 ? 'bg-raised rounded-sm px-1.5 py-1 font-medium' : 'text-muted-foreground px-1.5 py-1'}>
@@ -476,7 +476,7 @@ function Previa({ tema, modo }: { tema: Tema; modo: ModoCor }) {
             ))}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2.5">
-            <div className="bg-sunken flex w-fit gap-0.5 rounded-full p-0.5 text-[11px]">
+            <div className="bg-sunken flex w-fit gap-0.5 rounded-full p-0.5 text-xs">
               <span className="bg-raised rounded-full px-2.5 py-1 font-medium">Fiscal</span>
               <span className="text-muted-foreground px-2.5 py-1">DP</span>
               <span className="text-muted-foreground px-2.5 py-1">Contábil</span>
@@ -488,10 +488,10 @@ function Previa({ tema, modo }: { tema: Tema; modo: ModoCor }) {
               <span className="text-sm font-medium">Guias de outubro</span>
               <span className="text-muted-foreground text-xs">3 enviadas · 1 vence hoje</span>
               <div className="flex flex-wrap gap-1.5">
-                <span className="bg-success/15 rounded-full px-2 py-0.5 text-[11px]">paga</span>
-                <span className="bg-warning/15 rounded-full px-2 py-0.5 text-[11px]">vence hoje</span>
-                <span className="bg-destructive/15 text-destructive rounded-full px-2 py-0.5 text-[11px]">atrasada</span>
-                <span className="bg-highlight/20 rounded-full px-2 py-0.5 text-[11px]">destaque</span>
+                <span className="bg-success/15 rounded-full px-2 py-0.5 text-xs">paga</span>
+                <span className="bg-warning/15 rounded-full px-2 py-0.5 text-xs">vence hoje</span>
+                <span className="bg-destructive/15 text-foreground rounded-full px-2 py-0.5 text-xs">atrasada</span>
+                <span className="bg-highlight/20 rounded-full px-2 py-0.5 text-xs">destaque</span>
               </div>
               <div className="flex gap-2">
                 <span className="bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium" style={{ borderRadius: tema.tokens.raio_borda }}>
@@ -555,11 +555,11 @@ function Dominios({ inicial, onFechar, onSalvar }: { inicial: Dom; onFechar: () 
               />
             )}
           </Campo>
-          <div className="bg-sunken/60 rounded-md px-3 py-2 font-mono text-[11px]">
+          <div className="bg-sunken/60 rounded-md px-3 py-2 font-mono text-xs">
             {d[k].host.split('.')[0]} CNAME {k}.plataforma-contabil.com.br
           </div>
           {d[k].ok ? (
-            <span className="text-success flex items-center gap-1.5 text-sm">
+            <span className="text-success-text flex items-center gap-1.5 text-sm">
               <CheckCircleIcon weight="fill" className="size-4" /> Verificado · certificado HTTPS emitido
             </span>
           ) : (
@@ -622,12 +622,12 @@ function Remetente({ inicial, onFechar, onSalvar }: { inicial: Rem; onFechar: ()
       <div className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium">Registros para {dominio || 'o domínio'}</span>
         {['SPF  TXT  v=spf1 include:mail.plataforma-contabil.com.br ~all', 'DKIM CNAME pc._domainkey → dkim.plataforma-contabil.com.br'].map((x) => (
-          <code key={x} className="bg-sunken/60 rounded-md px-3 py-1.5 text-[11px]">
+          <code key={x} className="bg-sunken/60 rounded-md px-3 py-1.5 text-xs">
             {x}
           </code>
         ))}
         {r.ok ? (
-          <span className="text-success flex items-center gap-1.5">
+          <span className="text-success-text flex items-center gap-1.5">
             <CheckCircleIcon weight="fill" className="size-4" /> Domínio verificado
           </span>
         ) : (

@@ -174,7 +174,7 @@ export function IntegrantesTela() {
                     {m.setor} · {m.escrita} · origem: {m.origem}
                   </span>
                   {m.alerta && (
-                    <span className="text-warning flex items-center gap-1 text-xs">
+                    <span className="text-warning-text flex items-center gap-1 text-xs">
                       <WarningIcon className="size-3.5" /> {m.alerta}
                     </span>
                   )}

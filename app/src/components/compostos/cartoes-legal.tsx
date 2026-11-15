@@ -70,7 +70,7 @@ export function CartaoRespostaLegal({ resposta: r, className }: { resposta: Resp
                 </div>
               ))}
             </dl>
-            <p className="text-muted-foreground border-t pt-1.5 text-[11px]">Origem dos números: {r.calculo.origem}</p>
+            <p className="text-muted-foreground border-t pt-1.5 text-xs">Origem dos números: {r.calculo.origem}</p>
           </div>
         </Secao>
       )}

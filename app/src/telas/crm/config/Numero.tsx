@@ -59,7 +59,7 @@ export function ConectarNumero({ setorInicial, setoresLivres, onFechar, onConect
         {passos.map((p, i) => (
           <li key={p} className="flex min-w-0 flex-1 flex-col gap-1">
             <span className={cn('h-1.5 rounded-full', i < passo ? 'bg-success' : i === passo ? 'bg-foreground' : 'bg-sunken')} />
-            <span className={cn('truncate text-[11px]', i === passo ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
+            <span className={cn('truncate text-xs', i === passo ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
           </li>
         ))}
       </ol>

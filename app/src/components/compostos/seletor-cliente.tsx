@@ -109,7 +109,7 @@ export function SeletorCliente({ clientes: doModulo, selecionado, onSelecionar, 
               e.stopPropagation()
               alternar(c.id)
             }}
-            className={cn('hover:bg-sunken flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full', favoritos.includes(c.id) ? 'text-warning' : 'text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-60')}
+            className={cn('hover:bg-sunken flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full', favoritos.includes(c.id) ? 'text-warning-text' : 'text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-60')}
           >
             <StarIcon className="size-4" weight={favoritos.includes(c.id) ? 'fill' : 'regular'} />
           </button>
@@ -160,7 +160,7 @@ export function SeletorCliente({ clientes: doModulo, selecionado, onSelecionar, 
             aria-label="Buscar cliente"
             className="placeholder:text-muted-foreground h-10 w-full bg-transparent text-sm outline-none"
           />
-          <kbd className="text-muted-foreground shrink-0 font-sans text-[11px] max-sm:hidden">Ctrl+J</kbd>
+          <kbd className="text-muted-foreground shrink-0 font-sans text-xs max-sm:hidden">Ctrl+J</kbd>
         </div>
         <AreaRolagem as="ul" role="listbox" aria-label="Clientes" className="max-h-[min(26rem,60vh)] p-1">
           {!busca && (
@@ -194,7 +194,7 @@ export function SeletorCliente({ clientes: doModulo, selecionado, onSelecionar, 
 
 function Secao({ icone, children }: { icone: ReactNode; children: ReactNode }) {
   return (
-    <li role="presentation" className="text-muted-foreground flex items-center gap-1.5 px-2 pt-3 pb-1 text-[11px] font-medium [&_svg]:size-3.5">
+    <li role="presentation" className="text-muted-foreground flex items-center gap-1.5 px-2 pt-3 pb-1 text-xs font-medium [&_svg]:size-3.5">
       {icone}
       {children}
     </li>

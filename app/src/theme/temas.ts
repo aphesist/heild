@@ -96,6 +96,11 @@ export const temaFabrica: Tema = {
     fundo_fim: areia[300],
     lateral: areia[150],
     lateral_fim: areia[400],
+    // Texto de estado do design system (tokens.json: erro-texto, sucesso-texto, atencao-texto, destaque-texto).
+    erro_texto: '#ba3c2c',
+    sucesso_texto: '#237554',
+    atencao_texto: '#8f5e18',
+    destaque_texto: '#4a56e6',
   },
   modo_escuro: {
     primaria: areia[100],
@@ -110,6 +115,10 @@ export const temaFabrica: Tema = {
     fundo_fim: areia[950],
     lateral: areia[850],
     lateral_fim: areia[925],
+    erro_texto: '#dd8a80',
+    sucesso_texto: '#59b18e',
+    atencao_texto: '#e2a845',
+    destaque_texto: '#9098f9',
   },
   integrantes_padrao: {
     ...integrantesBase,

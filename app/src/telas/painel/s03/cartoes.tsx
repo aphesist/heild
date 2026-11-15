@@ -117,13 +117,13 @@ export function Aprendizado({ acao }: { acao: AcaoS03 }) {
   const total = a ? a.aprovados + a.editados + a.recusados : 0
   if (naoPromoviveis.includes(acao))
     return (
-      <p className="text-muted-foreground flex items-center gap-1 text-[11px]">
+      <p className="text-muted-foreground flex items-center gap-1 text-xs">
         <GraduationCapIcon className="size-3.5" /> Sempre com aprovação de uma pessoa (nunca promovível).
       </p>
     )
   const semEdicao = total ? Math.round((a!.aprovados / total) * 100) : 0
   return (
-    <p className="text-muted-foreground flex items-center gap-1 text-[11px]">
+    <p className="text-muted-foreground flex items-center gap-1 text-xs">
       <GraduationCapIcon className="size-3.5" />
       {total < 30 ? `${total} de 30 decisões para o integrante poder pedir para fazer sozinho` : semEdicao >= 95 ? `${total} decisões, ${semEdicao}% sem edição: o integrante vai perguntar ao Administrador se pode fazer sozinho` : `${total} decisões, ${semEdicao}% sem edição (precisa de 95%)`}
     </p>

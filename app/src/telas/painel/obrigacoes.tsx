@@ -430,14 +430,14 @@ function Faixas({ clienteId, tamanho }: { clienteId?: string; tamanho: TamanhoWi
       <div className="flex gap-2">
         {(
           [
-            ['vencido', 'vencidas', 'text-destructive'],
-            ['7', 'em 7 dias', 'text-warning'],
+            ['vencido', 'vencidas', 'text-destructive-text'],
+            ['7', 'em 7 dias', 'text-warning-text'],
             ['30', 'em 30 dias', ''],
           ] as const
         ).map(([f, rotulo, cor]) => (
           <button key={f} type="button" aria-pressed={faixa === f} onClick={() => setFaixa(faixa === f ? null : f)} className={cn('flex min-w-20 cursor-pointer flex-col rounded-[14px] px-3 py-1.5 text-left transition-colors', faixa === f ? 'bg-raised shadow-cartao' : 'bg-sunken hover:bg-raised')}>
             <span className={cn('font-heading text-2xl font-light tabular-nums', cor)}>{conta(f)}</span>
-            <span className="text-muted-foreground text-[11px]">{rotulo}</span>
+            <span className="text-muted-foreground text-xs">{rotulo}</span>
           </button>
         ))}
       </div>
@@ -561,8 +561,8 @@ function Calendario({ tamanho }: { tamanho: TamanhoWidget }) {
                   </span>
                 </Tooltip>
               )}
-              {o.eventual && <span className="text-muted-foreground ml-1.5 text-[11px]">eventual</span>}
-              {o.falta && <span className="text-warning block text-[11px]">falta {o.falta}</span>}
+              {o.eventual && <span className="text-muted-foreground ml-1.5 text-xs">eventual</span>}
+              {o.falta && <span className="text-warning-text block text-xs">falta {o.falta}</span>}
               {o.feitoPor && <FeitoPor refId={o.id} quem={o.feitoPor} className="block" />}
             </td>
             <td className="py-1.5 pr-2">
@@ -573,7 +573,7 @@ function Calendario({ tamanho }: { tamanho: TamanhoWidget }) {
             <td className="py-1.5 pr-2">
               <SeloStatusObrigacao status={o.status} />
             </td>
-            <td className="py-1.5 pr-2">{o.recibo ? <code className="text-muted-foreground text-[11px]">{o.recibo}</code> : <span className="text-muted-foreground">·</span>}</td>
+            <td className="py-1.5 pr-2">{o.recibo ? <code className="text-muted-foreground text-xs">{o.recibo}</code> : <span className="text-muted-foreground">·</span>}</td>
             <td className="py-1.5 text-right">
               <BotaoAcoes acoes={acoes(o)} rotulo={`Ações de ${o.nome}`} />
             </td>
@@ -616,8 +616,8 @@ function Riscos({ tamanho }: { tamanho: TamanhoWidget }) {
           { r: 'em risco', v: emRisco, alerta: true },
         ].map((x) => (
           <div key={x.r} className="flex flex-col">
-            <span className={cn('font-heading text-2xl font-light tabular-nums', x.erro && x.v > 0 && 'text-destructive', x.alerta && x.v > 0 && 'text-warning')}>{x.v}</span>
-            <span className="text-muted-foreground text-[11px]">{x.r}</span>
+            <span className={cn('font-heading text-2xl font-light tabular-nums', x.erro && x.v > 0 && 'text-destructive-text', x.alerta && x.v > 0 && 'text-warning-text')}>{x.v}</span>
+            <span className="text-muted-foreground text-xs">{x.r}</span>
           </div>
         ))}
       </div>
@@ -738,7 +738,7 @@ function Comprovacao({ tamanho }: { tamanho: TamanhoWidget }) {
             <li key={o.id} className="flex items-center gap-2">
               <ChecksIcon className="text-success size-4" />
               <span className="flex-1 truncate">{o.nome}</span>
-              <code className="text-muted-foreground text-[11px]">{o.recibo}</code>
+              <code className="text-muted-foreground text-xs">{o.recibo}</code>
             </li>
           ))}
         </ul>
@@ -927,7 +927,7 @@ function Eventuais({ tamanho }: { tamanho: TamanhoWidget }) {
           Empresa chamada pelo IBGE (PAC/PAS)
         </Button>
       )}
-      {tamanho !== 'M' && <p className="text-muted-foreground text-[11px]">ICMS, ISS e PIS/COFINS só existem com imposto: sem arquivo não é falta (D-23). DMED só para CNAE de saúde (C2-16).</p>}
+      {tamanho !== 'M' && <p className="text-muted-foreground text-xs">ICMS, ISS e PIS/COFINS só existem com imposto: sem arquivo não é falta (D-23). DMED só para CNAE de saúde (C2-16).</p>}
     </div>
   )
 }
@@ -975,7 +975,7 @@ function SemanaCarteira() {
   if (!itens.length) return <EstadoVazio compacto icone={CalendarCheckIcon} titulo="Carteira sem obrigações nesta competência" descricao="Gere o calendário do mês ou troque os setores mostrados." />
   return (
     <div className="flex h-full flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2 text-[11px]">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="text-muted-foreground">✓ entregue · • pendente · ! em risco ou vence hoje · ✗ atrasada · – dispensada</span>
         <span className="ml-auto flex gap-1">
           <Button size="sm" variant="ghost" className="h-6 rounded-full px-2 text-xs" onClick={() => exportar('csv')}>
@@ -996,7 +996,7 @@ function SemanaCarteira() {
                 <td key={n} className="py-1 text-center">
                   {i ? (
                     <Tooltip conteudo={`${n} · ${i.status} · legal ${ddmm(i.legal)}`}>
-                      <button type="button" aria-label={`${n} de ${c}: ${i.status}`} onClick={() => fluxos.abrirTarefa(i.id)} className={cn('inline-flex size-6 cursor-pointer items-center justify-center rounded-full text-xs font-medium', i.status === 'entregue' && 'bg-success/15', i.status === 'atrasada' && 'bg-destructive/12 text-destructive', (i.status === 'em risco' || i.status === 'vence hoje') && 'bg-warning/15', ['pendente', 'cancelada', 'dispensada'].includes(i.status) && 'bg-sunken text-muted-foreground')}>
+                      <button type="button" aria-label={`${n} de ${c}: ${i.status}`} onClick={() => fluxos.abrirTarefa(i.id)} className={cn('inline-flex size-6 cursor-pointer items-center justify-center rounded-full text-xs font-medium', i.status === 'entregue' && 'bg-success/15', i.status === 'atrasada' && 'bg-destructive/12 text-foreground', (i.status === 'em risco' || i.status === 'vence hoje') && 'bg-warning/15', ['pendente', 'cancelada', 'dispensada'].includes(i.status) && 'bg-sunken text-muted-foreground')}>
                         {simbolo[i.status]}
                       </button>
                     </Tooltip>

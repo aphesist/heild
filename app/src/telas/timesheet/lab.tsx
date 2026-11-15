@@ -167,7 +167,7 @@ export function ComoAExtensaoVe({ onFechar }: { onFechar: () => void }) {
           </p>
         )}
         {erro && (
-          <p role="alert" className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
+          <p role="alert" className="bg-destructive/10 text-foreground flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
             <XCircleIcon weight="fill" className="size-4" /> {erro}
           </p>
         )}

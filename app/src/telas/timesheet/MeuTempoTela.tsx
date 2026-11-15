@@ -371,7 +371,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                       Ver portais
                     </Button>
                   </div>
-                  {!!vinculo?.pausas.length && <p className="text-muted-foreground text-[11px]">Pausas: {vinculo.pausas.slice(-3).map((p) => `${rotuloDia(diaDe(p.de))} ${hm(p.de)} (${p.rotulo})`).join(', ')}. Só você vê.</p>}
+                  {!!vinculo?.pausas.length && <p className="text-muted-foreground text-xs">Pausas: {vinculo.pausas.slice(-3).map((p) => `${rotuloDia(diaDe(p.de))} ${hm(p.de)} (${p.rotulo})`).join(', ')}. Só você vê.</p>}
                 </>
               ) : (
                 <>
@@ -400,7 +400,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                         </span>
                         <span className="text-muted-foreground text-xs">
                           {rotuloMotivoContestacao(c.motivo)} → {c.correcao} ·{' '}
-                          <span className={cn(c.status === 'aceita' && 'text-success', c.status === 'recusada' && 'text-destructive')}>{c.status === 'pendente' ? 'aguardando o Gestor' : c.status === 'aceita' ? `aceita por ${c.decidido_por_nome}` : `recusada por ${c.decidido_por_nome}: ${c.motivo_recusa}`}</span>
+                          <span className={cn(c.status === 'aceita' && 'text-success-text', c.status === 'recusada' && 'text-destructive-text')}>{c.status === 'pendente' ? 'aguardando o Gestor' : c.status === 'aceita' ? `aceita por ${c.decidido_por_nome}` : `recusada por ${c.decidido_por_nome}: ${c.motivo_recusa}`}</span>
                         </span>
                       </li>
                     )

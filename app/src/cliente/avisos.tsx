@@ -107,7 +107,7 @@ export function PushSimulado({ ctx }: { ctx: Ctx }) {
     >
       <span className="bg-sunken flex size-8 shrink-0 items-center justify-center rounded-md">{mostrando.canal === 'push' ? <BellIcon className="size-4" weight="fill" /> : <ChatCircleTextIcon className="size-4" weight="fill" />}</span>
       <span className="min-w-0 flex-1">
-        <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
+        <span className="text-muted-foreground flex items-center gap-1 text-xs">
           {mostrando.canal === 'push' ? produto : 'WhatsApp'} · agora{mostrando.prioridade === 'urgente' && ' · urgente'}
         </span>
         <span className="block text-sm font-medium">{mostrando.canal === 'push' ? mostrando.titulo : `${produto}: você tem novidades no app`}</span>
@@ -178,7 +178,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
               <span className="min-w-0 flex-1">
                 <span className={cn('block text-sm', !a.lido && 'font-medium')}>{a.titulo}</span>
                 {a.corpo && <span className="text-muted-foreground block text-xs">{a.corpo}</span>}
-                <span className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                <span className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1.5 text-xs">
                   {a.quando} · {rotuloCategoria[a.categoria]}
                   {a.prioridade === 'urgente' && <Selo tom="erro">urgente</Selo>}
                   {a.quantidade && a.quantidade > 1 && <Selo>{a.quantidade} itens</Selo>}
@@ -189,7 +189,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
             {a.competencia && (
               <button
                 type="button"
-                className="text-muted-foreground flex w-fit cursor-pointer items-center gap-1 pl-4 text-[11px] underline-offset-2 hover:underline"
+                className="text-muted-foreground flex w-fit cursor-pointer items-center gap-1 pl-4 text-xs underline-offset-2 hover:underline"
                 onClick={() => {
                   const silenciada = pref.competenciasSilenciadas.includes(a.competencia!)
                   setPref((p) => ({ ...p, competenciasSilenciadas: silenciada ? p.competenciasSilenciadas.filter((c) => c !== a.competencia) : [...p.competenciasSilenciadas, a.competencia!] }))

@@ -361,7 +361,7 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
                     <button type="button" className="flex w-full cursor-pointer flex-col gap-1 text-left" onClick={() => onEscolher(e.clienteId, 'visao')}>
                       <span className="flex items-baseline gap-2">
                         <span className="min-w-0 flex-1 truncate">{e.nome}</span>
-                        <span className={cn('text-xs tabular-nums', e.caixa < e.perfil.caixa_minimo ? 'text-destructive' : 'text-muted-foreground')}>
+                        <span className={cn('text-xs tabular-nums', e.caixa < e.perfil.caixa_minimo ? 'text-destructive-text' : 'text-muted-foreground')}>
                           {brl(e.caixa)} <span className="text-muted-foreground">/ {brl(e.perfil.caixa_minimo)}</span>
                         </span>
                       </span>
@@ -649,8 +649,8 @@ export function CarteiraBpoTela({ empresa, onEscolher }: PropsBpo) {
                       </button>
                       <SeloErp e={e} />
                       <span className="min-w-32 shrink-0 whitespace-nowrap text-right text-sm tabular-nums">
-                        {e.bancos.length ? <span className={e.caixa < e.perfil.caixa_minimo ? 'text-destructive' : undefined}>{brl(e.caixa)}</span> : <span className="text-muted-foreground text-xs">sem banco</span>}
-                        <span className="text-muted-foreground block text-[11px]">mínimo {brl(e.perfil.caixa_minimo)}</span>
+                        {e.bancos.length ? <span className={e.caixa < e.perfil.caixa_minimo ? 'text-destructive-text' : undefined}>{brl(e.caixa)}</span> : <span className="text-muted-foreground text-xs">sem banco</span>}
+                        <span className="text-muted-foreground block text-xs">mínimo {brl(e.perfil.caixa_minimo)}</span>
                       </span>
                       <span className="text-muted-foreground w-36 text-xs">
                         {e.lotesAbertos.length === 0 ? 'nenhum lote' : `${e.lotesAbertos.length} lote${e.lotesAbertos.length === 1 ? '' : 's'}`} com o cliente

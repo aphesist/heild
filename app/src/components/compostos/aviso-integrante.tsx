@@ -47,10 +47,10 @@ export function AvisoIntegrante({ aviso, onDecidir, onAbrirChat, embutido, idDec
       )}
 
       <div className="flex flex-col gap-2">
-        {aviso.fiz && <Bloco icone={<CheckCircleIcon className="text-success" />} rotulo="Fiz" texto={aviso.fiz} />}
+        {aviso.fiz && <Bloco icone={<CheckCircleIcon className="text-success-text" />} rotulo="Fiz" texto={aviso.fiz} />}
         {aviso.decisao && (
           <Bloco
-            icone={<QuestionIcon className="text-warning" />}
+            icone={<QuestionIcon className="text-warning-text" />}
             rotulo="Decisão"
             texto={aviso.decisao.texto}
             extra={aviso.decisao.expiraEm && !decidido ? <span className="text-muted-foreground text-xs">{aviso.decisao.expiraEm}</span> : undefined}

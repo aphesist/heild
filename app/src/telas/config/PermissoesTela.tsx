@@ -131,7 +131,7 @@ export function PermissoesTela() {
                   <tr>
                     <th className="bg-surface sticky left-0 z-10 py-2 pr-3 text-left text-xs font-medium">Pessoa</th>
                     {indices.map(({ c }) => (
-                      <th key={`${c.modulo}-${c.aba}`} className="text-muted-foreground px-1.5 py-2 text-left text-[11px] font-normal">
+                      <th key={`${c.modulo}-${c.aba}`} className="text-muted-foreground px-1.5 py-2 text-left text-xs font-normal">
                         {c.rotulo.split(' › ').pop()}
                       </th>
                     ))}
@@ -143,7 +143,7 @@ export function PermissoesTela() {
                     <tr key={u.id} className="border-border/70 border-t">
                       <th scope="row" className="bg-surface sticky left-0 z-10 py-2 pr-3 text-left font-normal">
                         <span className="block text-sm">{u.nome}</span>
-                        <span className="text-muted-foreground block text-[11px]">{papelExibido(u)}</span>
+                        <span className="text-muted-foreground block text-xs">{papelExibido(u)}</span>
                       </th>
                       {indices.map(({ c, i }) => {
                         const cel = celulas[i]
@@ -154,7 +154,7 @@ export function PermissoesTela() {
                               onClick={() => setDetalhe({ u, col: c, c: cel })}
                               aria-label={`${u.nome} · ${c.rotulo}: ${rotuloNivel[cel.nivel]}`}
                               className={cn(
-                                'w-full cursor-pointer rounded-full px-2 py-0.5 text-center text-[11px] whitespace-nowrap',
+                                'w-full cursor-pointer rounded-full px-2 py-0.5 text-center text-xs whitespace-nowrap',
                                 cel.nivel === 'gere' ? 'bg-success/20' : cel.nivel === 'executa' ? 'bg-success/10' : cel.nivel === 'le' ? 'bg-warning/15' : 'text-muted-foreground bg-sunken/60',
                               )}
                             >

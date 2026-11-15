@@ -144,7 +144,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
         type="button"
         onClick={() => ir(id)}
         aria-current={ativo || undefined}
-        className={cn('flex cursor-pointer items-center rounded-md text-[11px]', largo ? 'flex-row gap-2.5 px-3 py-2 text-sm' : 'flex-col gap-0.5 py-1', ativo ? 'text-foreground font-medium' : 'text-muted-foreground', largo && ativo && 'bg-sunken')}
+        className={cn('flex cursor-pointer items-center rounded-md text-xs', largo ? 'flex-row gap-2.5 px-3 py-2 text-sm' : 'flex-col gap-0.5 py-1', ativo ? 'text-foreground font-medium' : 'text-muted-foreground', largo && ativo && 'bg-sunken')}
       >
         <I className="size-5" weight={ativo ? 'fill' : 'regular'} /> {rotulo}
       </button>
@@ -163,7 +163,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
           <button type="button" onClick={() => setSeletor(!seletor)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 text-left" aria-label="Trocar empresa" aria-expanded={seletor}>
             <span className="min-w-0">
               <span className="block truncate text-sm font-medium">{cliente.nome}</span>
-              <span className="text-muted-foreground block truncate text-[11px]">
+              <span className="text-muted-foreground block truncate text-xs">
                 {pessoa.nome} · {emp.contato.papel}
               </span>
             </span>
@@ -171,7 +171,7 @@ function AppDaPessoa({ pessoa, onSair, largo }: { pessoa: PessoaApp; onSair: () 
           </button>
           <button type="button" aria-label={`Notificações${naoLidos ? ` (${naoLidos} não lidas)` : ''}`} onClick={() => ir('avisos')} className="hover:bg-sunken relative cursor-pointer rounded-full p-2">
             <BellIcon className="size-5" weight={tela === 'avisos' ? 'fill' : 'regular'} />
-            {naoLidos > 0 && <span className="bg-destructive text-background absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] tabular-nums">{naoLidos > 9 ? '9+' : naoLidos}</span>}
+            {naoLidos > 0 && <span className="bg-destructive text-background absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs tabular-nums">{naoLidos > 9 ? '9+' : naoLidos}</span>}
           </button>
         </header>
 

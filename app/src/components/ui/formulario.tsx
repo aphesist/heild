@@ -82,7 +82,7 @@ export function Campo({ rotulo, ajuda, erro, children, className }: { rotulo: st
         {rotulo}
       </label>
       {children(id)}
-      {erro ? <p className="text-destructive text-xs">{erro}</p> : ajuda ? <p className="text-muted-foreground text-xs">{ajuda}</p> : null}
+      {erro ? <p className="text-destructive-text text-xs">{erro}</p> : ajuda ? <p className="text-muted-foreground text-xs">{ajuda}</p> : null}
     </div>
   )
 }

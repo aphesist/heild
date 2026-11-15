@@ -213,7 +213,7 @@ function ItemPendencia({ t, estado, ctx, onAbrir, onRecibo }: { t: Tarefa; estad
       {estado?.situacao === 'nao_tenho' && <p className="text-muted-foreground text-xs">“{estado.motivo}” · o escritório decide e responde na conversa.</p>}
       {estado?.situacao === 'ja_fiz' && <p className="text-muted-foreground text-xs">{estado.motivo ?? 'O integrante está conferindo no órgão.'}</p>}
       {def.consequencia && !estado && <p className="text-xs">{def.consequencia}</p>}
-      {estado?.visto && !estado.situacao && <p className="text-muted-foreground text-[11px]">Visto por você em {estado.visto}.</p>}
+      {estado?.visto && !estado.situacao && <p className="text-muted-foreground text-xs">Visto por você em {estado.visto}.</p>}
       <div className="flex flex-wrap gap-2">
         {estado?.situacao !== 'em_conferencia' && estado?.situacao !== 'ja_fiz' && (
           <Button size="sm" className="rounded-full" onClick={onAbrir}>

@@ -200,7 +200,7 @@ function Conexoes({ conectores }: { conectores: SaudeConector[] }) {
                         </span>
                       )}
                       {c.tom !== 'ok' && c.estado !== 'desconectado' && (
-                        <span className={cn('mt-0.5 flex items-start gap-1 text-xs', c.tom === 'erro' ? 'text-destructive' : 'text-foreground')}>
+                        <span className={cn('mt-0.5 flex items-start gap-1 text-xs', c.tom === 'erro' ? 'text-destructive-text' : 'text-foreground')}>
                           <WarningIcon className="mt-0.5 size-3.5 shrink-0" /> {c.frase}
                         </span>
                       )}
@@ -810,7 +810,7 @@ function CoberturaClientes() {
               </span>
               <span className="flex flex-wrap gap-1.5">
                 {cob.itens.map((i) => (
-                  <span key={i.doc} title={i.falta} className={cn('rounded-full px-2 py-0.5 text-[11px]', i.caminho === 'falta' ? 'bg-destructive/15 text-destructive' : i.caminho === 'api' ? 'bg-success/15' : 'bg-sunken')}>
+                  <span key={i.doc} title={i.falta} className={cn('rounded-full px-2 py-0.5 text-xs', i.caminho === 'falta' ? 'bg-destructive/15 text-foreground' : i.caminho === 'api' ? 'bg-success/15' : 'bg-sunken')}>
                     {i.doc}: {rotuloCaminho[i.caminho]}
                     {i.falta ? ` (${i.falta})` : ''}
                   </span>

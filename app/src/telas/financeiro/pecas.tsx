@@ -58,7 +58,7 @@ export function SaldosContas({ bancos, aPagar30, acao }: { bancos: ContaBancaria
                 {b.fatura && ` · ${b.fatura}`}
               </span>
             </span>
-            <span className={cn('tabular-nums', b.saldo < 0 && 'text-destructive')}>{brl(b.saldo).replace('-', '−')}</span>
+            <span className={cn('tabular-nums', b.saldo < 0 && 'text-destructive-text')}>{brl(b.saldo).replace('-', '−')}</span>
           </li>
         ))}
       </ul>
@@ -101,7 +101,7 @@ export function FluxoMensal({ d, altura = 'h-44', ajuste = 0 }: { d: DadosFluxo;
           )
         })}
       </div>
-      <div className="text-muted-foreground flex gap-1.5 text-[11px] sm:gap-3">
+      <div className="text-muted-foreground flex gap-1.5 text-xs sm:gap-3">
         {d.meses.map((m, i) => (
           <span key={m} className={cn('flex-1 text-center', i === d.inicio && 'text-foreground font-medium')}>
             {m}

@@ -117,7 +117,7 @@ export function AceitarConvite({ conta, convite, escritorio, onVoltar, onAceito 
             ))}
           </ul>
           <Interruptor ligado={termo} onMudar={setTermo} rotulo="Li e aceito o termo de uso da equipe" />
-          {erro && <p className="text-destructive text-sm">{erro}</p>}
+          {erro && <p className="text-destructive-text text-sm">{erro}</p>}
         </>
       )}
       <div className="flex items-center gap-2">

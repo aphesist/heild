@@ -169,7 +169,7 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
                   </span>
                 ))}
                 {clienteId && caminho.length > 0 && (
-                  <span className={cn('ml-auto flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]', pastaVisivel(caminho) ? 'bg-success/15' : 'bg-sunken text-muted-foreground')}>
+                  <span className={cn('ml-auto flex items-center gap-1 rounded-full px-2 py-0.5 text-xs', pastaVisivel(caminho) ? 'bg-success/15' : 'bg-sunken text-muted-foreground')}>
                     {pastaVisivel(caminho) ? <EyeIcon className="size-3.5" /> : <LockSimpleIcon className="size-3.5" />}
                     {pastaVisivel(caminho) ? 'visível no app do cliente' : 'privada do escritório'}
                   </span>
@@ -306,19 +306,19 @@ function ListaArquivos({ itens, comCaminho, onAbrir, onPasta }: { itens: Documen
               </button>
             )}
             {con?.situacao === 'somente_leitura' && (
-              <span className="bg-sunken text-muted-foreground flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px]">
+              <span className="bg-sunken text-muted-foreground flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs">
                 <CloudIcon className="size-3.5" /> {con.nome}
               </span>
             )}
-            {d.s09?.semOrigem && <span className="bg-warning/15 hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">origem a confirmar</span>}
-            {d.s09?.conflito && !d.s09.conflito.resolvido && <span className="bg-warning/15 hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">conflito</span>}
+            {d.s09?.semOrigem && <span className="bg-warning/15 hidden shrink-0 rounded-full px-2 py-0.5 text-xs sm:inline">origem a confirmar</span>}
+            {d.s09?.conflito && !d.s09.conflito.resolvido && <span className="bg-warning/15 hidden shrink-0 rounded-full px-2 py-0.5 text-xs sm:inline">conflito</span>}
             {d.s09?.indisponivelDesde && (
-              <span className="bg-destructive/15 text-destructive flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px]">
+              <span className="bg-destructive/15 text-foreground flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs">
                 <CloudSlashIcon className="size-3.5" /> sem bytes
               </span>
             )}
-            {d.s09?.conferencia && <span className="bg-sunken hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">em conferência</span>}
-            {repetidos.has(d.id) && <span className="bg-sunken hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] sm:inline">repetido</span>}
+            {d.s09?.conferencia && <span className="bg-sunken hidden shrink-0 rounded-full px-2 py-0.5 text-xs sm:inline">em conferência</span>}
+            {repetidos.has(d.id) && <span className="bg-sunken hidden shrink-0 rounded-full px-2 py-0.5 text-xs sm:inline">repetido</span>}
             {d.clienteId && visivelAoCliente(d) && <EyeIcon className="text-success size-4 shrink-0" aria-label="visível ao cliente" />}
             <span className="text-muted-foreground hidden w-16 shrink-0 text-right text-xs tabular-nums sm:block">{d.tamanho}</span>
             <BotaoAcoes acoes={acoesDe(d)} rotulo={`Ações de ${d.nome}`} />

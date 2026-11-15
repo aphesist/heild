@@ -123,7 +123,7 @@ function Notificacao({ t, onAbrir, onFechar }: { t: Toast; onAbrir: () => void; 
         {nome && (
           <p className="flex min-w-0 items-baseline gap-1.5">
             <span className="max-w-[70%] shrink-0 truncate font-semibold">{nome}</span>
-            {meta && <span className={cn('min-w-0 truncate text-xs', pede ? 'text-highlight font-medium' : 'text-muted-foreground')}>{meta}</span>}
+            {meta && <span className={cn('min-w-0 truncate text-xs', pede ? 'text-highlight-text font-medium' : 'text-muted-foreground')}>{meta}</span>}
             <span className="text-muted-foreground ml-auto shrink-0 text-xs">agora</span>
           </p>
         )}
@@ -264,7 +264,7 @@ export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void 
                 <span className={cn('text-sm', !lido(n) && 'font-medium')}>{n.titulo}</span>
               </span>
               {n.corpo && <span className="text-muted-foreground block text-xs">{n.corpo}</span>}
-              <span className="text-muted-foreground block text-[11px]">
+              <span className="text-muted-foreground block text-xs">
                 {rotuloCategoria[n.categoria]} · {n.quando}
                 {n.cliente_id && nomeCliente(n.cliente_id) ? ` · ${nomeCliente(n.cliente_id)}` : ''}
               </span>

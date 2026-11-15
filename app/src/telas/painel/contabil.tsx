@@ -179,7 +179,7 @@ function FechamentoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
           return (
             <li key={e.id}>
               <button type="button" onClick={() => setVer(ver === e.id ? null : e.id)} className={cn('flex h-full w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded-[14px] px-2.5 py-1.5 text-left', s === 'feito' ? 'bg-success/10' : s === 'andamento' ? 'bg-raised shadow-contorno' : 'bg-sunken/60')} aria-expanded={ver === e.id}>
-                <span className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
+                <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
                   {s === 'feito' ? <CheckIcon weight="bold" className="text-success size-3" /> : <span className="tabular-nums">{i + 1}</span>}
                   {s === 'feito' ? 'feito' : s === 'andamento' ? 'em andamento' : 'a fazer'}
                 </span>
@@ -245,7 +245,7 @@ function DeveChegarBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
   if (tamanho === 'P')
     return (
       <div className="flex h-full flex-col justify-end">
-        <span className={cn('font-heading text-4xl font-light tabular-nums', faltam.length && 'text-warning')}>{faltam.length}</span>
+        <span className={cn('font-heading text-4xl font-light tabular-nums', faltam.length && 'text-warning-text')}>{faltam.length}</span>
         <span className="text-muted-foreground text-xs">faltando</span>
       </div>
     )
@@ -257,7 +257,7 @@ function DeveChegarBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
           const chegou = x.chegou || !!estado.chegou[x.id]
           return <ItemChegada key={x.id} chegou={chegou} nome={x.item} detalhe={chegou ? (estado.chegou[x.id] ? `marcado ${estado.chegou[x.id]}` : x.quando) : `${x.quando}${estado.cobrancas[x.id] ? ` · +${estado.cobrancas[x.id]} pela régua` : ''}`} onMarcar={() => marcar(x.id, x.item)} />
         })}
-        <li className="text-muted-foreground pt-1 text-[11px]">Contas esperadas por banco (D-03)</li>
+        <li className="text-muted-foreground pt-1 text-xs">Contas esperadas por banco (D-03)</li>
         {contas.map((x) => {
           const chegou = x.chegou || !!estado.chegou[x.id]
           return <ItemChegada key={x.id} chegou={chegou} nome={`${x.banco} · conta ${x.conta}`} detalhe={chegou ? `${x.origem}${x.buracos.length ? ` · buraco ${x.buracos[0]}` : ' · sem buracos'}` : `${x.banco} não mandou extrato · ${x.quando}`} onMarcar={() => marcar(x.id, `Extrato ${x.banco}`)} />
@@ -362,7 +362,7 @@ function TriagemBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
   return (
     <div className="flex flex-col gap-2">
       <SaudeConectores ids={['email', 'whatsapp', 'open_finance']} />
-      <p className="text-muted-foreground text-[11px]">Regras do mês (D-02): nome do arquivo, pasta e conteúdo decidem a competência; mês futuro não conta; mais de 3 meses vai para “conferir”. Um .zip é aberto e cada arquivo entra sozinho (D-04).</p>
+      <p className="text-muted-foreground text-xs">Regras do mês (D-02): nome do arquivo, pasta e conteúdo decidem a competência; mês futuro não conta; mais de 3 meses vai para “conferir”. Um .zip é aberto e cada arquivo entra sozinho (D-04).</p>
       <ul className="divide-border/70 flex flex-col divide-y">
         {d.triagem.map((t) => {
           const conf = estado.triagem[t.id]
@@ -370,7 +370,7 @@ function TriagemBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
             <li key={t.id} className="flex flex-wrap items-center gap-2 py-1.5 first:pt-0">
               <span className="min-w-0 grow basis-40">
                 <span className="block truncate font-mono text-xs">{t.nome}</span>
-                <span className="text-muted-foreground block truncate text-[11px]">
+                <span className="text-muted-foreground block truncate text-xs">
                   {t.canal} · {conf ? `confirmado ${conf.confirmado}` : `${t.regra}: ${t.detalhe}`}
                 </span>
               </span>
@@ -498,7 +498,7 @@ function ClassificacaoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: T
             <tr key={l.id} className={cn(!feito && l.confianca < 0.7 && 'bg-warning/5')}>
               <td className="py-1.5 pr-2">
                 <div className="font-mono text-xs">{l.descricao}</div>
-                <div className="text-muted-foreground text-[11px]">{l.data}</div>
+                <div className="text-muted-foreground text-xs">{l.data}</div>
               </td>
               <td className="py-1.5 pr-2 text-right tabular-nums">{brl(l.valor)}</td>
               <td className="py-1.5 pr-2">{feito ? feito.conta : aprendida ? `${aprendida.conta} (regra)` : l.sugestao}</td>
@@ -559,7 +559,7 @@ function ConciliacaoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tam
   if (tamanho === 'P')
     return (
       <div className="flex h-full flex-col justify-end">
-        <span className={cn('font-heading text-4xl font-light tabular-nums', abertas.length && 'text-warning')}>{abertas.filter((c) => !estado.diferencas[c.id]).length}</span>
+        <span className={cn('font-heading text-4xl font-light tabular-nums', abertas.length && 'text-warning-text')}>{abertas.filter((c) => !estado.diferencas[c.id]).length}</span>
         <span className="text-muted-foreground text-xs">diferenças sem tarefa</span>
       </div>
     )
@@ -661,13 +661,13 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
           <tr key={t.socio}>
             <td className="py-1.5 pr-2">{t.socio}</td>
             {t.meses.map((m) => (
-              <td key={m.mes} className={cn('py-1.5 pr-2 text-right tabular-nums', m.lucro > 50_000 && 'text-warning font-medium')}>
+              <td key={m.mes} className={cn('py-1.5 pr-2 text-right tabular-nums', m.lucro > 50_000 && 'text-warning-text font-medium')}>
                 <div className="flex items-center justify-end gap-1">
                   {travado(m.mes) && <LockSimpleIcon className="text-muted-foreground size-3" aria-label="trimestre travado depois do REINF" />}
                   {brl0(m.lucro)}
                 </div>
                 {tamanho === 'XL' && (
-                  <div className="text-muted-foreground text-[11px] font-normal">
+                  <div className="text-muted-foreground text-xs font-normal">
                     pró-labore {brl0(m.proLabore)}
                     {m.devolucao ? ` · devol. ${brl0(m.devolucao)}` : ''}
                     {m.suspeita ? ` · ${m.suspeita} dúvida` : ''}
@@ -713,7 +713,7 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
         <BotaoNivel compacto nivel="executar" ferramenta="contabil.lucros.exportar" setor="contabil" variante="ghost" onClick={() => setExportar(true)}>
           Exportar trimestre
         </BotaoNivel>
-        <span className="text-muted-foreground text-[11px]">{reinf.length ? '3º trimestre travado: REINF enviado em 15/10.' : 'Sem REINF neste regime: trimestres abertos até o fechamento anual.'}</span>
+        <span className="text-muted-foreground text-xs">{reinf.length ? '3º trimestre travado: REINF enviado em 15/10.' : 'Sem REINF neste regime: trimestres abertos até o fechamento anual.'}</span>
       </div>
       {duvida && (
         <GavetaFormulario aberta onFechar={() => setDuvida(null)} titulo="Dúvida da distribuição de lucros" descricao={`${duvida.data} · ${duvida.favorecido} · ${brl(duvida.valor)} · ${cliente.nome}. A resposta pode virar regra por favorecido (D-13).`} acao="Responder" onAcao={responder}>
@@ -895,7 +895,7 @@ function RelatoriosBloco({ cliente }: { cliente: Cliente }) {
                   <span className="block truncate text-sm">
                     {rel.nome} {rel.fase > 1 && <SeloFase fase={rel.fase} />}
                   </span>
-                  <span className="text-muted-foreground block truncate text-[11px]">
+                  <span className="text-muted-foreground block truncate text-xs">
                     {rel.assina ? 'sai assinado pelo contador' : 'sem assinatura'}
                     {e?.motivo ? ` · ${e.motivo}` : ''}
                     {e?.recibo ? ` · recibo ${e.recibo}` : ''}
@@ -1184,11 +1184,11 @@ function Fase4Bloco({ cliente }: { cliente: Cliente }) {
     <div className="flex flex-col gap-2 text-sm">
       <dl className="grid grid-cols-2 gap-2">
         <div className="bg-raised rounded-[12px] px-3 py-1.5">
-          <dt className="text-muted-foreground text-[11px]">Margem líquida {COMPETENCIA}</dt>
+          <dt className="text-muted-foreground text-xs">Margem líquida {COMPETENCIA}</dt>
           <dd className="font-medium tabular-nums">{r.faturamento ? pct(margem) : '—'}</dd>
         </div>
         <div className="bg-raised rounded-[12px] px-3 py-1.5">
-          <dt className="text-muted-foreground text-[11px]">Custo sobre receita</dt>
+          <dt className="text-muted-foreground text-xs">Custo sobre receita</dt>
           <dd className="font-medium tabular-nums">{r.faturamento ? pct(r.custos / r.faturamento) : '—'}</dd>
         </div>
       </dl>
@@ -1311,7 +1311,7 @@ function EtapasCarteira() {
           <tr key={l.c.id}>
             <td className="py-2 pr-2">
               <div>{l.c.nome}</div>
-              {parado && idx < 5 && <div className="text-warning text-[11px]">{parado}</div>}
+              {parado && idx < 5 && <div className="text-warning-text text-xs">{parado}</div>}
             </td>
             <td className="text-muted-foreground py-2 pr-2">{l.p.analista}</td>
             {etapasFechamento.map((e, i) => (

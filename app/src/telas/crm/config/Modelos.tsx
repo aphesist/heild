@@ -61,7 +61,7 @@ export function Modelos() {
                 {m.status}
               </Badge>
               {m.motivo && (
-                <span className="text-destructive flex w-full items-center gap-1 text-xs">
+                <span className="text-destructive-text flex w-full items-center gap-1 text-xs">
                   <WarningIcon className="size-3.5" /> {m.motivo}
                 </span>
               )}
@@ -169,7 +169,7 @@ function EditorModelo({
                   type="button"
                   title={v.descricao}
                   onClick={() => set('texto', `${m.texto}{${v.nome}}`)}
-                  className={cn('bg-sunken hover:bg-accent cursor-pointer rounded-full px-2 py-0.5 font-mono text-[11px]', usadas.includes(v.nome) && 'ring-foreground/30 ring-1')}
+                  className={cn('bg-sunken hover:bg-accent cursor-pointer rounded-full px-2 py-0.5 font-mono text-xs', usadas.includes(v.nome) && 'ring-foreground/30 ring-1')}
                 >
                   {`{${v.nome}}`}
                 </button>

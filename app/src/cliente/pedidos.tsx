@@ -208,7 +208,7 @@ function NovoPedido({ ctx, onFechar, tipoInicial }: { ctx: Ctx; onFechar: () => 
       </p>
       <CamposForm campos={def.campos} form={form} />
       <AreaTexto rotulo="Detalhes" valor={detalhe} onMudar={setDetalhe} placeholder="Algo mais que o escritório precisa saber (opcional)" linhas={2} />
-      <p className="text-muted-foreground text-[11px]">Pedidos do seu papel ({ctx.contato.papel}). Outros tipos, o sócio pede.</p>
+      <p className="text-muted-foreground text-xs">Pedidos do seu papel ({ctx.contato.papel}). Outros tipos, o sócio pede.</p>
     </Folha>
   )
 }
@@ -250,7 +250,7 @@ function DetalhePedido({ t, ctx }: { t: Tarefa; ctx: Ctx }) {
           {passos.map((p, i) => (
             <li key={p} className="flex min-w-0 flex-1 flex-col gap-1">
               <span className={cn('h-1.5 rounded-full', i <= etapa ? (t.status === 'cancelada' && i === 3 ? 'bg-muted-foreground' : 'bg-primary') : 'bg-sunken')} />
-              <span className={cn('truncate text-[10px]', i === etapa ? 'text-foreground font-medium' : 'text-muted-foreground')}>{p}</span>
+              <span className={cn('truncate text-xs', i === etapa ? 'text-foreground font-medium' : 'text-muted-foreground')}>{p}</span>
             </li>
           ))}
         </ol>
@@ -296,7 +296,7 @@ function DetalhePedido({ t, ctx }: { t: Tarefa; ctx: Ctx }) {
               {sim.linhas.map(([r, v]) => (
                 <tr key={r}>
                   <td className="py-0.5">{r}</td>
-                  <td className={cn('py-0.5 text-right tabular-nums', v < 0 && 'text-destructive')}>{brl(v)}</td>
+                  <td className={cn('py-0.5 text-right tabular-nums', v < 0 && 'text-destructive-text')}>{brl(v)}</td>
                 </tr>
               ))}
               <tr className="border-t font-medium">
@@ -338,7 +338,7 @@ function DetalhePedido({ t, ctx }: { t: Tarefa; ctx: Ctx }) {
                   Não vai seguir
                 </Button>
               </div>
-              <p className="text-muted-foreground text-[11px]">Sem resposta, o DP lembra em D+1 e D+3 ({extra.simulado.lembretes?.join(' · ')}).</p>
+              <p className="text-muted-foreground text-xs">Sem resposta, o DP lembra em D+1 e D+3 ({extra.simulado.lembretes?.join(' · ')}).</p>
             </>
           )}
         </Bloco>

@@ -107,8 +107,8 @@ function Coluna({ id, rotulo, itens, onAbrir, arrastando }: { id: EtapaLead; rot
     <section ref={setNodeRef} aria-label={rotulo} className={cn('flex w-[85%] max-w-80 shrink-0 snap-start flex-col transition-colors sm:w-64 lg:w-auto lg:max-w-none lg:min-w-60 lg:flex-1', isOver && 'bg-sunken/70', id === 'perdido' && 'bg-sunken/30')}>
       <header className="flex items-center gap-2 px-4 pt-4 pb-3">
         <h3 className="text-sm font-medium">{rotulo}</h3>
-        <span className="bg-sunken text-muted-foreground rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums">{itens.length}</span>
-        {id === 'perdido' && <span className="text-muted-foreground ml-auto text-[11px]">no mês</span>}
+        <span className="bg-sunken text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">{itens.length}</span>
+        {id === 'perdido' && <span className="text-muted-foreground ml-auto text-xs">no mês</span>}
       </header>
       <AreaRolagem className="flex-1 px-3 pb-3">
         <ul className="flex flex-col gap-2.5">
@@ -141,7 +141,7 @@ function CartaoLead({ lead: l, onClick, className }: { lead: Lead; onClick?: () 
       <span className="flex items-start gap-2">
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{l.nome}</span>
         {l.prazoMin != null && (
-          <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums', l.prazoMin < 0 ? 'bg-destructive/12 text-destructive' : 'bg-warning/15')}>
+          <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-xs font-medium tabular-nums', l.prazoMin < 0 ? 'bg-destructive/12 text-foreground' : 'bg-warning/15')}>
             {l.prazoMin < 0 ? `−${-l.prazoMin} min` : `${l.prazoMin} min`}
           </span>
         )}
@@ -150,7 +150,7 @@ function CartaoLead({ lead: l, onClick, className }: { lead: Lead; onClick?: () 
       {l.qualificacao && <span className="truncate text-xs">{l.qualificacao}</span>}
       {l.valor && <span className="font-heading text-base font-light tabular-nums">{l.valor}</span>}
       {l.trilha && (
-        <span className="flex items-center gap-2 text-[11px]">
+        <span className="flex items-center gap-2 text-xs">
           <span className="bg-sunken h-1.5 flex-1 overflow-hidden rounded-full">
             <span className="bg-success block h-full rounded-full" style={{ width: `${(l.trilha.feitos / l.trilha.total) * 100}%` }} />
           </span>
@@ -158,7 +158,7 @@ function CartaoLead({ lead: l, onClick, className }: { lead: Lead; onClick?: () 
         </span>
       )}
       {l.motivoPerda && <Badge variant="outline">{l.motivoPerda}</Badge>}
-      <span className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
+      <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
         <span className="min-w-0 flex-1 truncate">{l.proxima ?? l.desde}</span>
         {l.responsavel && <span className="shrink-0">{l.responsavel.split(' ')[0]}</span>}
       </span>
@@ -214,7 +214,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
           <dt className="text-muted-foreground">Contato</dt>
           <dd>{l.contato}</dd>
           <dt className="text-muted-foreground">Responsável</dt>
-          <dd>{l.responsavel ?? <span className="text-warning">sem responsável</span>}</dd>
+          <dd>{l.responsavel ?? <span className="text-warning-text">sem responsável</span>}</dd>
           <dt className="text-muted-foreground">Qualificação</dt>
           <dd>{l.qualificacao ?? 'regime, porte, serviços e contabilidade atual: o integrante pergunta'}</dd>
           {l.servicos && (
@@ -251,7 +251,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
 
         {(l.etapa === 'lead' || l.etapa === 'qualificado') && (
           <div className="flex flex-col gap-2 border-t pt-4">
-            <h3 className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">Qualificação pela conversa</h3>
+            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Qualificação pela conversa</h3>
             {l.qualificacaoProposta ? (
               <div className="bg-primary/6 flex flex-col gap-2 rounded-[14px] p-3">
                 <span className="text-muted-foreground flex items-center gap-1 text-xs">
@@ -290,7 +290,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
 
         {(proposta || contrato) && (
           <div className="flex flex-col gap-2 border-t pt-4">
-            <h3 className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">Documentos</h3>
+            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Documentos</h3>
             {[proposta, contrato].filter((d): d is NonNullable<typeof d> => !!d).map((d) => (
               <div key={d.tipo} className="bg-raised shadow-contorno flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2">
                 <FileTextIcon className="text-muted-foreground size-4" />
@@ -398,7 +398,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
         )}
 
         <div className="flex flex-col gap-2 border-t pt-4">
-          <h3 className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">Próxima ação</h3>
+          <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Próxima ação</h3>
           {l.etapa === 'lead' && <Acao icone={<CheckIcon />} titulo="Marcar como qualificado" nivel="executar" onClick={() => onMover('qualificado', { proxima: 'montar proposta' })} />}
           {l.etapa === 'qualificado' && (
             <Acao
@@ -466,7 +466,7 @@ function Acao({ icone, titulo, nivel, onClick }: { icone: ReactNode; titulo: str
       {icone}
       <span className="flex flex-col">
         <span className="text-sm">{titulo}</span>
-        <span className="text-muted-foreground text-[11px] font-normal">{nivel}</span>
+        <span className="text-muted-foreground text-xs font-normal">{nivel}</span>
       </span>
     </Button>
   )
@@ -642,7 +642,7 @@ function ListaLeads({ leads, onAbrir }: { leads: Lead[]; onAbrir: (id: string) =
                 </td>
                 <td className="px-2 py-2.5">{etapasLead.find((e) => e.id === l.etapa)?.rotulo}</td>
                 <td className="px-2 py-2.5">{l.origem}</td>
-                <td className="px-2 py-2.5">{l.responsavel ?? <span className="text-warning">sem responsável</span>}</td>
+                <td className="px-2 py-2.5">{l.responsavel ?? <span className="text-warning-text">sem responsável</span>}</td>
                 <td className="px-2 py-2.5 tabular-nums">{l.valor ?? '·'}</td>
                 <td className="text-muted-foreground px-4 py-2.5 text-xs">{l.motivoPerda ? `perdido: ${l.motivoPerda}` : (l.proxima ?? '·')}</td>
               </tr>

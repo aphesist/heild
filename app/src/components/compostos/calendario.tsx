@@ -240,7 +240,7 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
         {visao === 'mes' ? (
           <div className="grid grid-cols-7 gap-1" role="grid" aria-label={titulo}>
             {nomesDia.slice(1).concat('dom').map((n) => (
-              <div key={n} className="text-muted-foreground px-1 text-[11px]">
+              <div key={n} className="text-muted-foreground px-1 text-xs">
                 {n}
               </div>
             ))}
@@ -250,7 +250,7 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
                 <Dia key={iso} iso={iso} hoje={iso === data} foraDoMes={iso.slice(5, 7) !== ref.slice(5, 7)} feriado={feriados[iso]} compacto>
                   {lista.slice(0, 3).map((t) => item(t, true))}
                   {lista.length > 3 && (
-                    <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer text-left text-[11px]" onClick={() => (setRef(iso), setVisao('dia'))}>
+                    <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer text-left text-xs" onClick={() => (setRef(iso), setVisao('dia'))}>
                       + {lista.length - 3} tarefas
                     </button>
                   )}
@@ -286,7 +286,7 @@ export function Calendario({ tarefas, visao: visaoInicial = 'semana', onReprogra
           </div>
         )}
       </DndContext>
-      {onReprogramar && <p className="text-muted-foreground text-[11px]">Arraste para reprogramar o prazo interno (ou use “reprogramar”). O prazo legal não muda.</p>}
+      {onReprogramar && <p className="text-muted-foreground text-xs">Arraste para reprogramar o prazo interno (ou use “reprogramar”). O prazo legal não muda.</p>}
     </div>
   )
 }
@@ -297,14 +297,14 @@ function Dia({ iso, hoje, foraDoMes, feriado, cabecalho, compacto, detalhe, chil
     <div ref={setNodeRef} role="gridcell" aria-label={`${diaMesDeIso(iso)}${feriado ? `, feriado: ${feriado}` : ''}`} className={cn('flex min-w-0 flex-col gap-1.5 rounded-md p-1 transition-colors', compacto && 'min-h-24 border', isOver && 'bg-accent', foraDoMes && 'opacity-50', feriado && 'bg-sunken/60')}>
       <div className={cn('flex items-center gap-1 px-1 text-sm', hoje ? 'text-foreground font-medium' : 'text-muted-foreground', compacto && 'text-xs')}>
         {cabecalho ?? iso.slice(8, 10)}
-        {hoje && <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[10px]">hoje</span>}
+        {hoje && <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-xs">hoje</span>}
         {feriado && (
-          <span title={feriado} className="ml-auto flex items-center gap-0.5 text-[10px]">
+          <span title={feriado} className="ml-auto flex items-center gap-0.5 text-xs">
             <CalendarDotsIcon className="size-3" /> feriado
           </span>
         )}
       </div>
-      {feriado && detalhe && <p className="text-muted-foreground px-1 text-[10px] leading-tight">{feriado}</p>}
+      {feriado && detalhe && <p className="text-muted-foreground px-1 text-xs leading-tight">{feriado}</p>}
       {children}
     </div>
   )
@@ -323,11 +323,11 @@ function ItemCalendario({ t, compacto, cor, nomeSetor, movel, reprogramando, onR
           {t.atrasada && <WarningIcon className="text-destructive ml-auto size-3 shrink-0" aria-label="atrasada" />}
         </span>
         {!compacto && <span className="text-foreground line-clamp-2 font-medium">{t.titulo}</span>}
-        {!compacto && t.prazoLegal && t.prazoLegal !== t.prazo && <span className="text-muted-foreground text-[10px]">prazo legal {t.prazoLegal}</span>}
-        {!compacto && t.status !== 'a_fazer' && <span className="text-muted-foreground text-[10px]">{rotuloStatus[t.status]}</span>}
+        {!compacto && t.prazoLegal && t.prazoLegal !== t.prazo && <span className="text-muted-foreground text-xs">prazo legal {t.prazoLegal}</span>}
+        {!compacto && t.status !== 'a_fazer' && <span className="text-muted-foreground text-xs">{rotuloStatus[t.status]}</span>}
       </button>
       {!compacto && movel && (
-        <button type="button" onClick={onReprogramar} className="text-muted-foreground hover:text-foreground w-fit cursor-pointer text-[10px] underline underline-offset-2">
+        <button type="button" onClick={onReprogramar} className="text-muted-foreground hover:text-foreground w-fit cursor-pointer text-xs underline underline-offset-2">
           reprogramar
         </button>
       )}
@@ -339,8 +339,8 @@ function ItemCalendario({ t, compacto, cor, nomeSetor, movel, reprogramando, onR
             onEscolherData(data)
           }}
         >
-          <input type="date" aria-label={`Novo prazo interno de ${t.titulo}`} value={data} onChange={(e) => setData(e.target.value)} className="bg-background min-w-0 flex-1 rounded border px-1 text-[11px]" />
-          <button type="submit" className="bg-foreground text-background cursor-pointer rounded px-1.5 text-[11px]">
+          <input type="date" aria-label={`Novo prazo interno de ${t.titulo}`} value={data} onChange={(e) => setData(e.target.value)} className="bg-background min-w-0 flex-1 rounded border px-1 text-xs" />
+          <button type="submit" className="bg-foreground text-background cursor-pointer rounded px-1.5 text-xs">
             ok
           </button>
         </form>

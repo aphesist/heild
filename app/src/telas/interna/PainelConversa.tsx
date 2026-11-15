@@ -259,7 +259,7 @@ function Fio({ raiz, respostas, conversa, acoes, destaque, somenteLeitura, onFec
           </li>
         )}
         <Mensagem m={raiz} conversa={conversa} acoes={semFio} destaque={destaque === raiz.id} compacto />
-        <li className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-[11px]">
+        <li className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-xs">
           <span className="bg-border h-px flex-1" /> respostas <span className="bg-border h-px flex-1" />
         </li>
         {respostas.map((m) => (

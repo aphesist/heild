@@ -90,7 +90,7 @@ export function Servicos({ ctx }: { ctx: Ctx }) {
                     acao={<span className={cn('rounded-full px-2 py-0.5 text-xs whitespace-nowrap', e === 'ativo' ? 'bg-success/15' : 'bg-sunken')}>{ped && e !== 'ativo' ? 'pedido enviado' : rotuloEstadoServico[e]}</span>}
                   >
                     <p className="text-muted-foreground text-xs">{s.entrega}</p>
-                    <p className="text-muted-foreground text-[11px]">
+                    <p className="text-muted-foreground text-xs">
                       Precisa: {s.exige} · Cobrança: {s.cobranca}
                     </p>
                     {e === 'ativo' &&
@@ -232,7 +232,7 @@ function Emissor({ ctx }: { ctx: Ctx }) {
         <CampoEscolha rotulo="Serviço" valor={servico} onMudar={setServico} opcoes={cad.servicos.map((x) => ({ valor: x.id, rotulo: x.descricao }))} />
         <input aria-label="Valor" inputMode="decimal" value={valor} onChange={(e) => setValor(e.target.value)} placeholder="Valor (R$)" className={campo} />
         <input aria-label="Descrição" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Descrição na nota (opcional)" className={campo} />
-        <p className="text-muted-foreground flex items-start gap-1 text-[11px]">
+        <p className="text-muted-foreground flex items-start gap-1 text-xs">
           <LockSimpleIcon className="mt-0.5 size-3 shrink-0" /> Travado pelo escritório: {sv.codigo}, ISS {sv.iss}%{v ? ` (${brl((v * sv.iss) / 100)})` : ''}, retenções e IBS/CBS pela regra do cadastro. Emite com o {cert}.
         </p>
         {erro && <EstadoErro titulo="O emissor não respondeu" descricao={erro} onTentar={() => setErro(null)} />}
@@ -403,7 +403,7 @@ function Consultor({ ctx }: { ctx: Ctx }) {
   return (
     <>
       <div className="flex items-center gap-2">
-        <span className="text-muted-foreground flex-1 text-[11px]">
+        <span className="text-muted-foreground flex-1 text-xs">
           Perguntas do mês: {dados.usadas} de {dados.franquia} (franquia da empresa)
         </span>
         <SeloDemonstracao fonte="Consultor da empresa (IA)" />
@@ -414,7 +414,7 @@ function Consultor({ ctx }: { ctx: Ctx }) {
           const parcial = escrevendo?.id === m.id ? m.texto.slice(0, escrevendo.ate) : m.texto
           return (
             <div key={m.id} className={cn('max-w-[88%] rounded-lg px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
-              {m.de === 'consultor' && <span className="text-muted-foreground block text-[11px]">{nome} (assistente)</span>}
+              {m.de === 'consultor' && <span className="text-muted-foreground block text-xs">{nome} (assistente)</span>}
               {parcial}
               {escrevendo?.id !== m.id && m.cartao && (
                 <span className="bg-sunken mt-2 flex flex-col gap-0.5 rounded-md px-2.5 py-2 text-xs">
@@ -427,7 +427,7 @@ function Consultor({ ctx }: { ctx: Ctx }) {
                   ))}
                 </span>
               )}
-              {escrevendo?.id !== m.id && m.fonte && <span className="text-muted-foreground mt-1 block text-[11px]">Fonte: {m.fonte}</span>}
+              {escrevendo?.id !== m.id && m.fonte && <span className="text-muted-foreground mt-1 block text-xs">Fonte: {m.fonte}</span>}
               {escrevendo?.id !== m.id && m.tarefa && (
                 <button type="button" className="mt-1 block cursor-pointer text-xs underline underline-offset-2" onClick={() => ctx.ir('pedidos', m.tarefa)}>
                   Acompanhar em Pedidos
@@ -535,9 +535,9 @@ function PainelSocio({ ctx }: { ctx: Ctx }) {
           ] as const
         ).map(([r, v, d]) => (
           <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-lg p-3">
-            <span className="text-muted-foreground text-[11px]">{r}</span>
+            <span className="text-muted-foreground text-xs">{r}</span>
             <span className="text-lg font-light tabular-nums">{v}</span>
-            <span className="text-muted-foreground text-[11px]">{d}</span>
+            <span className="text-muted-foreground text-xs">{d}</span>
           </div>
         ))}
       </div>
@@ -959,9 +959,9 @@ function PainelPorPedido({ ctx }: { ctx: Ctx }) {
               <div className="grid grid-cols-2 gap-2">
                 {caixas.map(([r, v, f]) => (
                   <div key={r} className="bg-surface shadow-cartao flex flex-col rounded-lg p-3">
-                    <span className="text-muted-foreground text-[11px]">{r}</span>
+                    <span className="text-muted-foreground text-xs">{r}</span>
                     <span className="text-lg font-light tabular-nums">{v}</span>
-                    <span className="text-muted-foreground text-[10px]">{f}</span>
+                    <span className="text-muted-foreground text-xs">{f}</span>
                   </div>
                 ))}
               </div>
@@ -982,7 +982,7 @@ function PainelPorPedido({ ctx }: { ctx: Ctx }) {
                   Gerar link para guardar
                 </Button>
               )}
-              <p className="text-muted-foreground text-[11px]">Números da plataforma, sem opinião; para análise, peça ao contador em Pedidos › Dúvida.</p>
+              <p className="text-muted-foreground text-xs">Números da plataforma, sem opinião; para análise, peça ao contador em Pedidos › Dúvida.</p>
             </>
           )}
         </Folha>

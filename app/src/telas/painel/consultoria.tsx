@@ -242,7 +242,7 @@ function EditorParecer({ pergunta, cliente, onFechar }: { pergunta: PerguntaS03 
             <CampoArea valor={par.texto} onMudar={(v) => setPars((xs) => xs.map((x, j) => (j === i ? { ...x, texto: v } : x)))} linhas={2} />
             <CampoEscolha rotulo={`Fonte do parágrafo ${i + 1}`} valor={par.fonte ?? ''} onMudar={(v) => setPars((xs) => xs.map((x, j) => (j === i ? { ...x, fonte: v || undefined } : x)))} opcoes={fontes} />
             {trecho && (
-              <p className="text-muted-foreground text-[11px]">
+              <p className="text-muted-foreground text-xs">
                 [{trecho.norma}] “{trecho.redacao}” · vigente {trecho.vigente}
               </p>
             )}
@@ -491,7 +491,7 @@ function ReformaBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
             <td className="py-1 pr-2 tabular-nums">{c.ano}</td>
             <td className="py-1 pr-2 tabular-nums">{pct(c.cbs)}</td>
             <td className="py-1 pr-2 tabular-nums">{pct(c.ibs)}</td>
-            <td className={cn('py-1 pr-2 text-right tabular-nums', c.carga > c.atual && 'text-warning')}>{brl0(c.carga)}</td>
+            <td className={cn('py-1 pr-2 text-right tabular-nums', c.carga > c.atual && 'text-warning-text')}>{brl0(c.carga)}</td>
             <td className="text-muted-foreground py-1 pr-2 text-right tabular-nums">{brl0(c.atual)}</td>
             <td className="py-1 text-right">
               <BotaoNivel compacto nivel="executar" ferramenta="consultoria.simular" setor="consultor" variante="ghost" className="h-6 px-2 text-xs" onClick={() => simular(c.ano)}>

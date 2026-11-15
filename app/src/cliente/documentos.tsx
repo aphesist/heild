@@ -439,9 +439,9 @@ function FolhaPacote({ ctx, docs, onFechar }: { ctx: Ctx; docs: Documento[]; onF
             <CheckCircleIcon className="text-success size-4" weight="fill" /> {res.nome} · {res.tamanho}
           </p>
           <div className="bg-sunken rounded-md p-2.5">
-            <p className="text-muted-foreground mb-1 text-[11px]">manifesto.txt (protocolo {protocolo()})</p>
+            <p className="text-muted-foreground mb-1 text-xs">manifesto.txt (protocolo {protocolo()})</p>
             {res.manifesto.map((m) => (
-              <p key={m.nome} className={cn('flex gap-2 text-[11px]')}>
+              <p key={m.nome} className={cn('flex gap-2 text-xs')}>
                 <span className="min-w-0 flex-1 truncate">{m.nome}</span>
                 <span className="font-mono">{m.hash.slice(0, 12)}</span>
               </p>

@@ -53,7 +53,7 @@ export function Contador({ valor, className }: { valor: number; className?: stri
   return (
     <span
       className={cn(
-        'bg-destructive text-destructive-foreground inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold tabular-nums',
+        'bg-destructive text-destructive-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs leading-none font-medium tabular-nums',
         className,
       )}
     >

@@ -152,7 +152,7 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string }) {
                     </span>
                     <span className="text-muted-foreground col-span-2 row-start-2 text-xs md:col-span-1 md:col-start-2 md:row-start-1">
                       {servicosLinha} serviço(s), {notas.filter((n) => n.situacao === 'emitida').length} NFS-e
-                      {notas.some((n) => n.situacao === 'rejeitada') && <span className="text-destructive"> · NFS-e rejeitada</span>}
+                      {notas.some((n) => n.situacao === 'rejeitada') && <span className="text-destructive-text"> · NFS-e rejeitada</span>}
                       {c.regua_pausada_ate && ` · régua pausada até ${dataCurta(c.regua_pausada_ate)}`}
                     </span>
                     <span className="text-right md:col-start-3">

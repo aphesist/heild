@@ -102,7 +102,7 @@ export function EdicaoEmLinha({
           <XIcon className="size-3.5" />
         </button>
       </div>
-      {erro ? <p className="text-destructive text-xs">{erro}</p> : <p className="text-muted-foreground text-[11px]">{multilinha ? 'Ctrl+Enter salva' : 'Enter salva'} · Esc cancela</p>}
+      {erro ? <p className="text-destructive-text text-xs">{erro}</p> : <p className="text-muted-foreground text-xs">{multilinha ? 'Ctrl+Enter salva' : 'Enter salva'} · Esc cancela</p>}
     </div>
   )
 }

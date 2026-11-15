@@ -275,7 +275,7 @@ function LinhaConferir({ e, c, mostrarEmpresa, marcado, onMarcar }: { e: Empresa
         </span>
         {motivo && <span className="text-muted-foreground block text-xs">{motivo}</span>}
         {vencida && (
-          <span className="text-destructive flex items-center gap-1 text-xs">
+          <span className="text-destructive-text flex items-center gap-1 text-xs">
             <WarningIcon className="size-3.5" weight="fill" /> venceu em {dataCurta(c.vencimento)} sem aprovação: alerta ao Gestor e ao sócio; nunca execução
           </span>
         )}
@@ -435,11 +435,11 @@ function ProximoLote({ e, mostrarEmpresa }: { e: EmpresaVista; mostrarEmpresa: b
                 `acima de ${brl(teto)}: só no app, com segundo fator`
               )}
             </span>
-            {e.caixa - total < 0 && <span className="text-destructive block text-xs">O saldo não cobre o lote: o cliente vê o aviso no cartão.</span>}
+            {e.caixa - total < 0 && <span className="text-destructive-text block text-xs">O saldo não cobre o lote: o cliente vê o aviso no cartão.</span>}
             {modo.motivo && <span className="text-warning-foreground block text-xs">{modo.motivo}</span>}
             {foraSla && <span className="text-warning-foreground block text-xs">Sai com menos de {regrasSlaDe(e).lote_antes_h} h antes do vencimento: conta como desvio do SLA.</span>}
-            {limite && <span className="text-destructive block text-xs">{limite}</span>}
-            {faltaQuem && <span className="text-destructive block text-xs">A reforçada pede duas pessoas e a ficha tem {podem.length}: marque mais um aprovador na Configuração (vale com o aceite do sócio).</span>}
+            {limite && <span className="text-destructive-text block text-xs">{limite}</span>}
+            {faltaQuem && <span className="text-destructive-text block text-xs">A reforçada pede duas pessoas e a ficha tem {podem.length}: marque mais um aprovador na Configuração (vale com o aceite do sócio).</span>}
           </span>
           <SePode ferramenta="pagamento_lote.pedir_aprovacao" alvo={{ cliente_id: e.clienteId }} mostrarMotivo>
             <Button size="sm" className="rounded-full" disabled={!!limite} title={limite ?? undefined} onClick={() => void enviar()}>

@@ -23,7 +23,7 @@ function Passos({ nomes, atual }: { nomes: readonly string[]; atual: number }) {
       {nomes.map((p, i) => (
         <li key={p} className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={cn('h-1.5 rounded-full', i < atual ? 'bg-success' : i === atual ? 'bg-foreground' : 'bg-sunken')} />
-          <span className={cn('truncate text-[11px]', i === atual ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
+          <span className={cn('truncate text-xs', i === atual ? 'font-medium' : 'text-muted-foreground')}>{p}</span>
         </li>
       ))}
     </ol>
@@ -32,7 +32,7 @@ function Passos({ nomes, atual }: { nomes: readonly string[]; atual: number }) {
 
 function Erro({ texto }: { texto: string }) {
   return (
-    <p role="alert" className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
+    <p role="alert" className="bg-destructive/10 text-foreground flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
       <WarningCircleIcon weight="fill" className="mt-0.5 size-4 shrink-0" /> {texto}
     </p>
   )
@@ -309,7 +309,7 @@ export function Dominios({ admin, onFechar }: { admin: boolean; onFechar: () => 
           <li key={d.id} className={cn('bg-sunken flex items-start gap-3 rounded-lg px-3 py-2.5', d.situacao === 'desligado' && 'opacity-60')}>
             <div className="min-w-0 flex-1 text-sm">
               <div className="font-medium">{d.portal}</div>
-              <code className="text-muted-foreground block truncate text-[11px]">{d.dominio}</code>
+              <code className="text-muted-foreground block truncate text-xs">{d.dominio}</code>
               <div className="text-muted-foreground text-xs">
                 lê: {d.leitura} · sugere {d.atividade_sugerida}
               </div>
@@ -651,7 +651,7 @@ export function MapasCore({ conector, onFechar }: { conector: ConectorCore; onFe
         <span className="text-sm font-medium">Responsável → pessoa</span>
         {resps.map((r, i) => (
           <div key={r.core} className="grid grid-cols-[1fr_1fr] items-center gap-3 text-sm">
-            <code className={cn(!r.usuario_id && 'text-warning')}>{r.core}</code>
+            <code className={cn(!r.usuario_id && 'text-warning-text')}>{r.core}</code>
             <CampoEscolha valor={r.usuario_id ?? ''} onMudar={(v) => setResps((xs) => xs.map((x, k) => (k === i ? { ...x, usuario_id: v || null } : x)))} opcoes={[{ valor: '', rotulo: 'casar depois' }, ...pessoas.map((p) => ({ valor: p.id, rotulo: p.nome }))]} />
           </div>
         ))}

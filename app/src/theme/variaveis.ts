@@ -24,6 +24,10 @@ export function tokensDoModo(tema: Tema, modo: ModoCor): TokensTema {
       elevada: undefined,
       rebaixada: undefined,
       rebaixada_fim: undefined,
+      erro_texto: undefined,
+      sucesso_texto: undefined,
+      atencao_texto: undefined,
+      destaque_texto: undefined,
     }
     return { ...base, ...escuro }
   }
@@ -31,6 +35,47 @@ export function tokensDoModo(tema: Tema, modo: ModoCor): TokensTema {
 }
 
 const mix = (a: string, b: string, pctA: number) => `color-mix(in oklab, ${a} ${pctA}%, ${b})`
+
+/* ---------- Contraste garantido nas cores derivadas (marca branca) ---------- */
+
+type Rgb = [number, number, number]
+const rgbDe = (c: string): Rgb | null => (/^#[0-9a-f]{6}$/i.test(c) ? [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)] : null)
+const hexDe = (c: Rgb) => `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`
+const misturar = (a: Rgb, b: Rgb, pctA: number): Rgb => [0, 1, 2].map((i) => a[i] * (pctA / 100) + b[i] * (1 - pctA / 100)) as Rgb
+const luminancia = (c: Rgb) => {
+  const f = (v: number) => {
+    const s = v / 255
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+  }
+  return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2])
+}
+const contraste = (a: Rgb, b: Rgb) => {
+  const [x, y] = [luminancia(a), luminancia(b)].sort((m, n) => n - m)
+  return (x + 0.05) / (y + 0.05)
+}
+/** Camada derivada em hexadecimal (para medir; a variável CSS continua com color-mix). */
+const camada = (explicita: string | undefined, fundo: string, texto: string, pctFundo: number) => explicita && rgbDe(explicita) ? explicita : (() => {
+  const f = rgbDe(fundo)
+  const t = rgbDe(texto)
+  return f && t ? hexDe(misturar(f, t, pctFundo)) : fundo
+})()
+
+/**
+ * Leva a cor na direção do texto do tema, em passos de 5%, até passar o mínimo
+ * (4,5:1, com folga) sobre todas as camadas onde ela aparece como texto.
+ * Cor que não é hexadecimal fica como veio.
+ */
+export function comContraste(cor: string, camadas: string[], texto: string, minimo = 4.6): string {
+  const c = rgbDe(cor)
+  const t = rgbDe(texto)
+  const fundos = camadas.map(rgbDe).filter((x): x is Rgb => !!x)
+  if (!c || !t || !fundos.length) return cor
+  for (let p = 0; p <= 100; p += 5) {
+    const m = misturar(t, c, p)
+    if (fundos.every((f) => contraste(m, f) >= minimo)) return hexDe(m)
+  }
+  return texto
+}
 
 /** Escolhe texto claro ou escuro sobre uma cor hexadecimal: o que dá o maior contraste WCAG. */
 export function textoSobre(cor: string): string {
@@ -53,7 +98,10 @@ export function variaveisCss(tema: Tema, modo: ModoCor): Record<string, string> 
   const rebaixada = t.rebaixada ?? mix(t.fundo, t.texto, escuro ? 97 : 90)
   const rebaixadaFim = t.rebaixada_fim ?? mix(t.fundo, t.texto, escuro ? 99 : 85)
   const borda = t.borda ?? mix(t.fundo, t.texto, modo === 'escuro' ? 82 : 88)
-  const textoSuave = t.texto_suave ?? mix(t.texto, t.fundo, 60)
+  // Camadas em hexadecimal, para garantir o contraste do que é derivado (temas de escritório).
+  const camadasTexto = [t.fundo, camada(t.superficie, t.fundo, t.texto, escuro ? 94 : 97), camada(t.elevada, t.fundo, t.texto, escuro ? 89 : 100), camada(t.rebaixada, t.fundo, t.texto, escuro ? 97 : 90)]
+  const textoSuave = t.texto_suave ?? comContraste(camada(undefined, t.texto, t.fundo, 60), camadasTexto, t.texto)
+  const atencao = t.atencao ?? (escuro ? '#e2a845' : '#b7791f')
   const fundoFim = t.fundo_fim ?? mix(t.fundo, t.texto, modo === 'escuro' ? 92 : 90)
   const lateral = t.lateral ?? mix(t.fundo, t.texto, modo === 'escuro' ? 92 : 93)
   const lateralFim = t.lateral_fim ?? mix(t.fundo, t.texto, modo === 'escuro' ? 86 : 80)
@@ -77,7 +125,12 @@ export function variaveisCss(tema: Tema, modo: ModoCor): Record<string, string> 
     '--muted-foreground': textoSuave,
     '--accent': rebaixada,
     '--accent-foreground': t.texto,
-    '--warning': t.atencao ?? (escuro ? '#e2a845' : '#b7791f'),
+    '--warning': atencao,
+    // Cor de estado como texto (cores.md): a do tema, ou a cor de estado com contraste garantido.
+    '--destructive-text': t.erro_texto ?? comContraste(t.erro, camadasTexto, t.texto),
+    '--success-text': t.sucesso_texto ?? comContraste(t.sucesso, camadasTexto, t.texto),
+    '--warning-text': t.atencao_texto ?? comContraste(atencao, camadasTexto, t.texto),
+    '--highlight-text': t.destaque_texto ?? comContraste(t.destaque, camadasTexto, t.texto),
     '--highlight': t.destaque,
     '--highlight-foreground': textoSobre(t.destaque),
     '--destructive': t.erro,

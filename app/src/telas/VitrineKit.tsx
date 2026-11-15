@@ -471,18 +471,18 @@ function ServicosSimulados() {
                   Testar
                 </Button>
               </div>
-              <p className="text-muted-foreground text-[11px]">
+              <p className="text-muted-foreground text-xs">
                 <span className="font-mono">{s.api}</span> · Para ligar: {s.requisito}
               </p>
               {r?.carregando && <Carregando rotulo="Chamando" className="py-2" />}
-              {r?.erro && <p className="text-destructive text-xs">{r.erro}</p>}
+              {r?.erro && <p className="text-destructive-text text-xs">{r.erro}</p>}
               {r?.r && (
                 <div className="bg-sunken/70 flex flex-col gap-1 rounded-[10px] p-2">
                   <div className="flex items-center gap-2">
                     {r.r.demonstracao && <SeloDemonstracao fonte={r.r.fonte} />}
-                    <span className="text-muted-foreground text-[11px]">{r.r.latencia_ms} ms</span>
+                    <span className="text-muted-foreground text-xs">{r.r.latencia_ms} ms</span>
                   </div>
-                  <AreaRolagem eixo="ambos" as="pre" className="max-h-32 font-mono text-[11px] leading-snug whitespace-pre-wrap">{JSON.stringify(r.r.dados, null, 1)}</AreaRolagem>
+                  <AreaRolagem eixo="ambos" as="pre" className="max-h-32 font-mono text-xs leading-snug whitespace-pre-wrap">{JSON.stringify(r.r.dados, null, 1)}</AreaRolagem>
                 </div>
               )}
             </li>
@@ -506,7 +506,7 @@ function Eventos() {
             <li key={e.id} className="flex items-baseline gap-2">
               <span className="text-muted-foreground w-12 shrink-0 text-xs tabular-nums">{new Date(e.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
               <span className="min-w-0 flex-1">{e.texto}</span>
-              <span className="text-muted-foreground hidden shrink-0 font-mono text-[11px] sm:inline">{e.nome}</span>
+              <span className="text-muted-foreground hidden shrink-0 font-mono text-xs sm:inline">{e.nome}</span>
             </li>
           ))}
         </ol>

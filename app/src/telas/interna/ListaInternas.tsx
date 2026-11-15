@@ -148,7 +148,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
 
         {buscando && (
           <section aria-label="Resultados da busca" className="mb-3">
-            <h3 className="text-muted-foreground px-3 py-1.5 text-[11px] font-medium tracking-wide uppercase">Mensagens · {resultados.length}</h3>
+            <h3 className="text-muted-foreground px-3 py-1.5 text-xs font-medium tracking-wide uppercase">Mensagens · {resultados.length}</h3>
             {resultados.length === 0 ? (
               <p className="text-muted-foreground px-3 py-2 text-sm">Nada encontrado no que você pode ver.</p>
             ) : (
@@ -158,7 +158,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
                   return (
                     <li key={m.id}>
                       <button type="button" onClick={() => onAbrir(c.id, m.id)} className="hover:bg-sunken flex w-full cursor-pointer flex-col gap-0.5 rounded-[14px] px-3 py-2 text-left">
-                        <span className="text-muted-foreground flex justify-between gap-2 text-[11px]">
+                        <span className="text-muted-foreground flex justify-between gap-2 text-xs">
                           <span className="truncate">
                             {rotulo(c)} · {nomeAutor(m)}
                           </span>
@@ -171,7 +171,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
                 })}
               </ul>
             )}
-            {termo && <h3 className="text-muted-foreground px-3 pt-3 pb-1.5 text-[11px] font-medium tracking-wide uppercase">Conversas com esse nome</h3>}
+            {termo && <h3 className="text-muted-foreground px-3 pt-3 pb-1.5 text-xs font-medium tracking-wide uppercase">Conversas com esse nome</h3>}
           </section>
         )}
 
@@ -182,7 +182,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
           const naoLidas = lista.reduce((s, c) => s + (porConversa[c.id] ?? 0), 0)
           return (
             <section key={g.id} aria-label={g.rotulo} className="mb-2">
-              <button type="button" aria-expanded={!fechado} onClick={() => setFechados((x) => (fechado ? x.filter((y) => y !== g.id) : [...x, g.id]))} className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium tracking-wide uppercase">
+              <button type="button" aria-expanded={!fechado} onClick={() => setFechados((x) => (fechado ? x.filter((y) => y !== g.id) : [...x, g.id]))} className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-medium tracking-wide uppercase">
                 <CaretDownIcon className={cn('size-3 transition-transform', fechado && '-rotate-90')} />
                 {g.rotulo}
                 {fechado && <Contador valor={naoLidas} className="ml-auto" />}
@@ -216,7 +216,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
                             </span>
                             <span className="flex items-center gap-2">
                               <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs">{u ? `${extrasDe(u).sistema ? '' : `${nomeAutor(u)}: `}${u.corpo}` : 'Sem mensagens'}</span>
-                              {silenciada ? n > 0 && <span className="bg-sunken text-muted-foreground rounded-full px-1.5 text-[10px] tabular-nums">{n}</span> : <Contador valor={n} />}
+                              {silenciada ? n > 0 && <span className="bg-sunken text-muted-foreground rounded-full px-1.5 text-xs tabular-nums">{n}</span> : <Contador valor={n} />}
                             </span>
                           </span>
                         </button>

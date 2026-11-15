@@ -173,7 +173,7 @@ function MenuInferior({ maisAberto, onMais, onFecharMais }: { maisAberto: boolea
             onClick={acao}
             aria-current={ativo === id ? 'page' : undefined}
             aria-label={contador ? `${rotulo}, ${contador}` : rotulo}
-            className={cn('relative flex min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-[11px] transition-colors', ativo === id ? 'text-foreground font-medium' : 'text-muted-foreground')}
+            className={cn('relative flex min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-xs transition-colors', ativo === id ? 'text-foreground font-medium' : 'text-muted-foreground')}
           >
             {ativo === id && <motion.span layoutId="menu-inferior-traco" className="bg-foreground absolute top-0 h-[3px] w-8 rounded-b-full" />}
             <span className="relative">

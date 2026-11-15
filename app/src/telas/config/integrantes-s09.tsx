@@ -166,7 +166,7 @@ export function TetoEscritorio() {
       </p>
       <Interruptor ligado={teto.caiParaPessoa} desabilitado={!pode} onMudar={(x) => setTeto({ ...teto, caiParaPessoa: x })} rotulo="Ao atingir, a conversa cai para uma pessoa" detalhe="O cliente nunca fica sem resposta: vai para o responsável do setor (D-32)." />
       {teto.atingido ? (
-        <p className="text-warning flex items-center gap-1.5 text-sm">
+        <p className="text-warning-text flex items-center gap-1.5 text-sm">
           <WarningIcon className="size-4" /> Teto atingido.{' '}
           <button type="button" className="cursor-pointer underline" onClick={() => setTeto({ ...teto, gasto: 1612.4, atingido: false })}>
             Voltar ao normal

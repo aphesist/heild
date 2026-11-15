@@ -142,7 +142,7 @@ function VisaoMae({ contratantes, onContexto }: { contratantes: ContratanteVista
                 <span className="text-muted-foreground text-xs md:hidden">Empresas </span>
                 {c.clientes_finais.length}
               </span>
-              <span className={cn('md:text-right', c.sla_mes < 90 && slaTexto(c) !== '—' && 'text-destructive')}>
+              <span className={cn('md:text-right', c.sla_mes < 90 && slaTexto(c) !== '—' && 'text-destructive-text')}>
                 <span className="text-muted-foreground text-xs md:hidden">No prazo </span>
                 {slaTexto(c)}
                 {c.sla_mes < 90 && slaTexto(c) !== '—' && ' · atenção'}
@@ -155,7 +155,7 @@ function VisaoMae({ contratantes, onContexto }: { contratantes: ContratanteVista
                 <span className="text-muted-foreground text-xs md:hidden">Bola contratante </span>
                 {c.bolaContratante}
               </span>
-              <span className={cn('md:text-right', c.honorario_mes > 0 && c.margem < 20 && 'text-destructive')}>
+              <span className={cn('md:text-right', c.honorario_mes > 0 && c.margem < 20 && 'text-destructive-text')}>
                 <span className="text-muted-foreground text-xs md:hidden">Margem </span>
                 {permissoes.bpoMargem ? margemTexto(c) : '—'}
               </span>
@@ -340,7 +340,7 @@ export function ConversaContratante({ c, lado, nome }: { c: ContratanteVista; la
         {msgs.length === 0 && <li className="text-muted-foreground text-sm">Nenhuma mensagem ainda.</li>}
         {msgs.map((m) => (
           <li key={m.id} className={cn('flex max-w-[85%] flex-col rounded-lg px-3 py-2 text-sm', m.de === lado ? 'bg-primary text-primary-foreground self-end' : 'bg-sunken self-start')}>
-            <span className={cn('text-[11px]', m.de === lado ? 'opacity-80' : 'text-muted-foreground')}>
+            <span className={cn('text-xs', m.de === lado ? 'opacity-80' : 'text-muted-foreground')}>
               {m.nome} · {dataHora(m.quando)}
             </span>
             {m.texto}
@@ -641,7 +641,7 @@ function FilaContratante({ c }: { c: ContratanteVista }) {
                     {f.cliente_final} · {rotuloDepto[f.departamento ?? ''] ?? f.departamento} · {f.codigo} · {f.responsavel_nome}
                     {f.detalhe && ` · ${f.detalhe}`}
                   </span>
-                  <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive' : sla.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>
+                  <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>
                     {sla.texto}
                     {f.prazo_legal && ` · prazo legal ${quando(f.prazo_legal)}`}
                     {typeof f.extras?.cobrado_em === 'string' && ` · cobrado pelo Atendimento ${dataHora(f.extras.cobrado_em)}`}
@@ -778,7 +778,7 @@ function RevisoesContratante({ c, onPortal }: { c: ContratanteVista; onPortal: (
                   {est === 'aprovada' ? 'aprovado: pode transmitir' : est === 'ajuste' ? 'ajuste pedido pelo RT' : est === 'pendente' ? `aguardando ${rt?.nome ?? 'o responsável técnico'}` : 'preparando: mande ao RT quando pronto'}
                 </Badge>
                 <p className="text-muted-foreground text-xs">{f.detalhe}</p>
-                {typeof f.extras?.hash === 'string' && <p className="text-muted-foreground text-[11px]">hash da entrega {f.extras.hash}</p>}
+                {typeof f.extras?.hash === 'string' && <p className="text-muted-foreground text-xs">hash da entrega {f.extras.hash}</p>}
                 {est === 'pendente' && (
                   <Button
                     size="sm"
@@ -1004,12 +1004,12 @@ function RentabilidadeContratantes({ contratantes }: { contratantes: Contratante
                 <span className="text-muted-foreground text-xs tabular-nums">
                   {c.horas_mes} h · {brl(c.honorario_mes)}
                 </span>
-                <span className={cn('w-12 text-right tabular-nums', c.honorario_mes > 0 && c.margem < 20 && 'text-destructive')}>{margemTexto(c)}</span>
+                <span className={cn('w-12 text-right tabular-nums', c.honorario_mes > 0 && c.margem < 20 && 'text-destructive-text')}>{margemTexto(c)}</span>
               </span>
               {c.honorario_mes > 0 && (
                 <ul className="text-muted-foreground grid gap-x-4 gap-y-0.5 text-xs sm:grid-cols-3" aria-label={`Margem de ${c.nome} por departamento`}>
                   {margemPorDepto(c).map((d) => (
-                    <li key={d.depto} className={cn(d.margem < 20 && 'text-destructive')}>
+                    <li key={d.depto} className={cn(d.margem < 20 && 'text-destructive-text')}>
                       {rotuloDepto[d.depto] ?? d.depto}: {d.margem}% · {d.horas} h · {brl(d.honorario)}
                     </li>
                   ))}

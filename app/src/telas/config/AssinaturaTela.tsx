@@ -149,7 +149,7 @@ export function AssinaturaTela() {
             O escritório recebe a exportação completa (clientes, documentos, tarefas, conversas, horas e eventos) e fica 90 dias em modo leitura. Clientes podem ser transferidos para outro escritório da plataforma, com aceite dos dois
             lados.
           </p>
-          <Button size="sm" variant="outline" className="text-destructive w-fit rounded-full" onClick={() => setModal('saida')}>
+          <Button size="sm" variant="outline" className="text-destructive-text w-fit rounded-full" onClick={() => setModal('saida')}>
             Encerrar…
           </Button>
         </section>

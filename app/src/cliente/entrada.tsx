@@ -209,7 +209,7 @@ function ConviteCartao({ c, empresa, onAbrir, onPedirNovo }: { c: ConviteApp; em
       {c.situacao === 'aceito' && <span className="text-xs">Aceito: essa pessoa já entra pelo código.</span>}
       {c.situacao === 'expirado' && (
         <>
-          <span className="text-destructive text-xs">Este convite venceu em {c.expiraEm}.</span>
+          <span className="text-destructive-text text-xs">Este convite venceu em {c.expiraEm}.</span>
           <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={onPedirNovo}>
             Pedir um convite novo
           </Button>
@@ -315,7 +315,7 @@ function PassoCodigo({ alvo, onVoltar, onOk, onBloqueado, primeiroAcesso, onEntr
         <div className="bg-sunken flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           {alvo.canal === 'whatsapp' ? <ChatCircleTextIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" /> : <EnvelopeSimpleIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />}
           <span className="min-w-0 flex-1">
-            <span className="text-muted-foreground block text-[11px]">Mensagem recebida no {alvo.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'}</span>
+            <span className="text-muted-foreground block text-xs">Mensagem recebida no {alvo.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'}</span>
             Seu código de acesso é <strong className="font-mono font-medium tracking-wider">{envio.codigo}</strong>. Não passe a ninguém.
           </span>
           <SeloDemonstracao fonte={envio.fonte} />
@@ -334,7 +334,7 @@ function PassoCodigo({ alvo, onVoltar, onOk, onBloqueado, primeiroAcesso, onEntr
         placeholder="000000"
         className={cn(classeCampo, 'font-mono text-lg tracking-[0.4em]', errado && 'ring-destructive ring-2')}
       />
-      {errado && tentativas > 0 && <p className="text-destructive text-xs">Código errado. Restam {tentativas} tentativas.</p>}
+      {errado && tentativas > 0 && <p className="text-destructive-text text-xs">Código errado. Restam {tentativas} tentativas.</p>}
       <p className="text-muted-foreground text-xs tabular-nums">{resta > 0 ? `Vence em ${Math.floor(resta / 60)}:${String(resta % 60).padStart(2, '0')}` : 'O código venceu.'}</p>
       <Button className="rounded-full" disabled={codigo.length !== 6 || !envio || resta === 0} onClick={conferir}>
         {primeiroAcesso ? 'Confirmar' : 'Entrar'}
@@ -342,7 +342,7 @@ function PassoCodigo({ alvo, onVoltar, onOk, onBloqueado, primeiroAcesso, onEntr
       <button type="button" className="text-muted-foreground w-fit cursor-pointer text-sm underline-offset-2 hover:underline" onClick={enviar}>
         Mandar outro código
       </button>
-      <p className="text-muted-foreground text-[11px]">Na demonstração, o código acima entra, e qualquer outra sequência de 6 números também; 000000 simula um código errado (5 tentativas).</p>
+      <p className="text-muted-foreground text-xs">Na demonstração, o código acima entra, e qualquer outra sequência de 6 números também; 000000 simula um código errado (5 tentativas).</p>
     </>
   )
 }
@@ -496,7 +496,7 @@ function PassoInstalar({ alvo, onPronto }: { alvo: Alvo; onPronto: (a: AcessoPes
       <Button variant="ghost" className="rounded-full" onClick={() => fim(null, true)}>
         Agora não
       </Button>
-      <p className="text-muted-foreground text-[11px]">Sem instalar, os avisos chegam por WhatsApp ou e-mail, como hoje.</p>
+      <p className="text-muted-foreground text-xs">Sem instalar, os avisos chegam por WhatsApp ou e-mail, como hoje.</p>
     </>
   )
 }

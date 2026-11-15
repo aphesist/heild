@@ -254,7 +254,7 @@ export function ParearAgente({ onPareado }: { onPareado: (a: { dispositivo: stri
       {fase === 'erro' && <EstadoErro titulo="O agente não pareou" descricao={erro} onTentar={() => void aguardar()} />}
       {fase === 'pastas' && dispositivo && (
         <div className="flex flex-col gap-2">
-          <p className="text-success flex items-center gap-1.5">
+          <p className="text-success-text flex items-center gap-1.5">
             <CheckCircleIcon weight="fill" className="size-4" /> {dispositivo.nome} pareado · agente {dispositivo.versao}
           </p>
           <span className="font-medium">Pastas que a Heild pode ler e gravar</span>
@@ -339,7 +339,7 @@ export function CartaoAgente({ agenteId, onRevogado }: { agenteId: string; onRev
         {revogado ? `revogado por ${a.revogado_por} em ${new Date(a.revogado_em!).toLocaleString('pt-BR')}` : `última sincronização ${tempoRelativo(a.ultima_sincronizacao)} · ${a.arquivos.toLocaleString('pt-BR')} arquivos · pareado por ${a.pareado_por} em ${new Date(a.pareado_em).toLocaleDateString('pt-BR')}`}
       </span>
       {!revogado && !a.online && (
-        <span className="text-destructive flex items-start gap-1">
+        <span className="text-destructive-text flex items-start gap-1">
           <WarningIcon className="mt-0.5 size-3.5 shrink-0" /> O servidor está desligado ou sem internet. Os documentos continuam no índice; abrir e gravar volta quando o agente reconectar.
         </span>
       )}

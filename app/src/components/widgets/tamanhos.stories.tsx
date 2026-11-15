@@ -30,7 +30,7 @@ function Catalogo({ defs }: { defs: DefWidget[] }) {
               const d = dimensoes[t]
               return (
                 <div key={t} className="flex flex-col gap-1">
-                  <span className="text-muted-foreground text-[11px]">
+                  <span className="text-muted-foreground text-xs">
                     {t} · {d.rotulo}
                   </span>
                   <div data-medida={`${def.id}:${t}`} style={{ width: d.colunas * CELULA + (d.colunas - 1) * VAO, height: `calc(${d.linhas} * var(--celula-widget) + ${(d.linhas - 1) * VAO}px)` }}>

@@ -77,7 +77,7 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
                             {!fechado ? (
                               <input type="checkbox" aria-label={`Marcar ${hm(i.inicio)}`} className="accent-foreground mt-1 size-4 shrink-0" checked={i.situacao === 'marcado'} disabled={!temSugestao} onChange={(ev) => executar(() => repos.itensConfirmacao.marcar(i.id, ev.target.checked))} />
                             ) : (
-                              <CheckIcon className={cn('mt-1 size-4 shrink-0', i.situacao === 'confirmado' ? 'text-success' : 'text-muted-foreground')} />
+                              <CheckIcon className={cn('mt-1 size-4 shrink-0', i.situacao === 'confirmado' ? 'text-success-text' : 'text-muted-foreground')} />
                             )}
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-x-2 text-sm">

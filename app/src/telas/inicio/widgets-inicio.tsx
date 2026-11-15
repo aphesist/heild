@@ -335,8 +335,8 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
           <div className="grid grid-cols-3 gap-2 text-center">
             {(
               [
-                ['Vencido', vencido.length, 'text-destructive'],
-                ['7 dias', sete.length, 'text-warning'],
+                ['Vencido', vencido.length, 'text-destructive-text'],
+                ['7 dias', sete.length, 'text-warning-text'],
                 ['30 dias', trinta.length, 'text-foreground'],
               ] as const
             ).map(([r, n, c]) => (
@@ -387,7 +387,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
                       {c.cliente ?? 'lead'} · {rotuloSetorCurto[c.setor]} · {c.responsavel ?? 'sem responsável'}
                     </span>
                   </span>
-                  <span className={cn('shrink-0 text-xs font-medium', c.prazoMin !== null && c.prazoMin < 0 ? 'text-destructive' : 'text-warning')}>{c.prazoMin === null ? 'pausado' : c.prazoMin < 0 ? `estourou ${-c.prazoMin} min` : `${c.prazoMin} min`}</span>
+                  <span className={cn('shrink-0 text-xs font-medium', c.prazoMin !== null && c.prazoMin < 0 ? 'text-destructive-text' : 'text-warning-text')}>{c.prazoMin === null ? 'pausado' : c.prazoMin < 0 ? `estourou ${-c.prazoMin} min` : `${c.prazoMin} min`}</span>
                 </button>
               </li>
             ))}
@@ -467,7 +467,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
               {primeiros.map((p, i) => (
                 <li key={p.id} className="min-w-[12rem] flex-1">
                   <div className={cn('bg-raised flex h-full items-center gap-2 rounded-[14px] px-3 py-2 text-sm', p.feito && 'opacity-60')}>
-                    {p.feito ? <CheckCircleIcon className="text-success size-5 shrink-0" weight="fill" /> : <span className="bg-sunken flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] tabular-nums">{i + 1}</span>}
+                    {p.feito ? <CheckCircleIcon className="text-success size-5 shrink-0" weight="fill" /> : <span className="bg-sunken flex size-5 shrink-0 items-center justify-center rounded-full text-xs tabular-nums">{i + 1}</span>}
                     <button type="button" onClick={() => nav.irPara(p.destino)} className="min-w-0 flex-1 cursor-pointer truncate text-left underline-offset-2 hover:underline">
                       {p.rotulo}
                     </button>

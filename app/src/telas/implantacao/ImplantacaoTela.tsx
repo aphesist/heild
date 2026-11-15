@@ -483,7 +483,7 @@ function PassoCampanha({ e }: { e: EstadoImplantacao }) {
         ))}
       </ul>
       {e.campanha_em ? (
-        <p className="text-success flex items-center gap-1.5 text-sm">
+        <p className="text-success-text flex items-center gap-1.5 text-sm">
           <CheckCircleIcon weight="fill" className="size-4" /> Campanha enviada em {new Date(e.campanha_em).toLocaleDateString('pt-BR')}.
         </p>
       ) : (
@@ -532,7 +532,7 @@ function PassoMigracao({ e, setE, onFeito }: { e: EstadoImplantacao; setE: (f: (
         ))}
       </ol>
       {e.plano_aprovado_em ? (
-        <p className="text-success flex items-center gap-1.5 text-sm">
+        <p className="text-success-text flex items-center gap-1.5 text-sm">
           <CheckCircleIcon weight="fill" className="size-4" /> Plano aprovado em {new Date(e.plano_aprovado_em).toLocaleDateString('pt-BR')}.
         </p>
       ) : (

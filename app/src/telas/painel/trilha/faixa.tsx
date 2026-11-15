@@ -122,7 +122,7 @@ export function CicloDeVida({ clienteId, compacto }: { clienteId: string; compac
           ))}
         </div>
       )}
-      <ol className="flex flex-wrap items-center gap-1 text-[11px]" aria-label="Estados do ciclo">
+      <ol className="flex flex-wrap items-center gap-1 text-xs" aria-label="Estados do ciclo">
         {ordemCiclo.map((e) => (
           <li key={e} className={cn('rounded-full px-2 py-0.5', e === atual ? 'bg-foreground text-background font-medium' : 'bg-sunken text-muted-foreground')} aria-current={e === atual ? 'step' : undefined}>
             {rotuloCiclo[e]}
@@ -166,7 +166,7 @@ export function CicloDeVida({ clienteId, compacto }: { clienteId: string; compac
               ))}
             </div>
           )}
-          <ol className="text-muted-foreground flex flex-col gap-0.5 text-[11px]">
+          <ol className="text-muted-foreground flex flex-col gap-0.5 text-xs">
             {historico.map((e) => (
               <li key={e.id}>
                 {diaMes(e.criado_em.slice(0, 10))} · {e.ator_nome}: {e.texto}

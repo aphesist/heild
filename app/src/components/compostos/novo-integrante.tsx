@@ -232,7 +232,7 @@ export function NovoIntegrante({ aberto, onFechar, onAtivar, criados = 0, pessoa
                 <Label htmlFor="nome-integrante">Nome</Label>
                 <Input id="nome-integrante" value={nome} onChange={(e) => setNome(e.target.value)} aria-invalid={!!erroNome} aria-describedby={erroNome ? 'erro-nome-integrante' : undefined} />
                 {erroNome && (
-                  <span id="erro-nome-integrante" className="text-destructive text-xs">
+                  <span id="erro-nome-integrante" className="text-destructive-text text-xs">
                     {erroNome}
                   </span>
                 )}

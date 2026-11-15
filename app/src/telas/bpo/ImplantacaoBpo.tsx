@@ -669,7 +669,7 @@ export function SaidaBpo({ e, perfil, nome, onConcluir }: { e?: EmpresaVista; pe
                     </Button>
                   )}
                   {p.id === 'revogar' && (
-                    <Button size="sm" variant="outline" className="text-destructive rounded-full" onClick={() => void revogar()}>
+                    <Button size="sm" variant="outline" className="text-destructive-text rounded-full" onClick={() => void revogar()}>
                       Revogar em um passo
                     </Button>
                   )}

@@ -87,11 +87,11 @@ export function DialogoNovaConversa({ tipo, onFechar, onCriada }: { tipo: 'pesso
         {tipo === 'grupo' && (
           <div className="flex flex-col gap-1">
             <CampoTexto valor={nome} onMudar={setNome} placeholder="Nome do grupo" aria-label="Nome do grupo" />
-            {tentou && !nome.trim() && <span className="text-destructive text-xs">Dê um nome ao grupo.</span>}
+            {tentou && !nome.trim() && <span className="text-destructive-text text-xs">Dê um nome ao grupo.</span>}
           </div>
         )}
         <EscolherPessoas escolhidas={ids} onMudar={setIds} unica={tipo === 'pessoal'} />
-        {tentou && !ids.length && <span className="text-destructive text-xs">{tipo === 'pessoal' ? 'Escolha um colega.' : 'Escolha pelo menos um colega.'}</span>}
+        {tentou && !ids.length && <span className="text-destructive-text text-xs">{tipo === 'pessoal' ? 'Escolha um colega.' : 'Escolha pelo menos um colega.'}</span>}
         <DialogFooter>
           <Button variant="ghost" className="rounded-full" onClick={fechar}>
             Cancelar

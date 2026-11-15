@@ -128,7 +128,7 @@ export function CartaoCitacao({ c }: { c: Citacao }) {
         <Icone className="size-3.5" />
       </span>
       <span className="min-w-0">
-        <span className="text-muted-foreground block text-[10px] tracking-wide uppercase">{pode ? rotuloCitacao[c.tipo] : 'Sem acesso'}</span>
+        <span className="text-muted-foreground block text-xs tracking-wide uppercase">{pode ? rotuloCitacao[c.tipo] : 'Sem acesso'}</span>
         <span className="block truncate font-medium">{pode ? c.rotulo : `${rotuloCitacao[c.tipo]} de um cliente que você não vê`}</span>
         {pode && tarefa && <span className="text-muted-foreground block truncate">{tarefa.status.replace(/_/g, ' ')}{tarefa.prazo_legal ? ` · prazo ${tarefa.prazo_legal.split('-').reverse().slice(0, 2).join('/')}` : ''}</span>}
       </span>
@@ -175,7 +175,7 @@ export function PlayerAudio({ m, onTentar }: { m: MensagemInterna; onTentar: () 
         <span className="bg-sunken relative h-1.5 flex-1 overflow-hidden rounded-full">
           <span className="bg-primary absolute inset-y-0 left-0 rounded-full transition-[width] duration-1000 ease-linear" style={{ width: `${(pos / a.duracao_seg) * 100}%` }} />
         </span>
-        <span className="text-muted-foreground pr-2 text-[11px] tabular-nums">{mmss(tocando ? pos : a.duracao_seg)}</span>
+        <span className="text-muted-foreground pr-2 text-xs tabular-nums">{mmss(tocando ? pos : a.duracao_seg)}</span>
       </div>
       <p className="text-muted-foreground text-xs">
         {a.estado === 'transcrevendo' && 'Transcrevendo…'}
@@ -345,7 +345,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
           <span className="text-foreground text-sm font-medium">{e.ia ? e.ia.nome : nomeDe(m.autor_id)}</span>
-          {e.ia && <Badge variant="outline" className="h-4 px-1.5 text-[10px]">IA · integrante</Badge>}
+          {e.ia && <Badge variant="outline" className="h-4 px-1.5 text-xs">IA · integrante</Badge>}
           <span className="text-muted-foreground tabular-nums">{quando(m.criado_em)}</span>
           {m.editada_em && (
             <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer underline-offset-2 hover:underline" onClick={() => acoes.onVersoes(m)}>
@@ -357,7 +357,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
               <PushPinIcon weight="fill" className="text-warning size-3" /> fixada{e.fixada_por ? ` por ${e.fixada_por}` : ''}
             </span>
           )}
-          {e.resumo === 'manha' && <Badge variant="destaque" className="h-4 px-1.5 text-[10px]">resumo da manhã</Badge>}
+          {e.resumo === 'manha' && <Badge variant="destaque" className="h-4 px-1.5 text-xs">resumo da manhã</Badge>}
         </div>
         {editando ? (
           <div className="flex flex-col gap-2">
@@ -446,7 +446,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
             <ArrowBendUpLeftIcon className="size-3.5 -scale-x-100" /> {respostas.length} {respostas.length === 1 ? 'resposta' : 'respostas'} · última {quando(respostas.at(-1)!.criado_em)}
           </button>
         )}
-        {vistoPor && vistoPor.length > 0 && <span className="text-muted-foreground text-[11px]">visto por {vistoPor.join(', ')}</span>}
+        {vistoPor && vistoPor.length > 0 && <span className="text-muted-foreground text-xs">visto por {vistoPor.join(', ')}</span>}
       </div>
       {!acoes.somenteLeitura && !editando && (
         <div className="bg-surface shadow-contorno absolute -top-3 right-2 hidden items-center gap-0.5 rounded-full p-0.5 group-focus-within:flex group-hover:flex">
@@ -619,7 +619,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
     <div className={cn('relative flex flex-col gap-2', compacto ? 'p-2' : 'p-3')}>
       {lista.length > 0 && (
         <AreaRolagem as="ul" role="listbox" aria-label={gatilho?.[1] === '@' ? 'Mencionar' : 'Citar'} className="bg-popover shadow-lg absolute right-3 bottom-full left-3 z-20 mb-1 flex max-h-72 flex-col rounded-[16px] border p-1">
-          <li className="text-muted-foreground px-3 py-1 text-[11px]">{gatilho?.[1] === '@' ? 'Mencionar pessoa, equipe ou integrante' : 'Citar cliente, tarefa, obrigação ou documento'}</li>
+          <li className="text-muted-foreground px-3 py-1 text-xs">{gatilho?.[1] === '@' ? 'Mencionar pessoa, equipe ou integrante' : 'Citar cliente, tarefa, obrigação ou documento'}</li>
           {lista.map((s, i) => (
             <li key={s.chave} role="option" aria-selected={i === sel}>
               <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => escolher(s)} className={cn('flex w-full cursor-pointer items-center gap-2.5 rounded-[12px] px-3 py-1.5 text-left text-sm', i === sel ? 'bg-sunken' : 'hover:bg-sunken')}>
@@ -667,7 +667,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
               </button>
             </span>
           ))}
-          <span className="text-muted-foreground self-center text-[11px]">vão para Arquivos e não se apagam</span>
+          <span className="text-muted-foreground self-center text-xs">vão para Arquivos e não se apagam</span>
         </div>
       )}
       <div className="bg-raised shadow-contorno flex flex-col rounded-[18px]">
@@ -780,7 +780,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
                 #
               </Button>
             </Tooltip>
-            <span className="text-muted-foreground ml-1 hidden truncate text-[11px] sm:inline">{conversa.tipo === 'pessoal' ? 'Só vocês dois leem. Integrantes só se chamados.' : 'Mensagens não se apagam; dá para editar.'}</span>
+            <span className="text-muted-foreground ml-1 hidden truncate text-xs sm:inline">{conversa.tipo === 'pessoal' ? 'Só vocês dois leem. Integrantes só se chamados.' : 'Mensagens não se apagam; dá para editar.'}</span>
             <span className="flex-1" />
             <Button size="icon-sm" className="rounded-full" aria-label="Enviar" disabled={!texto.trim() && !arquivos.length} onClick={() => void enviar()}>
               <PaperPlaneRightIcon />

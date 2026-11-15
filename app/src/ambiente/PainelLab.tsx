@@ -162,7 +162,7 @@ export function PainelLab({
             }}
             opcoes={escritoriosDeExemplo.map((e) => ({ valor: e.id, rotulo: e.nome }))}
           />
-          <span className="text-muted-foreground text-[11px]">{banco.escritorio.descricao} Os dados de cada escritório ficam separados.</span>
+          <span className="text-muted-foreground text-xs">{banco.escritorio.descricao} Os dados de cada escritório ficam separados.</span>
         </div>
         {visao === 'escritorio' && (
           <div className="flex flex-col gap-1">
@@ -206,7 +206,7 @@ export function PainelLab({
                 <Avatar nome={u.nome} tamanho="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm">{u.nome}</span>
-                  <span className="text-muted-foreground block truncate text-[11px]">{papelExibido(u)}</span>
+                  <span className="text-muted-foreground block truncate text-xs">{papelExibido(u)}</span>
                 </span>
               </button>
             ))}
@@ -274,7 +274,7 @@ export function PainelLab({
                 <Avatar nome={p.nome} tamanho="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm">{p.nome}</span>
-                  <span className="text-muted-foreground block truncate text-[11px]">{p.empresas.map((e) => `${loja.clientes.find((c) => c.id === e.clienteId)?.nome} · ${e.contato.papel}`).join(' / ')}</span>
+                  <span className="text-muted-foreground block truncate text-xs">{p.empresas.map((e) => `${loja.clientes.find((c) => c.id === e.clienteId)?.nome} · ${e.contato.papel}`).join(' / ')}</span>
                 </span>
               </button>
             ))}
@@ -316,7 +316,7 @@ export function PainelLab({
         <a href="#/lab/ui" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
           <FlaskIcon className="size-4 shrink-0" /> UI Lab: componentes e regras, em todos os estados
         </a>
-        <p className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
+        <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
           <DatabaseIcon className="size-3.5 shrink-0" /> Dados guardados: {banco.armazenamento.descricao}. Recarregar a página não perde nada.
         </p>
         {!confirmar ? (

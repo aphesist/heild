@@ -72,7 +72,7 @@ function Linha({ rotulo, valor, tom }: { rotulo: ReactNode; valor: ReactNode; to
   return (
     <div className="flex items-baseline gap-2 text-sm">
       <span className="min-w-0 flex-1">{rotulo}</span>
-      <span className={cn('tabular-nums', tom === 'erro' && 'text-destructive', tom === 'ok' && 'text-success')}>{valor}</span>
+      <span className={cn('tabular-nums', tom === 'erro' && 'text-destructive-text', tom === 'ok' && 'text-success-text')}>{valor}</span>
     </div>
   )
 }

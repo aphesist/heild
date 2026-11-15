@@ -288,14 +288,14 @@ function Permissoes() {
               const n = nivel(u, a)
               return (
                 <td key={a} className="py-1 pr-2 text-center">
-                  <span className={cn('inline-flex size-6 items-center justify-center rounded-md text-[11px] font-medium', n === 'E' ? 'bg-foreground/80 text-background' : n === 'L' ? 'bg-sunken' : 'text-muted-foreground')}>{n}</span>
+                  <span className={cn('inline-flex size-6 items-center justify-center rounded-md text-xs font-medium', n === 'E' ? 'bg-foreground/80 text-background' : n === 'L' ? 'bg-sunken' : 'text-muted-foreground')}>{n}</span>
                 </td>
               )
             })}
           </tr>
         ))}
       </Tabela>
-      <p className="text-muted-foreground text-[11px]">E executa · L lê · · sem acesso. Calculado pela mesma função que autoriza (sem lógica própria na tela). Clique no nome: “o que Fulano vê?”.</p>
+      <p className="text-muted-foreground text-xs">E executa · L lê · · sem acesso. Calculado pela mesma função que autoriza (sem lógica própria na tela). Clique no nome: “o que Fulano vê?”.</p>
       {sel && (
         <div className="bg-raised flex flex-col gap-1 rounded-[12px] p-3 text-xs" aria-label={`O que ${sel.nome} vê`}>
           <span className="text-sm font-medium">O que {sel.nome} vê</span>
@@ -348,7 +348,7 @@ function Produtividade({ t }: { t: TamanhoWidget }) {
                 <span className="bg-foreground/70 h-full" style={{ width: `${(x.feitas / max) * 100}%` }} />
                 <span className="bg-foreground/25 h-full" style={{ width: `${(x.abertas / max) * 100}%` }} />
               </span>
-              <span className={cn('w-36 text-right text-xs tabular-nums', x.atrasadas ? 'text-destructive font-medium' : 'text-muted-foreground')}>
+              <span className={cn('w-36 text-right text-xs tabular-nums', x.atrasadas ? 'text-destructive-text font-medium' : 'text-muted-foreground')}>
                 {x.abertas} abertas · {x.atrasadas} atras.{t === 'XL' ? ` · ${x.revisao} em revisão · ${x.reabertas} correções` : ''}
               </span>
             </button>
@@ -380,11 +380,11 @@ function Ia({ t }: { t: TamanhoWidget }) {
       <div className="flex items-end gap-4">
         <div className="flex flex-col">
           <span className="font-heading text-3xl font-light tabular-nums">{pct(aprovados)}%</span>
-          <span className="text-muted-foreground text-[11px]">cartões aprovados sem edição</span>
+          <span className="text-muted-foreground text-xs">cartões aprovados sem edição</span>
         </div>
         <div className="flex flex-col">
           <span className="font-heading text-xl font-light tabular-nums">R$ 412,80</span>
-          <span className="text-muted-foreground text-[11px]">custo no mês (mês passado R$ 398,10)</span>
+          <span className="text-muted-foreground text-xs">custo no mês (mês passado R$ 398,10)</span>
         </div>
       </div>
       {t !== 'M' && (
@@ -444,7 +444,7 @@ function Ia({ t }: { t: TamanhoWidget }) {
                   ))}
                 </>
               )}
-              <span className="text-muted-foreground text-[11px]">Nunca promovível: transmitir, pagar, assinar, alterar regime.</span>
+              <span className="text-muted-foreground text-xs">Nunca promovível: transmitir, pagar, assinar, alterar regime.</span>
             </div>
           </div>
         </>
@@ -495,7 +495,7 @@ function Catalogo() {
           )
         })}
       </Tabela>
-      {!admin && <p className="text-muted-foreground text-[11px]">Só o Administrador edita o catálogo.</p>}
+      {!admin && <p className="text-muted-foreground text-xs">Só o Administrador edita o catálogo.</p>}
     </div>
   )
 }
@@ -544,7 +544,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
                   Gerar agora
                 </Mini>
               </div>
-              <span className="text-muted-foreground text-[11px]">Checklist: {p.checklist.join(' · ')}</span>
+              <span className="text-muted-foreground text-xs">Checklist: {p.checklist.join(' · ')}</span>
             </li>
           ))}
         </ul>
@@ -611,7 +611,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
             ))}
           </AreaRolagem>
         )}
-        <span className="text-muted-foreground text-[11px]">Mudar o molde cria versão nova; trilhas já geradas não mudam. {admin ? '' : 'Só o Administrador edita.'}</span>
+        <span className="text-muted-foreground text-xs">Mudar o molde cria versão nova; trilhas já geradas não mudam. {admin ? '' : 'Só o Administrador edita.'}</span>
       </div>
     </div>
   )
@@ -791,7 +791,7 @@ function Auditoria() {
           Exportar CSV
         </Mini>
       </div>
-      <AreaRolagem as="ol" className="flex flex-col gap-0.5 text-[11px]">
+      <AreaRolagem as="ol" className="flex flex-col gap-0.5 text-xs">
         {filtrados.map((e) => (
           <li key={e.id} className="truncate">
             <span className="text-muted-foreground tabular-nums">{new Date(e.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span> · <span className="font-mono">{e.ferramenta}</span> · {e.texto}
@@ -800,7 +800,7 @@ function Auditoria() {
         ))}
         {!filtrados.length && <li className="text-muted-foreground">Nenhum evento com estes filtros.</li>}
       </AreaRolagem>
-      <span className="text-muted-foreground text-[11px]">
+      <span className="text-muted-foreground text-xs">
         Métricas do app e custo: dados da demonstração <SeloDemonstracao fonte="indicadores" />
       </span>
     </div>

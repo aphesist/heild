@@ -255,7 +255,7 @@ export function EditarPassoRegua({ p, onFechar, onSalvar, onExcluir }: Fechar & 
       onAcao={() => onSalvar(d)}
       secundaria={
         onExcluir ? (
-          <Button type="button" variant="ghost" className="text-destructive rounded-full" onClick={onExcluir}>
+          <Button type="button" variant="ghost" className="text-destructive-text rounded-full" onClick={onExcluir}>
             <TrashIcon /> Tirar da régua
           </Button>
         ) : undefined
@@ -581,7 +581,7 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
             <Button
               size="icon-sm"
               variant="ghost"
-              className="text-destructive rounded-full"
+              className="text-destructive-text rounded-full"
               aria-label={`Excluir ${t.nome}`}
               onClick={async () => {
                 if (!(await confirmar({ titulo: `Excluir ${t.nome} da tabela?`, descricao: 'Os avulsos já propostos não mudam.', acao: 'Excluir', perigo: true }))) return

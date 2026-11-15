@@ -121,13 +121,13 @@ export function SecaoPagar({ e, onEscolher }: { e: EmpresaVista; onEscolher: Ir 
                     </span>
                     {c.alerta && (
                       <span className="text-warning-foreground flex items-center gap-1 text-xs">
-                        <WarningIcon weight="fill" className="text-warning shrink-0" /> {c.alerta}
+                        <WarningIcon weight="fill" className="text-warning-text shrink-0" /> {c.alerta}
                       </span>
                     )}
                     {c.lancar_no_erp && <span className="text-muted-foreground block text-xs">em “lançar no {e.erp.provedor}”</span>}
                   </span>
                   <Badge variant={c.etapa === 'capturada' ? 'destaque' : c.etapa === 'paga' ? 'sucesso' : c.etapa === 'recusada' ? 'erro' : 'outline'}>{rotuloEtapa[c.etapa]}</Badge>
-                  <span className={cn('w-14 text-right text-xs', contaAberta(c) && diasAte(c.vencimento) < 0 ? 'text-destructive' : 'text-muted-foreground')}>{quando(c.vencimento)}</span>
+                  <span className={cn('w-14 text-right text-xs', contaAberta(c) && diasAte(c.vencimento) < 0 ? 'text-destructive-text' : 'text-muted-foreground')}>{quando(c.vencimento)}</span>
                   <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
                   {c.etapa === 'capturada' && (
                     <Button size="sm" variant="ghost" className="rounded-full" title={voceDigitou ? 'Você digitou: outra pessoa confere' : undefined} onClick={() => onEscolher(e.clienteId, 'aprovacoes')}>
@@ -266,7 +266,7 @@ export function SecaoReceber({ e, onEscolher }: { e: EmpresaVista; onEscolher: I
                     {c.etapa === 'atrasada' && ` · ${-diasAte(c.vencimento)} dias de atraso`}
                   </span>
                   {c.alerta && <span className="text-muted-foreground block text-xs">{c.alerta}</span>}
-                  {t && <span className="text-success block text-xs">o extrato tem {t.descricao} ({brl(t.valor)}): pode ser este</span>}
+                  {t && <span className="text-success-text block text-xs">o extrato tem {t.descricao} ({brl(t.valor)}): pode ser este</span>}
                 </span>
                 <Badge variant={c.etapa === 'atrasada' ? 'erro' : c.etapa === 'recebida' ? 'sucesso' : 'outline'}>{rotuloEtapa[c.etapa]}</Badge>
                 <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
@@ -356,7 +356,7 @@ export function SecaoConciliacao({ e }: { e: EmpresaVista }) {
                       {vence !== null && <span className={cn(vence <= 30 && 'text-warning-foreground')}> · consentimento até {dataCurta(b.consentimento_ate)}</span>}
                     </span>
                   </span>
-                  <span className={cn('tabular-nums', b.saldo < 0 && 'text-destructive')}>{brl(b.saldo)}</span>
+                  <span className={cn('tabular-nums', b.saldo < 0 && 'text-destructive-text')}>{brl(b.saldo)}</span>
                 </li>
               )
             })}

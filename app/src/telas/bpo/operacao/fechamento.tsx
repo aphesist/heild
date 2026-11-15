@@ -198,7 +198,7 @@ export function RelatorioGerencial({ dre }: { dre: RascunhoGerencial }) {
             <th scope="row" className="py-2 text-left font-medium">
               Resultado
             </th>
-            <td className={cn('py-2 text-right font-medium tabular-nums', dre.resultado < 0 && 'text-destructive')}>{brl(dre.resultado).replace('-', '−')}</td>
+            <td className={cn('py-2 text-right font-medium tabular-nums', dre.resultado < 0 && 'text-destructive-text')}>{brl(dre.resultado).replace('-', '−')}</td>
           </tr>
         </tbody>
       </table>

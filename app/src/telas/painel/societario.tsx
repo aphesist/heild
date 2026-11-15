@@ -217,7 +217,7 @@ function PessoasDoCliente({ t }: { t: TamanhoWidget }) {
               titulo={p.nome}
               detalhe={`${p.papel} · recebe ${p.assuntos.join(', ').replace('documentos_pendentes', 'documentos').replace('honorarios', 'honorários').replace('societario', 'societário') || 'nada'}`}
               fim={
-                <span className="flex flex-col items-end gap-0.5 text-[11px]">
+                <span className="flex flex-col items-end gap-0.5 text-xs">
                   <span>{app?.situacao === 'ativo' ? 'usa o app' : app?.situacao === 'convite_pendente' ? 'convite pendente' : app?.situacao === 'revogado' ? 'acesso revogado' : 'sem app'}</span>
                   {!p.whatsapp && <span className="text-muted-foreground">sem WhatsApp</span>}
                 </span>
@@ -504,11 +504,11 @@ function Contrato({ t }: { t: TamanhoWidget }) {
           {podeSoc && (
             <div className="flex flex-wrap gap-1">
               <Button size="sm" variant="outline" className="h-7 rounded-full" onClick={gerar}>
-                Gerar proposta e contrato <span className="text-muted-foreground text-[11px]">preparar</span>
+                Gerar proposta e contrato <span className="text-muted-foreground text-xs">preparar</span>
               </Button>
               {c.contrato === 'rascunho' && (
                 <Button size="sm" variant="secondary" className="h-7 rounded-full" onClick={enviar}>
-                  Enviar para assinatura <span className="text-muted-foreground text-[11px]">com aprovação</span>
+                  Enviar para assinatura <span className="text-muted-foreground text-xs">com aprovação</span>
                 </Button>
               )}
             </div>
@@ -641,7 +641,7 @@ function Comunicacoes() {
               </span>
               {!c.aberta_em && podeSoc && (
                 <Button size="sm" variant="outline" className="h-7 rounded-full" onClick={() => abrir(c, () => colComunicacoes.atualizar(c.id, { aberta_em: new Date().toISOString(), aberta_por: usuario.nome }))}>
-                  <WarningIcon className="text-warning" /> Abrir (dá ciência)
+                  <WarningIcon className="text-warning-text" /> Abrir (dá ciência)
                 </Button>
               )}
             </li>
@@ -681,7 +681,7 @@ function Ciclo({ t }: { t: TamanhoWidget }) {
         {trilhaVisivel.map((e, i) => (
           <li key={e} className="flex min-w-0 flex-1 flex-col gap-1">
             <span className={cn('h-1.5 rounded-full', i < atual ? 'bg-success' : i === atual ? 'bg-foreground' : 'bg-sunken')} />
-            {t === 'XL' && <span className={cn('truncate text-[11px]', i === atual ? 'font-medium' : 'text-muted-foreground')}>{rotuloEstado[e]}</span>}
+            {t === 'XL' && <span className={cn('truncate text-xs', i === atual ? 'font-medium' : 'text-muted-foreground')}>{rotuloEstado[e]}</span>}
           </li>
         ))}
       </ol>
@@ -753,7 +753,7 @@ function AppDoCliente({ t }: { t: TamanhoWidget }) {
                 {[a.papeis.contabil && `Contábil: ${a.papeis.contabil}`, a.papeis.bpo_financeiro && `BPO: ${a.papeis.bpo_financeiro}`].filter(Boolean).join(' · ')}
               </span>
             </span>
-            <span className="text-muted-foreground shrink-0 text-right text-[11px]">{a.situacao === 'ativo' ? `${a.instalado ? 'instalado · ' : ''}${a.ultimo_acesso ?? ''}` : a.situacao === 'convite_pendente' ? `convite de ${ddmm(a.convidado_em)}` : `revogado por ${a.revogado_por}`}</span>
+            <span className="text-muted-foreground shrink-0 text-right text-xs">{a.situacao === 'ativo' ? `${a.instalado ? 'instalado · ' : ''}${a.ultimo_acesso ?? ''}` : a.situacao === 'convite_pendente' ? `convite de ${ddmm(a.convidado_em)}` : `revogado por ${a.revogado_por}`}</span>
             {podeSoc && a.situacao !== 'revogado' && (
               <BotaoAcoes
                 rotulo={`Ações de ${a.pessoa}`}
@@ -983,7 +983,7 @@ function EstadosCarteira({ t }: { t: TamanhoWidget }) {
         {porEstado.slice(0, t === 'M' ? 4 : 8).map(([e, l]) => (
           <button key={e} type="button" aria-pressed={aberto === e} onClick={() => setAberto(aberto === e ? null : e)} className={cn('flex min-w-0 cursor-pointer flex-col rounded-[12px] px-2 py-1 text-left', aberto === e ? 'bg-raised shadow-cartao' : 'hover:bg-sunken')}>
             <span className="font-heading text-2xl font-light tabular-nums">{l.length}</span>
-            <span className="text-muted-foreground truncate text-[11px]">{rotuloEstado[e]}</span>
+            <span className="text-muted-foreground truncate text-xs">{rotuloEstado[e]}</span>
           </button>
         ))}
       </div>

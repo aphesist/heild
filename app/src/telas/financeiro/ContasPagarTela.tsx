@@ -283,7 +283,7 @@ export function ContasPagarTela() {
             <Button
               type="button"
               variant="ghost"
-              className="text-destructive rounded-full"
+              className="text-destructive-text rounded-full"
               onClick={() => {
                 if (executar(() => repos.contasPagar.cancelar(modal.c.id, modal.c.alerta ?? 'descartada na conferência'), { sucesso: 'Conta descartada; o integrante não traz mais este boleto.' })) setModal(null)
               }}
@@ -411,7 +411,7 @@ function Classificar({ fin, c, onFechar }: { fin: Fin; c: ContaPagarFin; onFecha
         <Button type="button" size="sm" variant="outline" className="w-fit rounded-full" onClick={() => setRateio((xs) => [...xs, { centro_custo_id: 'cc-fiscal', percentual: 0 }])}>
           <PlusIcon /> Ratear com outro centro
         </Button>
-        <p className={soma === 100 ? 'text-muted-foreground text-xs' : 'text-destructive text-xs'}>Soma: {soma}% {soma !== 100 && '(precisa dar 100%)'}</p>
+        <p className={soma === 100 ? 'text-muted-foreground text-xs' : 'text-destructive-text text-xs'}>Soma: {soma}% {soma !== 100 && '(precisa dar 100%)'}</p>
       </section>
     </GavetaFormulario>
   )

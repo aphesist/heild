@@ -176,7 +176,7 @@ function Pessoas({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
             </div>
           )
         })}
-        <p className="text-muted-foreground text-[11px]">O papel e as áreas de cada pessoa são definidos pelo escritório, por serviço contratado. Para mudar, peça na conversa.</p>
+        <p className="text-muted-foreground text-xs">O papel e as áreas de cada pessoa são definidos pelo escritório, por serviço contratado. Para mudar, peça na conversa.</p>
       </Bloco>
       {(pendentes.length > 0 || ctx.ehSocio) && (
         <Bloco titulo="Convites pendentes">
@@ -610,7 +610,7 @@ function Acessos({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
             <SignOutIcon /> Sair de todos os outros aparelhos
           </Button>
         )}
-        <p className="text-muted-foreground text-[11px]">A sessão dura 90 dias e renova a cada uso; não sai sozinha por inatividade.</p>
+        <p className="text-muted-foreground text-xs">A sessão dura 90 dias e renova a cada uso; não sai sozinha por inatividade.</p>
       </Bloco>
       <Bloco titulo="Formas de entrar">
         <Linha icone={<KeyIcon />} titulo="Código por WhatsApp ou e-mail" apoio="sempre disponível" direita={<Selo tom="ok">ativo</Selo>} />
@@ -732,7 +732,7 @@ function PreferenciasAviso({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
         <div className="grid grid-cols-[1fr_repeat(3,auto)] items-center gap-x-2 gap-y-1.5 text-sm">
           <span />
           {canais.map(([, r]) => (
-            <span key={r} className="text-muted-foreground text-center text-[11px]">
+            <span key={r} className="text-muted-foreground text-center text-xs">
               {r}
             </span>
           ))}
@@ -747,7 +747,7 @@ function PreferenciasAviso({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
             </div>
           ))}
         </div>
-        <p className="text-muted-foreground text-[11px]">Conteúdo sensível (holerite, valor de honorário) nunca vai no texto do WhatsApp: só o link, que pede login.</p>
+        <p className="text-muted-foreground text-xs">Conteúdo sensível (holerite, valor de honorário) nunca vai no texto do WhatsApp: só o link, que pede login.</p>
       </Bloco>
       <Bloco titulo="Silêncio e resumo">
         <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -759,7 +759,7 @@ function PreferenciasAviso({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
             <Campo rotulo="Até" tipo="time" valor={pref.silencio.ate} onMudar={(v) => setPref((p) => ({ ...p, silencio: { ...p.silencio, ate: v } }))} />
           </div>
         )}
-        <p className="text-muted-foreground text-[11px]">Urgente (guia vencendo hoje sem pagamento, certificado a 5 dias) fura o silêncio.</p>
+        <p className="text-muted-foreground text-xs">Urgente (guia vencendo hoje sem pagamento, certificado a 5 dias) fura o silêncio.</p>
         <label className="flex cursor-pointer items-center gap-2 text-sm">
           <input type="checkbox" checked={pref.resumoDiario.ligado} onChange={(e) => setPref((p) => ({ ...p, resumoDiario: { ...p.resumoDiario, ligado: e.target.checked } }))} className="accent-primary size-4" /> Resumo diário do que não é urgente
         </label>

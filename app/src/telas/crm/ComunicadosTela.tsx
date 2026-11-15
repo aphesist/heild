@@ -114,7 +114,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
                     <span className={cn('bg-background shadow-pilula absolute top-0.5 size-5 rounded-full transition-all', r.ativa ? 'left-[18px]' : 'left-0.5')} />
                   </button>
                 </div>
-                <ol className="flex flex-wrap items-center gap-1 text-[11px]">
+                <ol className="flex flex-wrap items-center gap-1 text-xs">
                   {r.etapas.map((e, i) => (
                     <li key={e} className="flex items-center gap-1">
                       <span className="bg-sunken rounded-full px-2 py-0.5">{e}</span>
@@ -124,7 +124,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
                 </ol>
                 <div className="text-muted-foreground flex items-center gap-2 text-xs">
                   <span>{r.ativa ? `${r.emCurso} em curso agora` : r.id === 'r6' ? 'chega com o Financeiro (fase 3)' : 'desligada'}</span>
-                  <code className="ml-auto text-[11px]">{r.atividades}</code>
+                  <code className="ml-auto text-xs">{r.atividades}</code>
                 </div>
               </li>
             ))}
@@ -207,7 +207,7 @@ function EditorRegua({ inicial, onFechar, onSalvar }: { inicial: Regua; onFechar
         >
           <PlusIcon /> Etapa
         </Button>
-        <ol className="flex flex-wrap items-center gap-1 text-[11px]">
+        <ol className="flex flex-wrap items-center gap-1 text-xs">
           {ordenadas.map((e, i) => (
             <li key={i} className="flex items-center gap-1">
               <span className="bg-raised shadow-contorno rounded-full px-2 py-0.5">{escreverEtapa(e)}</span>
@@ -249,8 +249,8 @@ function CartaoComunicado({ c, onResultado }: { c: Comunicado; onResultado: () =
             ['falharam', c.falhas],
           ].map(([r, v]) => (
             <div key={r as string} className="flex flex-col">
-              <span className={cn('font-heading text-2xl font-light tabular-nums', r === 'falharam' && (v as number) > 0 && 'text-destructive')}>{v as number}</span>
-              <span className="text-muted-foreground text-[11px]">
+              <span className={cn('font-heading text-2xl font-light tabular-nums', r === 'falharam' && (v as number) > 0 && 'text-destructive-text')}>{v as number}</span>
+              <span className="text-muted-foreground text-xs">
                 {r as string}
                 {r !== 'falharam' && ` · ${pct(v as number)}%`}
               </span>
@@ -263,7 +263,7 @@ function CartaoComunicado({ c, onResultado }: { c: Comunicado; onResultado: () =
         </p>
       )}
       <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-        <code className="text-[11px]">{c.modelo}</code>
+        <code className="text-xs">{c.modelo}</code>
         <span className="ml-auto">{c.quando}</span>
         {c.status === 'enviado' && (
           <Button size="sm" variant="ghost" className="h-6 rounded-full px-2 text-xs" onClick={onResultado}>
@@ -365,7 +365,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
                 <label className="hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
                   <input type="checkbox" className="accent-foreground size-4" checked={escolhidos.includes(c.id)} onChange={(e) => setEscolhidos((xs) => (e.target.checked ? [...xs, c.id] : xs.filter((x) => x !== c.id)))} />
                   <span className="min-w-0 flex-1 truncate">{c.nome}</span>
-                  <span className="text-muted-foreground text-[11px]">{c.regime}</span>
+                  <span className="text-muted-foreground text-xs">{c.regime}</span>
                 </label>
               </li>
             ))}
@@ -419,10 +419,10 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
         <div className="grid gap-2 sm:grid-cols-3">
           {seg.exemplos.map((e) => (
             <div key={e.nome} className="bg-raised shadow-contorno rounded-[14px] px-3 py-2 text-sm">
-              <div className="text-muted-foreground text-[11px]">para {e.nome}</div>
+              <div className="text-muted-foreground text-xs">para {e.nome}</div>
               {preencher(e)}
               {pdf && (
-                <span className="text-muted-foreground mt-1.5 flex items-center gap-1 text-[11px]">
+                <span className="text-muted-foreground mt-1.5 flex items-center gap-1 text-xs">
                   <FilePdfIcon className="size-3.5" /> pendencias-{e.nome.split(' ')[0].toLowerCase()}.pdf
                 </span>
               )}

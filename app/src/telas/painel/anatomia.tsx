@@ -178,7 +178,7 @@ export function CartoesPendentes({ setor, clienteId }: { setor: SetorIntegrante;
           <RobotIcon className="text-muted-foreground size-4 shrink-0" />
           <span className="min-w-0 grow basis-40">
             <span className="block truncate">{c.resumo_humano}</span>
-            <span className="text-muted-foreground block text-[11px]">preparado pelo {rotuloSetorCurto[setor]} · aguardando aprovação</span>
+            <span className="text-muted-foreground block text-xs">preparado pelo {rotuloSetorCurto[setor]} · aguardando aprovação</span>
           </span>
           {decide(c) && (
             <span className="flex gap-1">
@@ -205,14 +205,14 @@ export function FeitoPor({ refId, quem, className }: { refId: string; /** Nome d
   if (!ev && !quem) return null
   if (!ev)
     return (
-      <span className={cn('text-muted-foreground inline-flex items-center gap-1 text-[11px]', className)}>
+      <span className={cn('text-muted-foreground inline-flex items-center gap-1 text-xs', className)}>
         <RobotIcon className="size-3" /> feito por {quem}
       </span>
     )
   return (
     <>
       <Tooltip conteudo="Ver o evento: quem fez, quando e com qual ferramenta">
-        <button type="button" onClick={() => setAberto(ev)} className={cn('text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1 text-[11px] underline-offset-2 hover:underline', className)}>
+        <button type="button" onClick={() => setAberto(ev)} className={cn('text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1 text-xs underline-offset-2 hover:underline', className)}>
           <RobotIcon className="size-3" /> feito por {quem ?? ev.ator_nome ?? 'integrante'}
         </button>
       </Tooltip>

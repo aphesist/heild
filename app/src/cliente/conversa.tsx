@@ -193,7 +193,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
         {itens.length === 0 && <p className="text-muted-foreground text-sm">Escreva sua dúvida ou pedido. Quem cuida do seu {nomeSetor[setor]?.toLowerCase()} responde aqui. O que você mandar pelo WhatsApp também aparece aqui.</p>}
         {itens.map((m) => (
           <div key={m.id} className={cn('max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm', m.de === 'cliente' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
-            {m.de !== 'cliente' && <span className="text-muted-foreground block text-[11px]">{m.de === 'integrante' ? `${m.autor} (${textos.assinaAssistente(m.autor ?? '')})` : m.de === 'auto' ? 'Mensagem automática' : m.autor}</span>}
+            {m.de !== 'cliente' && <span className="text-muted-foreground block text-xs">{m.de === 'integrante' ? `${m.autor} (${textos.assinaAssistente(m.autor ?? '')})` : m.de === 'auto' ? 'Mensagem automática' : m.autor}</span>}
             {m.audio ? (
               <span className="flex items-center gap-2">
                 <PlayIcon className="size-4" weight="fill" /> Áudio · {m.audio.duracao}
@@ -206,7 +206,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
                 <PaperclipIcon className="size-3" /> {a.nome}
               </span>
             ))}
-            <span className="mt-0.5 block text-right text-[10px] opacity-60">
+            <span className="mt-0.5 block text-right text-xs opacity-60">
               {canalRotulo[m.canal] ? `${canalRotulo[m.canal]} · ` : ''}
               {m.hora}
             </span>
@@ -217,7 +217,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
 
       {implicito && estado.implicitos[implicito.msgId] === undefined && (
         <div className="bg-surface shadow-cartao flex flex-col gap-2 self-start rounded-lg p-3 text-sm" role="group" aria-label="Pedido sugerido">
-          <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
+          <span className="text-muted-foreground flex items-center gap-1 text-xs">
             <SparkleIcon className="size-3" /> Assistente do escritório
           </span>
           <p>Entendi: {implicito.frase}</p>
@@ -267,7 +267,7 @@ function Fio({ ctx, setor }: { ctx: Ctx; setor: SetorIntegrante }) {
           </div>
         </div>
       )}
-      {fio && estado.avaliacoes[fio.id] && <p className="text-muted-foreground text-center text-[11px]">Você avaliou este atendimento: {estado.avaliacoes[fio.id].nota === 'otimo' ? 'ótimo' : estado.avaliacoes[fio.id].nota}.</p>}
+      {fio && estado.avaliacoes[fio.id] && <p className="text-muted-foreground text-center text-xs">Você avaliou este atendimento: {estado.avaliacoes[fio.id].nota === 'otimo' ? 'ótimo' : estado.avaliacoes[fio.id].nota}.</p>}
 
       {!ctx.leitura && (
         <div className="bg-surface shadow-cartao sticky bottom-0 flex items-center gap-1.5 rounded-full py-1 pr-1 pl-2">

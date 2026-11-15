@@ -47,7 +47,7 @@ export function BarraConversa({ atual, historico, contexto, onAbrir, onNova, onL
               if (!itens.length) return null
               return (
                 <div key={g} className="py-1">
-                  <div className="text-muted-foreground px-3 py-1 text-[11px] font-medium tracking-wide uppercase">{g}</div>
+                  <div className="text-muted-foreground px-3 py-1 text-xs font-medium tracking-wide uppercase">{g}</div>
                   {itens.map((c) => (
                     <button
                       key={c.id}

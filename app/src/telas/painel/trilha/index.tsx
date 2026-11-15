@@ -154,13 +154,13 @@ function Marcos({ filhas }: { filhas: TarefaE[] }) {
         return (
           <div key={t.id} role="listitem" className={cn('flex items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 text-xs', estado === 'feito' && 'bg-success/10 border-transparent', estado === 'bloqueado' && 'text-muted-foreground border-dashed')}>
             <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="flex cursor-pointer items-center gap-1" title={falta.length ? `depende de ${falta.join(', ')}` : estado}>
-              <I className={cn('size-3.5', estado === 'feito' && 'text-success')} weight={estado === 'feito' ? 'fill' : 'regular'} />
+              <I className={cn('size-3.5', estado === 'feito' && 'text-success-text')} weight={estado === 'feito' ? 'fill' : 'regular'} />
               {t.titulo}
               <span className="sr-only">: {estado}</span>
-              {falta.length > 0 && <span className="text-[10px]">· depende de {falta.join(', ')}</span>}
+              {falta.length > 0 && <span className="text-xs">· depende de {falta.join(', ')}</span>}
             </button>
             {estado !== 'feito' && estado !== 'bloqueado' && (
-              <button type="button" className="hover:bg-accent cursor-pointer rounded-full px-1.5 py-0.5 text-[10px] underline" onClick={() => executar(() => concluirMarco(t, filhas), { sucesso: `${String(t.extras?.marco)} concluído: os dependentes foram liberados` })}>
+              <button type="button" className="hover:bg-accent cursor-pointer rounded-full px-1.5 py-0.5 text-xs underline" onClick={() => executar(() => concluirMarco(t, filhas), { sucesso: `${String(t.extras?.marco)} concluído: os dependentes foram liberados` })}>
                 concluir
               </button>
             )}
@@ -282,16 +282,16 @@ function TrilhaEntrada({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
                 <li key={k} className="flex items-center gap-2">
                   <input type="checkbox" className="accent-primary size-4" aria-label={`Recebido: ${i.item}`} checked={!!i.recebido_em} disabled={!!i.recebido_em} onChange={() => marcarRecebido(k)} />
                   <span className={cn('min-w-0 flex-1', i.recebido_em && 'text-muted-foreground line-through')}>
-                    {i.item} <span className="text-muted-foreground text-[11px]">({i.marco})</span>
+                    {i.item} <span className="text-muted-foreground text-xs">({i.marco})</span>
                   </span>
-                  <span className="text-muted-foreground shrink-0 text-[11px]">{i.recebido_em ? `recebido ${diaMes(i.recebido_em)}` : `pedido ${diaMes(i.pedido_em)}${i.cobrancas ? ` · ${i.cobrancas} cobr.` : ''}`}</span>
+                  <span className="text-muted-foreground shrink-0 text-xs">{i.recebido_em ? `recebido ${diaMes(i.recebido_em)}` : `pedido ${diaMes(i.pedido_em)}${i.cobrancas ? ` · ${i.cobrancas} cobr.` : ''}`}</span>
                 </li>
               ))}
             </ul>
           )}
           {previa && (
             <div className="border-border mt-1 flex flex-col gap-1.5 rounded-[18px] border-4 p-3" aria-label="Prévia do app do cliente">
-              <span className="text-muted-foreground text-[11px]">Prévia do app de {c.nome} · Pendências</span>
+              <span className="text-muted-foreground text-xs">Prévia do app de {c.nome} · Pendências</span>
               {pendentesCliente.map((i) => (
                 <span key={i.item} className="bg-raised flex items-center justify-between rounded-[12px] px-2.5 py-2 text-sm">
                   {i.item}
@@ -329,7 +329,7 @@ function TrilhaEntrada({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
                 <li key={k} className="flex items-center gap-2">
                   <input type="checkbox" className="accent-primary size-4" aria-label={`Recebido do contador anterior: ${i.item}`} checked={!!i.recebido_em} onChange={(e) => atualizar({ anterior: estado.anterior.map((x, j) => (j === k ? { ...x, recebido_em: e.target.checked ? HOJE_ISO : undefined } : x)) })} />
                   <span className={cn('min-w-0 flex-1', i.recebido_em && 'text-muted-foreground line-through')}>{i.item}</span>
-                  <span className="text-muted-foreground shrink-0 text-[11px]">{i.recebido_em ? 'recebido' : `${i.cobrancas} cobr.`}</span>
+                  <span className="text-muted-foreground shrink-0 text-xs">{i.recebido_em ? 'recebido' : `${i.cobrancas} cobr.`}</span>
                 </li>
               ))}
             </ul>
@@ -504,7 +504,7 @@ function TrilhaSaida({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
               <p className="text-xs">
                 Gerado em {diaMes(estado.dossie.gerado_em)} · {estado.dossie.manifesto.length} pacotes{estado.dossie.enviado_em ? ` · enviado em ${diaMes(estado.dossie.enviado_em)}` : ''} <SeloDemonstracao fonte="armazenamento" />
               </p>
-              <AreaRolagem as="ul" className="flex max-h-32 flex-col gap-0.5 text-[11px]">
+              <AreaRolagem as="ul" className="flex max-h-32 flex-col gap-0.5 text-xs">
                 {estado.dossie.manifesto.map((x) => (
                   <li key={x.arquivo} className="flex gap-2">
                     <DownloadSimpleIcon className="size-3 shrink-0" /> <span className="min-w-0 flex-1 truncate">{x.arquivo}</span> <span className="text-muted-foreground font-mono">{x.hash}</span>

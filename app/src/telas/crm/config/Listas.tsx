@@ -31,14 +31,14 @@ export function Etiquetas() {
       />
       {grupos.map((g) => (
         <div key={g} className="flex flex-col gap-2">
-          <h4 className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">{g === 'assunto' ? 'Assunto' : 'Tipo de atendimento'}</h4>
+          <h4 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">{g === 'assunto' ? 'Assunto' : 'Tipo de atendimento'}</h4>
           <div className="flex flex-wrap gap-2">
             {lista
               .filter((e) => e.tipo === g)
               .map((e) => (
                 <button key={e.id} type="button" onClick={() => setEd(e)} className="bg-sunken hover:bg-accent flex cursor-pointer items-center gap-2 rounded-full py-1 pr-3 pl-2 text-sm">
                   <span className="size-2.5 rounded-full" style={{ background: e.cor }} />#{e.nome}
-                  <span className="text-muted-foreground text-[11px]">{e.atividade ?? (e.setor ? rotuloSetor[e.setor] : 'todos')}</span>
+                  <span className="text-muted-foreground text-xs">{e.atividade ?? (e.setor ? rotuloSetor[e.setor] : 'todos')}</span>
                 </button>
               ))}
           </div>
@@ -150,7 +150,7 @@ export function RespostasRapidas() {
             <button type="button" onClick={() => setEd(r)} className="hover:bg-sunken/60 flex w-full cursor-pointer gap-3 rounded-[12px] px-2 py-2.5 text-left text-sm">
               <code className="text-muted-foreground w-20 shrink-0">{r.atalho}</code>
               <span className="min-w-0 flex-1">{r.texto}</span>
-              <span className="text-muted-foreground shrink-0 text-[11px]">{r.setor ? rotuloSetor[r.setor] : 'todos'}</span>
+              <span className="text-muted-foreground shrink-0 text-xs">{r.setor ? rotuloSetor[r.setor] : 'todos'}</span>
             </button>
           </li>
         ))}

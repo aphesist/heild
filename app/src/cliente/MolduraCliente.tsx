@@ -149,7 +149,7 @@ function Farol() {
           <div key={d.id} className="flex items-center gap-2 text-sm">
             <span className="min-w-0 flex-1">
               <span className="block truncate">{d.nome}</span>
-              <span className="text-muted-foreground block text-[11px]">
+              <span className="text-muted-foreground block text-xs">
                 enviado {d.quando.slice(0, 5)}
                 {r ? ` · reenvio ${r.situacao === 'preparado' ? 'preparado, aguarda aprovação' : r.situacao === 'enviado' ? `enviado por ${r.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'}` : 'recusado'}` : ''}
               </span>

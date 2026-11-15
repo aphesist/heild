@@ -259,7 +259,7 @@ export function EntregasBpoTela({ empresa }: PropsBpo) {
                       {deles.length} empresa{deles.length > 1 ? 's' : ''} · {deles.reduce((t, e) => t + e.perfil.sla.desvios.filter((d) => d.de === 'bpo').length, 0)} desvio(s) do BPO · {deles.filter((e) => e.audit.cor === 'vermelho').length} no vermelho
                     </span>
                   </span>
-                  <span className={cn('tabular-nums', s < meta && 'text-destructive')}>
+                  <span className={cn('tabular-nums', s < meta && 'text-destructive-text')}>
                     {s}%{s < meta && <span className="text-xs"> · abaixo</span>}
                   </span>
                 </li>
@@ -407,7 +407,7 @@ function AuditoriaQualidade({ lista }: { lista: EmpresaVista[] }) {
                   <span className="text-muted-foreground block text-xs">
                     {x.e.nome} · digitou {x.c.digitado_por_nome} · conferiu {x.c.conferencias.map((k) => k.nome).join(' e ') || 'ninguém ainda'}
                   </span>
-                  {r && !r.ok && <span className="text-destructive block text-xs">divergência: {r.motivo}</span>}
+                  {r && !r.ok && <span className="text-destructive-text block text-xs">divergência: {r.motivo}</span>}
                 </span>
                 {r ? (
                   <Badge variant={r.ok ? 'sucesso' : 'erro'}>{r.ok ? 'sem divergência' : 'na fila'}</Badge>
@@ -888,7 +888,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <Caixa className="gap-0">
             <TituloBloco descricao={base === 'faturado' ? 'Honorário do BPO no mês menos as horas da equipe e os custos variáveis.' : 'O que já entrou no caixa do escritório (fatura de novembro paga) menos os mesmos custos.'}>Margem por empresa</TituloBloco>
-            <div className="text-muted-foreground mt-2 hidden grid-cols-[minmax(0,1fr)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(3.5rem,max-content)] gap-3 text-[11px] sm:grid">
+            <div className="text-muted-foreground mt-2 hidden grid-cols-[minmax(0,1fr)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(3.5rem,max-content)] gap-3 text-xs sm:grid">
               <span />
               <span className="text-right">{base === 'faturado' ? 'faturado' : 'recebido'}</span>
               <span className="text-right">horas</span>
@@ -904,7 +904,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
                   <span className="text-muted-foreground hidden text-right text-xs tabular-nums sm:block">{e.perfil.horas_mes.toLocaleString('pt-BR')} h</span>
                   <span className="text-muted-foreground hidden text-right text-xs tabular-nums sm:block">{brl(custoHoras)}</span>
                   <span className="text-muted-foreground hidden text-right text-xs tabular-nums sm:block">{brl(variaveis)}</span>
-                  <span className={cn('text-right tabular-nums', margem !== null && margem < 20 && 'text-destructive')}>{margem === null ? <span className="text-muted-foreground text-xs">a receber</span> : `${margem}%`}</span>
+                  <span className={cn('text-right tabular-nums', margem !== null && margem < 20 && 'text-destructive-text')}>{margem === null ? <span className="text-muted-foreground text-xs">a receber</span> : `${margem}%`}</span>
                   <span className="text-muted-foreground col-span-2 text-xs sm:hidden">
                     {brl(receita)} · {e.perfil.horas_mes} h ({brl(custoHoras)}) · variáveis {brl(variaveis)}
                   </span>
@@ -941,13 +941,13 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
             <span className="border-destructive/60 pointer-events-none absolute inset-x-0 border-t border-dashed" style={{ bottom: `${(capSemanal / maxSemana) * 100 * 0.78 + 18}px` }} aria-hidden />
             {semanas.map((s) => (
               <div key={s.rotulo} className="flex flex-1 flex-col items-center gap-1">
-                <span className={cn('text-xs tabular-nums', s.total > capSemanal && 'text-destructive')}>{s.total} h</span>
+                <span className={cn('text-xs tabular-nums', s.total > capSemanal && 'text-destructive-text')}>{s.total} h</span>
                 <span className="flex w-full max-w-10 flex-col-reverse overflow-hidden rounded-t-sm" style={{ height: `${(s.total / maxSemana) * 78}px` }}>
                   {pessoas.map((p, i) => (
                     <span key={p} title={`${p}: ${Math.round(s.porPessoa[p])} h`} className={i % 2 ? 'bg-foreground/35' : 'bg-foreground/65'} style={{ height: `${s.total ? (s.porPessoa[p] / s.total) * 100 : 0}%` }} />
                   ))}
                 </span>
-                <span className="text-muted-foreground text-[11px]">{s.rotulo}</span>
+                <span className="text-muted-foreground text-xs">{s.rotulo}</span>
               </div>
             ))}
           </div>
@@ -1023,11 +1023,11 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
                       <span className="flex items-center gap-2">
                         <span className="min-w-0 flex-1 truncate">{c.nome}</span>
                         <span className="text-muted-foreground text-xs tabular-nums">{c.horas_mes} h</span>
-                        <span className={cn('w-12 text-right tabular-nums', c.margem < 20 && 'text-destructive')}>{c.margem}%</span>
+                        <span className={cn('w-12 text-right tabular-nums', c.margem < 20 && 'text-destructive-text')}>{c.margem}%</span>
                       </span>
                       <span className="text-muted-foreground flex flex-wrap gap-x-3 text-xs">
                         {margemPorDepto(c).map((d) => (
-                          <span key={d.depto} className={cn(d.margem < 20 && 'text-destructive')}>
+                          <span key={d.depto} className={cn(d.margem < 20 && 'text-destructive-text')}>
                             {rotuloDeptoG[d.depto] ?? d.depto}: {d.margem}%
                           </span>
                         ))}

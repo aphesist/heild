@@ -273,7 +273,7 @@ function FolhaPagar({ f, ctx, onFechar, onSegundaVia }: { f: Fatura; ctx: Ctx; o
         (pix ? (
           <div className="flex flex-col items-center gap-2">
             <QrFicticio codigo={pix.copia} />
-            <code className="bg-sunken w-full rounded-md px-3 py-2 text-[10px] break-all">{pix.copia}</code>
+            <code className="bg-sunken w-full rounded-md px-3 py-2 text-xs break-all">{pix.copia}</code>
             <div className="flex items-center gap-2">
               <BotaoCopiar texto={pix.copia} rotulo="Copiar Pix" aoCopiar={() => ctx.avisarApp('Código Pix copiado.')} />
               <SeloDemonstracao fonte={pix.fonte} />

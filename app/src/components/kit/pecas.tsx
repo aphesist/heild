@@ -49,7 +49,7 @@ export function Aviso({ tom = 'neutro', icone, acao, children, className }: { to
 export function Kpi({ valor, rotulo, detalhe, tamanho = 'grande', tom = 'neutro', pressionado, onClick, className }: { valor: ReactNode; rotulo: ReactNode; detalhe?: ReactNode; tamanho?: 'grande' | 'medio'; tom?: 'neutro' | 'atencao' | 'erro'; pressionado?: boolean; onClick?: () => void; className?: string }) {
   const corpo = (
     <>
-      <span className={cn('font-heading min-w-0 font-light tabular-nums leading-none', tamanho === 'grande' ? 'text-4xl' : 'text-2xl', tom === 'atencao' && 'text-warning', tom === 'erro' && 'text-destructive')}>{valor}</span>
+      <span className={cn('font-heading min-w-0 font-light tabular-nums leading-none', tamanho === 'grande' ? 'text-4xl' : 'text-2xl', tom === 'atencao' && 'text-warning-text', tom === 'erro' && 'text-destructive-text')}>{valor}</span>
       <span className="text-muted-foreground min-w-0 text-xs text-pretty">{rotulo}</span>
       {detalhe && <span className="text-muted-foreground min-w-0 text-xs text-pretty">{detalhe}</span>}
     </>

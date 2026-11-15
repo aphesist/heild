@@ -342,7 +342,7 @@ export function OpcaoPdfPendencias({ ligado, onMudar }: { ligado: boolean; onMud
 export function AvisoLimite({ total }: { total: number }) {
   if (total <= 2000) return null
   return (
-    <p className="text-destructive flex items-center gap-1.5 text-xs">
+    <p className="text-destructive-text flex items-center gap-1.5 text-xs">
       <WarningCircleIcon className="size-4" /> Passa do limite do número (2.000 em 24 h): o envio é dividido em dois dias.
     </p>
   )

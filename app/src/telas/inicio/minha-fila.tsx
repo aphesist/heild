@@ -77,7 +77,7 @@ export function MinhaFila({ className }: { className?: string }) {
                     <span className="size-2 rounded-full" style={{ background: a.cor }} aria-hidden />
                     {a.nome} · {t.codigo} · {rotuloStatus[t.status]}
                     {t.atrasada && (
-                      <span className="text-warning ml-auto flex items-center gap-1 font-medium">
+                      <span className="text-warning-text ml-auto flex items-center gap-1 font-medium">
                         <WarningIcon className="size-3.5" weight="fill" /> atrasada
                       </span>
                     )}

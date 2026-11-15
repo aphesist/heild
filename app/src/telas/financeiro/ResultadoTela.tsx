@@ -122,7 +122,7 @@ export function ResultadoTela() {
                   <td className="py-2 text-right tabular-nums">{brl(l.pessoal)}</td>
                   <td className="hidden py-2 text-right tabular-nums sm:table-cell">{brl(l.operacao)}</td>
                   <td className="hidden py-2 text-right tabular-nums sm:table-cell">{brl(Math.round(l.rateio))}</td>
-                  <td className={cn('py-2 text-right tabular-nums', l.resultado < 0 && 'text-destructive')}>{sinal(Math.round(l.resultado))}</td>
+                  <td className={cn('py-2 text-right tabular-nums', l.resultado < 0 && 'text-destructive-text')}>{sinal(Math.round(l.resultado))}</td>
                   <td className="py-2 text-right tabular-nums">{Math.round((l.resultado / l.receita) * 100)}%</td>
                   <td className="hidden py-2 text-right tabular-nums sm:table-cell">{l.horas} h</td>
                 </tr>
@@ -200,7 +200,7 @@ export function ResultadoTela() {
                     <span>{o.nome}</span>
                     <span className="text-muted-foreground text-right tabular-nums">{brl(o.orcado)}</span>
                     <span className="text-right tabular-nums">{brl(o.realizado)}</span>
-                    <span className={cn('text-right text-xs tabular-nums', o.nome !== 'Receita' && pct > 0 && 'text-destructive')}>{pct > 0 ? '+' : ''}{pct.toLocaleString('pt-BR')}%</span>
+                    <span className={cn('text-right text-xs tabular-nums', o.nome !== 'Receita' && pct > 0 && 'text-destructive-text')}>{pct > 0 ? '+' : ''}{pct.toLocaleString('pt-BR')}%</span>
                   </li>
                 )
               })}
@@ -291,7 +291,7 @@ export function ResultadoTela() {
                 return (
                   <li key={c.id} className="flex justify-between gap-2">
                     <span>{c.nome}</span>
-                    <span className={cn('tabular-nums', s < 0 && 'text-destructive')}>{sinal(s * 1000)}</span>
+                    <span className={cn('tabular-nums', s < 0 && 'text-destructive-text')}>{sinal(s * 1000)}</span>
                   </li>
                 )
               })}

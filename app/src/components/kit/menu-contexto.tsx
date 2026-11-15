@@ -35,8 +35,8 @@ function Itens({ acoes, Item, Separador }: { acoes: AcaoMenu[]; Item: typeof Con
       {acoes.map((a, i) => (
         <div key={a.rotulo} className="contents">
           {a.separar && i > 0 && <Separador className="bg-border my-1 h-px" />}
-          <Item disabled={!!a.motivo} onSelect={a.onSelecionar} className={cn(classeItem, a.perigo && 'text-destructive')}>
-            {a.icone && <span className={a.perigo ? 'text-destructive' : 'text-muted-foreground'}>{a.icone}</span>}
+          <Item disabled={!!a.motivo} onSelect={a.onSelecionar} className={cn(classeItem, a.perigo && 'text-destructive-text')}>
+            {a.icone && <span className={a.perigo ? 'text-destructive-text' : 'text-muted-foreground'}>{a.icone}</span>}
             <span className="min-w-0 flex-1">
               <span className="block">{a.rotulo}</span>
               {a.motivo && <span className="text-muted-foreground block text-xs">{a.motivo}</span>}

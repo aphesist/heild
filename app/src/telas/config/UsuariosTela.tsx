@@ -449,7 +449,7 @@ function EditarUsuario({ u, onFechar, onSalvar }: { u: UsuarioCfg; onFechar: () 
             >
               {d.situacao === 'bloqueado' ? 'Desbloquear' : 'Bloquear'}
             </Button>
-            <Button type="button" variant="ghost" className="text-destructive rounded-full" onClick={() => setDesativando(true)}>
+            <Button type="button" variant="ghost" className="text-destructive-text rounded-full" onClick={() => setDesativando(true)}>
               Desativar
             </Button>
           </span>

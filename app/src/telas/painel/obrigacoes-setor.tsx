@@ -60,13 +60,13 @@ export const corStatusObrigacao: Record<StatusObrigacao, string> = {
   pendente: 'bg-sunken text-muted-foreground',
   'vence hoje': 'bg-warning/15',
   'em risco': 'bg-warning/15',
-  atrasada: 'bg-destructive/12 text-destructive',
+  atrasada: 'bg-destructive/12 text-foreground',
   cancelada: 'bg-sunken text-muted-foreground line-through',
   dispensada: 'bg-sunken text-muted-foreground',
 }
 
 export function SeloStatusObrigacao({ status, className }: { status: StatusObrigacao; className?: string }) {
-  return <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[11px] whitespace-nowrap', corStatusObrigacao[status], className)}>{status}</span>
+  return <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', corStatusObrigacao[status], className)}>{status}</span>
 }
 
 /** Ocorrências do setor (abertas primeiro, por prazo legal). */

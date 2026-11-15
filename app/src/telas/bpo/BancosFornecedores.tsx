@@ -65,7 +65,7 @@ export function BancosEmpresa({ e, onConectar }: { e: EmpresaVista; onConectar: 
                         Renovar
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" className="text-destructive rounded-full" onClick={() => void desconectar(b)}>
+                    <Button size="sm" variant="ghost" className="text-destructive-text rounded-full" onClick={() => void desconectar(b)}>
                       Desconectar
                     </Button>
                   </span>

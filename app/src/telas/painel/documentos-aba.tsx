@@ -186,7 +186,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
                     <FileTextIcon weight="duotone" className="text-muted-foreground size-5 shrink-0" />
                     <div className="min-w-0">
                       <div className="truncate">{d.nome}</div>
-                      <div className="text-muted-foreground text-[11px]">
+                      <div className="text-muted-foreground text-xs">
                         {d.tipo} · <code>{d.hash}</code>
                       </div>
                     </div>
@@ -195,7 +195,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
                 <td className="py-2 pr-3 tabular-nums">{d.competencia}</td>
                 <td className="py-2 pr-3">
                   <div>{d.origem}</div>
-                  <div className="text-muted-foreground text-[11px]">{d.semOrigem ? 'sem origem: confirmar' : d.enviadoPor}</div>
+                  <div className="text-muted-foreground text-xs">{d.semOrigem ? 'sem origem: confirmar' : d.enviadoPor}</div>
                 </td>
                 <td className="py-2 pr-3">
                   <Tooltip conteudo={`Pasta: ${d.pasta}`}>

@@ -213,7 +213,7 @@ export function FilaBpoTela({ empresa, onEscolher }: PropsBpo) {
                   <span className="text-muted-foreground text-xs">
                     {e.nome} · {rotuloBola[f.bola]} · {quando(f.prazo)}
                   </span>
-                  <span className={cn('text-xs', s.tom === 'erro' ? 'text-destructive' : s.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>{s.texto}</span>
+                  <span className={cn('text-xs', s.tom === 'erro' ? 'text-destructive-text' : s.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>{s.texto}</span>
                 </button>
               )
             }}
@@ -355,7 +355,7 @@ function ItemFila({ e, f, eventos, risco, mostrarEmpresa, menu, onAbrir, onEscol
           {f.detalhe && ` · ${f.detalhe}`}
           {notas > 0 && ` · ${notas} anotaç${notas > 1 ? 'ões' : 'ão'}`}
         </span>
-        <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive' : sla.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>
+        <span className={cn('block text-xs', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-foreground' : 'text-muted-foreground')}>
           {sla.texto}
           {parada && <span className="text-warning-foreground"> · bola parada há {textoHoras(parada)}</span>}
           {risco && <span className="text-muted-foreground"> · risco: {risco}</span>}
@@ -426,7 +426,7 @@ function GavetaLancarConta({ e, f, onFechar }: { e: EmpresaVista; f: BpoItemFila
         <Campo rotulo="Vencimento">{(id) => <CampoTexto id={id} tipo="date" valor={r.vencimento} onMudar={(v) => setR((x) => ({ ...x, vencimento: v }))} />}</Campo>
       </div>
       <Campo rotulo="Categoria">{(id) => <CampoTexto id={id} valor={r.categoria} onMudar={(v) => setR((x) => ({ ...x, categoria: v }))} />}</Campo>
-      {erro && <p className="text-destructive text-xs">{erro}</p>}
+      {erro && <p className="text-destructive-text text-xs">{erro}</p>}
       <p className="text-muted-foreground text-xs">{e.erp.modo === 'E1' ? `A conta é criada no ${e.erp.provedor} por comando e relida no espelho.` : e.erp.modo === 'E2' ? `O ${e.erp.provedor} não aceita escrita: a conta fica em “lançar no ERP” nas Rotinas.` : 'Livro próprio: a conta nasce na plataforma.'} Nenhum pagamento sai daqui: o cartão vai ao cliente pelo lote.</p>
     </GavetaFormulario>
   )
@@ -481,7 +481,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
               <span className="text-muted-foreground text-xs">desde {dataHora(bolaDesde(f, eventos))}</span>
               {parada && <Badge variant="destaque">bola parada há {textoHoras(parada)}</Badge>}
             </div>
-            <p className={cn('text-sm', sla.tom === 'erro' ? 'text-destructive' : sla.tom === 'atencao' ? 'text-warning-foreground' : undefined)}>{sla.texto}</p>
+            <p className={cn('text-sm', sla.tom === 'erro' ? 'text-destructive-text' : sla.tom === 'atencao' ? 'text-warning-foreground' : undefined)}>{sla.texto}</p>
             <dl className="text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
               <div>
                 <dt>Responsável</dt>
@@ -547,7 +547,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
             <TituloBloco descricao="BPO-009: o SLA só começa com o pedido completo.">Completude</TituloBloco>
             {f.faltando.length === 0 ? (
               <p className="text-sm">
-                <CheckIcon className="text-success mr-1 inline" /> Completo{f.sla_inicio ? ` desde ${dataHora(f.sla_inicio)}` : ''}.
+                <CheckIcon className="text-success-text mr-1 inline" /> Completo{f.sla_inicio ? ` desde ${dataHora(f.sla_inicio)}` : ''}.
               </p>
             ) : (
               <ul className="flex flex-col gap-1.5">

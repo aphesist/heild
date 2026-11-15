@@ -223,18 +223,18 @@ function Calendario({ e }: { e: EmpresaVista }) {
               onClick={() => setDia(dia === d.dia ? null : d.dia)}
               className={cn('bg-sunken/50 flex min-w-0 cursor-pointer flex-col gap-1 rounded-md p-1.5 text-left', d.dia === hoje && 'ring-foreground/20 ring-1', dia === d.dia && 'ring-foreground/50 ring-2')}
             >
-              <span className="text-muted-foreground px-0.5 text-[11px]">
+              <span className="text-muted-foreground px-0.5 text-xs">
                 {d.rotulo} {d.dia}
               </span>
               {itens.slice(0, 5).map((x) => (
                 <Tooltip key={x.id} conteudo={`${x.c} · ${x.t}`}>
-                  <span className="bg-surface flex min-w-0 items-center gap-1 rounded-sm px-1 py-0.5 text-[11px]">
+                  <span className="bg-surface flex min-w-0 items-center gap-1 rounded-sm px-1 py-0.5 text-xs">
                     <span className="size-1.5 shrink-0 rounded-full" style={{ background: x.cor }} />
                     <span className="truncate">{x.t.split(' ').slice(0, 3).join(' ')}</span>
                   </span>
                 </Tooltip>
               ))}
-              {itens.length > 5 && <span className="text-muted-foreground px-0.5 text-[11px]">+{itens.length - 5}</span>}
+              {itens.length > 5 && <span className="text-muted-foreground px-0.5 text-xs">+{itens.length - 5}</span>}
             </button>
           )
         })}

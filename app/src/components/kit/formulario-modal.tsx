@@ -102,7 +102,7 @@ export function FormularioModal<T extends Record<string, unknown>>({
         >
           {children}
           {erro && (
-            <p role="alert" className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-sm">
+            <p role="alert" className="bg-destructive/10 text-foreground rounded-md px-3 py-2 text-sm">
               {erro}
             </p>
           )}

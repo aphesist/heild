@@ -286,7 +286,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                         {porCliente(clientes).map((l) => (
                           <tr key={l.cliente.id} className="border-border/70 border-t">
                             <td className="py-1.5">{veNomes ? l.cliente.nome : `Cliente ${l.cliente.id.replace(/\D/g, '')}`}</td>
-                            <td>{l.casouPor ?? <span className="text-destructive">sem pasta</span>}</td>
+                            <td>{l.casouPor ?? <span className="text-destructive-text">sem pasta</span>}</td>
                             {[l.contabil, l.fiscal, l.pessoal, l.legalizacao].map((v, i) => (
                               <td key={i}>{v ? 'tem' : <span className="text-muted-foreground">não tem</span>}</td>
                             ))}
@@ -405,7 +405,7 @@ function DicionarioEditavel({ d, podeEditar, onMudar }: { d: Dicionario; podeEdi
                 </span>
                 <span className="flex flex-wrap gap-1">
                   {item.sinonimos.map((s) => (
-                    <span key={s} className="bg-raised shadow-contorno flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]">
+                    <span key={s} className="bg-raised shadow-contorno flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
                       {s}
                       {podeEditar && (
                         <button type="button" aria-label={`Tirar ${s}`} className="cursor-pointer" onClick={() => onMudar({ ...d, [g]: d[g].map((x) => (x.nome === item.nome ? { ...x, sinonimos: x.sinonimos.filter((y) => y !== s) } : x)) })}>

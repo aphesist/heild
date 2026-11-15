@@ -264,11 +264,11 @@ export function DialogoComprovante({ d, onFechar }: { d: Documento; onFechar: ()
             <div className="mx-auto flex w-full max-w-[560px] flex-col gap-3 bg-white p-[7%] text-black shadow-[0_1px_2px_rgba(0,0,0,.12),0_12px_32px_-12px_rgba(0,0,0,.35)]">
               <header className="flex items-center gap-2 border-b border-black/10 pb-2">
                 <span className="font-heading text-lg leading-none font-semibold tracking-tighter">{tema.sigla}</span>
-                <span className="text-[11px] text-black/60">{tema.nome_produto}</span>
-                <span className="ml-auto text-[10px] text-black/50">Comprovante de entrega</span>
+                <span className="text-xs text-black/60">{tema.nome_produto}</span>
+                <span className="ml-auto text-xs text-black/50">Comprovante de entrega</span>
               </header>
               <p className="text-[13px] font-semibold">{d.nome}</p>
-              <table className="w-full text-[11px]">
+              <table className="w-full text-xs">
                 <tbody>
                   {[
                     ['Cliente', cliente ? `${cliente.nome} · ${cliente.documento}` : 'Documento do escritório'],
@@ -284,11 +284,11 @@ export function DialogoComprovante({ d, onFechar }: { d: Documento; onFechar: ()
                   ))}
                 </tbody>
               </table>
-              <p className="text-[11px] font-semibold">Registro</p>
+              <p className="text-xs font-semibold">Registro</p>
               {(d.entregas ?? []).length === 0 ? (
-                <p className="text-[11px] text-black/55">Sem entrega registrada até agora.</p>
+                <p className="text-xs text-black/55">Sem entrega registrada até agora.</p>
               ) : (
-                <ol className="flex flex-col gap-1 text-[11px]">
+                <ol className="flex flex-col gap-1 text-xs">
                   {(d.entregas ?? []).map((e, i) => (
                     <li key={i} className="flex justify-between gap-2 border-b border-black/5 pb-1">
                       <span>
@@ -350,7 +350,7 @@ export function GavetaEnviarCliente({ d, onFechar, onEscrever }: { d: Documento;
           <CheckCircleIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" /> CNPJ do documento ({cnpjDoc}) é o de {cliente?.nome}.
         </p>
       ) : (
-        <p className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
+        <p className="bg-destructive/10 text-foreground flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           <WarningIcon className="mt-0.5 size-4 shrink-0" /> {cliente ? `O CNPJ do documento (${cnpjDoc || 'sem CNPJ'}) não é o de ${cliente.nome} (${cliente.documento}). Envio bloqueado.` : 'Documento do escritório: não tem cliente para enviar.'}
         </p>
       )}
@@ -374,7 +374,7 @@ export function conferirAssinatura(d: Documento): { resultado: 'valida' | 'ausen
 export function SeloAssinatura({ a }: { a: NonNullable<Documento['s09']>['assinatura'] }) {
   if (!a) return null
   return (
-    <p className={a.resultado === 'valida' ? 'flex items-start gap-1.5 text-sm' : 'text-destructive flex items-start gap-1.5 text-sm'}>
+    <p className={a.resultado === 'valida' ? 'flex items-start gap-1.5 text-sm' : 'text-destructive-text flex items-start gap-1.5 text-sm'}>
       {a.resultado === 'valida' ? <SealCheckIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" /> : <WarningIcon className="mt-0.5 size-4 shrink-0" />}
       <span>
         {a.detalhe} <span className="text-muted-foreground text-xs">· conferido {a.quando}</span>

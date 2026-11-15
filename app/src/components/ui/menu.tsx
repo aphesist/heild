@@ -44,5 +44,5 @@ export function ItemMenu({ icone, children, detalhe, onClick, desabilitado }: { 
 }
 
 export function RotuloMenu({ children }: { children: ReactNode }) {
-  return <div className="text-muted-foreground px-3 pt-2 pb-1 text-[11px] font-medium">{children}</div>
+  return <div className="text-muted-foreground px-3 pt-2 pb-1 text-xs font-medium">{children}</div>
 }

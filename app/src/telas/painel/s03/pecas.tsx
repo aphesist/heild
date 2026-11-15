@@ -70,20 +70,20 @@ export function BotaoNivel({
       <span className="flex items-center gap-1.5 text-[13px]">
         {icone[nivel]} {children}
       </span>
-      <span className="text-muted-foreground text-[11px] font-normal">{nivel}</span>
+      <span className="text-muted-foreground text-xs font-normal">{nivel}</span>
     </Button>
   )
 }
 
 /** Selo discreto da fase do plano (Anexo A): o que vem depois aparece, marcado. */
 export function SeloFase({ fase, className }: { fase: number; className?: string }) {
-  return <span className={cn('bg-sunken text-muted-foreground shrink-0 rounded-full px-1.5 py-0.5 text-[10px] whitespace-nowrap', className)}>fase {fase}</span>
+  return <span className={cn('bg-sunken text-muted-foreground shrink-0 rounded-full px-1.5 py-0.5 text-xs whitespace-nowrap', className)}>fase {fase}</span>
 }
 
 /** Rótulo de situação: texto e cor (nunca só cor, 1.5). */
 export function Rotulo({ tom, children, className }: { tom: 'ok' | 'atencao' | 'erro' | 'neutro' | 'info'; children: ReactNode; className?: string }) {
-  const cor = { ok: 'bg-success/15', atencao: 'bg-warning/15', erro: 'bg-destructive/12 text-destructive', neutro: 'bg-sunken text-muted-foreground', info: 'bg-raised shadow-contorno' }[tom]
-  return <span className={cn('inline-flex w-fit shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] whitespace-nowrap', cor, className)}>{children}</span>
+  const cor = { ok: 'bg-success/15', atencao: 'bg-warning/15', erro: 'bg-destructive/12 text-foreground', neutro: 'bg-sunken text-muted-foreground', info: 'bg-raised shadow-contorno' }[tom]
+  return <span className={cn('inline-flex w-fit shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap', cor, className)}>{children}</span>
 }
 
 /**
@@ -99,7 +99,7 @@ export function SaudeConectores({ ids, className }: { ids: IdConector[]; classNa
   const um = parados.length === 1 ? parados[0] : undefined
   return (
     <div role="status" className={cn('flex items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-xs', erro ? 'bg-destructive/10' : 'bg-warning/10', className)}>
-      <PlugsIcon className={cn('size-4 shrink-0', erro ? 'text-destructive' : 'text-warning')} />
+      <PlugsIcon className={cn('size-4 shrink-0', erro ? 'text-destructive-text' : 'text-warning-text')} />
       <span className="min-w-0 flex-1">
         {um ? (
           <>

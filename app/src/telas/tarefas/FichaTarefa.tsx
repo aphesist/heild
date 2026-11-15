@@ -290,7 +290,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
           )}
         </div>
         <dl className="bg-sunken/60 grid grid-cols-2 gap-x-4 gap-y-2 rounded-[14px] p-3 text-sm sm:grid-cols-3">
-          <Dado rotulo="Prazo interno" valor={<span className={cn(atrasadaE(t) && 'text-destructive font-medium')}>{diaMes(t.prazo_interno)}</span>} />
+          <Dado rotulo="Prazo interno" valor={<span className={cn(atrasadaE(t) && 'text-destructive-text font-medium')}>{diaMes(t.prazo_interno)}</span>} />
           <Dado rotulo="Prazo legal" valor={diaMes(t.prazo_legal)} />
           <Dado
             rotulo="Responsável"
@@ -399,9 +399,9 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
                   <input type="checkbox" className="accent-primary mt-0.5 size-4" checked={i.feito} disabled={fechada} onChange={(e) => fazer(() => acoesTarefa.marcarItem(t.id, k, e.target.checked))} />
                   <span className="min-w-0 flex-1">
                     <span className={cn(i.feito && 'text-muted-foreground line-through')}>{i.item}</span>
-                    {i.obrigatorio && <span className="text-muted-foreground ml-1 text-[11px]">· obrigatório</span>}
+                    {i.obrigatorio && <span className="text-muted-foreground ml-1 text-xs">· obrigatório</span>}
                     {i.feito && (nomesChecklist[k] || i.feito_em) && (
-                      <span className="text-muted-foreground block text-[11px]">
+                      <span className="text-muted-foreground block text-xs">
                         {nomesChecklist[k] || 'marcado'}
                         {i.feito_em ? `, ${new Date(i.feito_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : ''}
                       </span>
@@ -456,7 +456,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
             />
           ))}
           {aprendizados.length > 0 && (
-            <p className="text-muted-foreground text-[11px]">
+            <p className="text-muted-foreground text-xs">
               O {tom.nome} aprendeu: {aprendizados.map((x) => `“${x.texto}”`).join(' · ')}
             </p>
           )}
@@ -507,7 +507,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
                 <li key={d.id} className="flex items-center gap-2">
                   <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
                   <span className="min-w-0 flex-1 truncate">{d.nome_arquivo}</span>
-                  <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer text-[11px] underline" onClick={() => fazer(() => repos.documentos.atualizar(d.id, { visivel_ao_cliente: !d.visivel_ao_cliente }))}>
+                  <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer text-xs underline" onClick={() => fazer(() => repos.documentos.atualizar(d.id, { visivel_ao_cliente: !d.visivel_ao_cliente }))}>
                     {d.visivel_ao_cliente ? 'visível no app' : 'só escritório'}
                   </button>
                 </li>
@@ -606,7 +606,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
           {!!t.extras?.conversa_interna && <Ligacao icone={<ChatCircleDotsIcon />} titulo="Conversa interna que originou" detalhe={String(t.extras.conversa_interna)} rotulo="Abrir" onClick={() => ir({ modulo: 'inicio', aba: 'assistente' })} />}
         </ul>
       </Secao>
-      <p className="text-muted-foreground text-[11px]">Setor {nomeDoSetor(setor)} · {t.id}</p>
+      <p className="text-muted-foreground text-xs">Setor {nomeDoSetor(setor)} · {t.id}</p>
     </GavetaLarga>
   )
 }
@@ -731,7 +731,7 @@ export function CartaoNaTarefa({
           </div>
         ))}
       </dl>
-      <span className="text-muted-foreground text-[11px]">
+      <span className="text-muted-foreground text-xs">
         pedido por {pedidoPor}
         {expira && !decidido ? ` · ${expira}` : ''}
       </span>

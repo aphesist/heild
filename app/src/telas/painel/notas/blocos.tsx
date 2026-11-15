@@ -45,7 +45,7 @@ function CapturaDoMes({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
         {cap.fonte && !rodando && <SeloDemonstracao fonte={cap.fonte} />}
       </div>
       {cap.erro?.clienteId === clienteId && (
-        <div role="alert" className="bg-destructive/12 text-destructive flex items-start gap-2 rounded-[12px] px-3 py-2 text-xs">
+        <div role="alert" className="bg-destructive/12 text-foreground flex items-start gap-2 rounded-[12px] px-3 py-2 text-xs">
           <span className="flex-1">{cap.erro.texto}</span>
           <button type="button" className="cursor-pointer font-medium underline" onClick={() => cap.forcar([clienteId])}>
             tentar de novo
@@ -63,15 +63,15 @@ function CapturaDoMes({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
               <div key={f.tipo} className="bg-raised flex min-w-0 items-baseline gap-2 rounded-[12px] px-3 py-1.5">
                 <span className="font-heading text-xl font-light tabular-nums">{fmt(f.qtd)}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="text-muted-foreground block truncate text-[11px]">{f.tipo}</span>
-                  <span className={cn('block truncate text-[11px]', alerta ? 'text-warning font-medium' : 'text-muted-foreground')}>{paridade}</span>
+                  <span className="text-muted-foreground block truncate text-xs">{f.tipo}</span>
+                  <span className={cn('block truncate text-xs', alerta ? 'text-warning-text font-medium' : 'text-muted-foreground')}>{paridade}</span>
                 </span>
               </div>
             ) : (
               <div key={f.tipo} className="bg-raised flex min-w-0 flex-col justify-between rounded-[14px] px-3 py-2">
-                <span className="text-muted-foreground truncate text-[11px]">{f.tipo}</span>
+                <span className="text-muted-foreground truncate text-xs">{f.tipo}</span>
                 <span className="font-heading text-2xl font-light tabular-nums">{fmt(f.qtd)}</span>
-                <span className={cn('truncate text-[11px]', alerta ? 'text-warning font-medium' : 'text-muted-foreground')}>{e.migracao_aberta ? `${f.fonte} · ${paridade}` : f.fonte}</span>
+                <span className={cn('truncate text-xs', alerta ? 'text-warning-text font-medium' : 'text-muted-foreground')}>{e.migracao_aberta ? `${f.fonte} · ${paridade}` : f.fonte}</span>
               </div>
             )
           })}
@@ -264,11 +264,11 @@ function Manifestacao({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col">
           <span className="font-heading text-2xl font-light tabular-nums">{semCiencia.length}</span>
-          <span className="text-muted-foreground text-[11px]">resumos sem ciência</span>
+          <span className="text-muted-foreground text-xs">resumos sem ciência</span>
         </div>
         <div className="flex flex-col">
-          <span className={cn('font-heading text-2xl font-light tabular-nums', semConclusao.length && 'text-warning')}>{semConclusao.length}</span>
-          <span className="text-muted-foreground text-[11px]">sem conclusão · {e.prazo_manifestacao}</span>
+          <span className={cn('font-heading text-2xl font-light tabular-nums', semConclusao.length && 'text-warning-text')}>{semConclusao.length}</span>
+          <span className="text-muted-foreground text-xs">sem conclusão · {e.prazo_manifestacao}</span>
         </div>
       </div>
       {t === 'G' && (
@@ -962,7 +962,7 @@ function CapturaCarteira() {
         )}
         {cap.fonte && <SeloDemonstracao fonte={cap.fonte} />}
       </div>
-      {cap.erro && <p className="text-destructive text-xs">{cap.erro.texto}</p>}
+      {cap.erro && <p className="text-destructive-text text-xs">{cap.erro.texto}</p>}
       <Tabela colunas={[{ rotulo: '' }, { rotulo: 'Cliente' }, { rotulo: 'Última captura' }, { rotulo: 'XMLs do mês', direita: true }, { rotulo: 'Divergências', direita: true }, { rotulo: 'Paridade', direita: true }]} minimo={620}>
         {linhas.map(({ c, e }) => (
           <tr key={c.id}>
@@ -973,7 +973,7 @@ function CapturaCarteira() {
               </span>
             </td>
             <td className="py-2 pr-2">{c.nome}</td>
-            <td className={cn('py-2 pr-2', e.captura.situacao === 'ok' ? 'text-muted-foreground' : e.captura.situacao === 'parada' ? 'text-destructive font-medium' : 'font-medium')}>
+            <td className={cn('py-2 pr-2', e.captura.situacao === 'ok' ? 'text-muted-foreground' : e.captura.situacao === 'parada' ? 'text-destructive-text font-medium' : 'font-medium')}>
               {e.captura.situacao === 'parada'
                 ? `parada há ${e.captura.dias} dias · ${e.captura.motivo?.split(':')[0]}`
                 : e.captura.situacao === 'sem_configuracao'
@@ -981,8 +981,8 @@ function CapturaCarteira() {
                   : `${e.captura.ultima}${e.captura.motivo ? ` · ${e.captura.motivo}` : ''}`}
             </td>
             <td className="py-2 pr-2 text-right tabular-nums">{fmt(totalXmls(e))}</td>
-            <td className={cn('py-2 pr-2 text-right tabular-nums', divergenciasAbertas(e) > 0 && 'text-warning font-medium')}>{divergenciasAbertas(e) || '·'}</td>
-            <td className={cn('py-2 pr-2 text-right tabular-nums', e.migracao_aberta && difParidade(e) !== 0 && 'text-warning font-medium')}>
+            <td className={cn('py-2 pr-2 text-right tabular-nums', divergenciasAbertas(e) > 0 && 'text-warning-text font-medium')}>{divergenciasAbertas(e) || '·'}</td>
+            <td className={cn('py-2 pr-2 text-right tabular-nums', e.migracao_aberta && difParidade(e) !== 0 && 'text-warning-text font-medium')}>
               {e.migracao_aberta ? (difParidade(e) === 0 ? 'ok' : `${difParidade(e) > 0 ? '+' : ''}${difParidade(e)}`) : 'fechada'}
             </td>
           </tr>
@@ -1001,11 +1001,11 @@ function ManifestacaoCarteira() {
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col">
           <span className="font-heading text-2xl font-light tabular-nums">{semCiencia}</span>
-          <span className="text-muted-foreground text-[11px]">resumos sem ciência</span>
+          <span className="text-muted-foreground text-xs">resumos sem ciência</span>
         </div>
         <div className="flex flex-col">
-          <span className={cn('font-heading text-2xl font-light tabular-nums', semConclusao && 'text-warning')}>{semConclusao}</span>
-          <span className="text-muted-foreground text-[11px]">sem conclusão na carteira</span>
+          <span className={cn('font-heading text-2xl font-light tabular-nums', semConclusao && 'text-warning-text')}>{semConclusao}</span>
+          <span className="text-muted-foreground text-xs">sem conclusão na carteira</span>
         </div>
       </div>
       <p className="text-muted-foreground text-xs">A ciência o integrante dá sozinho na rotina; a conclusão é por cliente.</p>

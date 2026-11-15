@@ -98,7 +98,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate">{acoes.nomeDe(p.usuario_id)}{p.usuario_id === usuario.id ? ' (você)' : ''}</span>
-                  <span className="text-muted-foreground block text-[11px]">
+                  <span className="text-muted-foreground block text-xs">
                     {p.saiu_em ? `entrou ${quando(p.entrou_em)} · saiu ${quando(p.saiu_em)}` : `${rotuloPresenca[presenca(p.usuario_id)]} · entrou ${quando(p.entrou_em)}${p.extras?.automatica ? ' (pelo setor)' : ''}`}
                   </span>
                 </span>
@@ -137,7 +137,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
                     <PaperclipIcon className="text-muted-foreground size-4" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{a.nome}</span>
-                      <span className="text-muted-foreground block text-[11px]">
+                      <span className="text-muted-foreground block text-xs">
                         {a.por} · {quando(a.em)} · {a.tamanho}
                       </span>
                     </span>
@@ -151,7 +151,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
         {conversa.tipo === 'grupo' && participo && (
           <Button
             variant="outline"
-            className="text-destructive self-start rounded-full"
+            className="text-destructive-text self-start rounded-full"
             onClick={async () => {
               const ok = await confirmar({ titulo: 'Sair do grupo?', descricao: 'Sua saída fica registrada e o histórico continua no grupo. Alguém do grupo pode adicionar você de novo.', acao: 'Sair do grupo', perigo: true })
               if (ok) exec(() => acoes.sair(conversa.id))
@@ -161,7 +161,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
           </Button>
         )}
         {conversa.tipo === 'grupo' && !participo && <p className="text-muted-foreground text-xs">Você saiu deste grupo. O histórico fica.</p>}
-        <p className="text-muted-foreground flex items-start gap-1.5 text-[11px]">
+        <p className="text-muted-foreground flex items-start gap-1.5 text-xs">
           <PencilSimpleIcon className="mt-0.5 size-3 shrink-0" /> Mensagens são registro do escritório: não se apagam, nem pelo Administrador. Editar guarda a versão anterior.
         </p>
       </AreaRolagem>

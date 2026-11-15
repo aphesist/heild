@@ -253,7 +253,7 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
                 <BarraCaixa caixa={e.caixa} minimo={perfil.caixa_minimo} semBanco={e.bancos.length === 0} />
                 <dl className="divide-border/70 divide-y">
                   <Propriedade rotulo="Saldo nos bancos">
-                    <span className={e.bancos.length && e.caixa < perfil.caixa_minimo ? 'text-destructive' : e.bancos.length ? undefined : 'text-muted-foreground'}>{e.bancos.length ? brl(e.caixa) : 'nenhum banco conectado'}</span>
+                    <span className={e.bancos.length && e.caixa < perfil.caixa_minimo ? 'text-destructive-text' : e.bancos.length ? undefined : 'text-muted-foreground'}>{e.bancos.length ? brl(e.caixa) : 'nenhum banco conectado'}</span>
                   </Propriedade>
                   <Propriedade rotulo="A pagar em aberto">{`${e.contas.filter(contaAberta).length} contas · ${brl(e.contas.filter(contaAberta).reduce((s, c) => s + c.valor, 0))}`}</Propriedade>
                   <Propriedade rotulo="Lotes com o cliente">{e.lotesAbertos.length ? e.lotesAbertos.map((l) => `${brl(l.total)} (expira ${quando(l.expira_em.slice(0, 10))})`).join(' · ') : 'nenhum'}</Propriedade>
@@ -385,7 +385,7 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
           </section>
 
           {podeEncerrar && perfil.situacao !== 'encerrando' && perfil.situacao !== 'encerrado' && (
-            <Button size="sm" variant="ghost" className="text-destructive w-fit rounded-full" onClick={() => void encerrar()}>
+            <Button size="sm" variant="ghost" className="text-destructive-text w-fit rounded-full" onClick={() => void encerrar()}>
               <SignOutIcon /> Encerrar o BPO desta empresa
             </Button>
           )}

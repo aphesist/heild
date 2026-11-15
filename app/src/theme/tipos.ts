@@ -34,6 +34,17 @@ export interface TokensTema {
   borda?: string
   texto_suave?: string
   texto_sobre_primaria?: string
+  /**
+   * Cor de estado usada como texto (cores.md: `erro-texto`, `sucesso-texto`,
+   * `atencao-texto`, `destaque-texto`). A cor de estado cheia é para ícone e
+   * preenchimento; como texto ela reprova em algum modo. Sem eles, o provider
+   * escurece (ou clareia) a cor de estado na direção do texto até passar 4,5:1
+   * em todas as camadas.
+   */
+  erro_texto?: string
+  sucesso_texto?: string
+  atencao_texto?: string
+  destaque_texto?: string
   /** Fim do degradê vertical do fundo (o Figma vai de branco a #d9d2cc). */
   fundo_fim?: string
   /** Barra lateral dos módulos: início e fim do degradê. */

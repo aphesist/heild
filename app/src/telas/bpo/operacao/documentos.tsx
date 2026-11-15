@@ -221,7 +221,7 @@ function GavetaRevisarDocumento({ d, e, onFechar }: { d: BpoDocumento; e: Empres
         ))}
       </ul>
       {dup && <Campo rotulo="Por que não é duplicada?" erro={r.duplicidade.trim() ? undefined : 'Obrigatório para lançar'}>{(id) => <CampoTexto id={id} valor={r.duplicidade} onMudar={(v) => setR((x) => ({ ...x, duplicidade: v }))} placeholder="Ex.: é a segunda parcela, confirmada com o cliente" />}</Campo>}
-      {erro && !dup && <p className="text-destructive text-xs">{erro}</p>}
+      {erro && !dup && <p className="text-destructive-text text-xs">{erro}</p>}
     </GavetaFormulario>
   )
 }

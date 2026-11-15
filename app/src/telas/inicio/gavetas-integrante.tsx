@@ -272,7 +272,7 @@ export function GavetaConfigurar({ integrante, aberta, onFechar }: { integrante:
               <li key={f.nome} className={cn('flex items-center gap-3 px-3 py-2', removida && 'opacity-60')}>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm">{f.rotulo}</span>
-                  <span className="text-muted-foreground block font-mono text-[11px]">{f.nome}</span>
+                  <span className="text-muted-foreground block font-mono text-xs">{f.nome}</span>
                 </span>
                 {removida ? (
                   <Badge variant="outline">removido · você não tem isso</Badge>
@@ -316,7 +316,7 @@ export function GavetaConfigurar({ integrante, aberta, onFechar }: { integrante:
 
 const iconeResultado: Record<ResultadoJob, typeof CheckCircleIcon> = { ok: CheckCircleIcon, vazio: MinusCircleIcon, parcial: WarningIcon, falhou: XCircleIcon }
 const rotuloResultado: Record<ResultadoJob, string> = { ok: 'ok', vazio: 'vazio', parcial: 'parcial', falhou: 'falhou' }
-const corResultado: Record<ResultadoJob, string> = { ok: 'text-success', vazio: 'text-muted-foreground', parcial: 'text-warning', falhou: 'text-destructive' }
+const corResultado: Record<ResultadoJob, string> = { ok: 'text-success-text', vazio: 'text-muted-foreground', parcial: 'text-warning-text', falhou: 'text-destructive-text' }
 
 export function GavetaJobs({ integrante, aberta, onFechar }: { integrante: Integrante; aberta: boolean; onFechar: () => void }) {
   const { usuario } = useSessao()

@@ -1,7 +1,7 @@
 import { Avatar as AvatarPrimitive } from 'radix-ui'
 import { cn } from '@/lib/utils'
 
-const tamanhos = { sm: 'size-6 text-[10px]', md: 'size-8 text-xs', lg: 'size-10 text-sm' }
+const tamanhos = { sm: 'size-6 text-xs', md: 'size-8 text-xs', lg: 'size-10 text-sm' }
 
 function iniciais(nome: string) {
   const partes = nome.trim().split(/\s+/)

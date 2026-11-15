@@ -24,7 +24,7 @@ export function SaudeCaptura({ clienteId, className }: { clienteId: string; clas
     )
   if (c.situacao === 'parada')
     return (
-      <span role="status" className={cn('bg-destructive/12 text-destructive inline-flex w-fit flex-wrap items-center gap-1.5 rounded-full px-2.5 py-1 text-xs', className)}>
+      <span role="status" className={cn('bg-destructive/12 text-foreground inline-flex w-fit flex-wrap items-center gap-1.5 rounded-full px-2.5 py-1 text-xs', className)}>
         <WarningCircleIcon weight="fill" className="size-3.5 shrink-0" />
         <span>
           captura parada{c.dias ? ` há ${c.dias} ${c.dias === 1 ? 'dia' : 'dias'}` : ''}: {c.motivo}
