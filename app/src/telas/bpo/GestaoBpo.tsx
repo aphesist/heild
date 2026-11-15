@@ -322,7 +322,7 @@ function RevisarSla({ e, gestor, onFechar }: { e: EmpresaVista; gestor: boolean;
           </li>
         ))}
       </ul>
-      <p className="bg-sunken/60 rounded-[14px] px-3 py-2 text-sm">
+      <p className="bg-sunken/60 rounded-lg px-3 py-2 text-sm">
         {credito > 0 ? (
           <>
             Crédito do contrato: <strong className="font-medium">{brl(credito)}</strong> (1% do honorário do BPO por ponto abaixo da meta, até 10%). Vai como desconto na próxima fatura.
@@ -657,7 +657,7 @@ export function VolumeBpoTela({ empresa }: PropsBpo) {
                       </span>
                     </div>
                     {aberto === e.clienteId && v && (
-                      <div className="bg-sunken/50 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+                      <div className="bg-sunken/50 flex flex-col gap-2 rounded-lg p-3 text-sm">
                         <span className="text-muted-foreground text-xs">Extrato de volume de {COMPETENCIA_BPO} · o cliente vê antes da fatura</span>
                         <ul className="flex flex-col gap-1">
                           {v.itens.map((i) => (
@@ -879,7 +879,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
         />
       </CabecalhoBpo>
       {!loja.estado.custoPorPacote && (
-        <p className="bg-sunken/60 text-muted-foreground rounded-[14px] px-4 py-2.5 text-sm">
+        <p className="bg-sunken/60 text-muted-foreground rounded-lg px-4 py-2.5 text-sm">
           No custo-hora do escritório, que inclui a equipe contábil, o BPO aparece com margem menor. Para ver com o custo da equipe do BPO, ligue “Custo-hora por pacote (opcional)” em Timesheet › Configurar › Custo-hora.
         </p>
       )}
@@ -942,7 +942,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
             {semanas.map((s) => (
               <div key={s.rotulo} className="flex flex-1 flex-col items-center gap-1">
                 <span className={cn('text-xs tabular-nums', s.total > capSemanal && 'text-destructive')}>{s.total} h</span>
-                <span className="flex w-full max-w-10 flex-col-reverse overflow-hidden rounded-t-[6px]" style={{ height: `${(s.total / maxSemana) * 78}px` }}>
+                <span className="flex w-full max-w-10 flex-col-reverse overflow-hidden rounded-t-sm" style={{ height: `${(s.total / maxSemana) * 78}px` }}>
                   {pessoas.map((p, i) => (
                     <span key={p} title={`${p}: ${Math.round(s.porPessoa[p])} h`} className={i % 2 ? 'bg-foreground/35' : 'bg-foreground/65'} style={{ height: `${s.total ? (s.porPessoa[p] / s.total) * 100 : 0}%` }} />
                   ))}
@@ -954,7 +954,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
           <ul className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
             {pessoas.map((p, i) => (
               <li key={p} className="flex items-center gap-1.5">
-                <span className={cn('inline-block size-2.5 rounded-[3px]', i % 2 ? 'bg-foreground/35' : 'bg-foreground/65')} aria-hidden /> {p}
+                <span className={cn('inline-block size-2.5 rounded-xs', i % 2 ? 'bg-foreground/35' : 'bg-foreground/65')} aria-hidden /> {p}
               </li>
             ))}
             {semanas.some((s) => s.marcos.length) && <li>marcos: {semanas.map((s) => (s.marcos.length ? `${s.rotulo}: ${s.marcos.join(', ')}` : null)).filter(Boolean).join(' · ')}</li>}
@@ -968,7 +968,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
               </Button>
             </div>
             {prop && (
-              <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3 text-sm" aria-label="Sugestão de redistribuição">
+              <div className="bg-sunken/60 flex flex-col gap-2 rounded-lg p-3 text-sm" aria-label="Sugestão de redistribuição">
                 <span className="text-muted-foreground text-xs">
                   {prop.por} · {dataHora(prop.em)}
                 </span>

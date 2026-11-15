@@ -115,7 +115,7 @@ export function TimesheetVazio() {
 /** Faixa de aviso discreta (ex.: custo-hora não definido). */
 export function Faixa({ icone, children, acao }: { icone?: ReactNode; children: ReactNode; acao?: ReactNode }) {
   return (
-    <div className="bg-warning/10 flex flex-wrap items-center gap-3 rounded-[18px] px-4 py-3 text-sm">
+    <div className="bg-warning/10 flex flex-wrap items-center gap-3 rounded-lg px-4 py-3 text-sm">
       {icone}
       <p className="min-w-0 flex-1">{children}</p>
       {acao}

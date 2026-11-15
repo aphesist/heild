@@ -26,7 +26,7 @@ export function SecaoDemonstracaoOperacaoBpo() {
       loja.toastErro(e instanceof Error ? e.message : String(e))
     }
   }
-  const botao = 'text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm'
+  const botao = 'text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm'
   return (
     <div className="flex flex-col gap-1">
       <span className="text-muted-foreground flex items-center gap-1.5 text-xs">

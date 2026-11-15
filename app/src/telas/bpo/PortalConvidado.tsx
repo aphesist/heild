@@ -70,7 +70,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
   return (
     <div role="dialog" aria-modal="true" aria-label={`Portal do convidado de ${c.nome}`} className="bg-background text-foreground fixed inset-0 z-50 flex flex-col overflow-hidden" style={estilo}>
       <header className="border-border/70 flex flex-wrap items-center gap-x-3 gap-y-2 border-b px-4 py-3 sm:px-6">
-        <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-[10px] text-sm font-medium" aria-hidden>
+        <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-md text-sm font-medium" aria-hidden>
           {siglaDe(c.nome)}
         </span>
         <span className="min-w-0 flex-1">
@@ -91,7 +91,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
         <main className="flex flex-1 items-center justify-center p-6 text-center text-sm">Nenhum convidado ativo neste contratante. O Administrador do BPO convida em Configuração.</main>
       ) : primeiroAcesso ? (
         <main className="flex flex-1 items-center justify-center overflow-y-auto p-4">
-          <section className="bg-surface shadow-cartao flex w-full max-w-md flex-col gap-3 rounded-[24px] p-5" aria-label="Primeiro acesso">
+          <section className="bg-surface shadow-cartao flex w-full max-w-md flex-col gap-3 rounded-cartao p-5" aria-label="Primeiro acesso">
             <EnvelopeOpenIcon className="size-8" />
             <h1 className="text-xl font-light">Olá, {g.nome.split(' ')[0]}. Você foi convidado por {c.nome}.</h1>
             <p className="text-muted-foreground text-sm">Aqui você acompanha a fila e o SLA, manda pedidos e documentos{g.papel === 'responsavel_tecnico' ? ', aprova as revisões antes da transmissão' : ''} e lê os relatórios do mês. Seu acesso é pessoal e fica registrado.</p>
@@ -136,14 +136,14 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                       { v: compartilhada.filter((f) => f.bola === 'contratante' || f.bola === 'cliente_final').length, r: 'esperando vocês ou o cliente' },
                       { v: pendentesRt.length, r: 'revisões para aprovar' },
                     ].map((x) => (
-                      <div key={x.r} className="bg-surface shadow-cartao flex flex-col rounded-[18px] p-3">
+                      <div key={x.r} className="bg-surface shadow-cartao flex flex-col rounded-cartao p-3">
                         <span className="text-2xl font-light tabular-nums">{x.v}</span>
                         <span className="text-muted-foreground text-xs">{x.r}</span>
                       </div>
                     ))}
                   </div>
                   {rt && pendentesRt.length > 0 && (
-                    <button type="button" className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[20px] p-4 text-left text-sm" onClick={() => setAba('aprovacoes')}>
+                    <button type="button" className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-cartao p-4 text-left text-sm" onClick={() => setAba('aprovacoes')}>
                       <span className="flex-1">
                         {pendentesRt.length} revisão(ões) esperando o seu “pode transmitir”
                         <span className="text-muted-foreground block text-xs">{pendentesRt.map((f) => `${f.texto} até ${quando(f.prazo_legal ?? f.prazo)}`).join(' · ')}</span>
@@ -151,7 +151,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                       <Badge variant="destaque">revisar</Badge>
                     </button>
                   )}
-                  <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4">
+                  <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4">
                     <h2 className="text-sm font-medium">Enviar um pedido</h2>
                     {c.clientes_finais.length === 0 ? (
                       <p className="text-muted-foreground text-sm">A equipe ainda está importando as suas empresas.</p>
@@ -188,7 +188,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
               )}
 
               {aba === 'fila' && (
-                <section className="bg-surface shadow-cartao flex flex-col rounded-[20px] p-4">
+                <section className="bg-surface shadow-cartao flex flex-col rounded-cartao p-4">
                   <h2 className="mb-2 text-sm font-medium">Fila compartilhada</h2>
                   <ul className="divide-border/70 flex flex-col divide-y" aria-label="Fila compartilhada">
                     {compartilhada.length === 0 && <li className="text-muted-foreground py-3 text-sm">Nada na fila.</li>}
@@ -224,13 +224,13 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
 
               {aba === 'aprovacoes' && (
                 <section className="flex flex-col gap-3">
-                  {!rt && <p className="bg-sunken/60 text-muted-foreground rounded-[14px] px-4 py-3 text-sm">Só o responsável técnico aprova as revisões. Você acompanha.</p>}
+                  {!rt && <p className="bg-sunken/60 text-muted-foreground rounded-lg px-4 py-3 text-sm">Só o responsável técnico aprova as revisões. Você acompanha.</p>}
                   {revisoes.length === 0 && <p className="text-muted-foreground text-sm">Nenhuma revisão.</p>}
                   {revisoes.map((f) => {
                     const pendente = f.bola === 'contratante'
                     const est = estadoRevisao(f)
                     return (
-                      <div key={f.id} className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4">
+                      <div key={f.id} className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4">
                         <span className="text-sm font-medium">{f.texto}</span>
                         <span className="text-muted-foreground text-xs">
                           {f.cliente_final} · {f.codigo} · prazo legal {quando(f.prazo_legal ?? f.prazo)}
@@ -261,7 +261,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
               )}
 
               {aba === 'relatorios' && (
-                <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4 text-sm">
+                <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4 text-sm">
                   <h2 className="text-sm font-medium">Relatório e SLA</h2>
                   <span>
                     SLA do mês: <strong className="font-medium">{c.sla_mes}%</strong> no prazo (contrato: {c.contrato.sla_h} h por pedido completo)
@@ -288,7 +288,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
 
               {aba === 'volume' &&
                 (c.volume ? (
-                  <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4 text-sm">
+                  <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4 text-sm">
                     <h2 className="text-sm font-medium">Extrato de volume · {c.volume.competencia}</h2>
                     <ul className="flex flex-col gap-1" aria-label="Extrato de volume">
                       {c.volume.itens.map((i) => (
@@ -319,7 +319,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                 ))}
 
               {aba === 'conversa' && (
-                <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-4">
+                <section className="bg-surface shadow-cartao flex flex-col gap-2 rounded-cartao p-4">
                   <h2 className="text-sm font-medium">Conversa com a equipe</h2>
                   <ConversaContratante c={c} lado="contratante" nome={g.nome} />
                 </section>

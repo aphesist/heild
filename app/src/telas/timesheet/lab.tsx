@@ -27,7 +27,7 @@ export function SecaoTimesheetLab({ onFechar }: { onFechar: () => void }) {
           onFechar()
           window.dispatchEvent(new Event(EVENTO_EXTENSAO_LAB))
         }}
-        className="text-muted-foreground hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+        className="text-muted-foreground hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
       >
         <EyeIcon className="size-4 shrink-0" /> Timesheet: como a extensão vê (simular visita a portal)
       </button>
@@ -39,7 +39,7 @@ export function SecaoTimesheetLab({ onFechar }: { onFechar: () => void }) {
           setRapida(v)
           window.dispatchEvent(new CustomEvent(EVENTO_CAPTURA_RAPIDA, { detail: v }))
         }}
-        className="text-muted-foreground hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+        className="text-muted-foreground hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
       >
         <LightningIcon className="size-4 shrink-0" /> Timesheet: sessão nasce em {rapida ? '5 s (demonstração)' : '60 s (regra do plano)'} (alternar)
       </button>
@@ -125,7 +125,7 @@ export function ComoAExtensaoVe({ onFechar }: { onFechar: () => void }) {
   return (
     <>
       <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo="Como a extensão vê" descricao="Simule uma visita a um portal e veja, campo a campo, o que a extensão envia à plataforma e o que fica só no navegador (05, 3.3 a 3.5)." acao={rodando ? 'Simulando…' : 'Simular visita'} acaoDesabilitada={rodando || (!cliente && onde !== 'nenhum')} onAcao={simular} secundaria={<Button type="button" variant="ghost" className="rounded-full" onClick={() => setPausando(true)}><PauseIcon /> Pausar pela extensão</Button>}>
-        {inerte && <p className="bg-warning/10 rounded-[14px] px-3 py-2.5 text-sm">Agora {inerte}: a simulação mostra que nada sai.</p>}
+        {inerte && <p className="bg-warning/10 rounded-lg px-3 py-2.5 text-sm">Agora {inerte}: a simulação mostra que nada sai.</p>}
         <Campo rotulo="Site visitado">{(id) => <CampoEscolha id={id} valor={portalId} onMudar={setPortalId} opcoes={[...ativos.map((p) => ({ valor: p.id, rotulo: `${p.portal} (${p.dominio.split(',')[0]})` })), { valor: FORA, rotulo: 'Internet banking (fora da lista)' }]} />}</Campo>
         {portal && <p className="text-muted-foreground -mt-2 text-xs">Lê: {portal.leitura}. Sugere {portal.atividade_sugerida}.</p>}
         <Campo rotulo="O cliente aberto no portal">{(id) => <CampoEscolha id={id} valor={clienteId} onMudar={setClienteId} opcoes={ts.clientes.map((c) => ({ valor: c.id, rotulo: `${c.nome} · ${c.documento}` }))} />}</Campo>
@@ -167,7 +167,7 @@ export function ComoAExtensaoVe({ onFechar }: { onFechar: () => void }) {
           </p>
         )}
         {erro && (
-          <p role="alert" className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+          <p role="alert" className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
             <XCircleIcon weight="fill" className="size-4" /> {erro}
           </p>
         )}
@@ -178,7 +178,7 @@ export function ComoAExtensaoVe({ onFechar }: { onFechar: () => void }) {
                 Enviado à plataforma <Badge variant={resultado.pulsos ? 'sucesso' : 'outline'}>{resultado.pulsos} pulsos</Badge> <SeloDemonstracao />
               </span>
               {resultado.enviado.length ? (
-                <dl className="bg-sunken grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-[14px] px-3 py-2.5 font-mono text-xs">
+                <dl className="bg-sunken grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg px-3 py-2.5 font-mono text-xs">
                   {resultado.enviado.map((x) => (
                     <div key={x.campo} className="contents">
                       <dt className="text-muted-foreground">{x.campo}</dt>
@@ -200,7 +200,7 @@ export function ComoAExtensaoVe({ onFechar }: { onFechar: () => void }) {
                 ))}
               </ul>
             </div>
-            <p className={cn('rounded-[14px] px-3 py-2.5 text-sm', resultado.pulsos ? 'bg-success/10' : 'bg-sunken')}>{resultado.efeito}</p>
+            <p className={cn('rounded-lg px-3 py-2.5 text-sm', resultado.pulsos ? 'bg-success/10' : 'bg-sunken')}>{resultado.efeito}</p>
             <p className="text-muted-foreground text-xs">Hora do relógio do servidor: {hm(agoraDemo())}. O pulso adia o modo de espera e estende a tarefa aberta; sozinho, nunca abre sessão.</p>
           </div>
         )}

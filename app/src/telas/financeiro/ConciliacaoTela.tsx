@@ -111,7 +111,7 @@ export function ConciliacaoTela() {
       ))}
 
       <Caixa>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           <Numero valor={fin.lancamentos.length} rotulo="lançamentos de 01/11 a hoje" />
           <Numero valor={conciliados.length} rotulo="conciliados" detalhe={`${porRegra} por regra aprovada`} />
           <Numero valor={sugeridos.length} rotulo="sugestões para confirmar" detalhe={`${seguras.length} seguras (regra aprovada)`} />
@@ -242,7 +242,7 @@ export function ConciliacaoTela() {
         <ul className="divide-border/70 flex flex-col divide-y">
           {fin.contasBancarias.map((c) => (
             <li key={c.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-              <BankIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
+              <BankIcon className="text-muted-foreground size-5 shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block">{c.nome}</span>
                 <span className="text-muted-foreground block text-xs">
@@ -281,7 +281,7 @@ function Regras({ fin, pode }: { fin: Fin; pode: boolean }) {
       {propostas.length > 0 && (
         <ul className="flex flex-col gap-2">
           {propostas.map((r) => (
-            <li key={r.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+            <li key={r.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm">
               <span className="min-w-0 flex-1">
                 <span className="block font-mono text-xs">{r.padrao}</span>
                 <span className="text-muted-foreground block text-xs">

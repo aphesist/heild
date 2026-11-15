@@ -32,7 +32,7 @@ function Passos({ nomes, atual }: { nomes: readonly string[]; atual: number }) {
 
 function Erro({ texto }: { texto: string }) {
   return (
-    <p role="alert" className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+    <p role="alert" className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
       <WarningCircleIcon weight="fill" className="mt-0.5 size-4 shrink-0" /> {texto}
     </p>
   )
@@ -93,7 +93,7 @@ export function TermoCiencia({ onFechar, onAceitar, somenteLeitura }: { onFechar
         </p>
       </div>
       {!somenteLeitura && (
-        <label className="bg-sunken flex cursor-pointer items-start gap-2.5 rounded-[14px] px-3 py-2.5 text-sm">
+        <label className="bg-sunken flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm">
           <input type="checkbox" className="accent-foreground mt-0.5 size-4" checked={lido} onChange={(e) => setLido(e.target.checked)} />
           Li e entendi como o meu tempo é registrado. O aceite fica guardado com data e hora.
         </label>
@@ -164,7 +164,7 @@ export function VincularExtensao({ onFechar }: { onFechar: () => void }) {
         <div className="flex flex-col gap-3 text-sm">
           <p>Abra a loja do {navegador === 'chrome' ? 'Chrome' : 'Edge'}, instale a extensão e volte aqui.</p>
           {instalada ? (
-            <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2.5">
+            <p className="bg-success/10 flex items-center gap-2 rounded-lg px-3 py-2.5">
               <CheckCircleIcon weight="fill" className="text-success size-5" /> Extensão {instalada} encontrada neste navegador. <SeloDemonstracao />
             </p>
           ) : (
@@ -179,7 +179,7 @@ export function VincularExtensao({ onFechar }: { onFechar: () => void }) {
         <div className="flex flex-col gap-3 text-sm">
           <p>A extensão usa o login da plataforma; sem login, não envia nada. Vincular liga a extensão à sua conta neste navegador.</p>
           {vinculada ? (
-            <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2.5">
+            <p className="bg-success/10 flex items-center gap-2 rounded-lg px-3 py-2.5">
               <CheckCircleIcon weight="fill" className="text-success size-5" /> Vinculada a {usuario.nome}.
             </p>
           ) : (
@@ -197,7 +197,7 @@ export function VincularExtensao({ onFechar }: { onFechar: () => void }) {
             {ts.portais
               .filter((d) => d.situacao === 'ativo')
               .map((d) => (
-                <li key={d.id} className="bg-sunken rounded-[12px] px-3 py-2">
+                <li key={d.id} className="bg-sunken rounded-md px-3 py-2">
                   <span className="block">{d.portal}</span>
                   <span className="text-muted-foreground block text-xs">lê: {d.leitura}</span>
                 </li>
@@ -306,7 +306,7 @@ export function Dominios({ admin, onFechar }: { admin: boolean; onFechar: () => 
     >
       <ul className="flex flex-col gap-2">
         {lista.map((d) => (
-          <li key={d.id} className={cn('bg-sunken flex items-start gap-3 rounded-[14px] px-3 py-2.5', d.situacao === 'desligado' && 'opacity-60')}>
+          <li key={d.id} className={cn('bg-sunken flex items-start gap-3 rounded-lg px-3 py-2.5', d.situacao === 'desligado' && 'opacity-60')}>
             <div className="min-w-0 flex-1 text-sm">
               <div className="font-medium">{d.portal}</div>
               <code className="text-muted-foreground block truncate text-[11px]">{d.dominio}</code>
@@ -509,7 +509,7 @@ export function Exportar({ papel, onFechar }: { papel: PapelTs; onFechar: () => 
       {o === 'csv' && !ts.permissoes.gere.length && papel !== 'admin' && <p className="text-muted-foreground text-xs">Só os setores que você gere.</p>}
       {o === 'benchmark' && <p className="text-muted-foreground text-xs">Só medianas por atividade com 5 ou mais sessões; sem nomes, clientes nem horários.</p>}
       {pronto && (
-        <p className="bg-success/10 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-success/10 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
           <DownloadSimpleIcon className="size-4" /> {pronto} {o === 'pdf' ? 'gerado e guardado em Arquivos › Escritório › Relatórios.' : 'baixado.'}
           {o === 'pdf' && <SeloDemonstracao fonte="relatório mensal" />}
         </p>
@@ -591,7 +591,7 @@ export function ConectarCore({ inicial, onFechar }: { inicial?: ConectorCore['co
             )}
           </Campo>
           {testado != null ? (
-            <p className="bg-success/10 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+            <p className="bg-success/10 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
               <CheckCircleIcon weight="fill" className="text-success size-5" /> Conexão ok · {testado} tarefas encontradas no mês. <SeloDemonstracao />
             </p>
           ) : (
@@ -721,7 +721,7 @@ export function CustoHora({ onFechar }: { onFechar: () => void }) {
           <Campo rotulo="Horas produtivas registradas no mês" ajuda={`Vem do Timesheet (humanas, sem as de agente${horasMedidas ? `; medidas em ${rotuloCompetencia(competencia)}: ${horasMedidas} h` : ''}). Ajuste se faltar alguém.`}>
             {(id) => <CampoTexto id={id} tipo="number" valor={horas} onMudar={setHoras} className="w-32 tabular-nums" />}
           </Campo>
-          <p className="bg-sunken rounded-[14px] px-3 py-2.5 text-sm">
+          <p className="bg-sunken rounded-lg px-3 py-2.5 text-sm">
             {brl(total)} ÷ {horas} h = <strong className="font-medium">{brl(calculado)} por hora</strong>. Cliente que toma 2 h no mês e paga R$ 500 fica {brl(Math.abs(500 - 2 * calculado))} {500 - 2 * calculado < 0 ? 'abaixo' : 'acima'} da neutralidade.
           </p>
         </>
@@ -749,7 +749,7 @@ export function CustoHora({ onFechar }: { onFechar: () => void }) {
             ['Pleno', 1],
             ['Júnior', 0.7],
           ].map(([c, f]) => (
-            <div key={c as string} className="bg-sunken rounded-[12px] px-3 py-2 text-sm">
+            <div key={c as string} className="bg-sunken rounded-md px-3 py-2 text-sm">
               <div className="text-muted-foreground text-xs">{c as string}</div>
               <div className="font-medium tabular-nums">{brl(Math.round(valor * (f as number)))}/h</div>
             </div>
@@ -809,7 +809,7 @@ export function ReconstruirPeriodo({ onFechar }: { onFechar: () => void }) {
         </p>
       )}
       {resultado && (
-        <dl className="bg-success/10 grid grid-cols-2 gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <dl className="bg-success/10 grid grid-cols-2 gap-2 rounded-lg px-3 py-2.5 text-sm">
           <dt className="text-muted-foreground">sessões relidas</dt>
           <dd className="text-right tabular-nums">{resultado.relidas}</dd>
           <dt className="text-muted-foreground">ajustadas</dt>

@@ -236,7 +236,7 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
           )}
           <ul className="flex flex-col gap-2" aria-label="Precisa de decisão">
             {visiveis.map((d) => (
-              <li key={d.id} className="bg-sunken/50 flex items-center gap-3 rounded-[14px] p-3 text-sm">
+              <li key={d.id} className="bg-sunken/50 flex items-center gap-3 rounded-lg p-3 text-sm">
                 <span className="size-2.5 shrink-0 rounded-full" style={{ background: corAudit[d.cor] }} aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block">
@@ -379,7 +379,7 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
                   <li key={a.nome}>
                     <button
                       type="button"
-                      className="hover:bg-raised/50 flex w-full cursor-pointer items-center gap-3 rounded-[10px] px-1 py-2 text-left"
+                      className="hover:bg-raised/50 flex w-full cursor-pointer items-center gap-3 rounded-md px-1 py-2 text-left"
                       onClick={() => {
                         setFiltroCarteira({ ...filtrosPadrao, analista: a.nome })
                         onEscolher(null, 'carteira')

@@ -64,7 +64,7 @@ export function SecaoDemonstracaoBpo() {
             loja.toast(`O cartão “${aberto.titulo}” expirou: nada foi pago (B3)`)
           })
         }
-        className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50"
       >
         Fazer um cartão de pagamento expirar {aberto ? `(${String(banco.obter('cliente', aberto.cliente_id)?.nome ?? '')})` : '(nenhum aberto)'}
       </button>

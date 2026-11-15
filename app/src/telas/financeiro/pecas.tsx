@@ -50,7 +50,7 @@ export function SaldosContas({ bancos, aPagar30, acao }: { bancos: ContaBancaria
       <ul className="divide-border/70 flex flex-col divide-y">
         {bancos.map((b) => (
           <li key={b.id} className="flex items-center gap-3 py-2 text-sm">
-            <BankIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
+            <BankIcon className="text-muted-foreground size-5 shrink-0" />
             <span className="min-w-0 flex-1">
               <span className="block truncate">{b.nome}</span>
               <span className="text-muted-foreground block text-xs">
@@ -94,8 +94,8 @@ export function FluxoMensal({ d, altura = 'h-44', ajuste = 0 }: { d: DadosFluxo;
             <Tooltip key={m} conteudo={`${m}${proj ? ' (projetado)' : ''}: entram R$ ${entradas[i]} mil, saem R$ ${d.saidas[i]} mil, sobra R$ ${entradas[i] - d.saidas[i]} mil${marco ? ` · ${marco.texto}` : ''}`}>
               <span className="relative flex h-full flex-1 items-end justify-center gap-[2px]">
                 {marco && <span className="bg-warning absolute -top-1 size-2 rounded-full ring-2 ring-[var(--surface)]" />}
-                <span className="w-full max-w-4 rounded-t-[4px]" style={{ height: `${(entradas[i] / max) * 100}%`, background: proj ? listras(corE) : corE, boxShadow: proj ? `inset 0 0 0 1px ${corE}` : undefined }} />
-                <span className="w-full max-w-4 rounded-t-[4px]" style={{ height: `${(d.saidas[i] / max) * 100}%`, background: proj ? listras(corS) : corS, boxShadow: proj ? `inset 0 0 0 1px ${corS}` : undefined }} />
+                <span className="w-full max-w-4 rounded-t-xs" style={{ height: `${(entradas[i] / max) * 100}%`, background: proj ? listras(corE) : corE, boxShadow: proj ? `inset 0 0 0 1px ${corE}` : undefined }} />
+                <span className="w-full max-w-4 rounded-t-xs" style={{ height: `${(d.saidas[i] / max) * 100}%`, background: proj ? listras(corS) : corS, boxShadow: proj ? `inset 0 0 0 1px ${corS}` : undefined }} />
               </span>
             </Tooltip>
           )
@@ -110,13 +110,13 @@ export function FluxoMensal({ d, altura = 'h-44', ajuste = 0 }: { d: DadosFluxo;
       </div>
       <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="size-3 rounded-[3px]" style={{ background: corE }} /> entradas
+          <span className="size-3 rounded-xs" style={{ background: corE }} /> entradas
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-3 rounded-[3px]" style={{ background: corS }} /> saídas
+          <span className="size-3 rounded-xs" style={{ background: corS }} /> saídas
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-3 rounded-[3px]" style={{ background: listras(corE), boxShadow: `inset 0 0 0 1px ${corE}` }} /> projetado
+          <span className="size-3 rounded-xs" style={{ background: listras(corE), boxShadow: `inset 0 0 0 1px ${corE}` }} /> projetado
         </span>
         <span className="flex items-center gap-1.5">
           <span className="bg-warning size-2 rounded-full" /> marco

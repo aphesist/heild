@@ -78,7 +78,7 @@ export function Corrigir({ titulo, descricao, inicio, fim, sugestao, alternativa
           </Campo>
           <Campo rotulo="Segundo cliente">{(id) => <CampoEscolha id={id} valor={cliente2} onMudar={setCliente2} opcoes={opcoesClientes.filter((c) => c.valor !== cliente)} />}</Campo>
           <Campo rotulo="Atividade do segundo">{(id) => <CampoEscolha id={id} valor={atividade2} onMudar={setAtividade2} opcoes={opcoesAtividade} />}</Campo>
-          <p className="bg-sunken flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+          <p className="bg-sunken flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
             <ScissorsIcon className="size-4 shrink-0" /> {ini}–{corte} {ts.nomeCliente(cliente)} · {corte}–{f} {ts.nomeCliente(cliente2)}
           </p>
         </>
@@ -190,7 +190,7 @@ export function DetalheLinha({ linha, onFechar }: { linha: LinhaDia; onFechar: (
           <span className="text-sm font-medium">Evidências</span>
           <ul className="flex flex-col gap-1">
             {s.evidencias.map((e, k) => (
-              <li key={k} className="bg-sunken rounded-[10px] px-3 py-1.5 text-sm">
+              <li key={k} className="bg-sunken rounded-md px-3 py-1.5 text-sm">
                 {e}
               </li>
             ))}
@@ -202,15 +202,15 @@ export function DetalheLinha({ linha, onFechar }: { linha: LinhaDia; onFechar: (
           )}
         </div>
       )}
-      {i && <p className="bg-sunken rounded-[14px] px-3 py-2.5 text-sm">Pista: {i.pista}. Use Confirmações para resolver em um clique.</p>}
+      {i && <p className="bg-sunken rounded-lg px-3 py-2.5 text-sm">Pista: {i.pista}. Use Confirmações para resolver em um clique.</p>}
       {s?.contestacao && (
-        <p className="bg-sunken rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-sunken rounded-lg px-3 py-2.5 text-sm">
           Contestada: {rotuloMotivoContestacao(s.contestacao.motivo)} → {s.contestacao.correcao} ·{' '}
           {s.contestacao.status === 'pendente' ? 'aguardando o Gestor' : s.contestacao.status === 'aceita' ? `aceita por ${s.contestacao.decidido_por_nome}` : `recusada por ${s.contestacao.decidido_por_nome}: ${s.contestacao.motivo_recusa}`}
         </p>
       )}
       {s?.anomalia && (
-        <p className="bg-warning/10 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-warning/10 rounded-lg px-3 py-2.5 text-sm">
           Sessão anômala: {s.anomalia.texto}
           {s.anomalia.revisao ? ` · revisada (${s.anomalia.revisao})` : ''}
         </p>
@@ -280,7 +280,7 @@ export function DecidirContestacao({ s, onFechar }: { s: SessaoTrabalho; onFecha
         if (executar(() => repos.sessoes.decidirContestacao(s.id, decisao === 'aceitar', decisao === 'recusar' ? motivo : ''), { sucesso: decisao === 'aceitar' ? 'Contestação aceita: a sessão foi corrigida' : 'Contestação recusada; a pessoa vê o motivo' })) onFechar()
       }}
     >
-      <div className="bg-sunken flex flex-col gap-1 rounded-[14px] px-3 py-2.5 text-sm">
+      <div className="bg-sunken flex flex-col gap-1 rounded-lg px-3 py-2.5 text-sm">
         <span>
           <strong className="font-medium">Motivo:</strong> {rotuloMotivoContestacao(c.motivo)} → {c.correcao}
         </span>
@@ -290,7 +290,7 @@ export function DecidirContestacao({ s, onFechar }: { s: SessaoTrabalho; onFecha
         <span className="text-sm font-medium">Evidências</span>
         <ul className="flex flex-col gap-1">
           {s.evidencias.map((e, k) => (
-            <li key={k} className="bg-sunken rounded-[10px] px-3 py-1.5 text-sm">
+            <li key={k} className="bg-sunken rounded-md px-3 py-1.5 text-sm">
               {e}
             </li>
           ))}
@@ -411,10 +411,10 @@ export function RevisarAnomalia({ s, onFechar }: { s: SessaoTrabalho; onFechar: 
   }
   return (
     <GavetaFormulario aberta onFechar={onFechar} titulo="Revisar sessão anômala" descricao={`${ts.nomeUsuario(s.usuario_dono_id)} · ${diaDe(s.inicio).split('-').reverse().join('/')} · ${hm(s.inicio)}–${hm(s.fim)} · ${s.atividade_id ?? ''} ${s.rotulo}`} acao="Revisar" onAcao={revisar}>
-      <p className="bg-warning/10 rounded-[14px] px-3 py-2.5 text-sm">{s.anomalia?.texto}</p>
+      <p className="bg-warning/10 rounded-lg px-3 py-2.5 text-sm">{s.anomalia?.texto}</p>
       <ul className="flex flex-col gap-1">
         {s.evidencias.map((e, k) => (
-          <li key={k} className="bg-sunken rounded-[10px] px-3 py-1.5 text-sm">
+          <li key={k} className="bg-sunken rounded-md px-3 py-1.5 text-sm">
             {e}
           </li>
         ))}
@@ -472,14 +472,14 @@ export function ProporReajuste({ r, custoHora, onFechar }: { r: LinhaRent; custo
           ['Horas', `${String(r.horas).replace('.', ',')} h × ${brl(custoHora)}`],
           ['Variáveis (agentes, serviços)', brl(r.variaveis)],
         ].map(([k, v]) => (
-          <div key={k} className="bg-sunken rounded-[12px] px-3 py-2">
+          <div key={k} className="bg-sunken rounded-md px-3 py-2">
             <dt className="text-muted-foreground text-[11px]">{k}</dt>
             <dd className="font-medium tabular-nums">{v}</dd>
           </div>
         ))}
       </dl>
       <Campo rotulo="Margem alvo (%)">{(id) => <CampoTexto id={id} tipo="number" valor={margem} onMudar={setMargem} className="w-28 tabular-nums" />}</Campo>
-      <p className="bg-sunken flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+      <p className="bg-sunken flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
         <SparkleIcon className="mt-0.5 size-4 shrink-0" /> Honorário sugerido: <strong className="font-medium tabular-nums">{brl(sugerido)}</strong>
         {atual ? ` (${sugerido > atual ? '+' : ''}${Math.round(((sugerido - atual) / atual) * 100)}%)` : ''}. O integrante junta os marcos do ano como justificativa.
       </p>

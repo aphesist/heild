@@ -101,7 +101,7 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string }) {
       <CartoesDaAba fin={fin} aba="cobranca" />
 
       <Caixa>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           <Numero valor={brl(soma(doMes))} rotulo={`emitido em ${rotuloCompetencia(COMPETENCIA_ATUAL)}`} detalhe={`${doMes.length} cobranças de exemplo`} />
           <Numero valor={brl(soma(doMes.filter((c) => c.situacao === 'paga')))} rotulo="recebido" detalhe={`${doMes.filter((c) => c.situacao === 'paga').length} pagas`} />
           <Numero valor={brl(soma(doMes.filter((c) => fin.situacao(c) === 'a_vencer' || fin.situacao(c) === 'aguardando_confirmacao')))} rotulo="a vencer" />
@@ -142,7 +142,7 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string }) {
               const servicosLinha = c.linhas.filter((l) => l.tipo === 'item').length
               return (
                 <li key={c.id}>
-                  <button type="button" onClick={() => setAberta(c.id)} className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_8rem_10rem]">
+                  <button type="button" onClick={() => setAberta(c.id)} className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-md px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_8rem_10rem]">
                     <span className="min-w-0">
                       <span className="block truncate font-medium">{fin.nomeCliente(c.cliente_id)}</span>
                       <span className="text-muted-foreground block text-xs">
@@ -364,7 +364,7 @@ function DetalheFatura({ fin, c, pode, onFechar }: { fin: Fin; c: Cobranca; pode
         <h3 className="text-sm font-medium">NFS-e ({fin.politica?.nfse.nfse_por_servico ? 'uma por serviço' : 'vários itens na mesma nota'})</h3>
         <ul className="flex flex-col gap-1.5 text-sm">
           {notas.map((n) => (
-            <li key={n.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[12px] px-3 py-2">
+            <li key={n.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-md px-3 py-2">
               <span className="min-w-0 flex-1">
                 <span className="block">
                   {n.numero} · {n.servico}
@@ -484,7 +484,7 @@ function SegundaVia({ fin, c, onFechar }: { fin: Fin; c: Cobranca; onFechar: () 
   return (
     <GavetaFormulario aberta onFechar={onFechar} titulo={`2ª via · ${c.numero}`} descricao="Juros e multa pela política, calculados pelo motor Cálculo. O cliente também pede no app e no WhatsApp; o integrante responde sozinho (FIN-010)." acao={r.s === 'ok' ? 'Fechar' : 'Gerar 2ª via'} acaoDesabilitada={r.s === 'indo'} onAcao={() => (r.s === 'ok' ? onFechar() : gerar())}>
       <Campo rotulo="Pagar em">{(id) => <CampoEscolha id={id} valor={data} onMudar={(v) => { setData(v); setR({ s: 'nao' }) }} opcoes={[0, 1, 3, 5, 10].map((d) => somarDias(HOJE > c.vencimento ? HOJE : c.vencimento, d)).map((d) => ({ valor: d, rotulo: dataCurta(d) }))} />}</Campo>
-      <ul className="bg-sunken/60 flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+      <ul className="bg-sunken/60 flex flex-col gap-1 rounded-lg p-3 text-sm">
         <li className="flex justify-between">
           <span>Valor original</span>
           <span className="tabular-nums">{brl(c.valor, true)}</span>
@@ -784,7 +784,7 @@ function Provedor({ fin }: { fin: Fin }) {
       <Pergunta descricao={`${p.convenio} · conta ${p.conta}`}>
         Provedor: {p.nome}
       </Pergunta>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Numero valor={p.boleto} rotulo="por boleto pago" />
         <Numero valor={p.pix} rotulo="por Pix" />
         <Numero valor={p.pix_automatico} rotulo="por Pix Automático" />

@@ -184,7 +184,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
                   aria-checked={atual}
                   disabled={!podeAlcada || m === 'M3' || atual}
                   onClick={() => (m === 'M2' ? setModo({ m, teto: String(e.perfil.teto_m2 ?? 10_000) }) : void proporModo(m))}
-                  className={cn('flex cursor-pointer items-start gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm disabled:cursor-default', m === 'M3' && 'opacity-60', atual ? 'bg-raised shadow-contorno' : 'hover:bg-sunken/60')}
+                  className={cn('flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm disabled:cursor-default', m === 'M3' && 'opacity-60', atual ? 'bg-raised shadow-contorno' : 'hover:bg-sunken/60')}
                 >
                   <span className={cn('mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border', atual && 'border-foreground')}>{atual && <span className="bg-foreground size-2 rounded-full" />}</span>
                   <span className="min-w-0 flex-1">
@@ -229,7 +229,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
           <ul className="flex flex-col gap-1.5" aria-label="Aprovadores da ficha">
             {(e.ficha?.contatos ?? []).length === 0 && <li className="text-muted-foreground text-sm">Nenhum contato na ficha: convide o sócio e o financeiro no app.</li>}
             {(e.ficha?.contatos ?? []).map((c) => (
-              <li key={c.nome} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+              <li key={c.nome} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm">
                 <span className="min-w-0 flex-1 basis-40">
                   {c.nome}
                   <span className="text-muted-foreground block text-xs">
@@ -245,7 +245,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
           </ul>
           <p className="text-muted-foreground text-xs">A alçada da pessoa fica no contato da ficha e quem edita é o sócio aprovador. Toda mudança vai ao aceite no app. Quem altera as alçadas de uma empresa não confere nem aprova pagamento nela.</p>
           {e.proposta && (
-            <div className="bg-sunken/60 flex flex-col gap-1 rounded-[14px] px-3 py-2.5 text-sm">
+            <div className="bg-sunken/60 flex flex-col gap-1 rounded-lg px-3 py-2.5 text-sm">
               <span className="font-medium">Proposta aguardando o aceite do sócio no app</span>
               <span className="text-muted-foreground text-xs">
                 faixa 1 até {brl(e.proposta.faixa1)} · faixa 2 até {brl(e.proposta.faixa2)} · {e.proposta.janela}
@@ -277,16 +277,16 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
           <TituloBloco descricao="Segregação de funções (10, 3.8): o sistema confere a etapa de cada pessoa e desliga o botão com o motivo.">Regras de conferência</TituloBloco>
           <ul className="flex flex-col gap-1.5 text-sm">
             <li className="flex gap-2">
-              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" weight="duotone" /> Quem digitou não confere, também em operação pequena.
+              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" /> Quem digitou não confere, também em operação pequena.
             </li>
             <li className="flex gap-2">
-              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" weight="duotone" /> Até {brl(e.faixa1)}: uma conferência. Acima: analista e Gestor do BPO.
+              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" /> Até {brl(e.faixa1)}: uma conferência. Acima: analista e Gestor do BPO.
             </li>
             <li className="flex gap-2">
-              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" weight="duotone" /> Fornecedor novo ou com dados alterados só entra em lote com os dados confirmados por segundo canal.
+              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" /> Fornecedor novo ou com dados alterados só entra em lote com os dados confirmados por segundo canal.
             </li>
             <li className="flex gap-2">
-              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" weight="duotone" /> {e.perfil.analista_nome === e.perfil.responsavel_nome ? `BPO de uma pessoa (${e.perfil.analista_nome}): a conferência pode passar ao cliente, na aprovação ("Cliente confere").` : `Analista ${e.perfil.analista_nome}, responsável ${e.perfil.responsavel_nome}: a segunda conferência é do Gestor.`}
+              <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" /> {e.perfil.analista_nome === e.perfil.responsavel_nome ? `BPO de uma pessoa (${e.perfil.analista_nome}): a conferência pode passar ao cliente, na aprovação ("Cliente confere").` : `Analista ${e.perfil.analista_nome}, responsável ${e.perfil.responsavel_nome}: a segunda conferência é do Gestor.`}
             </li>
           </ul>
           <div>
@@ -336,7 +336,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
           </TituloBloco>
           <ol className="grid gap-2 sm:grid-cols-5" aria-label="Passos do escalonamento">
             {passosEscalonamento(e).map((p, i) => (
-              <li key={i} className="bg-sunken/50 flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+              <li key={i} className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
                 <span className="text-muted-foreground text-xs">
                   {i + 1}. {p.quando}
                 </span>
@@ -545,12 +545,12 @@ function PesosAudit() {
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
         <label className="flex items-center gap-2">
           Atenção a partir de
-          <input type="number" min={1} max={vermelho - 1} value={amarelo} disabled={!pode} aria-label="Limiar de atenção" onChange={(ev) => Number(ev.target.value) >= 1 && Number(ev.target.value) < vermelho && salvar({ limiar_amarelo: Number(ev.target.value) }, 'Ajustou o limiar de atenção da auditoria')} className="bg-sunken w-16 rounded-[10px] px-2 py-1 tabular-nums" />
+          <input type="number" min={1} max={vermelho - 1} value={amarelo} disabled={!pode} aria-label="Limiar de atenção" onChange={(ev) => Number(ev.target.value) >= 1 && Number(ev.target.value) < vermelho && salvar({ limiar_amarelo: Number(ev.target.value) }, 'Ajustou o limiar de atenção da auditoria')} className="bg-sunken w-16 rounded-md px-2 py-1 tabular-nums" />
           pontos
         </label>
         <label className="flex items-center gap-2">
           Agir hoje a partir de
-          <input type="number" min={amarelo + 1} max={60} value={vermelho} disabled={!pode} aria-label="Limiar de agir hoje" onChange={(ev) => Number(ev.target.value) > amarelo && salvar({ limiar_vermelho: Number(ev.target.value) }, 'Ajustou o limiar de agir hoje da auditoria')} className="bg-sunken w-16 rounded-[10px] px-2 py-1 tabular-nums" />
+          <input type="number" min={amarelo + 1} max={60} value={vermelho} disabled={!pode} aria-label="Limiar de agir hoje" onChange={(ev) => Number(ev.target.value) > amarelo && salvar({ limiar_vermelho: Number(ev.target.value) }, 'Ajustou o limiar de agir hoje da auditoria')} className="bg-sunken w-16 rounded-md px-2 py-1 tabular-nums" />
           pontos
         </label>
       </div>
@@ -678,7 +678,7 @@ function IntegrantesPorFuncao() {
           const base = integrantesBase.find((i) => i.id === ib.id)
           const t = base ? aparencia(base) : undefined
           return (
-            <section key={ib.id} className="bg-sunken/40 flex flex-col gap-2 rounded-[18px] p-3" aria-label={`Integrante ${ib.nome}`}>
+            <section key={ib.id} className="bg-sunken/40 flex flex-col gap-2 rounded-lg p-3" aria-label={`Integrante ${ib.nome}`}>
               <header className="flex items-center gap-2">
                 {t && <Orb cor={t.cor} corOlhos={t.corOlhos} estado="disponivel" tamanho={28} cutucavel={false} />}
                 <span className="min-w-0 flex-1">

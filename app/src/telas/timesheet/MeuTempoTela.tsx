@@ -113,7 +113,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
 
         {!termo && (
           <Faixa
-            icone={<ShieldCheckIcon weight="duotone" className="text-warning size-5 shrink-0" />}
+            icone={<ShieldCheckIcon className="text-warning size-5 shrink-0" />}
             acao={
               <Button size="sm" className="rounded-full" onClick={() => setModal('termo')}>
                 Ler e aceitar
@@ -146,7 +146,7 @@ export function MeuTempoTela({ papel, clienteNome, clienteId }: { papel: PapelTs
                   extra={
                     <>
                       <li className="flex items-center gap-1.5">
-                        <span className="ring-warning size-3 rounded-[3px] ring-2 ring-inset" /> fora da jornada
+                        <span className="ring-warning size-3 rounded-xs ring-2 ring-inset" /> fora da jornada
                       </li>
                       <li className="flex items-center gap-1.5">
                         <span className="h-1.5 w-4 rounded-full" style={{ background: aparencia({ setor: 'fiscal' }).cor }} /> agente (série à parte)

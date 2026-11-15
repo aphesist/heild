@@ -173,7 +173,7 @@ export function LancarTempo({ inicial = {}, editar, onFechar }: { inicial?: Cont
       <Interruptor ligado={faturavel} onMudar={setFaturavel} rotulo="Faturável" detalhe="Entra nas horas cobráveis (valor-hora de cobrança e serviço extra). Interno nunca é faturável." />
       {erroQue && escolha !== '' && <p className="text-destructive text-sm">{erroQue}</p>}
       {!editar && cruzam.length > 0 && (
-        <div className="bg-warning/10 flex flex-col gap-2 rounded-[14px] px-3 py-2.5 text-sm" data-testid="ts-sobreposicao">
+        <div className="bg-warning/10 flex flex-col gap-2 rounded-lg px-3 py-2.5 text-sm" data-testid="ts-sobreposicao">
           <span className="flex items-start gap-2">
             <WarningIcon weight="fill" className="text-warning mt-0.5 size-4 shrink-0" />
             Cruza {cruzam.length === 1 ? 'uma sessão já capturada' : `${cruzam.length} sessões já capturadas`}: {cruzam.map((c) => `${hm(c.inicio)}–${hm(c.fim)} ${c.atividade_id ?? ''} ${c.rotulo}`).join('; ')}. O que fazer?
@@ -191,7 +191,7 @@ export function LancarTempo({ inicial = {}, editar, onFechar }: { inicial?: Cont
       )}
       {editar && (
         <>
-          <div className="bg-sunken flex flex-wrap items-end gap-2 rounded-[14px] px-3 py-2.5">
+          <div className="bg-sunken flex flex-wrap items-end gap-2 rounded-lg px-3 py-2.5">
             <span className="w-40">
               <CampoTexto aria-label="Duplicar para o dia" tipo="date" valor={duplicarPara} onMudar={setDuplicarPara} />
             </span>

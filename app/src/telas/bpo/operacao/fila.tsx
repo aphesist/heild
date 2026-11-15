@@ -418,7 +418,7 @@ function GavetaLancarConta({ e, f, onFechar }: { e: EmpresaVista; f: BpoItemFila
         if (ok) onFechar()
       }}
     >
-      {doc && <p className="bg-sunken/60 rounded-[12px] px-3 py-2 text-xs">Preenchido com a leitura de {doc.nome_arquivo} ({doc.lido_por}).</p>}
+      {doc && <p className="bg-sunken/60 rounded-md px-3 py-2 text-xs">Preenchido com a leitura de {doc.nome_arquivo} ({doc.lido_por}).</p>}
       <Campo rotulo="Fornecedor">{(id) => <CampoTexto id={id} valor={r.fornecedor} onMudar={(v) => setR((x) => ({ ...x, fornecedor: v }))} />}</Campo>
       <div className="grid grid-cols-2 gap-2">
         <Campo rotulo="Valor (R$)">{(id) => <CampoTexto id={id} tipo="number" valor={r.valor} onMudar={(v) => setR((x) => ({ ...x, valor: v }))} />}</Campo>
@@ -550,7 +550,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
             ) : (
               <ul className="flex flex-col gap-1.5">
                 {f.faltando.map((x) => (
-                  <li key={x} className="bg-warning/10 flex items-center gap-2 rounded-[12px] px-3 py-2 text-sm">
+                  <li key={x} className="bg-warning/10 flex items-center gap-2 rounded-md px-3 py-2 text-sm">
                     <span className="flex-1">Falta {x}</span>
                     <Button size="sm" variant="outline" className="rounded-full" onClick={() => executar(() => repos.bpo.fila.completar(f.id, x), { sucesso: `Chegou: ${x}` })}>
                       <CheckIcon /> Chegou
@@ -579,7 +579,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
             <TituloBloco descricao="O boleto ou a nota que veio com o pedido.">Documentos</TituloBloco>
             {anexados.length === 0 && <p className="text-muted-foreground text-sm">Nenhum documento anexado.</p>}
             {anexados.map((d) => (
-              <p key={d.id} className="bg-sunken/60 flex items-center gap-2 rounded-[12px] px-3 py-2 text-sm">
+              <p key={d.id} className="bg-sunken/60 flex items-center gap-2 rounded-md px-3 py-2 text-sm">
                 <PaperclipIcon className="shrink-0" /> <span className="min-w-0 flex-1 truncate">{d.nome_arquivo}</span>
                 {d.leitura && <span className="text-muted-foreground text-xs tabular-nums">{brl(d.leitura.valor, true)}</span>}
               </p>
@@ -609,7 +609,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
             {notas.length > 0 && (
               <ul className="flex flex-col gap-2">
                 {notas.map((n, i) => (
-                  <li key={`${n.em}-${i}`} className="bg-sunken/50 rounded-[12px] px-3 py-2 text-sm">
+                  <li key={`${n.em}-${i}`} className="bg-sunken/50 rounded-md px-3 py-2 text-sm">
                     <span className="block">{n.texto}</span>
                     <span className="text-muted-foreground block text-xs">
                       {n.por} · {dataHora(n.em)} · {n.tipo === 'cobranca' ? 'cobrança' : n.tipo === 'resolucao' ? 'como foi resolvido' : n.tipo === 'reabertura' ? 'reabertura' : 'anotação'}
@@ -759,7 +759,7 @@ function NovoPedido({ aberto, onFechar, empresas }: { aberto: boolean; onFechar:
       </div>
       <Campo rotulo="Responsável">{(id) => <CampoEscolha id={id} valor={r.responsavel} onMudar={(v) => setR((x) => ({ ...x, responsavel: v }))} opcoes={[{ valor: '', rotulo: `O analista da empresa (${empresa?.perfil.analista_nome ?? '—'})` }, ...equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))]} />}</Campo>
       <Interruptor ligado={r.anexo} onMudar={(v) => setR((x) => ({ ...x, anexo: v }))} rotulo="Veio com o boleto ou a nota" />
-      <p className={cn('rounded-[12px] px-3 py-2 text-xs', faltando.length && !interno ? 'bg-warning/10' : 'bg-success/10')}>
+      <p className={cn('rounded-md px-3 py-2 text-xs', faltando.length && !interno ? 'bg-warning/10' : 'bg-success/10')}>
         {interno ? 'Pedido da equipe: entra com a bola conosco e o SLA começa (a completude do cliente não se aplica).' : faltando.length ? `Completude: falta ${faltando.join(', ')}. O pedido entra com a bola com o cliente e o integrante pede o que falta.` : 'Completo: entra com a bola conosco e o SLA começa.'}
       </p>
     </GavetaFormulario>
