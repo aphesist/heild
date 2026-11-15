@@ -833,10 +833,16 @@ export class Motor {
       if (!conector) throw new ErroRegra('CONECTOR_AUSENTE', `Conector ${e.passo.conector} não configurado.`)
       if (e.consultar) resultado = await conector.consultar(e.passo.metodo, e.chave, { escritorio_id: job.escritorio_id })
       if (!resultado) resultado = await conector.executar(e.passo.metodo, e.argumentos, { chave: e.chave, escritorio_id: job.escritorio_id })
+      // Resposta de terceiro é dado e passa pelo esquema antes de qualquer uso.
+      const v = e.passo.resultado.safeParse(resultado)
+      if (!v.success) throw new ErroRegra('ESQUEMA_EXTERNO', `A resposta de ${e.passo.conector}.${e.passo.metodo} veio fora do esquema esperado.`)
+      resultado = v.data as Record<string, unknown>
     } catch (erro) {
       if (erro instanceof ErroRegra) {
         await comEscritorio(this.d.sql, job.escritorio_id, async (tx) => {
-          await tx`update efeito_externo set estado = 'falhou', resultado = ${tx.json({ codigo: erro.codigo, mensagem: erro.message } as never)} where chave = ${e.chave} and estado = 'reservado'`
+          // Resposta fora do esquema: o envio pode ter chegado. O efeito fica reservado, e a retomada consulta pela chave antes de reenviar.
+          if (erro.codigo !== 'ESQUEMA_EXTERNO')
+            await tx`update efeito_externo set estado = 'falhou', resultado = ${tx.json({ codigo: erro.codigo, mensagem: erro.message } as never)} where chave = ${e.chave} and estado = 'reservado'`
           const ex = await this.travar(tx, job.execucao_id)
           if (!ex || TERMINAIS.includes(ex.estado)) return
           await this.registrarPassoFalho(tx, ex, job.ordem, job.tentativa, e.passo, { codigo: erro.codigo, mensagem: erro.message })

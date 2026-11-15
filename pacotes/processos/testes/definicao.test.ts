@@ -22,14 +22,14 @@ const esquema = z.object({ cliente_id: z.string() }).strict()
 describe('regras de definição (o que o CI recusa)', () => {
   it('ato irreversível sem cartão humano não compila', () => {
     expect(() =>
-      definirProcedimento({ ...base, passos: [{ tipo: 'externo', nome: 'transmitir', ferramenta: 'contabil.ecd_ecf.transmitir', conector: 'sped', metodo: 'x', aprovacao: 'nada', chave: () => 'k' }, concluir] }),
+      definirProcedimento({ ...base, passos: [{ tipo: 'externo', nome: 'transmitir', ferramenta: 'contabil.ecd_ecf.transmitir', conector: 'sped', metodo: 'x', aprovacao: 'nada', chave: () => 'k', resultado: z.object({}).strict() }, concluir] }),
     ).toThrow(/aprovação anterior/)
     expect(() =>
       definirProcedimento({
         ...base,
         passos: [
           { tipo: 'aprovacao', nome: 'ap', ferramenta: 'contabil.ecd_ecf.transmitir', exigida: 'por_regra', esquema, argumentos: (s) => s.entrada, resumo: () => 'x' },
-          { tipo: 'externo', nome: 'transmitir', ferramenta: 'contabil.ecd_ecf.transmitir', conector: 'sped', metodo: 'x', aprovacao: 'ap', chave: () => 'k' },
+          { tipo: 'externo', nome: 'transmitir', ferramenta: 'contabil.ecd_ecf.transmitir', conector: 'sped', metodo: 'x', aprovacao: 'ap', chave: () => 'k', resultado: z.object({}).strict() },
           concluir,
         ],
       }),
@@ -40,7 +40,7 @@ describe('regras de definição (o que o CI recusa)', () => {
         ...base,
         passos: [
           { tipo: 'aprovacao', nome: 'ap', ferramenta: 'documento.classificar', exigida: 'sempre', esquema, argumentos: (s) => s.entrada, resumo: () => 'x' },
-          { tipo: 'externo', nome: 'transmitir', ferramenta: 'contabil.ecd_ecf.transmitir', conector: 'sped', metodo: 'x', aprovacao: 'ap', chave: () => 'k' },
+          { tipo: 'externo', nome: 'transmitir', ferramenta: 'contabil.ecd_ecf.transmitir', conector: 'sped', metodo: 'x', aprovacao: 'ap', chave: () => 'k', resultado: z.object({}).strict() },
           concluir,
         ],
       }),

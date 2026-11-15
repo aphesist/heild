@@ -163,6 +163,7 @@ export const ctbEcd = definirProcedimento({
       metodo: 'transmitir_ecd',
       aprovacao: 'aprovar_transmissao',
       chave: (s) => `ECD:${s.entrada.cliente_id}:${s.entrada.exercicio}`,
+      resultado: z.object({ recibo: z.string().regex(/^[A-Za-z0-9.\-]{4,80}$/) }).strict(),
     },
     {
       tipo: 'efeito',

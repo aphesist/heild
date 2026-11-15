@@ -66,8 +66,10 @@ export async function rotasMcp(app: FastifyInstance, registro: RegistroFerrament
     await server.connect(transport)
     await transport.handleRequest(req.raw, reply.raw, req.body)
   }
-  app.post('/mcp', tratar)
-  app.post<{ Params: { codigo: string } }>('/mcp/setor/:codigo', tratar)
+  // Tetos do padrão (PADROES.md): corpo até 2 MB. Limite de taxa e timeouts vêm do app da B1 que monta as rotas.
+  const opcoes = { bodyLimit: 2 * 1024 * 1024 }
+  app.post('/mcp', opcoes, tratar)
+  app.post<{ Params: { codigo: string } }>('/mcp/setor/:codigo', opcoes, tratar)
   const semSessao = async (_: FastifyRequest, reply: import('fastify').FastifyReply) => reply.code(405).send({ erro: 'Servidor MCP sem sessão: use POST.' })
   app.get('/mcp', semSessao)
   app.get('/mcp/setor/:codigo', semSessao)

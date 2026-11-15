@@ -23,9 +23,10 @@ export const PAPEL_ESCRITA = 'api_executor'
 
 /** Tempo máximo de uma consulta, de espera por trava e de transação parada (configurável por ambiente). */
 export const LIMITES_TX = {
-  consulta: process.env.HEILD_TX_CONSULTA ?? '15s',
-  trava: process.env.HEILD_TX_TRAVA ?? '10s',
-  ocioso: process.env.HEILD_TX_OCIOSO ?? '60s',
+  // Os mesmos tetos da API (docs/backend/PADROES.md). Chamada a modelo e a órgão nunca roda com transação aberta.
+  consulta: process.env.HEILD_TX_CONSULTA ?? '5s',
+  trava: process.env.HEILD_TX_TRAVA ?? '3s',
+  ocioso: process.env.HEILD_TX_OCIOSO ?? '10s',
 }
 
 /**

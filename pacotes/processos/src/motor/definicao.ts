@@ -91,6 +91,8 @@ export type Passo<E = any> =
       aprovacao: string
       /** Chave natural do efeito: a mesma chave nunca sai duas vezes, nem de outra execução. */
       chave: (s: Estado<E>) => string
+      /** Esquema da resposta do órgão: fora dele é `ESQUEMA_EXTERNO` (OWASP API10; 08, 2.5). */
+      resultado: z.ZodObject
     }
   | {
       tipo: 'efeito'
