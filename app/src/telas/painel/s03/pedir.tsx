@@ -4,8 +4,11 @@ import { useState } from 'react'
 import { integranteDoSetor } from '@/ambiente/fluxos'
 import { useLoja } from '@/ambiente/loja'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoArea, GavetaFormulario } from '@/components/ui/formulario'
+import { CampoComSuposicoes, FaixaSuposicoes } from '@/components/kit/valor-editavel'
+import { Campo, GavetaFormulario } from '@/components/ui/formulario'
 import { useAparencia } from '@/hooks/useAparencia'
+import { useSuposicoes } from '@/hooks/useSuposicoes'
+import type { CampoSuposicao } from '@/lib/suposicoes'
 import * as exemplo from '@/dados/exemplo'
 import type { SetorIntegrante } from '@/theme/tipos'
 
@@ -25,15 +28,22 @@ export function PedirAoIntegrante({ setor, cliente, sugestoes, compacto }: { set
   const integrante = exemplo.integrantes.find((i) => i.id === integranteDoSetor(setor))
   const nome = integrante ? aparencia(integrante).nome : 'integrante'
   const trabalhando = loja.trabalhoDe({ integrante: integrante?.id })
+  // Feedforward (fase 6): o que ele vai supor do pedido escrito aparece acima do campo, corrigível.
+  const sup = useSuposicoes(texto, { clienteId: loja.clientes.find((c) => c.nome === cliente)?.id, setor }, aberto)
+  const [abrir, setAbrir] = useState<{ campo: CampoSuposicao; vez: number }>()
   const pedir = (s: SugestaoPedido | string) => {
-    const sug: SugestaoPedido = typeof s === 'string' ? { rotulo: s, etapas: ['Entendendo o pedido', `Juntando o que há de ${cliente ?? 'carteira'}`, 'Conferindo com as regras do setor', 'Preparando o resultado'], fim: `Pronto: “${s}”. Deixei o resultado aqui no chat para você conferir; nada saiu para o cliente.` } : s
+    const escrito = typeof s === 'string'
+    const supostoId = escrito ? sup.suposicoes.find((x) => x.campo === 'cliente')?.valor : undefined
+    const clienteDoPedido = (supostoId && loja.clientes.find((c) => c.id === supostoId)?.nome) || cliente
+    const sug: SugestaoPedido = typeof s === 'string' ? { rotulo: s, etapas: ['Entendendo o pedido', `Juntando o que há de ${clienteDoPedido ?? 'carteira'}`, 'Conferindo com as regras do setor', 'Preparando o resultado'], fim: `Pronto: “${s}”. Deixei o resultado aqui no chat para você conferir; nada saiu para o cliente.` } : s
     loja.iniciarTrabalho({
       id: `s03-pedido-${Date.now()}`,
       integrante: integrante?.id ?? 'i-geral',
       setor,
       titulo: sug.rotulo,
-      cliente,
-      inicio: `Combinado. Vou ${sug.rotulo.charAt(0).toLowerCase()}${sug.rotulo.slice(1)}${cliente ? ` de ${cliente}` : ' da carteira'}.`,
+      cliente: clienteDoPedido,
+      inicio: `Combinado. Vou ${sug.rotulo.charAt(0).toLowerCase()}${sug.rotulo.slice(1)}${clienteDoPedido ? ` de ${clienteDoPedido}` : ' da carteira'}.`,
+      suposicoes: escrito && sup.suposicoes.length ? sup.suposicoes : undefined,
       etapas: sug.etapas,
       seg: 1.4,
       fim: { texto: sug.fim, aviso: sug.aviso ?? `${nome} terminou: ${sug.rotulo.toLowerCase()}` },
@@ -41,6 +51,7 @@ export function PedirAoIntegrante({ setor, cliente, sugestoes, compacto }: { set
     loja.toast(`${nome} começou: ${sug.rotulo}.`, { modulo: 'inicio', aba: 'time', integrante: integrante?.id }, 'Acompanhar', { tipo: 'integrante', setor, estado: 'trabalhando' })
     setAberto(false)
     setTexto('')
+    sup.limpar()
   }
   return (
     <>
@@ -65,7 +76,23 @@ export function PedirAoIntegrante({ setor, cliente, sugestoes, compacto }: { set
       )}
       {aberto && (
         <GavetaFormulario aberta onFechar={() => setAberto(false)} titulo={`Pedir ao ${nome}`} descricao={`${cliente ?? 'Carteira'}. Ele faz com as permissões de quem pediu; o que transmite, paga ou sai ao cliente volta como cartão.`} acao="Pedir" acaoDesabilitada={texto.trim().length < 4} onAcao={() => pedir(texto.trim())}>
-          <Campo rotulo="O que fazer">{(id) => <CampoArea id={id} valor={texto} onMudar={setTexto} placeholder="Ex.: confere as retenções de outubro" />}</Campo>
+          <Campo rotulo="O que fazer">
+            {(id) => (
+              <div className="flex flex-col gap-1.5">
+                <FaixaSuposicoes linhas={sup.linhas} carregando={sup.carregando} abrir={abrir} onMudar={sup.mudar} />
+                <CampoComSuposicoes
+                  id={id}
+                  valor={texto}
+                  onMudar={setTexto}
+                  suposicoes={sup.suposicoes}
+                  onTrecho={(campo) => setAbrir((a) => ({ campo, vez: (a?.vez ?? 0) + 1 }))}
+                  placeholder="Ex.: confere as retenções de outubro"
+                  classeTexto="placeholder:text-muted-foreground min-h-24"
+                  className="bg-raised shadow-contorno focus-within:ring-ring/40 rounded-md focus-within:ring-[3px]"
+                />
+              </div>
+            )}
+          </Campo>
           <div className="flex flex-col gap-1.5">
             <span className="text-muted-foreground text-xs">Sugestões</span>
             {sugestoes.map((s) => (

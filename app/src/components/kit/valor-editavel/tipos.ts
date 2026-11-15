@@ -27,8 +27,8 @@ export type ConfigValor =
   | ({ tipo: 'escolha'; opcoes: Opcao[]; outra?: boolean } & EstadoOpcoes)
   | ({ tipo: 'multipla'; opcoes: Opcao[]; outra?: boolean } & EstadoOpcoes)
   | { tipo: 'intervalo'; min: number; max: number; passo?: number; unidade?: string }
-  | { tipo: 'numero'; min?: number; max?: number; passo?: number; unidade?: string }
-  | { tipo: 'dinheiro'; min?: number; max?: number }
+  | { tipo: 'numero'; min?: number; max?: number; passo?: number; unidade?: string; limpar?: string }
+  | { tipo: 'dinheiro'; min?: number; max?: number; limpar?: string }
   | { tipo: 'data' }
   | { tipo: 'competencia' }
   | ({ tipo: 'entidade'; opcoes: Opcao[]; buscar?: string; outra?: boolean } & EstadoOpcoes)

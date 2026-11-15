@@ -1,3 +1,4 @@
+import type { Suposicao } from '@/lib/suposicoes'
 import { useState } from 'react'
 import { useLoja } from '@/ambiente/loja'
 import { fluxos, respostasProntas } from '@/dados/simulacao'
@@ -14,7 +15,7 @@ import { respostaDoIntegrante } from './roteador'
 export function useEnviarAoIntegrante(integrante: Integrante, nomeUsuario: string) {
   const loja = useLoja()
   const [pensando, setPensando] = useState(false)
-  const enviar = (texto: string, anexos: Anexo[]) => {
+  const enviar = (texto: string, anexos: Anexo[], suposicoes?: Suposicao[]) => {
     loja.mensagemTimeComId(integrante.id, { id: crypto.randomUUID(), autor: { tipo: 'usuario', nome: nomeUsuario }, hora: agora(), texto, anexos })
     const fluxo = Object.values(fluxos).find((f) => f.integrante === integrante.id && f.gatilho?.test(texto))
     if (fluxo && !anexos.length) return loja.iniciarTrabalho(fluxo)
@@ -26,7 +27,7 @@ export function useEnviarAoIntegrante(integrante: Integrante, nomeUsuario: strin
     window.setTimeout(() => {
       setPensando(false)
       const r = roteiro ?? { texto: !anexos.length && pronta ? pronta.texto : respostaDeExemplo(anexos) }
-      loja.ajustarMensagemTime(integrante.id, id, { pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: r.texto, cartoes: r.cartoes, demonstracao: true })
+      loja.ajustarMensagemTime(integrante.id, id, { pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: r.texto, cartoes: r.cartoes, demonstracao: true, suposicoes })
     }, 2200)
   }
   return { enviar, pensando }

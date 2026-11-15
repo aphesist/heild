@@ -1,3 +1,4 @@
+import type { Suposicao } from '@/lib/suposicoes'
 import type { EstadoIntegrante } from '@/lib/integrante'
 import type { SetorIntegrante } from '@/theme/tipos'
 
@@ -214,6 +215,8 @@ export interface Mensagem {
   em?: number
   /** Gerada ao vivo por um serviço simulado (src/servicos): a bolha mostra o selo "demonstração". */
   demonstracao?: boolean
+  /** O que o integrante supôs do pedido (fase 6, feedforward): a resposta começa com esse resumo. */
+  suposicoes?: Suposicao[]
 }
 
 /** Widgets da Visão geral (Home do subplano 03, seção 4). */

@@ -1,3 +1,4 @@
+import type { Suposicao } from '@/lib/suposicoes'
 import type { SetorIntegrante } from '@/theme/tipos'
 import type { Cartao, RespostaLegal, Tarefa } from './tipos'
 
@@ -50,6 +51,8 @@ export interface FluxoSimulado {
   fim: FimFluxo
   /** Frase que dispara o fluxo no chat do integrante (as sugestões dele). */
   gatilho?: RegExp
+  /** O que ele supôs do pedido escrito (fase 6): a primeira resposta começa com esse resumo. */
+  suposicoes?: Suposicao[]
 }
 
 /** Nome do integrante padrão de cada setor, para as frases do Assistente. */

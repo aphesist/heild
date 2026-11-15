@@ -2,12 +2,18 @@ import { ArrowUp, FileText, Microphone, Plus, Stop, X } from '@phosphor-icons/re
 import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
+import { CampoComSuposicoes, FaixaSuposicoes } from '@/components/kit/valor-editavel'
 import type { Anexo } from '@/dados/tipos'
 import { useDitado } from '@/hooks/useDitado'
+import { useSuposicoes } from '@/hooks/useSuposicoes'
+import type { CampoSuposicao, Suposicao } from '@/lib/suposicoes'
+import type { PadroesSuposicao } from '@/lib/suposicoes-ia'
 import { cn } from '@/lib/utils'
 
 interface Props {
-  onEnviar?: (texto: string, anexos: Anexo[]) => void
+  onEnviar?: (texto: string, anexos: Anexo[], suposicoes?: Suposicao[]) => void
+  /** Feedforward (fase 6): mostra acima do campo o que o integrante vai supor do pedido, para corrigir antes de enviar. */
+  suposicoes?: PadroesSuposicao | boolean
   placeholder?: string
   /** Contexto mostrado abaixo do campo (cliente selecionado). */
   contexto?: string
@@ -29,9 +35,13 @@ function tamanhoLegivel(bytes: number) {
  * ditar e enviar à direita. O ditado escreve no campo, para a pessoa revisar
  * antes de enviar. Enter envia; Shift+Enter quebra linha.
  * A conversa por voz (botão de ondas do Figma) está no backlog.
+ * Com `suposicoes`, a faixa "Vou supor" fica acima do campo e as palavras
+ * que geraram cada suposição aparecem sublinhadas (clicar abre o seletor).
  */
-export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, desabilitado, autoFocus, acessorio, className }: Props) {
+export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, desabilitado, autoFocus, acessorio, suposicoes: comSuposicoes, className }: Props) {
   const [texto, setTexto] = useState('')
+  const sup = useSuposicoes(texto, typeof comSuposicoes === 'object' ? comSuposicoes : {}, !!comSuposicoes)
+  const [abrir, setAbrir] = useState<{ campo: CampoSuposicao; vez: number }>()
   const [anexos, setAnexos] = useState<Anexo[]>([])
   const arquivo = useRef<HTMLInputElement>(null)
   const area = useRef<HTMLTextAreaElement>(null)
@@ -53,7 +63,8 @@ export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, de
   const enviar = () => {
     if (!podeEnviar) return
     if (ditado.ouvindo) ditado.parar()
-    onEnviar?.(texto.trim(), anexos)
+    onEnviar?.(texto.trim(), anexos, comSuposicoes && sup.suposicoes.length ? sup.suposicoes : undefined)
+    sup.limpar()
     setTexto('')
     setAnexos([])
     if (area.current) area.current.style.height = ''
@@ -70,6 +81,7 @@ export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, de
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
+      {comSuposicoes && <FaixaSuposicoes className="px-2" linhas={sup.linhas} carregando={sup.carregando} abrir={abrir} onMudar={sup.mudar} />}
       <div
         className={cn(
           'bg-card flex flex-col gap-1 rounded-campo p-2 shadow-campo transition focus-within:ring-2 focus-within:ring-ring/40',
@@ -95,21 +107,37 @@ export function CampoChat({ onEnviar, placeholder = 'Escreva aqui', contexto, de
             ))}
           </ul>
         )}
-        <textarea
-          ref={area}
-          rows={1}
-          value={texto}
-          autoFocus={autoFocus}
-          disabled={desabilitado}
-          aria-label={placeholder}
-          placeholder={ditado.ouvindo ? 'Ouvindo…' : placeholder}
-          onChange={(e) => {
-            setTexto(e.target.value)
-            ajustarAltura()
-          }}
-          onKeyDown={teclas}
-          className="placeholder:text-muted-foreground max-h-[200px] min-h-11 w-full resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none"
-        />
+        {comSuposicoes ? (
+          <CampoComSuposicoes
+            ref={area}
+            valor={texto}
+            onMudar={setTexto}
+            suposicoes={sup.suposicoes}
+            onTrecho={(campo) => setAbrir((a) => ({ campo, vez: (a?.vez ?? 0) + 1 }))}
+            autoFocus={autoFocus}
+            disabled={desabilitado}
+            aria-label={placeholder}
+            placeholder={ditado.ouvindo ? 'Ouvindo…' : placeholder}
+            onKeyDown={teclas}
+            classeTexto="placeholder:text-muted-foreground min-h-11 text-[15px]"
+          />
+        ) : (
+          <textarea
+            ref={area}
+            rows={1}
+            value={texto}
+            autoFocus={autoFocus}
+            disabled={desabilitado}
+            aria-label={placeholder}
+            placeholder={ditado.ouvindo ? 'Ouvindo…' : placeholder}
+            onChange={(e) => {
+              setTexto(e.target.value)
+              ajustarAltura()
+            }}
+            onKeyDown={teclas}
+            className="placeholder:text-muted-foreground max-h-[200px] min-h-11 w-full resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none"
+          />
+        )}
         {ditado.ouvindo && ditado.parcial && <p className="text-muted-foreground -mt-1 px-3 text-sm italic">{ditado.parcial}</p>}
         <div className="flex items-center justify-between gap-2">
           <input

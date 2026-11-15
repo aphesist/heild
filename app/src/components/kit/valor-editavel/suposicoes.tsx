@@ -2,7 +2,7 @@ import { BuildingsIcon, CalendarBlankIcon, ClockIcon, CurrencyCircleDollarIcon, 
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, type ReactNode, type TextareaHTMLAttributes } from 'react'
 import type { CampoSuposicao, Suposicao } from '@/lib/suposicoes'
 import { cn } from '@/lib/utils'
-import type { ConfigValor, QualquerValor } from './tipos'
+import { textoDoValor, type ConfigValor, type QualquerValor } from './tipos'
 import { ValorEditavel } from './valor-editavel'
 
 /**
@@ -34,7 +34,7 @@ export interface LinhaSuposicao {
 }
 
 /** A faixa acima do campo: "Vou supor: Para **Padaria** · Competência **10/2026** · Setor **Fiscal**". */
-export function FaixaSuposicoes({ linhas, onMudar, carregando, className }: { linhas: LinhaSuposicao[]; onMudar: (campo: CampoSuposicao, valor: QualquerValor) => void; carregando?: boolean; className?: string }) {
+export function FaixaSuposicoes({ linhas, onMudar, carregando, abrir, className }: { linhas: LinhaSuposicao[]; onMudar: (campo: CampoSuposicao, valor: QualquerValor) => void; carregando?: boolean; /** Abre o seletor de um campo (clique no trecho sublinhado do pedido); `vez` muda a cada clique. */ abrir?: { campo: CampoSuposicao; vez: number }; className?: string }) {
   if (!linhas.length && !carregando) return null
   return (
     <div role="status" aria-live="polite" aria-label="O que vou supor" className={cn('text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs', className)}>
@@ -44,10 +44,11 @@ export function FaixaSuposicoes({ linhas, onMudar, carregando, className }: { li
       {linhas.map(({ s, config, rotulo }) => {
         const I = iconeDoCampo[s.campo]
         return (
-          <span key={s.campo} className="flex min-w-0 max-w-full items-center gap-1">
+          <span key={abrir?.campo === s.campo ? `${s.campo}-${abrir.vez}` : s.campo} className="flex min-w-0 max-w-full items-center gap-1">
             <I className="size-3.5 shrink-0" aria-hidden />
             <span className="shrink-0">{fraseDoCampo[s.campo]}</span>
-            <ValorEditavel rotulo={rotulo} valor={s.valor as QualquerValor} config={config} desfazer={false} className="text-foreground min-w-0 font-medium" onMudar={(v) => onMudar(s.campo, v)} />
+            <ValorEditavel rotulo={rotulo} valor={s.valor as QualquerValor} config={config} desfazer={false} abertoInicial={abrir?.campo === s.campo} className="text-foreground min-w-0 font-medium" onMudar={(v) => onMudar(s.campo, v)} />
+            {s.origem === 'ia' && <span className="sr-only">(sugerido pelo integrante)</span>}
           </span>
         )
       })}
@@ -68,7 +69,7 @@ export function ResumoSuposicoes({ linhas, onMudar, className }: { linhas: Linha
             <I className="text-muted-foreground size-4 shrink-0" aria-hidden />
             <span className="min-w-0">
               {fraseDoCampo[s.campo]}{' '}
-              {onMudar ? <ValorEditavel rotulo={rotulo} valor={s.valor as QualquerValor} config={config} className="font-medium" onMudar={(v) => onMudar(s.campo, v)} /> : <b className="font-medium">{String(s.valor)}</b>}
+              {onMudar ? <ValorEditavel rotulo={rotulo} valor={s.valor as QualquerValor} config={config} className="font-medium" onMudar={(v) => onMudar(s.campo, v)} /> : <b className="font-medium">{textoDoValor(config, s.valor as QualquerValor) || String(s.valor)}</b>}
               {s.origem === 'padrao' && <span className="text-muted-foreground"> (padrão)</span>}
             </span>
           </li>
@@ -84,7 +85,7 @@ export function ResumoSuposicoes({ linhas, onMudar, className }: { linhas: Linha
  * transparente com os trechos sublinhados; o clique no trecho abre a
  * suposição (`onTrecho`), o resto do clique cai no textarea.
  */
-export const CampoComSuposicoes = forwardRef<HTMLTextAreaElement, { valor: string; onMudar: (v: string) => void; suposicoes: Suposicao[]; onTrecho?: (campo: CampoSuposicao) => void; acessorio?: ReactNode } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value' | 'onChange'>>(function CampoComSuposicoes({ valor, onMudar, suposicoes, onTrecho, className, acessorio, ...props }, ref) {
+export const CampoComSuposicoes = forwardRef<HTMLTextAreaElement, { valor: string; onMudar: (v: string) => void; suposicoes: Suposicao[]; onTrecho?: (campo: CampoSuposicao) => void; acessorio?: ReactNode; /** Tamanho e altura do texto, iguais nas duas camadas (o espelho precisa casar letra a letra). */ classeTexto?: string } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value' | 'onChange'>>(function CampoComSuposicoes({ valor, onMudar, suposicoes, onTrecho, className, acessorio, classeTexto: extraTexto, ...props }, ref) {
   const campo = useRef<HTMLTextAreaElement>(null)
   const espelho = useRef<HTMLDivElement>(null)
   useImperativeHandle(ref, () => campo.current!)
@@ -110,7 +111,7 @@ export const CampoComSuposicoes = forwardRef<HTMLTextAreaElement, { valor: strin
     i = fim
   }
   partes.push(valor.slice(i) + '​')
-  const classeTexto = 'w-full px-3 py-2.5 text-sm leading-6 whitespace-pre-wrap break-words'
+  const classeTexto = cn('w-full px-3 py-2.5 text-sm leading-6 whitespace-pre-wrap break-words', extraTexto)
   return (
     <div className={cn('relative min-w-0', className)}>
       <textarea

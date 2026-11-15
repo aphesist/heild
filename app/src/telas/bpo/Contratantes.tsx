@@ -2,7 +2,7 @@ import { ArrowRightIcon, BellRingingIcon, BuildingsIcon, CheckIcon, EyeIcon, Fil
 import { useMemo, useState } from 'react'
 import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
-import { BotaoAcoes, EdicaoEmLinha, EstadoVazio, SePode, useAcao, useConfirmar, usePode } from '@/components/kit'
+import { BotaoAcoes, EdicaoEmLinha, EstadoVazio, SePode, useAcao, useConfirmar, usePode, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Segmentado } from '@/components/ui/formulario'
@@ -1253,7 +1253,7 @@ function ConfigContratante({ contratantes, contratante, onContexto, onPortal }: 
           {pode && (
             <span className="text-muted-foreground flex items-center gap-1 text-sm">
               Teto de convidados:
-              <EdicaoEmLinha rotulo="Teto de convidados" valor={String(c.convidados_max)} validar={(v) => (Number.isInteger(Number(v)) && Number(v) > 0 && Number(v) <= 100 ? null : 'Um número de 1 a 100.')} onSalvar={(v) => void executar(() => repos.bpo.subinquilinos.atualizar(c.id, { convidados_max: Number(v) }, { texto: `Teto de convidados de ${c.nome}: ${v}` }), { sucesso: 'Teto salvo' })} className="w-14" />
+              <ValorEditavel rotulo="Teto de convidados" valor={c.convidados_max} config={{ tipo: 'numero', min: 1, max: 100 }} onMudar={(v) => repos.bpo.subinquilinos.atualizar(c.id, { convidados_max: Math.round(v) }, { texto: `Teto de convidados de ${c.nome}: ${Math.round(v)}` })} className="tabular-nums" />
             </span>
           )}
         </Caixa>

@@ -1,3 +1,4 @@
+import type { Suposicao } from '@/lib/suposicoes'
 import type { Anexo, Cartao, Integrante, Tarefa } from '@/dados/tipos'
 import { useClienteDaRota } from '@/ambiente/contexto-cliente'
 import { useLoja } from '@/ambiente/loja'
@@ -221,7 +222,7 @@ export function useEnviarAoGeral(conversa: ReturnType<typeof useHistorico>) {
   const { usuario, permissoes } = useSessao()
   const clienteId = useClienteDaRota()
   const cliente = clienteId ? loja.clientes.find((c) => c.id === clienteId) : undefined
-  return (texto: string, anexos: Anexo[]) => {
+  return (texto: string, anexos: Anexo[], suposicoes?: Suposicao[]) => {
     const pedido = pedidosAssistente.find((p) => p.texto.toLowerCase() === texto.trim().toLowerCase())
     if (pedido && !anexos.length) return pedirAoTime(pedido, conversa.atual.id, conversa.enviar, loja)
     if (anexos.length) {
@@ -244,8 +245,8 @@ export function useEnviarAoGeral(conversa: ReturnType<typeof useHistorico>) {
       contatoDe: (id) => loja.fichaDe(id)?.contatos[0]?.nome,
     }
     const roteiro = roteiroDoGeral(texto, ctx)
-    if (roteiro) return conversa.enviar(texto, anexos, roteiro)
+    if (roteiro) return conversa.enviar(texto, anexos, roteiro, suposicoes)
     const pronta = respostasProntas.find((r) => r.re.test(texto))
-    conversa.enviar(texto, anexos, pronta ? { texto: pronta.texto } : undefined)
+    conversa.enviar(texto, anexos, pronta ? { texto: pronta.texto } : undefined, suposicoes)
   }
 }

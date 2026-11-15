@@ -658,11 +658,11 @@ function LojaInterna({ children, semRotinas }: { children: ReactNode; semRotinas
     despachar({ t: 'avisar', aviso: { ...aviso, id: novoId('av'), quando: hora(), lidoPor: olhando && u ? [u] : [] } })
     if (!olhando && toastTexto) toast(toastTexto, aviso.destino, rotulo, quem)
   }
-  const falar = useCallback((integrante: string, setor: SetorIntegrante, texto: string, cartoes?: Cartao[], ms = PENSA, aoTerminar?: () => void) => {
+  const falar = useCallback((integrante: string, setor: SetorIntegrante, texto: string, cartoes?: Cartao[], ms = PENSA, aoTerminar?: () => void, extra?: Partial<Mensagem>) => {
     const id = novoId('mt')
     despachar({ t: 'timeMsg', integrante, msg: { id, autor: { tipo: 'integrante', setor }, hora: hora(), pendente: true } })
     depois(ms, () => {
-      despachar({ t: 'timeMsgPatch', integrante, id, patch: { pendente: false, escrever: true, escreverDesde: Date.now(), hora: hora(), texto, cartoes, demonstracao: true } })
+      despachar({ t: 'timeMsgPatch', integrante, id, patch: { pendente: false, escrever: true, escreverDesde: Date.now(), hora: hora(), texto, cartoes, demonstracao: true, ...extra } })
       // Os efeitos (aviso, CRM, passagem) só vêm quando ele termina de escrever.
       if (aoTerminar) depois(duracaoEscrita(texto) + 250, aoTerminar)
     })
@@ -684,7 +684,7 @@ function LojaInterna({ children, semRotinas }: { children: ReactNode; semRotinas
   }
   const iniciarTrabalho = useCallback(
     (f: FluxoSimulado, opcoes?: { tarefaId?: string; origem?: string; final?: PedidoAssistente['final'] }) => comoAtor(ctxIntegrante(f.integrante, f.setor), () => {
-      falar(f.integrante, f.setor, f.inicio)
+      falar(f.integrante, f.setor, f.inicio, undefined, PENSA, undefined, f.suposicoes?.length ? { suposicoes: f.suposicoes } : undefined)
       if (opcoes?.tarefaId) despachar({ t: 'tarefa', id: opcoes.tarefaId, patch: { status: 'em_andamento' } })
       if (opcoes?.origem && opcoes.final) finaisRef.current[opcoes.origem] = opcoes.final
       const uid = novoId('tr')

@@ -1,3 +1,4 @@
+import type { Suposicao } from '@/lib/suposicoes'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Anexo, Cartao, Mensagem } from '@/dados/tipos'
 
@@ -23,7 +24,7 @@ export function useEnvioSimulado(autor: Omit<AutorIntegrante, 'tipo'>, nomeUsuar
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
   const enviar = useCallback(
-    (texto: string, anexos: Anexo[], resposta?: { texto: string; cartoes?: Cartao[] }) => {
+    (texto: string, anexos: Anexo[], resposta?: { texto: string; cartoes?: Cartao[] }, suposicoes?: Suposicao[]) => {
       const id = crypto.randomUUID()
       const idResposta = `${id}-r`
       atualizar((ms) => [
@@ -35,7 +36,7 @@ export function useEnvioSimulado(autor: Omit<AutorIntegrante, 'tipo'>, nomeUsuar
       window.clearTimeout(timer.current)
       timer.current = window.setTimeout(() => {
         setPensando(false)
-        atualizar((ms) => ms.map((m) => (m.id === idResposta ? { ...m, pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: resposta?.texto ?? respostaDeExemplo(anexos), cartoes: resposta?.cartoes, demonstracao: true } : m)))
+        atualizar((ms) => ms.map((m) => (m.id === idResposta ? { ...m, pendente: false, escrever: true, escreverDesde: Date.now(), hora: agora(), texto: resposta?.texto ?? respostaDeExemplo(anexos), cartoes: resposta?.cartoes, demonstracao: true, suposicoes } : m)))
       }, 2200)
     },
     [autor, nomeUsuario, atualizar],

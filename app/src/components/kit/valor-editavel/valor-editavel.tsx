@@ -38,7 +38,7 @@ export function ValorEditavel<V extends QualquerValor>({
   rotulo: string
   valor: V | null | undefined
   config: ConfigValor
-  onMudar: (novo: V) => void | Promise<void>
+  onMudar: (novo: V) => unknown
   /** Texto próprio para o valor (senão, o do tipo). */
   formatar?: (v: V) => string
   /** O que aparece quando não há valor (sublinhado do mesmo jeito). */

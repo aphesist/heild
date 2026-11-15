@@ -1,3 +1,5 @@
+import { useClienteDaRota } from '@/ambiente/contexto-cliente'
+import type { Suposicao } from '@/lib/suposicoes'
 import { CaretDownIcon, HourglassMediumIcon, LifebuoyIcon, PlugsIcon, QuestionIcon, ScalesIcon, SparkleIcon } from '@phosphor-icons/react'
 import { useLoja } from '@/ambiente/loja'
 import { pedidosAssistente } from '@/dados/simulacao'
@@ -58,16 +60,17 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
   const largo = useMedia('(min-width: 640px)')
   const { atual, historico, enviar: enviarBase, pensando, abrir, criar, limpar } = conversa
   const loja = useLoja()
+  const clienteDaRota = useClienteDaRota()
   // O que o time escreve aqui enquanto faz o pedido (trabalho, retorno, passagens, fechamento) mora na loja.
   const doTime = loja.estado.assistente[atual.id]
   const mensagens = mensagensComTime(atual.mensagens, doTime)
   // A mesma decisão do Geral no Início e na gaveta do Chat (roteador da S01).
   const enviarRoteado = useEnviarAoGeral(conversa)
   const { limite: limiteAtingido, semIa } = useDemoS01()
-  const enviar = (texto: string, anexos: Anexo[]) => {
+  const enviar = (texto: string, anexos: Anexo[], suposicoes?: Suposicao[]) => {
     // Sem plano de IA (02, ad. 25): só a ajuda do sistema e as pessoas do suporte.
     if (semIa) return enviarBase(texto, anexos, { texto: 'Este escritório não tem plano de IA: posso responder sobre o sistema (a ajuda não gasta limite) e chamar o Suporte. Os integrantes ficam parados até o Administrador contratar.' })
-    enviarRoteado(texto, anexos)
+    enviarRoteado(texto, anexos, suposicoes)
   }
   // Limpar não apaga cartões que ainda esperam decisão (02, ad. 22).
   const temPendente = (m: (typeof atual.mensagens)[number]) => (m.cartoes ?? []).some((c) => (c.tipo === 'aprovacao' || c.tipo === 'regra' || c.tipo === 'previa_mensagem') && !loja.estado.decisoes[c.id])
@@ -194,6 +197,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
         <div className="relative">
           <CampoChat
             onEnviar={enviar}
+            suposicoes={semIa ? false : { clienteId: clienteDaRota ?? undefined }}
             desabilitado={pensando}
             placeholder={`Pergunte ao ${geral.nome} ou peça uma ação`}
             // Abaixo de 1024px não há margem: limite e ajuda entram na barra do campo.

@@ -5,6 +5,9 @@ import { duracaoEscrita, useEscritaTexto } from '@/lib/escrita'
 import { cn } from '@/lib/utils'
 import { useAparencia } from '@/hooks/useAparencia'
 import { CartaoChat, type AcoesCartao } from './cartoes-chat'
+import { ResumoSuposicoes } from '@/components/kit/valor-editavel'
+import { useLinhasSuposicao } from '@/hooks/useSuposicoes'
+import type { Suposicao } from '@/lib/suposicoes'
 import { OrbMensagem } from './orb-mensagem'
 
 /**
@@ -89,6 +92,7 @@ function BolhaIntegrante({ mensagem, acoes, className, nome, cor, corOlhos }: { 
             </span>
           </p>
         )}
+        {!mensagem.pendente && !!mensagem.suposicoes?.length && <ResumoDaResposta suposicoes={mensagem.suposicoes} />}
         {mensagem.texto && (
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
             {visivel}
@@ -111,3 +115,9 @@ function useEscrita(m: Mensagem) {
 }
 /** A mensagem acabou de chegar? Só aí os cartões entram animados; aberta depois, já está no lugar. */
 const recente = (m: Mensagem) => m.escreverDesde === undefined || Date.now() - m.escreverDesde < duracaoEscrita(m.texto) + 1500
+
+/** O resumo do que o integrante supôs, no topo da resposta (o mesmo da faixa acima do campo). */
+function ResumoDaResposta({ suposicoes }: { suposicoes: Suposicao[] }) {
+  const linhas = useLinhasSuposicao(suposicoes)
+  return <ResumoSuposicoes linhas={linhas} />
+}

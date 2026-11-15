@@ -177,7 +177,7 @@ function ChatIntegrante({
       </AreaRolagem>
       <div className="flex flex-col gap-2 px-3 pb-3 sm:px-6 sm:pb-5">
         <FilaIntegrante className="mx-auto w-full max-w-3xl ultra:max-w-4xl" integrante={integrante} />
-        <CampoChat className="mx-auto w-full max-w-3xl ultra:max-w-4xl" onEnviar={enviar} desabilitado={pensando} placeholder={`Escreva para ${t.nome}`} />
+        <CampoChat className="mx-auto w-full max-w-3xl ultra:max-w-4xl" onEnviar={enviar} suposicoes={{ setor: integrante.setor }} desabilitado={pensando} placeholder={`Escreva para ${t.nome}`} />
       </div>
     </div>
   )

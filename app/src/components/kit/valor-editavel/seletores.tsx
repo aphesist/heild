@@ -228,7 +228,12 @@ function SeletorNumero({ config, valor, rotulo, aplicar }: PropsSeletor) {
           {erro}
         </p>
       )}
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-1">
+        {c.limpar && (
+          <Button type="button" size="sm" variant="ghost" className="mr-auto rounded-full" onClick={() => aplicar('', true)}>
+            {c.limpar}
+          </Button>
+        )}
         <Button type="submit" size="sm" className="rounded-full">
           Aplicar
         </Button>

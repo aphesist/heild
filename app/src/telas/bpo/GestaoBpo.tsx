@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useLoja, useNavegacao, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { BarraUso } from '@/components/compostos/blocos'
-import { EdicaoEmLinha, EstadoVazio, SePode, useAcao, useConfirmar, usePode } from '@/components/kit'
+import { EstadoVazio, SePode, useAcao, useConfirmar, usePode, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario, Segmentado } from '@/components/ui/formulario'
@@ -923,7 +923,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
                     {gestor ? (
                       <span className="text-muted-foreground flex items-center gap-1 text-xs">
                         capacidade no mês, em horas:
-                        <EdicaoEmLinha rotulo={`Capacidade de ${p} (horas no mês)`} valor={String(capacidade[p])} validar={(v) => (Number(v) > 0 && Number(v) <= 220 ? null : 'Entre 1 e 220 horas.')} onSalvar={(v) => setCapacidade({ ...capacidade, [p]: Number(v) })} className="w-16" />
+                        <ValorEditavel rotulo={`Capacidade de ${p} (horas no mês)`} valor={capacidade[p]} config={{ tipo: 'numero', min: 1, max: 220, passo: 10, unidade: 'h' }} onMudar={(v) => setCapacidade({ ...capacidade, [p]: v })} className="tabular-nums" />
                       </span>
                     ) : null}
                   </li>
