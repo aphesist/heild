@@ -17,11 +17,12 @@ export * from '@/nucleo/modelo/entidades'
 export { autorizar, autorizarPerfil, ErroPermissao, ErroRegra, type Alvo, type Decisao } from '@/nucleo/permissoes/autorizar'
 export { ferramentas as catalogo, ferramenta as ferramentaDoCatalogo, type Ferramenta } from '@/nucleo/permissoes/ferramentas'
 export { permissoesDoPerfil, type Permissoes } from '@/nucleo/permissoes/telas'
+export { rotuloSetorCurto } from '@/nucleo/permissoes/setores'
 export { nomeDoAtor, idDoAtor, type Ator, type Contexto, type Perfil } from '@/nucleo/permissoes/perfil'
 export { contaParaTela, perfilDeConta } from '@/nucleo/mapeadores'
 export { Banco, comBanco, type Transacao } from '@/nucleo/banco'
 export { adaptadorMemoria, fotografiaVazia } from '@/nucleo/banco/navegador'
-export { repos, comoAtor, definirGeradorId, definirModoAprovacao, ErroAprovacao, novoIdPadrao, registrarEvento, Repositorio, type Repos, type RegrasEntidade } from '@/nucleo/repositorios'
+export { repos, operacoesS08b, comoAtor, definirGeradorId, definirModoAprovacao, ErroAprovacao, novoIdPadrao, registrarEvento, Repositorio, type Repos, type RegrasEntidade } from '@/nucleo/repositorios'
 export { escritoriosDeExemplo, escritorioDeExemplo } from '@/nucleo/semente'
 
 // 2. Novo do backend

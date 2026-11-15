@@ -123,9 +123,11 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
     return t
   }
 
+  // Integrante age sempre como integrante, em nome do dono; sem dono no contexto (motor da
+  // demonstração), em nome da pessoa da sessão. O servidor faz a interseção (R4).
   const cabecalhosDe = async (escritorio: Id, ator: AtorComando) => ({
     authorization: `Bearer ${await token(escritorio, ator)}`,
-    ...(ator.tipo === 'integrante' && ator.dono_usuario_id ? { 'x-heild-integrante': ator.integrante_id } : {}),
+    ...(ator.tipo === 'integrante' ? { 'x-heild-integrante': ator.integrante_id } : {}),
   })
 
   const paraFotografia = (tabelas: Partial<Record<NomeTabela, Registro[]>>): Fotografia => {
@@ -241,6 +243,8 @@ const SO_LEITURA = new Set(['constructor', 'listar', 'obter', 'pode', 'exigir', 
 
 interface DependenciasCaptura {
   repos: Record<string, unknown>
+  /** Objetos de operação fora de `repos` (S08b): cada função vira um comando `nome.funcao`. */
+  modulos?: Record<string, Record<string, unknown>>
   banco: Banco
   definirGeradorId: (g: ((prefixo: string) => string) | null) => void
   novoIdPadrao: (prefixo: string) => string
@@ -294,8 +298,9 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
     )
   }
 
-  const embrulhar = (repo: Record<string, unknown>, caminho: string) => {
+  const embrulhar = (repo: Record<string, unknown>, caminho: string, proprios = false) => {
     const metodos = new Set<string>()
+    if (proprios) for (const n of Object.keys(repo)) if (!SO_LEITURA.has(n) && typeof repo[n] === 'function') metodos.add(n)
     for (let p = Object.getPrototypeOf(repo); p && p !== Object.prototype; p = Object.getPrototypeOf(p)) for (const n of Object.getOwnPropertyNames(p)) if (!SO_LEITURA.has(n) && typeof repo[n] === 'function') metodos.add(n)
     for (const m of metodos) {
       const original = repo[m] as (...a: unknown[]) => unknown
@@ -344,4 +349,9 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
     }
   }
   andar(d.repos, [])
+  for (const [nome, m] of Object.entries(d.modulos ?? {})) {
+    const r = m as Record<string, unknown>
+    if (r.regras && typeof r.listar === 'function') embrulhar(r, nome)
+    else embrulhar(r, nome, true)
+  }
 }
