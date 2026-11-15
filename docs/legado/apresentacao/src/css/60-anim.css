@@ -1,0 +1,318 @@
+/* Biblioteca de animações declarativas.
+   Regra: um elemento com data-anim fica no estado "escondido" até receber .is-in
+   (na chegada ao slide ou no build do seu data-step). Em .is-static (impressão,
+   miniaturas, visão do apresentador) tudo aparece no estado final. */
+
+[data-anim] {
+  transition-property: opacity, transform, filter, clip-path, background-size;
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease);
+  transition-delay: var(--d, 0ms) !important;
+}
+/* Ao desfazer um build (voltar), some rápido e sem atraso */
+[data-anim]:not(.is-in) {
+  transition-duration: 320ms;
+  transition-delay: 0ms;
+  transition-timing-function: ease-out;
+}
+
+/* Desliga transições durante reposicionamentos instantâneos */
+.no-tr,
+.no-tr *,
+.no-tr *::before,
+.no-tr *::after {
+  transition: none !important;
+}
+
+/* ---------- Entradas simples ---------- */
+.slide:not(.is-static) [data-anim="fade"]:not(.is-in) {
+  opacity: 0;
+}
+.slide:not(.is-static) [data-anim="fade-up"]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(0, 48px, 0);
+}
+.slide:not(.is-static) [data-anim="fade-down"]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(0, -48px, 0);
+}
+.slide:not(.is-static) [data-anim="fade-left"]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(72px, 0, 0);
+}
+.slide:not(.is-static) [data-anim="fade-right"]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(-72px, 0, 0);
+}
+.slide:not(.is-static) [data-anim="blur-in"]:not(.is-in) {
+  opacity: 0;
+  filter: blur(28px);
+  transform: scale(1.04);
+}
+[data-anim="blur-in"] {
+  transition-duration: var(--dur-slow);
+}
+.slide:not(.is-static) [data-anim="scale-in"]:not(.is-in) {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.slide:not(.is-static) [data-anim="zoom-in"]:not(.is-in) {
+  opacity: 0;
+  filter: blur(18px);
+  transform: scale(1.18);
+}
+[data-anim="zoom-in"] {
+  transition-duration: var(--dur-slow);
+}
+.slide:not(.is-static) [data-anim="pop"]:not(.is-in) {
+  opacity: 0;
+  transform: scale(0.6);
+}
+[data-anim="pop"].is-in {
+  transition-timing-function: var(--ease-pop);
+  transition-duration: 700ms;
+}
+
+/* ---------- Máscara: o bloco sobe de dentro de uma janela ---------- */
+[data-anim="mask"] {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+[data-anim="mask"] > .mask-inner {
+  display: block;
+  transition: transform var(--dur-slow) var(--ease) var(--d, 0ms);
+}
+.slide:not(.is-static) [data-anim="mask"]:not(.is-in) > .mask-inner {
+  transform: translate3d(0, 110%, 0);
+  transition-duration: 320ms;
+  transition-delay: 0ms;
+}
+
+/* ---------- Palavras: cada palavra sobe por uma máscara, em sequência ---------- */
+[data-anim="words"] .w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0 0.04em 0.12em;
+  margin: 0 -0.04em -0.12em;
+}
+[data-anim="words"] .wi {
+  display: inline-block;
+  transition:
+    transform var(--dur-slow) var(--ease) var(--wd, 0ms),
+    opacity var(--dur) var(--ease) var(--wd, 0ms);
+}
+.slide:not(.is-static) [data-anim="words"]:not(.is-in) .wi {
+  transform: translate3d(0, 110%, 0);
+  opacity: 0;
+  transition-duration: 300ms;
+  transition-delay: 0ms;
+}
+/* gradiente aplicado a cada palavra, porque o recorte de texto não atravessa a máscara */
+[data-anim="words"] .grad-text .wi,
+[data-anim="words"].grad-text .wi {
+  background: var(--grad);
+  background-size: var(--gw, 100%) 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Wipe: revela da esquerda para a direita ---------- */
+[data-anim="wipe"] {
+  clip-path: inset(-10% 0 -10% 0);
+  transition-duration: var(--dur-slow);
+  transition-timing-function: var(--ease-io);
+}
+.slide:not(.is-static) [data-anim="wipe"]:not(.is-in) {
+  clip-path: inset(-10% 100% -10% 0);
+}
+
+/* ---------- Marca-texto ---------- */
+[data-anim="highlight"] {
+  transition-property: background-size;
+  transition-duration: var(--dur-slow);
+  transition-timing-function: var(--ease-io);
+}
+.slide:not(.is-static) [data-anim="highlight"]:not(.is-in) {
+  background-size: 0% 42%;
+}
+.slide:not(.is-static) .hl--full[data-anim="highlight"]:not(.is-in) {
+  background-size: 0% 100%;
+}
+
+/* ---------- Linhas SVG que se desenham ---------- */
+.dl {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+  transition:
+    stroke-dashoffset var(--dur-draw) var(--ease-io) var(--d, 0ms),
+    opacity 200ms linear var(--d, 0ms);
+}
+.slide:not(.is-static) [data-anim="draw"]:not(.is-in) .dl,
+.slide:not(.is-static) .dl[data-anim="draw"]:not(.is-in) {
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition-duration: 300ms;
+  transition-delay: 0ms;
+}
+/* partes que surgem depois do traço (pontas de seta, áreas, pontos) */
+.fade-part {
+  transition: opacity 500ms var(--ease) calc(var(--d, 0ms) + var(--dur-draw) * 0.8);
+}
+.slide:not(.is-static) [data-anim="draw"]:not(.is-in) .fade-part {
+  opacity: 0;
+  transition-duration: 200ms;
+  transition-delay: 0ms;
+}
+
+/* ---------- Gráfico de barras que cresce ---------- */
+.bar-fill {
+  transition: transform var(--dur-slow) var(--ease) var(--d, 0ms);
+}
+.bar-value {
+  transition: opacity 600ms var(--ease) calc(var(--d, 0ms) + 350ms), transform 800ms var(--ease) calc(var(--d, 0ms) + 350ms);
+}
+.slide:not(.is-static) [data-anim="bars"]:not(.is-in) .bar-fill,
+.slide:not(.is-static) [data-anim="bar"]:not(.is-in) .bar-fill {
+  transform: scaleY(0);
+  transition-duration: 300ms;
+  transition-delay: 0ms;
+}
+.slide:not(.is-static) .is-horizontal[data-anim="bars"]:not(.is-in) .bar-fill,
+.slide:not(.is-static) .is-horizontal [data-anim="bar"]:not(.is-in) .bar-fill {
+  transform: scaleX(0);
+}
+.slide:not(.is-static) [data-anim="bars"]:not(.is-in) .bar-value,
+.slide:not(.is-static) [data-anim="bar"]:not(.is-in) .bar-value {
+  opacity: 0;
+  transform: translateY(16px);
+  transition-duration: 200ms;
+  transition-delay: 0ms;
+}
+
+/* ---------- Gantt que se desenha ---------- */
+.gantt-bar {
+  transition: transform var(--dur-slow) var(--ease) var(--d, 0ms), opacity 400ms var(--ease) var(--d, 0ms);
+}
+.gantt-marker {
+  transition: transform var(--dur) var(--ease-io) var(--d, 0ms), opacity 300ms var(--ease) var(--d, 0ms);
+}
+.gantt-marker span {
+  transition: opacity 500ms var(--ease) calc(var(--d, 0ms) + 500ms), transform 600ms var(--ease-pop) calc(var(--d, 0ms) + 500ms);
+}
+.slide:not(.is-static) [data-anim="gantt"]:not(.is-in) .gantt-bar,
+.slide:not(.is-static) [data-anim="gantt-bar"]:not(.is-in) {
+  transform: scaleX(0);
+  opacity: 0;
+  transition-duration: 250ms;
+  transition-delay: 0ms;
+}
+.slide:not(.is-static) [data-anim="gantt"]:not(.is-in) .gantt-marker,
+.slide:not(.is-static) [data-anim="gantt-marker"]:not(.is-in) {
+  transform: scaleY(0);
+  opacity: 0;
+  transition-duration: 250ms;
+  transition-delay: 0ms;
+}
+.slide:not(.is-static) [data-anim="gantt"]:not(.is-in) .gantt-marker span,
+.slide:not(.is-static) [data-anim="gantt-marker"]:not(.is-in) span {
+  opacity: 0;
+  transform: translate(-50%, 10px) scale(0.8);
+  transition-duration: 200ms;
+  transition-delay: 0ms;
+}
+
+/* ---------- Texto digitando ---------- */
+[data-anim="type"] {
+  white-space: pre-wrap;
+}
+[data-anim="type"].is-typing::after,
+[data-anim="type"].is-typed::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 1.08em;
+  margin-left: 3px;
+  vertical-align: -0.18em;
+  border-radius: 2px;
+  background: var(--blue);
+}
+[data-anim="type"].is-typed::after {
+  animation: caret-blink 1.1s steps(1) infinite;
+}
+.is-static [data-anim="type"]::after {
+  display: none !important;
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- Pré-visualização do apresentador: o que ainda vai entrar fica fantasma ---------- */
+.is-static .is-pending {
+  opacity: 0.14 !important;
+}
+
+/* ---------- Movimento reduzido: só esmaecer, sem deslocamentos ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-anim],
+  [data-anim] *,
+  .dl,
+  .fade-part,
+  .bar-fill,
+  .gantt-bar {
+    transition-duration: 250ms !important;
+    transition-delay: 0ms !important;
+  }
+  .slide:not(.is-static) [data-anim]:not(.is-in) {
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+  }
+  .slide:not(.is-static) [data-anim]:not(.is-in) .bar-fill,
+  .slide:not(.is-static) [data-anim]:not(.is-in) .gantt-bar,
+  .slide:not(.is-static) [data-anim]:not(.is-in) .gantt-marker,
+  .slide:not(.is-static) [data-anim]:not(.is-in) .wi,
+  .slide:not(.is-static) [data-anim]:not(.is-in) > .mask-inner {
+    transform: none !important;
+  }
+  .slide:not(.is-static) [data-anim="words"]:not(.is-in),
+  .slide:not(.is-static) [data-anim="mask"]:not(.is-in),
+  .slide:not(.is-static) [data-anim="bars"]:not(.is-in),
+  .slide:not(.is-static) [data-anim="gantt"]:not(.is-in),
+  .slide:not(.is-static) [data-anim="wipe"]:not(.is-in),
+  .slide:not(.is-static) [data-anim="highlight"]:not(.is-in) {
+    opacity: 0;
+    background-size: 100% 42%;
+  }
+  .slide:not(.is-static) [data-anim="draw"]:not(.is-in) .dl,
+  .slide:not(.is-static) .dl[data-anim="draw"]:not(.is-in) {
+    stroke-dashoffset: 0;
+  }
+  .slide {
+    transition-duration: 300ms !important;
+  }
+  .slide[data-transition] {
+    transform: none !important;
+  }
+}
+
+/* grow-x: a barra cresce da esquerda (orçamento, barra empilhada) */
+.slide:not(.is-static) [data-anim="grow-x"]:not(.is-in) {
+  clip-path: inset(-40% 100% -40% 0);
+  opacity: 0;
+}
+[data-anim="grow-x"] {
+  clip-path: inset(-40% -2% -40% 0);
+  transition-duration: var(--dur-slow);
+}
+
+/* Garantia: todo elemento com data-delay respeita o atraso ao aparecer,
+   mesmo quando o CSS da seção redefine "transition" sem var(--d). */
+.slide:not(.is-static) [data-anim][data-delay].is-in {
+  transition-delay: var(--d, 0ms) !important;
+}

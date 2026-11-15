@@ -1,0 +1,814 @@
+<!-- Seções 10 a 17: diferenciais, segurança, desenvolvimento em 6 meses, investimento, GPU, custo por pergunta,
+     preço, escala, riscos e encerramento. 17 slides. Fonte de verdade: docs/Plano_MVP_6_meses.md e pesquisa/08-modelo-mvp.md;
+     números via data/modelo.json quando batem com o plano (o plano tem a linha de R$ 300 de sindicatos e Juntas,
+     que o modelo ainda não tem: os totais do desenvolvimento ficam como texto fixo).
+     CSS específico em src/css/84-negocio.css (classes s4-). -->
+
+<!-- 1 · Seis diferenciais -->
+<section class="slide" data-layout="lista" data-title="Seis diferenciais" id="s4-diferenciais">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Diferenciais</p>
+    <h2 class="title title--md title--wide" data-anim="words">Seis diferenciais que ninguém reúne.</h2>
+  </div>
+
+  <div class="s4-diffs" data-anim="stagger" data-stagger="260" data-delay="700" data-child-anim="s4-lit">
+    <div class="s4-diff">
+      <svg class="s4-ico" viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="10" width="34" height="31" rx="6"/><path d="M7 19h34M16 6v8M32 6v8"/><path d="M17 30l5 5 9-10"/></svg>
+      <h3>Data do fato</h3>
+      <p>Fato de 2022, regra de 2022</p>
+    </div>
+    <div class="s4-diff">
+      <svg class="s4-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6.5 17-15 21-8.5-4-15-11-15-21V11z"/><path d="M17 24l5 5 9-10"/></svg>
+      <h3>Citação conferida</h3>
+      <p>Checada antes de chegar a você</p>
+    </div>
+    <div class="s4-diff">
+      <svg class="s4-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 7l17 8-17 8-17-8z"/><path d="M7 24l17 8 17-8"/><path d="M7 33l17 8 17-8"/></svg>
+      <h3>Várias normas num passo</h3>
+      <p>Lei, decreto, IN, convenção e Junta</p>
+    </div>
+    <div class="s4-diff">
+      <svg class="s4-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 34l10-10 7 7 15-15"/><path d="M30 16h10v10"/></svg>
+      <h3>Precisão publicada</h3>
+      <p>Erro medido e aberto, ciclo a ciclo</p>
+    </div>
+    <div class="s4-diff">
+      <svg class="s4-ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="5"/><circle cx="11" cy="34" r="5"/><circle cx="37" cy="34" r="5"/><path d="M21 16.5l-7 13M27 16.5l7 13M16 34h16"/></svg>
+      <h3>Time de agentes</h3>
+      <p>Não só chat: vigia, avisa e prepara</p>
+    </div>
+    <div class="s4-diff">
+      <svg class="s4-ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17"/><path d="M19 19a5 5 0 1 1 7 4.6c-1.3.6-2 1.6-2 3V28"/><path d="M24 34v.5"/></svg>
+      <h3>“Não sei” honesto</h3>
+      <p>Abstém-se em vez de inventar</p>
+    </div>
+  </div>
+
+  <p class="s4-footline" data-step="1" data-anim="fade">E custo baixo por desenho: o modelo caro só lê o que importa.</p>
+
+  <p class="source">Fontes: Plano do Assistente, “Nossos diferenciais”; docs/Plano_MVP_6_meses.md (escopo); pesquisa/05-mercado-preco.md, §2 (18 concorrentes).</p>
+  <aside class="notes">
+    <p>Os seis acendem um a um. Resumindo:</p>
+    <ul>
+      <li><strong>Data do fato:</strong> pergunta sobre 2022 é respondida com a regra de 2022.</li>
+      <li><strong>Citação conferida</strong> antes de chegar ao contador.</li>
+      <li><strong>Várias normas num passo:</strong> lei, decreto, IN, e também a convenção coletiva e a Junta Comercial.</li>
+      <li><strong>Precisão publicada,</strong> num mercado em que quase ninguém publica. E a melhora é medida: cada ciclo de evolução passa pelo benchmark que vocês vão montar.</li>
+      <li><strong>Time de agentes, não só chat:</strong> um vigia que avisa quando uma mudança na lei afeta um cliente, avisos de prazo, rascunhos de respostas e cálculos para vocês revisarem. Num agente próprio, na nossa GPU, com aprovação humana para tudo o que é sensível.</li>
+      <li><strong>“Não encontrei”</strong> em vez de inventar.</li>
+    </ul>
+    <p>Nenhum dos 18 concorrentes que olhamos descreve os seis juntos.</p>
+    <p><strong>Avance:</strong> a linha do custo. Vamos voltar a ela com números: o modelo caro só lê o que importa, e é isso que deixa a pergunta barata.</p>
+  </aside>
+</section>
+
+<!-- 2 · Os dados dos seus clientes -->
+<section class="slide" data-layout="diagrama" data-title="Dados dos clientes" id="s4-dados">
+  <div class="split s4-split-dados fill">
+    <div class="stack">
+      <div>
+        <p class="kicker" data-anim="fade">Segurança e LGPD</p>
+        <h2 class="title title--md" data-anim="words">Dados dos clientes, protegidos.</h2>
+      </div>
+      <ul class="checks mt-2 s4-checks-lg" data-anim="stagger" data-delay="700" data-stagger="160">
+        <li><strong>Cifrados e isolados</strong> por escritório</li>
+        <li><strong>Nunca</strong> usados para treinar modelos</li>
+        <li>Termos e <strong>LGPD</strong> prontos antes de cobrar</li>
+      </ul>
+    </div>
+
+    <div class="s4-vault-wrap">
+      <div class="s4-region" data-anim="scale-in" data-delay="300">
+        <div class="s4-region-head"><span class="s4-pin"></span>Nosso servidor<small>cifrado, com registro de acessos</small></div>
+        <div class="s4-vaults" data-anim="stagger" data-delay="700" data-stagger="90" data-child-anim="pop">
+          <div class="s4-vault"><i></i>Escritório A</div>
+          <div class="s4-vault"><i></i>Escritório B</div>
+          <div class="s4-vault"><i></i>Escritório C</div>
+          <div class="s4-vault"><i></i>Escritório D</div>
+          <div class="s4-vault"><i></i>Escritório E</div>
+          <div class="s4-vault"><i></i>Escritório F</div>
+        </div>
+      </div>
+      <div class="s4-egress" data-step="1" data-anim="fade">
+        <svg class="s4-egress-line" viewBox="0 0 20 120" data-anim="draw" aria-hidden="true"><path d="M10 0 V112"/><path class="fade-part" d="M3 104 L10 116 L17 104"/></svg>
+        <p class="s4-egress-label">só a pergunta, sem guardar<br><span>cláusulas-padrão da ANPD</span></p>
+      </div>
+      <div class="s4-model" data-step="1" data-anim="fade-up" data-delay="500">
+        <b>Modelo de IA</b><small>fora do país, sem treino com os seus dados</small>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Fontes: docs/Plano_MVP_6_meses.md (termos e LGPD no M5; GPU própria em datacenter de São Paulo); pesquisa/05-mercado-preco.md, §1.4 (Fenacon: 33% temem vazamento); pesquisa/04-juridico-tributario-dados.md, §7.</p>
+  <aside class="notes">
+    <p>A maior preocupação dos contadores com IA, na pesquisa da Fenacon, é vazamento de dados de clientes: 33%.</p>
+    <p>Os dados de cada escritório ficam cifrados e isolados dos outros, com registro de quem acessou. Termos de uso e LGPD ficam prontos no mês 5, antes de qualquer cobrança.</p>
+    <p>Sobre onde fica: no desenvolvimento é um servidor dedicado alugado. Uma das alavancas do orçamento é usar um servidor no Brasil, cobrado em reais. E quando a GPU for nossa, ela fica num datacenter em São Paulo, com as perguntas processadas no Brasil.</p>
+    <p><strong>Avance:</strong> a seta para fora. Sendo transparentes: a pergunta precisa ir ao modelo de IA, que roda fora do país. É transferência internacional, coberta pelas cláusulas-padrão da ANPD, e o fornecedor não guarda nem treina com ela.</p>
+    <p>Dados de clientes não entram no benchmark sem anonimização.</p>
+  </aside>
+</section>
+
+<!-- 3 · Quem assina é o contador -->
+<section class="slide" data-layout="diagrama" data-title="Quem assina" id="s4-assina">
+  <div class="split s4-split-assina fill">
+    <div class="stack">
+      <div>
+        <p class="kicker" data-anim="fade">Responsabilidade</p>
+        <h2 class="title" data-anim="words">Assistente, não substituto.</h2>
+      </div>
+      <p class="lead" data-anim="fade-up" data-delay="400">A decisão e a assinatura são suas.</p>
+    </div>
+
+    <div class="s4-paper-wrap">
+      <div class="s4-paper" data-anim="fade-up" data-delay="200">
+        <p class="s4-paper-title">Parecer</p>
+        <span class="s4-line" style="--w: 92%"></span>
+        <span class="s4-line" style="--w: 84%"></span>
+        <div class="s4-paper-answer" data-anim="fade-left" data-delay="900">
+          <span class="s4-paper-tag">Pesquisa do assistente</span>
+          <span class="s4-line" style="--w: 96%"></span>
+          <span class="s4-line" style="--w: 70%"></span>
+          <span class="s4-paper-cite">Lei nº 9.718/1998, art. 3º · redação vigente na data do fato</span>
+        </div>
+        <span class="s4-line" style="--w: 88%"></span>
+        <span class="s4-line" style="--w: 58%"></span>
+        <div class="s4-sign">
+          <svg viewBox="0 0 360 90" data-anim="draw" data-delay="1500" aria-hidden="true">
+            <path d="M8 62 C 30 20, 46 18, 50 48 S 70 80, 86 40 S 112 12, 118 54 C 122 72, 140 70, 152 44 C 160 28, 172 30, 170 52 C 168 70, 190 66, 204 40 C 214 22, 232 28, 236 50 C 240 66, 262 62, 280 46 C 296 34, 320 40, 350 36"/>
+          </svg>
+          <span class="s4-sign-line"></span>
+          <span class="s4-sign-name">Contador(a) responsável · CRC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pills s4-seals" data-step="1" data-anim="stagger" data-child-anim="pop" data-stagger="160">
+    <span class="pill pill--lg pill--outline"><span class="dot"></span>Versão da base registrada</span>
+    <span class="pill pill--lg pill--outline"><span class="dot"></span>Taxa de erro publicada</span>
+    <span class="pill pill--lg pill--outline"><span class="dot"></span>Seguro de responsabilidade</span>
+  </div>
+
+  <p class="source">Fontes: pesquisa/04-juridico-tributario-dados.md, §4, §8.3 e §11; pesquisa/08-modelo-mvp.md, §3 (seguro e auditoria humana a partir de 500 usuários).</p>
+  <aside class="notes">
+    <p>Uma posição clara: isto é um <strong>assistente</strong>. Não substitui o contador nem o advogado. A decisão e a assinatura são de quem tem CRC.</p>
+    <p>Deixe a assinatura se desenhar. <strong>Avance:</strong> os três selos.</p>
+    <ul>
+      <li>Toda resposta cita a fonte e a data de vigência, e registramos qual versão da base gerou cada uma, para reconstruir depois.</li>
+      <li>Publicamos a taxa de erro medida, em vez de prometer “100% correto”.</li>
+      <li>Seguro de responsabilidade profissional e auditoria humana por amostra entram no custo a partir de 500 usuários.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- 4 · Seis meses de desenvolvimento -->
+<section class="slide" data-layout="diagrama" data-title="Seis meses" id="s4-timeline">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Desenvolvimento</p>
+    <h2 class="title title--md title--wide" data-anim="words">Seis meses, uma pessoa, a arquitetura inteira.</h2>
+  </div>
+
+  <div class="s4-tl6 fill">
+    <div class="s4-tl6-months" data-anim="stagger" data-delay="500" data-stagger="150">
+      <div class="s4-mo"><span class="s4-mo-n">M1</span><h4>Base federal</h4><ul><li>Lei com todas as versões</li><li>Ingestão federal</li><li>Busca e vigência</li></ul></div>
+      <div class="s4-mo"><span class="s4-mo-n">M2</span><h4>SP e MG</h4><ul><li>ColBERT e grafo</li><li>Árvore de temas</li><li>Citação verificada</li></ul></div>
+      <div class="s4-mo"><span class="s4-mo-n">M3</span><h4>Sul e municípios</h4><ul><li>Reranker próprio</li><li>Convenções e Juntas</li><li>Servidor no ar</li></ul></div>
+      <div class="s4-mo"><span class="s4-mo-n">M4</span><h4>Inteligência</h4><ul><li>Política de busca</li><li>Busca ao vivo</li><li>1º ciclo DGM</li></ul></div>
+      <div class="s4-mo"><span class="s4-mo-n">M5</span><h4>Cache e empresa</h4><ul><li>Cache semântico</li><li>CNPJ e LGPD</li><li>Teste de carga</li></ul></div>
+      <div class="s4-mo"><span class="s4-mo-n">M6</span><h4>Portão</h4><ul><li>Congelamento</li><li>Cobrança e NFS-e</li><li>3º ciclo DGM</li></ul></div>
+    </div>
+
+    <div class="s4-tl6-play" data-step="1" data-anim="fade-up">
+      <p class="s4-tl6-play-t"><i></i>Os contadores do grupo, desde o M1</p>
+      <div class="s4-tl6-cells" data-anim="stagger" data-delay="200" data-stagger="110" data-child-anim="fade">
+        <span><b>50 perguntas</b> com gabarito</span>
+        <span><b>Alfa</b> na web</span>
+        <span><b>Uso semanal</b> marcando erros</span>
+        <span><b>Uso diário</b> 200 perguntas</span>
+        <span><b>Beta fechado</b> com todos</span>
+        <span><b>Cotas</b> ligadas</span>
+      </div>
+    </div>
+
+    <div class="s4-launch" data-step="2" data-anim="scale-in">
+      <span class="s4-mo-n">M7</span>
+      <h4>Lançamento</h4>
+      <p>Federal, mais</p>
+      <div class="s4-ufs" data-anim="stagger" data-delay="300" data-stagger="90" data-child-anim="pop">
+        <span>SP</span><span>MG</span><span>PR</span><span>SC</span><span>RS</span>
+      </div>
+      <p class="s4-launch-foot">com preço</p>
+    </div>
+  </div>
+
+  <p class="source">Fonte: docs/Plano_MVP_6_meses.md, “Cronograma: tudo pronto até o M6”. Só o fundador, com agentes de programação.</p>
+  <aside class="notes">
+    <p>Seis meses, uma pessoa: o fundador, trabalhando com agentes de programação. Sem equipe contratada. Os meses entram um a um.</p>
+    <ul>
+      <li><strong>M1:</strong> o coração, a lei guardada com todas as versões de cada artigo e as três datas; ingestão federal por programa; busca por palavra com filtro de vigência.</li>
+      <li><strong>M2:</strong> São Paulo e Minas; a busca por significado (ColBERT), o grafo de normas e a árvore de temas; e a resposta com citação conferida ou abstenção.</li>
+      <li><strong>M3:</strong> Paraná, Santa Catarina, Rio Grande do Sul e municípios; nosso reranker treinado; convenções coletivas e Juntas Comerciais; servidor dedicado no ar.</li>
+      <li><strong>M4:</strong> a política de busca treinada por reforço, a busca ao vivo no Diário Oficial e nas Sefaz, e o primeiro ciclo da DGM, a evolução automática.</li>
+      <li><strong>M5:</strong> cache de respostas validadas por vocês, CNPJ, termos e LGPD, teste de carga. Meta: custo medido de até R$ 0,30 por pergunta.</li>
+      <li><strong>M6:</strong> o portão. Congela, corrige, liga a cobrança e a nota fiscal.</li>
+    </ul>
+    <p><strong>Avance:</strong> vocês. Os contadores do grupo são os playtesters desde o primeiro mês: mandam 50 perguntas reais com gabarito no M1, usam o alfa no M2, usam toda semana no M3 marcando erros, todo dia no M4, beta fechado com todos os escritórios no M5 e, no M6, uso igual ao lançamento, com as cotas ligadas. Também mandam documentos que só circulam no WhatsApp, como convenções.</p>
+    <p><strong>Avance:</strong> lançamento comercial no mês 7. Federal, mais São Paulo, Minas, Paraná, Santa Catarina e Rio Grande do Sul.</p>
+    <p>Por que dá em seis meses: o escopo é de cinco estados, não do país todo; os textos oficiais são digitais, não precisa ler papel escaneado; e os agentes de programação fazem o trabalho de vários programadores. A ordem é por risco: a base com datas e a citação conferida vêm primeiro. O que não vencer no benchmark entra desligado, sem mudar o custo.</p>
+  </aside>
+</section>
+
+<!-- 5 · Investimento do desenvolvimento -->
+<section class="slide" data-layout="grafico" data-title="Investimento" id="s4-invest">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Investimento do desenvolvimento</p>
+    <h2 class="title title--md title--wide" data-anim="words">Desenvolver custa R$ 15,6 mil na base.</h2>
+    <p class="lead" data-anim="fade-up" data-delay="400">Com as alavancas, <b class="ink">R$ 9,3 mil</b>, dentro do teto de R$ 10 mil. Com assinaturas e reserva, o aporte fecha em R$ 20 mil.</p>
+  </div>
+
+  <div class="s4-inv">
+    <div class="s4-inv-chart">
+      <span class="s4-inv-cap" data-anim="fade" data-delay="700"><b>teto de R$ 10 mil</b></span>
+      <div class="s4-inv-row">
+        <span class="s4-inv-name">Base</span>
+        <div class="s4-inv-track">
+          <div class="s4-inv-bar" style="--t: 15576" data-anim="s4-grow-x" data-delay="800">
+            <i class="c1" style="--v: 3238"></i><i class="c2" style="--v: 2608"></i><i class="c3" style="--v: 2368"></i><i class="c4" style="--v: 2219"></i><i class="c5" style="--v: 2163"></i><i class="c6" style="--v: 1257"></i><i class="c7" style="--v: 683"></i><i class="c8" style="--v: 740"></i><i class="c9" style="--v: 300"></i>
+          </div>
+          <span class="s4-inv-val" data-anim="fade" data-delay="1500">R$ 15.576</span>
+        </div>
+      </div>
+      <div class="s4-inv-row" data-step="1" data-anim="fade">
+        <span class="s4-inv-name">Com alavancas</span>
+        <div class="s4-inv-track">
+          <div class="s4-inv-bar is-lev" style="--t: 9296" data-anim="s4-grow-x" data-delay="150">
+            <i class="c1" style="--v: 2266"></i><i class="c2" style="--v: 1618"></i><i class="c3" style="--v: 2048"></i><i class="c4" style="--v: 750"></i><i class="c5" style="--v: 854"></i><i class="c6" style="--v: 946"></i><i class="c7" style="--v: 273"></i><i class="c8" style="--v: 240"></i><i class="c9" style="--v: 300"></i>
+          </div>
+          <span class="s4-inv-val grad-text" data-anim="fade" data-delay="900">R$ 9.296</span>
+        </div>
+      </div>
+      <span class="s4-inv-teto" data-anim="fade" data-delay="700"></span>
+    </div>
+
+    <div class="s4-inv-legend" data-anim="stagger" data-delay="1300" data-stagger="60">
+      <span><i class="c1"></i>Ingestão e enriquecimento<em>3.238</em></span>
+      <span><i class="c2"></i>GPU por hora<em>2.608</em></span>
+      <span><i class="c3"></i>Testes e regressão<em>2.368</em></span>
+      <span><i class="c4"></i>Servidor dedicado<em>2.219</em></span>
+      <span><i class="c5"></i>3 ciclos DGM<em>2.163</em></span>
+      <span><i class="c6"></i>Perguntas dos playtesters<em>1.257</em></span>
+      <span><i class="c7"></i>Treino do reranker<em>683</em></span>
+      <span><i class="c8"></i>Domínio, e-CNPJ, termos<em>740</em></span>
+      <span><i class="c9"></i>Sindicatos e Juntas<em>300</em></span>
+    </div>
+  </div>
+
+  <div class="s4-inv-foot" data-step="2" data-anim="stagger" data-stagger="120">
+    <span><b>Quem financia:</b> os contadores-playtesters</span>
+    <span><b>M1–M6:</b> sem preço, sem receita</span>
+    <span><b>Freio:</b> limite mensal e alerta de gasto</span>
+  </div>
+
+  <p class="source">Fonte: docs/Plano_MVP_6_meses.md, “Orçamento do desenvolvimento” (base R$ 15.576, faixa R$ 8.969 a R$ 27.384; com alavancas R$ 9.296, faixa R$ 5.623 a R$ 15.906). Valores em reais, base; legenda: base de cada item.</p>
+  <aside class="notes">
+    <p>Quanto custa construir tudo isso em seis meses: <strong>R$ 15,6 mil</strong> na conta base. É a soma de 1.400, 1.493, 2.716, 2.551, 4.097 e 3.318 reais, mês a mês. A faixa vai de R$ 9 mil a R$ 27,4 mil, porque são estimativas.</p>
+    <p>A barra mostra para onde vai o dinheiro: IA para ler e organizar a lei (21%), GPU alugada por hora (17%), testes (16%), servidor (15%) e os três ciclos da DGM (14%). O resto: as perguntas de vocês, o treino do reranker, domínio, e-CNPJ e termos, e R$ 300 para sindicatos e Juntas.</p>
+    <p>A linha tracejada é o teto de referência de R$ 10 mil. A base passa dele em cerca de R$ 5,6 mil. Este slide é só o desenvolvimento: as assinaturas dos agentes de programação (Claude Ultra e Cursor), o ambiente isolado e a reserva entram no aporte de R$ 20 mil, que mostro no fim.</p>
+    <p><strong>Avance:</strong> com as alavancas, <strong>R$ 9,3 mil</strong>, dentro do teto (faixa de R$ 5,6 mil a R$ 15,9 mil). As principais: pagar os meses 5 e 6 ainda no cartão de pessoa física e abrir o CNPJ só no fim do M6; um servidor no Brasil, cobrado em reais; a DGM usando o próprio agente da assinatura; GPU mais barata, de comunidade; e os termos revisados pelo advogado do grupo.</p>
+    <p><strong>Avance:</strong> quem paga são vocês, os contadores que entrarem no grupo, como playtesters. Não há preço nem receita nos meses 1 a 6. Controle: limite mensal no console da IA e alerta de gasto na GPU. Se apertar, cortamos nesta ordem: o 3º ciclo da DGM, a 2ª rodada de treino da política e o doc2query completo. O que é essencial para o portão do M6 não entra no corte.</p>
+  </aside>
+</section>
+
+<!-- 6 · Tributos sobre serviço em dólar -->
+<section class="slide" data-layout="grafico" data-title="Tributos sobre o dólar" id="s4-dolar">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Serviço importado</p>
+    <h2 class="title title--md title--wide" data-anim="words">Com CNPJ, cada US$ 1 custa R$ 7,97.</h2>
+  </div>
+
+  <div class="chart-bars is-horizontal s4-usd-bars" data-max="8.4" data-decimals="2" data-prefix="R$ " data-delay="300" style="--label-w: 560px">
+    <div class="bar is-muted" data-value="5.49" data-label="Câmbio do dia<br><small>PTAX</small>"></div>
+    <div class="bar" data-value="5.69" data-bind="cambio.antes_cnpj" data-label="No cartão de pessoa física<br><small>com IOF de 3,5%</small>"></div>
+    <div class="bar is-accent" data-step="1" data-value="7.97" data-bind="cambio.depois_cnpj" data-label="Com CNPJ, a partir do M5<br><small>IRRF, CIDE, CBS, IBS, ISS e IOF</small>"></div>
+  </div>
+
+  <p class="s4-usd-take" data-step="2" data-anim="fade-up"><b class="grad-text">+40%</b> em tudo o que é pago lá fora: IA, GPU e servidor.</p>
+
+  <p class="source">Fontes: docs/Plano_MVP_6_meses.md, “Premissas · Câmbio”; pesquisa/04-juridico-tributario-dados.md, §3.6 (caso base de importação de serviço, PTAX + 45,1%).</p>
+  <aside class="notes">
+    <p>Algo que vocês conhecem bem: serviço importado. A IA, a GPU e o servidor são cobrados em dólar ou euro.</p>
+    <p>O câmbio do dia está em cerca de R$ 5,49. No cartão de pessoa física, com IOF de 3,5%, sai a <strong>R$ 5,69</strong>. É assim que pagamos nos meses 1 a 4.</p>
+    <p><strong>Avance:</strong> com CNPJ, a partir do mês 5, entram IRRF, CIDE, CBS e IBS, ISS e IOF: cada dólar custa <strong>R$ 7,97</strong>.</p>
+    <p><strong>Avance:</strong> são 40% a mais em tudo o que é pago lá fora. Por isso a primeira alavanca do orçamento é decidir com vocês quando abrir o CNPJ e como fazer o aporte. E é por isso que, no lançamento, todo o custo de IA já está calculado a R$ 7,97.</p>
+  </aside>
+</section>
+
+<!-- 7 · GPU: do aluguel à compra -->
+<section class="slide" data-layout="comparacao" data-title="GPU em três fases" id="s4-gpu">
+  <div class="head">
+    <p class="kicker" data-anim="fade">GPU</p>
+    <h2 class="title title--md title--wide" data-anim="words">Alugar para começar, comprar para crescer.</h2>
+  </div>
+
+  <div class="s4-phases">
+    <div class="s4-phase" data-anim="fade-up" data-delay="500">
+      <p class="s4-phase-tag">M1–M6 · desenvolvimento</p>
+      <h3>Por hora</h3>
+      <p>Ligada só para indexar e treinar, no RunPod.</p>
+      <div class="s4-phase-num"><span data-count-to="275" data-delay="900">275</span><small> horas no total</small></div>
+      <p class="s4-phase-foot">≈ R$ 2,6 mil nos seis meses</p>
+    </div>
+    <div class="s4-phase" data-step="1" data-anim="fade-up">
+      <p class="s4-phase-tag">M7 em diante · lançamento</p>
+      <h3>Servidor alugado</h3>
+      <p>Servidor dedicado com GPU, ligado o mês todo.</p>
+      <div class="s4-phase-num">R$ 2,5 mil<small> por mês</small></div>
+      <p class="s4-phase-foot">com 500 usuários pagantes</p>
+    </div>
+    <div class="s4-phase is-accent" data-step="2" data-anim="fade-up">
+      <p class="s4-phase-tag">≈ 3.500 usuários · o ideal</p>
+      <h3>GPU própria</h3>
+      <p>Em São Paulo. Roda também o nosso agente.</p>
+      <div class="s4-phase-num grad-text">R$ 40,8 mil</div>
+      <p class="s4-phase-foot">uma vez, mais R$ 1.075 por mês</p>
+    </div>
+  </div>
+
+  <p class="analogia" data-step="3" data-anim="fade">Como o imóvel: aluga-se para começar, compra-se quando o uso justifica.</p>
+
+  <p class="source">Fontes: docs/Plano_MVP_6_meses.md, “GPU no desenvolvimento”, “Degraus de infraestrutura” e “Quando comprar GPU própria”; pesquisa/08-modelo-mvp.md, §3 e §6. Com 500 usuários: 1 Hetzner GEX45 24/7 + treino por hora (R$ 2.457/mês).</p>
+  <aside class="notes">
+    <p>A GPU é a placa que roda os nossos modelos pequenos: o reranker e a política de busca. Ela passa por três fases.</p>
+    <ul>
+      <li><strong>Desenvolvimento:</strong> só alugada por hora no RunPod, ligada quando precisa indexar ou treinar. Cerca de 275 horas em seis meses: 180 de RTX 4090, 25 de A100 e 70 de H100. Uns R$ 2,6 mil no total.</li>
+      <li><strong>Avance. Lançamento:</strong> servidor dedicado alugado. Com até 50 usuários, ainda por hora no expediente (cerca de R$ 2,1 mil por mês); com 500, um servidor Hetzner ligado o mês todo, cerca de R$ 2,5 mil por mês com o treino.</li>
+      <li><strong>Avance. O ideal:</strong> comprar GPU própria, num datacenter de São Paulo, com um servidor alugado de reserva. Uma RTX 5090 com o computador custa cerca de R$ 40,8 mil, mais R$ 1.075 por mês de datacenter e energia. E ela não roda só o reranker e a política: roda também o nosso agente, de código aberto, que fica sob nosso controle em vez de numa máquina de terceiros. No próximo slide, a conta de quando isso se paga.</li>
+    </ul>
+    <p><strong>Avance (analogia):</strong> É como o imóvel: no começo se aluga; quando o uso é certo e alto, comprar sai mais barato.</p>
+  </aside>
+</section>
+
+<!-- 8 · Quando comprar a GPU -->
+<section class="slide" data-layout="grafico" data-title="Comprar GPU própria" id="s4-gpu-compra">
+  <div class="split s4-split-gpu fill">
+    <div class="stack">
+      <div>
+        <p class="kicker" data-anim="fade">GPU própria</p>
+        <h2 class="title title--md" data-anim="words">Alugar para sempre não é sustentável.</h2>
+      </div>
+      <div class="s4-gpu-kpis mt-1" data-anim="stagger" data-delay="700" data-stagger="160">
+        <div><b><span data-count-to="40.8" data-decimals="1" data-prefix="R$ " data-suffix=" mil" data-delay="800">R$ 40,8 mil</span></b><small>placa RTX 5090 (R$ 27,8 mil) + computador (R$ 13 mil)</small></div>
+        <div><b>R$ 1.075<em>/mês</em></b><small>datacenter (R$ 700) + energia (R$ 375)</small></div>
+      </div>
+    </div>
+
+    <div class="s4-gpu-chart">
+      <p class="small s4-gpu-cap" data-anim="fade" data-delay="300">GPU por mês, em reais: <span class="s4-k s4-k--rent"></span>só alugada <span class="s4-k s4-k--own"></span>com a própria</p>
+      <div class="s4-gpu-groups">
+        <div class="s4-gg">
+          <div class="s4-gg-bars">
+            <div class="s4-gb is-rent" style="--v: 2457" data-anim="s4-rise" data-delay="500"><span>2.457</span></div>
+            <div class="s4-gb is-own" style="--v: 3215" data-anim="s4-rise" data-delay="620"><span>3.215</span></div>
+          </div>
+          <p class="s4-gg-x"><b>500</b> usuários</p>
+          <p class="s4-gg-pb is-no" data-anim="fade" data-delay="1400">não se paga</p>
+        </div>
+        <div class="s4-gg">
+          <div class="s4-gg-bars">
+            <div class="s4-gb is-rent" style="--v: 4914" data-anim="s4-rise" data-delay="760"><span>4.914</span></div>
+            <div class="s4-gb is-own" style="--v: 3215" data-anim="s4-rise" data-delay="880"><span>3.215</span></div>
+          </div>
+          <p class="s4-gg-x"><b>3.000</b> usuários</p>
+          <p class="s4-gg-pb" data-anim="fade" data-delay="1600">paga-se em <b>24 meses</b></p>
+        </div>
+        <div class="s4-gg">
+          <div class="s4-gg-bars">
+            <div class="s4-gb is-rent" style="--v: 9828" data-anim="s4-rise" data-delay="1020"><span>9.828</span></div>
+            <div class="s4-gb is-own" style="--v: 3215" data-anim="s4-rise" data-delay="1140"><span>3.215</span></div>
+          </div>
+          <p class="s4-gg-x"><b>10.000</b> usuários</p>
+          <p class="s4-gg-pb is-yes" data-anim="fade" data-delay="1800">paga-se em <b>6 meses</b></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pills s4-gpu-rules" data-step="1" data-anim="stagger" data-child-anim="pop" data-stagger="140">
+    <span class="pill pill--lg pill--violet"><span class="dot"></span>Comprar com ≈ 3.500 usuários</span>
+    <span class="pill pill--lg pill--outline"><span class="dot"></span>Datacenter em SP, não em casa</span>
+    <span class="pill pill--lg pill--outline"><span class="dot"></span>1 alugado de reserva</span>
+  </div>
+
+  <p class="source">Fonte: docs/Plano_MVP_6_meses.md, “Quando comprar GPU própria”; pesquisa/08-modelo-mvp.md, §6 (RTX 5090: mediana de 3 meses no gpuprix em 4/11/2026; host, colocation e capacidade são premissas a confirmar). “Com a própria”: 1 RTX 5090 em colocation + 1 GEX45 de reserva.</p>
+  <aside class="notes">
+    <p>Alugar para sempre não é sustentável: o aluguel cresce com a base, e a máquina própria não.</p>
+    <p>A compra: uma RTX 5090 a cerca de R$ 27,8 mil, mais R$ 13 mil do computador onde ela fica: <strong>R$ 40,8 mil</strong>. Depois, <strong>R$ 1.075 por mês</strong>: R$ 700 de datacenter e R$ 375 de energia.</p>
+    <p>O gráfico compara o gasto mensal com GPU nos dois jeitos.</p>
+    <ul>
+      <li><strong>500 usuários:</strong> um servidor alugado basta (R$ 2.457). Com a própria seria mais caro (R$ 3.215, porque mantemos um alugado de reserva). Não se paga.</li>
+      <li><strong>3.000 usuários:</strong> alugado, R$ 4.914; com a própria, R$ 3.215. A compra se paga em 24 meses.</li>
+      <li><strong>10.000 usuários:</strong> alugado, R$ 9.828; com a própria, R$ 3.215. Paga-se em 6 meses, e o treino da DGM roda nela à noite.</li>
+    </ul>
+    <p><strong>Avance:</strong> a regra. Compramos quando a compra se paga em até 12 meses, o que acontece por volta de <strong>3.500 usuários pagantes</strong>. Antes, se o aluguel subir de novo. Fica num datacenter em São Paulo, não em casa: energia redundante, acesso controlado e as perguntas processadas no Brasil, bom para a LGPD. E sempre um servidor alugado de reserva.</p>
+  </aside>
+</section>
+
+<!-- 9 · Custo por pergunta: duas arquiteturas -->
+<section class="slide" data-layout="grafico" data-title="Custo por pergunta" id="s4-pergunta">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Custo por pergunta</p>
+    <h2 class="title title--md title--wide" data-anim="words">A mesma pergunta, até 13 vezes mais barata.</h2>
+    <p class="lead s4-lead-wide" data-anim="fade-up" data-delay="400">As técnicas devolvem a informação certa, de forma barata. O modelo caro só lê o que importa.</p>
+  </div>
+
+  <div class="s4-arq">
+    <div class="chart-bars is-horizontal s4-arq-bars" data-max="2.87" data-decimals="2" data-prefix="R$ " data-delay="900" style="--label-w: 600px">
+      <div class="bar is-muted" data-value="2.87" data-label="<b>Jeito comum, modelo maior</b><small>80 mil tokens no Opus, sem cache nem roteamento</small>"></div>
+      <div class="bar is-muted" data-value="1.43" data-label="<b>Jeito comum, modelo médio</b><small>80 mil tokens no Sonnet, sem cache nem roteamento</small>"></div>
+      <div class="bar is-accent" data-step="1" data-value="0.22" data-display="R$ 0,22" data-label="<b>Nosso jeito</b><small>cascata filtra antes; Haiku na maioria, Sonnet 9%, Opus 1%</small>"></div>
+    </div>
+    <div class="s4-arq-x" data-step="2" data-anim="pop">
+      <b>6 a 13×</b><span>menos por pergunta</span>
+    </div>
+  </div>
+
+  <p class="analogia" data-step="3" data-anim="fade">Triagem antes: o processo inteiro não vai ao advogado mais caro.</p>
+
+  <p class="source">Só API, com tributos de importação (R$ 7,97/US$). Concorrentes não publicam custo: esta é a conta com a mesma tabela de preços. Jeito comum: 80 mil tokens de entrada e 2 mil de saída (Sonnet 5.5 a US$ 2 e US$ 10 por milhão: US$ 0,18; Opus 5.5 a US$ 4 e US$ 20: US$ 0,36). Nosso jeito: pesquisa/08-modelo-mvp.md, §2 (US$ 0,0273 = R$ 0,217 no lançamento).</p>
+  <aside class="notes">
+    <p>Este é o ponto que mais importa para o preço. A economia não vem de usar um modelo fraco. Vem das técnicas: elas encontram a informação certa de forma barata, e o modelo caro só lê o que importa.</p>
+    <p>A mesma pergunta, duas arquiteturas, só o custo da IA, já com os tributos do dólar a R$ 7,97.</p>
+    <ul>
+      <li><strong>O jeito comum:</strong> pega uns 80 mil tokens de texto parecido com a pergunta e manda tudo para um modelo grande, sem cache e sem escolher o modelo pelo tamanho da pergunta. No Opus, US$ 0,36: <strong>R$ 2,87</strong> por pergunta. No Sonnet, US$ 0,18: <strong>R$ 1,43</strong>.</li>
+    </ul>
+    <p><strong>Avance:</strong> o nosso jeito. A cascata filtra antes: árvore de temas, vigência, busca, grafo e reranker rodam nas nossas máquinas, sem custo de IA. E o roteamento manda 90% das perguntas para o Haiku, o modelo pequeno, 9% para o Sonnet e só 1% para o Opus. Resultado: <strong>R$ 0,22</strong> por pergunta, já com a conferência das citações.</p>
+    <p><strong>Avance:</strong> de 6 a 13 vezes menos.</p>
+    <p>Honestidade: os concorrentes não publicam quanto gastam. Esta é a conta com a mesma tabela de preços para os dois jeitos. O nosso número é estimativa, a medir com vocês; a meta do M5 é até R$ 0,30.</p>
+    <p><strong>Avance (analogia):</strong> É não mandar o processo inteiro ao advogado mais caro: a triagem separa antes, e ele só lê o que importa.</p>
+  </aside>
+</section>
+
+<!-- 10 · Custo total por pergunta, por degrau -->
+<section class="slide" data-layout="grafico" data-title="Custo total por pergunta" id="s4-pergunta-total">
+  <div class="split s4-split-tot fill">
+    <div class="stack">
+      <div>
+        <p class="kicker" data-anim="fade">Custo total por pergunta</p>
+        <h2 class="title title--md" data-anim="words">Com escala, o custo fixo se dilui.</h2>
+      </div>
+      <p class="text dim mt-1" data-anim="fade-up" data-delay="600">Tudo o que a operação gasta, dividido pelas perguntas pagas: IA, GPU, servidor, DGM, seguro, auditoria e suporte.</p>
+      <div class="s4-legend2 mt-1" data-anim="stagger" data-delay="900" data-stagger="90">
+        <span><i class="l"></i>Tecnologia</span>
+        <span><i class="s"></i>Seguro, auditoria, suporte, contador</span>
+      </div>
+    </div>
+
+    <div class="s4-tot">
+      <div class="s4-tc">
+        <p class="s4-tc-v" data-anim="fade" data-delay="1100">R$ 2,69</p>
+        <div class="s4-tc-bar" style="--t: 2.69">
+          <i class="s" style="--v: 0.21" data-anim="s4-rise" data-delay="560"></i>
+          <i class="l" style="--v: 2.48" data-anim="s4-rise" data-delay="400"></i>
+        </div>
+        <p class="s4-tc-x"><b>50</b> usuários</p>
+        <p class="s4-tc-t">tecnologia R$ 2,48</p>
+      </div>
+      <div class="s4-tc">
+        <p class="s4-tc-v" data-anim="fade" data-delay="1300">R$ 0,63</p>
+        <div class="s4-tc-bar" style="--t: 0.63">
+          <i class="s" style="--v: 0.12" data-anim="s4-rise" data-delay="760"></i>
+          <i class="l" style="--v: 0.51" data-anim="s4-rise" data-delay="600"></i>
+        </div>
+        <p class="s4-tc-x"><b>500</b> usuários</p>
+        <p class="s4-tc-t">tecnologia R$ 0,51</p>
+      </div>
+      <div class="s4-tc">
+        <p class="s4-tc-v" data-anim="fade" data-delay="1500">R$ 0,47</p>
+        <div class="s4-tc-bar" style="--t: 0.47">
+          <i class="s" style="--v: 0.17" data-anim="s4-rise" data-delay="960"></i>
+          <i class="l" style="--v: 0.30" data-anim="s4-rise" data-delay="800"></i>
+        </div>
+        <p class="s4-tc-x"><b>3.000</b> usuários</p>
+        <p class="s4-tc-t">tecnologia R$ 0,30</p>
+      </div>
+      <div class="s4-tc is-accent">
+        <p class="s4-tc-v" data-anim="fade" data-delay="1700">R$ 0,39</p>
+        <div class="s4-tc-bar" style="--t: 0.39">
+          <i class="s" style="--v: 0.16" data-anim="s4-rise" data-delay="1160"></i>
+          <i class="l" style="--v: 0.23" data-anim="s4-rise" data-delay="1000"></i>
+        </div>
+        <p class="s4-tc-x"><b>10.000</b> usuários</p>
+        <p class="s4-tc-t">tecnologia R$ 0,23</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Fonte: pesquisa/08-modelo-mvp.md, §3 (custo mensal ÷ perguntas pagas, sem tributos nem meio de pagamento; 50% da cota; inclui o Grátis).</p>
+  <aside class="notes">
+    <p>O slide anterior era só a IA. Agora o custo total de uma pergunta: IA, GPU, servidor, a evolução automática, e também seguro, auditoria humana, suporte e contador. Fora ficam os tributos sobre a receita e a taxa do meio de pagamento. Dividimos tudo pelas perguntas pagas do mês.</p>
+    <ul>
+      <li><strong>50 usuários:</strong> R$ 2,69 por pergunta. O custo fixo mínimo, servidor, GPU e DGM, cai sobre poucas perguntas.</li>
+      <li><strong>500:</strong> R$ 0,63.</li>
+      <li><strong>3.000:</strong> R$ 0,47.</li>
+      <li><strong>10.000:</strong> R$ 0,39.</li>
+    </ul>
+    <p>Só a tecnologia: R$ 2,48, 0,51, 0,30 e 0,23. A parte cinza, seguro, auditoria e suporte, cresce com o número de clientes, mas a tecnologia se dilui. É a escala trabalhando a favor.</p>
+  </aside>
+</section>
+
+<!-- 11 · Preço por pergunta no mercado -->
+<section class="slide" data-layout="grafico" data-title="Preço por pergunta" id="s4-preco-pergunta">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Preço, não custo</p>
+    <h2 class="title title--md title--wide" data-anim="words">Por pergunta, abaixo do que o mercado cobra.</h2>
+  </div>
+
+  <div class="s4-pp">
+    <div class="chart-bars is-horizontal s4-pp-bars" data-max="2.63" data-decimals="2" data-prefix="R$ " data-delay="400" style="--label-w: 560px">
+      <div class="bar is-muted" data-value="2.63" data-label="<b>Jus IA, plano de entrada</b><small>R$ 78,90 por 30 mensagens</small>"></div>
+      <div class="bar is-muted" data-value="2.50" data-label="<b>Locus.IA</b><small>R$ 249,90 por 100 análises</small>"></div>
+      <div class="bar is-accent" data-step="1" data-value="1.99" data-label="<b>Nosso Individual</b><small>R$ 199 por 100 perguntas</small>"></div>
+    </div>
+    <div class="s4-pp-m" data-step="2" data-anim="fade-left">
+      <b data-bind="planos.lista.individual.rotulos.margem_50">67,3%</b>
+      <span>de margem no Individual, com metade da cota usada</span>
+    </div>
+  </div>
+
+  <p class="source">Preço de tabela por mensagem, análise ou pergunta, no plano mensal. Fontes: pesquisa/05-mercado-preco.md, §2.1 e §2.2 (Jus IA e Locus.IA, 20/9 a 15/10/2026); pesquisa/08-modelo-mvp.md, §4 (margem com 500 usuários).</p>
+  <aside class="notes">
+    <p>Agora o outro lado: preço, não custo. Quanto o profissional paga hoje por cada consulta.</p>
+    <ul>
+      <li><strong>Jus IA,</strong> plano de entrada: R$ 78,90 por 30 mensagens, cerca de <strong>R$ 2,63</strong> por mensagem.</li>
+      <li><strong>Locus.IA:</strong> R$ 249,90 por 100 análises, R$ 2,50 cada.</li>
+    </ul>
+    <p><strong>Avance:</strong> o nosso Individual: R$ 199 por 100 perguntas, <strong>R$ 1,99</strong> por pergunta. E cada pergunta nossa é uma pesquisa fundamentada, com citação conferida e data do fato, não uma mensagem de chat.</p>
+    <p><strong>Avance:</strong> mesmo mais barato, sobra margem: cerca de 67% com metade da cota usada, e 62% com a cota cheia. É o que as técnicas do slide anterior compram.</p>
+  </aside>
+</section>
+
+<!-- 12 · Planos -->
+<section class="slide" data-layout="comparacao" data-title="Planos" id="s4-planos">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Preço</p>
+    <h2 class="title title--md title--wide" data-anim="words">Planos simples, do grátis ao corporativo.</h2>
+  </div>
+
+  <div class="s4-plans" data-anim="stagger" data-delay="500" data-stagger="120">
+    <div class="s4-plan is-free">
+      <p class="s4-plan-name">Grátis</p>
+      <div class="s4-plan-price"><span data-bind="planos.lista.gratis.preco_mensal" data-prefix="R$ ">R$ 0</span></div>
+      <p class="s4-plan-annual">para experimentar</p>
+      <ul class="s4-plan-feats">
+        <li><b>1</b> usuário</li>
+        <li><b data-bind="planos.lista.gratis.perguntas_mes">10</b> perguntas/mês</li>
+        <li class="off">Só as simples</li>
+      </ul>
+      <p class="s4-plan-margin">custa <b>R$ 0,43</b> por usuário/mês</p>
+    </div>
+    <div class="s4-plan">
+      <p class="s4-plan-name">Individual</p>
+      <div class="s4-plan-price"><span data-bind="planos.lista.individual.preco_mensal" data-prefix="R$ ">R$ 199</span></div>
+      <p class="s4-plan-annual">por mês · <span data-bind="planos.lista.individual.preco_anual_mes" data-prefix="R$ ">R$ 169</span> no anual</p>
+      <ul class="s4-plan-feats">
+        <li><b>1</b> usuário</li>
+        <li><b data-bind="planos.lista.individual.perguntas_mes">100</b> perguntas/mês</li>
+        <li class="on">Data do fato</li>
+      </ul>
+      <p class="s4-plan-margin">margem <b data-bind="planos.lista.individual.rotulos.margem_50">67,3%</b> a <b data-bind="planos.lista.individual.rotulos.margem_100">62,1%</b></p>
+    </div>
+    <div class="s4-plan is-star">
+      <span class="s4-plan-badge">o escritório típico</span>
+      <p class="s4-plan-name">Escritório</p>
+      <div class="s4-plan-price"><span data-bind="planos.lista.escritorio.preco_mensal" data-prefix="R$ ">R$ 790</span></div>
+      <p class="s4-plan-annual">por mês · <span data-bind="planos.lista.escritorio.preco_anual_mes" data-prefix="R$ ">R$ 659</span> no anual</p>
+      <ul class="s4-plan-feats">
+        <li><b data-bind="planos.lista.escritorio.usuarios">5</b> usuários</li>
+        <li><b data-bind="planos.lista.escritorio.perguntas_mes">400</b> perguntas/mês</li>
+        <li class="on">Data do fato</li>
+      </ul>
+      <p class="s4-plan-margin">margem <b data-bind="planos.lista.escritorio.rotulos.margem_50">68,1%</b> a <b data-bind="planos.lista.escritorio.rotulos.margem_100">62,9%</b></p>
+    </div>
+    <div class="s4-plan">
+      <p class="s4-plan-name">Corporativo</p>
+      <div class="s4-plan-price"><span data-bind="planos.lista.corporativo.preco_mensal" data-prefix="R$ ">R$ 2.290</span></div>
+      <p class="s4-plan-annual">por mês · <span data-bind="planos.lista.corporativo.preco_anual_mes" data-prefix="R$ ">R$ 1.890</span> no anual</p>
+      <ul class="s4-plan-feats">
+        <li><b data-bind="planos.lista.corporativo.usuarios">15</b> usuários</li>
+        <li><b data-bind="planos.lista.corporativo.perguntas_mes">1.050</b> perguntas/mês</li>
+        <li class="on">Data do fato</li>
+      </ul>
+      <p class="s4-plan-margin">margem <b data-bind="planos.lista.corporativo.rotulos.margem_50">68,3%</b> a <b data-bind="planos.lista.corporativo.rotulos.margem_100">63,6%</b></p>
+    </div>
+    <div class="s4-plan">
+      <p class="s4-plan-name">Enterprise</p>
+      <div class="s4-plan-price"><span data-bind="planos.lista.enterprise.preco_mensal" data-prefix="R$ ">R$ 6.900</span></div>
+      <p class="s4-plan-annual">a partir de, por mês · contrato anual</p>
+      <ul class="s4-plan-feats">
+        <li><b data-bind="planos.lista.enterprise.usuarios">50</b> usuários</li>
+        <li><b data-bind="planos.lista.enterprise.perguntas_mes">3.500</b> perguntas/mês</li>
+        <li class="on">Data do fato</li>
+      </ul>
+      <p class="s4-plan-margin">margem <b data-bind="planos.lista.enterprise.rotulos.margem_50">68,2%</b> a <b data-bind="planos.lista.enterprise.rotulos.margem_100">63,3%</b></p>
+    </div>
+  </div>
+
+  <p class="s4-plans-foot" data-step="1" data-anim="fade-up">Passou da cota? Pacote extra de <b>100 perguntas por R$ 149</b>, com 64,8% de margem.</p>
+
+  <p class="source">Fontes: docs/Plano_MVP_6_meses.md, “Lançamento (M7)”; pesquisa/08-modelo-mvp.md, §4 (margem com 500 usuários, com metade e com toda a cota usada; 40% no anual). Nota fiscal no CNPJ do escritório.</p>
+  <aside class="notes">
+    <p>Os planos que ligamos no lançamento. Mensalidade com franquia de perguntas, nota fiscal no CNPJ do escritório e desconto no anual.</p>
+    <ul>
+      <li><strong>Grátis:</strong> 10 perguntas por mês, só as simples. Custa para nós R$ 0,43 por usuário: é o nosso custo de aquisição.</li>
+      <li><strong>Individual:</strong> R$ 199, ou R$ 169 no anual, com 100 perguntas.</li>
+      <li><strong>Escritório:</strong> R$ 790, ou R$ 659 no anual, 5 usuários e 400 perguntas. É o tamanho do escritório típico.</li>
+      <li><strong>Corporativo:</strong> R$ 2.290, ou R$ 1.890 no anual, 15 usuários e 1.050 perguntas.</li>
+      <li><strong>Enterprise:</strong> a partir de R$ 6.900.</li>
+    </ul>
+    <p>Embaixo de cada plano, a margem: o primeiro número com metade da cota usada, o segundo com a cota cheia. Fica entre 62% e 68% em todos.</p>
+    <p><strong>Avance:</strong> quem passa da cota compra pacote de 100 perguntas por R$ 149, com 65% de margem. Isso segura a conta: um plano “ilimitado” quebraria a margem.</p>
+  </aside>
+</section>
+
+<!-- 13 · Ao lado do mercado -->
+<section class="slide" data-layout="grafico" data-title="Ao lado do mercado" id="s4-mercado">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Preço por usuário, por mês</p>
+    <h2 class="title title--md title--wide" data-anim="words">Dentro da faixa que o mercado já paga.</h2>
+  </div>
+
+  <div class="s4-prices fill">
+    <div class="s4-prices-band" style="--a: 78.9; --b: 249.9" data-anim="fade" data-delay="300"><span>faixa paga hoje por IA especializada</span></div>
+    <div class="s4-prices-axis" data-anim="fade" data-delay="200"><span style="--v: 75">R$ 75</span><span style="--v: 100">R$ 100</span><span style="--v: 125">R$ 125</span><span style="--v: 150">R$ 150</span><span style="--v: 175">R$ 175</span><span style="--v: 200">R$ 200</span><span style="--v: 225">R$ 225</span><span style="--v: 250">R$ 250</span></div>
+    <div class="s4-pr" style="--v: 78.9" data-anim="s4-slide" data-delay="400"><span class="s4-pr-name"><b>Jus IA Essencial</b><small>30 mensagens</small></span><span class="s4-pr-val">R$ 78,90</span></div>
+    <div class="s4-pr" style="--v: 97" data-anim="s4-slide" data-delay="510"><span class="s4-pr-name"><b>Pacote IOB</b><small>5 usuários, por usuário</small></span><span class="s4-pr-val">≈ R$ 97</span></div>
+    <div class="s4-pr" style="--v: 99.9" data-anim="s4-slide" data-delay="620"><span class="s4-pr-name"><b>ChatGPT Plus</b><small>genérico</small></span><span class="s4-pr-val">R$ 99,90</span></div>
+    <div class="s4-pr" style="--v: 108.9" data-anim="s4-slide" data-delay="730"><span class="s4-pr-name"><b>Jus IA Profissional</b><small>150 mensagens</small></span><span class="s4-pr-val">R$ 108,90</span></div>
+    <div class="s4-pr is-us" style="--v: 138" data-step="1" data-anim="s4-drop"><span class="s4-pr-name"><b>Enterprise</b><small>50 usuários, por usuário</small></span><span class="s4-pr-val"><span data-bind="planos.lista.enterprise.preco_por_usuario" data-prefix="R$ ">R$ 138</span></span></div>
+    <div class="s4-pr is-us" style="--v: 158" data-step="1" data-anim="s4-drop"><span class="s4-pr-name"><b>Escritório</b><small>5 usuários, por usuário</small></span><span class="s4-pr-val"><span data-bind="planos.lista.escritorio.preco_por_usuario" data-prefix="R$ ">R$ 158</span></span></div>
+    <div class="s4-pr is-us" style="--v: 169" data-step="1" data-anim="s4-drop"><span class="s4-pr-name"><b>Individual no anual</b><small>100 perguntas</small></span><span class="s4-pr-val"><span data-bind="planos.lista.individual.preco_anual_mes" data-prefix="R$ ">R$ 169</span></span></div>
+    <div class="s4-pr" style="--v: 199" data-anim="s4-slide" data-delay="840"><span class="s4-pr-name"><b>Portal da Reforma</b><small>só a reforma</small></span><span class="s4-pr-val">R$ 199</span></div>
+    <div class="s4-pr is-us" style="--v: 199" data-step="1" data-anim="s4-drop"><span class="s4-pr-name"><b>Individual</b><small>100 perguntas</small></span><span class="s4-pr-val"><span data-bind="planos.lista.individual.preco_mensal" data-prefix="R$ ">R$ 199</span></span></div>
+    <div class="s4-pr" style="--v: 208.9" data-anim="s4-slide" data-delay="950"><span class="s4-pr-name"><b>Jus IA Premium</b><small>ilimitado</small></span><span class="s4-pr-val">R$ 208,90</span></div>
+    <div class="s4-pr" style="--v: 249.9" data-anim="s4-slide" data-delay="1060"><span class="s4-pr-name"><b>Locus.IA</b><small>100 análises</small></span><span class="s4-pr-val">R$ 249,90</span></div>
+  </div>
+
+  <p class="source">Fontes: pesquisa/05-mercado-preco.md, §2.1 e §2.2 (Jus IA e Locus.IA via Locus.IA, 20/9 a 15/10/2026; ChatGPT via Canaltech; Portal da Reforma, plano Profissional mensal); IOB: contrato de 2023 corrigido para 2026, estimativa (07, §5.3).</p>
+  <aside class="notes">
+    <p>Os concorrentes em cinza, por usuário e por mês. A faixa sombreada, de R$ 79 a R$ 250, é o que um profissional já paga hoje por IA especializada.</p>
+    <p><strong>Avance:</strong> nossos planos caem na régua.</p>
+    <ul>
+      <li>O <strong>Individual, R$ 199</strong>, empata com o Portal da Reforma, que só cobre a reforma, e fica abaixo do Jus IA Premium (R$ 208,90) e do Locus.IA (R$ 249,90).</li>
+      <li>Fica acima do ChatGPT Plus (R$ 99,90). A diferença é o que o genérico não tem: citação conferida e data do fato.</li>
+      <li>O <strong>Escritório sai a R$ 158 por usuário</strong>, acima do pacote IOB de cinco usuários (cerca de R$ 97 por usuário), que é um portal com IA acessória. É o plano que mais queremos ouvir de vocês sobre preço.</li>
+    </ul>
+    <p>Para quem já tem IA grátis no sistema contábil: não competimos como sistema; somos a camada de consulta que ele não tem.</p>
+  </aside>
+</section>
+
+<!-- 14 · Escala por degraus -->
+<section class="slide" data-layout="tabela" data-title="Escala e equilíbrio" id="s4-escala">
+  <div class="split s4-split-escala fill">
+    <div class="stack">
+      <div>
+        <p class="kicker" data-anim="fade">Escala</p>
+        <h2 class="title title--md" data-anim="words">A operação se paga cedo.</h2>
+      </div>
+      <div class="s4-be-hero" data-anim="blur-in" data-delay="500"><span data-bind="breakeven.sem_salario" data-count-to="44" data-delay="600">44</span></div>
+      <p class="s4-be-sub" data-anim="fade-up" data-delay="800">usuários pagantes cobrem a operação, <b>sem salário</b>.</p>
+      <p class="s4-be-sub dim" data-step="1" data-anim="fade-up"><b data-bind="breakeven.com_pro_labore">137</b> com pró-labore de R$ 10 mil (premissa a confirmar).</p>
+    </div>
+
+    <div class="s4-esc">
+      <table class="table s4-esc-table">
+        <thead><tr><th>Por mês</th><th class="num">50</th><th class="num">500</th><th class="num">3.000</th><th class="num">10.000</th></tr></thead>
+        <tbody data-anim="stagger" data-delay="900" data-stagger="160">
+          <tr><td>Receita</td><td class="num" data-bind="escala.0.rotulos.receita">R$ 8.560</td><td class="num" data-bind="escala.1.rotulos.receita">R$ 82.389</td><td class="num" data-bind="escala.2.rotulos.receita">R$ 478.615</td><td class="num" data-bind="escala.3.rotulos.receita">R$ 1.568.320</td></tr>
+          <tr><td>Custos e tributos</td><td class="num" data-bind="escala.0.custos_totais" data-prefix="R$ ">R$ 7.754</td><td class="num" data-bind="escala.1.custos_totais" data-prefix="R$ ">R$ 31.229</td><td class="num" data-bind="escala.2.custos_totais" data-prefix="R$ ">R$ 189.344</td><td class="num" data-bind="escala.3.custos_totais" data-prefix="R$ ">R$ 599.606</td></tr>
+          <tr class="is-highlight"><td>Resultado</td><td class="num" data-bind="escala.0.rotulos.resultado">R$ 806</td><td class="num" data-bind="escala.1.rotulos.resultado">R$ 51.160</td><td class="num" data-bind="escala.2.rotulos.resultado">R$ 289.271</td><td class="num" data-bind="escala.3.rotulos.resultado">R$ 968.714</td></tr>
+          <tr><td>Margem</td><td class="num" data-bind="escala.0.rotulos.margem_operacional">9,4%</td><td class="num" data-bind="escala.1.rotulos.margem_operacional">62,1%</td><td class="num" data-bind="escala.2.rotulos.margem_operacional">60,4%</td><td class="num" data-bind="escala.3.rotulos.margem_operacional">61,8%</td></tr>
+        </tbody>
+      </table>
+      <p class="micro dim s4-esc-note" data-anim="fade" data-delay="1700">Colunas: usuários pagantes. Custos incluem tributos sobre a receita, meio de pagamento, IA, GPU, servidor, DGM, seguro, auditoria e suporte.</p>
+    </div>
+  </div>
+
+  <p class="source">Fonte: pesquisa/08-modelo-mvp.md, §3 e §5; data/modelo.json (escala, breakeven). Mix de planos do modelo, 40% no anual, uso de 50% da cota. Simples com 50 e 500; Lucro Presumido de 2027 com 3.000 e 10.000. Sem pró-labore.</p>
+  <aside class="notes">
+    <p>A boa notícia para quem está financiando: o ponto de equilíbrio está perto. Com <strong>44 usuários pagantes</strong>, cerca de R$ 7,5 mil de receita por mês, a operação se paga, sem contar salário. Só o grupo de vocês pode chegar perto disso.</p>
+    <p>A tabela mostra os degraus, por mês:</p>
+    <ul>
+      <li><strong>50 usuários:</strong> receita de R$ 8,6 mil, resultado de R$ 806. Margem de 9%: a infraestrutura mínima ainda pesa.</li>
+      <li><strong>500:</strong> receita de R$ 82 mil, resultado de R$ 51 mil, margem de 62%.</li>
+      <li><strong>3.000:</strong> receita de R$ 479 mil, resultado de R$ 289 mil.</li>
+      <li><strong>10.000:</strong> receita de R$ 1,57 milhão por mês, resultado de R$ 969 mil.</li>
+    </ul>
+    <p><strong>Avance:</strong> com um pró-labore de R$ 10 mil para o fundador, que ainda é premissa a confirmar, o equilíbrio vai para 137 usuários, cerca de R$ 23 mil por mês.</p>
+  </aside>
+</section>
+
+<!-- 15 · O que pode dar errado -->
+<section class="slide" data-layout="lista" data-title="Riscos" id="s4-riscos">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Riscos</p>
+    <h2 class="title title--md title--wide" data-anim="words">Cada risco já tem uma trava.</h2>
+  </div>
+
+  <div class="s4-risks" data-anim="stagger" data-delay="600" data-stagger="380" data-child-anim="s4-lock">
+    <div class="s4-risk"><span class="s4-risk-l">Resposta errada dita com confiança</span><span class="s4-risk-k"><i></i></span><span class="s4-risk-r">Citação conferida e abstenção</span></div>
+    <div class="s4-risk"><span class="s4-risk-l">Orçamento passa do teto</span><span class="s4-risk-k"><i></i></span><span class="s4-risk-r">Alavancas, freio e ordem de corte</span></div>
+    <div class="s4-risk"><span class="s4-risk-l">Peça nova não vence no teste</span><span class="s4-risk-k"><i></i></span><span class="s4-risk-r">Entra desligada, sem custo</span></div>
+    <div class="s4-risk"><span class="s4-risk-l">Direito autoral das convenções</span><span class="s4-risk-k"><i></i></span><span class="s4-risk-r">Parecer, e o dado com a citação</span></div>
+    <div class="s4-risk"><span class="s4-risk-l">Agente age fora do combinado</span><span class="s4-risk-k"><i></i></span><span class="s4-risk-r">Permissão por ação e aprovação humana</span></div>
+    <div class="s4-risk"><span class="s4-risk-l">Uso acima da cota</span><span class="s4-risk-k"><i></i></span><span class="s4-risk-r">Franquia e pacote extra</span></div>
+  </div>
+
+  <p class="source">Fontes: docs/Plano_MVP_6_meses.md (ordem de risco, alavancas, controle de gasto, questão para o advogado do grupo: Lei 9.610/1998, art. 8º, IV; “Agentes”); pesquisa/08-modelo-mvp.md, §4 e §7.</p>
+  <aside class="notes">
+    <p>Sejamos honestos sobre o que pode dar errado. Cada linha trava quando aparece.</p>
+    <ul>
+      <li>O maior risco é uma <strong>resposta errada dita com confiança</strong>. Quase toda a arquitetura existe para impedir isso: cada citação é conferida, e quando não há prova o sistema se abstém.</li>
+      <li>O <strong>orçamento</strong> pode passar dos R$ 10 mil: temos as alavancas, limite mensal de gasto e uma ordem de corte já combinada.</li>
+      <li>Uma <strong>peça nova</strong>, como o reranker, a política ou a DGM, pode não ganhar no benchmark. Então ela entra desligada por chave, e o custo não muda.</li>
+      <li><strong>Convenções coletivas:</strong> a lei de direito autoral exclui os atos oficiais, mas falta saber se a convenção se enquadra. Pergunta para o advogado do grupo. Se não puder, mostramos o dado com a citação e o link, sem republicar o texto.</li>
+      <li><strong>Agentes:</strong> um agente pode tentar fazer algo fora do combinado, por exemplo levado por um texto escondido numa página. A trava é de engenharia: cada ação precisa de permissão própria, o que é sensível (certificado digital, e-CAC, envio ao cliente) espera a aprovação de uma pessoa, o agente roda isolado e tudo fica registrado. E o agente é nosso, na nossa máquina.</li>
+      <li><strong>Uso acima da cota:</strong> franquia e pacote extra. Mesmo com toda a cota usada, a margem fica em 62%.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- 16 · Próximos passos -->
+<section class="slide" data-layout="lista" data-title="Próximos passos" id="s4-proximos">
+  <div class="split s4-split-next fill">
+    <div class="stack s4-next-left">
+      <div>
+        <p class="kicker" data-anim="fade">Próximos passos</p>
+        <h2 class="title title--md" data-anim="words">O que fazemos agora.</h2>
+      </div>
+      <ul class="s4-todo">
+        <li data-step="1" class="is-open"><span class="s4-box"></span><b>Fechar o grupo e o aporte</b><em class="s4-you">vocês?</em></li>
+        <li data-step="2"><span class="s4-box"></span><b>Montar o benchmark</b><em>com vocês</em></li>
+        <li data-step="3"><span class="s4-box"></span><b>Parecer sobre convenções</b><em>advogado do grupo</em></li>
+        <li data-step="4"><span class="s4-box"></span><b>Começar o M1</b><em>base federal</em></li>
+      </ul>
+      <div class="card card--compact card--quiet s4-ask-card" data-step="1" data-anim="fade-up" data-delay="900">
+        <p class="s4-card-cat">O que pedimos, além do aporte</p>
+        <h3><span data-count-to="50">50</span> perguntas reais, com gabarito</h3>
+        <p>uso desde o alfa, marcando erros, e as tarefas que querem delegar aos agentes.</p>
+      </div>
+    </div>
+
+    <div class="card card--accent budget s4-aporte" data-step="1" data-anim="fade-left" data-delay="300">
+      <p class="budget-cat">Aporte dos seis meses</p>
+      <div class="budget-total" data-count-to="20000" data-prefix="R$ " data-duration="1400" data-delay="500">R$ 20.000</div>
+      <div class="budget-bar" data-anim="grow-x" data-delay="700" aria-hidden="true">
+        <i style="--v: 6828; --c: var(--blue)"></i><i style="--v: 1024; --c: var(--green)"></i><i style="--v: 360; --c: var(--ink-3)"></i><i style="--v: 9296; --c: var(--grad)"></i><i class="is-reserve" style="--v: 2492"></i>
+      </div>
+      <ul class="budget-list" data-anim="stagger" data-stagger="90" data-delay="1100">
+        <li style="--c: var(--blue)"><span>Claude Ultra <small>antigo Max 20x · US$ 200/mês × 6</small></span><b>R$ 6.828</b></li>
+        <li style="--c: var(--green)"><span>Cursor Premium <small>Grok Bot e agentes · US$ 30/mês × 6</small></span><b>R$ 1.024</b></li>
+        <li style="--c: var(--ink-3)"><span>Ambiente isolado (VPS) <small>agentes abertos: OpenClaw, Hermes</small></span><b>R$ 360</b></li>
+        <li style="--c: var(--grad)"><span>Desenvolvimento <small>API, GPU por hora, servidor, domínio, e-CNPJ, termos</small></span><b>R$ 9.296</b></li>
+        <li class="is-reserve"><span>Reserva <small>cerca de 12%</small></span><b>R$ 2.492</b></li>
+        <li class="is-total"><span>Total</span><b>R$ 20.000</b></li>
+      </ul>
+      <p class="budget-note">Premissa: cartão PF com IOF (R$ 5,69/US$); CNPJ no fim do M6.<br>Possível folga: o Ultra inclui US$ 200/mês em créditos de API (a confirmar).</p>
+    </div>
+  </div>
+
+  <p class="source">Fonte: docs/Plano_MVP_6_meses.md, “Aporte dos 6 meses: R$ 20.000”, premissas e cronograma do M1.</p>
+  <aside class="notes">
+    <p>O que acontece agora. Cada item ganha o seu visto ao ser lido.</p>
+    <ul>
+      <li><strong>Avance:</strong> fechar o grupo de playtesters e o aporte. É aí que vocês entram. O aporte dos seis meses é de <strong>R$ 20 mil</strong>, dividido entre os escritórios do grupo. Para onde vai cada real: R$ 6.828 para o Claude Ultra, o antigo Max 20x, que é o agente de programação principal (US$ 200 por mês, seis meses); R$ 1.024 para o Cursor Premium, com o Grok Bot e os agentes (US$ 30 por mês); R$ 360 para um servidor isolado onde rodam os agentes abertos, OpenClaw e Hermes, longe dos dados de vocês; R$ 9.296 para o desenvolvimento em si, que é a conta com alavancas que vimos antes (IA por API, GPU por hora, servidor, domínio, e-CNPJ e termos); e R$ 2.492 de reserva, cerca de 12%.</li>
+      <li>Premissa: as assinaturas são pagas no cartão de pessoa física, com IOF, a R$ 5,69 por dólar, e o CNPJ abre no fim do M6. Possível folga: o plano Ultra inclui US$ 200 por mês em créditos de API, o que pode reduzir a linha de desenvolvimento; ainda vamos confirmar.</li>
+      <li>Além do aporte, pedimos 50 perguntas reais do dia a dia, com a resposta certa, uso desde o alfa, marcando erros, e a lista das tarefas repetitivas que vocês gostariam de entregar a um agente: é ela que define os primeiros agentes depois do lançamento.</li>
+      <li><strong>Avance:</strong> montar o benchmark com vocês: as 50 perguntas do M1, que viram 100 no M2 e 200 no M4. É a régua de tudo.</li>
+      <li><strong>Avance:</strong> levar ao advogado do grupo a questão do direito autoral das convenções coletivas.</li>
+      <li><strong>Avance:</strong> começar o M1: a base federal com todas as versões.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- 17 · A lei certa, na data certa -->
+<section class="slide slide--end" data-layout="encerramento" data-chrome="off" data-title="Encerramento" id="s4-fim">
+  <div class="s4-end">
+    <p class="s4-end-line" data-anim="mask" data-delay="200"><span class="grad-text">A lei certa.</span></p>
+    <p class="s4-end-line" data-anim="mask" data-delay="700"><span class="grad-text">Na data certa.</span></p>
+    <p class="s4-end-line" data-anim="mask" data-delay="1200"><span class="grad-text">Com a prova.</span></p>
+  </div>
+  <p class="s4-thanks" data-anim="fade" data-delay="2800">Obrigado.</p>
+  <div class="brand s4-end-brand" data-anim="fade" data-delay="3200">Enzo Vasconcelos</div>
+
+  <aside class="notes">
+    <p>Começamos com três linhas e terminamos com elas.</p>
+    <ul>
+      <li><strong>A lei certa,</strong> porque guardamos cada artigo com todas as suas versões.</li>
+      <li><strong>Na data certa,</strong> porque toda pergunta carrega a data do fato.</li>
+      <li><strong>Com a prova,</strong> porque cada citação é conferida antes de chegar a vocês, e quando não há prova o sistema diz que não encontrou.</li>
+    </ul>
+    <p>Seis meses, um aporte de R$ 20 mil, e vocês testando desde o primeiro mês. Lançamento no mês 7.</p>
+    <p>Se isso resolve um problema real no escritório de vocês, falem comigo na saída para entrar no grupo. Obrigado. Agora, perguntas.</p>
+  </aside>
+</section>

@@ -1,0 +1,976 @@
+{
+ "versao": "parametros do pacote Juridico, proposta 0.5 (JU-12)",
+ "data": "2026-11-09",
+ "aviso": "PROPOSTA de parametros de teste do pacote Juridico. Nao sao precos de venda, nao foram medidos e nao substituem parametros.json (que continua sendo o do Contabil). Listas de custo = [baixo, provavel, alto], em R$ de 7/11/2026. Tudo marcado a_confirmar precisa de conferencia antes de virar regra.",
+ "pacote_area": "juridico",
+ "piso_mensal": 250,
+ "faixas_clientes": [
+  {
+   "ate": 30,
+   "fator": 1
+  },
+  {
+   "ate": 60,
+   "fator": 0.92
+  },
+  {
+   "ate": 120,
+   "fator": 0.85
+  },
+  {
+   "ate": 250,
+   "fator": 0.75
+  },
+  {
+   "ate": 500,
+   "fator": 0.65
+  },
+  {
+   "ate": 1000,
+   "fator": 0.55
+  },
+  {
+   "ate": null,
+   "fator": 0.5
+  }
+ ],
+ "faixas_processos": [
+  {
+   "ate": 100,
+   "fator": 1
+  },
+  {
+   "ate": 300,
+   "fator": 0.9
+  },
+  {
+   "ate": 1000,
+   "fator": 0.8
+  },
+  {
+   "ate": null,
+   "fator": 0.7
+  }
+ ],
+ "unidades": {
+  "nota": "Cliente = pessoa ou empresa com Caso ativo. Usuario = pessoa com login. Inscricao OAB = advogado inscrito (captura, peticionamento, IA e modulos de lei contam por inscricao). Processo ativo = processo cadastrado e nao arquivado.",
+  "processos_por_cliente": 1.6,
+  "inscricoes_por_usuario": 0.6,
+  "a_medir": true
+ },
+ "modulos": {
+  "nucleo": {
+   "nome": "Plataforma (nucleo)",
+   "obrigatorio": true,
+   "herdado_de": "parametros.json: nucleo_sem_contabil",
+   "preco": {
+    "base": 100,
+    "cliente": 0.3,
+    "usuario": 5,
+    "processo": 0
+   },
+   "custo": {
+    "fixo": [
+     12,
+     22,
+     55
+    ],
+    "cliente": [
+     0.1,
+     0.3,
+     0.75
+    ],
+    "usuario": [
+     6,
+     12.5,
+     25
+    ],
+    "processo": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Inclui o suporte humano por assento (R$ 6 / 12,50 / 25). Cobrado uma vez por escritorio, mesmo com dois pacotes de area (DA-02.1)."
+  },
+  "pacote_juridico": {
+   "nome": "Pacote Juridico (Processo, Prazo, Caso, Honorario-Juridico, calendario forense, motor de prazos)",
+   "obrigatorio": true,
+   "exige": [
+    "nucleo"
+   ],
+   "preco": {
+    "base": 30,
+    "cliente": 0,
+    "usuario": 18,
+    "processo": 0.12
+   },
+   "custo": {
+    "fixo": [
+     3,
+     6,
+     15
+    ],
+    "cliente": [
+     0,
+     0,
+     0
+    ],
+    "usuario": [
+     1,
+     2,
+     4
+    ],
+    "processo": [
+     0.02,
+     0.05,
+     0.12
+    ]
+   },
+   "nota": "Cobra por usuario com acesso ao Juridico (a confirmar). Processos pela faixa de processos."
+  },
+  "timesheet": {
+   "nome": "Timesheet",
+   "exige": [
+    "pacote_juridico"
+   ],
+   "preco": {
+    "base": 20,
+    "cliente": 0,
+    "usuario": 7,
+    "processo": 0
+   },
+   "custo": {
+    "fixo": [
+     0,
+     0,
+     0
+    ],
+    "cliente": [
+     0,
+     0,
+     0
+    ],
+    "usuario": [
+     1,
+     2,
+     5
+    ],
+    "processo": [
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "fin": {
+   "nome": "Financeiro (honorarios)",
+   "exige": [
+    "pacote_juridico"
+   ],
+   "preco": {
+    "base": 30,
+    "cliente": 0.4,
+    "usuario": 0,
+    "processo": 0
+   },
+   "custo": {
+    "fixo": [
+     3,
+     8,
+     20
+    ],
+    "cliente": [
+     0.052,
+     0.1,
+     0.3
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ],
+    "processo": [
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "app": {
+   "nome": "App do cliente (incluido por padrao em todos os atalhos)",
+   "exige": [
+    "pacote_juridico"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0.6,
+    "usuario": 0,
+    "processo": 0
+   },
+   "custo": {
+    "fixo": [
+     3,
+     5,
+     10
+    ],
+    "cliente": [
+     0.1,
+     0.2,
+     0.5
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ],
+    "processo": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Correcao do Enzo (9/11/2026): o App funciona por padrao, incluido nos atalhos e pacotes; a venda a parte e so da marca branca e do app na loja; no Juridico o Essencial e excecao (sem App, App opcional). Valor por cliente subiu de 0,15 (JU-05) para 0,60: depois do fator da faixa de clientes cobre o custo provavel (0,20) com folga de pelo menos 50% ate 1.000 clientes (0,60 x 0,55 = 0,33). Custo herdado, igual ao do Contabil, entao o mesmo valor serve aos dois pacotes. No uso alto (0,50 por cliente) perde no Medio. Chat do app exige CRM."
+  },
+  "crm": {
+   "nome": "CRM e WhatsApp",
+   "exige": [
+    "pacote_juridico"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0.7,
+    "usuario": 2,
+    "processo": 0
+   },
+   "piso_fator_faixa": 0.75,
+   "custo": {
+    "fixo": [
+     0,
+     0,
+     0
+    ],
+    "cliente": [
+     0.2,
+     0.43,
+     1.18
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ],
+    "processo": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Regra do Enzo (9/11/2026): CRM incluso no Completo e escalando por cliente. Era R$ 0,40 (abaixo do custo de R$ 0,43). R$ 0,70 com a faixa de clientes parando em 0,75 (marginal minimo R$ 0,525, 22% acima do custo provavel; no uso alto, R$ 1,18, o cliente acima de 250 perde). Mensagens de WhatsApp sao repassadas ao custo da Meta (chave whatsapp)."
+  }
+ },
+ "regra_crm_app": {
+  "decisao": "Enzo, 9/11/2026 (corrigida): vale para todos os pacotes de area. O CRM entra no uso completo e escala por cliente; o App do cliente funciona por padrao, incluido nos atalhos e pacotes, sem contratacao extra; a venda a parte e so da marca branca e do app na loja. EXCECAO do Juridico (pergunta 15): o Essencial nao inclui o App, porque o mercado juridico nao o da nos planos de entrada; o Contabil nao foi reavaliado.",
+  "criterio_valor_por_cliente": "depois do fator da faixa de clientes, cobrir o custo provavel com folga de pelo menos 50% nas faixas ate 1.000 clientes (App: 0,20 -> 0,60 x 0,55 = 0,33; CRM: piso de fator 0,75)",
+  "valores_juridico": {
+   "crm_cliente": 0.7,
+   "crm_piso_fator_faixa": 0.75,
+   "app_fixo": 40,
+   "app_cliente": 0.6
+  },
+  "contabil_hoje": {
+   "app": "ja esta dentro dos 4 atalhos (base, essencial, operacao, completo): nao conflita na estrutura; valor 80 + 0,30 por cliente fica abaixo do custo de 0,20 acima de 500 clientes (0,30 x 0,55 = 0,165): sugerido 0,60; se mudar, cerca de 191 de 304 testes mudam de valor esperado",
+   "crm": "200 + 0,90 por cliente + 2 por usuario, dentro dos 4 atalhos: nao conflita (folga de 5% na ultima faixa; sugerido piso de fator 0,75)"
+  }
+ },
+ "regra_modulos_compartilhados": {
+  "nota": "Quando o escritorio tem Contabil e Juridico (DA-02.1): plataforma, faixa de clientes, usuarios, GB, Timesheet, Financeiro, App, CRM e plano de IA sao cobrados uma vez, pela tabela do pacote principal escolhido no contrato; o segundo pacote soma so o seu proprio componente e seus complementos.",
+  "tabela_do_pacote_principal": true
+ },
+ "suporte": {
+  "chat_usuario": [
+   1,
+   2,
+   4
+  ],
+  "ajuda_usuario": [
+   0.06,
+   0.16,
+   0.65
+  ],
+  "nota": "Chat com pessoas e ajuda do sistema, como no Contabil. Suporte humano por assento ja esta no custo do nucleo."
+ },
+ "armazenamento": {
+  "gb_incluidos_por_usuario": 15,
+  "uso_da_franquia": [
+   0.2,
+   0.5,
+   1.0
+  ],
+  "preco_gb_excedente": 0.45,
+  "custo_gb": [
+   0.08,
+   0.2,
+   0.35
+  ],
+  "nota": "Correcao em relacao ao JU-05: o custo da franquia entra nas margens (R$ 0,24 / 1,50 / 5,25 por usuario)."
+ },
+ "complementos": {
+  "captura_publicacoes": {
+   "nome": "Captura de publicacoes (DJEN e Domicilio, hospedada no Brasil)",
+   "pre_marcado": true,
+   "preco_inscricao": 15,
+   "custo_inscricao": [
+    2,
+    4,
+    8
+   ],
+   "fixo_plataforma": 400,
+   "teto": {
+    "publicacoes_inscricao": [
+     60,
+     100,
+     160
+    ],
+    "fator_teto": 1.3,
+    "custo_segunda_fonte_100_publicacoes": 1.35,
+    "markup_excedente": 1.2
+   },
+   "nota": "Segunda fonte paga do DJEN (R$ 1,35 por 100 entregas, JU-03) so para conferir."
+  },
+  "monitoramento_andamentos": {
+   "nome": "Monitoramento de andamentos por agregador",
+   "exige": [
+    "pacote_juridico"
+   ],
+   "preco_regra": "custo_mais_20",
+   "markup": 1.2,
+   "preco_processo_referencia": 1.8,
+   "custo_processo": [
+    1.0,
+    1.5,
+    2.0
+   ],
+   "faixas_agregador": {
+    "nota": "Judit, tabela publica 8/11/2026: R$ 1,50 por processo na faixa de R$ 1 mil por mes; R$ 0,45 na faixa de R$ 35 mil; faixas intermediarias nao levantadas (a_confirmar).",
+    "minimo_mensal": 1000,
+    "processos_para_cobrir_minimo": 667
+   },
+   "pct_processos_monitorados_padrao": 0.4,
+   "nota": "Nunca pre-marcado. Preco = custo real mais 20% (decisao de 9/11/2026); o escritorio escolhe quais processos monitorar."
+  },
+  "peticionamento_assistido": {
+   "nome": "Peticionamento assistido (prepara e confere; o advogado protocola)",
+   "preco_inscricao": 19,
+   "custo_inscricao": [
+    1,
+    2,
+    4
+   ]
+  },
+  "assinatura_eletronica": {
+   "nome": "Assinatura eletronica por documento",
+   "preco_regra": "custo_mais_20",
+   "markup": 1.2,
+   "preco_documento_referencia": 3.0,
+   "custo_documento": [
+    1.5,
+    2.5,
+    4.0
+   ],
+   "documentos_inscricao_mes": [
+    5,
+    12,
+    22
+   ],
+   "v1": "conta do provedor no nome do escritorio (JU-08 8.3, opcao A): sem custo nem receita para a plataforma; o repasse a custo mais 20% fica para depois",
+   "nota": "Custo por documento: JU-08 8.1 (preco do plano dividido pela franquia, R$ 1,30 a R$ 3,50, a_confirmar); baixo e alto sao premissas. Uso: JU-08 8.2 estima 15 a 65 documentos por escritorio por mes."
+  },
+  "correspondentes": {
+   "nome": "Correspondentes (sem receita; decisao do Enzo, 9/11/2026)",
+   "receita": false,
+   "taxa_demanda": 0,
+   "nota": "A plataforma nao e um marketplace. Vale o JU-09: o sistema organiza as despesas e permite pagar o correspondente pela conta do escritorio, via Financeiro, com aprovacao humana; a plataforma nunca segura dinheiro. Correspondente entra como convidado sem custo de assento (a_confirmar, JU-09 C5). Nao entra nos atalhos nem no preco.",
+   "convidados_contam_como_usuario": false
+  },
+  "marca_branca": {
+   "preco_fixo": 150,
+   "custo_fixo": [
+    7,
+    15,
+    30
+   ],
+   "a_parte": true,
+   "nota": "Igual ao Contabil. Vendida a parte (e o app na loja), nunca em atalho."
+  },
+  "app_loja": {
+   "preco_fixo": 350,
+   "custo_fixo": [
+    150,
+    240,
+    330
+   ],
+   "exige": [
+    "app",
+    "marca_branca"
+   ],
+   "a_parte": true,
+   "nota": "Igual ao Contabil. Publicacao inicial de R$ 1,5 mil a 3 mil, uma vez."
+  }
+ },
+ "modulos_lei": {
+  "nota": "Contrato por escritorio; cobrado por advogado inscrito do escritorio que usa o modulo (hipotese a confirmar: a alternativa e preco fixo por escritorio, que triplica o equilibrio).",
+  "preco_advogado": {
+   "trabalhista": 60,
+   "familia_sucessoes": 60,
+   "penal": 90,
+   "generalista": 100,
+   "completo": 110
+  },
+  "custo_advogado": [
+   1,
+   2,
+   4
+  ],
+  "curadoria_mensal": {
+   "v1": 1500,
+   "com_jurisprudencia": 4000
+  },
+  "modulos_na_v1_nos_fixos": 3,
+  "ressalva_penal": "So depois da camada de lei no tempo e da politica de dados sensiveis; so para advogado inscrito."
+ },
+ "ia": {
+  "nota": "Planos, precos e limites iguais aos do Contabil (parametros.json: ia.planos). Muda a utilizacao do teto e o custo por UU (cota ponderada, JU-04).",
+  "planos": {
+   "essencial": {
+    "preco": 79,
+    "uu_semana": 100,
+    "infra": [
+     3,
+     7,
+     20
+    ]
+   },
+   "operacao": {
+    "preco": 189,
+    "uu_semana": 300,
+    "infra": [
+     5,
+     14,
+     40
+    ]
+   },
+   "intensivo": {
+    "preco": 299,
+    "uu_semana": 500,
+    "infra": [
+     5,
+     14,
+     40
+    ]
+   }
+  },
+  "semanas_mes": 4.3,
+  "utilizacao_plano_juridico": [
+   0.15,
+   0.5,
+   0.8,
+   1.0
+  ],
+  "utilizacao_plano_contabil_referencia": [
+   0.15,
+   0.35,
+   0.7,
+   1.0
+  ],
+  "custo_uu": {
+   "medio": 0.0882,
+   "principal_ponderada_pior_caso": 0.1156,
+   "nota": "0,1156 = (8,82 - 0,25 x 0,60) / 0,75 por MTok, derivado de JU-04 7.1 (25% em modelo barato a R$ 0,60 por MTok); premissa."
+  },
+  "suporte_ia_usuario": [
+   4,
+   8,
+   16
+  ],
+  "meta_margem_ia": 0.6,
+  "bolsa": "igual ao Contabil (ia.bolsa); usar para a IA do atendimento do CRM (pergunta do JU-07)"
+ },
+ "whatsapp": {
+  "repassado": true,
+  "custo_utilidade": 0.035,
+  "custo_marketing": 0.3217,
+  "custo_servico": 0.035,
+  "gratis_servico_por_numero": 1000,
+  "msgs_utilidade": [
+   3,
+   6,
+   12
+  ],
+  "msgs_marketing": [
+   0,
+   0,
+   0
+  ],
+  "msgs_servico": [
+   10,
+   25,
+   50
+  ],
+  "numeros": {
+   "Solo": 1,
+   "Pequeno": 2,
+   "Medio": 3
+  },
+  "nota": "Quantidades emprestadas do Contabil, a medir (JU-07 11.1). Marketing zero por desenho."
+ },
+ "conectores_teto": {
+  "nota": "Teto embutido de 130% do uso provavel, como no Contabil. No Juridico quase nada e embutido: o que custa por uso (autos R$ 3,50, cadastro SERPRO R$ 0,66 a 1,17, monitoramento) vai em cartao de custo ou em complemento por unidade.",
+  "fator_teto": 1.3,
+  "markup_excedente": 1.2,
+  "embutido": {
+   "segunda_fonte_djen_publicacoes_inscricao_mes": [
+    60,
+    100,
+    160
+   ]
+  },
+  "por_cartao_de_custo": {
+   "autos_sob_demanda": 3.5,
+   "cadastro_serpro_cnpj": [
+    0.6591,
+    0.66,
+    1.17
+   ]
+  }
+ },
+ "escritorios_tipo": {
+  "Solo": {
+   "nome": "Solo",
+   "usuarios": 1,
+   "inscricoes_oab": 1,
+   "processos": 80,
+   "clientes": 50,
+   "numeros_whatsapp": 1
+  },
+  "Pequeno": {
+   "nome": "Pequeno",
+   "usuarios": 5,
+   "inscricoes_oab": 3,
+   "processos": 400,
+   "clientes": 250,
+   "numeros_whatsapp": 2
+  },
+  "Medio": {
+   "nome": "Medio",
+   "usuarios": 10,
+   "inscricoes_oab": 6,
+   "processos": 1000,
+   "clientes": 625,
+   "numeros_whatsapp": 3
+  }
+ },
+ "perfis_uso": [
+  "baixo",
+  "provavel",
+  "alto",
+  "pior caso"
+ ],
+ "atalhos": {
+  "essencial": {
+   "nome": "Juridico Essencial (sem App)",
+   "modulos": [
+    "nucleo",
+    "pacote_juridico"
+   ],
+   "complementos": [
+    "captura_publicacoes"
+   ],
+   "app_opcional": true,
+   "precos_teste": "R$ 250 / 395 / 682 (Solo / Pequeno / Medio); com App opcional R$ 261 / 559 / 984",
+   "excecao_juridico": "Decisao do Enzo, 9/11/2026 (pergunta 15): o mercado juridico nao da portal do cliente nos planos de entrada (J8 linha 75: Astrea so no Smart; J1 linha 64: Projuris so no ADV completo; busca nova inconclusiva) [a_confirmar nas paginas oficiais antes do lancamento]. Nao vale automaticamente ao Contabil, cujo Essencial inclui o App; o Contabil nao foi reavaliado."
+  },
+  "integrado": {
+   "nome": "Juridico Integrado (inclui App)",
+   "modulos": [
+    "nucleo",
+    "pacote_juridico",
+    "app",
+    "timesheet",
+    "fin"
+   ],
+   "complementos": [
+    "captura_publicacoes"
+   ]
+  },
+  "completo": {
+   "nome": "Juridico Completo (inclui App)",
+   "modulos": [
+    "nucleo",
+    "pacote_juridico",
+    "app",
+    "timesheet",
+    "fin",
+    "crm"
+   ],
+   "complementos": [
+    "captura_publicacoes"
+   ]
+  },
+  "nunca_pre_marcados": [
+   "monitoramento_andamentos",
+   "peticionamento_assistido",
+   "assinatura_eletronica",
+   "marca_branca",
+   "app_loja",
+   "modulos_lei",
+   "ia"
+  ],
+  "nota": "Atalho nao e desconto: so marca modulos. O Essencial de 5 usuarios e 250 clientes sai a R$ 395 (decisao de 9/11/2026). O Integrado e o Completo incluem o App; o Essencial nao (excecao do Juridico), mas pode te-lo como complemento. Marca branca e app na loja sao vendidos a parte."
+ },
+ "fixos_pacote": {
+  "nota": "Fixos mensais do pacote Juridico, fora da plataforma comum (R$ 8,2 mil, paga pelo Contabil e pelo BPO). v0.3: reavaliados com a IA do time do Enzo. Dinheiro e tempo (horas da equipe a R$ 90) separados. Seguro, minimo do agregador e encarregado so valem com cliente pagante.",
+  "aprovado_referencia": {
+   "total": 6000,
+   "coletor_brasil": 400,
+   "minimo_agregador": 1000,
+   "curadoria_modulos": {
+    "quantidade": 3,
+    "por_modulo": 1500
+   }
+  },
+  "v03": {
+   "coletor_brasil": [
+    400,
+    400,
+    400
+   ],
+   "minimo_agregador": [
+    0,
+    1000,
+    1000
+   ],
+   "curadoria_3_modulos": [
+    2250,
+    4500,
+    4500
+   ],
+   "calendario_forense": {
+    "tribunais": [
+     15,
+     30,
+     60
+    ],
+    "uu_por_tribunal": 25,
+    "horas_ratificacao": [
+     2,
+     3,
+     4
+    ],
+    "custo_uu": 0.0882,
+    "ia": [
+     33,
+     66,
+     132
+    ],
+    "tempo": [
+     180,
+     270,
+     360
+    ],
+    "antes": "12 h = R$ 1.080"
+   },
+   "encarregado_interno": {
+    "quem": "socio da plataforma nomeado por escrito",
+    "uu": [
+     50,
+     100,
+     200
+    ],
+    "ia": [
+     4,
+     9,
+     18
+    ],
+    "horas_socio": [
+     2,
+     4,
+     8
+    ],
+    "tempo": [
+     180,
+     360,
+     720
+    ]
+   },
+   "seguros_ea_e_cyber": {
+    "mensal": [
+     500,
+     1500,
+     2500
+    ],
+    "comeca_com_cliente_pagante": true
+   },
+   "total_dinheiro": [
+    3187,
+    7475,
+    8550
+   ],
+   "total_tempo": [
+    360,
+    630,
+    1080
+   ],
+   "total": [
+    3547,
+    8105,
+    9630
+   ]
+  },
+  "sensibilidade_encarregado_terceirizado": {
+   "mensal": [
+    1500,
+    2750,
+    4000
+   ],
+   "total": [
+    4863,
+    10486,
+    12892
+   ],
+   "quando": "so quando a escala ou um cliente exigir"
+  },
+  "plataforma_comum": 8200,
+  "total_com_plataforma": {
+   "v03_provavel": 16305,
+   "v03_com_terceirizado": 18686
+  },
+  "anpd": "Res. CD/ANPD 2/2022 dispensa agente de pequeno porte de indicar encarregado, mas nao quem faz tratamento de alto risco (a_confirmar o texto; JU-10 2.4)",
+  "curadoria_nota": "Sem base para reduzir: provavel mantem R$ 4.500; baixo (metade) e premissa a medir; dinheiro ou tempo a decidir (tratado como dinheiro).",
+  "nao_incluido": [
+   "teste de invasao anual (sem valor levantado)",
+   "certificacao",
+   "carimbo do tempo",
+   "chave por escritorio alem de 3 a 5 chaves iniciais",
+   "reserva de prazos e testes com canarios (JU-06)"
+  ],
+  "rateio": {
+   "escritorios_ativos": 30,
+   "peso": "usuarios / 5"
+  }
+ },
+ "capital_inicial": {
+  "decisao": "Enzo, 9/11/2026: sem parecer especializado pago; revisao escrita por advogados conhecidos do grupo; piloto de 1 a 5 escritorios.",
+  "pareceres_pagos": 0,
+  "risco": "Sem parecer pago o risco de sigilo, LGPD e etica continua; o controle e contratual (termo do piloto, termo de IA, casos reais so de quem consentiu, revisao escrita por advogado do grupo). O parecer pago volta com clientes pagantes em escala.",
+  "piloto": {
+   "escritorios": [
+    1,
+    3,
+    5
+   ],
+   "meses": 4,
+   "configuracao": "completo_ia",
+   "composicao": {
+    "1": [
+     "Medio"
+    ],
+    "3": [
+     "Medio",
+     "Pequeno",
+     "Solo"
+    ],
+    "5": [
+     "Medio",
+     "Pequeno",
+     "Pequeno",
+     "Solo",
+     "Solo"
+    ]
+   },
+   "horas_implantacao": {
+    "1": 48,
+    "3": 83,
+    "5": 118
+   },
+   "cobranca_simbolica_escritorio_mes": [
+    0,
+    100,
+    250
+   ],
+   "fixos_caixa_mes": 475,
+   "dinheiro_4_meses": {
+    "1": 5913,
+    "3": 8268,
+    "5": 10623
+   },
+   "dinheiro_4_meses_com_250": {
+    "1": 4913,
+    "3": 5268,
+    "5": 5623
+   },
+   "tempo_equipe_4_meses_sem_curadoria": {
+    "1": 7340,
+    "3": 10790,
+    "5": 14240
+   },
+   "curadoria_se_tempo_4_meses": 18000,
+   "sem_seguro_no_piloto_gratuito": true
+  },
+  "antes_v02": {
+   "pareceres": [
+    21000,
+    82000
+   ],
+   "piloto_10_a_20": [
+    44700,
+    65500
+   ]
+  }
+ },
+ "tributos": {
+  "aliquota": 0.125,
+  "faixa": [
+   0.08,
+   0.17
+  ],
+  "referencia_alta": [
+   0.155,
+   0.249
+  ],
+  "comissao": 0,
+  "nota": "Aliquota de trabalho do Contabil (12,5%), a confirmar com o contador da familia."
+ },
+ "implantacao": {
+  "nota": "Piso = custo de entrega (margem zero, P27). Horas a medir no piloto; R$ 90 por hora.",
+  "custo_hora": 90,
+  "margem_piso": 0,
+  "mig_hora_tabela": 130,
+  "horas": {
+   "solo_autoatendimento": 0.5,
+   "solo_assistida": 6,
+   "solo_trilha_completa": 14,
+   "pequeno": 29,
+   "medio": 48
+  },
+  "tabela": {
+   "solo_autoatendimento": 0,
+   "solo_assistida": 900,
+   "solo_trilha_completa": 1800,
+   "pequeno": 3900,
+   "medio": 6500
+  },
+  "migracao_horas": {
+   "Solo": {
+    "historico": 3,
+    "financeiro": 2
+   },
+   "Pequeno": {
+    "historico": 10,
+    "financeiro": 6
+   },
+   "Medio": {
+    "historico": 20,
+    "financeiro": 12
+   }
+  },
+  "indexacao_documentos": [
+   50,
+   300
+  ],
+  "mercado": {
+   "astrea": "plano gratuito de um ano (J1)",
+   "easyjur_setup": 880,
+   "nota": "setup do EasyJur citado em JU-05 5.7; a_confirmar"
+  }
+ },
+ "fluxo": {
+  "nota": "Fluxo dos primeiros 12 meses. Mix de novos: Solo 50%, Pequeno 40%, Medio 10%. Solo: 30% escolhe a trilha assistida (R$ 900), 70% faz sozinho (custo de apoio de R$ 45). Mensalidade comeca 1 mes apos a assinatura. Sem capital inicial.",
+  "horizonte": 12,
+  "mix": {
+   "Solo": 0.5,
+   "Pequeno": 0.4,
+   "Medio": 0.1
+  },
+  "solo_assistida": 0.3,
+  "solo_apoio_autoatendimento": 45,
+  "configuracao": {
+   "sem_ia": "integrado",
+   "com_ia": "completo_ia"
+  },
+  "meses_ate_mensalidade": 1,
+  "cobra_implantacao": true,
+  "fixos_mensais": {
+   "base_provavel": 8105,
+   "referencia_aprovada": 6000,
+   "terceirizado": 10486,
+   "plataforma_inclusa": 16305,
+   "so_dinheiro_caixa": 7475
+  },
+  "cenarios": {
+   "conservador": {
+    "novos_mes": 2,
+    "desconto": 0.3,
+    "churn": 0.02,
+    "adesao_ia": 0.4
+   },
+   "base": {
+    "novos_mes": 4,
+    "desconto": 0.2,
+    "churn": 0.01,
+    "adesao_ia": 0.6
+   },
+   "otimista": {
+    "novos_mes": 8,
+    "desconto": 0.1,
+    "churn": 0,
+    "adesao_ia": 0.8
+   }
+  }
+ },
+ "mercado": {
+  "nota": "Faixa de preco de mercado. SIJUR leu as paginas oficiais em 18/10/2026 (a_confirmar); J1 (8/11/2026) e secundaria e os blogs divergem.",
+  "sijur_18_10_2026": {
+   "astrea": [
+    0,
+    1249
+   ],
+   "advbox": [
+    220,
+    5000
+   ],
+   "projuris_adv_start_solo": 79
+  },
+  "j1": {
+   "solo": [
+    79,
+    220,
+    229,
+    249
+   ],
+   "pequeno": [
+    349,
+    439,
+    450,
+    499
+   ],
+   "medio": [
+    769,
+    900,
+    990
+   ]
+  },
+  "sgjur": {
+   "advogado": 377,
+   "equipe_6_usuarios": 1977,
+   "escritorio_15_usuarios": 4200
+  },
+  "ia_mercado": {
+   "jus_ia": [
+    78.9,
+    108.9,
+    208.9
+   ]
+  }
+ }
+}

@@ -1,0 +1,284 @@
+<title>Cola da apresentação</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Teleprompter de bolso: uma tela por slide, texto grande, marcações de palco coloridas. Escuro por escolha (palco). */
+:root {
+  --bg: #0c0d10;
+  --bg-2: #15171c;
+  --bg-3: #1e2128;
+  --fg: #f3f2ee;
+  --muted: #9ba1ab;
+  --line: #2a2e36;
+  --clique: #7cc4ff;
+  --pausa: #f3c56d;
+  --avanca: #7fe0a8;
+  --entender: #c7b8ff;
+  --late: #ff8a7a;
+  --font: "Atkinson Hyperlegible", -apple-system, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --fs: 21px;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font);
+  font-size: var(--fs); line-height: 1.55; -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: contain;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--clique); outline-offset: 2px; border-radius: 8px; }
+
+/* Topo */
+.topo {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px 0; border-bottom: 1px solid var(--line);
+}
+.topo-linha { display: flex; align-items: center; gap: 12px; }
+.num { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.num b { color: var(--fg); font-size: 22px; }
+.titulos { flex: 1; min-width: 0; }
+.secao { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.titulo { font-size: 18px; font-weight: 700; line-height: 1.25; text-wrap: balance; }
+.relogio { text-align: right; font-variant-numeric: tabular-nums; padding: 4px 2px; }
+.relogio .t { font-size: 20px; font-weight: 700; display: block; }
+.relogio .d { font-size: 12px; color: var(--muted); display: block; }
+.relogio .d.atrasado { color: var(--late); }
+.relogio.parado .t { color: var(--muted); }
+.meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); padding: 6px 0 8px; }
+.meta .c { color: var(--clique); }
+.barra { height: 3px; background: var(--bg-3); margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); }
+.barra i { display: block; height: 100%; background: var(--fg); width: 0; transition: width .3s; }
+
+/* Texto */
+main {
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px calc(110px + env(safe-area-inset-bottom, 0px));
+  max-width: 44rem; margin: 0 auto;
+}
+.fala p, .fala li { margin: 0 0 .9em; }
+.fala ul { padding-left: 1.1em; margin: 0 0 .9em; }
+.fala strong { color: #fff; background: linear-gradient(transparent 62%, rgba(124,196,255,.18) 62%); }
+.so-mk { margin: .2em 0 1em !important; }
+/* o que não é fala (indicações de cena) fica menor, em itálico e apagado */
+.fala em { font-style: italic; font-size: .8em; color: var(--muted); opacity: .75; }
+.fala strong em { color: var(--muted); background: none; }
+.mk {
+  display: inline-block; font-size: .72em; font-weight: 700; letter-spacing: .06em; line-height: 1;
+  padding: .42em .7em; border-radius: 999px; vertical-align: .12em; margin: 0 .15em; white-space: nowrap;
+}
+.mk-clique { color: #08131d; background: var(--clique); }
+.mk-pausa { color: #1d1504; background: var(--pausa); }
+.mk-avanca { color: #06190e; background: var(--avanca); }
+body.curta .fala p:not(.chave):not(.so-mk), body.curta .fala li:not(.chave) { display: none; }
+body.curta .fala ul:not(:has(li.chave)) { display: none; }
+
+details.entender { margin-top: 22px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; font-size: .86em; }
+details.entender summary { color: var(--entender); font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+details.entender summary::-webkit-details-marker { display: none; }
+details.entender summary::after { content: "+"; font-size: 1.2em; line-height: 1; }
+details.entender[open] summary::after { content: "–"; }
+details.entender p { margin: .7em 0 0; color: #dcdad3; }
+
+/* Páginas de apoio */
+.apoio h3, .apoio h2 { font-size: 1.05em; margin: 1.4em 0 .5em; }
+.apoio p, .apoio li { margin: 0 0 .8em; }
+.apoio table { border-collapse: collapse; font-size: .78em; width: 100%; }
+.apoio .tab { overflow-x: auto; margin-bottom: 1em; }
+.apoio th, .apoio td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.apoio code { font-size: .85em; background: var(--bg-3); padding: .1em .35em; border-radius: 5px; }
+
+/* Barra inferior */
+.controles {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: rgba(12,13,16,.94);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line);
+  padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px));
+  padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  display: grid; grid-template-columns: 1.3fr auto auto auto 1.3fr; gap: 8px; align-items: stretch;
+}
+.controles button { background: var(--bg-3); border-radius: 14px; min-height: 56px; padding: 0 12px; font-size: 15px; font-weight: 700; }
+.controles .nav { font-size: 30px; font-weight: 400; }
+.controles .modo[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+
+/* Menu */
+.menu { position: fixed; inset: 0; z-index: 40; background: var(--bg); display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.menu-topo { display: flex; gap: 8px; align-items: center; padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.menu-topo .abas { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
+.menu-topo button { background: var(--bg-3); border-radius: 999px; padding: 8px 14px; font-size: 15px; }
+.menu-topo button[aria-selected="true"] { background: var(--fg); color: var(--bg); }
+.menu-corpo { overflow-y: auto; flex: 1; padding: 6px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+.lista-secao { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; }
+.lista button { display: flex; width: 100%; gap: 12px; text-align: left; padding: 11px 6px; border-bottom: 1px solid var(--line); font-size: 17px; }
+.lista button .n { color: var(--muted); width: 2.2em; flex: none; font-variant-numeric: tabular-nums; }
+.lista button.atual { color: var(--clique); }
+.opcoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.opcoes button { background: var(--bg-3); border-radius: 12px; padding: 10px 14px; font-size: 15px; }
+@media (prefers-reduced-motion: reduce) { .barra i { transition: none; } }
+</style>
+
+<header class="topo">
+  <div class="topo-linha">
+    <div class="num" id="num"><b>1</b> / 61</div>
+    <div class="titulos"><div class="secao" id="secao"></div><div class="titulo" id="titulo"></div></div>
+    <button class="relogio parado" id="relogio" aria-label="Iniciar ou pausar o cronômetro"><span class="t" id="tempo">0:00</span><span class="d" id="delta">toque p/ iniciar</span></button>
+  </div>
+  <div class="meta" id="meta"></div>
+  <div class="barra"><i id="progresso"></i></div>
+</header>
+
+<main id="palco">
+  <div class="fala" id="fala"></div>
+  <details class="entender" id="entender"><summary>Para você entender</summary><div id="entenderTxt"></div></details>
+</main>
+
+<nav class="controles" aria-label="Navegação">
+  <button class="nav" id="ant" aria-label="Slide anterior">‹</button>
+  <button id="abrirMenu">Menu</button>
+  <button class="modo" id="modo" aria-pressed="false">Curta</button>
+  <button id="fonte" aria-label="Tamanho do texto">Aa</button>
+  <button class="nav" id="prox" aria-label="Próximo slide">›</button>
+</nav>
+
+<div class="menu" id="menu" hidden>
+  <div class="menu-topo">
+    <div class="abas" role="tablist">
+      <button role="tab" data-aba="slides" aria-selected="true">Slides</button>
+      <button role="tab" data-aba="inicio" aria-selected="false">Antes de começar</button>
+      <button role="tab" data-aba="perguntas" aria-selected="false">Perguntas</button>
+      <button role="tab" data-aba="glossario" aria-selected="false">Glossário</button>
+    </div>
+    <button id="fecharMenu" aria-label="Fechar menu">Fechar</button>
+  </div>
+  <div class="menu-corpo" id="menuCorpo"></div>
+</div>
+
+<script>
+const D = /*DADOS*/null;
+const S = D.slides;
+const $ = (id) => document.getElementById(id);
+const guardar = (k, v) => { try { localStorage.setItem("cola." + k, JSON.stringify(v)); } catch (e) {} };
+const ler = (k, padrao) => { try { const v = localStorage.getItem("cola." + k); return v == null ? padrao : JSON.parse(v); } catch (e) { return padrao; } };
+const seg = (t) => { if (!t) return 0; const [m, s] = t.split(":").map(Number); return m * 60 + (s || 0); };
+const fmt = (x) => { const a = Math.abs(Math.round(x)); return Math.floor(a / 60) + ":" + String(a % 60).padStart(2, "0"); };
+
+let i = Math.min(Math.max(ler("slide", 0), 0), S.length - 1);
+let curta = ler("curta", false);
+const tamanhos = [18, 21, 24, 28, 32];
+let tam = ler("tam", 1);
+let rodando = false, inicio = 0, acumulado = ler("acumulado", 0);
+
+function previsto(idx) { let t = 0; for (let k = 0; k < idx; k++) t += seg(curta ? S[k].curta : S[k].tempo); return t; }
+
+function render() {
+  const s = S[i];
+  $("num").innerHTML = "<b>" + s.n + "</b> / " + S.length;
+  $("secao").textContent = s.secao;
+  $("titulo").textContent = s.titulo;
+  $("meta").innerHTML = "<span>⏱ " + (curta ? s.curta + " (curta)" : s.tempo) + "</span>" +
+    (s.cliques ? '<span class="c">' + s.cliques + (s.cliques === 1 ? " clique" : " cliques") + " antes de avançar</span>" : "<span>sem cliques</span>");
+  $("fala").innerHTML = s.fala;
+  $("entender").hidden = !s.entender;
+  $("entenderTxt").innerHTML = s.entender;
+  $("entender").open = ler("entenderAberto", false);
+  $("progresso").style.width = ((i + 1) / S.length * 100) + "%";
+  document.body.classList.toggle("curta", curta);
+  $("modo").setAttribute("aria-pressed", String(curta));
+  document.documentElement.style.setProperty("--fs", tamanhos[tam] + "px");
+  guardar("slide", i);
+  if (location.hash !== "#s" + s.n) history.replaceState(null, "", "#s" + s.n);
+  window.scrollTo(0, 0);
+  relogio();
+}
+
+function ir(novo) { if (novo < 0 || novo >= S.length) return; i = novo; render(); }
+
+function decorrido() { return acumulado + (rodando ? (Date.now() - inicio) / 1000 : 0); }
+function relogio() {
+  const t = decorrido();
+  $("tempo").textContent = fmt(t);
+  const r = $("relogio"); r.classList.toggle("parado", !rodando);
+  const d = $("delta");
+  if (!rodando && t === 0) { d.textContent = "toque p/ iniciar"; d.className = "d"; return; }
+  const diff = t - previsto(i);
+  d.textContent = (diff > 0 ? "+" : "−") + fmt(diff) + (diff > 0 ? " atrasado" : " folga");
+  d.className = "d" + (diff > 30 ? " atrasado" : "");
+}
+setInterval(() => { if (rodando) relogio(); }, 1000);
+$("relogio").addEventListener("click", () => {
+  if (rodando) { acumulado = decorrido(); rodando = false; guardar("acumulado", acumulado); }
+  else { inicio = Date.now(); rodando = true; manterTela(); }
+  relogio();
+});
+
+$("ant").addEventListener("click", () => ir(i - 1));
+$("prox").addEventListener("click", () => ir(i + 1));
+$("modo").addEventListener("click", () => { curta = !curta; guardar("curta", curta); render(); });
+$("fonte").addEventListener("click", () => { tam = (tam + 1) % tamanhos.length; guardar("tam", tam); render(); });
+$("entender").addEventListener("toggle", () => guardar("entenderAberto", $("entender").open));
+document.addEventListener("keydown", (e) => {
+  if (!$("menu").hidden) { if (e.key === "Escape") fecharMenu(); return; }
+  if (e.key === "ArrowRight" || e.key === "PageDown") ir(i + 1);
+  if (e.key === "ArrowLeft" || e.key === "PageUp") ir(i - 1);
+});
+
+// Deslizar para trocar de slide
+let x0 = null, y0 = null;
+$("palco").addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+$("palco").addEventListener("touchend", (e) => {
+  if (x0 == null) return;
+  const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+  if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) ir(i + (dx < 0 ? 1 : -1));
+  x0 = null;
+}, { passive: true });
+
+// Tela acesa durante a apresentação
+let trava = null;
+async function manterTela() {
+  try { if ("wakeLock" in navigator && !trava) { trava = await navigator.wakeLock.request("screen"); trava.addEventListener("release", () => { trava = null; }); } } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && rodando) manterTela(); });
+document.addEventListener("click", manterTela, { once: true });
+
+// Menu
+let aba = "slides";
+function abrirMenu(qual) { aba = qual || "slides"; $("menu").hidden = false; desenharMenu(); }
+function fecharMenu() { $("menu").hidden = true; }
+function embrulharTabelas(h) { return h.replace(/<table>/g, '<div class="tab"><table>').replace(/<\/table>/g, "</table></div>"); }
+function desenharMenu() {
+  document.querySelectorAll("[data-aba]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.aba === aba)));
+  const c = $("menuCorpo");
+  if (aba === "slides") {
+    let h = "", sec = "";
+    S.forEach((s, k) => {
+      if (s.secao !== sec) { if (sec) h += "</div>"; sec = s.secao; h += '<div class="lista-secao">' + sec + '</div><div class="lista">'; }
+      h += '<button data-ir="' + k + '" class="' + (k === i ? "atual" : "") + '"><span class="n">' + s.n + "</span><span>" + s.titulo + "</span></button>";
+    });
+    h += '</div><div class="opcoes"><button id="zerar">Zerar cronômetro</button></div>';
+    c.innerHTML = h;
+    c.querySelectorAll("[data-ir]").forEach((b) => b.addEventListener("click", () => { fecharMenu(); ir(Number(b.dataset.ir)); }));
+    $("zerar").addEventListener("click", () => { rodando = false; acumulado = 0; guardar("acumulado", 0); relogio(); fecharMenu(); });
+    const atual = c.querySelector(".atual"); if (atual) atual.scrollIntoView({ block: "center" });
+  } else {
+    c.innerHTML = '<div class="apoio">' + embrulharTabelas(D[aba]) + "</div>";
+    c.scrollTop = 0;
+  }
+  if (location.hash !== "#" + aba && aba !== "slides") history.replaceState(null, "", "#" + aba);
+}
+$("abrirMenu").addEventListener("click", () => abrirMenu("slides"));
+$("fecharMenu").addEventListener("click", () => { fecharMenu(); render(); });
+document.querySelectorAll("[data-aba]").forEach((b) => b.addEventListener("click", () => { aba = b.dataset.aba; desenharMenu(); }));
+
+function rota() {
+  const h = location.hash.slice(1);
+  const m = h.match(/^s(\d+)$/);
+  if (m) { const k = S.findIndex((s) => s.n === Number(m[1])); if (k >= 0) { i = k; } fecharMenu(); render(); }
+  else if (["inicio", "perguntas", "glossario"].includes(h)) { render(); abrirMenu(h); }
+  else render();
+}
+window.addEventListener("hashchange", rota);
+rota();
+</script>

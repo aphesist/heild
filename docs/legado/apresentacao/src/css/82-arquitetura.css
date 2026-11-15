@@ -1,0 +1,2078 @@
+/* Seção 5 e 6: arquitetura em 4 camadas e cascata de recuperação (slides 13 a 26).
+Tudo aqui usa o prefixo s2-. Coordenadas absolutas são em px do palco 1920×1080. */
+
+/* ---------- Utilitários de posição ---------- */
+.s2-canvas {
+  position: relative;
+  width: 100%;
+}
+.s2-abs {
+  position: absolute;
+}
+/* centra o elemento no ponto (left,
+top); usa "translate" para não brigar com as animações */
+.s2-at {
+  position: absolute;
+  translate: -50% -50%;
+}
+.s2-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.s2-svg path,
+.s2-svg line,
+.s2-svg polyline,
+.s2-svg circle,
+.s2-svg ellipse,
+.s2-svg rect {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.34);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.s2-svg .s2-head {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke: none;
+}
+.s2-svg .is-accent { stroke: var(--violet); stroke-width: 4; filter: drop-shadow(0 0 8px rgba(180, 160, 255, 0.65)); }
+.s2-svg .is-violet { stroke: var(--violet); stroke-width: 3; }
+.s2-svg .is-blue { stroke: var(--blue); stroke-width: 3; }
+.s2-svg .is-amber { stroke: var(--amber); stroke-width: 3; }
+.s2-svg .is-green { stroke: var(--green); stroke-width: 3; }
+.s2-svg .is-red { stroke: var(--red); stroke-width: 3; }
+.s2-svg .is-faint { stroke: rgba(255, 255, 255, 0.16); }
+.s2-svg .is-dash { stroke-dasharray: 8 10; }
+.s2-svg .s2-head.is-violet { fill: var(--violet); }
+.s2-svg .s2-head.is-blue { fill: var(--blue); }
+.s2-svg .s2-head.is-amber { fill: var(--amber); }
+.s2-svg .s2-head.is-green { fill: var(--green); }
+.s2-svg .s2-head.is-red { fill: var(--red); }
+.s2-svg .s2-head.is-accent { fill: var(--amber); stroke: none; }
+.s2-svg text {
+  fill: var(--ink-2);
+  stroke: none;
+  font-family: var(--font);
+  font-size: var(--fs-caption);
+}
+
+/* Rótulo de conector */
+.s2-tag {
+  padding: 6px 14px 7px;
+  border-radius: 999px;
+  background: #000;
+  box-shadow: none;
+  font-size: var(--fs-caption);
+  line-height: 1.2;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.s2-tag.is-blue { color: var(--blue); }
+.s2-tag.is-amber { color: var(--amber); }
+.s2-tag.is-violet { color: var(--violet); }
+.s2-tag.is-green { color: var(--green); }
+.s2-tag.is-red { color: var(--red); }
+.s2-tag--bare { background: transparent; box-shadow: none; padding: 0; }
+
+/* Gatilho invisível: um build que só muda o estado de outros elementos (via :has) */
+.s2-trig {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Caixa genérica */
+.s2-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 32px;
+  border-radius: var(--r);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line), 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+.s2-box b {
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.12;
+  color: var(--ink);
+}
+.s2-box small {
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.s2-box--accent {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+  box-shadow: 0 30px 90px rgba(140, 130, 255, 0.18);
+}
+.s2-box--ghost {
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* Chip pequeno (nós de árvore,
+fontes,
+termos) */
+.s2-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 22px 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--fs-text);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+  white-space: nowrap;
+  transition-property: opacity, transform, filter, box-shadow, background, color;
+}
+
+/* ---------- Cabeçalho das etapas da cascata ---------- */
+/* A trilha ocupa a linha do sobretítulo; o título fica no lugar padrão. */
+.s2-hd {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 48px;
+  margin: 0 0 40px;
+}
+.s2-hd .title {
+  max-width: none;
+  white-space: nowrap;
+}
+.s2-hd-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding-bottom: 8px;
+}
+
+/* ---------- Trilha das 7 etapas (elemento recorrente,
+no lugar do sobretítulo) ---------- */
+.s2-trail {
+  display: flex;
+  align-items: center;
+  height: var(--kicker-h);
+  margin-bottom: var(--kicker-gap);
+}
+.s2-st {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* fio entre etapas */
+.s2-st + .s2-st::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  margin: 0 14px;
+  background: var(--line-2);
+}
+.s2-st.is-done + .s2-st::before {
+  background: var(--accent);
+}
+.s2-st b {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.s2-st span {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+/* etapas já vistas */
+.s2-st.is-done b {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  color: var(--accent);
+}
+.s2-st.is-done span {
+  color: var(--ink-2);
+}
+/* etapa atual */
+.s2-st.is-cur b {
+  background: var(--grad);
+  box-shadow: none;
+  color: #000;
+}
+.s2-st.is-cur b::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(180, 160, 255, 0.55);
+  opacity: 0;
+}
+.slide.is-active .s2-st.is-cur b::after {
+  animation: s2-ring 1800ms var(--ease) 500ms 2;
+}
+.s2-st.is-cur span {
+  color: var(--ink);
+  font-weight: 600;
+}
+@keyframes s2-ring {
+0% { opacity: 0.9; transform: scale(0.8); }
+100% { opacity: 0; transform: scale(1.7); }
+}
+
+/* ---------- Comparativo "jeito comum vs. nosso jeito" (rodapé das etapas) ---------- */
+.s2-vs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  margin-top: auto;
+}
+.s2-vs-item {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  min-height: 100px;
+  padding: 20px 34px;
+  border-radius: var(--r);
+  font-size: var(--fs-text);
+  line-height: 1.3;
+}
+.s2-vs-item > em {
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.s2-vs-them {
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+}
+.s2-vs-them > em {
+  color: var(--ink-3);
+}
+.s2-vs-us {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+  color: var(--ink);
+}
+.s2-vs-us > em {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* área do visual em cada etapa */
+.s2-vis {
+  position: relative;
+  height: 520px;
+  flex: 0 0 auto;
+}
+
+/* =====================================================================
+   Slide 13 · Quatro camadas
+   ===================================================================== */
+.s2-arch {
+  height: 700px;
+}
+.s2-arch .s2-box {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 26px;
+  row-gap: 4px;
+}
+.s2-arch .s2-box > i {
+  grid-row: span 2;
+  font-style: normal;
+  font-size: var(--fs-stat);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: var(--grad-v);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.s2-who {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 64px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #0a0a0c;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.s2-who svg {
+  width: 30px;
+  height: 30px;
+}
+.s2-sep {
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.22);
+}
+.s2-sep span {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  top: -16px;
+  padding: 0 18px;
+  background: var(--bg);
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+}
+
+/* =====================================================================
+   Slide 14 · Cada artigo,
+todas as versões
+   ===================================================================== */
+.s2-art {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 600px;
+  padding: 34px 36px 36px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid transparent;
+}
+.s2-art-h {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 22px;
+}
+.s2-dev {
+  position: relative;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+  padding: 14px 16px;
+  margin-left: calc(var(--ind, 0) * 26px);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur) var(--ease), background var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.s2-dev + .s2-dev {
+  margin-top: 8px;
+}
+.s2-dev > em {
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--violet);
+  padding-top: 2px;
+  transition: opacity var(--dur-fast) var(--ease) 200ms;
+}
+.s2-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-top: 8px;
+}
+.s2-lines i {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.16);
+}
+/* estado inicial: texto corrido,
+sem estrutura */
+.slide:not(.is-static) .s2-l1:not(:has(.s2-on1.is-in)) .s2-dev > em {
+  opacity: 0;
+}
+.s2-l1:has(.s2-on1.is-in) .s2-dev,
+.is-static .s2-l1 .s2-dev {
+  box-shadow: inset 0 0 0 1px rgba(180, 160, 255, 0.35);
+  background: rgba(180, 160, 255, 0.04);
+}
+.s2-l1:has(.s2-on2.is-in) .s2-dev:not(.is-pick),
+.is-static .s2-l1 .s2-dev:not(.is-pick) {
+  opacity: 0.4;
+}
+.s2-l1:has(.s2-on2.is-in) .s2-dev.is-pick,
+.is-static .s2-l1 .s2-dev.is-pick {
+  border: 0;
+  background:
+    linear-gradient(#17171b, #17171b) padding-box,
+    var(--grad) border-box;
+  box-shadow: inset 0 0 0 1.5px rgba(180, 160, 255, 0.0), 0 0 40px rgba(180, 160, 255, 0.25);
+  outline: 1.5px solid rgba(180, 160, 255, 0.8);
+  outline-offset: -1.5px;
+}
+/* cortes do "jeito comum" */
+.s2-cut {
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  height: 0;
+  border-top: 2.5px dashed var(--red);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.s2-cut::after {
+  display: none;
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: -13px;
+  width: 22px;
+  height: 22px;
+  background:
+    radial-gradient(circle at 30% 30%, transparent 4px, var(--red) 5px, var(--red) 6.5px, transparent 7px),
+    radial-gradient(circle at 30% 75%, transparent 4px, var(--red) 5px, var(--red) 6.5px, transparent 7px);
+}
+.s2-l1:has(.s2-on1.is-in) .s2-cut,
+.is-static .s2-l1 .s2-cut {
+  opacity: 0;
+}
+.s2-cutnote {
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.s2-l1:has(.s2-on1.is-in) .s2-cutnote,
+.is-static .s2-l1 .s2-cutnote {
+  opacity: 0;
+}
+
+/* cartas de versão */
+.s2-ver {
+  position: absolute;
+  width: 300px;
+  padding: 26px 28px 28px;
+  border-radius: var(--r);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line), 0 24px 60px rgba(0, 0, 0, 0.6);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), filter var(--dur) var(--ease);
+}
+.s2-ver h4 {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+.s2-ver dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 14px;
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+}
+.s2-ver dt {
+  color: var(--ink-3);
+}
+.s2-ver dd {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.s2-l1:has(.s2-cursor.is-in) .s2-ver:not(.is-valid),
+.is-static .s2-l1 .s2-ver:not(.is-valid) {
+  opacity: 0.32;
+  filter: saturate(0.4);
+}
+.s2-l1:has(.s2-cursor.is-in) .s2-ver.is-valid,
+.is-static .s2-l1 .s2-ver.is-valid {
+  border: 0;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+  box-shadow: inset 0 0 0 0 transparent, 0 0 0 1.5px rgba(180, 160, 255, 0.9), 0 30px 90px rgba(140, 130, 255, 0.3);
+  transition-delay: 900ms;
+}
+/* linha do tempo das versões */
+.s2-axis {
+  position: absolute;
+  height: 64px;
+}
+.s2-seg {
+  position: absolute;
+  top: 18px;
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background var(--dur) var(--ease) 900ms;
+}
+.s2-l1:has(.s2-cursor.is-in) .s2-seg.is-valid,
+.is-static .s2-l1 .s2-seg.is-valid {
+  background: var(--grad);
+}
+.s2-axis small {
+  position: absolute;
+  top: 44px;
+  translate: -50% 0;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.s2-cursor {
+  position: absolute;
+  top: -34px;
+  width: 0;
+  height: 100px;
+}
+.s2-cursor::before {
+  content: "";
+  position: absolute;
+  left: -1.5px;
+  top: 34px;
+  width: 3px;
+  height: 46px;
+  border-radius: 2px;
+  background: var(--amber);
+  box-shadow: 0 0 18px rgba(255, 201, 131, 0.8);
+}
+.s2-cursor span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% 0;
+  padding: 4px 12px 5px;
+  border-radius: 999px;
+  background: rgba(255, 201, 131, 0.16);
+  color: var(--amber);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.s2-cursor[data-anim] {
+  transition: transform 1500ms var(--ease-io) var(--d, 0ms), opacity 300ms linear var(--d, 0ms);
+}
+.slide:not(.is-static) .s2-cursor:not(.is-in) {
+  opacity: 0;
+  transform: translateX(-560px);
+}
+
+/* =====================================================================
+   Slide 15 e 24 · Rede de normas
+   ===================================================================== */
+.s2-norm {
+  padding: 16px 26px 18px;
+  border-radius: var(--r);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line), 0 20px 50px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  white-space: nowrap;
+}
+.s2-norm b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.s2-norm small {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.s2-norm--center {
+  padding: 24px 38px 26px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+  box-shadow: 0 30px 90px rgba(140, 130, 255, 0.22);
+}
+.s2-norm--center b {
+  font-size: var(--fs-sub);
+}
+
+/* escada da hierarquia */
+.s2-ladder {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.s2-ladder h4 {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+.s2-rung {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 52px;
+  padding: 0 22px;
+  margin-left: calc(var(--i) * 18px);
+  border-radius: var(--r-sm);
+  background: rgba(180, 160, 255, calc(0.2 - var(--i) * 0.02));
+  font-size: var(--fs-caption);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.s2-rung i {
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--violet);
+  width: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* propagação (slide 24): nós esquentam conforme a onda passa */
+.s2-net .s2-norm {
+  transition: transform var(--dur) var(--ease) var(--hd, 0ms), box-shadow var(--dur) var(--ease) var(--hd, 0ms),
+    filter var(--dur) var(--ease) var(--hd, 0ms), background var(--dur) var(--ease) var(--hd, 0ms);
+}
+.s2-net .s2-norm.is-seed {
+  transition-delay: 0ms;
+}
+.s2-net:has(.s2-on1.is-in) .s2-norm.is-seed,
+.is-static .s2-net .s2-norm.is-seed {
+  box-shadow: inset 0 0 0 2px var(--blue), 0 0 50px rgba(124, 196, 255, 0.45);
+}
+.s2-net:has(.s2-on2.is-in) .s2-norm.h3,
+.is-static .s2-net .s2-norm.h3 {
+  transform: scale(1.16);
+  background:
+    linear-gradient(#1e1c2a, #1e1c2a) padding-box,
+    var(--grad) border-box;
+  box-shadow: inset 0 0 0 1.5px rgba(180, 160, 255, 0.9), 0 0 60px rgba(180, 160, 255, 0.45);
+}
+.s2-net:has(.s2-on2.is-in) .s2-norm.h2,
+.is-static .s2-net .s2-norm.h2 {
+  transform: scale(1.08);
+  box-shadow: inset 0 0 0 1.5px rgba(180, 160, 255, 0.75), 0 0 40px rgba(180, 160, 255, 0.3);
+}
+.s2-net:has(.s2-on2.is-in) .s2-norm.h0,
+.is-static .s2-net .s2-norm.h0 {
+  filter: brightness(0.42);
+}
+.s2-net .h2,
+.s2-net .h3 {
+  --hd: 900ms;
+}
+.s2-net .h1 {
+  --hd: 1400ms;
+}
+
+/* lista que sobe */
+.s2-rank {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.s2-rank li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 22px 13px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-size: var(--fs-text);
+  line-height: 1.25;
+  color: var(--ink);
+}
+.s2-rank li > i {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--violet);
+  font-variant-numeric: tabular-nums;
+}
+.s2-rank li small {
+  margin-left: 14px;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+}
+
+/* =====================================================================
+   Slide 16 · Metrô do agente
+   ===================================================================== */
+.s2-metro .s2-stop {
+  width: 228px;
+  text-align: center;
+}
+.s2-dotst {
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: inset 0 0 0 5px var(--violet), 0 0 30px rgba(180, 160, 255, 0.35);
+}
+.s2-stop b {
+  display: block;
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.s2-stop small {
+  display: block;
+  margin-top: 8px;
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.s2-stop.is-end .s2-dotst {
+  transition: box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.s2-metro:has(.s2-on2.is-in) .s2-stop.is-end .s2-dotst,
+.is-static .s2-metro .s2-stop.is-end .s2-dotst {
+  background: var(--grad);
+  box-shadow: 0 0 0 8px rgba(255, 201, 131, 0.18), 0 0 50px rgba(255, 201, 131, 0.5);
+}
+.s2-metro:has(.s2-on2.is-in) .s2-stop.is-end b,
+.is-static .s2-metro .s2-stop.is-end b {
+  color: var(--amber);
+}
+.s2-metro .s2-stop.is-search small {
+  color: var(--violet);
+}
+.s2-spec {
+  font-size: var(--fs-caption);
+  padding: 10px 20px 11px;
+}
+
+/* =====================================================================
+   Slide 17 · Busca ao vivo
+   ===================================================================== */
+.s2-src {
+  font-size: var(--fs-caption);
+  padding: 10px 20px 11px;
+  font-weight: 500;
+}
+.s2-live:has(.s2-on1.is-in) .s2-src.is-hot,
+.is-static .s2-live .s2-src.is-hot {
+  box-shadow: inset 0 0 0 2px var(--amber), 0 0 30px rgba(255, 201, 131, 0.35);
+  color: var(--amber);
+}
+.s2-agent {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px solid transparent;
+  background:
+    radial-gradient(circle at 50% 35%, #26243a, #141418 70%) padding-box,
+    var(--grad) border-box;
+  box-shadow: 0 0 90px rgba(140, 130, 255, 0.28);
+}
+.s2-agent b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.s2-agent small {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.s2-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px 13px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.s2-flag::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 14px currentColor;
+}
+.s2-flag--amber {
+  color: var(--amber);
+  background: rgba(255, 201, 131, 0.1);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 201, 131, 0.45);
+}
+.s2-flag--green {
+  color: var(--green);
+  background: rgba(114, 223, 174, 0.1);
+  box-shadow: inset 0 0 0 1.5px rgba(114, 223, 174, 0.45);
+}
+.s2-say {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+/* 17: o segundo estado desce até a altura da Camada 1 no diagrama */
+.s2-say--end {
+  margin-top: auto;
+  margin-bottom: 20px;
+}
+.s2-say p {
+  font-size: var(--fs-text);
+  color: var(--ink-2);
+  line-height: 1.35;
+  max-width: 26ch;
+}
+
+/* =====================================================================
+   Slide 18 e 26 · Funil da cascata
+   ===================================================================== */
+.s2-funnel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fg, 12px);
+}
+.s2-band {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: var(--w);
+  height: var(--bh, 68px);
+  padding: 0 24px 0 16px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, rgba(124, 196, 255, var(--a)), rgba(180, 160, 255, var(--a)));
+  border: 1px solid transparent;
+  font-size: var(--fs-text);
+  color: var(--ink);
+  white-space: nowrap;
+  transition-property: opacity, transform, filter, background, box-shadow;
+}
+.s2-band > i {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--ink);
+}
+.s2-band > span {
+  flex: 1 1 auto;
+}
+/* pontos: os dispositivos que sobram em cada etapa */
+.s2-band > u {
+  flex: 0 0 auto;
+  width: var(--dw, 150px);
+  height: 30px;
+  text-decoration: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.75) 2.4px, transparent 3px);
+  background-size: var(--ds, 10px) 10px;
+  background-position: right center;
+  opacity: 0.8;
+}
+.s2-band:nth-child(1) { --a: 0.12; --ds: 7px; --dw: 170px; }
+.s2-band:nth-child(2) { --a: 0.16; --ds: 9px; --dw: 150px; }
+.s2-band:nth-child(3) { --a: 0.2; --ds: 12px; --dw: 130px; }
+.s2-band:nth-child(4) { --a: 0.26; --ds: 16px; --dw: 112px; }
+.s2-band:nth-child(5) { --a: 0.32; --ds: 20px; --dw: 100px; }
+.s2-band:nth-child(6) { --a: 0.4; --ds: 26px; --dw: 78px; }
+.s2-band.is-final {
+  background: var(--grad);
+  color: #0a0a0c;
+  border-color: transparent;
+}
+.s2-band.is-final > i {
+  background: rgba(0, 0, 0, 0.75);
+  color: var(--ink);
+}
+.s2-band.is-final > u {
+  background-image: radial-gradient(circle, #0a0a0c 3.4px, transparent 4px);
+  background-size: 18px 10px;
+  width: 126px;
+  opacity: 1;
+}
+
+/* números ao lado do funil */
+.s2-big {
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.s2-big-label {
+  margin-top: 12px;
+  font-size: var(--fs-text);
+  color: var(--ink-2);
+  line-height: 1.3;
+}
+.s2-cost {
+  display: grid;
+  grid-template-columns: 6px minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+.s2-cost::before {
+  content: "";
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--blue), var(--violet) 80%, var(--amber));
+}
+.s2-cost p {
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.s2-cost p b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* mini-funil do slide 26 */
+.s2-mini .s2-band {
+  --bh: 58px;
+  font-size: var(--fs-caption);
+  opacity: 0.45;
+  transition: opacity var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.s2-mini .s2-band > i {
+  width: 32px;
+  height: 32px;
+  font-size: var(--fs-caption);
+}
+.s2-mini .s2-band.is-key {
+  opacity: 1;
+}
+.s2-mini .s2-band.is-key:not(.is-final) {
+  box-shadow: inset 0 0 0 2px var(--violet), 0 0 36px rgba(180, 160, 255, 0.35);
+}
+
+/* =====================================================================
+   Slide 19 · Árvore de temas
+   ===================================================================== */
+.s2-tree .s2-chip {
+  transition: opacity var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.s2-tree .s2-chip.is-root {
+  background: var(--ink);
+  color: #0a0a0c;
+  box-shadow: none;
+  font-weight: 600;
+}
+.s2-tree .s2-chip.s2-faint {
+  transition: opacity var(--dur) var(--ease);
+}
+/* os galhos mantêm a animação de desenho (.dl); o apagado do passo 1 muda só a cor do traço */
+.s2-tree path.s2-faint {
+  transition:
+    stroke-dashoffset var(--dur-draw) var(--ease-io) var(--d, 0ms),
+    opacity 200ms linear var(--d, 0ms),
+    stroke var(--dur) var(--ease);
+}
+.s2-tree:has(.s2-on1.is-in) .s2-chip.s2-faint,
+.is-static .s2-tree .s2-chip.s2-faint {
+  opacity: 0.28;
+}
+.s2-tree:has(.s2-on1.is-in) path.s2-faint,
+.is-static .s2-tree path.s2-faint {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+.s2-tree:has(.s2-on1.is-in) .s2-chip.is-path,
+.is-static .s2-tree .s2-chip.is-path {
+  box-shadow: inset 0 0 0 2px var(--violet);
+}
+.s2-tree:has(.s2-on1.is-in) .s2-chip.is-leaf,
+.is-static .s2-tree .s2-chip.is-leaf {
+  background: var(--grad);
+  color: #0a0a0c;
+  font-weight: 700;
+  box-shadow: 0 0 50px rgba(180, 160, 255, 0.6);
+  transition-delay: 1100ms;
+}
+.s2-sum {
+  display: inline-block;
+  width: 16px;
+  height: 13px;
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 5.5px / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 11px / 65% 2px no-repeat;
+  opacity: 0.5;
+}
+.s2-q {
+  width: 360px;
+  padding: 24px 28px 26px;
+  border-radius: var(--r);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line), 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.s2-q p {
+  font-size: var(--fs-text);
+  line-height: 1.3;
+  color: var(--ink);
+}
+.s2-q .pills {
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* =====================================================================
+   Slide 20 · Cache semântico
+   ===================================================================== */
+.s2-bub {
+  padding: 18px 28px 20px;
+  border-radius: var(--r) 26px 26px 8px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--fs-text);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.s2-eq {
+  font-size: var(--fs-stat);
+  font-weight: 400;
+  color: var(--violet);
+}
+.s2-cab {
+  width: 250px;
+  height: 330px;
+  padding: 18px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(180deg, #232327, #18181b);
+  box-shadow: inset 0 0 0 1px var(--line), 0 30px 70px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.s2-drawer {
+  position: relative;
+  flex: 1 1 0;
+  border-radius: 10px;
+  background: #2a2a2f;
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.s2-drawer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 10px;
+  translate: -50% -50%;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.28);
+}
+.s2-cache:has(.s2-on1.is-in) .s2-drawer.is-open,
+.is-static .s2-cache .s2-drawer.is-open {
+  transform: translateX(34px);
+  background: #34323f;
+  box-shadow: inset 0 0 0 1.5px rgba(180, 160, 255, 0.6), 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+.s2-folder {
+  width: 290px;
+  padding: 20px 48px 22px 24px;
+  border-radius: 6px 20px 20px 20px;
+  background: #f1e3c8;
+  color: #2a2116;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  transition-property: opacity, transform, filter, background, color;
+}
+.s2-folder::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -16px;
+  width: 110px;
+  height: 18px;
+  border-radius: 8px 12px 0 0;
+  background: inherit;
+}
+.s2-folder b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.s2-folder small {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  color: rgba(42, 33, 22, 0.7);
+}
+.s2-seal {
+  position: absolute;
+  right: -16px;
+  top: -20px;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #062616;
+  font-size: var(--fs-text);
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  rotate: -10deg;
+}
+.s2-folder.is-red {
+  background: #ffb3b8;
+  color: #3a0d12;
+}
+.s2-folder.is-red small {
+  color: rgba(58, 13, 18, 0.7);
+}
+.s2-folder.is-red .s2-seal {
+  background: var(--red);
+  color: #2b0508;
+}
+.s2-gate {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 40%, #222128, #121215 72%);
+  box-shadow: inset 0 0 0 1px var(--line), 0 24px 60px rgba(0, 0, 0, 0.6);
+  transition: box-shadow var(--dur) var(--ease);
+}
+.s2-gate svg {
+  width: 92px;
+  height: 92px;
+}
+.s2-gate svg * {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.s2-cache:has(.s2-on2.is-in) .s2-gate,
+.is-static .s2-cache .s2-gate {
+  box-shadow: inset 0 0 0 2.5px var(--green), 0 0 60px rgba(114, 223, 174, 0.3);
+}
+.s2-cache:has(.s2-on3.is-in) .s2-gate,
+.is-static .s2-cache:has(.s2-on3) .s2-gate {
+  box-shadow: inset 0 0 0 2.5px var(--green), 0 0 0 10px rgba(255, 125, 134, 0.12), 0 0 60px rgba(255, 125, 134, 0.25);
+}
+.s2-out {
+  width: 520px;
+  padding: 22px 30px 24px;
+  border-radius: var(--r);
+  font-size: var(--fs-text);
+  line-height: 1.3;
+}
+.s2-out b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.s2-out--ok {
+  background: rgba(114, 223, 174, 0.08);
+  box-shadow: inset 0 0 0 1.5px rgba(114, 223, 174, 0.5);
+  color: var(--ink-2);
+}
+.s2-out--ok b { color: var(--green); }
+.s2-out--no {
+  background: rgba(255, 125, 134, 0.07);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 125, 134, 0.45);
+  color: var(--ink-2);
+}
+.s2-out--no b { color: var(--red); }
+
+/* =====================================================================
+   Slide 21 · Filtro de vigência
+   ===================================================================== */
+.s2-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.s2-filter {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+.s2-filter > i {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--grad);
+  color: #0a0a0c;
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.s2-filter b {
+  display: block;
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.s2-filter small {
+  display: block;
+  font-size: var(--fs-caption);
+  color: var(--violet);
+}
+.s2-lib {
+  display: grid;
+  grid-template-columns: 150px repeat(4, minmax(0, 1fr));
+  gap: 14px 14px;
+  align-items: center;
+}
+.s2-lib > em {
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-2);
+  transition: opacity var(--dur) var(--ease);
+}
+.s2-shelf {
+  position: relative;
+  height: 78px;
+  padding: 0 14px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: flex-end;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0 9px, transparent 9px 13px, rgba(255, 255, 255, 0.12) 13px 20px, transparent 20px 24px)
+      14px 12px / calc(100% - 28px) 30px no-repeat,
+    #1a1a1e;
+  box-shadow: inset 0 -4px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  transition: opacity var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.s2-shelf span {
+  position: absolute;
+  left: 14px;
+  bottom: 50px;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--ink-2);
+  background: #1a1a1e;
+  padding: 0 6px 0 0;
+}
+.s2-shelf span {
+  bottom: auto;
+  top: 48px;
+  background: transparent;
+  font-size: var(--fs-caption);
+}
+.s2-vig:has(.s2-on1.is-in) .s2-lib .r-off,
+.is-static .s2-vig .s2-lib .r-off {
+  opacity: 0.18;
+}
+.s2-vig:has(.s2-on2.is-in) .s2-lib .t-off,
+.is-static .s2-vig .s2-lib .t-off {
+  opacity: 0.18;
+}
+.s2-vig:has(.s2-on2.is-in) .s2-shelf.is-on,
+.is-static .s2-vig .s2-shelf.is-on {
+  box-shadow: inset 0 -4px 0 var(--violet), inset 0 0 0 1.5px rgba(180, 160, 255, 0.8), 0 0 40px rgba(180, 160, 255, 0.35);
+}
+.s2-books {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 180px;
+  padding: 0 22px;
+  border-bottom: 5px solid rgba(255, 255, 255, 0.16);
+}
+.s2-book {
+  position: relative;
+  flex: 1 1 0;
+  height: var(--bk, 150px);
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(180deg, #2c2c33, #222227);
+  box-shadow: inset 0 0 0 1px var(--line);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 14px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  transition: opacity var(--dur) var(--ease) 900ms, box-shadow var(--dur) var(--ease) 900ms, background var(--dur) var(--ease) 900ms, color var(--dur) var(--ease) 900ms;
+}
+.s2-book::before {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 22px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 0 rgba(255, 255, 255, 0.12);
+}
+.s2-vig:has(.s2-cursor.is-in) .s2-book:not(.is-valid),
+.is-static .s2-vig .s2-book:not(.is-valid) {
+  opacity: 0.3;
+}
+.s2-vig:has(.s2-cursor.is-in) .s2-book.is-valid,
+.is-static .s2-vig .s2-book.is-valid {
+  background: var(--grad-v);
+  color: #0a0a0c;
+  box-shadow: 0 0 60px rgba(180, 160, 255, 0.55);
+}
+.s2-vig .s2-cursor {
+  top: -70px;
+  height: 70px;
+}
+.s2-vig .s2-cursor::before {
+  top: 34px;
+  height: 30px;
+}
+
+/* =====================================================================
+   Slide 22 · Palavras exatas e post-its
+   ===================================================================== */
+.s2-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 28px 15px 22px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line), 0 20px 50px rgba(0, 0, 0, 0.5);
+  font-size: var(--fs-text);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.s2-search svg {
+  width: 26px;
+  height: 26px;
+}
+.s2-search svg * {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.s2-index {
+  width: 600px;
+  padding: 28px 34px 30px;
+  border-radius: var(--r);
+  background: #f4f1ea;
+  color: #1d1b17;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.s2-index h4 {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #6b655a;
+  margin-bottom: 12px;
+}
+.s2-index ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.s2-index li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: var(--fs-text);
+  font-family: Georgia, "Times New Roman", serif;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.s2-index li::after {
+  content: "";
+  flex: 1 1 auto;
+  order: 1;
+  border-bottom: 2px dotted rgba(0, 0, 0, 0.3);
+  translate: 0 -6px;
+}
+.s2-index li span {
+  order: 2;
+  font-size: var(--fs-caption);
+  color: #6b655a;
+  font-family: var(--font);
+}
+.s2-index mark {
+  color: #1d1b17;
+  background-image: linear-gradient(90deg, rgba(255, 190, 80, 0.75), rgba(255, 190, 80, 0.75));
+}
+.s2-doc {
+  width: 460px;
+  padding: 30px 34px;
+  border-radius: var(--r);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line), 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.s2-doc b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.s2-doc small {
+  display: block;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+  margin-bottom: 20px;
+}
+.s2-doc .s2-lines i:nth-child(odd) { width: 100%; }
+.s2-doc .s2-lines i:nth-child(even) { width: 88%; }
+.s2-doc .s2-lines i:last-child { width: 56%; }
+.s2-doc .s2-lines i.is-hit {
+  background: rgba(255, 201, 131, 0.7);
+  box-shadow: 0 0 16px rgba(255, 201, 131, 0.5);
+}
+.s2-post {
+  width: 400px;
+  padding: 18px 22px 20px;
+  border-radius: 4px;
+  background: #ffd970;
+  color: #2b2410;
+  font-size: var(--fs-text);
+  font-weight: 500;
+  line-height: 1.25;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  rotate: var(--r, 0deg);
+}
+.s2-post::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  width: 90px;
+  height: 18px;
+  translate: -50% 0;
+  background: rgba(255, 255, 255, 0.4);
+  rotate: -2deg;
+}
+.s2-post mark {
+  color: #2b2410;
+  background-image: linear-gradient(90deg, rgba(124, 120, 255, 0.4), rgba(124, 120, 255, 0.4));
+}
+
+/* =====================================================================
+   Slide 23 · Significado termo a termo
+   ===================================================================== */
+.s2-panel {
+  position: absolute;
+  top: 0;
+  width: 800px;
+  height: 640px;
+  border-radius: var(--r);
+  padding: 30px 36px;
+}
+.s2-panel > em {
+  display: block;
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.s2-panel > strong {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.s2-panel--them {
+  border: 1px solid var(--line);
+}
+.s2-panel--them > em,
+.s2-panel--them > strong {
+  color: var(--ink-3);
+}
+.s2-panel--us {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#111114, #111114) padding-box,
+    var(--grad) border-box;
+}
+.s2-panel--us > em {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.s2-panel .s2-cap {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  bottom: 28px;
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.s2-term {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.s2-term svg {
+  width: 34px;
+  height: 22px;
+  overflow: visible;
+}
+.s2-term svg * {
+  fill: none;
+  stroke: var(--violet);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.s2-term .s2-chip {
+  font-size: var(--fs-caption);
+  padding: 8px 16px 9px;
+}
+.s2-term.is-q .s2-chip {
+  background: rgba(124, 196, 255, 0.12);
+  box-shadow: inset 0 0 0 1.5px rgba(124, 196, 255, 0.55);
+  color: var(--blue);
+}
+.s2-term.is-q svg * {
+  stroke: var(--blue);
+}
+.s2-term.is-dim .s2-chip {
+  color: var(--ink-3);
+}
+.s2-x {
+  font-size: var(--fs-text);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* =====================================================================
+   Slide 25 · Revisor
+   ===================================================================== */
+.s2-card {
+  width: 250px;
+  height: 64px;
+  border-radius: var(--r-sm);
+  background: #222227;
+  box-shadow: inset 0 0 0 1px var(--line), 0 8px 18px rgba(0, 0, 0, 0.5);
+}
+.s2-card::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 60px;
+  top: 18px;
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 16px 0 rgba(255, 255, 255, 0.12);
+}
+.s2-card.is-ok {
+  background: linear-gradient(90deg, rgba(124, 196, 255, 0.28), rgba(180, 160, 255, 0.28)), #1b1b22;
+  box-shadow: inset 0 0 0 1px rgba(180, 160, 255, 0.55), 0 8px 18px rgba(0, 0, 0, 0.5);
+}
+.s2-card.is-no {
+  opacity: 0.7;
+}
+.s2-review {
+  display: grid;
+  grid-template-columns: 330px 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+.s2-review + .s2-review {
+  margin-top: 30px;
+}
+.s2-cand {
+  padding: 14px 20px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.s2-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: var(--fs-text);
+  font-weight: 700;
+}
+.s2-mark.is-ok { background: rgba(114, 223, 174, 0.16); color: var(--green); }
+.s2-mark.is-no { background: rgba(255, 255, 255, 0.08); color: var(--ink-3); }
+.s2-note {
+  font-family: "Bradley Hand", "Segoe Print", "Comic Neue", var(--font);
+  font-size: var(--fs-text);
+  line-height: 1.25;
+  color: var(--ink-2);
+}
+.s2-note b {
+  font-weight: 700;
+}
+.s2-note.is-ok b { color: var(--green); }
+.s2-note.is-no b { color: var(--ink-3); }
+.s2-pile-label {
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.s2-pile-label b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* =====================================================================
+   Slide 26 · Decisão de parar
+   ===================================================================== */
+.s2-meter {
+  padding: 32px 38px 34px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid transparent;
+}
+.s2-meter h4 {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.s2-meter > p {
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.s2-try {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  margin-top: 22px;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.s2-try small {
+  display: block;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+}
+.s2-score {
+  position: relative;
+  height: 22px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.s2-score::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--v);
+  border-radius: 11px;
+  background: var(--c, var(--green));
+  transform-origin: 0 50%;
+  transition: transform var(--dur) var(--ease) var(--sd, 0ms);
+}
+.slide:not(.is-static) .s2-meter:not(.is-in) .s2-score::after {
+  transform: scaleX(0);
+  transition-duration: 200ms;
+  transition-delay: 0ms;
+}
+.s2-legend {
+  display: flex;
+  gap: 28px;
+  margin-top: 26px;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.s2-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.s2-legend span::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c);
+}
+.s2-final {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 28px 17px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #0a0a0c;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.s2-final::before {
+  content: "§";
+  font-weight: 700;
+  color: #9a5a00;
+}
+
+/* =====================================================================
+   Quem executa cada etapa: A = Claude por API (azul),
+B = nossos modelos
+   na GPU alugada (violeta),
+C = código e banco de dados,
+sem IA (verde).
+   ===================================================================== */
+/* executores A/B/C: cores semânticas dos tokens --exec-a/b/c,
+fundo sempre a 14% */
+.s2-ex-api { --ex: var(--exec-a); --ex-a: color-mix(in srgb, var(--exec-a) 14%, transparent); }
+.s2-ex-gpu { --ex: var(--exec-b); --ex-a: color-mix(in srgb, var(--exec-b) 14%, transparent); }
+.s2-ex-code { --ex: var(--exec-c); --ex-a: color-mix(in srgb, var(--exec-c) 14%, transparent); }
+
+/* selo no cabeçalho de cada etapa */
+.s2-exec {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px 9px 14px;
+  border-radius: 999px;
+  background: var(--ex-a);
+  box-shadow: none;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ex);
+  white-space: nowrap;
+}
+.s2-exec > em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.s2-exec::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ex);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ex) 70%, transparent);
+}
+
+.s2-hd-tags .pill--outline { color: var(--ink-2); }
+
+/* legenda A/B/C */
+.s2-legend3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.s2-lg {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 18px;
+  padding: 16px 24px 17px 18px;
+  border-radius: var(--r);
+  background: var(--ex-a);
+  box-shadow: none;
+}
+.s2-lg > i {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ex);
+  font-style: normal;
+  font-size: var(--fs-text);
+  font-weight: 700;
+  color: #0a0a0c;
+}
+.s2-lg > b {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.s2-lg > small {
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+/* funil colorido por executor */
+.s2-wmap {
+  position: relative;
+  height: 620px;
+}
+.s2-xf {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.s2-xb {
+  display: flex;
+  gap: 10px;
+  width: var(--w);
+}
+.s2-xc {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 62px;
+  padding: 0 22px 0 12px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--ex-a), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 3px 0 0 var(--ex);
+  white-space: nowrap;
+}
+.s2-xc > i {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 6px;
+  border-radius: 19px;
+  background: rgba(0, 0, 0, 0.5);
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--ink);
+}
+.s2-xc > b {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.s2-xc > span {
+  margin-left: auto;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--ex);
+}
+.s2-plus-api {
+  font-style: normal;
+  color: var(--blue);
+}
+/* faixa da política: barra lateral que abraça as etapas 4 a 7 */
+.s2-pol {
+  position: absolute;
+  left: 1170px;
+  top: 216px;
+  width: 494px;
+  height: 278px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 24px;
+  --ex: var(--violet);
+  --ex-a: rgba(180, 160, 255, 0.16);
+}
+.s2-pol::before {
+  content: "";
+  border: 3px solid var(--violet);
+  border-left: 0;
+  border-radius: 0 16px 16px 0;
+  box-shadow: 6px 0 18px -8px rgba(180, 160, 255, 0.8);
+}
+.s2-pol > div {
+  align-self: center;
+}
+.s2-pol b {
+  display: block;
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.s2-pol small {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.s2-pol .s2-exec { margin-top: 16px; }
+
+/* depois da redação */
+.s2-after {
+  position: absolute;
+  left: 0;
+  top: 546px;
+  width: 1664px;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+.s2-after > p {
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+.s2-after .s2-xc {
+  height: 66px;
+  padding-right: 20px;
+}
+.s2-after .s2-xc > b { font-size: var(--fs-caption); }
+.s2-after .s2-xc > span { font-size: var(--fs-caption); }
+
+/* fora da hora da pergunta: duas trilhas */
+.s2-offl {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  margin-top: 44px;
+}
+.s2-lane {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
+  padding: 40px 38px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid transparent;
+}
+.s2-lane > header b {
+  display: block;
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.s2-lane > header small {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.s2-chain {
+  display: flex;
+  align-items: stretch;
+}
+.s2-ln {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 20px 18px;
+  border-radius: var(--r-sm);
+  background: var(--ex-a, rgba(255, 255, 255, 0.05));
+  box-shadow: inset 0 3px 0 var(--ex, var(--ink-2));
+}
+.s2-ln b {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.s2-ln small {
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.s2-ln > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ex, var(--ink));
+}
+.s2-ln > span::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ex, var(--ink));
+}
+.s2-ln.is-human {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+}
+.s2-ln.is-human b { color: #0a0a0c; }
+.s2-ln.is-human small { color: #3a3a40; }
+.s2-ln.is-human > span { color: #0a0a0c; }
+.s2-ln.is-human > span::before { background: #0a0a0c; }
+.s2-ar {
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-size: var(--fs-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+.slide.is-active .s2-st.is-cur b::after {
+    animation: none;
+  }
+.s2-cursor[data-anim] {
+    transition-duration: 250ms !important;
+  }
+}
+
+/* legenda A/B/C logo abaixo do título (slides 19 e 20): o mesmo respiro total */
+.head:has(+ .s2-legend3) { margin-bottom: 28px; }
+.s2-legend3 + .s2-wmap { margin-top: 20px; }

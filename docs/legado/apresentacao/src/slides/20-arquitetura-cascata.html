@@ -1,0 +1,1209 @@
+<!-- Seções 5 e 6 do roteiro: arquitetura em 4 camadas (slides 13 a 17)
+     e cascata de recuperação em 7 etapas (slides 18 a 26).
+     Estilos em src/css/82-arquitetura.css (prefixo s2-). -->
+
+<!-- ===================================================== 13 · Quatro camadas -->
+<section class="slide" data-layout="diagrama" data-title="Quatro camadas">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Arquitetura</p>
+    <h2 class="title title--md title--wide" data-anim="words">Quatro camadas. Uma fonte da verdade.</h2>
+  </div>
+
+  <div class="s2-canvas s2-arch">
+    <svg class="s2-svg" width="1664" height="700" viewBox="0 0 1664 700" aria-hidden="true">
+      <!-- build 2: contador e agente -->
+      <g data-anim="draw" data-step="2" data-delay="500">
+        <path d="M800 76 L800 128" />
+        <path class="s2-head fade-part" d="M791 126 L809 126 L800 141 Z" />
+      </g>
+      <g data-anim="draw" data-step="2" data-delay="700">
+        <path class="is-violet" d="M864 140 L864 88" />
+        <path class="s2-head is-violet fade-part" d="M855 90 L873 90 L864 75 Z" />
+      </g>
+      <g data-anim="draw" data-step="2" data-delay="900">
+        <path d="M760 300 L760 356" />
+        <path class="s2-head fade-part" d="M751 354 L769 354 L760 369 Z" />
+      </g>
+      <!-- build 3: busca ao vivo -->
+      <g data-anim="draw" data-step="3" data-delay="400">
+        <path class="is-blue" d="M1122 250 C1300 250 1360 262 1360 356" />
+        <path class="s2-head is-blue fade-part" d="M1351 354 L1369 354 L1360 369 Z" />
+      </g>
+      <g data-anim="draw" data-step="3" data-delay="900">
+        <path class="is-blue" d="M1168 445 L1004 445" />
+        <path class="s2-head is-blue fade-part" d="M1006 436 L1006 454 L991 445 Z" />
+      </g>
+      <!-- build 4: melhoria contínua, fora da produção -->
+      <g data-anim="draw" data-step="4" data-delay="500" style="--dur-draw: 1600ms">
+        <path d="M542 220 L100 220 Q60 220 60 260 L60 610 Q60 650 100 650 L118 650" />
+        <path class="s2-head fade-part" d="M116 641 L116 659 L131 650 Z" />
+      </g>
+      <g data-anim="draw" data-step="4" data-delay="1300" style="--dur-draw: 1600ms">
+        <path class="is-amber" d="M1552 650 L1564 650 Q1604 650 1604 610 L1604 220 Q1604 180 1564 180 L1136 180" />
+        <path class="s2-head is-amber fade-part" d="M1138 171 L1138 189 L1123 180 Z" />
+      </g>
+    </svg>
+
+    <!-- rótulos dos conectores -->
+    <span class="s2-at s2-tag s2-tag--bare" style="left: 730px; top: 108px" data-step="2" data-anim="fade" data-delay="900">pergunta</span>
+    <span class="s2-at s2-tag s2-tag--bare is-violet" style="left: 984px; top: 108px" data-step="2" data-anim="fade" data-delay="1100">resposta com citação</span>
+    <span class="s2-at s2-tag" style="left: 910px; top: 334px" data-step="2" data-anim="fade" data-delay="1300">consulta na data do fato</span>
+    <span class="s2-at s2-tag is-blue" style="left: 1252px; top: 222px" data-step="3" data-anim="fade" data-delay="900">quando a base não tem</span>
+    <span class="s2-at s2-tag is-blue" style="left: 1086px; top: 410px" data-step="3" data-anim="fade" data-delay="1300">nova norma</span>
+    <span class="s2-at s2-tag" style="left: 300px; top: 196px" data-step="4" data-anim="fade" data-delay="1100">respostas avaliadas</span>
+    <span class="s2-at s2-tag is-amber" style="left: 1350px; top: 156px" data-step="4" data-anim="fade" data-delay="2100">nova versão aprovada</span>
+
+    <!-- caixas -->
+    <div class="s2-box" style="left: 140px; top: 380px; width: 840px; height: 130px" data-step="1" data-anim="fade-up">
+      <i>1</i><b>Base legal no tempo</b><small>a biblioteca: toda a legislação, com todas as versões e datas</small>
+    </div>
+
+    <div class="s2-abs s2-who" style="left: 642px; top: 0; width: 380px" data-step="2" data-anim="fade-down">
+      <svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="10" r="6" fill="#0a0a0c" /><path d="M3 28 C3 19 27 19 27 28 Z" fill="#0a0a0c" /></svg>
+      Contador
+    </div>
+    <div class="s2-box s2-box--accent" style="left: 552px; top: 150px; width: 560px; height: 140px" data-step="2" data-anim="scale-in" data-delay="200">
+      <i>2</i><b>Agente de resposta</b><small>o consultor sênior: pesquisa, confere, responde</small>
+    </div>
+
+    <div class="s2-box" style="left: 1180px; top: 380px; width: 360px; height: 130px" data-step="3" data-anim="fade-left">
+      <i>3</i><b>Busca ao vivo</b><small>vai às fontes oficiais</small>
+    </div>
+
+    <div class="s2-abs s2-sep" style="top: 570px" data-step="4" data-anim="fade"><span>fora da produção</span></div>
+    <div class="s2-box s2-box--ghost" style="left: 140px; top: 600px; width: 1400px; height: 100px" data-step="4" data-anim="fade-up" data-delay="200">
+      <i>4</i><b>Melhoria contínua</b><small>feedback → benchmark → DGM → revisão humana</small>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano do Assistente, “Arquitetura geral”.</p>
+  <aside class="notes">
+    <p>Por dentro, são quatro camadas. Pensem num escritório bem organizado.</p>
+    <p><strong>Avance (1):</strong> a Camada 1 é a biblioteca: guarda toda a legislação, com todas as versões e datas.</p>
+    <p><strong>Avance (2):</strong> a Camada 2 é o consultor sênior: recebe a pergunta, pesquisa na biblioteca, confere e responde. O contador só conversa com ela.</p>
+    <p><strong>Avance (3):</strong> a Camada 3 é o estagiário que corre ao Diário Oficial quando falta algo na biblioteca, e tudo o que ele traz entra no acervo.</p>
+    <p><strong>Avance (4):</strong> a Camada 4 é a reunião semanal de qualidade, que revisa o que deu certo e errado e melhora o método. Fica fora da produção: só uma versão aprovada por um ser humano volta.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 14 · Cada artigo, todas as versões -->
+<section class="slide" data-layout="diagrama" data-title="Camada 1: versões">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Camada 1 · Base legal no tempo</p>
+    <h2 class="title title--md title--wide" data-anim="words">Cada artigo, todas as versões.</h2>
+    <p class="lead" data-anim="fade-up" data-delay="400">Artigo, parágrafo, inciso e alínea, com todas as redações e as datas de cada uma.</p>
+  </div>
+
+  <div class="s2-canvas s2-l1" style="height: 560px">
+    <i class="s2-trig s2-on1" data-step="1" data-anim="fade"></i>
+    <i class="s2-trig s2-on2" data-step="2" data-anim="fade"></i>
+
+    <!-- o artigo -->
+    <div class="s2-art" data-anim="fade-up" data-delay="450">
+      <div class="s2-art-h">Lei X, art. 3º</div>
+      <div class="s2-dev" style="--ind: 0"><em>caput</em><span class="s2-lines"><i></i><i style="width: 92%"></i><i style="width: 70%"></i></span></div>
+      <div class="s2-dev is-pick" style="--ind: 1"><em>§ 1º</em><span class="s2-lines"><i></i><i style="width: 64%"></i></span></div>
+      <div class="s2-dev" style="--ind: 2"><em>inciso I</em><span class="s2-lines"><i></i><i style="width: 50%"></i></span></div>
+      <div class="s2-dev" style="--ind: 3"><em>alínea a</em><span class="s2-lines"><i style="width: 80%"></i></span></div>
+      <div class="s2-dev" style="--ind: 1"><em>§ 2º</em><span class="s2-lines"><i></i><i style="width: 40%"></i></span></div>
+      <i class="s2-cut" style="top: 128px"></i>
+      <i class="s2-cut" style="top: 236px"></i>
+      <i class="s2-cut" style="top: 338px"></i>
+    </div>
+    <p class="s2-abs s2-cutnote small c-red" style="left: 0; top: 516px" data-anim="fade" data-delay="900">Jeito comum: blocos de tamanho fixo, cortados ao acaso.</p>
+    <p class="s2-abs small" style="left: 0; top: 516px; color: var(--violet)" data-step="1" data-anim="fade" data-delay="300">Nosso jeito: cada dispositivo é uma unidade inteira.</p>
+
+    <!-- ligação até as versões -->
+    <svg class="s2-svg" width="1664" height="560" viewBox="0 0 1664 560" aria-hidden="true">
+      <g data-anim="draw" data-step="2" data-delay="100">
+        <path class="is-violet" d="M566 216 C640 216 630 190 692 190" />
+      </g>
+    </svg>
+
+    <span class="s2-abs pill pill--violet" style="left: 700px; top: 0" data-step="2" data-anim="fade" data-delay="200">§ 1º · identificador estável (URN do LexML)</span>
+
+    <div class="s2-abs" style="left: 700px; top: 70px" data-step="2" data-anim="fade-left" data-delay="300">
+      <div class="s2-ver" style="position: relative">
+        <h4>Redação 1</h4>
+        <dl><dt>publicação</dt><dd>2015</dd><dt>início</dt><dd>2015</dd><dt>fim</dt><dd>2019</dd><dt>norma</dt><dd>Lei X</dd></dl>
+      </div>
+    </div>
+    <div class="s2-abs" style="left: 1020px; top: 70px" data-step="2" data-anim="fade-left" data-delay="450">
+      <div class="s2-ver is-valid" style="position: relative">
+        <h4>Redação 2</h4>
+        <dl><dt>publicação</dt><dd>2019</dd><dt>início</dt><dd>2020</dd><dt>fim</dt><dd>2022</dd><dt>norma</dt><dd>Lei Y</dd></dl>
+      </div>
+    </div>
+    <div class="s2-abs" style="left: 1340px; top: 70px" data-step="2" data-anim="fade-left" data-delay="600">
+      <div class="s2-ver" style="position: relative">
+        <h4>Redação 3</h4>
+        <dl><dt>publicação</dt><dd>2022</dd><dt>início</dt><dd>2023</dd><dt>fim</dt><dd>vigente</dd><dt>norma</dt><dd>Lei Z</dd></dl>
+      </div>
+    </div>
+
+    <!-- linha do tempo com o cursor de data -->
+    <div class="s2-axis" style="left: 700px; top: 392px; width: 940px" data-step="3" data-anim="fade">
+      <span class="s2-seg" style="left: 0; width: 296px"></span>
+      <span class="s2-seg is-valid" style="left: 320px; width: 296px"></span>
+      <span class="s2-seg" style="left: 640px; width: 300px"></span>
+      <small style="left: 0">2015</small>
+      <small style="left: 320px">2020</small>
+      <small style="left: 640px">2023</small>
+      <small style="left: 940px">hoje</small>
+      <span class="s2-cursor" style="left: 470px" data-anim="fade" data-delay="300"><span>data do fato: 2021</span></span>
+    </div>
+    <p class="s2-abs small" style="left: 700px; top: 492px" data-step="3" data-anim="fade" data-delay="1500">Toda consulta carrega uma data. Sem data, usa a de hoje e avisa.</p>
+  </div>
+
+  <p class="analogia" data-step="4" data-anim="fade">Como o histórico de versões de um documento: a foto da lei em cada data.</p>
+
+  <p class="source">Fonte: Plano do Assistente, Camada 1, “Unidade de armazenamento”. Normas e anos do exemplo são ilustrativos.</p>
+  <aside class="notes">
+    <p>A maioria das IAs corta a lei em blocos de texto de tamanho fixo, como quem rasga páginas de um livro. (Na tela: os cortes vermelhos.)</p>
+    <p><strong>Avance (1):</strong> nós guardamos a lei do jeito que vocês a leem: artigo, parágrafo, inciso, alínea.</p>
+    <p><strong>Avance (2):</strong> cada um tem um identificador nacional estável, o padrão URN do LexML, e uma lista de todas as redações que já teve, com a data de publicação, o início e o fim da vigência e a norma que causou a mudança.</p>
+    <p><strong>Avance (3):</strong> toda consulta carrega uma data. Se o contador não informa, usamos a data de hoje e avisamos. É uma máquina do tempo para cada parágrafo: você escolhe a data e ela mostra a redação daquele dia.</p>
+    <p><strong>Avance (analogia):</strong> É como o histórico de versões de um documento: dá para abrir a lei como ela estava em qualquer data, como uma fotografia daquele dia.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 15 · A lei não vive sozinha -->
+<section class="slide" data-layout="diagrama" data-title="Camada 1: rede de normas">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Camada 1 · Rede de normas</p>
+    <h2 class="title title--md title--wide" data-anim="words">A lei não vive sozinha.</h2>
+  </div>
+
+  <div class="s2-canvas" style="height: 680px">
+    <svg class="s2-svg" width="1664" height="680" viewBox="0 0 1664 680" aria-hidden="true">
+      <path class="is-amber" data-anim="draw" data-delay="600" d="M530 330 L120 90" />
+      <path class="is-blue" data-anim="draw" data-delay="850" d="M530 330 L120 330" />
+      <path class="is-blue" data-anim="draw" data-delay="1100" d="M530 330 L120 570" />
+      <path class="is-violet" data-anim="draw" data-delay="1350" d="M530 330 L920 90" />
+      <path class="is-green" data-anim="draw" data-delay="1600" d="M530 330 L920 330" />
+      <path data-anim="draw" data-delay="1850" d="M530 330 L920 570" />
+    </svg>
+
+    <div class="s2-at" style="left: 530px; top: 330px" data-anim="scale-in" data-delay="300">
+      <div class="s2-norm s2-norm--center"><b>A lei</b><small>o artigo consultado</small></div>
+    </div>
+
+    <div class="s2-at" style="left: 120px; top: 90px" data-anim="scale-in" data-delay="1000"><div class="s2-norm"><b>Lei nova</b><small>muda a redação</small></div></div>
+    <div class="s2-at" style="left: 120px; top: 330px" data-anim="scale-in" data-delay="1250"><div class="s2-norm"><b>Decreto</b><small>detalha a lei</small></div></div>
+    <div class="s2-at" style="left: 120px; top: 570px" data-anim="scale-in" data-delay="1500"><div class="s2-norm"><b>IN da Receita</b><small>detalha a lei</small></div></div>
+    <div class="s2-at" style="left: 920px; top: 90px" data-anim="scale-in" data-delay="1750"><div class="s2-norm"><b>Solução de Consulta</b><small>COSIT</small></div></div>
+    <div class="s2-at" style="left: 920px; top: 330px" data-anim="scale-in" data-delay="2000"><div class="s2-norm"><b>Acórdão</b><small>CARF</small></div></div>
+    <div class="s2-at" style="left: 920px; top: 570px" data-anim="scale-in" data-delay="2250"><div class="s2-norm"><b>Outro artigo</b><small>citado no texto</small></div></div>
+
+    <span class="s2-at s2-tag is-amber" style="left: 322px; top: 208px" data-anim="fade" data-delay="1200">altera · revoga</span>
+    <span class="s2-at s2-tag is-blue" style="left: 312px; top: 330px" data-anim="fade" data-delay="1450">regulamenta</span>
+    <span class="s2-at s2-tag is-blue" style="left: 322px; top: 452px" data-anim="fade" data-delay="1700">regulamenta</span>
+    <span class="s2-at s2-tag is-violet" style="left: 730px; top: 208px" data-anim="fade" data-delay="1950">interpreta</span>
+    <span class="s2-at s2-tag is-green" style="left: 740px; top: 330px" data-anim="fade" data-delay="2200">julga</span>
+    <span class="s2-at s2-tag" style="left: 730px; top: 452px" data-anim="fade" data-delay="2450">remete a</span>
+
+    <div class="s2-ladder" style="left: 1150px; top: 50px; width: 514px" data-step="1" data-anim="stagger" data-stagger="120" data-child-anim="fade-left">
+      <h4>Hierarquia das fontes</h4>
+      <div class="s2-rung" style="--i: 0"><i>1</i>Constituição</div>
+      <div class="s2-rung" style="--i: 1"><i>2</i>Leis complementares</div>
+      <div class="s2-rung" style="--i: 2"><i>3</i>Leis ordinárias</div>
+      <div class="s2-rung" style="--i: 3"><i>4</i>Decretos</div>
+      <div class="s2-rung" style="--i: 4"><i>5</i>Instruções normativas</div>
+      <div class="s2-rung" style="--i: 5"><i>6</i>Soluções de consulta</div>
+      <div class="s2-rung" style="--i: 6"><i>7</i>Jurisprudência</div>
+      <div class="s2-rung" style="--i: 7"><i>8</i>NBC TG / CPC</div>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano do Assistente, Camada 1, “Grafo de relações entre normas”, “Hierarquia de fontes” e “Reforma tributária”.</p>
+  <aside class="notes">
+    <p>Nenhum de vocês responde uma pergunta lendo só a lei. Vocês olham o decreto que regulamenta, a instrução normativa, a solução de consulta da Receita, o que o CARF decidiu.</p>
+    <p>A rede se desenha sozinha: a base guarda essas ligações. Quem altera quem, quem regulamenta, quem interpreta, quem julga, quem remete a quem.</p>
+    <p><strong>Avance (1):</strong> e o agente respeita a hierarquia das fontes, da Constituição até as normas do CFC, e aponta quando duas fontes divergem.</p>
+    <p>A reforma entra aqui também: CBS, IBS e IS convivendo com PIS/Cofins, ICMS e ISS por ano, até 2033.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 16 · Pesquisa como um sênior -->
+<section class="slide" data-layout="diagrama" data-title="Camada 2: o agente">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Camada 2 · Agente de resposta</p>
+    <h2 class="title title--md title--wide" data-anim="words">Pesquisa como um sênior.</h2>
+  </div>
+
+  <div class="s2-canvas s2-metro" style="height: 620px">
+    <i class="s2-trig s2-on2" data-step="2" data-anim="fade"></i>
+    <svg class="s2-svg" width="1664" height="620" viewBox="0 0 1664 620" aria-hidden="true">
+      <path class="is-violet" data-anim="draw" data-delay="200" style="--dur-draw: 2400ms" d="M120 26 L1544 26" />
+      <g data-anim="draw" data-step="1" data-delay="100">
+        <path d="M357 214 C357 300 119 300 119 388" />
+        <path d="M357 214 L357 388" />
+        <path d="M357 214 C357 300 594 300 594 388" />
+        <path d="M357 214 C357 300 832 300 832 388" />
+        <path d="M357 214 C357 300 1070 300 1070 388" />
+        <path d="M357 214 C357 300 1307 300 1307 388" />
+        <path d="M357 214 C357 300 1545 300 1545 388" />
+      </g>
+    </svg>
+
+    <div class="s2-abs s2-stop" style="left: 6px; top: 0" data-anim="fade-up" data-delay="300"><span class="s2-dotst"></span><b>Entender</b><small>tema, data, regime, UF</small></div>
+    <div class="s2-abs s2-stop" style="left: 243px; top: 0" data-anim="fade-up" data-delay="600"><span class="s2-dotst"></span><b>Rotear</b><small>o especialista certo</small></div>
+    <div class="s2-abs s2-stop is-search" style="left: 481px; top: 0" data-anim="fade-up" data-delay="900"><span class="s2-dotst"></span><b>Pesquisar</b><small>a cascata, a seguir</small></div>
+    <div class="s2-abs s2-stop" style="left: 718px; top: 0" data-anim="fade-up" data-delay="1200"><span class="s2-dotst"></span><b>Montar</b><small>a norma inteira, na data</small></div>
+    <div class="s2-abs s2-stop" style="left: 955px; top: 0" data-anim="fade-up" data-delay="1500"><span class="s2-dotst"></span><b>Redigir</b><small>direto, depois o fundamento</small></div>
+    <div class="s2-abs s2-stop" style="left: 1193px; top: 0" data-anim="fade-up" data-delay="1800"><span class="s2-dotst"></span><b>Verificar</b><small>cada afirmação</small></div>
+    <div class="s2-abs s2-stop is-end" style="left: 1430px; top: 0" data-anim="fade-up" data-delay="2100"><span class="s2-dotst"></span><b>Ou se abster</b><small>sem base, não inventa</small></div>
+
+    <div data-step="1">
+      <span class="s2-at s2-chip s2-spec" style="left: 119px; top: 418px" data-anim="pop" data-delay="600">Federal</span>
+      <span class="s2-at s2-chip s2-spec" style="left: 357px; top: 418px" data-anim="pop" data-delay="680">ICMS</span>
+      <span class="s2-at s2-chip s2-spec" style="left: 594px; top: 418px" data-anim="pop" data-delay="760">ISS</span>
+      <span class="s2-at s2-chip s2-spec" style="left: 832px; top: 418px" data-anim="pop" data-delay="840">Trabalhista</span>
+      <span class="s2-at s2-chip s2-spec" style="left: 1070px; top: 418px" data-anim="pop" data-delay="920">Societário</span>
+      <span class="s2-at s2-chip s2-spec" style="left: 1307px; top: 418px" data-anim="pop" data-delay="1000">Contábil</span>
+      <span class="s2-at s2-chip s2-spec" style="left: 1545px; top: 418px" data-anim="pop" data-delay="1080">Reforma tributária</span>
+      <p class="s2-abs micro" style="left: 0; top: 470px" data-anim="fade" data-delay="1300">Sete especialistas, cada um com suas fontes prioritárias.</p>
+    </div>
+
+    <div class="s2-abs answer" style="right: 0; top: 520px; padding: 24px 36px; font-size: 30px" data-step="2" data-anim="fade-up" data-delay="300">
+      <p><strong>“Não encontrei base legal para afirmar isso.”</strong></p>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano do Assistente, Camada 2, “Fluxo de uma pergunta” e “Perfil do cliente opcional”.</p>
+  <aside class="notes">
+    <p>Esse é o agente, a parte com que vocês conversam. Ele trabalha como um sênior com método. (As estações acendem sozinhas, na ordem.)</p>
+    <p>Primeiro entende: tema, data do fato, regime, UF, município, CNAE. Se falta um dado que muda a resposta, por exemplo a UF numa pergunta de ICMS, ele pergunta de volta em vez de supor.</p>
+    <p><strong>Avance (1):</strong> depois encaminha para o especialista certo, que tem prioridades de fonte próprias.</p>
+    <p>Pesquisa (é a cascata que vem a seguir). Monta o contexto com a norma inteira, na redação da data. Redige: resposta direta primeiro, fundamento depois. Uma segunda etapa confere cada afirmação.</p>
+    <p><strong>Avance (2):</strong> e, se não houver fundamento, ele diz que não encontrou. O contador também pode cadastrar o perfil do cliente para não repetir contexto.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 17 · Busca ao vivo -->
+<section class="slide" data-layout="diagrama" data-title="Camada 3: busca ao vivo">
+  <div class="s2-live" style="display: grid; grid-template-columns: 620px 964px; gap: 80px; height: 100%">
+    <i class="s2-trig s2-on1" data-step="1" data-anim="fade"></i>
+    <div class="stack" style="justify-content: flex-start; gap: 0">
+      <p class="kicker" data-anim="fade">Camada 3 · Busca ao vivo</p>
+      <h2 class="title title--md" data-anim="words">Só fontes oficiais.</h2>
+      <p class="lead" data-anim="fade-up" data-delay="400">Quando a base ainda não tem a norma, o agente vai direto à fonte.</p>
+
+      <div class="s2-say mt-2" data-step="1" data-anim="fade-up" data-delay="900">
+        <span class="s2-flag s2-flag--amber">“Ainda não validada na base.”</span>
+        <p>A resposta sai com o link e a data da consulta.</p>
+      </div>
+      <div class="s2-say s2-say--end" data-step="2" data-anim="fade-up" data-delay="900">
+        <span class="s2-flag s2-flag--green">Entra na base, conferida.</span>
+        <p>A próxima pergunta já encontra o material validado.</p>
+      </div>
+    </div>
+
+    <div class="s2-canvas" style="height: 896px">
+      <svg class="s2-svg" width="964" height="896" viewBox="0 0 964 896" aria-hidden="true">
+        <ellipse class="is-faint is-dash no-draw" cx="482" cy="330" rx="380" ry="282" data-anim="fade" data-delay="200" />
+        <g data-anim="draw" data-step="1" data-delay="100">
+          <path class="is-amber" d="M482 78 L482 214" />
+          <path class="s2-head is-amber fade-part" d="M473 212 L491 212 L482 227 Z" />
+        </g>
+        <g data-anim="draw" data-step="2" data-delay="100">
+          <path class="is-green" d="M482 434 L482 722" />
+          <path class="s2-head is-green fade-part" d="M473 720 L491 720 L482 735 Z" />
+        </g>
+      </svg>
+
+      <div class="s2-at" style="left: 482px; top: 330px" data-anim="scale-in" data-delay="300">
+        <div class="s2-agent"><div><b>Agente</b><small>Camada 2</small></div></div>
+      </div>
+
+      <div data-anim="stagger" data-stagger="90" data-delay="700" data-child-anim="pop">
+        <span class="s2-at s2-chip s2-src" style="left: 292px; top: 572px">Banco Central</span>
+        <span class="s2-at s2-chip s2-src" style="left: 153px; top: 470px">CNPJ</span>
+        <span class="s2-at s2-chip s2-src" style="left: 102px; top: 330px">CFC</span>
+        <span class="s2-at s2-chip s2-src" style="left: 153px; top: 190px">Planalto</span>
+        <span class="s2-at s2-chip s2-src" style="left: 292px; top: 88px">LexML</span>
+        <span class="s2-at s2-chip s2-src is-hot" style="left: 482px; top: 50px">Diário Oficial</span>
+        <span class="s2-at s2-chip s2-src" style="left: 672px; top: 88px">Receita Federal</span>
+        <span class="s2-at s2-chip s2-src" style="left: 811px; top: 190px">CARF</span>
+        <span class="s2-at s2-chip s2-src" style="left: 862px; top: 330px">STF · STJ</span>
+        <span class="s2-at s2-chip s2-src" style="left: 811px; top: 470px">Sefaz</span>
+        <span class="s2-at s2-chip s2-src" style="left: 672px; top: 572px">CONFAZ</span>
+      </div>
+
+      <span class="s2-at s2-flag s2-flag--amber" style="left: 600px; top: 158px; font-size: 20px; padding: 8px 16px" data-step="1" data-anim="pop" data-delay="900">não validada</span>
+      <span class="s2-at s2-tag is-green" style="left: 600px; top: 660px" data-step="2" data-anim="fade" data-delay="700">fila de ingestão</span>
+
+      <div class="s2-box" style="left: 222px; top: 740px; width: 520px; height: 120px; display: grid; grid-template-columns: auto 1fr; column-gap: 20px; align-items: center" data-anim="fade-up" data-delay="1700">
+        <b style="font-size: 54px; background: var(--grad-v); -webkit-background-clip: text; background-clip: text; color: transparent; grid-row: span 2">1</b>
+        <b>Base legal no tempo</b>
+        <small>Camada 1</small>
+      </div>
+      <span class="s2-at s2-flag s2-flag--green" style="left: 820px; top: 800px; font-size: 20px; padding: 8px 16px" data-step="2" data-anim="pop" data-delay="1100">validada</span>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano do Assistente, Camada 3, “Busca ao vivo em fontes oficiais”.</p>
+  <aside class="notes">
+    <p>Uma lei publicada hoje cedo ainda não passou pelo nosso processo de ingestão.</p>
+    <p>Nesse caso, o agente vai direto às fontes oficiais: Planalto, Receita, Diário Oficial, CARF, Sefaz, CONFAZ, CFC, cadastros e índices do Banco Central. Busca na internet aberta só como último recurso e só em domínios oficiais.</p>
+    <p><strong>Avance (1):</strong> a regra de confiança é clara: o que vem da busca ao vivo sai com o link, a data da consulta e a marca “ainda não validada na base”.</p>
+    <p><strong>Avance (2):</strong> e todo documento útil entra na fila de ingestão. A próxima pergunta sobre o assunto já encontra o material conferido.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 18 · Do barato ao caro -->
+<section class="slide" data-layout="diagrama" data-title="Cascata: do barato ao caro">
+  <div class="head">
+    <p class="kicker" data-anim="fade">A cascata de recuperação</p>
+    <h2 class="title title--md title--wide" data-anim="words">Do barato ao caro.</h2>
+  </div>
+
+  <div class="s2-canvas" style="height: 600px">
+    <div class="s2-funnel" style="left: 0; top: 10px; width: 940px" data-step="1" data-anim="stagger" data-stagger="150" data-child-anim="fade-down">
+      <div class="s2-band" style="--w: 940px"><i>1</i><span>Árvore de temas</span><u></u></div>
+      <div class="s2-band" style="--w: 870px"><i>2</i><span>Cache semântico</span><u></u></div>
+      <div class="s2-band" style="--w: 800px"><i>3</i><span>Filtro de vigência</span><u></u></div>
+      <div class="s2-band" style="--w: 730px"><i>4</i><span>Palavras + significado</span><u></u></div>
+      <div class="s2-band" style="--w: 660px"><i>5</i><span>Grafo de normas</span><u></u></div>
+      <div class="s2-band" style="--w: 590px"><i>6</i><span>Revisor</span><u></u></div>
+      <div class="s2-band is-final" style="--w: 520px"><i>7</i><span>Redação</span><u></u></div>
+    </div>
+
+    <svg class="s2-svg" width="1664" height="600" viewBox="0 0 1664 600" aria-hidden="true">
+      <g data-anim="draw" data-step="3" data-delay="100">
+        <path class="is-accent" d="M742 524 C990 524 990 284 852 284" />
+        <path class="s2-head is-violet fade-part" d="M854 275 L854 293 L839 284 Z" />
+      </g>
+    </svg>
+    <p class="s2-abs small" style="left: 962px; top: 374px; color: var(--violet); line-height: 1.3" data-step="3" data-anim="fade" data-delay="900">faltou algo?<br>busca de novo</p>
+
+    <div class="s2-abs" style="left: 1176px; top: 0; width: 488px">
+      <div class="s2-big ink-text" style="font-size: 108px" data-anim="blur-in" data-delay="500">2 milhões</div>
+      <p class="s2-big-label" data-anim="fade" data-delay="900">de dispositivos na base, na nossa estimativa</p>
+    </div>
+    <div class="s2-abs s2-cost" style="left: 1176px; top: 222px; width: 488px; height: 150px" data-step="2" data-anim="fade" data-delay="500">
+      <p><b>Etapas 1 a 6:</b> código, índices e modelos pequenos, rápidos e baratos.<br><b>Etapa 7:</b> o Claude redige, uma vez só.</p>
+    </div>
+    <div class="s2-abs" style="left: 1176px; top: 410px; width: 488px" data-step="2" data-anim="fade-up">
+      <div class="s2-big grad-text" style="font-size: 108px">5 a 10</div>
+      <p class="s2-big-label">trechos chegam à redação</p>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano do Assistente, “Estratégia de recuperação”; pesquisa/01-infra-aws.md, §2.1 (estimativa de dispositivos na primeira onda).</p>
+  <aside class="notes">
+    <p>Agora o coração técnico. A base terá, na nossa estimativa, cerca de 2 milhões de dispositivos na primeira onda. O agente nunca lê tudo.</p>
+    <p><strong>Avance (1):</strong> cada pergunta passa por um funil de sete etapas.</p>
+    <p><strong>Avance (2):</strong> as primeiras são código, índices e modelos pequenos, rápidos e baratos. O Claude, que é o que custa por leitura, redige uma vez só, no fim, e lê só de 5 a 10 trechos. É como uma triagem de hospital: a recepção, a enfermagem e os exames resolvem quase tudo, e o especialista só vê o caso já preparado.</p>
+    <p><strong>Avance (3):</strong> se faltou algo, o funil volta à etapa 4 e busca de novo. Quem decide é uma política treinada, que vamos ver no fim. Antes das etapas, um mapa de quem faz cada uma.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 18b · Quem faz o quê -->
+<section class="slide" data-layout="diagrama" data-title="Quem faz o quê">
+  <div class="head">
+    <h2 class="title title--md title--wide" data-anim="words">Quem faz o quê, etapa por etapa.</h2>
+  </div>
+
+  <div class="s2-legend3" data-anim="stagger" data-stagger="160" data-delay="500">
+    <div class="s2-lg s2-ex-api"><i>A</i><b>Claude, por API</b><small>entende a pergunta e redige a resposta</small></div>
+    <div class="s2-lg s2-ex-gpu"><i>B</i><b>Nossos modelos abertos, na GPU</b><small>servidor alugado, não o seu computador</small></div>
+    <div class="s2-lg s2-ex-code"><i>C</i><b>Código e banco de dados</b><small>regras fixas, sem IA</small></div>
+  </div>
+
+  <div class="s2-wmap">
+    <div class="s2-xf" data-step="1" data-anim="stagger" data-stagger="140" data-child-anim="fade-down">
+      <div class="s2-xb" style="--w: 1200px"><div class="s2-xc s2-ex-api"><i>1</i><b>Entender a pergunta e achar o tema</b><span>Claude Haiku</span></div></div>
+      <div class="s2-xb" style="--w: 1140px"><div class="s2-xc s2-ex-api"><i>2</i><b>Cache semântico</b><span>embedding Voyage + Haiku confere a vigência</span></div></div>
+      <div class="s2-xb" style="--w: 1080px"><div class="s2-xc s2-ex-code"><i>3</i><b>Filtro de vigência</b><span>banco de dados</span></div></div>
+      <div class="s2-xb" style="--w: 1020px">
+        <div class="s2-xc s2-ex-code"><i>4a</i><b>Palavras exatas</b><span>banco (BM25)</span></div>
+        <div class="s2-xc s2-ex-gpu"><i>4b</i><b>Significado</b><span>modelo pequeno (ColBERT)</span></div>
+      </div>
+      <div class="s2-xb" style="--w: 960px"><div class="s2-xc s2-ex-code"><i>5</i><b>Rede de normas</b><span>algoritmo de grafo (PageRank)</span></div></div>
+      <div class="s2-xb" style="--w: 900px"><div class="s2-xc s2-ex-gpu"><i>6</i><b>Revisor</b><span>lê ~50, escolhe 5 a 10 (Rank1)</span></div></div>
+      <div class="s2-xb" style="--w: 840px"><div class="s2-xc s2-ex-api"><i>7</i><b>Redação</b><span>Haiku · Sonnet ~9% · Opus ~1%</span></div></div>
+    </div>
+
+    <div class="s2-pol" data-step="2" data-anim="fade-left">
+      <div>
+        <b>Controle do funil</b>
+        <small>Busca de novo, reformula a busca ou para. Treinado por reforço (Search-R1).</small>
+        <span class="s2-exec s2-ex-gpu">nosso modelo pequeno</span>
+      </div>
+    </div>
+
+    <div class="s2-after" data-step="3" data-anim="stagger" data-stagger="180" data-child-anim="fade-up">
+      <p>Antes de entregar a resposta:</p>
+      <div class="s2-xc s2-ex-code"><i>✓</i><b>Citações conferidas</b><span>código compara com o texto oficial <em class="s2-plus-api">+ Haiku</em></span></div>
+      <div class="s2-xc s2-ex-code"><i>=</i><b>Cálculos</b><span>fator R, alíquotas, prazos: só código</span></div>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano de desenvolvimento (6 meses); pesquisa/08-modelo-mvp.md (mix por dificuldade: Sonnet 9%, Opus 1%).</p>
+  <aside class="notes">
+    <p>O cliente pediu para deixar isso bem claro: quem faz cada etapa. São três tipos de executor. (Na tela, a legenda.)</p>
+    <ul>
+      <li><strong>A, em azul:</strong> o Claude, da Anthropic, chamado por API. Entra só nas pontas: entender a pergunta e redigir a resposta.</li>
+      <li><strong>B, em violeta:</strong> modelos abertos que são nossos, rodando numa GPU de um servidor alugado. Não é o computador de vocês: vocês só usam o navegador.</li>
+      <li><strong>C, em verde:</strong> código comum e banco de dados. Regras fixas, sem IA.</li>
+    </ul>
+    <p><strong>Avance (1):</strong> o funil, colorido por executor. 1: o Claude Haiku, o modelo mais barato, entende a pergunta e acha o ramo na árvore de temas. 2: o cache compara a pergunta com as já respondidas (um embedding da Voyage, por API) e o Haiku confere se as normas citadas ainda valem. 3: o filtro de vigência é banco de dados puro. 4: palavras exatas, banco; significado, um modelo pequeno nosso na GPU. 5: a rede de normas é um algoritmo de grafo, sem IA. 6: o revisor é um modelo aberto nosso na GPU: lê uns 50 candidatos e escolhe de 5 a 10, com a justificativa. 7: a redação é do Claude: o Haiku na maioria; o Sonnet nas difíceis, cerca de 9%; o Opus raramente, cerca de 1%.</p>
+    <p><strong>Avance (2):</strong> quem decide se busca de novo, reformula ou para é uma política pequena, também nossa, na GPU, treinada por reforço.</p>
+    <p><strong>Avance (3):</strong> antes de sair, as citações são conferidas por código, comparando letra a letra com o texto oficial, com o Haiku de apoio. E todo cálculo, fator R, alíquota, prazo, é feito por código. Nunca pela IA “de cabeça”.</p>
+    <p><strong>Por que ter GPU própria?</strong> Duas razões. Primeiro, treinar com os nossos dados: não dá para treinar o Claude; o reforço ajusta os pesos do modelo, e isso só se faz num modelo que é nosso. Segundo, custo: mandar 50 artigos ao Claude a cada pergunta é justamente o que encarece o jeito comum. Aqui o Claude lê só os 5 a 10 trechos que sobraram.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 18c · Fora da hora da pergunta -->
+<section class="slide" data-layout="diagrama" data-title="Fora da hora da pergunta">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Quem faz o quê</p>
+    <h2 class="title title--md title--wide" data-anim="words">Fora da hora da pergunta.</h2>
+  </div>
+
+  <div class="s2-legend3" data-anim="fade" data-delay="300">
+    <div class="s2-lg s2-ex-api"><i>A</i><b>Claude, por API</b><small>extrai, desempata e propõe</small></div>
+    <div class="s2-lg s2-ex-gpu"><i>B</i><b>Nossos modelos, na GPU</b><small>servidor alugado</small></div>
+    <div class="s2-lg s2-ex-code"><i>C</i><b>Código e banco de dados</b><small>sem IA</small></div>
+  </div>
+
+  <div class="s2-offl mt-1">
+    <div class="s2-lane" data-step="1" data-anim="fade-up">
+      <header><b>Ingestão</b><small>todo dia, quando sai norma nova</small></header>
+      <div class="s2-chain" data-anim="stagger" data-stagger="160" data-delay="200" data-child-anim="fade-right">
+        <div class="s2-ln s2-ex-api"><b>Extrai</b><small>artigo, versão, datas</small><span>Haiku, em lote</span></div>
+        <i class="s2-ar">→</i>
+        <div class="s2-ln s2-ex-api"><b>Desempata</b><small>só se dois extratores discordam</small><span>Sonnet</span></div>
+        <i class="s2-ar">→</i>
+        <div class="s2-ln s2-ex-code"><b>Valida e consolida</b><small>regras fixas</small><span>código</span></div>
+        <i class="s2-ar">→</i>
+        <div class="s2-ln s2-ex-gpu"><b>Indexa</b><small>o significado (ColBERT)</small><span>nossa GPU</span></div>
+      </div>
+    </div>
+
+    <div class="s2-lane" data-step="2" data-anim="fade-up">
+      <header><b>Melhoria contínua</b><small>DGM, semanal ou mensal</small></header>
+      <div class="s2-chain" data-anim="stagger" data-stagger="160" data-delay="200" data-child-anim="fade-right">
+        <div class="s2-ln s2-ex-api"><b>Propõe variações</b><small>do código e dos prompts</small><span>modelo forte</span></div>
+        <i class="s2-ar">→</i>
+        <div class="s2-ln s2-ex-code"><b>Testa cada uma</b><small>no benchmark dos contadores</small><span>código</span></div>
+        <i class="s2-ar">→</i>
+        <div class="s2-ln is-human"><b>Aprova ou não</b><small>nada entra sozinho</small><span>uma pessoa</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Fonte: Plano de desenvolvimento (6 meses), cronograma e orçamento (ingestão, ciclos DGM e GPU por hora); Plano do Assistente, Camada 4.</p>
+  <aside class="notes">
+    <p>Duas coisas acontecem fora da hora da pergunta, sem ninguém esperando.</p>
+    <p><strong>Avance (1):</strong> a ingestão. Quando sai uma norma nova, o Haiku, em lote, que é mais barato, extrai artigo, versão e datas. Se dois extratores discordam, e só nesse caso, o Sonnet desempata. Validar e consolidar é código, com regras fixas. E a indexação por significado roda na nossa GPU.</p>
+    <p><strong>Avance (2):</strong> a melhoria contínua, a DGM, semanal ou mensal. Um modelo forte propõe variações do código e dos prompts do agente. Cada variação é testada no benchmark que vocês, contadores, montaram. E nenhuma entra em produção sem a aprovação de uma pessoa.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 19 · 1 · Árvore de temas -->
+<section class="slide" data-layout="diagrama" data-title="1 · Árvore de temas">
+  <div class="s2-trail" data-at="1">
+    <div class="s2-st is-cur"><b>1</b><span>Temas</span></div>
+    <div class="s2-st"><b>2</b><span>Cache</span></div>
+    <div class="s2-st"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st"><b>4</b><span>Palavras + significado</span></div>
+    <div class="s2-st"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">A busca começa no ramo certo.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="600">
+      <span class="s2-exec s2-ex-api"><em>quem faz:</em> Claude Haiku, por API</span>
+      <span class="pill pill--outline">RAPTOR · árvore de temas</span>
+    </div>
+  </div>
+
+  <div class="s2-vis s2-tree">
+    <i class="s2-trig s2-on1" data-step="1" data-anim="fade"></i>
+    <svg class="s2-svg" width="1664" height="520" viewBox="0 0 1664 520" aria-hidden="true">
+      <!-- cada nível de galhos se desenha junto com os seus temas (mesmo ritmo dos chips) -->
+      <g data-anim="draw" data-delay="400" style="--dur-draw: 700ms">
+        <path d="M980 55 C980 100 560 100 560 145" />
+        <path class="s2-faint" d="M980 55 C980 100 860 100 860 145" />
+        <path class="s2-faint" d="M980 55 C980 100 1120 100 1120 145" />
+        <path class="s2-faint" d="M980 55 C980 100 1400 100 1400 145" />
+      </g>
+      <g data-anim="draw" data-delay="850" style="--dur-draw: 650ms">
+        <path class="s2-faint" d="M560 195 C560 245 400 245 400 295" />
+        <path d="M560 195 C560 245 580 245 580 295" />
+        <path class="s2-faint" d="M560 195 C560 245 760 245 760 295" />
+        <path class="s2-faint" d="M860 195 C860 245 1070 245 1070 295" />
+      </g>
+      <g data-anim="draw" data-delay="1250" style="--dur-draw: 650ms">
+        <path class="s2-faint" d="M580 345 C580 395 420 395 420 445" />
+        <path d="M580 345 C580 395 590 395 590 445" />
+        <path class="s2-faint" d="M580 345 C580 395 760 395 760 445" />
+        <path class="s2-faint" d="M1070 345 L1070 445" />
+      </g>
+      <g data-anim="draw" data-step="1" data-delay="200" style="--dur-draw: 1200ms">
+        <path class="is-accent" d="M980 55 C980 100 560 100 560 145 M560 195 C560 245 580 245 580 295 M580 345 C580 395 590 395 590 445" />
+      </g>
+      <g data-anim="draw" data-step="1" data-delay="0">
+        <path class="is-violet" d="M372 60 C620 60 700 30 866 30" />
+        <path class="s2-head is-violet fade-part" d="M864 21 L864 39 L879 30 Z" />
+      </g>
+    </svg>
+
+    <div class="s2-at" style="left: 980px; top: 30px" data-anim="scale-in" data-delay="300"><span class="s2-chip is-root is-path">Acervo inteiro</span></div>
+    <div class="s2-at" style="left: 560px; top: 170px" data-anim="scale-in" data-delay="700"><span class="s2-chip is-path">Simples Nacional <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 860px; top: 170px" data-anim="scale-in" data-delay="780"><span class="s2-chip s2-faint">ICMS <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 1120px; top: 170px" data-anim="scale-in" data-delay="860"><span class="s2-chip s2-faint">IRPJ e CSLL <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 1400px; top: 170px" data-anim="scale-in" data-delay="940"><span class="s2-chip s2-faint">Trabalhista <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 400px; top: 320px" data-anim="scale-in" data-delay="1100"><span class="s2-chip s2-faint">MEI <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 580px; top: 320px" data-anim="scale-in" data-delay="1180"><span class="s2-chip is-path">Anexos <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 760px; top: 320px" data-anim="scale-in" data-delay="1260"><span class="s2-chip s2-faint">Exclusão <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 1070px; top: 320px" data-anim="scale-in" data-delay="1340"><span class="s2-chip s2-faint">Substituição tributária <i class="s2-sum"></i></span></div>
+    <div class="s2-at" style="left: 420px; top: 470px" data-anim="scale-in" data-delay="1500"><span class="s2-chip s2-faint">Anexo III</span></div>
+    <div class="s2-at" style="left: 590px; top: 470px" data-anim="scale-in" data-delay="1580"><span class="s2-chip is-leaf">Fator R</span></div>
+    <div class="s2-at" style="left: 760px; top: 470px" data-anim="scale-in" data-delay="1660"><span class="s2-chip s2-faint">Anexo V</span></div>
+    <div class="s2-at" style="left: 1070px; top: 470px" data-anim="scale-in" data-delay="1740"><span class="s2-chip s2-faint">MVA</span></div>
+
+    <div class="s2-abs s2-q" style="left: 0; top: 0" data-step="1" data-anim="fade-right">
+      <p>“Meu cliente de software estava no anexo certo?”</p>
+      <div class="pills">
+        <span class="pill">Simples</span>
+        <span class="pill">03/2022</span>
+        <span class="pill">software</span>
+      </div>
+    </div>
+    <p class="s2-abs micro" style="left: 0; top: 250px; width: 300px; color: var(--ink-2)" data-anim="fade" data-delay="1900"><i class="s2-sum" style="margin-right: 8px"></i>Cada ramo guarda um resumo do que contém.</p>
+  </div>
+
+  <div class="s2-vs" data-step="2" data-anim="stagger" data-stagger="250">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>Joga a pergunta no acervo inteiro e torce.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>Classifica tema, tributo, UF e data. A busca já começa na estante certa.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="3" data-anim="fade">Como o sumário de um livro.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Árvore de temas com resumos (RAPTOR)” (Sarthi et al., ICLR 2024); cronograma de 6 meses.</p>
+  <aside class="notes">
+    <p>A primeira etapa é saber de que assunto estamos falando. Construímos uma árvore de temas que segue a taxonomia contábil: Simples Nacional, depois anexos, depois fator R; ou ICMS, depois substituição tributária, depois MVA.</p>
+    <p>Cada ramo tem um resumo do que contém, uma técnica publicada chamada RAPTOR. A analogia é o sumário de um livro: capítulo, seção, artigo.</p>
+    <p><strong>Avance (1):</strong> a nossa pergunta de exemplo desce pelos ramos e para em “Fator R”.</p>
+    <p><strong>Avance (2):</strong> o jeito comum é jogar a pergunta no acervo inteiro e torcer. Aqui a busca já começa na estante certa, e a pergunta também ganha tributo, UF e data.</p>
+    <p>Quem faz: o Claude Haiku, por API, o modelo mais barato da Anthropic (o selo azul). A árvore com os resumos fica pronta no mês 2.</p>
+    <p><strong>Avance (analogia):</strong> É como o sumário de um livro: capítulo, seção, artigo. Ninguém lê o livro inteiro para achar um assunto.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 20 · 2 · Cache semântico -->
+<section class="slide" data-layout="diagrama" data-title="2 · Cache semântico">
+  <div class="s2-trail" data-at="2">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-cur"><b>2</b><span>Cache</span></div>
+    <div class="s2-st"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st"><b>4</b><span>Palavras + significado</span></div>
+    <div class="s2-st"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">Já respondida? E a lei ainda vale?</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-api"><em>quem faz:</em> Voyage + Haiku, por API</span>
+      <span class="pill pill--outline">Cache semântico</span>
+    </div>
+  </div>
+
+  <div class="s2-vis s2-cache">
+    <i class="s2-trig s2-on1" data-step="1" data-anim="fade"></i>
+    <i class="s2-trig s2-on2" data-step="2" data-anim="fade"></i>
+    <i class="s2-trig s2-on3" data-step="3" data-anim="fade"></i>
+
+    <div class="s2-abs row" style="left: 0; top: 0; gap: 26px" data-anim="stagger" data-stagger="200" data-delay="400">
+      <span class="s2-bub">“Qual o prazo do DAS?”</span>
+      <span class="s2-eq">≈</span>
+      <span class="s2-bub">“Até quando pago o Simples?”</span>
+      <span class="small" style="color: var(--violet)">mesma pergunta, outras palavras</span>
+    </div>
+
+    <svg class="s2-svg" width="1664" height="520" viewBox="0 0 1664 520" aria-hidden="true">
+      <g data-anim="draw" data-step="1" data-delay="700">
+        <path d="M600 330 L700 330" />
+        <path class="s2-head fade-part" d="M700 321 L700 339 L715 330 Z" />
+      </g>
+      <g data-anim="draw" data-step="2" data-delay="300">
+        <path class="is-green" d="M888 300 C990 300 990 236 1086 236" />
+        <path class="s2-head is-green fade-part" d="M1086 227 L1086 245 L1101 236 Z" />
+      </g>
+      <g data-anim="draw" data-step="3" data-delay="300">
+        <path class="is-red" d="M888 360 C990 360 990 430 1086 430" />
+        <path class="s2-head is-red fade-part" d="M1086 421 L1086 439 L1101 430 Z" />
+      </g>
+    </svg>
+
+    <div class="s2-abs s2-cab" style="left: 0; top: 160px" data-anim="fade-up" data-delay="900">
+      <span class="s2-drawer"></span>
+      <span class="s2-drawer is-open"></span>
+      <span class="s2-drawer"></span>
+    </div>
+    <p class="s2-abs micro" style="left: 0; top: 500px; width: 250px; text-align: center; color: var(--ink-2)" data-anim="fade" data-delay="1100">pareceres já aprovados</p>
+
+    <div class="s2-abs" style="left: 320px; top: 278px" data-step="1" data-anim="fade-right" data-delay="300">
+      <div class="s2-folder" style="position: relative"><b>Resposta validada</b><small>cita LC 123/2006, art. 18</small><span class="s2-seal">✓</span></div>
+    </div>
+
+    <div class="s2-at" style="left: 800px; top: 330px" data-anim="scale-in" data-delay="1100">
+      <div class="s2-gate">
+        <svg viewBox="0 0 92 92" aria-hidden="true"><circle cx="46" cy="46" r="38" /><path d="M46 22 L46 46 L62 56" /></svg>
+      </div>
+    </div>
+    <p class="s2-abs small" style="left: 650px; top: 428px; width: 300px; text-align: center; line-height: 1.3" data-anim="fade" data-delay="1300">As normas citadas ainda valem?</p>
+
+    <div class="s2-abs s2-out s2-out--ok" style="left: 1110px; top: 180px" data-step="2" data-anim="fade-left" data-delay="900"><b>Sim: sai pronta</b>com as citações já conferidas</div>
+    <div class="s2-abs s2-out s2-out--no" style="left: 1110px; top: 374px" data-step="3" data-anim="fade-left" data-delay="900"><b>Mudou: não reutiliza</b>a pergunta segue para a cascata</div>
+  </div>
+
+  <div class="s2-vs" data-step="3" data-anim="stagger" data-stagger="250" data-delay="1500">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>Devolve a resposta antiga, mesmo com a lei já alterada.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>Só devolve se todas as normas citadas continuam vigentes.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="4" data-anim="fade">A resposta guardada na gaveta, conferindo se a lei mudou.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Guia das técnicas: Cache semântico”; Plano de desenvolvimento (6 meses), M5.</p>
+  <aside class="notes">
+    <p>Muitas perguntas se repetem com outras palavras. “Qual o prazo do DAS?” e “até quando pago o Simples?” são a mesma pergunta.</p>
+    <p><strong>Avance (1):</strong> o cache semântico reconhece isso e puxa a resposta já validada. A analogia é a pasta de pareceres aprovados do escritório.</p>
+    <p><strong>Avance (2):</strong> o detalhe que faz a diferença: ele só devolve a resposta se todas as normas citadas continuarem vigentes.</p>
+    <p><strong>Avance (3):</strong> se alguma mudou, a pasta volta para a gaveta e a pergunta segue a cascata. Um cache comum devolveria uma resposta vencida, que é o pior erro possível.</p>
+    <p>Quem faz: a comparação de significado usa um embedding da Voyage, por API, e o Haiku confere a vigência das normas citadas. Entra no mês 5, quando já há respostas validadas pelos contadores do grupo.</p>
+    <p><strong>Avance (analogia):</strong> É a resposta guardada na gaveta: antes de entregar de novo, a gente confere se a lei citada mudou.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 21 · 3 · Filtro de vigência -->
+<section class="slide" data-layout="diagrama" data-title="3 · Filtro de vigência">
+  <div class="s2-trail" data-at="3">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-done"><b>2</b><span>Cache</span></div>
+    <div class="s2-st is-cur"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st"><b>4</b><span>Palavras + significado</span></div>
+    <div class="s2-st"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">Só o que valia na data do fato.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-code"><em>quem faz:</em> banco de dados, sem IA</span>
+      <span class="pill pill--outline">Filtro de vigência e metadados</span>
+    </div>
+  </div>
+
+  <div class="s2-vis s2-vig">
+    <i class="s2-trig s2-on1" data-step="1" data-anim="fade"></i>
+    <i class="s2-trig s2-on2" data-step="2" data-anim="fade"></i>
+
+    <div class="s2-abs s2-filters" style="left: 0; top: 10px; width: 480px">
+      <div class="s2-filter" data-step="1"><i>1</i><div><b>Só a esfera certa.</b><small>federal</small></div></div>
+      <div class="s2-filter" data-step="2"><i>2</i><div><b>Só o tributo certo.</b><small>Simples Nacional</small></div></div>
+      <div class="s2-filter" data-step="3"><i>3</i><div><b>Só a redação válida na data.</b><small>março de 2022</small></div></div>
+    </div>
+
+    <div class="s2-abs s2-lib" style="left: 540px; top: 0; width: 1124px" data-anim="fade-up" data-delay="400">
+      <em>Federal</em>
+      <div class="s2-shelf t-off"><span>IRPJ e CSLL</span></div>
+      <div class="s2-shelf t-off"><span>PIS e Cofins</span></div>
+      <div class="s2-shelf is-on"><span>Simples Nacional</span></div>
+      <div class="s2-shelf t-off"><span>IPI</span></div>
+      <em class="r-off">Estadual</em>
+      <div class="s2-shelf r-off"><span>ICMS</span></div>
+      <div class="s2-shelf r-off"><span>ICMS-ST</span></div>
+      <div class="s2-shelf r-off"><span>IPVA</span></div>
+      <div class="s2-shelf r-off"><span>ITCMD</span></div>
+      <em class="r-off">Municipal</em>
+      <div class="s2-shelf r-off"><span>ISS</span></div>
+      <div class="s2-shelf r-off"><span>IPTU</span></div>
+      <div class="s2-shelf r-off"><span>ITBI</span></div>
+      <div class="s2-shelf r-off"><span>Taxas</span></div>
+    </div>
+
+    <div class="s2-abs" style="left: 540px; top: 330px; width: 1124px" data-step="3" data-anim="fade-up">
+      <div class="s2-books">
+        <span class="s2-book" style="--bk: 150px">2019</span>
+        <span class="s2-book" style="--bk: 162px">2020</span>
+        <span class="s2-book" style="--bk: 146px">2021</span>
+        <span class="s2-book is-valid" style="--bk: 170px">2022</span>
+        <span class="s2-book" style="--bk: 154px">2023</span>
+        <span class="s2-book" style="--bk: 164px">2024</span>
+        <span class="s2-book" style="--bk: 150px">2025</span>
+      </div>
+      <span class="s2-cursor" style="left: 562px; top: -66px" data-anim="fade" data-delay="500"><span>data do fato: 03/2022</span></span>
+    </div>
+  </div>
+
+  <div class="s2-vs" data-step="4" data-anim="stagger" data-stagger="250">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>Busca em tudo e espera que o texto antigo não apareça.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>A redação de outra data nem entra no caminho.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="5" data-anim="fade">Como a data de validade no rótulo.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Guia das técnicas: Filtro de vigência e metadados”. Estantes e anos ilustrativos.</p>
+  <aside class="notes">
+    <p>Essa etapa é simples e é obrigatória. Antes de procurar qualquer palavra, o sistema separa só o que pode responder.</p>
+    <p><strong>Avance (1):</strong> a esfera certa: federal, estadual ou municipal.</p>
+    <p><strong>Avance (2):</strong> o tributo certo.</p>
+    <p><strong>Avance (3):</strong> e, principalmente, a redação válida na data do fato. É ir direto à estante certa da biblioteca e pegar só a edição do ano em que o fato aconteceu.</p>
+    <p><strong>Avance (4):</strong> o jeito comum é buscar em tudo e esperar que o texto antigo não apareça. Aqui ele simplesmente não está no caminho. É essa etapa que torna possível responder sobre 2022 com a regra de 2022.</p>
+    <p>Quem faz: o banco de dados, sem IA nenhuma. É uma consulta comum por esfera, tributo e data. Fica pronta no primeiro mês.</p>
+    <p><strong>Avance (analogia):</strong> É como a data de validade no rótulo: o que venceu, ou ainda não valia naquela data, nem entra na sacola.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 22 · 4a · Palavras exatas -->
+<section class="slide" data-layout="diagrama" data-title="4a · Palavras exatas">
+  <div class="s2-trail" data-at="4">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-done"><b>2</b><span>Cache</span></div>
+    <div class="s2-st is-done"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st is-cur"><b>4a</b><span>Palavras + significado</span></div>
+    <div class="s2-st"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">Palavras exatas, e as do contador.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-code"><em>quem faz:</em> banco de dados, sem IA</span>
+      <span class="pill pill--outline">BM25 + perguntas previstas (doc2query)</span>
+    </div>
+  </div>
+
+  <div class="s2-vis">
+    <div class="s2-abs s2-search" style="left: 0; top: 0" data-anim="fade-up" data-delay="600">
+      <svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="M17 17 L24 24" /></svg>“art. 18, § 5º-J”
+    </div>
+
+    <div class="s2-abs s2-index" style="left: 0; top: 96px" data-anim="fade-up" data-delay="300">
+      <h4>Índice remissivo</h4>
+      <ul>
+        <li>Anexo V <span>→</span></li>
+        <li><mark data-anim="highlight" data-delay="1300">art. 18, § 5º-J</mark> <span>→</span></li>
+        <li>CFOP 5.405 <span>→</span></li>
+        <li>fator R <span>→</span></li>
+        <li>NCM 8471 <span>→</span></li>
+      </ul>
+    </div>
+
+    <svg class="s2-svg" width="1664" height="520" viewBox="0 0 1664 520" aria-hidden="true">
+      <g data-anim="draw" data-delay="1900">
+        <path class="is-amber" d="M604 226 C680 226 680 190 738 190" />
+        <path class="s2-head is-amber fade-part" d="M738 181 L738 199 L753 190 Z" />
+      </g>
+      <g data-anim="draw" data-step="2" data-delay="300">
+        <path class="is-blue" d="M1212 478 C1300 478 1330 450 1331 418" />
+        <path class="s2-head is-blue fade-part" d="M1322 418 L1340 418 L1331 403 Z" />
+      </g>
+    </svg>
+
+    <div class="s2-abs s2-doc" style="left: 760px; top: 96px" data-anim="fade-up" data-delay="500">
+      <b>LC 123/2006</b>
+      <small>art. 18, § 5º-J</small>
+      <span class="s2-lines"><i></i><i class="is-hit"></i><i></i><i></i><i></i><i></i></span>
+    </div>
+
+    <div data-step="1" data-anim="stagger" data-stagger="260" data-child-anim="pop">
+      <div class="s2-abs s2-post" style="left: 1160px; top: 66px; --r: -2.5deg">Como calculo o fator R?</div>
+      <div class="s2-abs s2-post" style="left: 1190px; top: 178px; --r: 1.8deg">Quando vou para o Anexo III?</div>
+      <div class="s2-abs s2-post" style="left: 1170px; top: 296px; --r: -1.2deg"><mark data-anim="highlight" data-step="2" data-delay="900">Posso pagar menos se aumentar a folha?</mark></div>
+    </div>
+
+    <div class="s2-abs s2-search" style="left: 600px; top: 446px" data-step="2" data-anim="fade-up">
+      <svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="M17 17 L24 24" /></svg>“posso pagar menos se aumentar a folha?”
+    </div>
+  </div>
+
+  <div class="s2-vs" data-step="3" data-anim="stagger" data-stagger="250">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>Um índice separado só para as perguntas hipotéticas.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>As perguntas ficam coladas no próprio artigo: um índice a menos.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="4" data-anim="fade">É como o Ctrl+F.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Guia das técnicas: BM25” e “Perguntas previstas por dispositivo (doc2query)” (Nogueira et al., 2019).</p>
+  <aside class="notes">
+    <p>A quarta etapa tem duas buscas lado a lado. A primeira é por palavras, uma técnica clássica chamada BM25, que dá mais peso a termos raros. É o índice remissivo no fim do livro. Para número de lei, NCM, CFOP e siglas, nada a substitui.</p>
+    <p><strong>Avance (1):</strong> mas a lei não usa as palavras do contador. Então, na ingestão, um modelo lê cada artigo e escreve as perguntas que ele responde, e colamos essas perguntas no artigo, como post-its.</p>
+    <p><strong>Avance (2):</strong> quando alguém pergunta “posso pagar menos se aumentar a folha?”, encontra o artigo do fator R, que não tem essas palavras.</p>
+    <p><strong>Avance (3):</strong> o jeito comum seria um índice separado; aqui é um índice a menos.</p>
+    <p>Quem faz: na hora da pergunta, só o banco de dados, sem IA. Os post-its são escritos antes, uma vez, na ingestão.</p>
+    <p><strong>Avance (analogia):</strong> É como o Ctrl+F: acha o número exato do artigo, letra por letra.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 23 · 4b · Significado, termo a termo -->
+<section class="slide" data-layout="diagrama" data-title="4b · Significado">
+  <div class="s2-trail" data-at="4">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-done"><b>2</b><span>Cache</span></div>
+    <div class="s2-st is-done"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st is-cur"><b>4b</b><span>Palavras + significado</span></div>
+    <div class="s2-st"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">Significado, termo a termo.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-gpu"><em>quem faz:</em> nosso modelo pequeno, na GPU</span>
+      <span class="pill pill--outline">ColBERT · recuperador multivetorial</span>
+    </div>
+  </div>
+
+  <div class="s2-vis" style="height: 620px">
+    <!-- jeito comum -->
+    <div class="s2-panel s2-panel--them" style="left: 0; height: 620px" data-step="1" data-anim="fade-up">
+      <em>Jeito comum</em>
+      <strong>1 resumo por artigo</strong>
+      <div class="s2-abs s2-doc" style="left: 36px; top: 170px; width: 200px; padding: 22px 24px">
+        <b style="font-size: 22px">Artigo</b>
+        <span class="s2-lines"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div class="s2-at" style="left: 420px; top: 260px; width: 140px; height: 140px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.3); display: grid; place-items: center">
+        <svg width="70" height="70" viewBox="0 0 70 70" aria-hidden="true"><path d="M12 58 L56 14" stroke="#a1a1a6" stroke-width="5" stroke-linecap="round" fill="none" /><path d="M40 12 L58 12 L58 30" stroke="#a1a1a6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg>
+      </div>
+      <p class="s2-at micro" style="left: 420px; top: 356px">1 vetor</p>
+      <span class="s2-at s2-chip" style="left: 680px; top: 170px; font-size: 20px; padding: 8px 16px">pergunta A</span>
+      <span class="s2-at s2-chip" style="left: 680px; top: 260px; font-size: 20px; padding: 8px 16px">pergunta B</span>
+      <span class="s2-at s2-chip" style="left: 680px; top: 350px; font-size: 20px; padding: 8px 16px">pergunta C</span>
+      <span class="s2-at s2-x c-green" style="left: 545px; top: 152px" data-anim="pop" data-delay="1500">✓</span>
+      <span class="s2-at s2-x c-red" style="left: 545px; top: 300px" data-anim="pop" data-delay="1700">✕</span>
+      <span class="s2-at s2-x c-red" style="left: 545px; top: 384px" data-anim="pop" data-delay="1900">✕</span>
+      <p class="s2-cap">Há combinações de artigos que um vetor só não consegue recuperar. Prova matemática: teste LIMIT.</p>
+    </div>
+
+    <svg class="s2-svg" width="1664" height="620" viewBox="0 0 1664 620" aria-hidden="true" style="z-index: 2">
+      <g data-anim="draw" data-step="1" data-delay="400">
+        <path class="is-faint" d="M240 260 L340 260" />
+        <path class="s2-head fade-part" d="M338 251 L338 269 L353 260 Z" />
+      </g>
+      <g data-anim="draw" data-step="1" data-delay="900">
+        <path class="is-green" d="M620 170 C560 170 520 190 494 220" />
+      </g>
+      <g data-anim="draw" data-step="1" data-delay="1100">
+        <path class="is-red" d="M620 260 C560 260 540 275 520 300 C540 318 580 312 600 300" />
+        <path class="is-red" d="M620 350 C570 350 540 360 520 384 C545 398 585 392 604 378" />
+      </g>
+      <!-- nosso jeito: cada termo da pergunta acha seu par -->
+      <g data-anim="draw" data-step="2" data-delay="900" style="--dur-draw: 1100ms">
+        <path class="is-violet" d="M991 236 C991 300 973 300 973 368" />
+        <path class="is-violet" d="M1173 236 C1173 300 1118 300 1118 368" />
+        <path class="is-violet" d="M1355 236 C1355 300 1410 300 1410 368" />
+        <path class="is-violet" d="M1537 236 C1537 300 1556 300 1556 368" />
+      </g>
+    </svg>
+
+    <div class="s2-panel s2-panel--us" style="left: 864px; height: 620px" data-step="2" data-anim="fade-up">
+      <em>Nosso jeito</em>
+      <strong>1 nota por termo</strong>
+      <p class="s2-abs micro" style="left: 36px; top: 118px">pergunta</p>
+      <div class="s2-at s2-term is-q" style="left: 127px; top: 192px"><span class="s2-chip">folha</span><svg viewBox="0 0 34 22"><path d="M17 0 L17 18 M10 11 L17 19 L24 11" /></svg></div>
+      <div class="s2-at s2-term is-q" style="left: 309px; top: 192px"><span class="s2-chip">faturamento</span><svg viewBox="0 0 34 22"><path d="M17 0 L17 18 M10 11 L17 19 L24 11" /></svg></div>
+      <div class="s2-at s2-term is-q" style="left: 491px; top: 192px"><span class="s2-chip">software</span><svg viewBox="0 0 34 22"><path d="M17 0 L17 18 M10 11 L17 19 L24 11" /></svg></div>
+      <div class="s2-at s2-term is-q" style="left: 673px; top: 192px"><span class="s2-chip">anexo</span><svg viewBox="0 0 34 22"><path d="M17 0 L17 18 M10 11 L17 19 L24 11" /></svg></div>
+
+      <p class="s2-abs micro" style="left: 36px; top: 478px">artigo</p>
+      <div class="s2-at s2-term" style="left: 109px; top: 412px"><svg viewBox="0 0 34 22"><path d="M17 22 L17 4 M10 11 L17 3 L24 11" /></svg><span class="s2-chip">salários</span></div>
+      <div class="s2-at s2-term" style="left: 254px; top: 412px"><svg viewBox="0 0 34 22"><path d="M17 22 L17 4 M10 11 L17 3 L24 11" /></svg><span class="s2-chip">receita</span></div>
+      <div class="s2-at s2-term is-dim" style="left: 400px; top: 412px"><svg viewBox="0 0 34 22"><path d="M17 22 L17 4 M10 11 L17 3 L24 11" /></svg><span class="s2-chip">bruta</span></div>
+      <div class="s2-at s2-term" style="left: 546px; top: 412px"><svg viewBox="0 0 34 22"><path d="M17 22 L17 4 M10 11 L17 3 L24 11" /></svg><span class="s2-chip">intelectual</span></div>
+      <div class="s2-at s2-term" style="left: 692px; top: 412px"><svg viewBox="0 0 34 22"><path d="M17 22 L17 4 M10 11 L17 3 L24 11" /></svg><span class="s2-chip">Anexo III</span></div>
+      <p class="s2-cap">Cada termo da pergunta procura seu melhor par no artigo. “Faturamento” encontra “receita”.</p>
+    </div>
+  </div>
+
+  <p class="analogia analogia--pe" data-step="3" data-anim="fade">Um bibliotecário que entende o que você quis dizer.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Guia das técnicas: Recuperador multivetorial (ColBERT)” (Khattab e Zaharia, 2020; Weller et al., ICLR 2026, teste LIMIT).</p>
+  <aside class="notes">
+    <p>A segunda busca da etapa 4 é por significado.</p>
+    <p><strong>Avance (1):</strong> o jeito comum, hoje, resume cada trecho num único vetor, uma espécie de impressão digital numérica. Em 2026, pesquisadores da Google DeepMind provaram que esse resumo único tem um limite matemático: há combinações de documentos que ele simplesmente não consegue recuperar, mesmo com perguntas simples. O teste se chama LIMIT.</p>
+    <p><strong>Avance (2):</strong> usamos um recuperador multivetorial, chamado ColBERT: em vez de uma frase-resumo por artigo, uma nota para cada termo, e cada termo da pergunta procura sua melhor correspondência. “Faturamento” acha “receita”.</p>
+    <p>Quem faz: um modelo pequeno, aberto, rodando na nossa GPU alugada. Por ser nosso, dá para ajustá-lo ao português jurídico com os nossos dados (mês 3). E somos honestos sobre o teste: se não ganhar do método comum no benchmark dos contadores, entra no lançamento desligado.</p>
+    <p><strong>Avance (analogia):</strong> É o bibliotecário que entende o que você quis dizer, mesmo quando você não usa as palavras da lei.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 24 · 5 · O aviso que se espalha -->
+<section class="slide" data-layout="diagrama" data-title="5 · Grafo de normas">
+  <div class="s2-trail" data-at="5">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-done"><b>2</b><span>Cache</span></div>
+    <div class="s2-st is-done"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st is-done"><b>4</b><span>Palavras + significado</span></div>
+    <div class="s2-st is-cur"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">O aviso que se espalha.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-code"><em>quem faz:</em> algoritmo de grafo, sem IA</span>
+      <span class="pill pill--outline">HippoRAG 2 · PageRank personalizado</span>
+    </div>
+  </div>
+
+  <div class="s2-vis s2-net">
+    <i class="s2-trig s2-on1" data-step="1" data-anim="fade"></i>
+    <i class="s2-trig s2-on2" data-step="2" data-anim="fade"></i>
+
+    <svg class="s2-svg" width="1664" height="520" viewBox="0 0 1664 520" aria-hidden="true">
+      <g class="is-faint" data-anim="draw" data-delay="300">
+        <path class="is-faint" d="M340 130 L760 60" />
+        <path class="is-faint" d="M340 130 L760 260" />
+        <path class="is-faint" d="M340 390 L760 260" />
+        <path class="is-faint" d="M340 390 L760 460" />
+        <path class="is-faint" d="M760 60 L760 260" />
+        <path class="is-faint" d="M760 260 L760 460" />
+        <path class="is-faint" d="M340 130 L110 40" />
+        <path class="is-faint" d="M340 130 L100 260" />
+        <path class="is-faint" d="M340 390 L100 260" />
+        <path class="is-faint" d="M100 260 L110 470" />
+      </g>
+      <!-- a onda: primeiro salto -->
+      <g data-anim="draw" data-step="2" data-delay="0" style="--dur-draw: 900ms">
+        <path class="is-accent" d="M340 130 L760 60" />
+        <path class="is-accent" d="M340 130 L760 260" />
+        <path class="is-accent" d="M340 390 L760 260" />
+        <path class="is-accent" d="M340 390 L760 460" />
+        <path class="is-violet" style="stroke-opacity: .5" d="M340 130 L110 40" />
+      </g>
+      <!-- segundo salto: reforço entre vizinhos -->
+      <g data-anim="draw" data-step="2" data-delay="700" style="--dur-draw: 700ms">
+        <path class="is-accent" d="M760 60 L760 260" />
+        <path class="is-accent" d="M760 460 L760 260" />
+      </g>
+    </svg>
+
+    <div class="s2-at" style="left: 340px; top: 130px" data-anim="scale-in" data-delay="300"><div class="s2-norm is-seed"><b>LC 123, art. 18, § 5º-J</b><small>achado na etapa 4</small></div></div>
+    <div class="s2-at" style="left: 340px; top: 390px" data-anim="scale-in" data-delay="380"><div class="s2-norm is-seed"><b>LC 123, art. 18, § 5º-M</b><small>achado na etapa 4</small></div></div>
+    <div class="s2-at" style="left: 760px; top: 60px" data-anim="scale-in" data-delay="460"><div class="s2-norm h2"><b>Res. CGSN 140</b><small>regulamenta</small></div></div>
+    <div class="s2-at" style="left: 760px; top: 260px" data-anim="scale-in" data-delay="540"><div class="s2-norm h3"><b>Solução de Consulta</b><small>COSIT · interpreta</small></div></div>
+    <div class="s2-at" style="left: 760px; top: 460px" data-anim="scale-in" data-delay="620"><div class="s2-norm h2"><b>Acórdão</b><small>CARF · julga</small></div></div>
+    <div class="s2-at" style="left: 110px; top: 40px" data-anim="scale-in" data-delay="700"><div class="s2-norm h1"><b>Lei que alterou</b></div></div>
+    <div class="s2-at" style="left: 100px; top: 260px" data-anim="scale-in" data-delay="780"><div class="s2-norm h0"><b>art. 18-A</b><small>MEI</small></div></div>
+    <div class="s2-at" style="left: 110px; top: 470px" data-anim="scale-in" data-delay="860"><div class="s2-norm h0"><b>IN de outro tema</b></div></div>
+
+    <div class="s2-abs" style="left: 1060px; top: 0; width: 604px" data-step="3">
+      <p class="small mb-1" data-anim="fade">Chegam juntos, num passo só:</p>
+      <ol class="s2-rank" data-anim="stagger" data-stagger="160" data-delay="150" data-child-anim="fade-left">
+        <li><i>1</i><span>LC 123, art. 18, §§ 5º-J e 5º-M<small>a lei</small></span></li>
+        <li><i>2</i><span>Solução de Consulta COSIT<small>interpreta</small></span></li>
+        <li><i>3</i><span>Res. CGSN 140<small>regulamenta</small></span></li>
+        <li><i>4</i><span>Acórdão do CARF<small>julga</small></span></li>
+      </ol>
+    </div>
+    <div class="s2-abs" style="left: 1060px; top: 372px; width: 604px; display: flex; align-items: center; gap: 22px" data-step="4" data-anim="blur-in">
+      <span class="s2-big grad-text" style="font-size: 84px">10 a 30×</span>
+      <span class="small" style="line-height: 1.3; white-space: nowrap">mais barato que<br>buscar em rodadas</span>
+    </div>
+  </div>
+
+  <div class="s2-vs" data-step="4" data-anim="stagger" data-stagger="250" data-delay="700">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>Busca de novo, rodada após rodada, seguindo cada remissão.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>A relevância se espalha pela rede a partir dos artigos achados.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="5" data-anim="fade">Quem cita quem: o boca a boca entre as normas.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Guia das técnicas: HippoRAG 2” (Gutiérrez et al., 2024 e 2025; “10 a 30×” é o resultado do artigo original).</p>
+  <aside class="notes">
+    <p>Encontrados os artigos principais, falta o resto: o decreto que regulamenta, a solução de consulta que interpreta, o acórdão que aplica. É a rede de normas que vimos na Camada 1.</p>
+    <p><strong>Avance (1):</strong> acendem os dois artigos achados na etapa 4.</p>
+    <p><strong>Avance (2):</strong> usamos uma técnica chamada HippoRAG 2, um PageRank personalizado, o mesmo princípio do antigo Google: a relevância parte dos artigos encontrados e se espalha pela rede; o que recebe mais ligações relevantes sobe. É como um aviso que corre pela rede de colegas: quem é citado por mais gente importante aparece primeiro.</p>
+    <p><strong>Avance (3):</strong> lei, regulamento, interpretação e julgamento chegam juntos, num passo só.</p>
+    <p><strong>Avance (4):</strong> o jeito comum é buscar de novo, rodada após rodada, seguindo remissões. No artigo original, esse caminho foi de 10 a 30 vezes mais barato que a busca em rodadas.</p>
+    <p>Quem faz: um algoritmo de grafo, conta pura, sem IA. Fica pronto no mês 2.</p>
+    <p><strong>Avance (analogia):</strong> É ver quem cita quem: o boca a boca entre as normas. A norma muito citada pelas que importam ganha peso.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 25 · 6 · O revisor que explica -->
+<section class="slide" data-layout="diagrama" data-title="6 · Revisor">
+  <div class="s2-trail" data-at="6">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-done"><b>2</b><span>Cache</span></div>
+    <div class="s2-st is-done"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st is-done"><b>4</b><span>Palavras + significado</span></div>
+    <div class="s2-st is-done"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st is-cur"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">Um revisor que lê e explica.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-gpu"><em>quem faz:</em> nosso modelo aberto, na GPU</span>
+      <span class="pill pill--outline">Rank1 · reranker de raciocínio</span>
+    </div>
+  </div>
+
+  <div class="s2-vis">
+    <!-- candidatos -->
+    <div class="s2-abs" style="left: 0; top: 0; width: 320px" data-anim="fade-up" data-delay="400">
+      <p class="s2-pile-label"><b>~50 candidatos</b>das etapas 4 e 5</p>
+      <div style="position: relative; height: 300px; margin-top: 26px">
+        <span class="s2-abs s2-card" style="left: 0; top: 0"></span>
+        <span class="s2-abs s2-card" style="left: 6px; top: 16px"></span>
+        <span class="s2-abs s2-card" style="left: 12px; top: 32px"></span>
+        <span class="s2-abs s2-card" style="left: 18px; top: 48px"></span>
+        <span class="s2-abs s2-card" style="left: 24px; top: 64px"></span>
+        <span class="s2-abs s2-card" style="left: 30px; top: 80px"></span>
+        <span class="s2-abs s2-card" style="left: 36px; top: 96px"></span>
+        <span class="s2-abs s2-card" style="left: 42px; top: 112px"></span>
+        <span class="s2-abs s2-card" style="left: 48px; top: 128px"></span>
+        <span class="s2-abs s2-card" style="left: 54px; top: 144px"></span>
+        <span class="s2-abs s2-card" style="left: 60px; top: 160px"></span>
+      </div>
+    </div>
+
+    <!-- a mesa do revisor -->
+    <div class="s2-abs" style="left: 400px; top: 34px; width: 790px" data-step="1">
+      <p class="micro mb-1" data-anim="fade">o revisor lê cada um, decide e anota o porquê</p>
+      <div class="s2-review">
+        <span class="s2-cand" data-anim="fade-right" data-delay="100">LC 123, art. 18, § 5º-J</span>
+        <span class="s2-mark is-ok" data-anim="pop" data-delay="500">✓</span>
+        <span class="s2-note is-ok" data-anim="wipe" data-delay="700"><b>responde:</b> fator R em 2022</span>
+      </div>
+      <div class="s2-review">
+        <span class="s2-cand" data-anim="fade-right" data-delay="1300">LC 123, art. 18-A</span>
+        <span class="s2-mark is-no" data-anim="pop" data-delay="1700">✕</span>
+        <span class="s2-note is-no" data-anim="wipe" data-delay="1900"><b>não responde:</b> é sobre MEI</span>
+      </div>
+      <div class="s2-review">
+        <span class="s2-cand" data-anim="fade-right" data-delay="2500">Solução de Consulta COSIT</span>
+        <span class="s2-mark is-ok" data-anim="pop" data-delay="2900">✓</span>
+        <span class="s2-note is-ok" data-anim="wipe" data-delay="3100"><b>responde:</b> interpreta o fator R</span>
+      </div>
+    </div>
+
+    <!-- as duas pilhas -->
+    <div class="s2-abs" style="left: 1210px; top: 20px; width: 454px" data-step="2">
+      <div style="position: relative; height: 70px" data-anim="stagger" data-stagger="90" data-child-anim="fade-right">
+        <span class="s2-abs s2-card is-ok" style="left: 0"></span>
+        <span class="s2-abs s2-card is-ok" style="left: 26px"></span>
+        <span class="s2-abs s2-card is-ok" style="left: 52px"></span>
+        <span class="s2-abs s2-card is-ok" style="left: 78px"></span>
+        <span class="s2-abs s2-card is-ok" style="left: 104px"></span>
+        <span class="s2-abs s2-card is-ok" style="left: 130px"></span>
+        <span class="s2-abs s2-card is-ok" style="left: 156px"></span>
+      </div>
+      <p class="s2-pile-label mt-1" data-anim="fade" data-delay="700"><b class="grad-text">5 a 10 trechos</b>seguem, cada um com o porquê</p>
+
+      <div style="position: relative; height: 70px; margin-top: 70px" data-anim="stagger" data-stagger="50" data-delay="900" data-child-anim="fade-right">
+        <span class="s2-abs s2-card is-no" style="left: 0"></span>
+        <span class="s2-abs s2-card is-no" style="left: 12px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 24px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 36px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 48px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 60px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 72px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 84px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 96px"></span>
+        <span class="s2-abs s2-card is-no" style="left: 108px"></span>
+      </div>
+      <p class="s2-pile-label mt-1" data-anim="fade" data-delay="1500"><b style="color: var(--ink-2)">Descartados</b>com o motivo registrado</p>
+    </div>
+  </div>
+
+  <div class="s2-vs" data-step="3" data-anim="stagger" data-stagger="250">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>Um ordenador dá uma nota e pronto, sem dizer por quê.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>Lê, decide e registra o motivo: dá para auditar cada escolha.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="4" data-anim="fade">O estagiário traz 50; o sênior escolhe 5 e explica por quê.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Reranker de raciocínio (Rank1)” (Weller et al., COLM 2025); cronograma de 6 meses.</p>
+  <aside class="notes">
+    <p>Depois das buscas, temos uns 50 candidatos. A etapa 6 escolhe os 5 a 10 melhores.</p>
+    <p><strong>Avance (1):</strong> o nosso é um reranker de raciocínio, técnica chamada Rank1: ele pensa antes de decidir e anota o motivo. É um revisor que lê cada candidato e escreve “este responde porque…” ou “este não responde porque…”.</p>
+    <p><strong>Avance (2):</strong> ficam de 5 a 10 trechos; os outros saem com o motivo registrado.</p>
+    <p><strong>Avance (3):</strong> o jeito comum é um ordenador que dá uma nota e pronto, sem dizer por quê. Num produto que precisa mostrar a base legal, essa justificativa é ouro: dá para auditar por que um artigo entrou e outro não.</p>
+    <p>Quem faz: um modelo aberto, nosso, na GPU alugada. É aqui que a GPU própria mais compensa: mandar 50 artigos ao Claude a cada pergunta é o que encarece o jeito comum. O revisor é treinado com os nossos dados no mês 3, e só substitui o reranker provisório por API se ganhar dele no benchmark.</p>
+    <p><strong>Avance (analogia):</strong> É o estagiário que traz 50 documentos e o sênior que escolhe 5 e explica por quê.</p>
+  </aside>
+</section>
+
+<!-- ===================================================== 26 · 7 · A resposta e a decisão de parar -->
+<section class="slide" data-layout="diagrama" data-title="7 · Decisão de parar">
+  <div class="s2-trail" data-at="7">
+    <div class="s2-st is-done"><b>1</b><span>Temas</span></div>
+    <div class="s2-st is-done"><b>2</b><span>Cache</span></div>
+    <div class="s2-st is-done"><b>3</b><span>Vigência</span></div>
+    <div class="s2-st is-done"><b>4</b><span>Palavras + significado</span></div>
+    <div class="s2-st is-done"><b>5</b><span>Grafo</span></div>
+    <div class="s2-st is-done"><b>6</b><span>Revisor</span></div>
+    <div class="s2-st is-cur"><b>7</b><span>Redação</span></div>
+  </div>
+  <div class="s2-hd">
+    <h2 class="title title--md" data-anim="words">Saber a hora de parar.</h2>
+    <div class="s2-hd-tags" data-anim="fade" data-delay="500">
+      <span class="s2-exec s2-ex-api"><em>redige:</em> Claude Haiku, Sonnet ou Opus</span>
+      <span class="s2-exec s2-ex-gpu"><em>decide parar:</em> nossa política, na GPU</span>
+    </div>
+  </div>
+
+  <div class="s2-vis">
+    <div class="s2-funnel s2-mini" style="left: 0; top: 0; width: 620px; --fg: 8px" data-anim="fade-up" data-delay="400">
+      <div class="s2-band" style="--w: 620px; --bh: 52px"><i>1</i><span>Árvore de temas</span></div>
+      <div class="s2-band" style="--w: 580px; --bh: 52px"><i>2</i><span>Cache semântico</span></div>
+      <div class="s2-band" style="--w: 540px; --bh: 52px"><i>3</i><span>Filtro de vigência</span></div>
+      <div class="s2-band is-key" style="--w: 500px; --bh: 52px"><i>4</i><span>Palavras + significado</span></div>
+      <div class="s2-band" style="--w: 460px; --bh: 52px"><i>5</i><span>Grafo de normas</span></div>
+      <div class="s2-band" style="--w: 420px; --bh: 52px"><i>6</i><span>Revisor</span></div>
+      <div class="s2-band is-final is-key" style="--w: 380px; --bh: 52px"><i>7</i><span>Redação</span></div>
+    </div>
+
+    <svg class="s2-svg" width="1664" height="520" viewBox="0 0 1664 520" aria-hidden="true">
+      <g data-anim="draw" data-step="1" data-delay="100">
+        <path class="is-accent" d="M512 386 C730 386 730 206 574 206" />
+        <path class="s2-head is-violet fade-part" d="M576 197 L576 215 L561 206 Z" />
+      </g>
+      <g data-anim="draw" data-step="3" data-delay="100">
+        <path d="M310 418 L310 440" />
+        <path class="s2-head fade-part" d="M301 438 L319 438 L310 453 Z" />
+      </g>
+    </svg>
+    <p class="s2-abs small" style="left: 690px; top: 262px; color: var(--violet); line-height: 1.3" data-step="1" data-anim="fade" data-delay="900">faltou algo?<br>busca de novo</p>
+
+    <div class="s2-at" style="left: 310px; top: 488px" data-step="3" data-anim="pop" data-delay="500"><span class="s2-final">Resposta citada</span></div>
+
+    <div class="s2-abs s2-meter" style="left: 880px; top: 0; width: 784px" data-step="2" data-anim="fade-up">
+      <h4>Como a política aprende</h4>
+      <p>Nota pelo resultado, como num estágio.</p>
+      <div class="s2-try"><span>Acertou com poucas buscas<small>nota alta</small></span><span class="s2-score" style="--v: 94%; --c: var(--green); --sd: 400ms"></span></div>
+      <div class="s2-try"><span>Acertou, mas buscou à toa<small>nota menor</small></span><span class="s2-score" style="--v: 56%; --c: var(--amber); --sd: 650ms"></span></div>
+      <div class="s2-try"><span>Errou<small>nota baixa</small></span><span class="s2-score" style="--v: 12%; --c: var(--red); --sd: 900ms"></span></div>
+      <div class="s2-legend"><span style="--c: var(--green)">premia o acerto</span><span style="--c: var(--red)">penaliza cada busca extra</span></div>
+    </div>
+    <p class="s2-abs small" style="left: 880px; top: 470px" data-step="3" data-anim="fade" data-delay="800">Não muda o acerto: reduz custo e espera.</p>
+  </div>
+
+  <div class="s2-vs" data-step="4" data-anim="stagger" data-stagger="250">
+    <div class="s2-vs-item s2-vs-them"><em>Jeito comum</em><span>“Se precisar, busque mais” no prompt: busca demais ou de menos.</span></div>
+    <div class="s2-vs-item s2-vs-us"><em>Nosso jeito</em><span>Uma política treinada por reforço aprende quando já basta.</span></div>
+  </div>
+
+  <p class="analogia analogia--faixa" data-step="5" data-anim="fade">Um GPS que aprende atalhos e sabe a hora de parar.</p>
+
+  <p class="source">Fonte: Plano do Assistente, “Política de busca treinada por reforço (Search-R1)” (Jin et al., 2025); pesquisa/08-modelo-mvp.md.</p>
+  <aside class="notes">
+    <p>Na etapa 7, o Claude lê os poucos trechos que sobraram, sempre na redação da data, e redige. Na maioria das perguntas, o Haiku; nas difíceis, cerca de 9%, o Sonnet; raramente, cerca de 1%, o Opus.</p>
+    <p><strong>Avance (1):</strong> às vezes falta algo. Aí ele pode voltar uma vez à etapa 4.</p>
+    <p><strong>Avance (2):</strong> quem decide é uma pequena política de busca treinada por reforço, técnica chamada Search-R1. É como treinar um estagiário com nota pelo resultado: acertou com poucas buscas, nota alta; buscou à toa ou errou, nota baixa. Com o tempo, ela aprende quando parar.</p>
+    <p><strong>Avance (3):</strong> e segue para a resposta citada. Isso não muda o acerto; reduz custo e espera.</p>
+    <p><strong>Avance (4):</strong> o jeito comum é escrever no prompt “se precisar, busque mais”, e o modelo busca demais ou de menos.</p>
+    <p>Quem faz: a política é um modelo pequeno, nosso, na GPU. Treinar por reforço ajusta os pesos do modelo, e isso não dá para fazer no Claude. Duas rodadas de treino, nos meses 4 e 5, com o benchmark dos contadores.</p>
+    <p><strong>Avance (analogia):</strong> É como um GPS que aprende os atalhos com o tempo e sabe quando já chegou: não fica dando voltas.</p>
+  </aside>
+</section>

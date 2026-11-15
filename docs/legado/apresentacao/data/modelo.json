@@ -1,0 +1,1097 @@
+{
+  "meta": {
+    "titulo": "Plano de desenvolvimento (6 meses) e lançamento",
+    "data": "05/11/2026",
+    "gerador": "pesquisa/modelo/modelo_lancamento.py",
+    "relatorio": "pesquisa/08-modelo-mvp.md",
+    "fontes": [
+      "docs/Plano_MVP_6_meses.md",
+      "pesquisa/05-mercado-preco.md",
+      "pesquisa/01-infra-aws.md",
+      "pesquisa/02-custos-llm.md",
+      "pesquisa/04-juridico-tributario-dados.md"
+    ],
+    "observacao": "1 pessoa; arquitetura completa construída em M1–M6 e lançada no M7; sem receita em M1–M6."
+  },
+  "premissas_chave": [
+    {
+      "chave": "cambio",
+      "valor": 5.4935,
+      "valor_fmt": "R$ 5,4935"
+    },
+    {
+      "chave": "reais_por_dolar_api",
+      "valor": 7.9711,
+      "valor_fmt": "R$ 7,97"
+    },
+    {
+      "chave": "reais_por_dolar_pf",
+      "valor": 5.69,
+      "valor_fmt": "R$ 5,69"
+    }
+  ],
+  "cambio": {
+    "ptax": 5.4935,
+    "antes_cnpj": 5.69,
+    "depois_cnpj": 7.9711,
+    "eur_usd": 1.16,
+    "rotulos": {
+      "antes_cnpj": "R$ 5,69/US$ (cartão PF, IOF 3,5%)",
+      "depois_cnpj": "R$ 7,97/US$ (PTAX +45,1%, caso base do 04)"
+    }
+  },
+  "investimento_desenvolvimento": {
+    "teto": 10000,
+    "total_base": 15575.86,
+    "total_minimo": 8969.39,
+    "total_maximo": 27383.91,
+    "estouro_base": 5575.86,
+    "meses": [
+      {
+        "mes": "M1",
+        "base": 1399.91
+      },
+      {
+        "mes": "M2",
+        "base": 1492.77
+      },
+      {
+        "mes": "M3",
+        "base": 2716.44
+      },
+      {
+        "mes": "M4",
+        "base": 2550.99
+      },
+      {
+        "mes": "M5",
+        "base": 4097.35
+      },
+      {
+        "mes": "M6",
+        "base": 3318.41
+      }
+    ],
+    "itens": [
+      {
+        "id": "api_ingestao",
+        "nome": "API: ingestão e enriquecimento (extração por programa + Haiku; doc2query, RAPTOR, grafo)",
+        "moeda": "usd",
+        "valores_moeda": [
+          199,
+          199,
+          114,
+          57,
+          0,
+          0
+        ],
+        "meses": [
+          1132.31,
+          1132.31,
+          648.66,
+          324.33,
+          0.0,
+          0.0
+        ],
+        "base": 3237.61,
+        "minimo": 2266.33,
+        "maximo": 5503.94
+      },
+      {
+        "id": "api_traces_rank1",
+        "nome": "API: traces para destilar o Rank1 (≈ 15 mil exemplos, lote)",
+        "moeda": "usd",
+        "valores_moeda": [
+          0,
+          0,
+          120,
+          0,
+          0,
+          0
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          682.8,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base": 682.8,
+        "minimo": 341.4,
+        "maximo": 1365.6
+      },
+      {
+        "id": "api_dev",
+        "nome": "API: desenvolvimento, testes e regressão do benchmark",
+        "moeda": "usd",
+        "valores_moeda": [
+          40,
+          40,
+          70,
+          70,
+          70,
+          70
+        ],
+        "meses": [
+          227.6,
+          227.6,
+          398.3,
+          398.3,
+          557.97,
+          557.97
+        ],
+        "base": 2367.75,
+        "minimo": 1420.65,
+        "maximo": 3551.62
+      },
+      {
+        "id": "api_dgm",
+        "nome": "API: ciclos DGM enxutos (10 variantes, benchmark de 200)",
+        "moeda": "usd",
+        "valores_moeda": [
+          0,
+          0,
+          0,
+          100,
+          100,
+          100
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          0.0,
+          569.0,
+          797.11,
+          797.11
+        ],
+        "base": 2163.21,
+        "minimo": 1297.93,
+        "maximo": 4326.43
+      },
+      {
+        "id": "api_playtesters",
+        "nome": "API: perguntas dos playtesters",
+        "moeda": "usd",
+        "valores_moeda": [
+          0.0,
+          0.0,
+          8.18,
+          21.82,
+          54.54,
+          81.81
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          46.55,
+          124.13,
+          434.72,
+          652.09
+        ],
+        "base": 1257.49,
+        "minimo": 628.74,
+        "maximo": 2514.97
+      },
+      {
+        "id": "gpu",
+        "nome": "GPU por hora (RunPod)",
+        "moeda": "usd",
+        "valores_moeda": [
+          0.0,
+          23.35,
+          66.45,
+          91.95,
+          114.2,
+          83.3
+        ],
+        "meses": [
+          0.0,
+          132.86,
+          378.1,
+          523.2,
+          910.3,
+          663.99
+        ],
+        "base": 2608.44,
+        "minimo": 1565.07,
+        "maximo": 4173.51
+      },
+      {
+        "id": "servidor",
+        "nome": "Servidor dedicado (Postgres + índices + app; M1–M2 local)",
+        "moeda": "eur",
+        "valores_moeda": [
+          0,
+          0,
+          70,
+          70,
+          70,
+          70
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          462.03,
+          462.03,
+          647.25,
+          647.25
+        ],
+        "base": 2218.56,
+        "minimo": 1109.28,
+        "maximo": 3327.84
+      },
+      {
+        "id": "dominio",
+        "nome": "Domínio .com.br",
+        "moeda": "brl",
+        "valores_moeda": [
+          40,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "meses": [
+          40.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base": 40.0,
+        "minimo": 40.0,
+        "maximo": 40.0
+      },
+      {
+        "id": "cnpj",
+        "nome": "CNPJ (aberto pelos contadores do grupo)",
+        "moeda": "brl",
+        "valores_moeda": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base": 0.0,
+        "minimo": 0.0,
+        "maximo": 0.0
+      },
+      {
+        "id": "e_cnpj",
+        "nome": "e-CNPJ A1",
+        "moeda": "brl",
+        "valores_moeda": [
+          0,
+          0,
+          0,
+          0,
+          200,
+          0
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          200.0,
+          0.0
+        ],
+        "base": 200.0,
+        "minimo": 150.0,
+        "maximo": 280.0
+      },
+      {
+        "id": "termos_lgpd",
+        "nome": "Termos de uso e LGPD (modelo + revisão)",
+        "moeda": "brl",
+        "valores_moeda": [
+          0,
+          0,
+          0,
+          0,
+          500,
+          0
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          500.0,
+          0.0
+        ],
+        "base": 500.0,
+        "minimo": 0.0,
+        "maximo": 1500.0
+      },
+      {
+        "id": "sindicatos_juntas",
+        "nome": "Sindicatos e Juntas: OCR aberto em GPU por hora + Haiku em lote",
+        "moeda": "brl",
+        "valores_moeda": [
+          0,
+          0,
+          100,
+          150,
+          50,
+          0
+        ],
+        "meses": [
+          0.0,
+          0.0,
+          100.0,
+          150.0,
+          50.0,
+          0.0
+        ],
+        "base": 300.0,
+        "minimo": 150.0,
+        "maximo": 800.0
+      }
+    ],
+    "com_alavancas": {
+      "total": 9296.27,
+      "minimo": 5623.44,
+      "maximo": 15906.07,
+      "itens": {
+        "api_ingestao": 2266.33,
+        "api_traces_rank1": 273.12,
+        "api_dev": 2048.4,
+        "api_dgm": 853.5,
+        "api_playtesters": 946.48,
+        "gpu": 1618.45,
+        "servidor": 750.0,
+        "dominio": 40.0,
+        "cnpj": 0.0,
+        "e_cnpj": 200.0,
+        "termos_lgpd": 0.0,
+        "sindicatos_juntas": 300.0
+      }
+    },
+    "gpu_horas": {
+      "rtx4090": 180,
+      "a100": 25,
+      "h100": 70
+    },
+    "perguntas_playtesters": 6100,
+    "custo_pergunta_beta_usd": 0.02727,
+    "rotulos": {
+      "total": "R$ 15.576 (R$ 8.969 a R$ 27.384)",
+      "com_alavancas": "R$ 9.296"
+    }
+  },
+  "aporte": {
+    "total": 20000,
+    "itens": [
+      {
+        "id": "claude_ultra",
+        "nome": "Claude Ultra (antigo Max 20x)",
+        "conta": "US$ 200/mês × 6",
+        "valor": 6828.0,
+        "valor_fmt": "R$ 6.828"
+      },
+      {
+        "id": "cursor_premium",
+        "nome": "Cursor Premium, com Grok Bot e agentes",
+        "conta": "US$ 30/mês × 6",
+        "valor": 1024.2,
+        "valor_fmt": "R$ 1.024"
+      },
+      {
+        "id": "vps_agentes",
+        "nome": "Ambiente isolado (VPS) para agentes abertos (OpenClaw, Hermes)",
+        "conta": "6 meses",
+        "valor": 360,
+        "valor_fmt": "R$ 360"
+      },
+      {
+        "id": "desenvolvimento",
+        "nome": "Desenvolvimento: API, GPU por hora, servidor, domínio, e-CNPJ, termos, sindicatos e Juntas",
+        "conta": "com as alavancas",
+        "valor": 9296.27,
+        "valor_fmt": "R$ 9.296"
+      },
+      {
+        "id": "reserva",
+        "nome": "Reserva",
+        "conta": "cerca de 12%",
+        "valor": 2491.53,
+        "valor_fmt": "R$ 2.492"
+      }
+    ],
+    "rotulos": {
+      "total": "R$ 20.000"
+    }
+  },
+  "custo_por_pergunta": {
+    "usd_lancamento": 0.02727,
+    "medio_lancamento": 0.2174,
+    "classes": [
+      {
+        "id": "A",
+        "nome": "Simples (prazo, alíquota, qual artigo)",
+        "participacao": 0.6,
+        "modelo": "haiku",
+        "tokens_contexto": 10000,
+        "tokens_raciocinio": 2000,
+        "escalonamento": 0.03,
+        "escala_para": "sonnet",
+        "custo_usd": 0.00867,
+        "custo_cnpj": 0.0691,
+        "partes_usd": {
+          "entendimento_arvore": 0.00061,
+          "modelo_principal": 0.00286,
+          "segunda_rodada": 0.00013,
+          "busca_ao_vivo": 0.00108,
+          "reescrita": 0.00026,
+          "verificacao_citacoes": 0.00196,
+          "escalonamento": 0.00177
+        },
+        "rotulos": {
+          "custo": "R$ 0,07",
+          "participacao": "60%"
+        }
+      },
+      {
+        "id": "B",
+        "nome": "Padrão (interpretar uma norma)",
+        "participacao": 0.3,
+        "modelo": "haiku",
+        "tokens_contexto": 16000,
+        "tokens_raciocinio": 4000,
+        "escalonamento": 0.08,
+        "escala_para": "sonnet",
+        "custo_usd": 0.01575,
+        "custo_cnpj": 0.1255,
+        "partes_usd": {
+          "entendimento_arvore": 0.00061,
+          "modelo_principal": 0.00456,
+          "segunda_rodada": 0.00013,
+          "busca_ao_vivo": 0.00108,
+          "reescrita": 0.00028,
+          "verificacao_citacoes": 0.00246,
+          "escalonamento": 0.00663
+        },
+        "rotulos": {
+          "custo": "R$ 0,13",
+          "participacao": "30%"
+        }
+      },
+      {
+        "id": "C",
+        "nome": "Difícil (várias normas, data passada)",
+        "participacao": 0.09,
+        "modelo": "sonnet",
+        "tokens_contexto": 25000,
+        "tokens_raciocinio": 5000,
+        "escalonamento": 0.05,
+        "escala_para": "opus",
+        "custo_usd": 0.14889,
+        "custo_cnpj": 1.1868,
+        "partes_usd": {
+          "entendimento_arvore": 0.00061,
+          "modelo_principal": 0.1214,
+          "segunda_rodada": 0.0025,
+          "busca_ao_vivo": 0.00265,
+          "reescrita": 0.00576,
+          "verificacao_citacoes": 0.00271,
+          "escalonamento": 0.01326
+        },
+        "rotulos": {
+          "custo": "R$ 1,19",
+          "participacao": "9%"
+        }
+      },
+      {
+        "id": "D",
+        "nome": "Crítica (alto risco, fontes divergentes)",
+        "participacao": 0.01,
+        "modelo": "opus",
+        "tokens_contexto": 40000,
+        "tokens_raciocinio": 6000,
+        "escalonamento": 0.0,
+        "escala_para": "opus",
+        "custo_usd": 0.39452,
+        "custo_cnpj": 3.1447,
+        "partes_usd": {
+          "entendimento_arvore": 0.00061,
+          "modelo_principal": 0.3228,
+          "segunda_rodada": 0.005,
+          "busca_ao_vivo": 0.0043,
+          "reescrita": 0.01305,
+          "verificacao_citacoes": 0.04876,
+          "escalonamento": 0.0
+        },
+        "rotulos": {
+          "custo": "R$ 3,14",
+          "participacao": "1%"
+        }
+      }
+    ],
+    "partes_usd": {
+      "entendimento_arvore": 0.00061,
+      "modelo_principal": 0.01724,
+      "segunda_rodada": 0.00039,
+      "busca_ao_vivo": 0.00126,
+      "reescrita": 0.00089,
+      "verificacao_citacoes": 0.00264,
+      "escalonamento": 0.00424
+    },
+    "gratis": 0.0433,
+    "por_degrau": [
+      {
+        "usuarios": 50,
+        "cache_semantico": 0.02,
+        "custo": 0.2132
+      },
+      {
+        "usuarios": 500,
+        "cache_semantico": 0.12,
+        "custo": 0.1924
+      },
+      {
+        "usuarios": 3000,
+        "cache_semantico": 0.198,
+        "custo": 0.1761
+      },
+      {
+        "usuarios": 10000,
+        "cache_semantico": 0.25,
+        "custo": 0.1652
+      }
+    ],
+    "rotulos": {
+      "medio_lancamento": "R$ 0,217",
+      "usd": "US$ 0,0273"
+    }
+  },
+  "planos": {
+    "lista": [
+      {
+        "id": "gratis",
+        "nome": "Grátis",
+        "usuarios": 1,
+        "perguntas_mes": 10,
+        "preco_mensal": 0,
+        "preco_anual_mes": 0,
+        "preco_por_usuario": 0.0,
+        "custo_usuario_cota_cheia": 0.43,
+        "rotulos": {
+          "custo": "R$ 0,43 por usuário/mês com a cota cheia"
+        }
+      },
+      {
+        "id": "individual",
+        "nome": "Individual",
+        "usuarios": 1,
+        "perguntas_mes": 100,
+        "preco_mensal": 199,
+        "preco_anual_mes": 169,
+        "preco_por_usuario": 199.0,
+        "preco_medio": 187.0,
+        "custo_api_50": 9.62,
+        "custo_api_100": 19.24,
+        "rateio_infra_gpu": 9.91,
+        "margem_50": 0.6728,
+        "margem_100": 0.6214,
+        "rotulos": {
+          "margem_50": "67,3%",
+          "margem_100": "62,1%"
+        }
+      },
+      {
+        "id": "escritorio",
+        "nome": "Escritório",
+        "usuarios": 5,
+        "perguntas_mes": 400,
+        "preco_mensal": 790,
+        "preco_anual_mes": 659,
+        "preco_por_usuario": 158.0,
+        "preco_medio": 737.6,
+        "custo_api_50": 38.47,
+        "custo_api_100": 76.94,
+        "rateio_infra_gpu": 49.57,
+        "margem_50": 0.6809,
+        "margem_100": 0.6288,
+        "rotulos": {
+          "margem_50": "68,1%",
+          "margem_100": "62,9%"
+        }
+      },
+      {
+        "id": "corporativo",
+        "nome": "Corporativo",
+        "usuarios": 15,
+        "perguntas_mes": 1050,
+        "preco_mensal": 2290,
+        "preco_anual_mes": 1890,
+        "preco_por_usuario": 152.67,
+        "preco_medio": 2130.0,
+        "custo_api_50": 100.99,
+        "custo_api_100": 201.97,
+        "rateio_infra_gpu": 148.71,
+        "margem_50": 0.6831,
+        "margem_100": 0.6357,
+        "rotulos": {
+          "margem_50": "68,3%",
+          "margem_100": "63,6%"
+        }
+      },
+      {
+        "id": "enterprise",
+        "nome": "Enterprise",
+        "usuarios": 50,
+        "perguntas_mes": 3500,
+        "preco_mensal": 6900,
+        "preco_anual_mes": 6900,
+        "preco_por_usuario": 138.0,
+        "preco_medio": 6900.0,
+        "custo_api_50": 336.62,
+        "custo_api_100": 673.23,
+        "rateio_infra_gpu": 495.7,
+        "margem_50": 0.6817,
+        "margem_100": 0.6329,
+        "rotulos": {
+          "margem_50": "68,2%",
+          "margem_100": "63,3%"
+        }
+      }
+    ],
+    "parcela_anual": 0.4,
+    "uso_medio": 0.5,
+    "definicao_margem": "(preço médio com 40% no anual − Simples do degrau de 500 usuários − gateway − API − infra e GPU rateadas) / preço",
+    "pacote_extra": {
+      "perguntas": 100,
+      "preco": 149,
+      "margem": 0.6482,
+      "rotulo": "R$ 149 por 100 perguntas (64,8% de margem)"
+    }
+  },
+  "escala": [
+    {
+      "usuarios": 50,
+      "degrau": 0,
+      "contas": 34.0,
+      "cache_semantico": 0.02,
+      "receita": 8560.4,
+      "perguntas": 2300.0,
+      "perguntas_gratis": 300.0,
+      "custo_pergunta": 0.21,
+      "tributos": 1326.86,
+      "regime": "Simples Anexo V",
+      "aliquota": 0.15,
+      "gateway": 231.75,
+      "api_perguntas": 490.39,
+      "api_gratis": 12.98,
+      "api_fixa": 1881.17,
+      "infra": 1200,
+      "gpu": 2110.82,
+      "gpu_modo": "RunPod RTX 4090 por hora, no expediente",
+      "gpu_capex": 0,
+      "seguro": 0,
+      "auditoria": 0,
+      "suporte": 0.0,
+      "contador_outros": 500,
+      "pro_labore": 0.0,
+      "custos_totais": 7753.97,
+      "resultado": 806.43,
+      "margem_operacional": 0.09,
+      "mix": {
+        "individual": 0.6,
+        "escritorio": 0.4,
+        "corporativo": 0.0,
+        "enterprise": 0.0
+      },
+      "custo_infra": 3310.82,
+      "rotulos": {
+        "receita": "R$ 8.560",
+        "tributos": "R$ 1.327 (15,5%, Simples Anexo V)",
+        "api": "R$ 2.385",
+        "infra": "R$ 1.200",
+        "gpu": "R$ 2.111 (RunPod RTX 4090 por hora, no expediente)",
+        "resultado": "R$ 806",
+        "custo_por_pergunta": "R$ 0,213",
+        "margem_operacional": "9,4%"
+      }
+    },
+    {
+      "usuarios": 500,
+      "degrau": 1,
+      "contas": 273.95,
+      "cache_semantico": 0.12,
+      "receita": 82388.74,
+      "perguntas": 21951.54,
+      "perguntas_gratis": 3000.0,
+      "custo_pergunta": 0.19,
+      "tributos": 15464.69,
+      "regime": "Simples Anexo V",
+      "aliquota": 0.19,
+      "gateway": 1973.51,
+      "api_perguntas": 4222.43,
+      "api_gratis": 129.81,
+      "api_fixa": 1881.17,
+      "infra": 2500,
+      "gpu": 2457.03,
+      "gpu_modo": "1× Hetzner GEX45 24/7",
+      "gpu_capex": 0,
+      "seguro": 500,
+      "auditoria": 1600,
+      "suporte": 0.0,
+      "contador_outros": 500,
+      "pro_labore": 0.0,
+      "custos_totais": 31228.65,
+      "resultado": 51160.09,
+      "margem_operacional": 0.62,
+      "mix": {
+        "individual": 0.46,
+        "escritorio": 0.4,
+        "corporativo": 0.105,
+        "enterprise": 0.035
+      },
+      "custo_infra": 4957.03,
+      "rotulos": {
+        "receita": "R$ 82.389",
+        "tributos": "R$ 15.465 (18,8%, Simples Anexo V)",
+        "api": "R$ 6.233",
+        "infra": "R$ 2.500",
+        "gpu": "R$ 2.457 (1× Hetzner GEX45 24/7)",
+        "resultado": "R$ 51.160",
+        "custo_por_pergunta": "R$ 0,192",
+        "margem_operacional": "62,1%"
+      }
+    },
+    {
+      "usuarios": 3000,
+      "degrau": 2,
+      "contas": 1323.18,
+      "cache_semantico": 0.2,
+      "receita": 478615.26,
+      "perguntas": 126495.11,
+      "perguntas_gratis": 18000.0,
+      "custo_pergunta": 0.18,
+      "tributos": 119189.32,
+      "regime": "Lucro Presumido 2027",
+      "aliquota": 0.25,
+      "gateway": 10208.05,
+      "api_perguntas": 22278.42,
+      "api_gratis": 778.83,
+      "api_fixa": 3475.39,
+      "infra": 6000,
+      "gpu": 4914.06,
+      "gpu_modo": "2× Hetzner GEX45 24/7 (1 de reserva)",
+      "gpu_capex": 0,
+      "seguro": 800,
+      "auditoria": 3200,
+      "suporte": 18000.0,
+      "contador_outros": 500,
+      "pro_labore": 0.0,
+      "custos_totais": 189344.07,
+      "resultado": 289271.19,
+      "margem_operacional": 0.6,
+      "mix": {
+        "individual": 0.352,
+        "escritorio": 0.376,
+        "corporativo": 0.174,
+        "enterprise": 0.098
+      },
+      "custo_infra": 10914.06,
+      "rotulos": {
+        "receita": "R$ 478.615",
+        "tributos": "R$ 119.189 (24,9%, Lucro Presumido 2027)",
+        "api": "R$ 26.533",
+        "infra": "R$ 6.000",
+        "gpu": "R$ 4.914 (2× Hetzner GEX45 24/7 (1 de reserva))",
+        "resultado": "R$ 289.271",
+        "custo_por_pergunta": "R$ 0,176",
+        "margem_operacional": "60,4%"
+      }
+    },
+    {
+      "usuarios": 10000,
+      "degrau": 3,
+      "contas": 3863.33,
+      "cache_semantico": 0.25,
+      "receita": 1568320.0,
+      "perguntas": 412500.0,
+      "perguntas_gratis": 60000.0,
+      "custo_pergunta": 0.17,
+      "tributos": 405432.96,
+      "regime": "Lucro Presumido 2027",
+      "aliquota": 0.26,
+      "gateway": 31308.84,
+      "api_perguntas": 68150.76,
+      "api_gratis": 2596.11,
+      "api_fixa": 7102.22,
+      "infra": 15000,
+      "gpu": 3214.78,
+      "gpu_modo": "1× RTX 5090 própria em colocation + 1 GEX45 de reserva",
+      "gpu_capex": 40800,
+      "seguro": 1500,
+      "auditoria": 4800,
+      "suporte": 60000.0,
+      "contador_outros": 500,
+      "pro_labore": 0.0,
+      "custos_totais": 599605.67,
+      "resultado": 968714.33,
+      "margem_operacional": 0.62,
+      "mix": {
+        "individual": 0.3,
+        "escritorio": 0.35,
+        "corporativo": 0.2,
+        "enterprise": 0.15
+      },
+      "custo_infra": 18214.78,
+      "rotulos": {
+        "receita": "R$ 1.568.320",
+        "tributos": "R$ 405.433 (25,9%, Lucro Presumido 2027)",
+        "api": "R$ 77.849",
+        "infra": "R$ 15.000",
+        "gpu": "R$ 3.215 (1× RTX 5090 própria em colocation + 1 GEX45 de reserva)",
+        "resultado": "R$ 968.714",
+        "custo_por_pergunta": "R$ 0,165",
+        "margem_operacional": "61,8%"
+      }
+    }
+  ],
+  "escala_gpu_alugada": [
+    {
+      "usuarios": 50,
+      "gpu": 2110.82,
+      "resultado": 806.43
+    },
+    {
+      "usuarios": 500,
+      "gpu": 2457.03,
+      "resultado": 51160.09
+    },
+    {
+      "usuarios": 3000,
+      "gpu": 4914.06,
+      "resultado": 289271.19
+    },
+    {
+      "usuarios": 10000,
+      "gpu": 9828.11,
+      "resultado": 962100.99
+    }
+  ],
+  "breakeven": {
+    "sem_salario": 44,
+    "com_pro_labore": 137,
+    "pro_labore": 10000,
+    "receita_sem_salario": 7533.15,
+    "receita_com_pro_labore": 23283.17,
+    "regime_com_pro_labore": "Simples Anexo III",
+    "rotulos": {
+      "sem_salario": "44 usuários pagantes (R$ 7.533/mês)",
+      "com_pro_labore": "137 usuários pagantes (R$ 23.283/mês)"
+    }
+  },
+  "gpu_propria": {
+    "preco_rtx5090": 27800,
+    "host": 13000,
+    "energia": 375,
+    "colocation": 700,
+    "custo_total_mes_com_depreciacao": 2208.33,
+    "runpod_5090_24x7": 6924.47,
+    "gex45_mes": 1978.74,
+    "comparacao": [
+      {
+        "usuarios": 500,
+        "alugada": 2457.03,
+        "alugada_modo": "1× Hetzner GEX45 24/7",
+        "propria": 3214.78,
+        "propria_modo": "1× RTX 5090 própria em colocation + 1 GEX45 de reserva",
+        "capex": 40800,
+        "economia_mes": -757.75,
+        "payback_meses": null
+      },
+      {
+        "usuarios": 3000,
+        "alugada": 4914.06,
+        "alugada_modo": "2× Hetzner GEX45 24/7 (1 de reserva)",
+        "propria": 3214.78,
+        "propria_modo": "1× RTX 5090 própria em colocation + 1 GEX45 de reserva",
+        "capex": 40800,
+        "economia_mes": 1699.28,
+        "payback_meses": 24.01
+      },
+      {
+        "usuarios": 10000,
+        "alugada": 9828.11,
+        "alugada_modo": "4× Hetzner GEX45 24/7 (1 de reserva)",
+        "propria": 3214.78,
+        "propria_modo": "1× RTX 5090 própria em colocation + 1 GEX45 de reserva",
+        "capex": 40800,
+        "economia_mes": 6613.33,
+        "payback_meses": 6.17
+      }
+    ],
+    "usuarios_para_comprar": 3500,
+    "payback_alvo_meses": 12
+  },
+  "sensibilidade": {
+    "cenarios": [
+      {
+        "custo_pergunta": 0.19235242848061446,
+        "custo_pergunta_lancamento": 0.21736201275269088,
+        "margem_individual_50": 0.6728485726522134,
+        "resultado_500": 51160.09218911351,
+        "resultado_3000": 289271.1922722688,
+        "breakeven": 44,
+        "breakeven_pro_labore": 137,
+        "id": "base",
+        "nome": "Base",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,217",
+          "margem_individual": "67,3%",
+          "resultado_500": "R$ 51.160",
+          "resultado_3000": "R$ 289.271",
+          "breakeven": "44 usuários",
+          "breakeven_pro_labore": "137 usuários"
+        }
+      },
+      {
+        "custo_pergunta": 0.21158767132867595,
+        "custo_pergunta_lancamento": 0.23909821402796,
+        "margem_individual_50": 0.665077621383033,
+        "resultado_500": 50291.04823499713,
+        "resultado_3000": 286126.5225244581,
+        "breakeven": 48,
+        "breakeven_pro_labore": 141,
+        "id": "cambio_mais_10",
+        "nome": "Câmbio +10%",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,239",
+          "margem_individual": "66,5%",
+          "resultado_500": "R$ 50.291",
+          "resultado_3000": "R$ 286.127",
+          "breakeven": "48 usuários",
+          "breakeven_pro_labore": "141 usuários"
+        }
+      },
+      {
+        "custo_pergunta": 0.17311718563255302,
+        "custo_pergunta_lancamento": 0.1956258114774218,
+        "margem_individual_50": 0.6806195239213939,
+        "resultado_500": 52029.1361432299,
+        "resultado_3000": 292415.8620200795,
+        "breakeven": 41,
+        "breakeven_pro_labore": 133,
+        "id": "cambio_menos_10",
+        "nome": "Câmbio −10%",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,196",
+          "margem_individual": "68,1%",
+          "resultado_500": "R$ 52.029",
+          "resultado_3000": "R$ 292.416",
+          "breakeven": "41 usuários",
+          "breakeven_pro_labore": "133 usuários"
+        }
+      },
+      {
+        "custo_pergunta": 0.19235242848061446,
+        "custo_pergunta_lancamento": 0.21736201275269088,
+        "margem_individual_50": 0.6214174420424234,
+        "resultado_500": 46937.65920071308,
+        "resultado_3000": 264852.9918837005,
+        "breakeven": 48,
+        "breakeven_pro_labore": 147,
+        "id": "uso_x2",
+        "nome": "Uso ×2 (100% da cota)",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,217",
+          "margem_individual": "62,1%",
+          "resultado_500": "R$ 46.938",
+          "resultado_3000": "R$ 264.853",
+          "breakeven": "48 usuários",
+          "breakeven_pro_labore": "147 usuários"
+        }
+      },
+      {
+        "custo_pergunta": 0.25005815702479883,
+        "custo_pergunta_lancamento": 0.28257061657849813,
+        "margem_individual_50": 0.6574192334692764,
+        "resultado_500": 49290.06894416485,
+        "resultado_3000": 281311.40026363765,
+        "breakeven": 50,
+        "breakeven_pro_labore": 144,
+        "id": "api_mais_30",
+        "nome": "API +30%",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,283",
+          "margem_individual": "65,7%",
+          "resultado_500": "R$ 49.290",
+          "resultado_3000": "R$ 281.311",
+          "breakeven": "50 usuários",
+          "breakeven_pro_labore": "144 usuários"
+        }
+      },
+      {
+        "custo_pergunta": 0.13464669993643014,
+        "custo_pergunta_lancamento": 0.15215340892688362,
+        "margem_individual_50": 0.6882779118351503,
+        "resultado_500": 53030.115434062165,
+        "resultado_3000": 297230.9842809,
+        "breakeven": 39,
+        "breakeven_pro_labore": 130,
+        "id": "api_menos_30",
+        "nome": "API −30%",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,152",
+          "margem_individual": "68,8%",
+          "resultado_500": "R$ 53.030",
+          "resultado_3000": "R$ 297.231",
+          "breakeven": "39 usuários",
+          "breakeven_pro_labore": "130 usuários"
+        }
+      },
+      {
+        "custo_pergunta": 0.5112466201811551,
+        "custo_pergunta_lancamento": 0.5796993662870508,
+        "margem_individual_50": 0.5875827459943148,
+        "resultado_500": 44159.87199183456,
+        "resultado_3000": 252499.20634615238,
+        "breakeven": 83,
+        "breakeven_pro_labore": 154,
+        "id": "roteamento_07",
+        "nome": "Roteamento conservador (B no Sonnet)",
+        "rotulos": {
+          "custo_pergunta": "R$ 0,580",
+          "margem_individual": "58,8%",
+          "resultado_500": "R$ 44.160",
+          "resultado_3000": "R$ 252.499",
+          "breakeven": "83 usuários",
+          "breakeven_pro_labore": "154 usuários"
+        }
+      }
+    ]
+  },
+  "premissas_a_confirmar": [
+    "Horas de GPU do desenvolvimento (≈ 275 GPU-h) e perguntas dos playtesters (6.100 no total)",
+    "Ingestão por programa com Haiku só onde o programa falha (US$ 568 com doc2query, RAPTOR e grafo)",
+    "Ciclo DGM enxuto a US$ 100 (10 variantes, benchmark de 200, juiz Haiku)",
+    "Servidor dedicado de dev a €70/mês e câmbio €/US$ 1,16",
+    "Roteamento 60/30/9/1%, tokens por classe e +5 mil tokens na segunda rodada",
+    "3,5 s de GPU classe L4 por pergunta (01) e RTX 5090 = 3× L4",
+    "Infra sem GPU por degrau (R$ 1,2 mil / 2,5 mil / 6 mil / 15 mil)",
+    "Seguro E&O, auditoria humana amostral e suporte a R$ 6/assento a partir do degrau 2",
+    "Host da GPU (R$ 13 mil), colocation (R$ 700/mês) e vida útil de 36 meses",
+    "Pró-labore de referência de R$ 10 mil/mês",
+    "Efeito de cada alavanca do orçamento",
+    "OCR e classificação de sindicatos e Juntas (R$ 300; faixa R$ 150–800)"
+  ]
+}

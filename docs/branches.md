@@ -15,6 +15,9 @@ O ponto de partida: o README animado, esta documentação e as ferramentas que g
 |---|---|
 | `README.md` | O hub: o que é a Heild, os branches, o time, a marca em uma tela |
 | `docs/branches.md` | Este mapa |
+| `docs/planos/` | **Os planos do produto** (fonte da verdade desde 15/11/2026): desenho do sistema, subplanos, Jurídico, precificação, base legal, backend, integrantes, levantamentos e decisões. Índice em `docs/planos/README.md` |
+| `docs/pesquisa/` | As pesquisas que embasam os planos (mercado, infraestrutura, custos, atividades, jurídico, relatórios) |
+| `docs/legado/` | A apresentação para os contadores e o site antigo do repositório de trabalho |
 | `docs/fluxo-de-trabalho.md` | Como rodar, publicar e mudar cada parte |
 | `ferramentas/gerar_svgs_readme.py` | Gera os SVGs animados de `assets/readme/` |
 | `ferramentas/wordmark.json` | Os traçados da logo (HE, LD e as medidas da pílula), os mesmos do `<heild-logo>` |
@@ -51,4 +54,4 @@ O site da Heild e as landing pages, em `app/src/site/` (entrada `app/site.html`)
 
 ## Origem
 
-Tudo veio do repositório de trabalho `DGM-RAG-Contabil` (branch `claude/ui-lab`, pasta `ui-lab/`), onde o produto foi planejado. A partir daqui, a Heild evolui neste repositório.
+Tudo veio do repositório de trabalho `DGM-RAG-Contabil` (branch `claude/ui-lab`, pasta `ui-lab/`), onde o produto foi planejado. Em 15/11/2026 os planos e as pesquisas também foram trazidos para `docs/planos/` e `docs/pesquisa/` neste branch, e o `DGM-RAG-Contabil` ficou só como histórico. Há ainda o branch `wireframe` (o wireframe interativo completo, com o mapa de telas e as entregas das sessões) e os branches de trabalho `wf-*`.

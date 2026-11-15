@@ -1,0 +1,654 @@
+/* Componentes de conteúdo. */
+
+/* ---------- Cartão ---------- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 44px 44px 48px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid transparent;
+}
+.card h3,
+.card .card-title {
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.026em;
+  color: var(--ink);
+}
+.card p {
+  font-size: var(--fs-text);
+  line-height: 1.42;
+  color: var(--ink-2);
+}
+.card .card-num {
+  font-size: var(--fs-stat);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.card .card-num.grad-text {
+  color: transparent;
+}
+.card .card-foot {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
+}
+/* Borda em gradiente para o cartão que importa */
+.card--accent {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+}
+.card--quiet {
+  background: transparent;
+  border-color: var(--line);
+}
+.card--compact {
+  padding: 36px 40px;
+  gap: 12px;
+}
+
+/* ---------- Pílulas / tags ---------- */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+/* Selo: um único formato. Fundo tênue, sem contorno; a cor só quando significa algo. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 9px;
+  border-radius: 999px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+.pill--blue { color: var(--blue); background: rgba(124, 196, 255, 0.13); }
+.pill--violet { color: var(--violet); background: rgba(180, 160, 255, 0.14); }
+.pill--amber { color: var(--amber); background: rgba(255, 201, 131, 0.13); }
+.pill--green { color: var(--green); background: rgba(114, 223, 174, 0.13); }
+.pill--red { color: var(--red); background: rgba(255, 125, 134, 0.13); }
+.pill--outline { background: transparent; box-shadow: inset 0 0 0 1px var(--line-2); color: var(--ink-2); }
+.pill--lg { font-size: var(--fs-text); padding: 12px 26px 13px; }
+.pill .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ---------- Tabela ---------- */
+/* Tabela: só fios horizontais; cabeçalho em rótulo cinza; a linha "nossa" em tinta forte com fio de acento. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-text);
+  font-variant-numeric: tabular-nums;
+}
+.table th {
+  padding: 0 28px 18px 0;
+  text-align: left;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--line-2);
+  white-space: nowrap;
+}
+.table td {
+  padding: 20px 28px 20px 0;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+  vertical-align: baseline;
+}
+.table td:first-child {
+  color: var(--ink);
+  font-weight: 500;
+}
+.table .num,
+.table th.num {
+  text-align: right;
+}
+.table th:last-child,
+.table td:last-child {
+  padding-right: 0;
+}
+.table tr.is-highlight {
+  background: rgba(255, 255, 255, 0.04);
+}
+.table tr.is-highlight td {
+  color: var(--ink);
+  font-weight: 600;
+}
+.table tr.is-highlight td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+  padding-left: 24px;
+}
+.table tr.is-total td {
+  border-bottom: 0;
+  border-top: 1.5px solid var(--line-2);
+  color: var(--ink);
+  font-weight: 700;
+}
+.table--lg {
+  font-size: var(--fs-text);
+}
+.table--lg td {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+/* ---------- Marcas de sim / não ---------- */
+.checks {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  font-size: var(--fs-text);
+  color: var(--ink-2);
+}
+.checks > li {
+  position: relative;
+  padding-left: 52px;
+  line-height: 1.35;
+}
+.checks > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.12em;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(114, 223, 174, 0.16);
+}
+.checks > li::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: calc(0.12em + 7px);
+  width: 8px;
+  height: 14px;
+  border: solid var(--green);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.checks > li.no::before {
+  background: rgba(255, 255, 255, 0.07);
+}
+.checks > li.no::after {
+  left: 9px;
+  top: calc(0.12em + 15px);
+  width: 14px;
+  height: 0;
+  border-width: 3px 0 0 0;
+  border-color: var(--ink-3);
+  transform: none;
+}
+.checks > li.partial::before {
+  background: rgba(255, 201, 131, 0.14);
+}
+.checks > li.partial::after {
+  left: 10px;
+  top: calc(0.12em + 15px);
+  width: 12px;
+  height: 0;
+  border-width: 3px 0 0 0;
+  border-color: var(--amber);
+  transform: none;
+}
+.checks > li strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Comparativo: nós vs. alternativa ---------- */
+.versus {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 40px;
+  align-items: stretch;
+}
+.versus-col {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 48px 52px;
+  border-radius: var(--r);
+}
+.versus-col h3 {
+  font-size: var(--fs-sub);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.versus-col .versus-sub {
+  margin-top: -18px;
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
+}
+.versus-col--us {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+}
+.versus-col--us h3 {
+  color: var(--ink);
+}
+.versus-col--them {
+  background: transparent;
+  border: 1px solid var(--line);
+}
+.versus-col--them h3 {
+  color: var(--ink-2);
+}
+.versus-col--them .checks {
+  color: var(--ink-3);
+}
+
+/* ---------- Diagrama de camadas ---------- */
+.layers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.layer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  padding: 30px 44px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid transparent;
+}
+.layer-num {
+  font-size: var(--fs-stat);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: var(--grad-v);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.layer-name {
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.024em;
+  color: var(--ink);
+  line-height: 1.12;
+}
+.layer-desc {
+  margin-top: 6px;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.layer-tag {
+  justify-self: end;
+}
+.layer.is-accent {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+}
+.layer.is-muted {
+  opacity: 0.45;
+}
+
+/* ---------- Funil ---------- */
+.funnel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.funnel-step {
+  width: var(--w, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 44px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, rgba(124, 196, 255, var(--a, 0.16)), rgba(180, 160, 255, var(--a, 0.16)));
+  border: 0;
+  font-size: var(--fs-text);
+  color: var(--ink);
+}
+.funnel-step:nth-child(2) { --a: 0.22; }
+.funnel-step:nth-child(3) { --a: 0.3; }
+.funnel-step:nth-child(4) { --a: 0.4; }
+.funnel-step:nth-child(5) { --a: 0.5; }
+.funnel-step .funnel-value {
+  font-weight: 700;
+  font-size: var(--fs-sub);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.funnel-step .funnel-label {
+  color: var(--ink-2);
+}
+.funnel-step.is-accent {
+  background: var(--grad);
+  color: #0a0a0c;
+}
+.funnel-step.is-accent .funnel-label {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Cascata de etapas (fluxo horizontal) ---------- */
+.flow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 64px;
+  counter-reset: flow;
+}
+.flow-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  counter-increment: flow;
+}
+.flow-step::before {
+  content: counter(flow);
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+}
+.flow-step.is-accent::before {
+  color: #0a0a0c;
+  background: var(--grad);
+  box-shadow: none;
+}
+/* conector entre etapas */
+.flow-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 32px;
+  left: 84px;
+  right: -44px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--line-2), rgba(255, 255, 255, 0.04));
+}
+.flow-step h4 {
+  font-size: var(--fs-sub);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.flow-step p {
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+.flow--plain .flow-step::before {
+  display: none;
+}
+.flow--plain .flow-step:not(:last-child)::after {
+  display: none;
+}
+
+/* ---------- KPIs em linha ---------- */
+.kpis {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 56px;
+}
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line-2);
+}
+.kpi-value {
+  font-size: var(--fs-stat);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.kpi-label {
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  line-height: 1.35;
+  max-width: 22ch;
+}
+
+/* ---------- Citação ---------- */
+.quote {
+  position: relative;
+  max-width: 26ch;
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.032em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.quote::before {
+  content: "“";
+  margin-right: 0.04em;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.quote-by {
+  margin-top: 44px;
+  font-size: var(--fs-text);
+  color: var(--ink-2);
+}
+.quote-by strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Rodapé de fonte: mesmo lugar, tamanho e cor em todo slide ---------- */
+.slide > .source,
+.source {
+  position: absolute;
+  left: var(--pad-x);
+  bottom: var(--foot-y);
+  right: 320px;
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--ink-3);
+  text-align: left;
+  z-index: 2;
+}
+.source a {
+  color: inherit;
+}
+
+/* ---------- Citação legal (marca do produto) ---------- */
+.cite {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 10px 20px 11px 16px;
+  border-radius: var(--r-sm);
+  background: rgba(255, 201, 131, 0.1);
+  box-shadow: none;
+  font-size: var(--fs-caption);
+  line-height: 1.25;
+  color: var(--amber);
+  white-space: nowrap;
+}
+.cite::before {
+  content: "§";
+  font-weight: 700;
+  font-size: 1.1em;
+  opacity: 0.9;
+}
+.cite strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.cite span {
+  color: var(--ink-2);
+  font-size: 0.86em;
+}
+.cite--blue {
+  color: var(--blue);
+  background: rgba(124, 196, 255, 0.1);
+}
+
+/* ---------- Pergunta de exemplo (campo que digita) ---------- */
+.ask {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 1400px;
+  padding: 32px 44px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: none;
+  font-size: var(--fs-sub);
+  line-height: 1.3;
+  color: var(--ink);
+  text-align: left;
+}
+.ask::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--grad);
+  box-shadow: 0 0 24px rgba(180, 160, 255, 0.6);
+}
+.ask--box {
+  border-radius: var(--r);
+  align-items: flex-start;
+}
+.ask--box::before {
+  margin-top: 0.35em;
+}
+
+/* Resposta do assistente */
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1400px;
+  padding: 44px 52px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid transparent;
+  font-size: var(--fs-text);
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.answer strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.answer .cites {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* ---------- Divisor e marca ---------- */
+.rule {
+  height: 1px;
+  width: 100%;
+  background: var(--line-2);
+  border: 0;
+}
+.brand {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.brand span {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+/* ---------- Analogia: uma frase do dia a dia do contador, num build próprio ----------
+   <p class="analogia" data-step="n">É como o Ctrl+F.</p>
+   Um por slide, sempre o último build (depois do mecanismo). Ícone de lâmpada em linha fina, no acento;
+   frase curta em --ink-2. Posição fixa, fora do fluxo, para não empurrar nada:
+   padrão  = linha do sobretítulo, alinhada à direita (y = 88 px);
+   --faixa = logo acima da faixa "Jeito comum / Nosso jeito" (slides da cascata, onde a linha do topo é a trilha);
+   --pe    = no pé do corpo (termina em y = 968 px), quando não há faixa. */
+.analogia {
+  position: absolute;
+  top: var(--pad-top);
+  right: var(--pad-x);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0;
+  font-size: var(--fs-text);
+  font-weight: 400;
+  line-height: var(--kicker-h);
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+  text-align: right;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.analogia::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  -webkit-mask: var(--icon-analogia) center / contain no-repeat;
+  mask: var(--icon-analogia) center / contain no-repeat;
+}
+.analogia--faixa {
+  top: auto;
+  bottom: calc(var(--pad-bottom) + 130px);
+}
+.analogia--pe {
+  top: auto;
+  bottom: var(--pad-bottom);
+}
+:root {
+  --icon-analogia: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.2 17.5h5.6M10.2 20.5h3.6M12 3.5a5.8 5.8 0 0 0-3.4 10.5c.6.5.9 1.1.9 1.8v.2h5v-.2c0-.7.3-1.3.9-1.8A5.8 5.8 0 0 0 12 3.5z'/%3E%3C/svg%3E");
+}

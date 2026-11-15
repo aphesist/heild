@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DGM-RAG-Contábil</title>
+<meta name="description" content="Assistente de IA para contadores brasileiros, com citação verificada da base legal.">
+<!-- Inter é opcional: sem internet, a pilha de fontes do sistema assume. Carregamento não bloqueante. -->
+<script>
+  // Inter só é pedida com rede; sem ela, a pilha de fontes do sistema assume sem erro.
+  if (navigator.onLine !== false && !/[?&]offline/.test(location.search)) {
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..800&display=swap';
+    l.media = 'print';
+    l.onload = function () { this.media = 'all'; };
+    document.head.appendChild(l);
+  }
+</script>
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport">
+  <main class="stage" id="stage" aria-live="polite">
+{{SLIDES}}
+    <div class="chrome" aria-hidden="true">
+      <div class="chrome-progress"><i></i></div>
+      <div class="chrome-num"><b></b><span></span></div>
+    </div>
+  </main>
+</div>
+<div class="blackout" aria-hidden="true"></div>
+<div class="goto" aria-live="polite"></div>
+<div class="replay-box">
+  <button class="replay" type="button" title="Repetir as animações deste slide (R)" aria-label="Repetir as animações deste slide">↺</button>
+  <button class="replay-all" type="button" title="Reiniciar as animações de todos os slides (Shift+R)">↺ tudo</button>
+</div>
+<div class="hint" aria-hidden="true">← → avançar · O visão geral · P apresentador · F tela cheia · B tela preta · R repete o slide · Shift+R reinicia todas</div>
+<script>
+{{MODELO}}
+</script>
+<script>
+{{JS}}
+</script>
+</body>
+</html>

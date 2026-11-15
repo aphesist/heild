@@ -1,0 +1,506 @@
+/* Gráficos e diagramas. A geometria é montada pelo JS a partir de atributos data-*. */
+
+/* ---------- Barras verticais ---------- */
+/* Gráfico: barras neutras em cinza claro, a barra "nossa" no gradiente, a alternativa em grafite.
+   Valor em cima (número de dado), rótulo embaixo (legenda). Um fio de base, sem grade. */
+.chart-bars {
+  --chart-h: 520px;
+  --bar-c1: #d2d2d7;
+  --bar-c2: rgba(210, 210, 215, 0.3);
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 48px;
+  height: var(--chart-h);
+  margin-bottom: 72px; /* espaço para os rótulos */
+  border-bottom: 1.5px solid var(--line-2);
+}
+.chart-bars .bar {
+  position: relative;
+  flex: 1 1 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  min-width: 0;
+}
+.bar-fill {
+  display: block;
+  height: var(--h, 0%);
+  min-height: 4px;
+  border-radius: 12px 12px 2px 2px;
+  background: linear-gradient(180deg, var(--bar-c1), var(--bar-c2));
+  transform-origin: 50% 100%;
+}
+.bar-value {
+  display: block;
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: var(--fs-sub);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.bar-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 20px);
+  text-align: center;
+  font-size: var(--fs-caption);
+  line-height: 1.25;
+  color: var(--ink-2);
+}
+.bar.is-accent {
+  --bar-c1: #ffd59c;
+  --bar-c2: rgba(180, 160, 255, 0.5);
+}
+.bar.is-accent .bar-fill {
+  background: linear-gradient(180deg, #ffd59c 0%, #b4a0ff 60%, rgba(124, 196, 255, 0.45) 100%);
+}
+.bar.is-muted {
+  --bar-c1: #48484d;
+  --bar-c2: #2c2c30;
+}
+.bar.is-muted .bar-value {
+  color: var(--ink-2);
+}
+
+/* Barras horizontais */
+.chart-bars.is-horizontal {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+  gap: 26px;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+.chart-bars.is-horizontal .bar {
+  height: auto;
+  display: grid;
+  grid-template-columns: var(--label-w, 320px) minmax(0, 1fr);
+  grid-template-areas: "label track";
+  align-items: center;
+  gap: 28px;
+}
+.chart-bars.is-horizontal .bar-label {
+  grid-area: label;
+  position: static;
+  text-align: left;
+  font-size: var(--fs-text);
+  color: var(--ink-2);
+}
+.chart-bars.is-horizontal .bar-track {
+  grid-area: track;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-width: 0;
+}
+.chart-bars.is-horizontal .bar-fill {
+  height: 48px;
+  width: var(--h, 0%);
+  min-width: 6px;
+  border-radius: 2px 12px 12px 2px;
+  background: linear-gradient(90deg, var(--bar-c2), var(--bar-c1));
+  transform-origin: 0 50%;
+}
+.chart-bars.is-horizontal .bar.is-accent .bar-fill {
+  background: linear-gradient(90deg, rgba(124, 196, 255, 0.45), #b4a0ff 50%, #ffd59c);
+}
+.chart-bars.is-horizontal .bar-value {
+  margin: 0;
+  font-size: var(--fs-sub);
+  text-align: left;
+}
+
+/* ---------- Linha ---------- */
+.chart-line {
+  position: relative;
+  width: 100%;
+  height: var(--chart-h, 520px);
+}
+.chart-line svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.chart-line .cl-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.chart-line .cl-line {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chart-line .cl-dot {
+  fill: #000;
+  stroke-width: 5;
+}
+.chart-line .cl-label {
+  fill: var(--ink-3);
+  font-size: var(--fs-caption);
+  font-family: var(--font);
+}
+.chart-line .cl-value {
+  fill: var(--ink);
+  font-size: var(--fs-sub);
+  font-weight: 700;
+  font-family: var(--font);
+  letter-spacing: -0.02em;
+}
+
+/* SVG livre desenhado à mão pelos autores */
+.svg-draw path,
+.svg-draw line,
+.svg-draw polyline,
+.svg-draw circle,
+.svg-draw rect {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Gantt / linha do tempo ---------- */
+.gantt {
+  --cols: 12;
+  --label-w: 340px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--label-w) minmax(0, 1fr);
+  column-gap: 32px;
+  row-gap: 16px;
+  align-items: center;
+}
+.gantt-head {
+  display: contents;
+}
+.gantt-scale {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-2);
+}
+.gantt-scale span {
+  padding-left: 10px;
+  white-space: nowrap;
+}
+.gantt-row {
+  display: contents;
+}
+.gantt-label {
+  grid-column: 1;
+  font-size: var(--fs-text);
+  line-height: 1.2;
+  color: var(--ink);
+  font-weight: 500;
+}
+.gantt-label small {
+  display: block;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+  font-weight: 400;
+}
+.gantt-track {
+  grid-column: 2;
+  position: relative;
+  height: 52px;
+  background:
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / calc(100% / var(--cols)) 100%;
+}
+.gantt-bar {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: calc(var(--from) / var(--cols) * 100%);
+  width: calc((var(--to) - var(--from)) / var(--cols) * 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(124, 196, 255, 0.85), rgba(180, 160, 255, 0.85));
+  color: #0a0a0c;
+  font-size: 19px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  transform-origin: 0 50%;
+}
+.gantt-bar.is-accent {
+  background: linear-gradient(90deg, #b4a0ff, #ffc983);
+}
+.gantt-bar.is-muted {
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+.gantt-bar.is-outline {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+  color: var(--ink-2);
+}
+.gantt-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--label-w) + 32px);
+  right: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.gantt-marker {
+  position: absolute;
+  top: 0;
+  bottom: -10px;
+  left: calc(var(--at) / var(--cols) * 100%);
+  width: 0;
+  border-left: 2px solid var(--amber);
+  transform-origin: 50% 0;
+}
+.gantt-marker span {
+  position: absolute;
+  top: -46px;
+  left: 0;
+  transform: translateX(-50%);
+  padding: 4px 14px 5px;
+  border-radius: 999px;
+  background: var(--amber);
+  color: #0a0a0c;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.gantt.has-markers {
+  margin-top: 48px;
+}
+
+/* ---------- Diagrama de nós ---------- */
+.diagram {
+  position: relative;
+  display: grid;
+  gap: 72px 96px;
+  align-items: center;
+  align-content: space-evenly;
+  justify-items: center;
+}
+.diagram-wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+.diagram > .node {
+  z-index: 1;
+}
+/* Diagrama: nós em superfície sem contorno, fios finos de 2 px, rótulos em legenda. */
+.node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 26px 34px 28px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  box-shadow: none;
+  text-align: left;
+  min-width: 260px;
+}
+.node b,
+.node .node-title {
+  font-size: var(--fs-text);
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.node small,
+.node .node-sub {
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.node .node-tag {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+.node--accent {
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--grad) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 0 60px rgba(140, 130, 255, 0.14);
+}
+.node--ghost {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.node--pill {
+  border-radius: 999px;
+  padding: 20px 36px;
+  min-width: 0;
+  align-items: center;
+}
+.node--solid {
+  background: var(--ink);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+.node--solid b,
+.node--solid small {
+  color: #0a0a0c;
+}
+
+.wire-path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.34);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.wire-head {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke: none;
+}
+.wire-g.is-accent .wire-path {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.wire-g.is-accent .wire-head {
+  fill: var(--violet);
+}
+.wire-g.is-amber .wire-path { stroke: var(--amber); }
+.wire-g.is-amber .wire-head { fill: var(--amber); }
+.wire-g.is-blue .wire-path { stroke: var(--blue); }
+.wire-g.is-blue .wire-head { fill: var(--blue); }
+.wire-g.is-muted .wire-path { stroke: rgba(255, 255, 255, 0.18); }
+.wire-g.is-muted .wire-head { fill: rgba(255, 255, 255, 0.3); }
+.wire-label {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  padding: 6px 14px 7px;
+  border-radius: 999px;
+  background: #000;
+  box-shadow: none;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.wire-label.at-left { transform: translate(calc(-100% - 14px), -50%); }
+.wire-label.at-right { transform: translate(14px, -50%); }
+.wire-label.at-above { transform: translate(-50%, calc(-100% - 12px)); }
+.wire-label.at-below { transform: translate(-50%, 12px); }
+.wire-label.is-accent { color: var(--violet); }
+.wire-label.is-amber { color: var(--amber); }
+.wire-label.is-blue { color: var(--blue); }
+.wire {
+  display: none;
+}
+
+/* ---------- Orçamento: total, barra empilhada e lista com valores ----------
+   .budget (em um .card) > .budget-cat, .budget-total, .budget-bar > i (--v valor, --c cor),
+   .budget-list > li (--c cor; .is-reserve hachurado; <span>nome <small>detalhe</small></span><b>valor</b>; li.is-total), .budget-note.
+   Cores só com significado: --blue Claude, --green código, --grad o que é nosso, cinzas para o resto. */
+.budget {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.budget .budget-cat {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+.budget-total {
+  margin-top: 6px;
+  font-size: var(--fs-stat);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.budget-bar {
+  display: flex;
+  gap: 3px;
+  height: 28px;
+  margin-top: 24px;
+}
+.budget-bar i {
+  flex: var(--v) 1 0;
+  min-width: 6px;
+  background: var(--c, var(--surface-3));
+}
+.budget-bar i:first-child { border-radius: 8px 0 0 8px; }
+.budget-bar i:last-child { border-radius: 0 8px 8px 0; }
+.budget-list {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+}
+.budget-list li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0 16px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-text);
+  line-height: 1.2;
+  color: var(--ink);
+}
+.budget-list li::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: var(--c, var(--surface-3));
+  transform: translateY(1px);
+}
+.budget-list li span small {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+}
+.budget-list li b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* reserva: hachurada, para ler como "não gasto" */
+.budget-bar i.is-reserve,
+.budget-list li.is-reserve::before {
+  background: repeating-linear-gradient(135deg, var(--ink-3) 0 2px, transparent 2px 7px);
+  box-shadow: inset 0 0 0 1.5px var(--ink-3);
+}
+.budget-list li.is-total {
+  border-top: 1px solid var(--line-2);
+  font-weight: 700;
+}
+.budget-list li.is-total::before {
+  background: none;
+}
+.budget-list li.is-total b {
+  font-weight: 700;
+}
+.budget .budget-note {
+  margin: 16px 0 0;
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--ink-3);
+}

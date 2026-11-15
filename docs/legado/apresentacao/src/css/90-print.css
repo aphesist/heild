@@ -1,0 +1,82 @@
+/* Impressão / PDF: abra com ?print (ou imprima direto) para ter um slide por página, no estado final. */
+@page {
+  size: 1920px 1080px;
+  margin: 0;
+}
+
+html.is-print,
+html.is-print body {
+  height: auto;
+  overflow: visible;
+  background: #000;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+html.is-print .viewport {
+  position: static;
+  overflow: visible;
+}
+html.is-print .stage {
+  position: static;
+  transform: none;
+  width: var(--stage-w);
+  height: auto;
+  contain: none;
+  overflow: visible;
+  counter-reset: pg;
+}
+html.is-print .slide {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: none;
+  break-after: page;
+  page-break-after: always;
+  break-inside: avoid;
+  counter-increment: pg;
+}
+html.is-print .slide:last-of-type {
+  break-after: auto;
+  page-break-after: auto;
+}
+html.is-print .slide::after {
+  content: counter(pg);
+  position: absolute;
+  right: var(--pad-x);
+  bottom: var(--foot-y);
+  line-height: 1;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  z-index: 3;
+}
+html.is-print .slide[data-chrome="off"]::after {
+  content: none;
+}
+html.is-print .chrome,
+html.is-print .goto,
+html.is-print .hint,
+html.is-print .blackout,
+html.is-print .overview {
+  display: none !important;
+}
+html.is-print .slide * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Na tela, o modo ?print mostra os slides encolhidos um abaixo do outro */
+@media screen {
+  html.is-print .stage {
+    zoom: var(--print-zoom, 1);
+  }
+  html.is-print .slide {
+    margin-bottom: 24px;
+  }
+}
+@media print {
+  html.is-print .slide {
+    margin: 0;
+  }
+}

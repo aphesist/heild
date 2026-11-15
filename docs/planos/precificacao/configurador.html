@@ -1,0 +1,1878 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurador de preço</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1b2430; --mut:#5b6675; --line:#dfe3ea;
+  --acc:#1f5eff; --acc-ink:#ffffff; --warn-bg:#fff4d6; --warn-ink:#6b4a00; --warn-line:#f0d27a;
+  --ok:#0b7a43; --bad:#b3261e; --soft:#eef2fb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141b; --card:#171e28; --ink:#e7ebf1; --mut:#9aa6b6; --line:#2a3443;
+    --acc:#6c97ff; --acc-ink:#0b1220; --warn-bg:#3a2f0b; --warn-ink:#f2d98a; --warn-line:#6b571a;
+    --ok:#4cc38a; --bad:#ff8a80; --soft:#1d2736;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --card:#171e28; --ink:#e7ebf1; --mut:#9aa6b6; --line:#2a3443;
+  --acc:#6c97ff; --acc-ink:#0b1220; --warn-bg:#3a2f0b; --warn-ink:#f2d98a; --warn-line:#6b571a;
+  --ok:#4cc38a; --bad:#ff8a80; --soft:#1d2736;
+}
+*{box-sizing:border-box}
+html,body{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.aviso{position:sticky;top:0;z-index:5;background:var(--warn-bg);color:var(--warn-ink);border-bottom:1px solid var(--warn-line);padding:10px 16px;font-weight:600;text-align:center}
+main{max-width:1080px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px}
+h2{font-size:1.05rem;margin:0 0 10px}
+p.sub{margin:0 0 14px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.field{flex:1 1 130px;min-width:120px;display:flex;flex-direction:column;gap:4px}
+label.l{font-size:.85rem;color:var(--mut)}
+input[type=number],select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.chk:first-of-type{border-top:0}
+.chk input{margin-top:4px;width:18px;height:18px;flex:none}
+.chk .t{font-weight:600}
+.chk .n{font-size:.85rem;color:var(--mut)}
+.chk>div{min-width:0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+button{font:inherit;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--acc)}
+.big{font-size:2rem;font-weight:700;line-height:1.1}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+@media (max-width:520px){.kpis{grid-template-columns:minmax(0,1fr)}}
+.kpi{background:var(--soft);border-radius:10px;padding:10px 12px}
+.kpi .k{font-size:.8rem;color:var(--mut)}
+.kpi .v{font-size:1.25rem;font-weight:700}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:right;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th:first-child,td:first-child{text-align:left;overflow-wrap:break-word}
+td:not(:first-child){white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:.8rem}
+tfoot td{font-weight:700}
+.wrap{overflow-x:auto}
+@media (max-width:520px){table{font-size:.8rem} th,td{padding:5px 2px}}
+.nota{font-size:.85rem;color:var(--mut);margin:8px 0 0}
+.msg{font-size:.85rem;background:var(--soft);border-radius:8px;padding:8px 10px;margin-top:8px}
+.msg.w{background:var(--warn-bg);color:var(--warn-ink)}
+.inline{display:none;margin-top:6px}
+.inline.on{display:block}
+.tag{display:inline-block;font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;border:1px solid var(--line);color:var(--mut)}
+.tag.conf{background:var(--warn-bg);color:var(--warn-ink);border-color:var(--warn-line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:.76rem;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.chip.conf{background:var(--warn-bg);color:var(--warn-ink);border-color:var(--warn-line)}
+fieldset.g{border:0;border-top:1px solid var(--line);margin:12px 0 0;padding:8px 0 0;min-width:0}
+fieldset.g legend{font-weight:700;font-size:.9rem;padding:0 0 4px}
+.pr{margin:10px 0}
+.pr .n{font-size:.8rem;color:var(--mut);margin-top:2px}
+.pr .tri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pr .tri span{font-size:.7rem;color:var(--mut);display:block}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--acc);font-size:.9rem}
+.full{margin-top:4px}
+</style>
+</head>
+<body>
+<div class="aviso">Parâmetros de teste, não são preços de venda.</div>
+<main>
+<h1>Configurador de preço do sistema modular</h1>
+<p class="sub">Escolha os módulos, os clientes, os usuários, o plano de IA de cada usuário e o armazenamento. O preço, o custo estimado e as <b>três margens</b> (contribuição, após os fixos da plataforma e líquida estimada) mudam na hora. O sistema-base (sem IA) é calibrado perto do mercado; a margem alta fica na IA, vendida à parte em planos por usuário. <b>Tributos e os demais percentuais estimados ficam no painel Premissas (bloco 6), editáveis, com a marca "a confirmar"</b>; o bloco 7 mostra a implantação como receita e o fluxo de caixa dos primeiros 12 meses. Os valores de partida ficam no objeto <code>PARAMETROS</code> no topo do script e em <code>parametros.json</code>.</p>
+
+<div class="grid">
+<section>
+  <div class="card">
+    <h2>1. Escritório</h2>
+    <div class="btns" id="tipos"></div>
+    <div class="row">
+      <div class="field"><label class="l" for="clientes">Clientes atendidos</label><input id="clientes" type="number" min="1" step="1" value="100"></div>
+      <div class="field"><label class="l" for="usuarios">Usuários</label><input id="usuarios" type="number" min="1" step="1" value="15"></div>
+      <div class="field"><label class="l" for="numeros">Números de WhatsApp</label><input id="numeros" type="number" min="1" step="1" value="2"></div>
+      <div class="field"><label class="l" for="perfil">Perfil de uso</label><select id="perfil"><option value="0">Baixo</option><option value="1" selected>Provável</option><option value="2">Alto</option><option value="3">Pior caso</option></select></div>
+    </div>
+    <p class="nota" id="faixa"></p>
+  </div>
+
+  <div class="card">
+    <h2>2. Módulos</h2>
+    <div class="btns" id="pacotes"></div>
+    <div class="chk"><input type="checkbox" id="semcont"><div><div class="t">Produto BPO financeiro puro (sem o pacote Contábil)</div><div class="n">A plataforma entra pelo núcleo (R$ 100 + R$ 0,30 por cliente + R$ 5 por usuário), no lugar do Painel (R$ 200 + R$ 0,70). Sem conectores de governo, estados e cores. Marque junto com o complemento Pacote BPO financeiro (subplano 10, cenário C1).</div></div></div>
+    <div id="modulos"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. IA: planos por usuário</h2>
+    <p class="nota" style="margin-top:0">O Administrador atribui o plano a cada usuário; quem fica sem plano não usa a IA dos integrantes. 1 unidade de uso (UU) = 10 mil tokens. O limite é um teto: o usuário médio usa parte dele (perfil de uso, no bloco 1). A ajuda sobre o próprio sistema (FAQ, depois o assistente de modelo pequeno com leitura de diagnóstico, depois a equipe) está no custo do sistema-base e vale também para quem não tem plano.</p>
+    <div class="btns" id="iapacotes"></div>
+    <div class="row" id="iaplanos"></div>
+    <p class="nota" id="iasem"></p>
+    <div class="chk"><input type="checkbox" id="bolsaon"><div><div class="t">Bolsa compartilhada do escritório</div><div class="n" id="bolsanota"></div></div></div>
+    <div class="inline" id="bolsabox">
+      <div class="row">
+        <div class="field"><label class="l" for="bolsauu">UU por semana na bolsa</label><input id="bolsauu" type="number" min="0" step="100" value="1500"></div>
+        <div class="field"><label class="l" for="bolsausu">Usuários com acesso à bolsa</label><input id="bolsausu" type="number" min="0" step="1" value="10"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="field"><label class="l" for="extrapac" id="extralbl">Pacotes de uso extra por mês</label><input id="extrapac" type="number" min="0" step="1" value="0"></div>
+    </div>
+    <div class="inline on" id="limites"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Armazenamento</h2>
+    <div class="chk"><input type="checkbox" id="gbon" checked><div><div class="t">Armazenamento de documentos na plataforma</div><div class="n">Opcional. Desligado, o escritório usa a nuvem própria e não paga GB.</div></div></div>
+    <div class="inline on" id="gbbox">
+      <div class="row">
+        <div class="field"><label class="l" for="gbcli">GB por cliente (padrão 5)</label><input id="gbcli" type="number" min="0" step="1" value="5"></div>
+        <div class="field"><label class="l" for="gb">GB contratados no total</label><input id="gb" type="number" min="0" step="1" value="500"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>5. Complementos e módulos extras</h2>
+    <div id="comps"></div>
+  </div>
+
+  <div class="card">
+    <h2>6. Premissas</h2>
+    <p class="nota" style="margin-top:0">Todo percentual e valor estimado do cálculo está aqui, editável; nada fica escondido no código. A marca <span class="tag conf">a confirmar</span> indica o que depende de confirmação externa (contador do projeto, vendas, fornecedores). Preço e custo mudam na hora; os preços de tabela dos módulos ficam em PARAMETROS.</p>
+    <div class="btns"><button type="button" id="restaura">Restaurar valores de partida</button></div>
+    <div id="premissas"></div>
+  </div>
+</section>
+
+<section>
+  <div class="card">
+    <h2>Resultado</h2>
+    <div class="big" id="total">-</div>
+    <div class="nota" id="totalnota"></div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Custo estimado</div><div class="v" id="custo">-</div></div>
+      <div class="kpi"><div class="k">Margem de contribuição (a)</div><div class="v" id="margem">-</div></div>
+      <div class="kpi"><div class="k">Preço por cliente</div><div class="v" id="porcli">-</div></div>
+    </div>
+    <div class="nota" style="margin:0 0 4px">Premissas em uso (edite no bloco 6):</div>
+    <div class="chips" id="chips"></div>
+    <div id="msgs"></div>
+    <div id="mercado"></div>
+    <div class="msg" id="iacap"></div>
+    <div class="wrap">
+    <table>
+      <thead><tr><th>Linha</th><th>Preço</th><th>Custo</th><th>Margem</th></tr></thead>
+      <tbody id="linhas"></tbody>
+      <tfoot id="rodape"></tfoot>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Três níveis de margem</h2>
+    <div class="wrap"><table><thead><tr><th>Nível</th><th>R$ por mês</th><th>Margem</th></tr></thead><tbody id="niveis"></tbody></table></div>
+    <p class="nota" id="niveisnota"></p>
+    <div id="equil"></div>
+  </div>
+  <div class="card">
+    <h2>A IA isolada, com todos os custos de IA</h2>
+    <div id="iaiso"></div>
+    <div id="iamin"></div>
+  </div>
+  <div class="card">
+    <h2>Custos de API do painel do cliente e teto de conectores</h2>
+    <div class="wrap"><table><thead><tr><th>API</th><th>Custo por mês</th></tr></thead><tbody id="apis"></tbody></table></div>
+    <div class="msg" id="teto"></div>
+    <p class="nota">Cada linha já está no custo da margem de contribuição. Os conectores de governo e estaduais vão embutidos no preço-base até o teto de uso; acima dele, o escritório paga o consumo a custo + 20%. Cobrança (Asaas, Efí) fica na conta do escritório: custo zero para a plataforma.</p>
+  </div>
+  <div class="card">
+    <h2>Margem de contribuição em cada perfil de uso</h2>
+    <div class="wrap"><table><thead><tr><th>Perfil</th><th>Preço</th><th>Custo</th><th>Margem</th></tr></thead><tbody id="perfis"></tbody></table></div>
+    <p class="nota">Preço e custo mudam com o perfil só onde há consumo (IA, conectores acima do teto). IA a 15%, 35%, 70% e 100% do teto dos planos por padrão (100% = pior caso, com o chat em modelo barato após o limite).</p>
+  </div>
+  <div class="card">
+    <h2>Consumo repassado ao escritório (fora do preço)</h2>
+    <div id="wa"></div>
+    <p class="nota">O custo por mensagem de WhatsApp vai ao escritório, ao custo da Meta. A plataforma só exibe a tarifa por categoria. Não entra na mensalidade nem na margem.</p>
+  </div>
+</section>
+</div>
+
+<div class="card full">
+  <h2>7. Implantação como receita e caixa dos primeiros 12 meses</h2>
+  <p class="nota" style="margin-top:0">A implantação é cobrada uma vez e entregue por horas de trabalho. Aqui ela entra como receita e como custo; o fluxo de caixa mostra quanto da caixa inicial vem dela. Todos os valores abaixo são parâmetros de teste, e os marcados como premissa ou a medir seguem o painel do bloco 6.</p>
+  <h2 style="font-size:.95rem">Preço de implantação por porte</h2>
+  <div class="wrap"><table id="impl"></table></div>
+  <div id="implaviso" role="alert"></div>
+  <p class="nota" id="implnota"></p>
+  <h2 style="font-size:.95rem;margin-top:14px">Margem do primeiro ano e ponto de equilíbrio, por porte</h2>
+  <div class="wrap"><table id="ano1"></table></div>
+  <p class="nota">Primeiro ano = 12 mensalidades mais a implantação, na margem de contribuição (a) da configuração escolhida abaixo. Equilíbrio em escritórios do mesmo porte para pagar os fixos da plataforma: em regime (só mensalidades) e no 1º ano (a margem da implantação soma ao ano).</p>
+  <h2 style="font-size:.95rem;margin-top:14px">Cenário do fluxo de caixa</h2>
+  <div class="row" id="fluxoprem"></div>
+  <div class="kpis" id="caixakpi" style="margin-top:12px"></div>
+  <div id="caixacmp"></div>
+  <div id="caixagraf" style="margin-top:12px"></div>
+  <div class="wrap" style="margin-top:8px"><table id="caixatab"></table></div>
+  <details><summary>Ver a composição de cada mês (R$ mil)</summary><div id="caixadet"></div></details>
+  <p class="nota" id="caixanota"></p>
+</div>
+
+<p class="nota">Regras: a margem de contribuição (a) inclui custos variáveis, fixos por escritório, infraestrutura rateada, suporte por assento, chat de suporte e ajuda do sistema; (b) desconta a parte rateada dos fixos da plataforma; (c) desconta ainda tributos sobre a receita e comissão (premissas). A alíquota de tributos será discutida depois com o contador do projeto. Não entram: tarifas de cobrança dos clientes, implantação (custo único, bloco 7) e WhatsApp (repassado). O Modo BPO entre escritórios e o BPO financeiro do cliente são módulos extras, fora de qualquer pacote; a faixa do Modo BPO conta os clientes de todos os subescritórios. Os atalhos Essencial, Operação e Completo só pré-marcam módulos e a distribuição dos planos de IA (Essencial: sem IA; Operação: IA Operação para 1/3 dos usuários; Completo: IA Operação para todos) e não dão desconto. Preço = soma dos módulos + soma dos planos de IA por usuário + complementos. A tabela de preços pode ser pública ou privada (decisão do time de vendas): o configurador funciona nos dois casos. Estudo completo: <code>docs/Estudo_de_Precificacao_por_Modulo.md</code>, seções 6, 8 e 9.</p>
+</main>
+
+<script>
+// =====================================================================
+// PARÂMETROS DE TESTE (valores de partida; o mesmo conteúdo está em parametros.json)
+// O painel Premissas da página edita uma cópia destes valores. Listas de custo = [baixo, provável, alto]. Valores em R$ por mês.
+// =====================================================================
+const PARAMETROS = {
+ "versao": "parametros de teste 0.9",
+ "data": "2026-11-09",
+ "aviso": "Parametros de teste, nao sao precos de venda.",
+ "faixas_clientes": [
+  {
+   "ate": 30,
+   "fator": 1
+  },
+  {
+   "ate": 60,
+   "fator": 0.92
+  },
+  {
+   "ate": 120,
+   "fator": 0.85
+  },
+  {
+   "ate": 250,
+   "fator": 0.75
+  },
+  {
+   "ate": 500,
+   "fator": 0.65
+  },
+  {
+   "ate": 1000,
+   "fator": 0.55
+  },
+  {
+   "ate": null,
+   "fator": 0.5
+  }
+ ],
+ "piso_mensal": 700,
+ "modulos": {
+  "painel": {
+   "nome": "Painel (inclui a Base)",
+   "obrigatorio": true,
+   "exige": [],
+   "preco": {
+    "base": 200,
+    "cliente": 0.7,
+    "usuario": 5
+   },
+   "custo": {
+    "fixo": [
+     18,
+     33,
+     80
+    ],
+    "cliente": [
+     0.2,
+     0.6,
+     1.5
+    ],
+    "usuario": [
+     6,
+     12.5,
+     25
+    ]
+   },
+   "nota": "Obrigatório. Contas, papéis, cadastro, tarefas, cofre. O custo por usuário é o suporte humano recorrente por assento (R$ 6 / 12,50 / 25; v0.5: o sistema é auto explicativo e a ajuda do sistema atende parte das dúvidas). O chat de suporte com pessoas e a ajuda do sistema (modelo pequeno) são linhas de custo à parte (suporte_chat e ajuda)."
+  },
+  "crm": {
+   "nome": "CRM",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 200,
+    "cliente": 0.9,
+    "usuario": 2
+   },
+   "custo": {
+    "fixo": [
+     0,
+     0,
+     0
+    ],
+    "cliente": [
+     0.2,
+     0.43,
+     1.18
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Caixa de conversas, WhatsApp, e-mail, réguas. Mensagens de WhatsApp são repassadas ao escritório."
+  },
+  "timesheet": {
+   "nome": "Timesheet",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0,
+    "usuario": 7
+   },
+   "custo": {
+    "fixo": [
+     0,
+     0,
+     0
+    ],
+    "cliente": [
+     0,
+     0,
+     0
+    ],
+    "usuario": [
+     1,
+     2,
+     5
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). Rentabilidade por cliente exige também o Financeiro."
+  },
+  "app": {
+   "nome": "App do cliente",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 80,
+    "cliente": 0.6,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     3,
+     5,
+     10
+    ],
+    "cliente": [
+     0.1,
+     0.2,
+     0.5
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). Chat no app exige CRM. Incluído por padrão nos pacotes e atalhos (decisão de 9/11/2026, v0.9); por isso o preço por cliente subiu de R$ 0,30 para R$ 0,60, para cobrir o custo provável (R$ 0,20) com folga de 50% ou mais em todas as faixas. Sem marca branca, usa a marca e o tema padrão da plataforma; marca branca e app na loja são complementos pagos."
+  },
+  "gov": {
+   "nome": "Conectores: governo federal",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 90,
+    "cliente": 1.4,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     10,
+     25,
+     60
+    ],
+    "cliente": [
+     1.07,
+     2.25,
+     3.8
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). API paga do painel do cliente: Integra Contador e CNPJ. Embutido no preço até o teto de uso (conectores_teto); acima do teto, consumo cobrado ao custo mais 20%."
+  },
+  "est": {
+   "nome": "Conectores: estaduais e municipais",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0.7,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     5,
+     15,
+     40
+    ],
+    "cliente": [
+     0.7,
+     1.37,
+     2.5
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). API paga do painel do cliente: DTE e certidões estaduais por agregador (InfoSimples). Embutido no preço até o teto de uso (conectores_teto); acima do teto, consumo cobrado ao custo mais 20%."
+  },
+  "cores": {
+   "nome": "Conectores: cores",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     5,
+     10,
+     30
+    ],
+    "cliente": [
+     0,
+     0,
+     0
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). O contrato com o core é do escritório."
+  },
+  "fin": {
+   "nome": "Financeiro",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 80,
+    "cliente": 1.3,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     3,
+     8,
+     20
+    ],
+    "cliente": [
+     0.052,
+     0.1,
+     0.3
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). A régua por WhatsApp exige CRM; sem ele, só e-mail."
+  }
+ },
+ "nucleo_sem_contabil": {
+  "nome": "Plataforma (núcleo), sem o pacote Contábil",
+  "nota": "Usado só no produto BPO financeiro puro (C1, subplano 10): o núcleo (contas, papéis, cadastro, tarefas, cofre) sem o pacote Contábil. Núcleo + pacote Contábil = Painel; sem o pacote Contábil ficam sem Fiscal, Notas, DP, Contábil e Consultoria e sem os conectores de governo, estados e cores.",
+  "preco": {
+   "base": 100,
+   "cliente": 0.3,
+   "usuario": 5
+  },
+  "custo": {
+   "fixo": [
+    12,
+    22,
+    55
+   ],
+   "cliente": [
+    0.1,
+    0.3,
+    0.75
+   ],
+   "usuario": [
+    6,
+    12.5,
+    25
+   ]
+  }
+ },
+ "armazenamento": {
+  "gb_padrao_por_cliente": 5,
+  "preco_gb": 0.45,
+  "custo_gb": [
+   0.08,
+   0.2,
+   0.35
+  ]
+ },
+ "ia": {
+  "nota": "IA vendida a parte, em planos por usuario. 1 UU (unidade de uso) = 10 mil tokens. Custo por UU = preco medio por MTok / 100 (uso.preco_mtok). O limite e um teto; o custo vem da utilizacao do teto.",
+  "tokens_por_uu": 10000,
+  "semanas_mes": 4.3,
+  "dias_uteis": 21,
+  "perfis": [
+   "baixo",
+   "provável",
+   "alto",
+   "pior caso"
+  ],
+  "utilizacao_plano": [
+   0.15,
+   0.35,
+   0.7,
+   1
+  ],
+  "utilizacao_bolsa": [
+   0.3,
+   0.6,
+   0.85,
+   1
+  ],
+  "planos": {
+   "essencial": {
+    "nome": "IA Essencial",
+    "preco": 79,
+    "uu_5h": 25,
+    "uu_semana": 100,
+    "infra": [
+     3,
+     7,
+     20
+    ],
+    "inclui": [
+     "Chat Geral e perguntas",
+     "Consultor: perguntar",
+     "Integrantes sob demanda"
+    ]
+   },
+   "operacao": {
+    "nome": "IA Operação",
+    "preco": 189,
+    "uu_5h": 60,
+    "uu_semana": 300,
+    "infra": [
+     5,
+     14,
+     40
+    ],
+    "inclui": [
+     "Tudo da Essencial",
+     "Consultor: parecer",
+     "Integrantes proativos (jobs e eventos)",
+     "Vigilância e revisão de enquadramento"
+    ]
+   },
+   "intensivo": {
+    "nome": "IA Intensivo",
+    "preco": 299,
+    "uu_5h": 100,
+    "uu_semana": 500,
+    "infra": [
+     5,
+     14,
+     40
+    ],
+    "inclui": [
+     "Tudo da Operação",
+     "Segunda opinião",
+     "Limites no nível do subplano 02"
+    ]
+   }
+  },
+  "bolsa": {
+   "nome": "Bolsa compartilhada do escritório",
+   "preco_base": 90,
+   "preco_uu_semana": 0.65,
+   "uu_5h_usuario": 60,
+   "custo_fixo": [
+    15,
+    30,
+    60
+   ],
+   "custo_usuario": [
+    2,
+    4,
+    10
+   ],
+   "nota": "Pool semanal do escritório dividido entre usuários sem plano individual; recursos da IA Operação; limite de 60 UU por usuário a cada 5 h."
+  },
+  "extra": {
+   "pacote_uu": 500,
+   "preco_pacote": 90,
+   "nota": "Uso extra avulso, pré-pago, válido por 30 dias; o Administrador autoriza e fixa o teto mensal."
+  },
+  "reserva_chat": {
+   "uu_dia": 30,
+   "custo_mtok_barato": 0.6,
+   "dias": 30,
+   "nota": "Ao atingir o limite semanal, o chat e as perguntas seguem em modelo barato, até 30 UU por dia."
+  },
+  "teto_defesa": {
+   "mtok_integrante_dia": 2
+  },
+  "suporte_usuario": [
+   4,
+   8,
+   16
+  ],
+  "suporte_nota": "Suporte específico da IA por usuário com plano (premissa a medir); entra só na visão \"IA isolada\", não na margem de contribuição."
+ },
+ "whatsapp": {
+  "custo_utilidade": 0.035,
+  "custo_marketing": 0.3217,
+  "custo_servico": 0.035,
+  "gratis_servico_por_numero": 1000,
+  "msgs_utilidade": [
+   3,
+   6,
+   12
+  ],
+  "msgs_marketing": [
+   0,
+   0.5,
+   2
+  ],
+  "msgs_servico": [
+   10,
+   25,
+   50
+  ],
+  "tarifas_exibidas": {
+   "utilidade": 0.035,
+   "autenticação": 0.035,
+   "serviço (além do gratuito)": 0.035,
+   "marketing": 0.3217
+  }
+ },
+ "uso": {
+  "tok_usuario_dia": [
+   0.25,
+   0.6,
+   1.2
+  ],
+  "tok_cliente": [
+   0.2,
+   0.5,
+   1.2
+  ],
+  "preco_mtok": [
+   6.08,
+   8.82,
+   8.82
+  ],
+  "nota": "tok_* = demanda bruta de IA do estudo 0.2 (MTok), usada só no indicador de cobertura; preco_mtok = R$ por MTok (baixo, provável, alto)."
+ },
+ "complementos": {
+  "marca_branca": {
+   "nome": "Marca branca (sistema e app com a marca, o domínio e o tema do escritório)",
+   "exige": [
+    "painel"
+   ],
+   "preco_fixo": 150,
+   "custo_fixo": [
+    7,
+    15,
+    30
+   ],
+   "nota": "Opcional. Sem ela, sistema e app usam a marca e o tema padrão da plataforma."
+  },
+  "app_loja": {
+   "nome": "App próprio na loja (nome e ícone do escritório)",
+   "exige": [
+    "app",
+    "marca_branca"
+   ],
+   "preco_fixo": 350,
+   "custo_fixo": [
+    150,
+    240,
+    330
+   ],
+   "nota": "Opcional. Exige App e Marca branca. Publicação inicial (R$ 1,5 mil a 3 mil) cobrada à parte, uma vez."
+  },
+  "consultor_empresa": {
+   "nome": "Consultor da empresa (serviço do App, por cliente)",
+   "exige": [
+    "app"
+   ],
+   "preco_cliente": 10,
+   "franquia_perguntas_cliente": 15,
+   "preco_excedente_pergunta": 0.4,
+   "custo_pergunta": 0.12,
+   "perguntas_cliente": [
+    5,
+    10,
+    15
+   ],
+   "nota": "Complemento do App, separado dos planos de IA, vendido pelo próprio escritório: ele ativa o Consultor para cada cliente nas configurações e a cobrança (plataforma ao escritório, por cliente ativo) vale na hora. R$ 10 por cliente ativo; franquia de 15 perguntas por mês; acima disso, R$ 0,40 por pergunta. O preço ao cliente final é do escritório."
+  },
+  "nfse_app": {
+   "nome": "NFS-e pelo app (serviço extra, por cliente ativo)",
+   "exige": [
+    "app"
+   ],
+   "participacao_cliente": 6,
+   "notas_cliente": [
+    10,
+    20,
+    40
+   ],
+   "custo_infra_nota": 0.05,
+   "custo_integrador_nota": 0.49,
+   "nota": "Serviço extra do App. Participação fixa de R$ 6 por cliente ativo; o integrador (Asaas, R$ 0,49 por nota) é repassado ao custo; infraestrutura R$ 0,05 por nota. Ativado pelo escritório para cada cliente."
+  },
+  "certidoes_app": {
+   "nome": "Certidões sob demanda pelo app (serviço extra)",
+   "exige": [
+    "app"
+   ],
+   "participacao_certidao": 1,
+   "certidoes_cliente": [
+    1,
+    2,
+    4
+   ],
+   "custo_certidao": [
+    0.25,
+    0.425,
+    0.6
+   ],
+   "nota": "Serviço extra do App. Participação de R$ 1 por certidão; custo de API R$ 0,25 a 0,60 por certidão."
+  },
+  "open_finance": {
+   "nome": "Open Finance (módulo à parte)",
+   "exige": [
+    "fin"
+   ],
+   "preco_fixo": 450,
+   "preco_cliente": 6,
+   "custo_fixo": [
+    250,
+    250,
+    250
+   ],
+   "custo_cliente": [
+    0.5,
+    1,
+    2
+   ],
+   "nota": "Exige Financeiro. Nunca embutido. Cobrado por clientes conectados; custo fixo é o contrato do agregador (R$ 2.500) rateado por 10 escritórios."
+  },
+  "bpo_fin": {
+   "nome": "Pacote BPO financeiro (trabalha no ERP do cliente; livro próprio opcional)",
+   "exige": [
+    "fin",
+    "app"
+   ],
+   "preco_fixo": 390,
+   "preco_empresa": 65,
+   "custo_fixo": [
+    15,
+    30,
+    60
+   ],
+   "custo_empresa": [
+    4,
+    9,
+    18
+   ],
+   "custo_conector_erp": [
+    1,
+    3,
+    8
+   ],
+   "nota": "Duas partes (decisão de 8/11/2026, P14): mensalidade-base do pacote por escritório (o acesso ao sistema do BPO) e valor por empresa cliente incluída. Era R$ 150 + R$ 12 (estudo 0.5) e R$ 150 + R$ 18 (proposta anterior). Exige Financeiro (espelho e conciliação) e App (aprovação do cliente); Timesheet, CRM e Open Finance são recomendados e desmarcáveis. Custo por empresa: IA de leitura, classificação e relatório (R$ 4 / 9 / 18) mais o conector de ERP financeiro (R$ 1 / 3 / 8, infraestrutura de sincronização; tarifa de terceiros desconhecida, a confirmar). O cliente paga o próprio ERP."
+  },
+  "modo_bpo": {
+   "nome": "Modo BPO entre escritórios (extra)",
+   "exige": [
+    "painel"
+   ],
+   "preco_fixo": 490,
+   "preco_sub": 120,
+   "custo_fixo": [
+    15,
+    30,
+    60
+   ],
+   "custo_sub": [
+    10,
+    25,
+    40
+   ],
+   "nota": "Extra, fora dos pacotes. Multi-inquilino em dois níveis; quem assina é o BPO, e o contratante é cliente dele (portal de convidado, sem preço por usuário; teto de abuso de convidados por contratante, editável, não é cobrança: P5). Informe no campo de clientes o total de todos os subescritórios: a faixa soma os clientes (P10). O Financeiro conta só os contratantes (P9).",
+   "convidados_max_por_contratante": 10
+  }
+ },
+ "pacotes": {
+  "base": {
+   "nome": "Sistema-base (sem IA)",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov",
+    "timesheet",
+    "est"
+   ],
+   "marca_branca": true,
+   "armazenamento": false,
+   "ia": {
+    "plano": null,
+    "fracao": 0
+   }
+  },
+  "essencial": {
+   "nome": "Essencial",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov"
+   ],
+   "marca_branca": false,
+   "armazenamento": false,
+   "ia": {
+    "plano": null,
+    "fracao": 0
+   }
+  },
+  "operacao": {
+   "nome": "Operação",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov",
+    "timesheet",
+    "est"
+   ],
+   "marca_branca": true,
+   "armazenamento": true,
+   "ia": {
+    "plano": "operacao",
+    "fracao": 0.3333
+   }
+  },
+  "completo": {
+   "nome": "Completo",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov",
+    "timesheet",
+    "est",
+    "fin"
+   ],
+   "marca_branca": true,
+   "armazenamento": true,
+   "ia": {
+    "plano": "operacao",
+    "fracao": 1
+   }
+  }
+ },
+ "escritorios_tipo": {
+  "P": {
+   "nome": "Pequeno",
+   "clientes": 30,
+   "usuarios": 5,
+   "numeros_whatsapp": 1
+  },
+  "M": {
+   "nome": "Médio",
+   "clientes": 100,
+   "usuarios": 15,
+   "numeros_whatsapp": 2
+  },
+  "G": {
+   "nome": "Grande",
+   "clientes": 300,
+   "usuarios": 40,
+   "numeros_whatsapp": 4
+  }
+ },
+ "perfis_uso": [
+  "baixo",
+  "provável",
+  "alto",
+  "pior caso"
+ ],
+ "comentarios": {
+  "custo": "Listas de custo = [baixo, provável, alto], em R$ de 7/11/2026 a R$ 7,97 por US$ (estudo, seção 3). O perfil 'pior caso' usa a coluna alto e 100% do teto de IA.",
+  "preco": "Preço do módulo = base + cliente x clientes efetivos (pelas faixas) + usuario x usuários. IA = soma dos planos por usuário + bolsa + uso extra; não depende de clientes.",
+  "faixas": "Faixa marginal: cada cliente é cobrado pelo fator da faixa em que cai (sem saltos).",
+  "whatsapp": "Custo por mensagem é repassado ao escritório ao custo da Meta; a plataforma só exibe a tarifa por categoria.",
+  "ia": "Custo de IA = utilização do teto (15%, 35%, 70%, 100%) x limite semanal x 4,3 semanas x custo por UU, mais infraestrutura por usuário.",
+  "mercado": "Referência de mercado por interpolação entre os pontos de mercado.pontos; vale só quando Painel, CRM, App com marca branca e conectores federais estão marcados.",
+  "suporte": "Suporte humano recorrente por assento: R$ 6 / 12,50 / 25 (baixo / provável / alto); era 6 / 25 / 60 na v0.4.",
+  "tributos": "Tributos, comissão, câmbio, utilização do teto de IA, suporte, fixos, pró-labore e número de escritórios ativos são premissas editáveis no painel Premissas da calculadora; nenhum percentual fica escondido no código."
+ },
+ "mercado": {
+  "nota": "Referência principal: HubStrom com o app de marca branca (o que o usuário comparou). Pontos: Professional R$ 527 + app R$ 300 (30 clientes); Enterprise R$ 957 + app R$ 300 (100 clientes); âncora do usuário de 200 clientes e 10 usuários: cerca de R$ 1.500 de tabela e R$ 1.200 com desconto. Acima de 200 clientes, extrapolação linear do último trecho (premissa; pedir cotação).",
+  "ancora_usuario": {
+   "clientes": 200,
+   "usuarios": 10,
+   "tabela": 1500,
+   "negociado": 1200
+  },
+  "pontos": [
+   [
+    30,
+    827
+   ],
+   [
+    100,
+    1257
+   ],
+   [
+    200,
+    1500
+   ]
+  ],
+  "fator_negociado": 0.8,
+  "ampliada": {
+   "nota": "Peças que, comprando separado, ficariam fora do HubStrom (soma das peças públicas, estudo 5.1): captura de notas (SIEG) e financeiro do escritório (Nibo).",
+   "captura": [
+    [
+     50,
+     223
+    ],
+    [
+     150,
+     470
+    ],
+    [
+     null,
+     800
+    ]
+   ],
+   "financeiro": [
+    [
+     50,
+     166
+    ],
+    [
+     150,
+     383
+    ],
+    [
+     null,
+     383
+    ]
+   ]
+  },
+  "a_mais": [
+   "Timesheet com rentabilidade por cliente (a rentabilidade exige o Financeiro)",
+   "Financeiro do escritório (contratos, cobrança, NFS-e dos honorários), quando existir",
+   "Captura de notas e conectores federais, estaduais e municipais dentro do preço (o mercado vende à parte: SIEG R$ 223 a 800)",
+   "Integrantes de IA, opcionais e à parte, em planos por usuário",
+   "Consultor da empresa por cliente (complemento)",
+   "Arquitetura aberta: MCP e ferramentas tipadas"
+  ]
+ },
+ "fixos_plataforma": {
+  "nota": "Fixos mensais da plataforma (estudo 9.4): infra 1.200 + GPU 2.111 + API fixa (base e DGM) 1.881 + operação multi-escritório 3.000 (premissa) = R$ 8,2 mil sem pró-labore; o pró-labore (R$ 10 mil, MVP) soma-se quando ligado (R$ 18,2 mil). A parte de IA (GPU e API fixa/DGM) é R$ 3.992.",
+  "sem_prolabore": 8200,
+  "ia_parte": 3992,
+  "cenarios_escritorios": [
+   10,
+   30,
+   100
+  ],
+  "clientes_medio": 100,
+  "prolabore": 10000
+ },
+ "tributos": {
+  "nota": "Hipótese de alíquota total sobre a receita (ISS ou equivalentes, PIS e COFINS), a confirmar com o contador do projeto; será discutida depois. Valor de trabalho: cenario.aliquota (12,5%). A pesquisa 08 usa 15,5% (Simples, Anexo V) a 24,9% (Presumido 2027).",
+  "faixa": [
+   0.08,
+   0.17
+  ],
+  "comissao_faixa": [
+   0,
+   0.1
+  ]
+ },
+ "cambio": {
+  "valor": 7.97,
+  "base": 7.97,
+  "nota": "R$ por US$ para tokens de IA e ajuda do sistema (Plano MVP: inclui IOF e tributos de importação de serviço; a confirmar com o contador do projeto). Os preços por MTok em uso.preco_mtok estão a R$ 7,97 (base) e são escalados por valor ÷ base."
+ },
+ "ajuda": {
+  "nome": "Ajuda do sistema (modelo pequeno, com base de conhecimento do produto)",
+  "perguntas_usuario": [
+   4,
+   10,
+   30
+  ],
+  "tokens_pergunta": [
+   5000,
+   8000,
+   15000
+  ],
+  "preco_mtok_usd": 0.075,
+  "infra_usuario": [
+   0.05,
+   0.1,
+   0.2
+  ],
+  "diagnostico": {
+   "pct_perguntas": [
+    0.1,
+    0.2,
+    0.4
+   ],
+   "chamadas": [
+    2,
+    3,
+    5
+   ],
+   "tokens_chamada": [
+    2000,
+    3000,
+    5000
+   ],
+   "nota": "Diagnóstico de leitura (8/11/2026): parte das perguntas de ajuda vira diagnóstico, com 2 a 5 chamadas de leitura (2 a 5 mil tokens de resultado cada), pelo escopo de quem perguntou. Custo por usuário por mês = perguntas × percentual × chamadas × tokens × preço × câmbio: R$ 0,001 / 0,011 / 0,18 (baixo / provável / alto), o que leva a ajuda a R$ 0,06 / 0,16 / 0,65. Seções básicas de FAQ (a primeira camada da Ajuda, antes do assistente) têm custo de conteúdo e manutenção, sem custo por consulta: tratado como desprezível e fora da conta."
+  },
+  "nota": "O assistente de ajuda padrão fica dentro do chat de suporte geral (suporte_chat): responde só sobre o sistema e as configurações dele, com um modelo pequeno (Haiku, US$ 0,075 por MTok na mistura de 3.1) e uma base de conhecimento do produto. Vale para todo usuário, inclusive sem plano de IA; não consome UU; limite de 30 perguntas por usuário por mês (hipótese, P25); ao atingir o limite, encaminha para a equipe. Custo por usuário por mês = perguntas × tokens por pergunta × preço × câmbio + infraestrutura (busca vetorial e registro) + diagnóstico de leitura (ajuda.diagnostico); o uso alto (30 perguntas) é o limite. A ordem de atendimento é FAQ, depois o assistente, depois a equipe; o FAQ não tem custo por consulta. Custo do sistema-base, sem receita própria.",
+  "limite_perguntas_mes": 30
+ },
+ "suporte_chat": {
+  "nome": "Chat de suporte geral com pessoas (ferramenta de chat e cobertura de horário, rateado por assento)",
+  "usuario": [
+   1,
+   2,
+   4
+  ],
+  "nota": "P25 (8/11/2026): o sistema tem um chat de suporte geral com a equipe da plataforma, para todo usuário. A hora de atendimento já está no suporte humano por assento (R$ 6 / 12,50 / 25, modulos.painel.custo.usuario); esta linha soma a ferramenta de chat (licença por agente) e a cobertura de horário comercial, rateadas por assento: cerca de R$ 1,40 com 2 agentes de US$ 40 e 450 assentos, arredondado para R$ 2 no provável. Premissa a medir; custo do sistema-base, sem receita própria."
+ },
+ "conectores_teto": {
+  "nota": "Teto de uso embutido no preço-base, por cliente por mês, somado no escritório (o escritório tem teto = clientes × teto por cliente; um cliente que consome mais compensa outro que consome menos). P26 (8/11/2026): teto apertado, 130% do uso provável (R$ 2,93 de Integra e CNPJ contra R$ 2,25; R$ 1,78 de InfoSimples contra R$ 1,37); era 162%. Acima do teto, consumo cobrado ao custo mais 20% (markup_excedente). Preços unitários da faixa 1 (08, seção 10.1).",
+  "precos": {
+   "consulta": 0.24,
+   "emissao": 0.32,
+   "declaracao": 0.4,
+   "cnpj": 0.6591,
+   "infosimples": 0.22
+  },
+  "gov": {
+   "consultas": 8,
+   "emissoes": 1.6,
+   "declaracoes": 0.8,
+   "cnpj": 0.27
+  },
+  "est": {
+   "consultas": 8.1
+  },
+  "markup_excedente": 1.2
+ },
+ "cenario": {
+  "aliquota": 0.125,
+  "comissao": 0,
+  "escritorios_ativos": 30,
+  "prolabore": false
+ },
+ "implantacao": {
+  "nota": "Implantação como receita e custo único. Horas de 8.2 do estudo (estimativa a medir no piloto) a R$ 90 por hora (premissa; R$ 70 a 130; P28 segue aberta: medir nos primeiros escritórios). P27 (8/11/2026): o preço depende do contexto, mas o piso é a margem zero: o time nunca vende abaixo do custo de entrega (piso = custo ÷ (1 − margem mínima), com margem mínima de 0%). Tabela da trilha ancorada no HubStrom (R$ 4.500 de tabela; R$ 2.200 após negociação do usuário) para o pequeno, e por hora com desconto de volume nos demais.",
+  "custo_hora": 90,
+  "margem_piso": 0,
+  "mig_hora_tabela": 130,
+  "horas": {
+   "trilha": {
+    "P": 28,
+    "M": 60,
+    "G": 150
+   },
+   "mig_ferramentas": {
+    "P": 6,
+    "M": 14,
+    "G": 36
+   },
+   "mig_financeiro": {
+    "P": 8,
+    "M": 16,
+    "G": 40
+   }
+  },
+  "tabela": {
+   "P": 4500,
+   "M": 8500,
+   "G": 19500
+  },
+  "mercado": {
+   "hubstrom_tabela": 4500,
+   "hubstrom_negociado": 2200
+  }
+ },
+ "fluxo": {
+  "nota": "Cenário do fluxo de caixa dos primeiros 12 meses. Entradas: implantação (parcelada) e mensalidades; saídas: horas de implantação, custo variável dos escritórios, fixos da plataforma, tributos e comissão sobre as entradas. Sem capital inicial.",
+  "horizonte": 12,
+  "novos_mes": 3,
+  "mix": {
+   "P": 0.5,
+   "M": 0.4,
+   "G": 0.1
+  },
+  "pacote": "base",
+  "desconto": 0.2,
+  "parcelas": 1,
+  "migracoes": false,
+  "cobra_implantacao": true,
+  "churn": 0,
+  "meses_ate_mensalidade": 1
+ },
+ "mercado_bpo": {
+  "nota": "Referências de BPO financeiro (S5, lidas em 7 e 8/11/2026; preços de páginas comerciais, sem auditoria). Sofia é o teto de referência: R$ 250 por organização ativa por mês (R$ 179 no plano Founders, mínimo de 3). BPO Suite: planos por CNPJ, CNPJ extra de R$ 70 a 99. Conta Azul Pro BPO: R$ 129,90 por licença do cliente (mínimo de 3). Nortcash: R$ 179 / 358 / 467. O que o usuário aceita é preço um pouco acima do mercado quando o sistema entrega mais.",
+  "sofia_organizacao": 250,
+  "sofia_founders": 179,
+  "bpo_suite_planos": [
+   [
+    3,
+    299
+   ],
+   [
+    5,
+    475
+   ],
+   [
+    10,
+    800
+   ],
+   [
+    25,
+    1750
+   ]
+  ],
+  "bpo_suite_cnpj_extra": [
+   70,
+   99
+  ]
+ }
+};
+
+
+// ===== LÓGICA =====
+function clientesEfetivos(C, P){
+  let ef = 0, ini = 0;
+  for (const f of P.faixas_clientes){
+    const lim = f.ate === null ? Infinity : f.ate;
+    const n = Math.max(0, Math.min(C, lim) - ini);
+    ef += n * f.fator; ini = lim;
+    if (C <= lim) break;
+  }
+  return ef;
+}
+// ic = índice de custo (0 baixo, 1 provável, 2 alto); o perfil 3 (pior caso) usa ic = 2
+function custoWhatsApp(C, ic, numeros, P){
+  const w = P.whatsapp;
+  let c = C * (w.msgs_utilidade[ic]*w.custo_utilidade + w.msgs_marketing[ic]*w.custo_marketing);
+  c += Math.max(0, C*w.msgs_servico[ic] - w.gratis_servico_por_numero*numeros) * w.custo_servico;
+  return c;
+}
+const fxCambio = P => P.cambio.valor / P.cambio.base;                                              // escala dos custos em dólar
+function custoUU(ic, P){ return P.uso.preco_mtok[ic] * fxCambio(P) * P.ia.tokens_por_uu / 1e6; }  // R$ por UU
+function custoReservaChat(P){ const r = P.ia.reserva_chat; return r.uu_dia * r.dias * r.custo_mtok_barato * fxCambio(P) * P.ia.tokens_por_uu / 1e6; } // R$ por usuário no pior caso
+// Ajuda do sistema: modelo pequeno com base de conhecimento do produto (R$ por usuário por mês)
+function custoAjuda(ic, P){
+  const a = P.ajuda;
+  return a.perguntas_usuario[ic] * a.tokens_pergunta[ic] / 1e6 * a.preco_mtok_usd * P.cambio.valor + a.infra_usuario[ic] + custoDiagnostico(ic, P);
+}
+// Diagnóstico de leitura do assistente (R$ por usuário por mês): perguntas × % que viram diagnóstico × chamadas × tokens por chamada
+function custoDiagnostico(ic, P){
+  const a = P.ajuda, d = a.diagnostico;
+  return a.perguntas_usuario[ic] * d.pct_perguntas[ic] * d.chamadas[ic] * d.tokens_chamada[ic] / 1e6 * a.preco_mtok_usd * P.cambio.valor;
+}
+// Chat de suporte geral com pessoas: ferramenta de chat e cobertura de horário, rateados por assento (R$ por usuário por mês)
+function custoChat(ic, P){ return P.suporte_chat.usuario[ic]; }
+// Teto embutido dos conectores, em R$ de custo por cliente por mês (chamadas × preço unitário da faixa 1)
+function tetoConectores(P){
+  const t = P.conectores_teto, u = t.precos;
+  return {gov: t.gov.consultas*u.consulta + t.gov.emissoes*u.emissao + t.gov.declaracoes*u.declaracao + t.gov.cnpj*u.cnpj,
+          est: t.est.consultas*u.infosimples};
+}
+// Distribui os usuários entre os planos (Intensivo, Operação, Essencial, bolsa) sem passar do total
+function ajustaPlanos(e){
+  const avisos = []; let resta = e.usuarios; const pl = {};
+  ['intensivo','operacao','essencial'].forEach(id => {
+    const n = Math.max(0, Math.floor((e.planos||{})[id]||0)); const u = Math.min(n, resta);
+    if (u < n) avisos.push('Há mais planos de IA do que usuários: '+id+' foi reduzido de '+n+' para '+u+'.');
+    pl[id] = u; resta -= u; });
+  let bu = 0;
+  if (e.bolsaUU > 0){ bu = Math.min(Math.max(0, Math.floor(e.bolsaUsuarios||0)), resta);
+    if (bu < (e.bolsaUsuarios||0)) avisos.push('A bolsa só atende usuários sem plano individual: acesso limitado a '+bu+'.'); }
+  return {planos:pl, bolsaUsu:bu, semIA:resta-bu, avisos};
+}
+// Referência de mercado do sistema-base (HubStrom com app de marca branca): interpolação entre os pontos de P.mercado.pontos
+function refMercado(C, P){
+  const pt = P.mercado.pontos;
+  if (C <= pt[0][0]) return pt[0][1];
+  for (let i = 1; i < pt.length; i++){
+    if (C <= pt[i][0]){ const a = pt[i-1], b = pt[i]; return a[1] + (b[1]-a[1])*(C-a[0])/(b[0]-a[0]); } }
+  const a = pt[pt.length-2], b = pt[pt.length-1];
+  return b[1] + (b[1]-a[1])/(b[0]-a[0])*(C-b[0]);   // extrapolação do último trecho (premissa)
+}
+function refAmpliada(C, P){
+  const f = l => { for (const x of l){ if (x[0] === null || C <= x[0]) return x[1]; } return 0; };
+  return {captura:f(P.mercado.ampliada.captura), financeiro:f(P.mercado.ampliada.financeiro)};
+}
+// e: {modulos:[ids], clientes, usuarios, gb, comp:{...}, perfil(0..3), numeros, ofClientes, bpoEmpresas, subs,
+//     planos:{essencial,operacao,intensivo}, bolsaUU, bolsaUsuarios, extraPacotes, consultorClientes, nfseClientes, certClientes,
+//     semContabil (produto BPO financeiro puro: núcleo no lugar do Painel, sem conectores de governo, estados e cores),
+//     finClientes (clientes contados no módulo Financeiro; 0 = todos; P9 do subplano 10: os contratantes no modo BPO)}
+function calcular(e, P){
+  const C = e.clientes, U = e.usuarios, pf = e.perfil, ic = Math.min(pf, 2), ef = clientesEfetivos(C, P);
+  const sel = new Set(e.modulos), comp = e.comp || {};
+  if (e.semContabil) ['gov','est','cores'].forEach(i => sel.delete(i));
+  const linhas = []; let preco = 0, custo = 0;
+  for (const id of Object.keys(P.modulos)){
+    if (!sel.has(id)) continue;
+    const d = (id === 'painel' && e.semContabil && P.nucleo_sem_contabil) ? P.nucleo_sem_contabil : P.modulos[id], p = d.preco, c = d.custo;
+    const Cm = (id === 'fin' && e.finClientes > 0) ? e.finClientes : C, efm = Cm === C ? ef : clientesEfetivos(Cm, P);
+    const v = p.base + p.cliente*efm + p.usuario*U;
+    const k = c.fixo[ic] + c.cliente[ic]*Cm + c.usuario[ic]*U;
+    linhas.push({id, nome:d.nome, preco:v, custo:k, tipo:'modulo'});
+    preco += v; custo += k;
+  }
+  // --- ajuda do sistema (modelo pequeno): custo do sistema-base, sem receita própria
+  const kAjuda = custoAjuda(ic, P)*U;
+  linhas.push({id:'ajuda', nome:'Ajuda do sistema (modelo pequeno, '+U+' usuários)', preco:0, custo:kAjuda, tipo:'custo'}); custo += kAjuda;
+  // --- chat de suporte geral com pessoas (P25): custo do sistema-base, sem receita própria
+  const kChat = custoChat(ic, P)*U;
+  linhas.push({id:'suporte_chat', nome:'Chat de suporte com pessoas ('+U+' usuários)', preco:0, custo:kChat, tipo:'custo'}); custo += kChat;
+  // --- IA: soma dos planos por usuário + bolsa (+ uso extra, mais abaixo)
+  const ia = P.ia, cuu = custoUU(ic, P), util = ia.utilizacao_plano[pf], utilB = ia.utilizacao_bolsa[pf];
+  const reserva = pf === 3 ? custoReservaChat(P) : 0;
+  const aj = ajustaPlanos(e); let capUU = 0, usuariosIA = 0, proativa = false, iaRec = 0, iaCusto = 0;
+  for (const id of ['essencial','operacao','intensivo']){
+    const n = aj.planos[id]; if (!n) continue;
+    const d = ia.planos[id];
+    const kUsuario = util*d.uu_semana*ia.semanas_mes*cuu + d.infra[ic] + reserva;
+    linhas.push({id:'ia_'+id, nome:d.nome+' × '+n+(n===1?' usuário':' usuários'), preco:n*d.preco, custo:n*kUsuario, tipo:'ia'});
+    preco += n*d.preco; custo += n*kUsuario; capUU += n*d.uu_semana*ia.semanas_mes; usuariosIA += n;
+    iaRec += n*d.preco; iaCusto += n*kUsuario;
+    if (id !== 'essencial') proativa = true;
+  }
+  if (aj.bolsaUsu > 0){
+    const b = ia.bolsa, UU = e.bolsaUU;
+    const v = b.preco_base + b.preco_uu_semana*UU;
+    const k = b.custo_fixo[ic] + b.custo_usuario[ic]*aj.bolsaUsu + utilB*UU*ia.semanas_mes*cuu + reserva*aj.bolsaUsu;
+    linhas.push({id:'ia_bolsa', nome:'Bolsa compartilhada ('+UU+' UU por semana, '+aj.bolsaUsu+' usuários)', preco:v, custo:k, tipo:'ia'});
+    preco += v; custo += k; capUU += UU*ia.semanas_mes; usuariosIA += aj.bolsaUsu; proativa = true; iaRec += v; iaCusto += k;
+  }
+  if (e.gb > 0){
+    const a = P.armazenamento, v = e.gb*a.preco_gb, k = e.gb*a.custo_gb[ic];
+    linhas.push({id:'gb', nome:'Armazenamento na plataforma ('+e.gb+' GB)', preco:v, custo:k, tipo:'comp'}); preco += v; custo += k;
+  }
+  const cp = P.complementos, api = [];
+  const add = (id, v, k) => { linhas.push({id, nome:cp[id].nome, preco:v, custo:k, tipo:'comp'}); preco += v; custo += k; };
+  if (comp.marca_branca) add('marca_branca', cp.marca_branca.preco_fixo, cp.marca_branca.custo_fixo[ic]);
+  if (comp.app_loja) add('app_loja', cp.app_loja.preco_fixo, cp.app_loja.custo_fixo[ic]);
+  if (comp.consultor_empresa){ const d = cp.consultor_empresa, n = Math.min(e.consultorClientes||0, C), k = d.custo_pergunta*d.perguntas_cliente[ic]*n;
+    add('consultor_empresa', d.preco_cliente*n, k);
+    api.push({nome:'Consultor da empresa (tokens, '+n+' clientes ativos)', custo:k, quem:'Complemento cobrado por cliente ativo (R$ '+d.preco_cliente+'); o escritório ativa e fixa o preço ao cliente final'}); }
+  if (comp.nfse_app){ const d = cp.nfse_app, n = Math.min(e.nfseClientes||0, C), nt = d.notas_cliente[ic], k = n*nt*(d.custo_infra_nota+d.custo_integrador_nota);
+    add('nfse_app', n*(d.participacao_cliente + nt*d.custo_integrador_nota), k);
+    api.push({nome:'NFS-e pelo app (integrador, '+n+' clientes ativos)', custo:k, quem:'Integrador repassado ao custo; participação de R$ '+d.participacao_cliente+' por cliente ativo'}); }
+  if (comp.certidoes_app){ const d = cp.certidoes_app, n = Math.min(e.certClientes||0, C), q = d.certidoes_cliente[ic], k = n*q*d.custo_certidao[ic];
+    add('certidoes_app', n*q*d.participacao_certidao, k);
+    api.push({nome:'Certidões sob demanda pelo app ('+n+' clientes ativos)', custo:k, quem:'Parte do serviço extra: participação de R$ '+d.participacao_certidao+' por certidão'}); }
+  if (comp.open_finance){ const d = cp.open_finance, k = d.custo_fixo[ic] + d.custo_cliente[ic]*e.ofClientes;
+    add('open_finance', d.preco_fixo + d.preco_cliente*e.ofClientes, k);
+    api.push({nome:'Open Finance (agregador, '+e.ofClientes+' clientes conectados)', custo:k, quem:'Módulo à parte, cobrado do escritório'}); }
+  if (comp.bpo_fin){ const d = cp.bpo_fin, n = e.bpoEmpresas, kErp = (d.custo_conector_erp ? d.custo_conector_erp[ic] : 0)*n;
+    add('bpo_fin', d.preco_fixo + d.preco_empresa*n, d.custo_fixo[ic] + d.custo_empresa[ic]*n + kErp);
+    api.push({nome:'Conectores de ERP financeiro (Conta Azul, Omie e outros; '+n+' empresas)', custo:kErp, quem:'Infraestrutura de sincronização por empresa; tarifa de terceiros não conhecida [a confirmar]. O cliente paga o próprio ERP'}); }
+  if (comp.modo_bpo){ const d = cp.modo_bpo;
+    add('modo_bpo', d.preco_fixo + d.preco_sub*e.subs, d.custo_fixo[ic] + d.custo_sub[ic]*e.subs); }
+  const CT = P.conectores_teto, teto = tetoConectores(P), mk = CT.markup_excedente, pct0 = Math.round((mk-1)*100);
+  if (sel.has('gov')) api.unshift({nome:'Integra Contador e CNPJ (monitoramento e consultas do app)', custo:P.modulos.gov.custo.cliente[ic]*C,
+    quem:'Embutido no módulo até o teto de '+CT.gov.consultas+' consultas, '+CT.gov.emissoes+' emissões, '+CT.gov.declaracoes+' declaração e '+CT.gov.cnpj.toLocaleString('pt-BR')+' consulta de CNPJ por cliente por mês (R$ '+teto.gov.toFixed(2).replace('.',',')+' de custo); acima dele, consumo cobrado a custo + '+pct0+'%'});
+  if (sel.has('est')) api.splice(sel.has('gov')?1:0, 0, {nome:'InfoSimples (DTE e certidões estaduais)', custo:P.modulos.est.custo.cliente[ic]*C,
+    quem:'Embutido no módulo até o teto de '+CT.est.consultas+' consultas por cliente por mês (R$ '+teto.est.toFixed(2).replace('.',',')+' de custo); acima dele, consumo cobrado a custo + '+pct0+'%'});
+  let ajuste = 0;
+  if (preco < P.piso_mensal){ ajuste = P.piso_mensal - preco; preco = P.piso_mensal; }
+  const mensalidade = preco;
+  // --- consumo cobrado: uso extra de IA e consultas de conectores acima do teto
+  let consumo = 0, consCon = 0; const exc = [];
+  if ((e.extraPacotes||0) > 0 && usuariosIA > 0){
+    const n = Math.floor(e.extraPacotes), x = n*ia.extra.preco_pacote, k = n*ia.extra.pacote_uu*cuu;
+    exc.push({nome:'Uso extra avulso ('+n+' × '+ia.extra.pacote_uu+' UU)', preco:x, custo:k}); consumo += x; custo += k; capUU += n*ia.extra.pacote_uu; iaRec += x; iaCusto += k;
+  }
+  const uso = {gov:P.modulos.gov.custo.cliente[ic], est:P.modulos.est.custo.cliente[ic]};
+  let excGov = 0, excEst = 0;
+  if (sel.has('gov')){
+    excGov = Math.max(0, (uso.gov - teto.gov)*C)*mk;
+    if (excGov > 0) exc.push({nome:'Consumo de consultas federais acima do teto (custo + '+pct0+'%)', preco:excGov}); consumo += excGov; consCon += excGov;
+  }
+  if (sel.has('est')){
+    excEst = Math.max(0, (uso.est - teto.est)*C)*mk;
+    if (excEst > 0) exc.push({nome:'Consumo de consultas estaduais e municipais acima do teto (custo + '+pct0+'%)', preco:excEst}); consumo += excEst; consCon += excEst;
+  }
+  const total = mensalidade + consumo;
+  // --- cobertura: demanda bruta do estudo 0.2 contra a capacidade mensal dos planos
+  const u = P.uso;
+  let demandaUU = 0;
+  if (usuariosIA > 0){
+    demandaUU = usuariosIA*ia.dias_uteis*u.tok_usuario_dia[ic]*1e6/ia.tokens_por_uu;
+    if (proativa) demandaUU += C*u.tok_cliente[ic]*1e6/ia.tokens_por_uu;
+  }
+  // --- referência de mercado (só quando o sistema-base é comparável ao HubStrom com app de marca branca)
+  const comparavel = ['painel','crm','app','gov'].every(i => sel.has(i)) && !!comp.marca_branca;
+  const BASE = ['painel','crm','timesheet','app','gov','est','marca_branca'];
+  const baseSemIA = linhas.filter(l => BASE.includes(l.id)).reduce((s,l) => s + l.preco, 0) + consCon;   // comparável ao HubStrom: sem IA, sem financeiro, sem GB
+  return {linhas, exc, ajuste, mensalidade, consumo, total, custo, margem:(total-custo)/total, ic,
+          efetivos:ef, whatsapp:custoWhatsApp(C, ic, e.numeros, P), api, ajuda:kAjuda, chat:kChat,
+          teto:{gov:teto.gov, est:teto.est, usoGov:uso.gov, usoEst:uso.est, excGov, excEst},
+          mercado:{comparavel, ref:refMercado(C, P), baseSemIA, ampliada:refAmpliada(C, P)},
+          ia:{capUU, demandaUU, usuariosIA, semIA:aj.semIA, avisos:aj.avisos, planos:aj.planos, rec:iaRec, custo:iaCusto}};
+}
+// Fixos mensais da plataforma, conforme o pró-labore esteja ligado ou não
+function fixosPlataforma(P, prolabore){ return P.fixos_plataforma.sem_prolabore + (prolabore ? P.fixos_plataforma.prolabore : 0); }
+// Três níveis de margem. cen: {N (médios equivalentes ativos), prolabore (bool), aliq, comissao}; por padrão, P.cenario
+// (a) contribuição; (b) após a parte rateada dos fixos da plataforma; (c) líquida após tributos e comissão.
+function cenarioPadrao(P){ const c = P.cenario; return {N:c.escritorios_ativos, prolabore:c.prolabore, aliq:c.aliquota, comissao:c.comissao}; }
+function niveis(r, e, P, cen){
+  cen = cen || cenarioPadrao(P);
+  const F = P.fixos_plataforma, peso = e.clientes/F.clientes_medio;       // peso em "escritórios médios equivalentes" (100 clientes)
+  const fix = fixosPlataforma(P, cen.prolabore);
+  const rateio = fix*peso/cen.N, contrib = r.total - r.custo;
+  const apos = contrib - rateio, trib = cen.aliq*r.total, com = cen.comissao*r.total, liq = apos - trib - com;
+  const contribLiq = contrib - trib - com;
+  // IA isolada: receita da IA menos tokens, infra do assistente, suporte da IA e a parte de IA dos fixos (GPU, API fixa e DGM)
+  const sup = P.ia.suporte_usuario[r.ic]*r.ia.usuariosIA, fixIA = F.ia_parte*peso/cen.N;
+  const sobra = r.ia.rec - r.ia.custo - sup - fixIA, sobraLiq = sobra - (cen.aliq+cen.comissao)*r.ia.rec;
+  return {fix, peso, rateio, contrib, apos, trib, com, liq, total:r.total,
+    mContrib:contrib/r.total, mApos:apos/r.total, mLiq:liq/r.total,
+    equilibrio: contrib > 0 ? fix/(contrib/peso) : null,                    // escritórios médios equivalentes
+    equilibrioLiq: contribLiq > 0 ? fix/(contribLiq/peso) : null,
+    ia:{rec:r.ia.rec, custoVar:r.ia.custo, suporte:sup, fixos:fixIA, sobra, mSobra:r.ia.rec>0 ? sobra/r.ia.rec : null, sobraLiq, mSobraLiq:r.ia.rec>0 ? sobraLiq/r.ia.rec : null}};
+}
+// Proporção mínima de usuários com um plano de IA para o escritório cobrir a sua parte dos fixos (sem e com tributos)
+function propMinIA(e, P, cen){
+  cen = cen || cenarioPadrao(P);
+  const base = calcular(Object.assign({}, e, {planos:{}, bolsaUU:0, extraPacotes:0}), P);
+  const F = P.fixos_plataforma, peso = e.clientes/F.clientes_medio, fix = fixosPlataforma(P, cen.prolabore);
+  const rateio = fix*peso/cen.N, t = cen.aliq + cen.comissao, ia = P.ia, ic = Math.min(e.perfil, 2);
+  const cuu = custoUU(ic, P), util = ia.utilizacao_plano[e.perfil], reserva = e.perfil === 3 ? custoReservaChat(P) : 0;
+  const c0 = base.total - base.custo, c0T = base.total*(1-t) - base.custo, out = {};
+  ['essencial','operacao','intensivo'].forEach(id => {
+    const d = ia.planos[id], k = util*d.uu_semana*ia.semanas_mes*cuu + d.infra[ic] + reserva;
+    const m = d.preco - k, mT = d.preco*(1-t) - k;
+    const f = (need, mm) => need <= 0 ? 0 : (mm > 0 ? need/(e.usuarios*mm) : Infinity);
+    out[id] = {margemUsuario:m, frac:f(rateio-c0, m), fracLiq:f(rateio-c0T, mT)};
+  });
+  return {base, rateio, contrib0:c0, out};
+}
+
+// ----- Implantação, margem do primeiro ano e fluxo de caixa -----
+// Entrada do calcular() para um atalho (P.pacotes) e um porte (P.escritorios_tipo), uso provável
+function entradaPacote(P, pid, porte){
+  const pk = P.pacotes[pid], t = P.escritorios_tipo[porte], U = t.usuarios, planos = {};
+  if (pk.ia.plano && pk.ia.fracao > 0) planos[pk.ia.plano] = Math.min(U, Math.max(1, Math.round(U*pk.ia.fracao)));
+  return {modulos:pk.modulos.slice(), clientes:t.clientes, usuarios:U, gb:pk.armazenamento ? t.clientes*P.armazenamento.gb_padrao_por_cliente : 0,
+    comp:{marca_branca:!!pk.marca_branca}, perfil:1, numeros:t.numeros_whatsapp, planos, bolsaUU:0, extraPacotes:0};
+}
+const arred100 = x => Math.ceil(x/100 - 1e-9)*100;
+// Preço de tabela, piso e custo da implantação de um porte; com migrações, soma as duas migrações de 8.2
+function implantacao(P, porte, migracoes){
+  const I = P.implantacao, h = I.horas;
+  const hT = h.trilha[porte], hM = migracoes ? h.mig_ferramentas[porte] + h.mig_financeiro[porte] : 0;
+  const horas = hT + hM, custo = horas*I.custo_hora;
+  const tabela = I.tabela[porte] + hM*I.mig_hora_tabela, piso = Math.ceil(custo/(1 - I.margem_piso) - 1e-9);   // P27: piso = custo de entrega (margem mínima 0%)
+  return {horas, horasTrilha:hT, horasMig:hM, custo, tabela, piso, margemTabela:(tabela-custo)/tabela, margemPiso:(piso-custo)/piso,
+          descontoMax:1 - piso/tabela, horasMercado:I.mercado.hubstrom_negociado*(1 - I.margem_piso)/I.custo_hora};
+}
+const precoImplantacao = (imp, desconto) => Math.max(imp.piso, imp.tabela*(1 - desconto));   // o desconto nunca leva abaixo do piso (o custo)
+// Maior desconto que não leva nenhum dos três portes abaixo do piso (arredondado para baixo, em décimos de ponto)
+const descontoMaximo = (P, migracoes) => Math.floor(Math.min(...['P','M','G'].map(k => implantacao(P, k, migracoes).descontoMax))*1000 + 1e-9)/1000;
+// Margem do primeiro ano de um escritório (12 mensalidades + implantação), contribuição (a)
+function primeiroAno(contribMes, precoMes, implPreco, implCusto){
+  const rec = 12*precoMes + implPreco, mar = 12*contribMes + implPreco - implCusto;
+  return {receita:rec, margem:mar, pct:mar/rec};
+}
+// Escritórios (do mesmo tipo) necessários para pagar os fixos: em regime (só mensalidades) e no 1º ano (com a margem da implantação)
+function equilibrioImplantacao(contribMes, implMargem, fix){
+  return {regime: contribMes > 0 ? fix/contribMes : null,
+          ano1: (12*contribMes + implMargem) > 0 ? 12*fix/(12*contribMes + implMargem) : null};
+}
+// Fluxo de caixa dos primeiros meses. F = P.fluxo (pode ser sobrescrito). Valores em R$; "novos" entram no início de cada mês.
+function fluxoCaixa(P, F){
+  F = Object.assign({}, P.fluxo, F || {});
+  const cen = cenarioPadrao(P), fix = fixosPlataforma(P, cen.prolabore), H = F.horizonte;
+  const portes = ['P','M','G'], soma = portes.reduce((s,k) => s + F.mix[k], 0) || 1, un = {};
+  portes.forEach(k => { const r = calcular(entradaPacote(P, F.pacote, k), P), imp = implantacao(P, k, F.migracoes);
+    un[k] = {parte:F.mix[k]/soma, preco:r.total, custo:r.custo, imp, implPreco:F.cobra_implantacao ? precoImplantacao(imp, F.desconto) : 0}; });
+  const rows = []; let acum = 0, impTotal = 0, entTotal = 0;
+  for (let t = 1; t <= H; t++){
+    let implRec = 0, implCusto = 0, mensal = 0, custoVar = 0, ativos = 0, emImpl = 0;
+    for (let c = 1; c <= t; c++){
+      const age = t - c, surv = Math.pow(1 - F.churn, age);
+      portes.forEach(k => { const u = un[k], n = F.novos_mes*u.parte;
+        if (age === 0) implCusto += n*u.imp.custo;
+        if (age < F.parcelas) implRec += n*u.implPreco/F.parcelas*surv;
+        if (age >= F.meses_ate_mensalidade){ mensal += n*u.preco*surv; custoVar += n*u.custo*surv; ativos += n*surv; } else emImpl += n*surv; });
+    }
+    const entradas = implRec + mensal, trib = cen.aliq*entradas, com = cen.comissao*entradas;
+    const saidas = implCusto + custoVar + fix + trib + com, saldo = entradas - saidas; acum += saldo;
+    impTotal += implRec; entTotal += entradas;
+    rows.push({mes:t, ativos, emImpl, implRec, mensal, entradas, implCusto, custoVar, fix, trib, com, saidas, saldo, acum});
+  }
+  const primeiro = f => { const r = rows.find(x => f(x)); return r ? r.mes : null; };
+  let mesCaixa = null;                                           // primeiro mês a partir do qual o caixa acumulado fica positivo até o fim do horizonte
+  for (let i = rows.length - 1; i >= 0 && rows[i].acum >= 0; i--) mesCaixa = rows[i].mes;
+  const m3 = rows.slice(0, 3), ent3 = m3.reduce((s,r) => s + r.entradas, 0), imp3 = m3.reduce((s,r) => s + r.implRec, 0);
+  return {rows, un, fix, mesSaldoPositivo:primeiro(r => r.saldo >= 0), mesCaixaPositivo:mesCaixa,
+    necessidadeMax:Math.max(0, -Math.min(0, ...rows.map(r => r.acum))), acumFinal:rows[rows.length-1].acum,
+    parteImplantacao12:entTotal > 0 ? impTotal/entTotal : 0, parteImplantacao3:ent3 > 0 ? imp3/ent3 : 0, entTotal, impTotal};
+}
+// Referência de BPO financeiro para N empresas (S5): Sofia por organização ativa; BPO Suite por plano de CNPJs (interpola; acima do último plano soma o CNPJ extra médio)
+function refBPO(n, P){
+  const m = P.mercado_bpo, pl = m.bpo_suite_planos; let suite;
+  if (n <= pl[0][0]) suite = pl[0][1];
+  else if (n > pl[pl.length-1][0]) suite = pl[pl.length-1][1] + (n - pl[pl.length-1][0])*(m.bpo_suite_cnpj_extra[0] + m.bpo_suite_cnpj_extra[1])/2;
+  else { suite = null; for (let i = 1; i < pl.length; i++) if (n <= pl[i][0]){ const a = pl[i-1], b = pl[i]; suite = a[1] + (b[1]-a[1])*(n-a[0])/(b[0]-a[0]); break; } }
+  return {sofia:n*m.sofia_organizacao, founders:n*m.sofia_founders, suite};
+}
+// ===== FIM DA LÓGICA =====
+
+// ===== INTERFACE =====
+if (typeof document !== 'undefined'){ (function(){
+let P = JSON.parse(JSON.stringify(PARAMETROS));      // cópia de trabalho: o painel Premissas altera esta cópia
+const $ = id => document.getElementById(id);
+const getP = (o, p) => p.split('.').reduce((a, k) => a[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'), last = ks.pop(); ks.reduce((a, k) => a[k], o)[last] = v; };
+const brl = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const brl2 = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:4});
+const pct = v => (v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+const nf = v => Math.round(v).toLocaleString('pt-BR');
+const mil = v => { const x = Math.round(v/100)/10; return (x === 0 ? 0 : x).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}); };
+const dec = (v, n) => v.toLocaleString('pt-BR',{minimumFractionDigits:n===undefined?2:n,maximumFractionDigits:n===undefined?2:n});
+const PLANOS = ['essencial','operacao','intensivo'];
+const XIN = ['consultor_empresa','nfse_app','certidoes_app','open_finance','bpo_fin','modo_bpo'];
+const TAGS = {conf:'a confirmar', medir:'a medir no piloto', dec:'decisão de 7/11/2026', prem:'premissa'};
+
+// ---- Painel Premissas: cada item aponta para um valor de PARAMETROS (caminho), com o tipo de exibição e a marca da premissa
+// t: pct (valor guardado como fração, exibido em %), mk (acréscimo sobre o custo: guardado como multiplicador), num, bool
+const PREM = [
+ {g:'Tributos e comissão (movem só as margens (c), o equilíbrio após tributos e o caixa)', it:[
+  {p:'cenario.aliquota', rot:'Tributos sobre a receita', t:'pct', min:0, max:40, st:0.5, tag:'conf', dica:'Valor de trabalho de 12,5%, faixa de 8% a 17% (ISS ou equivalentes, PIS e COFINS). A alíquota será discutida depois, com o contador do projeto.'},
+  {p:'cenario.comissao', rot:'Comissão de vendas', t:'pct', min:0, max:30, st:0.5, tag:'conf', dica:'0% ou 10% da receita; a definir com o time de vendas.'}]},
+ {g:'Câmbio e IA', it:[
+  {p:'cambio.valor', rot:'Câmbio (R$ por US$)', t:'num', min:1, max:15, st:0.01, tag:'conf', dica:'R$ 7,97 inclui IOF e tributos de importação de serviço; com só o IOF seria R$ 5,69. Escala tokens de IA e ajuda do sistema.'},
+  {p:'ia.utilizacao_plano', n:3, rot:'Utilização do teto de IA: baixo, provável, alto (pior caso: 100%)', t:'pct', min:0, max:100, st:1, tag:'medir', dica:'Quanto do limite do plano o usuário médio consome. Medir UU por usuário no piloto.'}]},
+ {g:'Suporte humano e ajuda do sistema', it:[
+  {p:'modulos.painel.custo.usuario', n:3, rot:'Suporte humano por assento, R$ por mês: baixo, provável, alto', t:'num', min:0, max:200, st:0.5, tag:'medir', dica:'Decisão de 7/11/2026: sistema auto explicativo raramente precisa de suporte (hora de atendimento do chat e dos chamados). Era 6 / 25 / 60.'},
+  {p:'ajuda.perguntas_usuario', n:3, rot:'Perguntas de ajuda por usuário por mês', t:'num', min:0, max:500, st:1, tag:'prem', dica:'Dúvidas sobre o próprio sistema, respondidas pelo modelo pequeno.'},
+  {p:'ajuda.tokens_pergunta', n:3, rot:'Tokens por pergunta de ajuda', t:'num', min:500, max:100000, st:500, tag:'prem', dica:'Pergunta + trechos da base de conhecimento do produto + resposta.'},
+  {p:'ajuda.preco_mtok_usd', rot:'Preço do modelo pequeno (US$ por MTok, mistura)', t:'num', min:0, max:5, st:0.005, tag:'prem', dica:'Haiku: 0,5 leitura de cache, 0,45 entrada, 0,05 saída (estudo 3.1).'},
+  {p:'ajuda.diagnostico.pct_perguntas', n:3, rot:'Perguntas de ajuda que viram diagnóstico (fração)', t:'num', min:0, max:1, st:0.05, tag:'prem', dica:'8/11/2026: o assistente lê configurações e dados pelo escopo de quem perguntou. Hipótese: 10% / 20% / 40%.'},
+  {p:'ajuda.diagnostico.chamadas', n:3, rot:'Chamadas de leitura por diagnóstico', t:'num', min:0, max:50, st:1, tag:'prem', dica:'Hipótese: 2 / 3 / 5 chamadas de leitura.'},
+  {p:'ajuda.diagnostico.tokens_chamada', n:3, rot:'Tokens de resultado por chamada de leitura', t:'num', min:0, max:50000, st:500, tag:'prem', dica:'Resultado resumido devolvido ao modelo. Hipótese: 2 mil / 3 mil / 5 mil.'},
+  {p:'ajuda.limite_perguntas_mes', rot:'Limite de perguntas ao assistente de ajuda por usuário por mês', t:'num', min:0, max:1000, st:5, tag:'prem', dica:'P25 (8/11/2026): vale para todo usuário, com ou sem plano de IA; não consome UU; ao atingir o limite, encaminha para a equipe. Hipótese: 30.'},
+  {p:'suporte_chat.usuario', n:3, rot:'Chat de suporte com pessoas (ferramenta e cobertura), R$ por assento por mês: baixo, provável, alto', t:'num', min:0, max:100, st:0.5, tag:'medir', dica:'P25: a hora de atendimento já está no suporte humano por assento; aqui entram a ferramenta de chat e a cobertura de horário. Premissa a medir.'}]},
+ {g:'Plataforma', it:[
+  {p:'modulos.painel.custo.cliente', n:3, rot:'Infraestrutura por cliente, R$ por mês: baixo, provável, alto', t:'num', min:0, max:20, st:0.05, tag:'prem', dica:'Premissa de engenharia.'},
+  {p:'fixos_plataforma.sem_prolabore', rot:'Custo fixo da plataforma, sem pró-labore (R$ por mês)', t:'num', min:0, max:200000, st:100, tag:'prem', dica:'Infra 1.200 + GPU 2.111 + índice legal e DGM 1.881 + operação 3.000 (premissa).'},
+  {p:'fixos_plataforma.prolabore', rot:'Pró-labore (R$ por mês)', t:'num', min:0, max:100000, st:500, tag:'prem', dica:'R$ 10 mil no Plano MVP.'},
+  {p:'cenario.prolabore', rot:'Pró-labore ligado (soma-se aos fixos)', t:'bool', tag:'prem', dica:'Desligado: fixos de R$ 8,2 mil. Ligado: R$ 18,2 mil.'},
+  {p:'cenario.escritorios_ativos', rot:'Escritórios ativos (médios equivalentes de 100 clientes)', t:'num', min:1, max:1000, st:1, tag:'prem', dica:'Divide os fixos nas margens (b) e (c). Cenários do estudo: 10, 30 e 100.'}]},
+ {g:'Conectores: teto embutido por cliente por mês (o escritório soma os clientes)', it:[
+  {p:'conectores_teto.gov.consultas', rot:'Integra: consultas (R$ 0,24 cada)', t:'num', min:0, max:100, st:1, tag:'conf', dica:'P26 (8/11/2026): teto apertado, 130% do uso provável (era 162%); tabela SERPRO de 06/11/2026.'},
+  {p:'conectores_teto.gov.emissoes', rot:'Integra: emissões (R$ 0,32)', t:'num', min:0, max:100, st:1, tag:'conf', dica:'Guia e DAS.'},
+  {p:'conectores_teto.gov.declaracoes', rot:'Integra: declarações (R$ 0,40)', t:'num', min:0, max:100, st:1, tag:'conf', dica:'PGDAS-D, DCTFWeb.'},
+  {p:'conectores_teto.gov.cnpj', rot:'Consulta de CNPJ (R$ 0,6591)', t:'num', min:0, max:50, st:0.1, tag:'conf', dica:'Consulta Básica.'},
+  {p:'conectores_teto.est.consultas', rot:'InfoSimples: consultas (R$ 0,22 em média; teto em 130% do provável)', t:'num', min:0, max:200, st:1, tag:'conf', dica:'DTE estadual, certidões, Sintegra.'},
+  {p:'conectores_teto.markup_excedente', rot:'Acréscimo sobre o custo acima do teto', t:'mk', min:0, max:200, st:5, tag:'dec', dica:'Custo + 20%, como já estava no estudo.'},
+  {p:'modulos.gov.custo.cliente', n:3, rot:'Uso de Integra e CNPJ, R$ por cliente por mês: baixo, provável, alto', t:'num', min:0, max:50, st:0.05, tag:'prem', dica:'08, seção 10.2: R$ 2,25 provável.'},
+  {p:'modulos.est.custo.cliente', n:3, rot:'Uso de InfoSimples, R$ por cliente por mês: baixo, provável, alto', t:'num', min:0, max:50, st:0.05, tag:'prem', dica:'08, seção 10.2: R$ 1,37 provável.'}]}
+];
+function inp(p, t, min, max, st){
+  if (t === 'bool') return '<input type="checkbox" data-p="'+p+'" data-t="bool">';
+  return '<input type="number" data-p="'+p+'" data-t="'+t+'" min="'+(min===undefined?0:min)+'" max="'+(max===undefined?'':max)+'" step="'+(st||'any')+'">';
+}
+function campoPrem(d){
+  if (d.t === 'pct' || d.t === 'mk') d = Object.assign({}, d, {rot:d.rot+' (%)'});
+  const tag = '<span class="tag '+d.tag+'">'+TAGS[d.tag]+'</span>';
+  let h = '<div class="pr"><label class="l">'+d.rot+tag+'</label>';
+  if (d.t === 'bool') h = '<div class="pr"><label class="l" style="display:flex;gap:8px;align-items:center">'+inp(d.p,'bool')+'<span>'+d.rot+tag+'</span></label>';
+  else if (d.n === 3) h += '<div class="tri">'+['baixo','provável','alto'].map((c,i) => '<div><span>'+c+'</span>'+inp(d.p+'.'+i, d.t, d.min, d.max, d.st)+'</div>').join('')+'</div>';
+  else h += inp(d.p, d.t, d.min, d.max, d.st);
+  return h+'<div class="n">'+d.dica+'</div></div>';
+}
+let descPedido = null;   // desconto de implantação digitado acima do piso (só para o aviso vermelho)
+function monta(){
+  const mod = $('modulos'); mod.innerHTML = '';
+  Object.keys(P.modulos).forEach(id => {
+    const d = P.modulos[id];
+    const el = document.createElement('div'); el.className = 'chk';
+    el.innerHTML = '<input type="checkbox" id="c_'+id+'"><div><div class="t">'+d.nome+'</div><div class="n">'+d.nota+'</div></div>';
+    mod.appendChild(el);
+  });
+  const cmp = $('comps'); cmp.innerHTML = '';
+  Object.keys(P.complementos).forEach(id => {
+    const d = P.complementos[id];
+    let extra = '';
+    if (id === 'consultor_empresa') extra = '<div class="inline" id="x_'+id+'"><div class="field"><label class="l" for="conscli">Clientes com o Consultor da empresa ativado pelo escritório (R$ '+d.preco_cliente+' por cliente ativo; franquia de '+d.franquia_perguntas_cliente+' perguntas; o preço ao cliente final é do escritório)</label><input id="conscli" type="number" min="0" value="40"></div></div>';
+    if (id === 'nfse_app') extra = '<div class="inline" id="x_'+id+'"><div class="field"><label class="l" for="nfsecli">Clientes com NFS-e pelo app ativa</label><input id="nfsecli" type="number" min="0" value="30"></div></div>';
+    if (id === 'certidoes_app') extra = '<div class="inline" id="x_'+id+'"><div class="field"><label class="l" for="certcli">Clientes com certidões pelo app ativas</label><input id="certcli" type="number" min="0" value="30"></div></div>';
+    if (id === 'open_finance') extra = '<div class="inline" id="x_'+id+'"><div class="field"><label class="l" for="ofcli">Clientes com Open Finance conectado</label><input id="ofcli" type="number" min="0" value="40"></div></div>';
+    if (id === 'bpo_fin') extra = '<div class="inline" id="x_'+id+'"><div class="field"><label class="l" for="bpoemp">Empresas clientes incluídas no pacote BPO financeiro</label><input id="bpoemp" type="number" min="0" value="20"></div><div class="field"><label class="l" for="bpobase">Mensalidade-base do pacote por escritório (R$), o acesso ao sistema do BPO</label><input id="bpobase" type="number" min="0" step="10" data-p="complementos.bpo_fin.preco_fixo" data-t="num"></div><div class="field"><label class="l" for="bpoval">Valor por empresa cliente incluída (R$ por mês)</label><input id="bpoval" type="number" min="0" step="1" data-p="complementos.bpo_fin.preco_empresa" data-t="num"></div><div class="wrap" id="bpoinfo"></div></div>';
+    if (id === 'modo_bpo') extra = '<div class="inline" id="x_'+id+'"><div class="field"><label class="l" for="subs">Subescritórios (escritórios contratantes)</label><input id="subs" type="number" min="1" value="4"></div><div class="msg">A faixa de clientes conta os clientes de todos os subescritórios: informe o total no campo "Clientes atendidos".</div><div class="msg">O módulo Financeiro conta só os subescritórios contratantes, não os clientes finais (P9). Os convidados do contratante não têm preço por usuário (P5).</div><div class="field" style="margin-top:6px"><label class="l" for="convmax">Teto de convidados por contratante (teto de abuso, não é cobrança)</label><input id="convmax" type="number" min="0" step="1" data-p="complementos.modo_bpo.convidados_max_por_contratante" data-t="num"></div></div>';
+    const el = document.createElement('div'); el.className = 'chk';
+    el.innerHTML = '<input type="checkbox" id="c_'+id+'"><div><div class="t">'+d.nome+'</div><div class="n">'+d.nota+'</div>'+extra+'</div>';
+    cmp.appendChild(el);
+  });
+  const tp = $('tipos'); tp.innerHTML = '';
+  Object.keys(P.escritorios_tipo).forEach(k => {
+    const t = P.escritorios_tipo[k]; const b = document.createElement('button');
+    b.type = 'button'; b.textContent = t.nome+' ('+t.clientes+' clientes, '+t.usuarios+' usuários)';
+    b.onclick = () => { $('clientes').value = t.clientes; $('usuarios').value = t.usuarios; $('numeros').value = t.numeros_whatsapp; gbPadrao(); aplicaIA(ultimaIA.plano, ultimaIA.fracao); render(); };
+    tp.appendChild(b);
+  });
+  { const a = P.mercado.ancora_usuario, b = document.createElement('button');
+    b.type = 'button'; b.textContent = 'Ponto de referência HubStrom ('+a.clientes+' clientes, '+a.usuarios+' usuários)';
+    b.onclick = () => { $('clientes').value = a.clientes; $('usuarios').value = a.usuarios; $('numeros').value = 3; gbPadrao(); aplicaIA(ultimaIA.plano, ultimaIA.fracao); render(); };
+    tp.appendChild(b); }
+  const pk = $('pacotes'); pk.innerHTML = '<span class="n" style="align-self:center;color:var(--mut)">Atalhos:</span>';
+  Object.keys(P.pacotes).forEach(k => {
+    const p = P.pacotes[k]; const b = document.createElement('button');
+    b.type = 'button'; b.textContent = p.nome;
+    b.onclick = () => { $('semcont').checked = false; Object.keys(estado).forEach(i => estado[i] = false);
+      p.modulos.forEach(i => estado[i] = true); estado.marca_branca = p.marca_branca;
+      $('gbon').checked = p.armazenamento; gbPadrao(); aplicaIA(p.ia.plano, p.ia.fracao); sync(); render(); };
+    pk.appendChild(b);
+  });
+  Object.keys(exige).forEach(id => { $('c_'+id).onchange = ev => alterna(id, ev.target.checked); });
+  // IA
+  const ip = $('iaplanos'); ip.innerHTML = '';
+  PLANOS.forEach(id => { const d = P.ia.planos[id];
+    const f = document.createElement('div'); f.className = 'field';
+    f.innerHTML = '<label class="l" for="ia_'+id+'">'+d.nome+' ('+brl(d.preco)+' por usuário)</label><input id="ia_'+id+'" type="number" min="0" step="1" value="0">';
+    ip.appendChild(f); });
+  const ib = $('iapacotes'); ib.innerHTML = '<span class="n" style="align-self:center;color:var(--mut)">Distribuir:</span>';
+  [['Sem IA',null,0],['IA Operação para 1/3','operacao',0.3333],['IA Operação para todos','operacao',1],['IA Intensivo para todos','intensivo',1]].forEach(a => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = a[0];
+    b.onclick = () => { aplicaIA(a[1], a[2]); render(); }; ib.appendChild(b); });
+  const b = P.ia.bolsa;
+  $('bolsanota').textContent = b.nota+' Preço: '+brl(b.preco_base)+' + '+brl2(b.preco_uu_semana)+' por UU por semana.';
+  $('extralbl').textContent = 'Pacotes de uso extra por mês ('+P.ia.extra.pacote_uu+' UU por '+brl(P.ia.extra.preco_pacote)+')';
+  let h = '<div class="wrap"><table><thead><tr><th>Plano</th><th>R$ / usuário</th><th>UU em 5 h</th><th>UU em 7 dias</th></tr></thead><tbody>';
+  PLANOS.forEach(id => { const d = P.ia.planos[id];
+    h += '<tr><td>'+d.nome+'</td><td>'+brl(d.preco)+'</td><td>'+d.uu_5h+' ('+(d.uu_5h*P.ia.tokens_por_uu/1e6).toLocaleString('pt-BR')+' MTok)</td><td>'+d.uu_semana+' ('+(d.uu_semana*P.ia.tokens_por_uu/1e6).toLocaleString('pt-BR')+' MTok)</td></tr>'; });
+  $('limites').innerHTML = h+'</tbody></table></div><p class="nota">Ao atingir o limite, os trabalhos automáticos (jobs e eventos) pausam; o chat e as perguntas continuam, em modelo mais barato após o limite semanal. A ajuda sobre o próprio sistema usa um modelo pequeno e não consome UU.</p>';
+  // painel Premissas e campos do cenário de caixa
+  $('premissas').innerHTML = PREM.map(g => '<fieldset class="g"><legend>'+g.g+'</legend>'+g.it.map(campoPrem).join('')+'</fieldset>').join('');
+  $('fluxoprem').innerHTML = [
+    campoFluxo('fluxo.novos_mes','Escritórios novos por mês','num',0,200,0.5,'prem'),
+    campoFluxo('fluxo.mix.P','Mix: pequenos (%)','pct',0,100,5,'prem'),
+    campoFluxo('fluxo.mix.M','Mix: médios (%)','pct',0,100,5,'prem'),
+    campoFluxo('fluxo.mix.G','Mix: grandes (%)','pct',0,100,5,'prem'),
+    '<div class="field"><label class="l" for="fl_pacote">Configuração vendida (atalho)</label><select id="fl_pacote"><option value="base">Sistema-base</option><option value="operacao">Operação</option><option value="completo">Completo</option></select></div>',
+    campoFluxo('fluxo.desconto','Desconto médio de implantação (%)','pct',0,80,5,'prem'),
+    '<div class="field"><label class="l" for="fl_parc">Parcelamento da implantação</label><select id="fl_parc"><option value="1">À vista</option><option value="2">2 vezes</option><option value="3">3 vezes</option><option value="4">4 vezes</option><option value="5">5 vezes</option><option value="6">6 vezes</option></select></div>',
+    campoFluxo('implantacao.custo_hora','Custo da hora de implantação (R$)','num',0,500,5,'prem'),
+    campoFluxo('implantacao.margem_piso','Margem mínima no piso (%)','pct',0,90,1,'prem'),
+    campoFluxo('fluxo.churn','Cancelamento mensal (%)','pct',0,50,0.5,'medir'),
+    campoFluxo('fluxo.meses_ate_mensalidade','Meses de implantação antes da mensalidade','num',0,6,1,'prem'),
+    '<div class="field"><label class="l"><input type="checkbox" data-p="fluxo.migracoes" data-t="bool"> Inclui migração de ferramentas e do financeiro</label></div>',
+    '<div class="field"><label class="l"><input type="checkbox" data-p="fluxo.cobra_implantacao" data-t="bool"> Cobra a implantação</label></div>',
+    '<div class="field"><label class="l"><input type="checkbox" data-p="cenario.prolabore" data-t="bool"> Fixos com pró-labore</label></div>'
+  ].join('');
+  $('fl_pacote').onchange = () => { P.fluxo.pacote = $('fl_pacote').value; render(); };
+  $('fl_parc').onchange = () => { P.fluxo.parcelas = parseInt($('fl_parc').value, 10); render(); };
+  document.querySelectorAll('[data-p]').forEach(el => el.addEventListener(el.dataset.t === 'bool' ? 'change' : 'input', ev => {
+    const t = el.dataset.t; let v;
+    if (t === 'bool') v = el.checked;
+    else { v = parseFloat(el.value); if (!isFinite(v) || v < 0) return; if (t === 'pct') v = v/100; else if (t === 'mk') v = 1 + v/100; }
+    if (el.dataset.p === 'fluxo.desconto'){   // P27: o campo não passa do piso; o aviso vermelho mostra o que o valor pedido faria
+      const dm = descontoMaximo(P, P.fluxo.migracoes);
+      descPedido = v > dm ? v : null; if (v > dm) v = dm; }
+    setP(P, el.dataset.p, v); render(); }));
+  const campoDesc = document.querySelector('[data-p="fluxo.desconto"]');
+  campoDesc.setAttribute('max', '80');
+  campoDesc.addEventListener('change', () => { campoDesc.value = +(P.fluxo.desconto*100).toFixed(4); });
+}
+function campoFluxo(p, rot, t, min, max, st, tag){
+  return '<div class="field"><label class="l">'+rot+'</label>'+inp(p, t, min, max, st)+'</div>';
+}
+// escreve os valores de P nos campos do painel (sem mexer no campo em edição)
+function atualizaCampos(){
+  document.querySelectorAll('[data-p]').forEach(el => {
+    if (el === document.activeElement) return;
+    const v = getP(P, el.dataset.p), t = el.dataset.t;
+    if (t === 'bool') el.checked = !!v;
+    else el.value = t === 'pct' ? +(v*100).toFixed(4) : (t === 'mk' ? +((v-1)*100).toFixed(4) : v);
+  });
+  $('fl_pacote').value = P.fluxo.pacote; $('fl_parc').value = String(P.fluxo.parcelas);
+}
+let ultimaIA = {plano:'operacao', fracao:0.3333};
+const exige = {};   // id -> lista de ids exigidos
+const nomes = {};
+Object.keys(P.modulos).forEach(i => { exige[i] = P.modulos[i].exige; nomes[i] = P.modulos[i].nome; });
+Object.keys(P.complementos).forEach(i => { exige[i] = P.complementos[i].exige; nomes[i] = P.complementos[i].nome; });
+const estado = {}; // id -> bool
+Object.keys(exige).forEach(i => estado[i] = false);
+estado.painel = true;
+
+function aplicaIA(plano, fracao){
+  ultimaIA = {plano, fracao};
+  const U = Math.max(1, num('usuarios'));
+  PLANOS.forEach(id => $('ia_'+id).value = 0);
+  if (plano && fracao > 0) $('ia_'+plano).value = Math.min(U, Math.max(1, Math.round(U*fracao)));
+}
+function alterna(id, on){
+  const avisos = [];
+  if (on && ['gov','est','cores'].includes(id) && $('semcont').checked){ $('semcont').checked = false; avisos.push('O produto BPO financeiro puro foi desmarcado: '+nomes[id]+' é do pacote Contábil, que volta ao Painel.'); }
+  if (id === 'painel' && !on){ estado.painel = true; avisos.push('O Painel é obrigatório: ele traz a Base.'); }
+  else if (on){
+    estado[id] = true;
+    const pilha = [id];
+    while (pilha.length){ const x = pilha.pop();
+      exige[x].forEach(r => { if (!estado[r]){ estado[r] = true; avisos.push(nomes[r]+' foi marcado porque '+nomes[x]+' exige.'); pilha.push(r); } }); }
+  } else {
+    estado[id] = false;
+    let mudou = true;
+    while (mudou){ mudou = false;
+      Object.keys(exige).forEach(x => { if (estado[x] && exige[x].some(r => !estado[r])){ estado[x] = false; mudou = true; avisos.push(nomes[x]+' foi desmarcado porque depende de '+nomes[id]+'.'); } }); }
+  }
+  sync(); render(avisos);
+}
+function sync(){
+  Object.keys(estado).forEach(id => { const c = $('c_'+id); if (c) c.checked = estado[id]; });
+  XIN.forEach(id => $('x_'+id).classList.toggle('on', estado[id]));
+  $('gbbox').classList.toggle('on', $('gbon').checked);
+  $('bolsabox').classList.toggle('on', $('bolsaon').checked);
+}
+function gbPadrao(){ $('gb').value = Math.round(num('clientes')*num('gbcli')); }
+function num(id){ const v = parseFloat($(id).value); return isFinite(v) && v >= 0 ? v : 0; }
+
+function entrada(){
+  const mods = Object.keys(P.modulos).filter(i => estado[i]);
+  const comp = {};
+  Object.keys(P.complementos).forEach(i => comp[i] = !!estado[i]);
+  const planos = {}; PLANOS.forEach(id => planos[id] = Math.floor(num('ia_'+id)));
+  return {modulos:mods, clientes:Math.max(1,num('clientes')), usuarios:Math.max(1,num('usuarios')),
+    gb: $('gbon').checked ? num('gb') : 0, comp, perfil:parseInt($('perfil').value,10), numeros:Math.max(1,num('numeros')),
+    ofClientes:num('ofcli'), bpoEmpresas:num('bpoemp'), subs:Math.max(1,num('subs')),
+    semContabil:$('semcont').checked, finClientes:estado.modo_bpo ? Math.max(1,num('subs')) : 0,
+    planos, bolsaUU:$('bolsaon').checked ? num('bolsauu') : 0, bolsaUsuarios:num('bolsausu'),
+    extraPacotes:num('extrapac'), consultorClientes:num('conscli'), nfseClientes:num('nfsecli'), certClientes:num('certcli')};
+}
+function render(avisos){
+  atualizaCampos();
+  const e = entrada(), r = calcular(e, P), cen = cenarioPadrao(P);
+  const op = $('perfil').options, nomesPerfil = ['Baixo','Provável','Alto','Pior caso'];
+  for (let i = 0; i < 4; i++) op[i].textContent = nomesPerfil[i]+' (IA a '+Math.round(P.ia.utilizacao_plano[i]*100)+'% do teto)';
+  $('total').textContent = brl(r.total)+' por mês';
+  $('totalnota').textContent = 'Mensalidade '+brl(r.mensalidade)+(r.consumo>0 ? ' + consumo cobrado '+brl(r.consumo) : '')+'. Perfil de uso: '+P.perfis_uso[e.perfil]+'.';
+  $('custo').textContent = brl(r.custo);
+  const m = $('margem'); m.textContent = pct(r.margem); m.className = 'v '+(r.margem >= 0.3 ? 'ok' : 'bad');
+  $('porcli').textContent = brl(r.total/e.clientes);
+  $('faixa').textContent = 'Clientes efetivos pelas faixas: '+r.efetivos.toLocaleString('pt-BR',{maximumFractionDigits:1})+' de '+e.clientes+' (faixa marginal, fator por faixa em PARAMETROS.faixas_clientes).';
+  $('iasem').textContent = 'Sem IA: '+r.ia.semIA+' de '+e.usuarios+' usuários'+(r.ia.semIA<0?'':'.');
+  // premissas em uso, ao lado do resultado
+  const cap = r.ic, sup = P.modulos.painel.custo.usuario[cap];
+  const ch = (t, conf) => '<span class="chip'+(conf?' conf':'')+'">'+t+(conf?' · a confirmar':'')+'</span>';
+  $('chips').innerHTML =
+    ch('Tributos '+pct(cen.aliq), true)+ch('Comissão '+pct(cen.comissao), true)+ch('Câmbio R$ '+dec(P.cambio.valor), true)+
+    ch('IA a '+pct(P.ia.utilizacao_plano[e.perfil])+' do teto')+ch('Suporte R$ '+dec(sup)+' por assento')+
+    ch('Chat de suporte R$ '+dec(custoChat(cap, P))+' por assento')+ch('Ajuda do sistema R$ '+dec(custoAjuda(cap, P))+' por usuário')+ch('Fixos '+brl(fixosPlataforma(P, cen.prolabore))+(cen.prolabore?' (com pró-labore)':' (sem pró-labore)'))+
+    ch(nf(cen.N)+' escritórios ativos')+ch('Infra R$ '+dec(P.modulos.painel.custo.cliente[cap])+' por cliente');
+  let h = '';
+  const linha = (nome, pr, ck) => '<tr><td>'+nome+'</td><td>'+brl(pr)+'</td><td>'+(ck===null||ck===undefined?'-':brl(ck))+'</td><td>'+(ck===null||ck===undefined||pr===0?'-':pct((pr-ck)/pr))+'</td></tr>';
+  r.linhas.forEach(l => h += linha(l.nome, l.preco, l.custo));
+  if (r.ajuste > 0) h += linha('Ajuste ao preço mínimo por escritório', r.ajuste, 0);
+  r.exc.forEach(x => h += linha(x.nome, x.preco, x.custo));
+  $('linhas').innerHTML = h;
+  $('rodape').innerHTML = '<tr><td>Total</td><td>'+brl(r.total)+'</td><td>'+brl(r.custo)+'</td><td>'+pct(r.margem)+'</td></tr>';
+  const ms = [];
+  (avisos||[]).forEach(a => ms.push('<div class="msg">'+a+'</div>'));
+  r.ia.avisos.forEach(a => ms.push('<div class="msg w">'+a+'</div>'));
+  if (r.ajuste > 0) ms.push('<div class="msg w">Preço mínimo por escritório aplicado: '+brl(P.piso_mensal)+'.</div>');
+  if (r.margem < 0) ms.push('<div class="msg w">Margem de contribuição negativa: o preço não cobre o custo por escritório neste cenário.</div>');
+  else if (r.margem < 0.3) ms.push('<div class="msg w">Margem de contribuição abaixo de 30%: sem IA, o sistema-base ainda não sustenta sozinho os fixos da plataforma.</div>');
+  $('msgs').innerHTML = ms.join('');
+  const ic = $('iacap');
+  if (r.ia.usuariosIA > 0){
+    const rz = r.ia.capUU > 0 ? r.ia.demandaUU/r.ia.capUU : 0;
+    ic.className = 'msg'+(rz > 1 ? ' w' : '');
+    ic.innerHTML = 'Capacidade de IA: <b>'+nf(r.ia.capUU)+' UU por mês</b> no teto ('+(r.ia.capUU*P.ia.tokens_por_uu/1e6).toLocaleString('pt-BR',{maximumFractionDigits:0})+' MTok). Demanda bruta do estudo 0.2 neste perfil: '+nf(r.ia.demandaUU)+' UU ('+pct(rz)+' da capacidade).'
+      +(rz > 1 ? ' Os trabalhos automáticos tendem a pausar antes do fim da semana: considere plano maior, bolsa ou uso extra.' : '');
+  } else { ic.className = 'msg'; ic.textContent = 'Nenhum usuário com IA: o sistema roda sem os integrantes e sem o Consultor. O chat de suporte e o assistente de ajuda (modelo pequeno, até 30 perguntas por mês) continuam disponíveis a todo usuário.'; }
+  let ph = '';
+  P.perfis_uso.forEach((nm, i) => { const q = calcular(Object.assign({}, e, {perfil:i}), P);
+    ph += '<tr><td>'+nm.charAt(0).toUpperCase()+nm.slice(1)+' ('+Math.round(P.ia.utilizacao_plano[i]*100)+'%)</td><td>'+brl(q.total)+'</td><td>'+brl(q.custo)+'</td><td class="'+(q.margem>=0.3?'ok':'bad')+'">'+pct(q.margem)+'</td></tr>'; });
+  $('perfis').innerHTML = ph;
+  renderExtra(e, r, cen);
+  renderCaixa(e);
+  const w = P.whatsapp.tarifas_exibidas;
+  $('wa').innerHTML = '<div class="big" style="font-size:1.4rem">'+brl(r.whatsapp)+' por mês (estimativa)</div><p class="nota">Tarifas por mensagem: utilidade '+brl2(w.utilidade)+'; marketing '+brl2(w['marketing'])+'; serviço '+brl2(w['serviço (além do gratuito)'])+' (1.000 gratuitas por número); autenticação '+brl2(w['autenticação'])+'. Estimativa para o perfil de uso escolhido; vale o que a Meta cobrar.</p>';
+}
+function renderExtra(e, r, cen){
+  const n = niveis(r, e, P, cen);
+  const eq = v => v === null ? 'não fecha: a contribuição é zero ou negativa' : (v < 1 ? 'menos de 1' : nf(Math.ceil(v)))+' escritórios médios equivalentes';
+  const pm = v => v === null ? '-' : pct(v);
+  const lin = (a, b, c, cls) => '<tr><td>'+a+'</td><td>'+b+'</td><td class="'+(cls||'')+'">'+c+'</td></tr>';
+  const cl = v => v >= 0.3 ? 'ok' : (v < 0 ? 'bad' : '');
+  $('niveis').innerHTML =
+    lin('(a) Margem de contribuição<br><span class="n" style="font-weight:400">custos variáveis, fixo por escritório, infraestrutura rateada, suporte por assento, chat de suporte e ajuda do sistema</span>', brl(n.contrib), pct(n.mContrib), cl(n.mContrib)) +
+    lin('menos: parte dos fixos da plataforma ('+nf(cen.N)+' escritórios; peso '+n.peso.toLocaleString('pt-BR',{maximumFractionDigits:2})+')', brl(-n.rateio), '') +
+    lin('(b) Margem após fixos rateados', brl(n.apos), pct(n.mApos), cl(n.mApos)) +
+    lin('menos: tributos ('+pct(cen.aliq)+', premissa a confirmar) e comissão ('+pct(cen.comissao)+')', brl(-(n.trib+n.com)), '') +
+    lin('(c) Margem líquida operacional estimada', brl(n.liq), pct(n.mLiq), cl(n.mLiq));
+  $('niveisnota').textContent = 'Fixos da plataforma: '+brl(n.fix)+' por mês (infra, GPU, índice legal e DGM, operação'+(cen.prolabore?', pró-labore de '+brl(P.fixos_plataforma.prolabore):'')+'), rateados por clientes ('+n.peso.toLocaleString('pt-BR',{maximumFractionDigits:2})+' escritório médio equivalente de '+nf(P.fixos_plataforma.clientes_medio)+' clientes). Fora de todos os níveis: tarifas de cobrança dos clientes, implantação (custo único; veja o bloco 7) e WhatsApp (repassado). Tributos e comissão são premissas, editáveis no painel Premissas; a alíquota será discutida depois.';
+  $('equil').innerHTML = '<div class="msg">Ponto de equilíbrio da plataforma com escritórios deste porte e desta configuração: <b>'+eq(n.equilibrio)+'</b> (antes de tributos); <b>'+eq(n.equilibrioLiq)+'</b> (após tributos e comissão).</div>';
+  // IA isolada
+  const ia = n.ia;
+  if (r.ia.usuariosIA > 0){
+    $('iaiso').innerHTML = '<div class="wrap"><table><tbody>'+
+      lin('Receita da IA (planos, bolsa e uso extra)', brl(ia.rec), '')+
+      lin('Tokens e infraestrutura do assistente (rateada)', brl(-ia.custoVar), '')+
+      lin('Suporte da IA ('+brl(P.ia.suporte_usuario[r.ic])+' por usuário, premissa)', brl(-ia.suporte), '')+
+      lin('Parte de IA dos fixos (GPU, índice legal, DGM), rateada', brl(-ia.fixos), '')+
+      lin('Sobra da IA, antes de tributos', brl(ia.sobra), pm(ia.mSobra), cl(ia.mSobra))+
+      lin('Sobra da IA, após tributos e comissão', brl(ia.sobraLiq), pm(ia.mSobraLiq), cl(ia.mSobraLiq))+
+      '</tbody></table></div><p class="nota">A margem alta do estudo está aqui: o sistema-base é vendido perto do mercado e a IA carrega a margem.</p>';
+  } else $('iaiso').innerHTML = '<p class="nota">Nenhum usuário com IA.</p>';
+  const mp = propMinIA(e, P, cen), fm = v => v === Infinity || v > 1 ? 'não fecha só com este plano' : pct(v);
+  let t = '<div class="wrap"><table><thead><tr><th>Plano</th><th>Sobra por usuário</th><th>Mínimo de usuários com IA (antes de tributos)</th><th>(após tributos)</th></tr></thead><tbody>';
+  ['essencial','operacao','intensivo'].forEach(id => { const o = mp.out[id];
+    t += '<tr><td>'+P.ia.planos[id].nome+'</td><td>'+brl(o.margemUsuario)+'</td><td>'+fm(o.frac)+'</td><td>'+fm(o.fracLiq)+'</td></tr>'; });
+  $('iamin').innerHTML = '<h2 style="margin-top:14px;font-size:.95rem">Proporção mínima de IA para cobrir a parte dos fixos</h2>'+t+'</tbody></table></div><p class="nota">Rateio de fixos deste escritório: '+brl(mp.rateio)+' por mês; contribuição do sistema-base sem IA: '+brl(mp.contrib0)+'. Proporção = parte dos usuários que precisa ter o plano para a contribuição empatar com o rateio.</p>';
+  // API do painel do cliente
+  let ah = '', tot = 0;
+  r.api.forEach(a => { tot += a.custo; ah += '<tr><td>'+a.nome+'<br><span class="n" style="font-weight:400;color:var(--mut)">'+a.quem+'</span></td><td>'+brl(a.custo)+'</td></tr>'; });
+  $('apis').innerHTML = (ah || '<tr><td colspan="2">Nenhum módulo ou serviço com API paga marcado.</td></tr>') + (ah ? '<tr><td><b>Total de API</b> ('+pct(r.custo>0 ? tot/r.custo : 0)+' do custo)</td><td><b>'+brl(tot)+'</b></td></tr>' : '');
+  const T = r.teto, rz = (u, t) => t > 0 ? pct(u/t) : '-';
+  $('teto').innerHTML = 'Teto embutido por cliente por mês (custo): Integra e CNPJ <b>R$ '+dec(T.gov)+'</b>, uso neste perfil R$ '+dec(T.usoGov)+' ('+rz(T.usoGov, T.gov)+' do teto); InfoSimples <b>R$ '+dec(T.est)+'</b>, uso R$ '+dec(T.usoEst)+' ('+rz(T.usoEst, T.est)+'). Excedente cobrado ao escritório neste perfil: <b>'+brl(T.excGov+T.excEst)+'</b> (custo + '+Math.round((P.conectores_teto.markup_excedente-1)*100)+'%).';
+  // pacote BPO financeiro: linha do pacote, os três níveis com e sem o pacote e a referência de mercado
+  const bx = $('bpoinfo');
+  if (bx && estado.bpo_fin){
+    const n = e.bpoEmpresas, ln = r.linhas.find(l => l.id === 'bpo_fin'), e0 = Object.assign({}, e, {comp:Object.assign({}, e.comp, {bpo_fin:false})});
+    const r0 = calcular(e0, P), n0 = niveis(r0, e0, P, cen), rf = refBPO(n, P), pq = ln ? ln.preco : 0;
+    const l3 = (a, b, c) => '<tr><td>'+a+'</td><td>'+b+'</td><td>'+c+'</td></tr>';
+    bx.innerHTML = '<table><thead><tr><th>Pacote BPO financeiro ('+n+' empresas)</th><th>Sem o pacote</th><th>Com o pacote</th></tr></thead><tbody>'+
+      l3('Preço do pacote (base + empresas)', '-', brl(pq)+(n > 0 ? ' ('+brl(pq/n)+' por empresa)' : ''))+
+      l3('Custo do pacote (inclui o conector de ERP)', '-', ln ? brl(ln.custo) : '-')+
+      l3('Margem de linha do pacote', '-', ln && pq > 0 ? pct((pq-ln.custo)/pq) : '-')+
+      l3('Preço mensal total', brl(r0.total), brl(r.total))+
+      l3('(a) Margem de contribuição', pct(r0.margem), pct(r.margem))+
+      l3('(b) Margem após fixos rateados', pct(n0.mApos), pct(niveis(r, e, P, cen).mApos))+
+      l3('(c) Margem líquida operacional estimada', pct(n0.mLiq), pct(niveis(r, e, P, cen).mLiq))+
+      '</tbody></table><div class="msg">Referência (S5, páginas comerciais): Sofia '+brl(rf.sofia)+' para '+n+' organizações (R$ '+P.mercado_bpo.sofia_organizacao+' cada; Founders '+brl(rf.founders)+'); BPO Suite cerca de '+brl(rf.suite)+' em planos por CNPJ, só o software, sem plataforma contábil nem IA por usuário. Nosso preço total por empresa: '+(n > 0 ? brl(r.total/n) : '-')+', no escritório inteiro (pacote, plataforma, IA e módulos).</div>';
+  }
+  // mercado
+  const mk = r.mercado, box = $('mercado');
+  if (mk.comparavel){
+    const a = P.mercado.ancora_usuario, ratio = mk.baseSemIA/mk.ref, neg = mk.ref*P.mercado.fator_negociado;
+    box.innerHTML = '<div class="msg"><b>Mercado:</b> HubStrom com app de marca branca para '+nf(e.clientes)+' clientes: cerca de <b>'+brl(mk.ref)+'</b> (com o desconto que o usuário obteve, cerca de '+brl(neg)+'). Nosso sistema-base sem IA (Painel, CRM, Timesheet, App, conectores, marca branca, sem financeiro e sem GB): <b>'+brl(mk.baseSemIA)+'</b>, '+(ratio >= 1 ? pct(ratio-1)+' acima' : pct(1-ratio)+' abaixo')+' da tabela e '+pct(mk.baseSemIA/neg-1)+' em relação ao valor com desconto. Pontos de apoio: R$ 527 + 300 (30 clientes), R$ 957 + 300 (100 clientes), R$ '+nf(a.tabela)+' ('+a.clientes+' clientes, '+a.usuarios+' usuários)'+(e.clientes > a.clientes ? '; acima de '+a.clientes+' clientes é extrapolação (premissa)' : '')+'. Peças que o HubStrom não cobre, se comprar à parte: captura de notas '+brl(mk.ampliada.captura)+' (SIEG) e financeiro do escritório '+brl(mk.ampliada.financeiro)+' (Nibo).<br><span class="n">O que temos a mais: '+P.mercado.a_mais.join('; ')+'.</span></div>';
+  } else box.innerHTML = '<div class="msg">Sem referência de mercado: marque Painel, CRM, App, conectores federais e Marca branca para comparar com o HubStrom.</div>';
+}
+// Bloco 7: implantação, margem do primeiro ano, equilíbrio e fluxo de caixa de 12 meses
+function renderCaixa(e){
+  const F = P.fluxo, cen = cenarioPadrao(P), fix = fixosPlataforma(P, cen.prolabore), portes = ['P','M','G'];
+  const fl = fluxoCaixa(P), sem = fluxoCaixa(P, {cobra_implantacao:false});
+  // tabela de preço de implantação por porte
+  const im = {}; portes.forEach(k => im[k] = implantacao(P, k, F.migracoes));
+  const nomeP = k => P.escritorios_tipo[k].nome;
+  const row = (rot, f) => '<tr><td>'+rot+'</td>'+portes.map(k => '<td>'+f(k)+'</td>').join('')+'</tr>';
+  const pr = k => F.cobra_implantacao ? precoImplantacao(im[k], F.desconto) : 0;
+  $('impl').innerHTML = '<thead><tr><th></th>'+portes.map(k => '<th>'+nomeP(k)+'</th>').join('')+'</tr></thead><tbody>'+
+    row('Horas ('+(F.migracoes?'trilha + migrações':'trilha')+')', k => im[k].horas+' h')+
+    row('Custo de entregar', k => brl(im[k].custo))+
+    row('Preço de tabela', k => brl(im[k].tabela))+
+    row('Piso (custo de entrega, margem zero)', k => brl(im[k].piso))+
+    row('Margem na tabela', k => pct(im[k].margemTabela))+
+    row('Margem no piso', k => pct(im[k].margemPiso))+
+    row('Desconto máximo (até o piso)', k => pct(im[k].descontoMax))+
+    row('Desconto no cenário', k => F.cobra_implantacao ? pct(1 - pr(k)/im[k].tabela) : '-')+
+    row('Preço no cenário', k => F.cobra_implantacao ? brl(pr(k))+(pr(k) <= im[k].piso+0.5 && F.desconto > im[k].descontoMax ? ' (piso)' : '') : 'não cobra')+
+    '</tbody>';
+  // aviso vermelho: o desconto pedido levaria algum porte abaixo do custo (o preço aplicado nunca passa do piso)
+  const pedido = descPedido !== null ? descPedido : F.desconto, abaixo = portes.filter(k => F.cobra_implantacao && im[k].tabela*(1 - pedido) < im[k].piso - 0.005);
+  $('implaviso').innerHTML = abaixo.length ? '<div class="msg w" style="border-color:var(--bad);color:var(--bad)"><b>Desconto abaixo do custo.</b> Um desconto de '+pct(pedido)+' levaria '+abaixo.map(k => nomeP(k)+' a '+brl(im[k].tabela*(1 - pedido))+' (custo '+brl(im[k].custo)+')').join('; ')+'. O time nunca vende abaixo do custo de entrega: vale o piso, e o campo fica limitado a '+pct(descontoMaximo(P, F.migracoes))+'.</div>' : '';
+  $('implnota').textContent = 'Referência de mercado: HubStrom cobra '+brl(P.implantacao.mercado.hubstrom_tabela)+' de tabela e o usuário conseguiu '+brl(P.implantacao.mercado.hubstrom_negociado)+'; a R$ '+dec(P.implantacao.custo_hora,0)+' por hora e '+pct(P.implantacao.margem_piso)+' de margem, esse valor paga cerca de '+dec(im.P.horasMercado,0)+' horas de entrega. O preço depende do contexto, mas o piso é a margem zero: o time nunca vende abaixo do custo de entrega (P27); o custo real da hora segue em aberto (P28, medir nos primeiros escritórios). Inclui na trilha: tenant, tema e domínio, importação de clientes, espelho de nuvem, conectores federais, WhatsApp, integrantes e réguas, treinamento e 30 dias de acompanhamento (8.2). Migração de ferramentas e do financeiro: opcional, tabela R$ '+P.implantacao.mig_hora_tabela+' por hora.';
+  // margem do primeiro ano e equilíbrio, por porte, na configuração do cenário
+  let t = '<thead><tr><th>Porte</th><th>1º ano, implantação absorvida</th><th>1º ano, implantação cobrada</th><th>Equilíbrio: regime / 1º ano</th></tr></thead><tbody>';
+  portes.forEach(k => { const u = fl.un[k], c = u.preco - u.custo, imp = im[k];
+    const a = primeiroAno(c, u.preco, 0, imp.custo), b = primeiroAno(c, u.preco, pr(k), imp.custo), q = equilibrioImplantacao(c, pr(k) - imp.custo, fix);
+    const fq = v => v === null ? 'não fecha' : dec(v,1);
+    t += '<tr><td>'+nomeP(k)+'<br><span class="n" style="font-weight:400;color:var(--mut)">mensalidade '+brl(u.preco)+', contribuição '+brl(c)+'</span></td><td class="'+(a.pct<0?'bad':'')+'">'+pct(a.pct)+'</td><td class="'+(b.pct<0?'bad':'')+'">'+pct(b.pct)+'</td><td>'+fq(q.regime)+' / '+fq(q.ano1)+'</td></tr>'; });
+  $('ano1').innerHTML = t+'</tbody>';
+  // fluxo de caixa
+  const posit = v => v === null ? 'não nos '+F.horizonte+' meses' : 'mês '+v;
+  $('caixakpi').innerHTML =
+    '<div class="kpi"><div class="k">Caixa acumulado fica positivo</div><div class="v '+(fl.mesCaixaPositivo===null?'bad':'ok')+'">'+posit(fl.mesCaixaPositivo)+'</div></div>'+
+    '<div class="kpi"><div class="k">Resultado do mês fica positivo</div><div class="v">'+posit(fl.mesSaldoPositivo)+'</div></div>'+
+    '<div class="kpi"><div class="k">Maior necessidade de caixa</div><div class="v '+(fl.necessidadeMax>0?'bad':'ok')+'">'+brl(fl.necessidadeMax)+'</div></div>'+
+    '<div class="kpi"><div class="k">Caixa acumulado no mês '+F.horizonte+'</div><div class="v '+(fl.acumFinal<0?'bad':'ok')+'">'+brl(fl.acumFinal)+'</div></div>'+
+    '<div class="kpi"><div class="k">Implantação nas entradas (3 primeiros meses)</div><div class="v">'+pct(fl.parteImplantacao3)+'</div></div>'+
+    '<div class="kpi"><div class="k">Implantação nas entradas ('+F.horizonte+' meses)</div><div class="v">'+pct(fl.parteImplantacao12)+'</div></div>';
+  $('caixacmp').innerHTML = F.cobra_implantacao ? '<div class="msg">Sem cobrar a implantação (o custo das horas seria absorvido): caixa acumulado positivo: <b>'+posit(sem.mesCaixaPositivo)+'</b>, maior necessidade de caixa <b>'+brl(sem.necessidadeMax)+'</b>, caixa no mês '+F.horizonte+' de <b>'+brl(sem.acumFinal)+'</b>. A implantação cobrada melhora o caixa do mês '+F.horizonte+' em '+brl(fl.acumFinal - sem.acumFinal)+'.</div>' : '<div class="msg w">Implantação não cobrada: as horas de entrega pesam no caixa dos primeiros meses.</div>';
+  let ct = '<thead><tr><th>Mês</th><th>Ativos</th><th>Entradas</th><th>Saídas</th><th>Saldo</th><th>Acumulado</th></tr></thead><tbody>';
+  fl.rows.forEach(r => { ct += '<tr><td>'+r.mes+'</td><td>'+dec(r.ativos,1)+'</td><td>'+mil(r.entradas)+'</td><td>'+mil(r.saidas)+'</td><td class="'+(r.saldo<0?'bad':'ok')+'">'+mil(r.saldo)+'</td><td class="'+(r.acum<0?'bad':'ok')+'">'+mil(r.acum)+'</td></tr>'; });
+  $('caixatab').innerHTML = ct+'</tbody>';
+  $('caixadet').innerHTML = (function(){
+    let d = '<table><thead><tr><th>Mês</th><th>Implantação recebida</th><th>Mensalidades</th><th>Total de entradas</th></tr></thead><tbody>';
+    fl.rows.forEach(r => d += '<tr><td>'+r.mes+'</td><td>'+mil(r.implRec)+'</td><td>'+mil(r.mensal)+'</td><td>'+mil(r.entradas)+'</td></tr>');
+    d += '</tbody></table><table style="margin-top:10px"><thead><tr><th>Mês</th><th>Horas de implantação</th><th>Custo variável</th><th>Fixos</th><th>Tributos e comissão</th><th>Total de saídas</th></tr></thead><tbody>';
+    fl.rows.forEach(r => d += '<tr><td>'+r.mes+'</td><td>'+mil(r.implCusto)+'</td><td>'+mil(r.custoVar)+'</td><td>'+mil(r.fix)+'</td><td>'+mil(r.trib+r.com)+'</td><td>'+mil(r.saidas)+'</td></tr>');
+    return d+'</tbody></table>'; })();
+  // gráfico do caixa acumulado
+  const W = 360, Hh = 130, mx = Math.max(1, ...fl.rows.map(r => Math.abs(r.acum))), z = Hh/2, bw = W/fl.rows.length;
+  let g = '<svg viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Caixa acumulado por mês" style="width:100%;max-width:520px;height:auto;display:block"><line x1="0" x2="'+W+'" y1="'+z+'" y2="'+z+'" stroke="var(--line)" stroke-width="1"/>';
+  fl.rows.forEach((r, i) => { const hgt = Math.abs(r.acum)/mx*(z-14), y = r.acum >= 0 ? z - hgt : z;
+    g += '<rect x="'+(i*bw+3)+'" y="'+y.toFixed(1)+'" width="'+(bw-6)+'" height="'+Math.max(hgt,0.5).toFixed(1)+'" rx="2" fill="'+(r.acum >= 0 ? 'var(--ok)' : 'var(--bad)')+'"/><text x="'+(i*bw+bw/2)+'" y="'+(Hh-2)+'" text-anchor="middle" font-size="9" fill="var(--mut)">'+r.mes+'</text>'; });
+  $('caixagraf').innerHTML = g+'</svg>';
+  $('caixanota').textContent = 'Escritórios novos por mês: '+dec(F.novos_mes,1)+'; mix '+pct(F.mix.P)+' / '+pct(F.mix.M)+' / '+pct(F.mix.G)+' (P / M / G, normalizado); configuração '+P.pacotes[F.pacote].nome+'; desconto médio de implantação '+pct(F.desconto)+' (não passa do piso); '+F.parcelas+' parcela(s); cancelamento mensal '+pct(F.churn)+'; mensalidade começa '+F.meses_ate_mensalidade+' mês(es) após a assinatura. Fixos '+brl(fix)+' por mês ('+(cen.prolabore?'com':'sem')+' pró-labore), tributos '+pct(cen.aliq)+' e comissão '+pct(cen.comissao)+' sobre as entradas. Entradas e saídas em R$ mil. Sem capital inicial.';
+}
+function ligaCampos(){
+  ['clientes','usuarios','numeros','perfil','gb','ofcli','bpoemp','subs','conscli','bolsauu','bolsausu','extrapac','nfsecli','certcli'].concat(PLANOS.map(i => 'ia_'+i)).forEach(id => $(id).addEventListener('input', () => { if (id==='clientes') gbPadrao(); render(); }));
+  $('gbcli').addEventListener('input', () => { gbPadrao(); render(); });
+  $('gbon').addEventListener('change', () => { sync(); render(); });
+  $('semcont').addEventListener('change', () => { const av = [];
+    if ($('semcont').checked){ ['gov','est','cores'].forEach(i => { if (estado[i]){ estado[i] = false; av.push(nomes[i]+' foi desmarcado: pertence ao pacote Contábil.'); } }); }
+    sync(); render(av); });
+  $('bolsaon').addEventListener('change', () => { sync(); render(); });
+  $('restaura').addEventListener('click', () => { P = JSON.parse(JSON.stringify(PARAMETROS)); descPedido = null; render(); });
+}
+monta(); ligaCampos(); alterna('painel', true);
+// começa com o atalho Operação (o primeiro atalho é o sistema-base sem IA)
+$('pacotes').querySelectorAll('button')[2].click();
+})(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!-- Seções 1 a 4 do roteiro: Abertura, O problema, Mercado e concorrentes, A solução (slides 1 a 12).
+     CSS específico em src/css/81-abertura.css (classes com prefixo s1-). -->
+
+<!-- ============ Slide 1 · A lei certa, na data certa ============ -->
+<section class="slide slide--end" data-layout="encerramento" data-chrome="off" data-title="A lei certa, na data certa">
+  <div class="s1-manifesto">
+    <p class="s1-line" data-anim="mask" data-delay="400">A lei certa.</p>
+    <p class="s1-line" data-anim="mask" data-delay="1400">Na data certa.</p>
+    <p class="s1-line" data-anim="mask" data-delay="2400">Com <span class="s1-ignite" data-text="a prova.">a prova.</span></p>
+  </div>
+
+  <aside class="notes">
+    <p><strong>Tela preta. As três linhas sobem sozinhas, uma por segundo. Na terceira, "a prova" acende.</strong> Espere a última linha antes de falar.</p>
+    <p>Boa noite. Antes de falar de tecnologia, quero falar de uma cena que todos aqui conhecem: o cliente pergunta algo, você sabe que a resposta existe, mas não sabe em qual lei, em qual redação, nem se ela já mudou.</p>
+    <p>Aí começa a pesquisa: Planalto, Receita, Sefaz, um parecer antigo, um grupo de WhatsApp. Hoje vou mostrar como queremos encurtar esse caminho.</p>
+    <p>Não com uma IA que "acha" coisas, mas com uma que responde pela lei vigente na data do fato e mostra, artigo por artigo, onde está escrito.</p>
+    <p>Essas três linhas são a apresentação inteira. O resto é como fazer isso de verdade.</p>
+    <p class="dim">Fonte: docs/Plano_Assistente_de_IA_para_Contadores.md, "Visão do produto".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 2 · 549.576 ============ -->
+<section class="slide slide--hero" data-layout="numero-heroi" data-title="549.576 profissionais">
+  <div class="hero-number s1-hero s1-clipfix" data-anim="blur-in" data-count-to="549576" data-duration="2000" data-delay="200">549.576</div>
+  <p class="hero-label" data-anim="fade-up" data-delay="900">profissionais da contabilidade no Brasil</p>
+
+  <p class="s1-sub" data-step="1" data-anim="fade-up">
+    <span class="s1-sub-num" data-count-to="101880" data-duration="1400">101.880</span>
+    organizações contábeis
+  </p>
+
+  <p class="source">Fontes: painel do CFC via FintechNode (19/10/2026); CFC, Relato Integrado 2025. Ver pesquisa/05-mercado-preco.md, §1.1 e §1.2.</p>
+
+  <aside class="notes">
+    <p><strong>O número sobe sozinho até 549.576.</strong> Deixe subir sem falar.</p>
+    <p>Esse é o tamanho da nossa comunidade: 549 mil profissionais registrados no sistema CFC/CRCs, em outubro deste ano.</p>
+    <p><strong>Avance:</strong> aparece, em cinza, "101.880 organizações contábeis".</p>
+    <p>E cerca de 102 mil organizações contábeis. Mais da metade dos escritórios tem de 1 a 9 pessoas. Ou seja, o perfil típico é o escritório pequeno, em que o dono é também o especialista que pesquisa.</p>
+    <p>Não vamos fazer escrituração, guia ou obrigação acessória: isso o ERP já faz. O que queremos devolver é o tempo gasto pesquisando e interpretando. É um tempo caro, porque é o tempo do profissional mais experiente da casa.</p>
+    <p class="dim">Fonte: pesquisa/05-mercado-preco.md, seções 1.1, 1.2 e 1.3 (54,8% com 1 a 9 colaboradores, Panorama 2023); Plano do Assistente, "O que ele não é".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 3 · A regra muda toda semana ============ -->
+<section class="slide" data-layout="numero-heroi" data-title="A regra muda toda semana">
+  <p class="kicker" data-anim="fade">O problema</p>
+  <div class="s1-flux fill">
+    <div class="s1-flux-text">
+      <div class="hero-number s1-clipfix" data-anim="blur-in" data-count-to="550" data-prefix="~" data-duration="1800" data-delay="300">~550</div>
+      <p class="s1-flux-label" data-anim="fade-up" data-delay="700">atos normativos novos por mês</p>
+    </div>
+
+    <div class="s1-pile" data-anim="stagger" data-child-anim="s1-drop" data-stagger="75" data-delay="200" aria-hidden="true">
+      <i class="s1-sheet" style="--r:-1.4deg; --x:-6px"></i>
+      <i class="s1-sheet" style="--r:0.8deg; --x:8px"></i>
+      <i class="s1-sheet" style="--r:-0.4deg; --x:-2px"></i>
+      <i class="s1-sheet" style="--r:1.6deg; --x:10px"></i>
+      <i class="s1-sheet" style="--r:-1deg; --x:-10px"></i>
+      <i class="s1-sheet" style="--r:0.3deg; --x:4px"></i>
+      <i class="s1-sheet" style="--r:-1.8deg; --x:-4px"></i>
+      <i class="s1-sheet" style="--r:1.1deg; --x:6px"></i>
+      <i class="s1-sheet" style="--r:-0.6deg; --x:-8px"></i>
+      <i class="s1-sheet" style="--r:0.9deg; --x:2px"></i>
+      <i class="s1-sheet" style="--r:-1.3deg; --x:9px"></i>
+      <i class="s1-sheet" style="--r:0.5deg; --x:-5px"></i>
+      <i class="s1-sheet" style="--r:-0.2deg; --x:3px"></i>
+      <i class="s1-sheet" style="--r:1.5deg; --x:-7px"></i>
+      <i class="s1-sheet" style="--r:-0.9deg; --x:5px"></i>
+      <i class="s1-sheet" style="--r:0.7deg; --x:-3px"></i>
+      <i class="s1-sheet" style="--r:-1.5deg; --x:7px"></i>
+      <i class="s1-sheet" style="--r:0.2deg; --x:-9px"></i>
+      <i class="s1-sheet" style="--r:1.2deg; --x:1px"></i>
+      <i class="s1-sheet s1-sheet--top" style="--r:-0.5deg; --x:0px"><span>Diário Oficial</span></i>
+    </div>
+  </div>
+
+  <div class="s1-past" data-step="1" data-anim="fade-up">
+    <p class="s1-past-q">E a pergunta é sobre <span class="s1-past-year">2022</span>.</p>
+    <div class="s1-years">
+      <div class="s1-years-track">
+        <span style="--i:0">2016</span><span style="--i:1">2017</span><span style="--i:2">2018</span><span style="--i:3">2019</span><span style="--i:4">2020</span><span style="--i:5">2021</span><span class="s1-yr-hit" style="--i:6" data-anim="s1-hit" data-delay="1500">2022</span><span style="--i:7">2023</span><span style="--i:8">2024</span><span style="--i:9">2025</span><span style="--i:10">2026</span>
+      </div>
+      <div class="s1-lens" data-anim="s1-lens" data-delay="300" aria-hidden="true">
+        <svg viewBox="0 0 140 140" width="140" height="140">
+          <defs>
+            <linearGradient id="s1-lens-g" gradientUnits="userSpaceOnUse" x1="10" y1="10" x2="130" y2="130">
+              <stop offset="0" stop-color="#7cc4ff" /><stop offset="0.5" stop-color="#b4a0ff" /><stop offset="1" stop-color="#ffc983" />
+            </linearGradient>
+          </defs>
+          <circle cx="56" cy="56" r="46" fill="rgba(124,196,255,0.10)" stroke="url(#s1-lens-g)" stroke-width="6" />
+          <line x1="90" y1="90" x2="128" y2="128" stroke="url(#s1-lens-g)" stroke-width="11" stroke-linecap="round" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Fontes: pesquisa/02-custos-llm.md, §6.4 (estimativa própria); Plano de Ingestão da Base Legal, §1 (10 anos e decadência).</p>
+
+  <aside class="notes">
+    <p><strong>As folhas caem e formam a pilha; o número sobe até ~550.</strong></p>
+    <p>Na nossa estimativa, só nas fontes que importam para tributação chegam cerca de 550 atos normativos novos por mês, entre leis, decretos, instruções e resoluções, e dezenas de milhares de publicações em diários que precisam ser triadas.</p>
+    <p><strong>Avance:</strong> a linha do tempo entra e a lupa volta de 2026 até 2022.</p>
+    <p>Mas o problema não é só acompanhar. Quando a fiscalização chega, ou quando vocês revisam um período, a pergunta é: qual regra valia naquela data? O prazo de decadência é de cinco anos. Então vocês precisam da redação de 2021, de 2022, não da de hoje.</p>
+    <p>Uma pesquisa no Google mostra a redação atual, quase sempre. É como consultar um mapa de hoje para saber como era a cidade dez anos atrás.</p>
+    <p class="dim">Fonte: pesquisa/02-custos-llm.md, seção 6.4 (550 atos normativos por mês e 47 mil atos triados, estimativa); docs/Plano_de_Ingestao_da_Base_Legal.md, seção 1.</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 4 · Dois sistemas até 2033 ============ -->
+<section class="slide" data-layout="grafico" data-title="Dois sistemas até 2033">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Reforma tributária</p>
+    <h2 class="title title--md" data-anim="words">Dois sistemas até 2033.</h2>
+  </div>
+
+  <div class="s1-reform">
+    <svg class="s1-reform-axis" viewBox="0 0 1664 460" width="1664" height="460" data-anim="draw" data-delay="300" aria-hidden="true">
+      <line x1="0" y1="230" x2="1664" y2="230" />
+    </svg>
+
+    <div class="s1-seg" style="left: 0px; width: 208px" data-step="1" data-anim="wipe">
+      <svg viewBox="0 0 208 460" width="208" height="460">
+        <rect class="s1-b-pis" x="3" y="6" width="202" height="70" rx="6" />
+        <rect class="s1-b-icms" x="3" y="84" width="202" height="140" rx="6" />
+        <rect class="s1-b-cbs" x="3" y="236" width="202" height="6" rx="3" />
+        <rect class="s1-b-ibs" x="3" y="314" width="202" height="4" rx="2" />
+        <text class="s1-b-label" x="24" y="49">PIS/Cofins</text>
+        <text class="s1-b-label" x="24" y="162">ICMS e ISS</text>
+      </svg>
+    </div>
+    <div class="s1-seg" style="left: 208px; width: 416px" data-step="2" data-anim="wipe">
+      <svg viewBox="208 0 416 460" width="416" height="460">
+        <rect class="s1-b-icms" x="211" y="84" width="202" height="140" rx="6" />
+        <rect class="s1-b-cbs" x="211" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="211" y="314" width="202" height="4" rx="2" />
+        <text class="s1-b-label s1-b-label--dark" x="232" y="280">CBS</text>
+        <rect class="s1-b-icms" x="419" y="84" width="202" height="140" rx="6" />
+        <rect class="s1-b-cbs" x="419" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="419" y="314" width="202" height="4" rx="2" />
+      </svg>
+    </div>
+    <div class="s1-seg" style="left: 624px; width: 832px" data-step="3" data-anim="wipe" data-duration="1600">
+      <svg viewBox="624 0 832 460" width="832" height="460">
+        <rect class="s1-b-icms" x="627" y="98" width="202" height="126" rx="6" />
+        <rect class="s1-b-cbs" x="627" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="627" y="314" width="202" height="14" rx="6" />
+        <rect class="s1-b-icms" x="835" y="112" width="202" height="112" rx="6" />
+        <rect class="s1-b-cbs" x="835" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="835" y="314" width="202" height="28" rx="6" />
+        <rect class="s1-b-icms" x="1043" y="126" width="202" height="98" rx="6" />
+        <rect class="s1-b-cbs" x="1043" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="1043" y="314" width="202" height="42" rx="6" />
+        <rect class="s1-b-icms" x="1251" y="140" width="202" height="84" rx="6" />
+        <rect class="s1-b-cbs" x="1251" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="1251" y="314" width="202" height="56" rx="6" />
+      </svg>
+    </div>
+    <div class="s1-seg" style="left: 1456px; width: 208px" data-step="4" data-anim="wipe">
+      <svg viewBox="1456 0 208 460" width="208" height="460">
+        <rect class="s1-b-cbs" x="1459" y="236" width="202" height="70" rx="6" />
+        <rect class="s1-b-ibs" x="1459" y="314" width="202" height="140" rx="6" />
+        <text class="s1-b-label s1-b-label--dark" x="1480" y="280">CBS</text>
+        <text class="s1-b-label s1-b-label--dark" x="1480" y="392">IBS</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="s1-reform-caps">
+    <div class="s1-cap" style="grid-column: 1 / 2" data-step="1" data-anim="fade-up" data-delay="500"><b>2026</b><span>teste</span></div>
+    <div class="s1-cap" style="grid-column: 2 / 4" data-step="2" data-anim="fade-up" data-delay="500"><b>2027</b><span>CBS</span></div>
+    <div class="s1-cap" style="grid-column: 4 / 8" data-step="3" data-anim="fade-up" data-delay="700"><b>2029–2032</b><span>ISS e ICMS diminuem, IBS cresce</span></div>
+    <div class="s1-cap is-accent" style="grid-column: 8 / 9" data-step="4" data-anim="fade-up" data-delay="500"><b>2033</b><span>só IBS e CBS</span></div>
+  </div>
+
+  <p class="source">Fontes: EC 132/2023 e LC 214/2025; pesquisa/04-juridico-tributario-dados.md, §3.4. Espessuras proporcionais ao peso relativo de cada tributo na transição, sem escala de alíquota.</p>
+
+  <aside class="notes">
+    <p>E agora a reforma. A Emenda 132 e a LC 214 criam uma transição em que os dois sistemas convivem. Em cima, em cinza, o que existe hoje; embaixo, o que entra.</p>
+    <p><strong>Avance (2026):</strong> CBS e IBS só aparecem destacados na nota, em teste (0,9% e 0,1%).</p>
+    <p><strong>Avance (2027):</strong> a CBS entra com alíquota cheia e o PIS/Cofins acaba, num corte seco. A alíquota de referência proposta pelo TCU é de 11,3%, ainda pendente de resolução do Senado. Começa também o Imposto Seletivo.</p>
+    <p><strong>Avance (2029–2032):</strong> ISS e ICMS vão diminuindo, para 90%, 80%, 70% e 60%, e o IBS cresce na mesma medida.</p>
+    <p><strong>Avance (2033):</strong> só IBS e CBS.</p>
+    <p>Uma pergunta sobre 2027 tem duas respostas certas, cada uma para um tributo. Quem responde só com a "lei atual" vai errar metade.</p>
+    <p class="dim">Fonte: pesquisa/04-juridico-tributario-dados.md, seção 3.4; Plano do Assistente, Camada 1, "Reforma tributária".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 5 · O preço de um erro ============ -->
+<section class="slide" data-layout="grafico" data-title="O preço de um erro">
+  <div class="head">
+    <p class="kicker" data-anim="fade">O problema</p>
+    <h2 class="title" data-anim="words">O preço de um erro.</h2>
+  </div>
+
+  <div class="s1-cost fill">
+
+    <div class="s1-stack">
+      <div class="s1-stack-row">
+        <i class="s1-block s1-block--tax" style="--h: 255px" data-anim="s1-grow" data-delay="300"></i>
+        <span class="s1-block-label" data-anim="fade-left" data-delay="600">Tributo</span>
+      </div>
+      <div class="s1-stack-row">
+        <i class="s1-block s1-block--fine" style="--h: 191px" data-anim="s1-grow" data-delay="1100"></i>
+        <span class="s1-block-label" data-anim="fade-left" data-delay="1400">+ 75% de multa</span>
+      </div>
+      <div class="s1-stack-row">
+        <i class="s1-block s1-block--selic" style="--h: 34px" data-anim="s1-grow" data-delay="1900"></i>
+        <span class="s1-block-label" data-anim="fade-left" data-delay="2100">+ Selic</span>
+      </div>
+      <div class="s1-stack-row" data-step="1">
+        <i class="s1-block s1-block--client" style="--h: 128px" data-anim="s1-grow"></i>
+        <span class="s1-block-label s1-block-label--dim" data-anim="fade-left" data-delay="300">+ o cliente</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Fontes: Lei nº 9.430/1996, art. 44, I (multa de 75%) e art. 61, § 3º (Selic); pesquisa/04, §3.6 e §11. Proporções ilustrativas.</p>
+
+  <aside class="notes">
+    <p><strong>A coluna se monta sozinha: tributo, multa, Selic.</strong></p>
+    <p>Vocês conhecem essa conta melhor do que eu. Quando um tributo deixa de ser recolhido e a fiscalização encontra, vem o tributo, a multa de ofício de 75% e os juros pela Selic.</p>
+    <p><strong>Avance:</strong> aparece, tracejado, "+ o cliente".</p>
+    <p>E há um custo que não aparece no auto: o cliente que perde a confiança no escritório.</p>
+    <p>Nas nossas pesquisas, esse é o risco número dois do próprio projeto: o contador usa uma resposta, erra a apuração, e o cliente dele é autuado.</p>
+    <p>Por isso todo o desenho que vou mostrar gira em torno de uma ideia: uma resposta errada dita com confiança é pior do que nenhuma resposta.</p>
+    <p class="dim">Fonte: pesquisa/04-juridico-tributario-dados.md, seções 3.6 e 11; Plano do Assistente, "Riscos e salvaguardas".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 6 · Por que a IA genérica erra ============ -->
+<section class="slide" data-layout="numero-heroi" data-title="Por que a IA genérica erra">
+  <p class="kicker" data-anim="fade">O problema</p>
+  <div class="s1-generic fill">
+    <div class="s1-generic-left">
+      <div class="hero-number s1-clipfix" data-anim="blur-in" data-count-to="78" data-suffix="%" data-duration="1600" data-delay="200">78%</div>
+      <p class="hero-label" data-anim="fade-up" data-delay="700">já usam IA toda semana</p>
+      <p class="s1-verdict" data-step="2" data-anim="fade-up" data-delay="900">Lei revogada.<br>Artigo inventado.</p>
+    </div>
+
+    <div class="s1-chat" data-step="1" data-anim="fade-up">
+      <div class="s1-chat-head"><i></i>Chat genérico</div>
+      <p class="s1-chat-body" data-anim="words" data-stagger="55" data-delay="300">
+        Sim. Empresa de software no Simples fica no Anexo III, como prevê o <span class="s1-flag">Decreto nº 3.000/1999<i class="s1-flag-line" data-step="2" data-anim="s1-underline"></i></span><i class="s1-flag-num" data-step="2" data-anim="pop" data-delay="200">1</i> e o <span class="s1-flag">art. 18, § 5º-Z, da LC 123/2006<i class="s1-flag-line" data-step="2" data-anim="s1-underline" data-delay="450"></i></span><i class="s1-flag-num" data-step="2" data-anim="pop" data-delay="650">2</i>. Basta emitir a nota com o código de serviço correspondente.
+      </p>
+      <div class="s1-chat-tags">
+        <span class="s1-tag" data-step="2" data-anim="pop" data-delay="300"><b>1</b>revogado em 2018</span>
+        <span class="s1-tag" data-step="2" data-anim="pop" data-delay="750"><b>2</b>este parágrafo não existe</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Fontes: pesquisa IOB, Fenacon e CFC (abr–mai/2026, n = 393), pesquisa/05, §1.4. Resposta ilustrativa; o Decreto nº 3.000/1999 foi revogado em 2018.</p>
+
+  <aside class="notes">
+    <p><strong>O 78% sobe sozinho.</strong></p>
+    <p>Uma pesquisa da IOB com a Fenacon e o CFC, deste ano, mostra que 78% dos contadores usam IA pelo menos uma vez por semana e 53% todo dia. Mas 62% dizem que o próprio conhecimento de IA é básico.</p>
+    <p><strong>Avance:</strong> o balão do chat genérico escreve uma resposta fluente.</p>
+    <p>O ChatGPT genérico aprendeu lendo a internet até uma certa data. Ele não sabe qual redação valia em 2022, mistura a lei antiga com a nova e, quando não sabe, escreve um artigo que parece verdadeiro.</p>
+    <p><strong>Avance:</strong> os dois trechos ficam sublinhados em vermelho, com as etiquetas, e aparece "Lei revogada. Artigo inventado."</p>
+    <p>Ele não foi feito para dizer "não sei". Até o chatbot da própria Receita sobre a reforma avisa que pode ter imprecisões. O balão na tela é ilustrativo, mas são esses dois erros que queremos eliminar.</p>
+    <p class="dim">Fonte: pesquisa/05-mercado-preco.md, seção 1.4; Plano do Assistente, "Riscos e salvaguardas" e "Quem já está no mercado" (BotRTC). O RIR/1999 (Decreto 3.000) foi revogado pelo Decreto 9.580/2018 (RIR/2018).</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 7 · 18 produtos, uma receita ============ -->
+<section class="slide" data-layout="diagrama" data-title="18 produtos, uma receita">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Mercado e concorrentes</p>
+    <h2 class="title title--md" data-anim="words"><span class="s1-num">18</span> produtos, uma receita.</h2>
+  </div>
+
+  <div class="s1-market fill">
+    <div class="s1-col">
+      <p class="s1-col-name" data-anim="fade" data-delay="300">Editoras</p>
+      <div class="s1-col-cards" data-anim="stagger" data-child-anim="s1-drop" data-stagger="70" data-delay="400">
+        <span class="s1-chip">IOB</span><span class="s1-chip">Econet</span><span class="s1-chip">Thomson Reuters</span><span class="s1-chip">Portal da Reforma</span>
+      </div>
+    </div>
+    <div class="s1-col">
+      <p class="s1-col-name" data-anim="fade" data-delay="400">IA no ERP</p>
+      <div class="s1-col-cards" data-anim="stagger" data-child-anim="s1-drop" data-stagger="70" data-delay="560">
+        <span class="s1-chip">Domínio</span><span class="s1-chip">Questor</span><span class="s1-chip">Makro</span><span class="s1-chip">Alterdata</span>
+      </div>
+    </div>
+    <div class="s1-col">
+      <p class="s1-col-name" data-anim="fade" data-delay="500">Startups</p>
+      <div class="s1-col-cards" data-anim="stagger" data-child-anim="s1-drop" data-stagger="70" data-delay="720">
+        <span class="s1-chip">TAIS</span><span class="s1-chip">Clara AI</span><span class="s1-chip">Busca.Legal</span><span class="s1-chip">V360</span><span class="s1-chip">e-Auditoria</span><span class="s1-chip">Fiscoplan</span><span class="s1-chip">ROIT</span>
+      </div>
+    </div>
+    <div class="s1-col">
+      <p class="s1-col-name" data-anim="fade" data-delay="600">Governo</p>
+      <div class="s1-col-cards" data-anim="stagger" data-child-anim="s1-drop" data-stagger="70" data-delay="880">
+        <span class="s1-chip">BotRTC</span>
+      </div>
+    </div>
+    <div class="s1-col">
+      <p class="s1-col-name" data-anim="fade" data-delay="700">Jurídico</p>
+      <div class="s1-col-cards" data-anim="stagger" data-child-anim="s1-drop" data-stagger="70" data-delay="1000">
+        <span class="s1-chip">Jus IA</span><span class="s1-chip">GPTuri</span>
+      </div>
+    </div>
+
+    <div class="s1-recipe" data-step="1" data-anim="wipe">
+      <div class="s1-recipe-part"><b>Modelo de outra empresa</b><span>OpenAI, Google, IBM</span></div>
+      <span class="s1-recipe-plus">+</span>
+      <div class="s1-recipe-part"><b>Acervo próprio</b><span>e curadoria humana</span></div>
+    </div>
+  </div>
+
+  <p class="source">Fonte: docs/Plano_Assistente_de_IA_para_Contadores.md, "Quem já está no mercado" e "O que o mercado tem em comum".</p>
+
+  <aside class="notes">
+    <p><strong>Os 18 cartões caem e se organizam em cinco grupos.</strong></p>
+    <p>Olhamos o mercado inteiro: editoras como IOB, Econet e Thomson Reuters; a IA que já vem dentro do ERP, como Domínio, Questor, Makro e Alterdata; startups tributárias; o chatbot da Receita; e duas IAs do mundo jurídico.</p>
+    <p><strong>Avance:</strong> a faixa atravessa as cinco colunas: "Modelo de outra empresa + acervo próprio".</p>
+    <p>Quase todos fazem a mesma coisa: pegam um modelo de linguagem de outra empresa, OpenAI, Google ou IBM, e colocam em cima do acervo próprio. O diferencial que eles anunciam é o acervo e a curadoria humana.</p>
+    <p>E quase ninguém mede precisão em público. A exceção é a Questor, que divulgou 66% de respostas avaliadas como úteis. Uma startup diz 95%, mas sem dizer como mediu.</p>
+    <p class="dim">Fonte: Plano do Assistente, "Quem já está no mercado" e "O que o mercado tem em comum".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 8 · Quanto se paga hoje ============ -->
+<section class="slide" data-layout="grafico" data-title="Quanto se paga hoje">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Mercado e concorrentes</p>
+    <h2 class="title title--md" data-anim="words">Quanto se paga hoje.</h2>
+  </div>
+
+  <div class="s1-ruler">
+    <div class="s1-band" data-step="1" data-anim="wipe"></div>
+    <i class="s1-ruler-line" data-anim="s1-line" data-delay="200"></i>
+    <span class="s1-tick" style="--x: 20" data-anim="fade" data-delay="500">50</span>
+    <span class="s1-tick" style="--x: 40" data-anim="fade" data-delay="500">100</span>
+    <span class="s1-tick" style="--x: 60" data-anim="fade" data-delay="500">150</span>
+    <span class="s1-tick" style="--x: 80" data-anim="fade" data-delay="500">200</span>
+
+    <div class="s1-pts" data-anim="stagger" data-child-anim="s1-pt" data-stagger="230" data-delay="700">
+      <div class="s1-pt s1-up1 s1-al" style="--x: 0"><i></i><span><b>BotRTC e Makro GI</b>R$ 0</span></div>
+      <div class="s1-pt s1-dn1" style="--x: 31.56"><i></i><span><b>Jus IA Essencial</b>R$ 78,90</span></div>
+      <div class="s1-pt s1-up1 s1-ar" style="--x: 39.96"><i></i><span><b>ChatGPT Plus</b>R$ 99,90</span></div>
+      <div class="s1-pt s1-dn2" style="--x: 43.56"><i></i><span><b>Jus IA Profissional</b>R$ 108,90</span></div>
+      <div class="s1-pt s1-up2" style="--x: 46.6"><i></i><span><b>Portal da Reforma, anual</b>R$ 116,50</span></div>
+      <div class="s1-pt s1-dn1 s1-al" style="--x: 54"><i></i><span><b>ChatGPT Business</b>R$ 134,99</span></div>
+      <div class="s1-pt s1-up1" style="--x: 79.6"><i></i><span><b>Portal da Reforma, mensal</b>R$ 199</span></div>
+      <div class="s1-pt s1-dn1" style="--x: 83.56"><i></i><span><b>Jus IA Premium</b>R$ 208,90</span></div>
+      <div class="s1-pt s1-up2 s1-ar" style="--x: 99.96"><i></i><span><b>Locus.IA</b>R$ 249,90</span></div>
+    </div>
+  </div>
+
+  <div class="s1-range" data-step="1" data-anim="fade-up" data-delay="600">
+    <span class="s1-range-num grad-text">R$ 79 a R$ 250</span>
+    <span class="s1-range-unit">por profissional, por mês</span>
+  </div>
+
+  <p class="source">Fontes: pesquisa/05-mercado-preco.md, §2.1 e §2.2 (Locus.IA, Canaltech e sites oficiais, set–out/2026). Preços mensais por usuário.</p>
+
+  <aside class="notes">
+    <p><strong>A régua se desenha e os preços entram um a um, do mais barato ao mais caro.</strong></p>
+    <p>Aqui está o que as pessoas pagam hoje. Na ponta de baixo, a Receita e o Makro oferecem IA de graça. No jurídico, o Jus IA começa em R$ 78,90 por mês, com 30 mensagens, e vai a R$ 208,90 no ilimitado. O ChatGPT Plus custa R$ 99,90.</p>
+    <p>A IA do Portal da Reforma Tributária custa R$ 199 no mensal ou R$ 116,50 no anual, e só fala da reforma. Um pacote da IOB para cinco usuários custou R$ 4.948 por ano num contrato público de 2023.</p>
+    <p><strong>Avance:</strong> a faixa de R$ 79 a R$ 250 fica sombreada.</p>
+    <p>A leitura é simples: existe disposição para pagar entre R$ 79 e R$ 250 por profissional. O que falta não é preço. É poder confiar na resposta sem refazer a pesquisa.</p>
+    <p class="dim">Fonte: pesquisa/05-mercado-preco.md, seções 2.1 e 2.2 (Jus IA atualizado para R$ 78,90). O teto de R$ 250 é o Locus.IA de 100 análises (R$ 249,90), na mesma seção 2.2.</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 9 · O espaço vazio ============ -->
+<section class="slide" data-layout="tabela" data-title="O espaço vazio">
+  <div class="head">
+    <p class="kicker" data-anim="fade">Mercado e concorrentes</p>
+    <h2 class="title title--md" data-anim="words">O espaço vazio.</h2>
+  </div>
+
+  <table class="table table--lg s1-gap">
+    <thead>
+      <tr><th></th><th>Editoras</th><th>IA no ERP</th><th>Startups</th><th class="s1-us" data-step="1" data-anim="fade">Nós</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Resposta pela data do fato</td>
+        <td class="s1-nd" data-anim="fade" data-delay="300">não divulgado</td>
+        <td class="s1-nd" data-anim="fade" data-delay="390">não divulgado</td>
+        <td class="s1-nd" data-anim="fade" data-delay="480">não divulgado</td>
+        <td class="s1-us" data-step="1" data-anim="pop" data-delay="100"><span class="s1-yes">sim</span></td>
+      </tr>
+      <tr>
+        <td>Citação conferida</td>
+        <td class="s1-nd" data-anim="fade" data-delay="570">não divulgado</td>
+        <td class="s1-nd" data-anim="fade" data-delay="660">não divulgado</td>
+        <td class="s1-nd" data-anim="fade" data-delay="750">não divulgado</td>
+        <td class="s1-us" data-step="1" data-anim="pop" data-delay="250"><span class="s1-yes">sim</span></td>
+      </tr>
+      <tr>
+        <td>Precisão medida e publicada</td>
+        <td class="s1-nd" data-anim="fade" data-delay="840">não</td>
+        <td class="s1-nd s1-nd--part" data-anim="fade" data-delay="930">Questor: 66% úteis</td>
+        <td class="s1-nd s1-nd--part" data-anim="fade" data-delay="1020">95%, sem método</td>
+        <td class="s1-us" data-step="1" data-anim="pop" data-delay="400"><span class="s1-yes">sim</span></td>
+      </tr>
+      <tr>
+        <td>Melhora medida a cada ciclo</td>
+        <td class="s1-nd" data-anim="fade" data-delay="1110">não divulgado</td>
+        <td class="s1-nd" data-anim="fade" data-delay="1200">não divulgado</td>
+        <td class="s1-nd" data-anim="fade" data-delay="1290">não divulgado</td>
+        <td class="s1-us" data-step="1" data-anim="pop" data-delay="550"><span class="s1-yes">sim</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="source">Fonte: docs/Plano_Assistente_de_IA_para_Contadores.md, "Comparativo de capacidades", com base no que cada grupo divulga. "Não divulgado" não significa que não exista.</p>
+
+  <aside class="notes">
+    <p><strong>As três colunas do mercado se preenchem sozinhas, célula por célula.</strong></p>
+    <p>Quando comparamos o que cada grupo divulga, aparece um espaço vazio. Nenhum produto contábil consultado descreve responder pela redação válida numa data passada; todos falam em "legislação vigente".</p>
+    <p>Nenhum descreve uma etapa que confere a citação antes de entregar; isso existe no jurídico, no Jus IA, mas não no contábil.</p>
+    <p>Quase ninguém publica precisão: a Questor divulgou 66% de respostas úteis; uma startup diz 95%, sem metodologia. E nenhum descreve melhoria automática medida.</p>
+    <p><strong>Avance:</strong> a coluna "Nós" acende, com um "sim" por linha.</p>
+    <p>Uma ressalva honesta: "não divulgado" não quer dizer que não exista. Mas, se existe, ninguém está mostrando, e mostrar é parte do nosso produto.</p>
+    <p class="dim">Fonte: Plano do Assistente, "Comparativo de capacidades".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 10 · Em uma frase ============ -->
+<section class="slide slide--statement" data-layout="declaracao" data-transition="zoom" data-title="Em uma frase">
+  <p class="kicker" data-anim="fade">A solução</p>
+  <h2 class="title s1-sentence" data-anim="words">
+    Um consultor de IA que responde<br>
+    pela lei vigente na <span class="grad-text">data do fato</span>,<br>
+    <span class="grad-text">prova</span> cada afirmação<br>
+    e <span class="grad-text">melhora</span> a cada ciclo.
+  </h2>
+  <p class="s1-areas" data-anim="fade" data-delay="2400">tributário · contábil · trabalhista · societário</p>
+
+  <aside class="notes">
+    <p><strong>A frase se escreve palavra por palavra.</strong> Leia junto, sem pressa.</p>
+    <p>Se eu tivesse uma frase só, seria esta. Um consultor de IA para o contador brasileiro: tributário, contábil, trabalhista e societário, em qualquer regime e qualquer data.</p>
+    <p>Ele responde pela lei vigente na data do fato, cita o dispositivo e confere a citação antes de entregar. E ele melhora a cada ciclo de forma medida.</p>
+    <p>Há um detalhe que parece técnico, mas é o centro de tudo: a lei não fica "decorada" dentro do modelo de IA. Ela fica numa base de dados organizada no tempo e auditável. O modelo só raciocina sobre ela.</p>
+    <p>É como um consultor brilhante que nunca responde de memória: sempre abre o código na página certa.</p>
+    <p class="dim">Fonte: Plano do Assistente, "Visão do produto" e "Princípio central".</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 11 · Uma pergunta real ============ -->
+<section class="slide" data-layout="diagrama" data-title="Uma pergunta real">
+  <div class="head">
+    <p class="kicker" data-anim="fade">A solução</p>
+    <h2 class="title title--md" data-anim="words">Uma pergunta real.</h2>
+  </div>
+
+  <div class="s1-question">
+    <div class="ask ask--box s1-ask" data-anim="scale-in" data-delay="300">
+      <span data-anim="type" data-delay="700" data-speed="34">Meu cliente desenvolve software, está no Simples. Em março de 2022 faturava R$ 12 mil por mês e tinha folha de R$ 3 mil. Ele estava no anexo certo?</span>
+    </div>
+
+    <div class="s1-parsed">
+      <span class="pill pill--lg" data-step="1" data-anim="s1-jump"><span class="dot"></span>Simples Nacional</span>
+      <span class="pill pill--lg" data-step="1" data-anim="s1-jump" data-delay="140"><span class="dot"></span>data: 03/2022</span>
+      <span class="pill pill--lg" data-step="1" data-anim="s1-jump" data-delay="280"><span class="dot"></span>atividade: software</span>
+      <span class="pill pill--lg" data-step="1" data-anim="s1-jump" data-delay="420"><span class="dot"></span>folha ÷ receita</span>
+    </div>
+  </div>
+
+  <p class="source">Exemplo ilustrativo, a validar pelo contador sênior antes do evento. Ver Plano do Assistente, Camada 2, "Fluxo de uma pergunta", passo 1.</p>
+
+  <aside class="notes">
+    <p><strong>A caixa abre e a pergunta é digitada sozinha.</strong> Espere terminar.</p>
+    <p>Vamos a um exemplo do dia a dia. Uma empresa de software no Simples, março de 2022, faturamento de R$ 12 mil por mês, folha de R$ 3 mil. Ela estava no anexo certo?</p>
+    <p>Repare em três coisas. Primeiro, a pergunta tem uma data no passado. Segundo, ela envolve uma conta, o fator R. Terceiro, a pessoa não falou "fator R" nem "anexo V"; falou do jeito que se fala no escritório.</p>
+    <p><strong>Avance:</strong> as quatro etiquetas saltam da frase e se alinham embaixo.</p>
+    <p>As etiquetas são o primeiro passo do sistema: ele entende o tema, o regime, a data do fato e a atividade antes de pesquisar qualquer coisa. Se faltasse um dado que muda a resposta, ele perguntaria de volta.</p>
+    <p class="dim">Fonte: Plano do Assistente, Camada 2, "Fluxo de uma pergunta", passo 1; pesquisa/04-juridico-tributario-dados.md, seção 3.1 (fator R). Exemplo ilustrativo, a validar pelo contador sênior antes do evento.</p>
+  </aside>
+</section>
+
+<!-- ============ Slide 12 · A resposta, montada ============ -->
+<section class="slide" data-layout="diagrama" data-title="A resposta, montada">
+  <div class="head">
+    <p class="kicker" data-anim="fade">A solução</p>
+    <h2 class="title title--md" data-anim="words">A resposta, montada.</h2>
+  </div>
+
+  <div class="s1-answer" data-anim="scale-in" data-delay="200">
+    <div class="s1-verdict-big" data-anim="blur-in" data-delay="500">
+      <span>Anexo V</span><i></i><span class="grad-text">15,5%</span>
+    </div>
+
+    <div class="s1-factor" data-step="1" data-anim="fade-up">
+      <svg class="s1-calc" viewBox="0 0 48 56" width="48" height="56" aria-hidden="true">
+        <rect x="2" y="2" width="44" height="52" rx="9" />
+        <rect x="9" y="9" width="30" height="11" rx="3" class="s1-calc-screen" />
+        <circle cx="14" cy="30" r="3" /><circle cx="24" cy="30" r="3" /><circle cx="34" cy="30" r="3" />
+        <circle cx="14" cy="42" r="3" /><circle cx="24" cy="42" r="3" /><circle cx="34" cy="42" r="3" />
+      </svg>
+      <div class="s1-factor-main">
+        <p class="s1-factor-title">Fator R: <span data-count-to="25" data-suffix="%" data-duration="1300" data-delay="300">25%</span> <span class="s1-factor-min">(mínimo 28%)</span></p>
+        <p class="s1-factor-calc">folha de R$ 36 mil ÷ receita de R$ 144 mil, em 12 meses</p>
+      </div>
+      <div class="s1-gauge" aria-hidden="true">
+        <i class="s1-gauge-fill" data-anim="s1-fill" data-delay="300"></i>
+        <i class="s1-gauge-mark"><span>28%</span></i>
+      </div>
+    </div>
+
+    <div class="s1-cites">
+      <div class="s1-cite-row" data-step="2" data-anim="fade-up">
+        <span class="cite"><strong>LC 123/2006, art. 18, §§ 5º-D e 5º-M</strong><span>vigente em 03/2022</span></span>
+        <svg class="s1-seal" viewBox="0 0 44 44" width="44" height="44" data-anim="draw" data-delay="350" aria-hidden="true">
+          <circle cx="22" cy="22" r="19" /><path d="M13 22.5 L19.5 29 L31 16" />
+        </svg>
+      </div>
+      <div class="s1-cite-row" data-step="3" data-anim="fade-up">
+        <span class="cite"><strong>Res. CGSN 140/2018, art. 25, § 1º, V</strong><span>vigente em 03/2022</span></span>
+        <svg class="s1-seal" viewBox="0 0 44 44" width="44" height="44" data-anim="draw" data-delay="350" aria-hidden="true">
+          <circle cx="22" cy="22" r="19" /><path d="M13 22.5 L19.5 29 L31 16" />
+        </svg>
+      </div>
+    </div>
+
+    <p class="s1-tip" data-step="4" data-anim="fade-up">Se a folha fosse R$ 3.360, Anexo III: 6%.</p>
+  </div>
+
+  <p class="source">Fontes: LC 123/2006, art. 18, §§ 5º-D, IV, e 5º-M, II; Res. CGSN 140/2018, art. 25, § 1º, V; SC Cosit 222/2019; pesquisa/04, §3.1 (Anexos III e V). Exemplo ilustrativo.</p>
+
+  <aside class="notes">
+    <p><strong>O cartão abre com a conclusão em letras grandes.</strong></p>
+    <p>A resposta começa pelo que interessa: Anexo V, alíquota de 15,5% na primeira faixa.</p>
+    <p><strong>Avance (fator R):</strong> a calculadora gira e a barra para em 25%, antes da marca de 28%.</p>
+    <p>Depois, o porquê: a folha dividida pela receita deu 25%, abaixo dos 28% que levariam ao Anexo III. Essa conta não foi feita pela IA; foi feita por um programa comum, com a tabela versionada. A IA só explica.</p>
+    <p><strong>Avance (duas vezes):</strong> cada citação entra com o selo de verificação.</p>
+    <p>Em seguida vêm as citações: a LC 123 e a Resolução CGSN 140, cada uma com a marca de que estava vigente em março de 2022 e que o texto citado diz o que se afirma.</p>
+    <p><strong>Avance:</strong> a dica de planejamento, em cinza.</p>
+    <p>E por fim a dica de planejamento: com R$ 3.360 de folha, o cliente iria para o Anexo III, 6%. É isso que vamos construir.</p>
+    <p class="dim">Conferência dos fatos (4/11/2026): software é atividade do art. 18, § 5º-D (IV: elaboração de programas; V: licenciamento) e vai ao Anexo V quando o fator R é menor que 28% pelo § 5º-M, II. O § 5º-J, citado no roteiro, vale para as atividades do § 5º-I, e não para software: por isso a citação foi corrigida para §§ 5º-D e 5º-M. Na Res. CGSN 140/2018, o dispositivo é o art. 25, § 1º, V (SC Cosit 222/2019). Anexo V, 1ª faixa (RBT12 até R$ 180 mil): 15,5%; Anexo III: 6%, ambos na redação da LC 155/2016, em vigor desde 1/1/2018. Conta: R$ 3 mil × 12 = R$ 36 mil; R$ 12 mil × 12 = R$ 144 mil (1ª faixa); 36 ÷ 144 = 25%; 28% de R$ 12 mil = R$ 3.360. A "folha" do fator R inclui pró-labore e encargos (CPP e FGTS), art. 18, § 24. Fontes: pesquisa/04, §3.1; Jornal Contábil, "As atividades sujeitas ao fator r" (texto do § 5º-M); Tributo Devido, SC Cosit 222/2019. Números a conferir pelo contador sênior.</p>
+  </aside>
+</section>

@@ -1,0 +1,949 @@
+{
+ "versao": "parametros de teste 0.9",
+ "data": "2026-11-09",
+ "aviso": "Parametros de teste, nao sao precos de venda.",
+ "faixas_clientes": [
+  {
+   "ate": 30,
+   "fator": 1
+  },
+  {
+   "ate": 60,
+   "fator": 0.92
+  },
+  {
+   "ate": 120,
+   "fator": 0.85
+  },
+  {
+   "ate": 250,
+   "fator": 0.75
+  },
+  {
+   "ate": 500,
+   "fator": 0.65
+  },
+  {
+   "ate": 1000,
+   "fator": 0.55
+  },
+  {
+   "ate": null,
+   "fator": 0.5
+  }
+ ],
+ "piso_mensal": 700,
+ "modulos": {
+  "painel": {
+   "nome": "Painel (inclui a Base)",
+   "obrigatorio": true,
+   "exige": [],
+   "preco": {
+    "base": 200,
+    "cliente": 0.7,
+    "usuario": 5
+   },
+   "custo": {
+    "fixo": [
+     18,
+     33,
+     80
+    ],
+    "cliente": [
+     0.2,
+     0.6,
+     1.5
+    ],
+    "usuario": [
+     6,
+     12.5,
+     25
+    ]
+   },
+   "nota": "Obrigatório. Contas, papéis, cadastro, tarefas, cofre. O custo por usuário é o suporte humano recorrente por assento (R$ 6 / 12,50 / 25; v0.5: o sistema é auto explicativo e a ajuda do sistema atende parte das dúvidas). O chat de suporte com pessoas e a ajuda do sistema (modelo pequeno) são linhas de custo à parte (suporte_chat e ajuda)."
+  },
+  "crm": {
+   "nome": "CRM",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 200,
+    "cliente": 0.9,
+    "usuario": 2
+   },
+   "custo": {
+    "fixo": [
+     0,
+     0,
+     0
+    ],
+    "cliente": [
+     0.2,
+     0.43,
+     1.18
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Caixa de conversas, WhatsApp, e-mail, réguas. Mensagens de WhatsApp são repassadas ao escritório."
+  },
+  "timesheet": {
+   "nome": "Timesheet",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0,
+    "usuario": 7
+   },
+   "custo": {
+    "fixo": [
+     0,
+     0,
+     0
+    ],
+    "cliente": [
+     0,
+     0,
+     0
+    ],
+    "usuario": [
+     1,
+     2,
+     5
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). Rentabilidade por cliente exige também o Financeiro."
+  },
+  "app": {
+   "nome": "App do cliente",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 80,
+    "cliente": 0.6,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     3,
+     5,
+     10
+    ],
+    "cliente": [
+     0.1,
+     0.2,
+     0.5
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). Chat no app exige CRM. Incluído por padrão nos pacotes e atalhos (decisão de 9/11/2026, v0.9); por isso o preço por cliente subiu de R$ 0,30 para R$ 0,60, para cobrir o custo provável (R$ 0,20) com folga de 50% ou mais em todas as faixas. Sem marca branca, usa a marca e o tema padrão da plataforma; marca branca e app na loja são complementos pagos."
+  },
+  "gov": {
+   "nome": "Conectores: governo federal",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 90,
+    "cliente": 1.4,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     10,
+     25,
+     60
+    ],
+    "cliente": [
+     1.07,
+     2.25,
+     3.8
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). API paga do painel do cliente: Integra Contador e CNPJ. Embutido no preço até o teto de uso (conectores_teto); acima do teto, consumo cobrado ao custo mais 20%."
+  },
+  "est": {
+   "nome": "Conectores: estaduais e municipais",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0.7,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     5,
+     15,
+     40
+    ],
+    "cliente": [
+     0.7,
+     1.37,
+     2.5
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). API paga do painel do cliente: DTE e certidões estaduais por agregador (InfoSimples). Embutido no preço até o teto de uso (conectores_teto); acima do teto, consumo cobrado ao custo mais 20%."
+  },
+  "cores": {
+   "nome": "Conectores: cores",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 40,
+    "cliente": 0,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     5,
+     10,
+     30
+    ],
+    "cliente": [
+     0,
+     0,
+     0
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). O contrato com o core é do escritório."
+  },
+  "fin": {
+   "nome": "Financeiro",
+   "exige": [
+    "painel"
+   ],
+   "preco": {
+    "base": 80,
+    "cliente": 1.3,
+    "usuario": 0
+   },
+   "custo": {
+    "fixo": [
+     3,
+     8,
+     20
+    ],
+    "cliente": [
+     0.052,
+     0.1,
+     0.3
+    ],
+    "usuario": [
+     0,
+     0,
+     0
+    ]
+   },
+   "nota": "Exige: pacote de área (DA-02). A régua por WhatsApp exige CRM; sem ele, só e-mail."
+  }
+ },
+ "nucleo_sem_contabil": {
+  "nome": "Plataforma (núcleo), sem o pacote Contábil",
+  "nota": "Usado só no produto BPO financeiro puro (C1, subplano 10): o núcleo (contas, papéis, cadastro, tarefas, cofre) sem o pacote Contábil. Núcleo + pacote Contábil = Painel; sem o pacote Contábil ficam sem Fiscal, Notas, DP, Contábil e Consultoria e sem os conectores de governo, estados e cores.",
+  "preco": {
+   "base": 100,
+   "cliente": 0.3,
+   "usuario": 5
+  },
+  "custo": {
+   "fixo": [
+    12,
+    22,
+    55
+   ],
+   "cliente": [
+    0.1,
+    0.3,
+    0.75
+   ],
+   "usuario": [
+    6,
+    12.5,
+    25
+   ]
+  }
+ },
+ "armazenamento": {
+  "gb_padrao_por_cliente": 5,
+  "preco_gb": 0.45,
+  "custo_gb": [
+   0.08,
+   0.2,
+   0.35
+  ]
+ },
+ "ia": {
+  "nota": "IA vendida a parte, em planos por usuario. 1 UU (unidade de uso) = 10 mil tokens. Custo por UU = preco medio por MTok / 100 (uso.preco_mtok). O limite e um teto; o custo vem da utilizacao do teto.",
+  "tokens_por_uu": 10000,
+  "semanas_mes": 4.3,
+  "dias_uteis": 21,
+  "perfis": [
+   "baixo",
+   "provável",
+   "alto",
+   "pior caso"
+  ],
+  "utilizacao_plano": [
+   0.15,
+   0.35,
+   0.7,
+   1
+  ],
+  "utilizacao_bolsa": [
+   0.3,
+   0.6,
+   0.85,
+   1
+  ],
+  "planos": {
+   "essencial": {
+    "nome": "IA Essencial",
+    "preco": 79,
+    "uu_5h": 25,
+    "uu_semana": 100,
+    "infra": [
+     3,
+     7,
+     20
+    ],
+    "inclui": [
+     "Chat Geral e perguntas",
+     "Consultor: perguntar",
+     "Integrantes sob demanda"
+    ]
+   },
+   "operacao": {
+    "nome": "IA Operação",
+    "preco": 189,
+    "uu_5h": 60,
+    "uu_semana": 300,
+    "infra": [
+     5,
+     14,
+     40
+    ],
+    "inclui": [
+     "Tudo da Essencial",
+     "Consultor: parecer",
+     "Integrantes proativos (jobs e eventos)",
+     "Vigilância e revisão de enquadramento"
+    ]
+   },
+   "intensivo": {
+    "nome": "IA Intensivo",
+    "preco": 299,
+    "uu_5h": 100,
+    "uu_semana": 500,
+    "infra": [
+     5,
+     14,
+     40
+    ],
+    "inclui": [
+     "Tudo da Operação",
+     "Segunda opinião",
+     "Limites no nível do subplano 02"
+    ]
+   }
+  },
+  "bolsa": {
+   "nome": "Bolsa compartilhada do escritório",
+   "preco_base": 90,
+   "preco_uu_semana": 0.65,
+   "uu_5h_usuario": 60,
+   "custo_fixo": [
+    15,
+    30,
+    60
+   ],
+   "custo_usuario": [
+    2,
+    4,
+    10
+   ],
+   "nota": "Pool semanal do escritório dividido entre usuários sem plano individual; recursos da IA Operação; limite de 60 UU por usuário a cada 5 h."
+  },
+  "extra": {
+   "pacote_uu": 500,
+   "preco_pacote": 90,
+   "nota": "Uso extra avulso, pré-pago, válido por 30 dias; o Administrador autoriza e fixa o teto mensal."
+  },
+  "reserva_chat": {
+   "uu_dia": 30,
+   "custo_mtok_barato": 0.6,
+   "dias": 30,
+   "nota": "Ao atingir o limite semanal, o chat e as perguntas seguem em modelo barato, até 30 UU por dia."
+  },
+  "teto_defesa": {
+   "mtok_integrante_dia": 2
+  },
+  "suporte_usuario": [
+   4,
+   8,
+   16
+  ],
+  "suporte_nota": "Suporte específico da IA por usuário com plano (premissa a medir); entra só na visão \"IA isolada\", não na margem de contribuição."
+ },
+ "whatsapp": {
+  "custo_utilidade": 0.035,
+  "custo_marketing": 0.3217,
+  "custo_servico": 0.035,
+  "gratis_servico_por_numero": 1000,
+  "msgs_utilidade": [
+   3,
+   6,
+   12
+  ],
+  "msgs_marketing": [
+   0,
+   0.5,
+   2
+  ],
+  "msgs_servico": [
+   10,
+   25,
+   50
+  ],
+  "tarifas_exibidas": {
+   "utilidade": 0.035,
+   "autenticação": 0.035,
+   "serviço (além do gratuito)": 0.035,
+   "marketing": 0.3217
+  }
+ },
+ "uso": {
+  "tok_usuario_dia": [
+   0.25,
+   0.6,
+   1.2
+  ],
+  "tok_cliente": [
+   0.2,
+   0.5,
+   1.2
+  ],
+  "preco_mtok": [
+   6.08,
+   8.82,
+   8.82
+  ],
+  "nota": "tok_* = demanda bruta de IA do estudo 0.2 (MTok), usada só no indicador de cobertura; preco_mtok = R$ por MTok (baixo, provável, alto)."
+ },
+ "complementos": {
+  "marca_branca": {
+   "nome": "Marca branca (sistema e app com a marca, o domínio e o tema do escritório)",
+   "exige": [
+    "painel"
+   ],
+   "preco_fixo": 150,
+   "custo_fixo": [
+    7,
+    15,
+    30
+   ],
+   "nota": "Opcional. Sem ela, sistema e app usam a marca e o tema padrão da plataforma."
+  },
+  "app_loja": {
+   "nome": "App próprio na loja (nome e ícone do escritório)",
+   "exige": [
+    "app",
+    "marca_branca"
+   ],
+   "preco_fixo": 350,
+   "custo_fixo": [
+    150,
+    240,
+    330
+   ],
+   "nota": "Opcional. Exige App e Marca branca. Publicação inicial (R$ 1,5 mil a 3 mil) cobrada à parte, uma vez."
+  },
+  "consultor_empresa": {
+   "nome": "Consultor da empresa (serviço do App, por cliente)",
+   "exige": [
+    "app"
+   ],
+   "preco_cliente": 10,
+   "franquia_perguntas_cliente": 15,
+   "preco_excedente_pergunta": 0.4,
+   "custo_pergunta": 0.12,
+   "perguntas_cliente": [
+    5,
+    10,
+    15
+   ],
+   "nota": "Complemento do App, separado dos planos de IA, vendido pelo próprio escritório: ele ativa o Consultor para cada cliente nas configurações e a cobrança (plataforma ao escritório, por cliente ativo) vale na hora. R$ 10 por cliente ativo; franquia de 15 perguntas por mês; acima disso, R$ 0,40 por pergunta. O preço ao cliente final é do escritório."
+  },
+  "nfse_app": {
+   "nome": "NFS-e pelo app (serviço extra, por cliente ativo)",
+   "exige": [
+    "app"
+   ],
+   "participacao_cliente": 6,
+   "notas_cliente": [
+    10,
+    20,
+    40
+   ],
+   "custo_infra_nota": 0.05,
+   "custo_integrador_nota": 0.49,
+   "nota": "Serviço extra do App. Participação fixa de R$ 6 por cliente ativo; o integrador (Asaas, R$ 0,49 por nota) é repassado ao custo; infraestrutura R$ 0,05 por nota. Ativado pelo escritório para cada cliente."
+  },
+  "certidoes_app": {
+   "nome": "Certidões sob demanda pelo app (serviço extra)",
+   "exige": [
+    "app"
+   ],
+   "participacao_certidao": 1,
+   "certidoes_cliente": [
+    1,
+    2,
+    4
+   ],
+   "custo_certidao": [
+    0.25,
+    0.425,
+    0.6
+   ],
+   "nota": "Serviço extra do App. Participação de R$ 1 por certidão; custo de API R$ 0,25 a 0,60 por certidão."
+  },
+  "open_finance": {
+   "nome": "Open Finance (módulo à parte)",
+   "exige": [
+    "fin"
+   ],
+   "preco_fixo": 450,
+   "preco_cliente": 6,
+   "custo_fixo": [
+    250,
+    250,
+    250
+   ],
+   "custo_cliente": [
+    0.5,
+    1,
+    2
+   ],
+   "nota": "Exige Financeiro. Nunca embutido. Cobrado por clientes conectados; custo fixo é o contrato do agregador (R$ 2.500) rateado por 10 escritórios."
+  },
+  "bpo_fin": {
+   "nome": "Pacote BPO financeiro (trabalha no ERP do cliente; livro próprio opcional)",
+   "exige": [
+    "fin",
+    "app"
+   ],
+   "preco_fixo": 390,
+   "preco_empresa": 65,
+   "custo_fixo": [
+    15,
+    30,
+    60
+   ],
+   "custo_empresa": [
+    4,
+    9,
+    18
+   ],
+   "custo_conector_erp": [
+    1,
+    3,
+    8
+   ],
+   "nota": "Duas partes (decisão de 8/11/2026, P14): mensalidade-base do pacote por escritório (o acesso ao sistema do BPO) e valor por empresa cliente incluída. Era R$ 150 + R$ 12 (estudo 0.5) e R$ 150 + R$ 18 (proposta anterior). Exige Financeiro (espelho e conciliação) e App (aprovação do cliente); Timesheet, CRM e Open Finance são recomendados e desmarcáveis. Custo por empresa: IA de leitura, classificação e relatório (R$ 4 / 9 / 18) mais o conector de ERP financeiro (R$ 1 / 3 / 8, infraestrutura de sincronização; tarifa de terceiros desconhecida, a confirmar). O cliente paga o próprio ERP."
+  },
+  "modo_bpo": {
+   "nome": "Modo BPO entre escritórios (extra)",
+   "exige": [
+    "painel"
+   ],
+   "preco_fixo": 490,
+   "preco_sub": 120,
+   "custo_fixo": [
+    15,
+    30,
+    60
+   ],
+   "custo_sub": [
+    10,
+    25,
+    40
+   ],
+   "nota": "Extra, fora dos pacotes. Multi-inquilino em dois níveis; quem assina é o BPO, e o contratante é cliente dele (portal de convidado, sem preço por usuário; teto de abuso de convidados por contratante, editável, não é cobrança: P5). Informe no campo de clientes o total de todos os subescritórios: a faixa soma os clientes (P10). O Financeiro conta só os contratantes (P9).",
+   "convidados_max_por_contratante": 10
+  }
+ },
+ "pacotes": {
+  "base": {
+   "nome": "Sistema-base (sem IA)",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov",
+    "timesheet",
+    "est"
+   ],
+   "marca_branca": true,
+   "armazenamento": false,
+   "ia": {
+    "plano": null,
+    "fracao": 0
+   }
+  },
+  "essencial": {
+   "nome": "Essencial",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov"
+   ],
+   "marca_branca": false,
+   "armazenamento": false,
+   "ia": {
+    "plano": null,
+    "fracao": 0
+   }
+  },
+  "operacao": {
+   "nome": "Operação",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov",
+    "timesheet",
+    "est"
+   ],
+   "marca_branca": true,
+   "armazenamento": true,
+   "ia": {
+    "plano": "operacao",
+    "fracao": 0.3333
+   }
+  },
+  "completo": {
+   "nome": "Completo",
+   "modulos": [
+    "painel",
+    "crm",
+    "app",
+    "gov",
+    "timesheet",
+    "est",
+    "fin"
+   ],
+   "marca_branca": true,
+   "armazenamento": true,
+   "ia": {
+    "plano": "operacao",
+    "fracao": 1
+   }
+  }
+ },
+ "escritorios_tipo": {
+  "P": {
+   "nome": "Pequeno",
+   "clientes": 30,
+   "usuarios": 5,
+   "numeros_whatsapp": 1
+  },
+  "M": {
+   "nome": "Médio",
+   "clientes": 100,
+   "usuarios": 15,
+   "numeros_whatsapp": 2
+  },
+  "G": {
+   "nome": "Grande",
+   "clientes": 300,
+   "usuarios": 40,
+   "numeros_whatsapp": 4
+  }
+ },
+ "perfis_uso": [
+  "baixo",
+  "provável",
+  "alto",
+  "pior caso"
+ ],
+ "comentarios": {
+  "custo": "Listas de custo = [baixo, provável, alto], em R$ de 7/11/2026 a R$ 7,97 por US$ (estudo, seção 3). O perfil 'pior caso' usa a coluna alto e 100% do teto de IA.",
+  "preco": "Preço do módulo = base + cliente x clientes efetivos (pelas faixas) + usuario x usuários. IA = soma dos planos por usuário + bolsa + uso extra; não depende de clientes.",
+  "faixas": "Faixa marginal: cada cliente é cobrado pelo fator da faixa em que cai (sem saltos).",
+  "whatsapp": "Custo por mensagem é repassado ao escritório ao custo da Meta; a plataforma só exibe a tarifa por categoria.",
+  "ia": "Custo de IA = utilização do teto (15%, 35%, 70%, 100%) x limite semanal x 4,3 semanas x custo por UU, mais infraestrutura por usuário.",
+  "mercado": "Referência de mercado por interpolação entre os pontos de mercado.pontos; vale só quando Painel, CRM, App com marca branca e conectores federais estão marcados.",
+  "suporte": "Suporte humano recorrente por assento: R$ 6 / 12,50 / 25 (baixo / provável / alto); era 6 / 25 / 60 na v0.4.",
+  "tributos": "Tributos, comissão, câmbio, utilização do teto de IA, suporte, fixos, pró-labore e número de escritórios ativos são premissas editáveis no painel Premissas da calculadora; nenhum percentual fica escondido no código."
+ },
+ "mercado": {
+  "nota": "Referência principal: HubStrom com o app de marca branca (o que o usuário comparou). Pontos: Professional R$ 527 + app R$ 300 (30 clientes); Enterprise R$ 957 + app R$ 300 (100 clientes); âncora do usuário de 200 clientes e 10 usuários: cerca de R$ 1.500 de tabela e R$ 1.200 com desconto. Acima de 200 clientes, extrapolação linear do último trecho (premissa; pedir cotação).",
+  "ancora_usuario": {
+   "clientes": 200,
+   "usuarios": 10,
+   "tabela": 1500,
+   "negociado": 1200
+  },
+  "pontos": [
+   [
+    30,
+    827
+   ],
+   [
+    100,
+    1257
+   ],
+   [
+    200,
+    1500
+   ]
+  ],
+  "fator_negociado": 0.8,
+  "ampliada": {
+   "nota": "Peças que, comprando separado, ficariam fora do HubStrom (soma das peças públicas, estudo 5.1): captura de notas (SIEG) e financeiro do escritório (Nibo).",
+   "captura": [
+    [
+     50,
+     223
+    ],
+    [
+     150,
+     470
+    ],
+    [
+     null,
+     800
+    ]
+   ],
+   "financeiro": [
+    [
+     50,
+     166
+    ],
+    [
+     150,
+     383
+    ],
+    [
+     null,
+     383
+    ]
+   ]
+  },
+  "a_mais": [
+   "Timesheet com rentabilidade por cliente (a rentabilidade exige o Financeiro)",
+   "Financeiro do escritório (contratos, cobrança, NFS-e dos honorários), quando existir",
+   "Captura de notas e conectores federais, estaduais e municipais dentro do preço (o mercado vende à parte: SIEG R$ 223 a 800)",
+   "Integrantes de IA, opcionais e à parte, em planos por usuário",
+   "Consultor da empresa por cliente (complemento)",
+   "Arquitetura aberta: MCP e ferramentas tipadas"
+  ]
+ },
+ "fixos_plataforma": {
+  "nota": "Fixos mensais da plataforma (estudo 9.4): infra 1.200 + GPU 2.111 + API fixa (base e DGM) 1.881 + operação multi-escritório 3.000 (premissa) = R$ 8,2 mil sem pró-labore; o pró-labore (R$ 10 mil, MVP) soma-se quando ligado (R$ 18,2 mil). A parte de IA (GPU e API fixa/DGM) é R$ 3.992.",
+  "sem_prolabore": 8200,
+  "ia_parte": 3992,
+  "cenarios_escritorios": [
+   10,
+   30,
+   100
+  ],
+  "clientes_medio": 100,
+  "prolabore": 10000
+ },
+ "tributos": {
+  "nota": "Hipótese de alíquota total sobre a receita (ISS ou equivalentes, PIS e COFINS), a confirmar com o contador do projeto; será discutida depois. Valor de trabalho: cenario.aliquota (12,5%). A pesquisa 08 usa 15,5% (Simples, Anexo V) a 24,9% (Presumido 2027).",
+  "faixa": [
+   0.08,
+   0.17
+  ],
+  "comissao_faixa": [
+   0,
+   0.1
+  ]
+ },
+ "cambio": {
+  "valor": 7.97,
+  "base": 7.97,
+  "nota": "R$ por US$ para tokens de IA e ajuda do sistema (Plano MVP: inclui IOF e tributos de importação de serviço; a confirmar com o contador do projeto). Os preços por MTok em uso.preco_mtok estão a R$ 7,97 (base) e são escalados por valor ÷ base."
+ },
+ "ajuda": {
+  "nome": "Ajuda do sistema (modelo pequeno, com base de conhecimento do produto)",
+  "perguntas_usuario": [
+   4,
+   10,
+   30
+  ],
+  "tokens_pergunta": [
+   5000,
+   8000,
+   15000
+  ],
+  "preco_mtok_usd": 0.075,
+  "infra_usuario": [
+   0.05,
+   0.1,
+   0.2
+  ],
+  "diagnostico": {
+   "pct_perguntas": [
+    0.1,
+    0.2,
+    0.4
+   ],
+   "chamadas": [
+    2,
+    3,
+    5
+   ],
+   "tokens_chamada": [
+    2000,
+    3000,
+    5000
+   ],
+   "nota": "Diagnóstico de leitura (8/11/2026): parte das perguntas de ajuda vira diagnóstico, com 2 a 5 chamadas de leitura (2 a 5 mil tokens de resultado cada), pelo escopo de quem perguntou. Custo por usuário por mês = perguntas × percentual × chamadas × tokens × preço × câmbio: R$ 0,001 / 0,011 / 0,18 (baixo / provável / alto), o que leva a ajuda a R$ 0,06 / 0,16 / 0,65. Seções básicas de FAQ (a primeira camada da Ajuda, antes do assistente) têm custo de conteúdo e manutenção, sem custo por consulta: tratado como desprezível e fora da conta."
+  },
+  "nota": "O assistente de ajuda padrão fica dentro do chat de suporte geral (suporte_chat): responde só sobre o sistema e as configurações dele, com um modelo pequeno (Haiku, US$ 0,075 por MTok na mistura de 3.1) e uma base de conhecimento do produto. Vale para todo usuário, inclusive sem plano de IA; não consome UU; limite de 30 perguntas por usuário por mês (hipótese, P25); ao atingir o limite, encaminha para a equipe. Custo por usuário por mês = perguntas × tokens por pergunta × preço × câmbio + infraestrutura (busca vetorial e registro) + diagnóstico de leitura (ajuda.diagnostico); o uso alto (30 perguntas) é o limite. A ordem de atendimento é FAQ, depois o assistente, depois a equipe; o FAQ não tem custo por consulta. Custo do sistema-base, sem receita própria.",
+  "limite_perguntas_mes": 30
+ },
+ "suporte_chat": {
+  "nome": "Chat de suporte geral com pessoas (ferramenta de chat e cobertura de horário, rateado por assento)",
+  "usuario": [
+   1,
+   2,
+   4
+  ],
+  "nota": "P25 (8/11/2026): o sistema tem um chat de suporte geral com a equipe da plataforma, para todo usuário. A hora de atendimento já está no suporte humano por assento (R$ 6 / 12,50 / 25, modulos.painel.custo.usuario); esta linha soma a ferramenta de chat (licença por agente) e a cobertura de horário comercial, rateadas por assento: cerca de R$ 1,40 com 2 agentes de US$ 40 e 450 assentos, arredondado para R$ 2 no provável. Premissa a medir; custo do sistema-base, sem receita própria."
+ },
+ "conectores_teto": {
+  "nota": "Teto de uso embutido no preço-base, por cliente por mês, somado no escritório (o escritório tem teto = clientes × teto por cliente; um cliente que consome mais compensa outro que consome menos). P26 (8/11/2026): teto apertado, 130% do uso provável (R$ 2,93 de Integra e CNPJ contra R$ 2,25; R$ 1,78 de InfoSimples contra R$ 1,37); era 162%. Acima do teto, consumo cobrado ao custo mais 20% (markup_excedente). Preços unitários da faixa 1 (08, seção 10.1).",
+  "precos": {
+   "consulta": 0.24,
+   "emissao": 0.32,
+   "declaracao": 0.4,
+   "cnpj": 0.6591,
+   "infosimples": 0.22
+  },
+  "gov": {
+   "consultas": 8,
+   "emissoes": 1.6,
+   "declaracoes": 0.8,
+   "cnpj": 0.27
+  },
+  "est": {
+   "consultas": 8.1
+  },
+  "markup_excedente": 1.2
+ },
+ "cenario": {
+  "aliquota": 0.125,
+  "comissao": 0,
+  "escritorios_ativos": 30,
+  "prolabore": false
+ },
+ "implantacao": {
+  "nota": "Implantação como receita e custo único. Horas de 8.2 do estudo (estimativa a medir no piloto) a R$ 90 por hora (premissa; R$ 70 a 130; P28 segue aberta: medir nos primeiros escritórios). P27 (8/11/2026): o preço depende do contexto, mas o piso é a margem zero: o time nunca vende abaixo do custo de entrega (piso = custo ÷ (1 − margem mínima), com margem mínima de 0%). Tabela da trilha ancorada no HubStrom (R$ 4.500 de tabela; R$ 2.200 após negociação do usuário) para o pequeno, e por hora com desconto de volume nos demais.",
+  "custo_hora": 90,
+  "margem_piso": 0,
+  "mig_hora_tabela": 130,
+  "horas": {
+   "trilha": {
+    "P": 28,
+    "M": 60,
+    "G": 150
+   },
+   "mig_ferramentas": {
+    "P": 6,
+    "M": 14,
+    "G": 36
+   },
+   "mig_financeiro": {
+    "P": 8,
+    "M": 16,
+    "G": 40
+   }
+  },
+  "tabela": {
+   "P": 4500,
+   "M": 8500,
+   "G": 19500
+  },
+  "mercado": {
+   "hubstrom_tabela": 4500,
+   "hubstrom_negociado": 2200
+  }
+ },
+ "fluxo": {
+  "nota": "Cenário do fluxo de caixa dos primeiros 12 meses. Entradas: implantação (parcelada) e mensalidades; saídas: horas de implantação, custo variável dos escritórios, fixos da plataforma, tributos e comissão sobre as entradas. Sem capital inicial.",
+  "horizonte": 12,
+  "novos_mes": 3,
+  "mix": {
+   "P": 0.5,
+   "M": 0.4,
+   "G": 0.1
+  },
+  "pacote": "base",
+  "desconto": 0.2,
+  "parcelas": 1,
+  "migracoes": false,
+  "cobra_implantacao": true,
+  "churn": 0,
+  "meses_ate_mensalidade": 1
+ },
+ "mercado_bpo": {
+  "nota": "Referências de BPO financeiro (S5, lidas em 7 e 8/11/2026; preços de páginas comerciais, sem auditoria). Sofia é o teto de referência: R$ 250 por organização ativa por mês (R$ 179 no plano Founders, mínimo de 3). BPO Suite: planos por CNPJ, CNPJ extra de R$ 70 a 99. Conta Azul Pro BPO: R$ 129,90 por licença do cliente (mínimo de 3). Nortcash: R$ 179 / 358 / 467. O que o usuário aceita é preço um pouco acima do mercado quando o sistema entrega mais.",
+  "sofia_organizacao": 250,
+  "sofia_founders": 179,
+  "bpo_suite_planos": [
+   [
+    3,
+    299
+   ],
+   [
+    5,
+    475
+   ],
+   [
+    10,
+    800
+   ],
+   [
+    25,
+    1750
+   ]
+  ],
+  "bpo_suite_cnpj_extra": [
+   70,
+   99
+  ]
+ }
+}

@@ -1,0 +1,89 @@
+/* PADRÃO VISUAL (keynote): tokens únicos da apresentação. Slides e CSS de seção só usam estes valores.
+   Resumo no início do GUIA.md, seção "Padrão visual". */
+:root {
+  /* Palco virtual: tudo é desenhado em 1920×1080 e escalado. */
+  --stage-w: 1920px;
+  --stage-h: 1080px;
+
+  /* ---------- Cor ---------- */
+  /* Palco preto puro e uma única superfície, sem contorno. */
+  --bg: #000;
+  --surface: #151517;          /* bloco: cartão, faixa, painel */
+  --surface-2: #1f1f22;        /* elemento dentro de um bloco (nó, linha, chip) */
+  --surface-3: #2c2c30;        /* trilho, barra neutra */
+  --line: rgba(255, 255, 255, 0.08);   /* fio fino: divisória, eixo, contorno do que é "deles" */
+  --line-2: rgba(255, 255, 255, 0.16); /* fio de ênfase: cabeçalho de tabela, linha de base */
+
+  /* Tinta: três cinzas */
+  --ink: #f5f5f7;    /* título, número, o que se lê primeiro */
+  --ink-2: #a1a1a6;  /* texto de apoio */
+  --ink-3: #75757b;  /* rótulo, legenda, fonte, sobretítulo */
+
+  /* Um acento e um gradiente. O gradiente só vai no que importa (o número, a palavra, a barra "nossa"). */
+  --accent: #b4a0ff;
+  --grad: linear-gradient(100deg, #7cc4ff 0%, #b4a0ff 48%, #ffc983 100%);
+  --grad-v: linear-gradient(180deg, #7cc4ff 0%, #b4a0ff 55%, #ffc983 100%);
+  --grad-ink: linear-gradient(180deg, #ffffff 35%, #9a9aa0 100%);
+
+  /* Cores semânticas (só com significado, nunca decoração) */
+  --blue: #7cc4ff;    /* executor A: Claude por API */
+  --violet: #b4a0ff;  /* executor B: nossos modelos na GPU; também "o que é nosso" */
+  --green: #72dfae;   /* executor C: código e banco; também "conferido / sim" */
+  --amber: #ffc983;   /* a lei citada (.cite, mark) */
+  --red: #ff7d86;     /* erro, risco */
+  --exec-a: var(--blue);   /* A · Claude, por API */
+  --exec-b: var(--violet); /* B · nossos modelos, na GPU */
+  --exec-c: var(--green);  /* C · código e banco de dados */
+
+  /* ---------- Tipografia ---------- */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Inter Display",
+    "Segoe UI Variable Display", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+  /* Cinco tamanhos de texto + dois de número. Pesos: 400 texto, 600 ênfase, 700 título e número. */
+  --fs-display: 120px; /* declaração, capa, encerramento */
+  --fs-title: 72px;    /* título de todo slide de conteúdo */
+  --fs-sub: 36px;      /* lead, nome de bloco, número secundário */
+  --fs-text: 26px;     /* texto de corpo, tabela, diagrama */
+  --fs-caption: 20px;  /* rótulo, legenda, selo, fonte, numeração */
+  --fs-stat: 56px;     /* número em dado (gráfico, cartão) */
+  --fs-hero: 240px;    /* número-herói, um por slide */
+
+  /* nomes antigos (compatibilidade) apontam para a escala acima */
+  --fs-mega: var(--fs-hero);
+  --fs-xl: var(--fs-display);
+  --fs-h1: var(--fs-title);
+  --fs-h2: var(--fs-title);
+  --fs-h3: var(--fs-sub);
+  --fs-lead: var(--fs-sub);
+  --fs-body: var(--fs-text);
+  --fs-small: var(--fs-text);
+  --fs-micro: var(--fs-caption);
+
+  /* ---------- Grade ---------- */
+  --pad-x: 128px;      /* margem lateral fixa */
+  --pad-top: 88px;     /* topo do sobretítulo */
+  --pad-bottom: 112px; /* acima do rodapé */
+  --foot-y: 44px;      /* linha de base do rodapé (fonte e número) */
+  --kicker-h: 32px;    /* altura reservada ao sobretítulo, exista ele ou não */
+  --kicker-gap: 14px;
+  --head-gap: 48px;    /* do título ao corpo */
+  --gap: 48px;
+
+  /* Raios: um para blocos, um para elementos internos, pílula */
+  --r: 28px;
+  --r-sm: 14px;
+  --r-xl: var(--r);
+  --r-lg: var(--r);
+  --r-md: var(--r-sm);
+
+  /* ---------- Movimento ---------- */
+  /* Uma curva para entradas, uma para mecanismos (vai e volta), uma com leve rebote para selos. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-pop: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --dur-fast: 500ms;
+  --dur: 900ms;
+  --dur-slow: 1200ms;
+  --dur-draw: 1400ms;
+}

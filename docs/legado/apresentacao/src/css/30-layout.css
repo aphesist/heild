@@ -1,0 +1,128 @@
+/* Composição dentro do slide (área útil: 1664 × 856 px). */
+
+/* Layouts nomeados (ver GUIA.md, "Padrão visual").
+   Padrão (diagrama, comparação, gráfico, tabela, lista): .head no topo, corpo em .fill.
+   O sobretítulo começa sempre em y = 88 px e o título em y = 134 px, com ou sem sobretítulo. */
+
+/* Capa e encerramento: centralizados */
+.slide--center,
+.slide--end,
+.slide--hero {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.slide--center .title,
+.slide--center .lead,
+.slide--center .hero-label,
+.slide--end .title,
+.slide--end .lead,
+.slide--hero .hero-label {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Declaração: uma frase grande, alinhada à margem, no meio da altura */
+.slide--statement {
+  justify-content: center;
+}
+/* Variações antigas: não mudam mais a grade */
+.slide--middle,
+.slide--bottom,
+.slide--tight {
+  --pad-top: 88px;
+  --pad-bottom: 112px;
+}
+
+/* Sobretítulo solto (declaração, número-herói): fica no mesmo ponto do topo */
+.slide > .kicker {
+  position: absolute;
+  top: var(--pad-top);
+  left: var(--pad-x);
+  margin: 0;
+}
+
+/* Cabeçalho do slide: sobretítulo + título (+ lead). Posição fixa. */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+  margin-bottom: var(--head-gap);
+}
+/* sem sobretítulo, o título fica no mesmo lugar */
+.head:not(:has(> .kicker)) {
+  padding-top: calc(var(--kicker-h) + var(--kicker-gap));
+}
+.slide--center .head,
+.head.center {
+  align-items: center;
+  text-align: center;
+}
+
+/* Corpo que ocupa o espaço restante */
+.fill {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Pilhas e grades */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  flex-wrap: wrap;
+}
+.grid-2,
+.grid-3,
+.grid-4 {
+  display: grid;
+  gap: var(--gap);
+  align-items: stretch;
+}
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); --gap: 36px; }
+
+/* Texto à esquerda, visual à direita */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 104px;
+  align-items: center;
+}
+/* Lado a lado: a coluna de texto começa no topo (título no lugar padrão); o visual centraliza na altura */
+.split > .stack:first-child {
+  align-self: start;
+}
+.split--even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.split--wide-left { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+
+.center {
+  text-align: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.align-start { align-items: flex-start; }
+.align-end { align-items: flex-end; }
+
+/* Espaçamentos */
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: 24px; }
+.mt-2 { margin-top: 48px; }
+.mt-3 { margin-top: 80px; }
+.mt-auto { margin-top: auto; }
+.mb-1 { margin-bottom: 24px; }
+.mb-2 { margin-bottom: 48px; }
+.gap-s { --gap: 24px; }
+.gap-l { --gap: 80px; }
+.w-50 { max-width: 50%; }
+.w-full { width: 100%; max-width: none; }
