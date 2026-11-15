@@ -22,6 +22,11 @@ export const config = {
   /** Origens aceitas pelo CORS (o Vite do app). */
   origens: (env.HEILD_ORIGENS ?? 'http://localhost:6100,http://127.0.0.1:6100,http://localhost:5173').split(','),
   logs: env.HEILD_LOGS ?? 'info',
+  /** Tetos (ms). O pedido HTTP inteiro, cada consulta, a espera por trava e a transação parada. */
+  tempoPedidoMs: Number(env.HEILD_TEMPO_PEDIDO_MS ?? 15_000),
+  pgTempoConsultaMs: Number(env.HEILD_PG_TEMPO_CONSULTA_MS ?? 5_000),
+  pgTempoTravaMs: Number(env.HEILD_PG_TEMPO_TRAVA_MS ?? 3_000),
+  pgTempoTransacaoOciosaMs: Number(env.HEILD_PG_TEMPO_OCIOSA_MS ?? 10_000),
 }
 
 export type Config = typeof config

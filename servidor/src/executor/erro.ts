@@ -31,7 +31,7 @@ export class ErroApi extends Error {
       campo: this.campo,
       mensagem: this.message,
       acao_sugerida: this.acaoSugerida,
-      tentar_de_novo_em: null,
+      tentar_de_novo_em: typeof this.detalhes?.tentar_de_novo_em === 'string' ? this.detalhes.tentar_de_novo_em : null,
       ...(this.detalhes ? { detalhes: this.detalhes } : {}),
       ...(eventoId ? { evento_id: eventoId } : {}),
     }

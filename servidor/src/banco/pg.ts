@@ -32,7 +32,11 @@ export function conectar(url: string, nome: string, max = 10): Sql {
   return postgres(url, {
     max,
     onnotice: () => {},
-    connection: { application_name: nome, TimeZone: 'UTC' },
+    // Nada espera para sempre: consulta, trava e transação aberta têm teto (padrões, PADROES.md).
+    connection: { application_name: nome, TimeZone: 'UTC', statement_timeout: config.pgTempoConsultaMs, lock_timeout: config.pgTempoTravaMs, idle_in_transaction_session_timeout: config.pgTempoTransacaoOciosaMs },
+    connect_timeout: 10,
+    idle_timeout: 60,
+    max_lifetime: 60 * 30,
     types: tipos,
     transform: { undefined: null },
   }) as unknown as Sql

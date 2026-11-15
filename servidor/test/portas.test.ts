@@ -120,3 +120,20 @@ describe('registro das operações e encaixe da fila', () => {
     await expect(enfileirarNaTransacao(null as never, [])).resolves.toBeUndefined()
   })
 })
+
+describe('limites e cabeçalhos', () => {
+  it('toda resposta leva o id do pedido e os cabeçalhos de segurança', async () => {
+    const r = await app.inject({ method: 'GET', url: '/v1/saude' })
+    expect(r.headers['x-request-id']).toMatch(/^rq/)
+    expect(r.headers['x-content-type-options']).toBe('nosniff')
+    expect(r.headers['cache-control']).toBe('no-store')
+  })
+
+  it('limite de taxa por ator: estourou, 429 LIMITE_TAXA com quando tentar de novo', async () => {
+    const { consumir } = await import('../src/limites.ts')
+    const limite = { porMinuto: 3 }
+    expect([consumir('t:x', limite, 0), consumir('t:x', limite, 1), consumir('t:x', limite, 2)]).toEqual([null, null, null])
+    expect(consumir('t:x', limite, 3)).toBe(new Date(60_000).toISOString())
+    expect(consumir('t:x', limite, 60_001)).toBeNull()
+  })
+})
