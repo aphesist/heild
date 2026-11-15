@@ -497,9 +497,26 @@ function ServicosSimulados() {
 
 function Eventos() {
   const eventos = useTabela('evento')
-  const recentes = useMemo(() => [...eventos].filter((e) => e.visivel_na_linha_do_tempo).sort((a, b) => b.criado_em.localeCompare(a.criado_em)).slice(0, 12), [eventos])
+  const [busca, setBusca] = useState('')
+  // Sem busca: os 12 mais recentes. Com busca: procura em todos os eventos (a janela dos recentes muda
+  // o tempo todo com o trabalho simulado dos integrantes, então achar um evento antigo é pela busca).
+  const recentes = useMemo(() => {
+    const termo = busca.trim().toLowerCase()
+    return [...eventos]
+      .filter((e) => e.visivel_na_linha_do_tempo && (!termo || e.texto.toLowerCase().includes(termo) || e.nome.toLowerCase().includes(termo)))
+      .sort((a, b) => b.criado_em.localeCompare(a.criado_em))
+      .slice(0, 12)
+  }, [eventos, busca])
   return (
-    <Secao titulo="Eventos" descricao="Tudo o que muda gera um evento com autor, data e ferramenta (Fundações 5). É de onde saem a auditoria, a linha do tempo e o timesheet.">
+    <Secao
+      titulo="Eventos"
+      descricao="Tudo o que muda gera um evento com autor, data e ferramenta (Fundações 5). É de onde saem a auditoria, a linha do tempo e o timesheet."
+      acao={
+        <div className="w-60">
+          <CampoTexto aria-label="Buscar nos eventos" valor={busca} onMudar={setBusca} placeholder="Buscar em todos os eventos" />
+        </div>
+      }
+    >
       {recentes.length ? (
         <ol className="flex flex-col gap-1 text-sm">
           {recentes.map((e) => (
@@ -511,7 +528,7 @@ function Eventos() {
           ))}
         </ol>
       ) : (
-        <EstadoVazio titulo="Nenhum evento ainda" descricao="Mude algo acima e o evento aparece aqui." compacto />
+        <EstadoVazio titulo={busca.trim() ? 'Nenhum evento com esse texto' : 'Nenhum evento ainda'} descricao={busca.trim() ? undefined : 'Mude algo acima e o evento aparece aqui.'} compacto />
       )}
     </Secao>
   )

@@ -135,9 +135,17 @@ const { chromium } = require('playwright')
   ok(await p.getByRole('region', { name: 'Concluída' }).getByText('Tarefa da fumaça editada').count(), 'depois de recarregar: tarefa editada e concluída')
   const convitesDepois = p.getByRole('region', { name: 'Convites pendentes' })
   ok((await convitesDepois.getByText('fica@exemplo.com.br').count()) && !(await convitesDepois.getByText('fumaca@exemplo.com.br').count()), 'depois de recarregar: convite criado fica, excluído não volta')
-  ok(await p.getByText(/excluiu o convite para fumaca@exemplo.com.br/).count(), 'a exclusão fica registrada no evento')
+  // Eventos: a lista mostra só os 12 mais recentes, e o trabalho simulado dos integrantes acrescenta
+  // eventos num ritmo que depende da máquina; o evento antigo se acha pela busca, sobre todos os eventos.
+  const eventos = p.getByRole('region', { name: 'Eventos' })
+  const achaEvento = async (termo, padrao) => {
+    await eventos.getByLabel('Buscar nos eventos').fill(termo)
+    return (await eventos.getByText(padrao).count()) > 0
+  }
+  ok(await achaEvento('fumaca@exemplo.com.br', /excluiu o convite para fumaca@exemplo.com.br/), 'a exclusão fica registrada no evento')
   ok(await p.getByText('Mensagem da fumaça').count(), 'depois de recarregar: mensagem interna continua')
-  ok(await p.getByText(/criou a tarefa Tarefa da fumaça/).count(), 'evento registrado com autor (linha do tempo)')
+  ok(await achaEvento('criou a tarefa', /Fernanda Lima criou a tarefa Tarefa da fumaça/), 'evento registrado com autor (linha do tempo)')
+  await eventos.getByLabel('Buscar nos eventos').fill('')
   await shot('recarregado')
 
   // 7. Permissão: agindo como Ana Souza (Membro do DP)
