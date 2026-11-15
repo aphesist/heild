@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "969219ae7ef8f6bc",
+    "version": "6c60cf77199c52d5",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -5743,16 +5743,9 @@
                     ]
                   },
                   "status": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "enum": [
-                          "pendente"
-                        ]
-                      },
-                      {
-                        "type": "null"
-                      }
+                    "type": "string",
+                    "enum": [
+                      "pendente"
                     ]
                   },
                   "expira_em": {
@@ -5826,7 +5819,8 @@
                 "required": [
                   "ferramenta",
                   "resumo_humano",
-                  "pedido_por_tipo"
+                  "pedido_por_tipo",
+                  "status"
                 ],
                 "additionalProperties": false
               }

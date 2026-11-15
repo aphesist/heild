@@ -133,6 +133,35 @@ describe('o tradutor (a chamada da tela vira a ferramenta)', () => {
     ])
   })
 
+  it('o patch leva só o que muda (a tela espalha a linha inteira): campo de estado igual ao atual não vira recusa', () => {
+    const atual = (t: string, id: string) => (t === 'tarefa' && id === 'tk1' ? ({ id: 'tk1', status: 'em_andamento', cliente_id: 'c1', titulo: 'A', extras: { x: 1 } } as never) : undefined)
+    expect(traduzirOperacao('tarefas.atualizar', ['tk1', { status: 'em_andamento', cliente_id: 'c1', titulo: 'B' }], atual)).toEqual([{ ferramenta: 'tarefa.atualizar', entrada: { tarefa_id: 'tk1', campos: { titulo: 'B' } } }])
+    expect(traduzirOperacao('tarefas.atualizar', ['tk1', { cliente_id: 'c1', extras: { x: 1 } }], atual)).toEqual([])
+  })
+
+  it('a criação leva o id escolhido pela tela (AIP-133) e deixa o nulo de fora', () => {
+    expect(traduzirOperacao('cartoes.criar', [{ id: 's07-x', ferramenta: 'f', resumo_humano: 'r', pedido_por_tipo: 'integrante', usuario_dono_id: null, criado_em: 'agora' }])).toEqual([
+      { ferramenta: 'cartao.criar', entrada: { id: 's07-x', ferramenta: 'f', resumo_humano: 'r', pedido_por_tipo: 'integrante' } },
+    ])
+  })
+
+  it('pela API, o id escolhido vale e o repetido é ID_EM_USO', async () => {
+    const id = `ca-escolhido-${Date.now().toString(36)}`
+    const entrada = { id, ferramenta: 'aprovacao.decidir', resumo_humano: 'Cartão com id escolhido', pedido_por_tipo: 'usuario', pode_aprovar: ['u1'], status: 'pendente' }
+    const r = await ferramenta(app, adm, 'cartao.criar', entrada)
+    expect(r.status).toBe(200)
+    expect(r.corpo.linhas.cartao_aprovacao[0].id).toBe(id)
+    const de_novo = await ferramenta(app, adm, 'cartao.criar', { ...entrada, resumo_humano: 'Outro' })
+    expect(de_novo.status).toBe(409)
+    expect(de_novo.corpo.codigo).toBe('ID_EM_USO')
+  })
+
+  it('o cartão nasce pendente: criar já decidido é recusado na entrada', async () => {
+    const r = await ferramenta(app, adm, 'cartao.criar', { ferramenta: 'f', resumo_humano: 'r', pedido_por_tipo: 'usuario', status: 'aprovado' })
+    expect(r.status).toBe(400)
+    expect(r.corpo.campo).toBe('status')
+  })
+
   it('o que não é da F1 segue por /v1/operacoes', () => {
     expect(traduzirOperacao('bpo.lotes.aprovar', ['l1'])).toBeNull()
     expect(traduzirOperacao('sessoes.atualizar', ['s1', { rotulo: 'x' }])).toBeNull()

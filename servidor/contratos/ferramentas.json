@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "969219ae7ef8f6bc",
+  "catalogo_hash": "6c60cf77199c52d5",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -513,16 +513,9 @@
             ]
           },
           "status": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "pendente"
-                ]
-              },
-              {
-                "type": "null"
-              }
+            "type": "string",
+            "enum": [
+              "pendente"
             ]
           },
           "expira_em": {
@@ -592,7 +585,8 @@
         "required": [
           "ferramenta",
           "resumo_humano",
-          "pedido_por_tipo"
+          "pedido_por_tipo",
+          "status"
         ],
         "additionalProperties": false
       },
