@@ -96,13 +96,15 @@ export interface ColunaQuadro {
 function Coluna({ coluna, ids, contagem, children }: { coluna: ColunaQuadro; ids: string[]; contagem: number; children: ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id: `coluna:${coluna.id}`, disabled: coluna.bloqueada })
   return (
-    <section aria-label={coluna.titulo} className={cn('bg-sunken/60 flex w-72 shrink-0 flex-col gap-2 rounded-[20px] p-2 transition-colors', isOver && 'bg-sunken')}>
+    // Coluna utilizável (PADRAO_DE_INTERFACE.md, 3): no celular, 85% da largura com encaixe (a próxima aparece na borda);
+    // do tablet em diante, as colunas dividem a largura, com no mínimo 15rem, e a lista rola por dentro quando a altura é limitada.
+    <section aria-label={coluna.titulo} className={cn('bg-sunken/60 flex min-h-0 w-[85%] max-w-80 shrink-0 snap-start flex-col gap-2 rounded-[20px] p-2 transition-colors sm:w-auto sm:max-w-none sm:min-w-60 sm:flex-1 sm:basis-0', isOver && 'bg-sunken')}>
       <header className="flex items-center gap-2 px-2 pt-1">
-        <h3 className="text-sm font-medium">{coluna.titulo}</h3>
+        <h3 className="min-w-0 truncate text-sm font-medium" title={coluna.titulo}>{coluna.titulo}</h3>
         <span className="text-muted-foreground ml-auto text-xs tabular-nums">{contagem}</span>
       </header>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <ul ref={setNodeRef} className="flex min-h-16 flex-col gap-1.5">
+        <ul ref={setNodeRef} className="flex min-h-16 flex-1 flex-col gap-1.5 overflow-y-auto">
           {children}
         </ul>
       </SortableContext>
@@ -178,7 +180,7 @@ export function Quadro<T>({
   const ativo = arraste ? porId.get(arraste.id) : undefined
   return (
     <DndContext sensors={sensores} collisionDetection={closestCorners} onDragStart={inicio} onDragOver={sobre} onDragEnd={fim} onDragCancel={() => setArraste(null)} accessibility={{ announcements: anuncios }}>
-      <div className={cn('flex gap-3 overflow-x-auto pb-2', className)}>
+      <div data-rolagem-horizontal className={cn('flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 sm:snap-proximity', className)}>
         {colunas.map((c) => {
           const daColuna = itens.filter((i) => colunaAtual(i) === c.id)
           return (

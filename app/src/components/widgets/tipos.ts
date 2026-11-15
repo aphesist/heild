@@ -30,6 +30,13 @@ export interface DefWidget {
   acao?: ReactNode
   /** Conteúdo; recebe o tamanho atual para se adaptar. */
   conteudo: (tamanho: TamanhoWidget) => ReactNode
+  /**
+   * Área de trabalho (kanban, tabela grande, calendário): ocupa a largura
+   * inteira da grade em qualquer tamanho (PADRAO_DE_INTERFACE.md, 3).
+   */
+  larguraTotal?: boolean
+  /** Altura mínima em células, para quem precisa de mais altura que o tamanho dá (ex.: kanban com 3). */
+  linhasMinimas?: number
 }
 
 /** Um widget posto na grade: qual e em que tamanho. A ordem do array é a posição. */
@@ -50,8 +57,128 @@ export function tamanhoValido(def: Pick<DefWidget, 'tamanhos'>, pedido: TamanhoW
  * estreita que o widget (L e XL no celular), ele ganha altura em vez de ficar
  * achatado: L vira 2×2, XL vira 2×4.
  */
-export function vao(tamanho: TamanhoWidget, colunas: number) {
+export function vao(tamanho: TamanhoWidget, colunas: number, def?: Pick<DefWidget, 'larguraTotal' | 'linhasMinimas'>) {
   const d = dimensoes[tamanho]
-  if (d.colunas <= colunas) return { colunas: d.colunas, linhas: d.linhas }
-  return { colunas, linhas: d.linhas * Math.ceil(d.colunas / colunas) }
+  const v = d.colunas <= colunas ? { colunas: d.colunas, linhas: d.linhas } : { colunas, linhas: d.linhas * Math.ceil(d.colunas / colunas) }
+  if (def?.larguraTotal) v.colunas = colunas
+  if (def?.linhasMinimas) v.linhas = Math.max(v.linhas, def.linhasMinimas)
+  return v
+}
+
+/** Posição de um widget na grade (base 0), com o tamanho que o conteúdo usa depois de preencher. */
+export interface Posicao {
+  coluna: number
+  linha: number
+  colunas: number
+  linhas: number
+  /** Tamanho que o conteúdo recebe: o maior que o widget aceita e que cabe no espaço final. */
+  efetivo: TamanhoWidget
+}
+
+/**
+ * Arranjo da grade (regra anti-buraco, PADRAO_DE_INTERFACE.md, 5):
+ * 1. coloca cada widget no primeiro lugar livre, na ordem (o `dense` do CSS);
+ * 2. se `preencher`, as faixas de linhas que só têm widgets da mesma altura
+ *    repartem as colunas que sobram entre eles (a linha fecha sem vão);
+ * 3. o vão que restar é coberto pelo vizinho: o da esquerda cresce para a
+ *    direita, o da direita para a esquerda, e o de cima desce quando ganha um
+ *    tamanho que o widget aceita (M vira G, L vira XL).
+ * O conteúdo recebe o maior tamanho aceito que cabe no espaço final, então um
+ * M que cresceu para 4 colunas mostra o seu L.
+ */
+export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWidget }[], colunas: number, preencher: boolean): Map<string, Posicao> {
+  const grade: (string | null)[][] = []
+  const linha = (r: number) => (grade[r] ??= Array<string | null>(colunas).fill(null))
+  const livre = (r: number, c: number) => c >= 0 && c < colunas && linha(r)[c] === null
+  const marcar = (p: Omit<Posicao, 'efetivo'>, id: string | null) => {
+    for (let r = p.linha; r < p.linha + p.linhas; r++) for (let c = p.coluna; c < p.coluna + p.colunas; c++) linha(r)[c] = id
+  }
+  const pos = new Map<string, Omit<Posicao, 'efetivo'>>()
+  for (const it of itens) {
+    const v = vao(it.tamanho, colunas, it.def)
+    const w = Math.min(v.colunas, colunas)
+    for (let r = 0; !pos.has(it.id); r++) {
+      for (let c = 0; c + w <= colunas; c++) {
+        let cabe = true
+        for (let rr = r; rr < r + v.linhas && cabe; rr++) for (let cc = c; cc < c + w && cabe; cc++) cabe = livre(rr, cc)
+        if (cabe) {
+          const p = { coluna: c, linha: r, colunas: w, linhas: v.linhas }
+          pos.set(it.id, p)
+          marcar(p, it.id)
+          break
+        }
+      }
+    }
+  }
+  const ultima = Math.max(0, ...[...pos.values()].map((p) => p.linha + p.linhas))
+  if (preencher) {
+    // 2. Faixas uniformes: todos os widgets que tocam as linhas [r, r+h) começam em r e têm altura h.
+    for (let r = 0; r < ultima; ) {
+      const naLinha = [...new Set(linha(r).filter((x): x is string => !!x))].map((id) => ({ id, p: pos.get(id)! }))
+      const h = naLinha[0]?.p.linhas ?? 1
+      const uniforme = naLinha.length > 0 && naLinha.every(({ p }) => p.linha === r && p.linhas === h)
+      const tocam = new Set<string>()
+      for (let rr = r; rr < r + h; rr++) linha(rr).forEach((x) => x && tocam.add(x))
+      if (uniforme && tocam.size === naLinha.length) {
+        const ordem = naLinha.sort((a, b) => a.p.coluna - b.p.coluna)
+        let sobra = colunas - ordem.reduce((s, x) => s + x.p.colunas, 0)
+        for (let i = 0; sobra > 0; i = (i + 1) % ordem.length, sobra--) ordem[i].p.colunas++
+        let c = 0
+        for (const { id, p } of ordem) {
+          marcar(p, null)
+          p.coluna = c
+          c += p.colunas
+          marcar(p, id)
+        }
+      }
+      r += uniforme && tocam.size === naLinha.length ? h : 1
+    }
+    // 3. Vizinhos cobrem o que sobrou.
+    const colunaLivre = (p: Omit<Posicao, 'efetivo'>, c: number) => {
+      for (let r = p.linha; r < p.linha + p.linhas; r++) if (!livre(r, c)) return false
+      return true
+    }
+    for (let mudou = true; mudou; ) {
+      mudou = false
+      for (const [id, p] of pos) {
+        if (colunaLivre(p, p.coluna + p.colunas)) {
+          p.colunas++
+          marcar(p, id)
+          mudou = true
+        } else if (colunaLivre(p, p.coluna - 1)) {
+          p.coluna--
+          p.colunas++
+          marcar(p, id)
+          mudou = true
+        }
+      }
+    }
+    for (const it of itens) {
+      const p = pos.get(it.id)!
+      const embaixo = p.linha + p.linhas
+      if (embaixo >= ultima) continue
+      let tudoLivre = true
+      for (let c = p.coluna; c < p.coluna + p.colunas; c++) tudoLivre &&= livre(embaixo, c)
+      if (tudoLivre && tamanhoQueCabe(it.def, p.colunas, p.linhas + 1, it.tamanho) !== tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho)) {
+        p.linhas++
+        marcar(p, it.id)
+      }
+    }
+  }
+  const final = new Map<string, Posicao>()
+  for (const it of itens) {
+    const p = pos.get(it.id)!
+    final.set(it.id, { ...p, efetivo: preencher ? tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho) : it.tamanho })
+  }
+  return final
+}
+
+/** O maior tamanho aceito que cabe em colunas × linhas; se só cabe um bem menor que o espaço, fica o escolhido. */
+function tamanhoQueCabe(def: Pick<DefWidget, 'tamanhos'>, colunas: number, linhas: number, escolhido: TamanhoWidget): TamanhoWidget {
+  const area = (t: TamanhoWidget) => dimensoes[t].colunas * dimensoes[t].linhas
+  const cabem = def.tamanhos.filter((t) => dimensoes[t].colunas <= colunas && dimensoes[t].linhas <= linhas)
+  if (!cabem.length) return escolhido
+  const melhor = cabem.reduce((a, b) => (area(b) > area(a) || (area(b) === area(a) && b === escolhido) ? b : a))
+  if (area(melhor) < area(escolhido) && area(melhor) * 2 <= colunas * linhas) return escolhido
+  return melhor
 }

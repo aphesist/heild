@@ -7,14 +7,18 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { usePreferencia } from '@/hooks/usePreferencia'
 import { cn } from '@/lib/utils'
-import { dimensoes, tamanhoValido, vao, type DefWidget, type ItemGrade, type TamanhoWidget } from './tipos'
+import { arranjar, dimensoes, tamanhoValido, vao, type DefWidget, type ItemGrade, type Posicao, type TamanhoWidget } from './tipos'
 import { Widget } from './widget'
 
-/** Colunas pela largura do contêiner: 2 (celular), 4 (tablet), 6 (comum), 8 (ultrawide). */
+/**
+ * Colunas pela largura do contêiner, com célula de no mínimo ~150px
+ * (PADRAO_DE_INTERFACE.md, 1): 2 no celular, 4 no tablet e no computador
+ * pequeno, 6 no computador, 8 no largo.
+ */
 function colunasPara(largura: number) {
-  if (largura < 520) return 2
-  if (largura < 880) return 4
-  if (largura < 1400) return 6
+  if (largura < 600) return 2
+  if (largura < 980) return 4
+  if (largura < 1320) return 6
   return 8
 }
 
@@ -67,8 +71,9 @@ interface Props {
 
 /**
  * Grade de widgets personalizável. Células de altura fixa e tamanhos fixos
- * (P, M, G, L, XL); `grid-auto-flow: dense` preenche os buracos, então tudo
- * fica alinhado. Modo edição: arrastar para trocar de lugar (mouse, toque,
+ * (P, M, G, L, XL); `arranjar` põe cada um no primeiro lugar livre e, fora do
+ * modo edição, fecha os vãos (o vizinho cresce e o conteúdo usa o tamanho que
+ * ganhou), então nada fica com buraco. Modo edição: arrastar para trocar de lugar (mouse, toque,
  * teclado), mudar o tamanho, esconder, adicionar pela galeria, restaurar.
  * O arranjo fica salvo por tela (em produção, `usuario.preferencias`, 03 4.3).
  */
@@ -101,6 +106,8 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
   )
 
   const defDe = (id: string) => catalogo.find((d) => d.id === id)!
+  // Posição explícita de cada widget; fora do modo edição, a grade preenche os vãos (regra anti-buraco).
+  const posicoes = arranjar(itens.map((i) => ({ ...i, def: defDe(i.id) })), colunas, !editando)
   const ocultos = catalogo.filter((d) => !itens.some((i) => i.id === d.id))
 
   // Troca de lugar ao vivo enquanto arrasta; a grade reflui e o motion anima.
@@ -151,7 +158,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
           <div
             ref={ref}
             {...(editando ? {} : toqueLongo)}
-            className="grid grid-flow-row-dense gap-3 sm:gap-4"
+            className="grid gap-4"
             style={{ gridTemplateColumns: `repeat(${colunas}, minmax(0, 1fr))`, gridAutoRows: 'var(--celula-widget)' }}
           >
             {itens.map((item) => (
@@ -159,7 +166,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
                 key={item.id}
                 item={item}
                 def={defDe(item.id)}
-                colunas={colunas}
+                posicao={posicoes.get(item.id)!}
                 editando={editando}
                 arrastando={ativo === item.id}
                 animar={!reduzir}
@@ -173,7 +180,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
           {ativo ? (() => {
             const it = itens.find((i) => i.id === ativo)
             if (!it) return null
-            const v = vao(it.tamanho, colunas)
+            const v = vao(it.tamanho, colunas, defDe(it.id))
             const el = ref.current
             const vaoPx = el ? parseFloat(getComputedStyle(el).columnGap) || 16 : 16
             const larguraCelula = el ? (el.clientWidth - (colunas - 1) * vaoPx) / colunas : 200
@@ -232,7 +239,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
 function ItemSortavel({
   item,
   def,
-  colunas,
+  posicao,
   editando,
   arrastando,
   animar,
@@ -241,7 +248,7 @@ function ItemSortavel({
 }: {
   item: ItemGrade
   def: DefWidget
-  colunas: number
+  posicao: Posicao
   editando: boolean
   arrastando: boolean
   animar: boolean
@@ -249,16 +256,16 @@ function ItemSortavel({
   onTamanho: (t: TamanhoWidget) => void
 }) {
   const { setNodeRef, attributes, listeners } = useSortable({ id: item.id, disabled: !editando })
-  const v = vao(item.tamanho, colunas)
+  const v = posicao
   return (
     <motion.div
       ref={setNodeRef}
       layout={animar ? 'position' : false}
       transition={{ type: 'spring', stiffness: 520, damping: 42 }}
       className="min-w-0"
-      style={{ gridColumn: `span ${v.colunas}`, gridRow: `span ${v.linhas}` }}
+      style={{ gridColumn: `${v.coluna + 1} / span ${v.colunas}`, gridRow: `${v.linha + 1} / span ${v.linhas}` }}
     >
-      <Widget def={def} tamanho={item.tamanho} editando={editando} arrastando={arrastando} onRemover={onRemover} onTamanho={onTamanho} alca={{ ...attributes, ...listeners }} />
+      <Widget def={def} tamanho={item.tamanho} conteudo={v.efetivo} editando={editando} arrastando={arrastando} onRemover={onRemover} onTamanho={onTamanho} alca={{ ...attributes, ...listeners }} />
     </motion.div>
   )
 }
