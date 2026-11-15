@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { definirContrato } from '@heild/processos'
-import { competenciasDoTexto, datasDoTexto, procedimentoDeEscolha, type Lido } from '../escolha.ts'
+import { competenciasDoTexto, datasDoTexto, procedimentoDeEscolha, type Lido, type OpcoesEscolha } from '../escolha.ts'
 import { resolverCom } from '../metas.ts'
 
 /**
@@ -45,7 +45,7 @@ export const contratoGuia = definirContrato({
   campos_externos: ['trecho'],
 })
 
-export const fisGuiaConferir = procedimentoDeEscolha({
+const opcoesGuia = {
   id: 'FIS-GUIA-CONFERIR',
   versao: 1,
   nome: 'Conferir e enviar a guia ao cliente',
@@ -84,6 +84,21 @@ export const fisGuiaConferir = procedimentoDeEscolha({
   },
   orcamento: { centavos: 8, tokens: 8_000 },
   resolver: resolverCom(),
+} satisfies OpcoesEscolha
+
+export const fisGuiaConferir = procedimentoDeEscolha(opcoesGuia)
+
+/** v2 (B3b): revisor de risco (Opus) antes do cartão, porque o ato é irreversível. */
+export const fisGuiaConferirV2 = procedimentoDeEscolha({
+  ...opcoesGuia,
+  versao: 2,
+  orcamento: { centavos: 30, tokens: 12_000 },
+  revisor: { evidencias: (e, l) => [
+      { rotulo: 'Valor da guia', valor: reais(Number(l.contexto.valor_centavos ?? 0)) },
+      { rotulo: 'Apuração do tributo na competência', valor: reais(Number((l.contexto.apuracao as Record<string, Record<string, number>>)[String(e.tributo)]?.[String(e.competencia)] ?? 0)) },
+      { rotulo: 'Opções de tributo no texto', valor: (l.candidatas.tributo as string[]).join(', ') },
+      { rotulo: 'Competências no texto', valor: (l.candidatas.competencia as string[]).join(', ') || 'nenhuma' },
+    ] },
 })
 
 export const CATEGORIAS_CAIXA_POSTAL = ['intimacao', 'malha', 'exclusao_simples', 'cobranca', 'informativo'] as const

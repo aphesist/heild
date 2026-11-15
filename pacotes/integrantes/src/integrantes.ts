@@ -1,10 +1,10 @@
-import { ctbCompetenciaDoc, ctbEcd, type Procedimento } from '@heild/processos'
+import { ctbCompetenciaDoc, ctbCompetenciaDocV2, ctbEcd, ctbEcdV2, type Procedimento } from '@heild/processos'
 import { definirIntegrante, type Anexos, type ExecucaoParaDecisao, type Integrante, type PacoteProcedimento } from './contrato.ts'
 import { decisaoDeEscolha, type Escolha } from './escolha.ts'
 import { resolverCom } from './metas.ts'
-import { BASE_PADRAO, gesFaq } from './setores/atendimento.ts'
+import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
 import { dpEventoFolha } from './setores/dp.ts'
-import { fisCaixaPostal, fisGuiaConferir } from './setores/fiscal.ts'
+import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
 
 /**
@@ -24,12 +24,14 @@ const entradaDeDocumento: PacoteProcedimento['entrada'] = (a: Anexos) =>
 const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
-const TODOS = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, fisCaixaPostal, dpEventoFolha, socAlteracao, gesFaq].map(P)
+const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolha, socAlteracao, gesFaqV2].map(P)
+/** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
 const competencia: PacoteProcedimento = {
-  procedimento: P(ctbCompetenciaDoc),
+  procedimento: P(ctbCompetenciaDocV2),
   entrada: entradaDeDocumento,
   regras: [/\bcompet[êe]ncia\b/i, /\bclassific\w* (o |este |esse )?(documento|recibo|lan[çc]amento)/i, /\bm[êe]s de refer[êe]ncia\b/i],
   descricao_roteamento: 'Classificar a competência (o mês) de um documento recebido do cliente.',
@@ -38,7 +40,7 @@ const competencia: PacoteProcedimento = {
 }
 
 const ecd: PacoteProcedimento = {
-  procedimento: P(ctbEcd),
+  procedimento: P(ctbEcdV2),
   entrada: (a) =>
     a.cliente_id && a.documento_id && a.exercicio
       ? { ok: true, entrada: { cliente_id: a.cliente_id, documento_id: a.documento_id, exercicio: a.exercicio } }
@@ -86,7 +88,7 @@ export const integranteFiscal: Integrante = definirIntegrante(
     ferramentas: [...LEITURA, 'fiscal.guia.conferir_e_enviar', 'fiscal.caixa_postal.triar', 'fiscal.guia.enviar', 'documento.atualizar', 'fiscal.caixa_postal.ler'],
     procedimentos: [
       {
-        procedimento: P(fisGuiaConferir),
+        procedimento: P(fisGuiaConferirV2),
         entrada: entradaDeDocumento,
         regras: [/\bguias?\b/i, /\bDARF\b/i, /\bDAS\b/, /\bGPS\b/],
         tipos_documento: ['guia'],
@@ -180,14 +182,14 @@ export const integranteAtendimento: Integrante = definirIntegrante(
     setor: 'gestao_atendimento',
     nome: 'Atendimento',
     descricao: 'Responde as perguntas frequentes dos clientes com as respostas aprovadas da base.',
-    papeis: { operario: true, escritor: true, revisor: false },
+    papeis: { operario: true, escritor: true, revisor: true },
     limites: { simultaneas: 10, segundo_plano_por_pessoa: 3 },
     limiar_confianca: 0.9,
     perguntar_responsavel: false,
     ferramentas: [...LEITURA, 'atendimento.faq.responder', 'conversa.responder', 'conversa.listar'],
     procedimentos: [
       {
-        procedimento: P(gesFaq),
+        procedimento: P(gesFaqV2),
         entrada: entradaDeDocumento,
         regras: [/\bsegunda via\b/i, /\bhor[áa]rio de atendimento\b/i, /\bcertid[ãa]o negativa\b/i, /\bpergunta frequente\b/i, /\bresponder? (o |a )?cliente\b/i],
         aceita_documentos: ['mensagem'],
@@ -206,7 +208,7 @@ export const integranteAtendimento: Integrante = definirIntegrante(
 export const integrantesContabil: Integrante[] = [integranteContabil, integranteFiscal, integranteDp, integranteSocietario, integranteAtendimento]
 
 /** Todos os procedimentos dos integrantes (para o motor, a API e o worker). */
-export const procedimentosDosIntegrantes: Procedimento[] = integrantesContabil.flatMap((i) => i.procedimentos.map((p) => p.procedimento))
+export const procedimentosDosIntegrantes: Procedimento[] = [...integrantesContabil.flatMap((i) => i.procedimentos.map((p) => p.procedimento)), ...ANTERIORES]
 
 export const integranteDoSetor = (setor: string) => integrantesContabil.find((i) => i.setor === setor)
 export const integrantePorId = (id: string) => integrantesContabil.find((i) => i.id === id)

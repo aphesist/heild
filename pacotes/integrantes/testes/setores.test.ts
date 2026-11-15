@@ -43,14 +43,41 @@ describe('Fiscal', () => {
     expect(ev!.aprovacao_id).toBe(c!.id)
   })
 
+  it('revisor de risco (Opus) antes do envio: devolve com motivo → cartão "não consegui"; a pessoa libera com motivo e o cartão de envio segue', async () => {
+    const s = await semear(admin)
+    const modelos: string[] = []
+    h.fornecedor.responder('revisor.ato_irreversivel', (_e, p) => {
+      modelos.push(`${p.classe}:${p.modelo}`)
+      return { decisao: 'devolve', motivo: 'A guia cita duas competências; confirme a de apuração.' }
+    })
+    try {
+      const doc = await documento(admin, s, 'guia', { texto_extraido: 'DAS do Simples Nacional. Período de apuração: 10/2026.', valor_centavos: 123456, apuracao: { DAS: { '2026-10': 123456 } } })
+      const ex = await rodar(s.esc, 'u-fiscal', 'FIS-GUIA-CONFERIR', doc)
+      expect(modelos).toEqual(['revisor:demo-revisor'])
+      const [c] = await admin`select id, tipo, resumo_humano from cartao_aprovacao where id = ${ex.cartao_id}`
+      expect(c).toMatchObject({ tipo: 'nao_consegui' })
+      expect(c!.resumo_humano).toContain('O revisor devolveu: A guia cita duas competências')
+      await h.motor.decidirCartao(await pessoa(admin, s.esc, 'u-fiscal'), { cartao_id: c!.id, decisao: 'editar', argumentos_editados: { decisao: 'aprova', motivo: 'Conferi: a apuração é 10/2026.' } })
+      const depois = await esperar(() => lerExecucao(admin, s.esc, ex.id), (e) => e.estado === 'aguardando_cartao' && e.cartao_id !== c!.id)
+      const [envio] = await admin`select ferramenta, resumo_humano from cartao_aprovacao where id = ${depois.cartao_id}`
+      expect(envio!.ferramenta).toBe('fiscal.guia.enviar')
+      expect(envio!.resumo_humano).toContain('uma pessoa liberou')
+      // O revisor não foi chamado de novo depois da decisão da pessoa.
+      expect(modelos).toHaveLength(1)
+    } finally {
+      h.fornecedor.responder('revisor.ato_irreversivel', RESPOSTAS_SIMULADAS['revisor.ato_irreversivel']!)
+    }
+  })
+
   it('FIS-GUIA-CONFERIR: com o código de receita, a regra decide sem modelo', async () => {
     const s = await semear(admin)
     const antes = h.fornecedor.chamadas.length
     const doc = await documento(admin, s, 'guia', { texto_extraido: 'DARF', codigo_receita: '2089', competencia: '2026-09', valor_centavos: 870000, apuracao: { IRPJ: { '2026-09': 870000 } } })
     const ex = await rodar(s.esc, 'u-fiscal', 'FIS-GUIA-CONFERIR', doc)
     expect(ex.estado).toBe('aguardando_cartao')
-    expect(h.fornecedor.chamadas.slice(antes).filter((c) => (c.entrada as { dados: { trecho?: { conteudo: string } } }).dados.trecho?.conteudo === 'DARF')).toHaveLength(0)
-    expect(await admin`select 1 from chamada_modelo where execucao_id = ${ex.id}`).toHaveLength(0)
+    expect(h.fornecedor.chamadas.slice(antes).filter((c) => c.contrato === 'fis.guia.identificar' && (c.entrada as { dados: { trecho?: { conteudo: string } } }).dados.trecho?.conteudo === 'DARF')).toHaveLength(0)
+    // Nenhum operário: a única chamada é a do revisor de risco, antes do envio ao cliente.
+    expect(await admin`select classe from chamada_modelo where execucao_id = ${ex.id}`).toEqual([{ classe: 'revisor' }])
   })
 
   it('FIS-GUIA-CONFERIR: valor que não bate com a apuração nunca chega ao envio (cartão "não consegui", sem escalar)', async () => {

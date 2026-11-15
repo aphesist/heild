@@ -32,7 +32,7 @@ export interface Semente {
 }
 
 /** Um escritório isolado por teste, com os cinco setores do Contábil, pessoas, integrantes e bolsas. */
-export async function semear(sql: Sql, o: { bolsa_centavos?: number; bolsa_assistente?: number; executa_sozinho?: string[] } = {}): Promise<Semente> {
+export async function semear(sql: Sql, o: { bolsa_centavos?: number; bolsa_assistente?: number; bolsa_piloto?: number; executa_sozinho?: string[] } = {}): Promise<Semente> {
   const esc = `esc-${randomUUID().slice(0, 8)}`
   const cnpj = `${Math.floor(10_000_000 + Math.random() * 89_999_999)}000190`
   await sql`insert into escritorio (id, escritorio_id, razao_social, nome_fantasia, cnpj, carteira_ligada) values (${esc}, ${esc}, 'Escritório Teste Ltda', 'Escritório Teste', ${esc}, false)`
@@ -56,7 +56,7 @@ export async function semear(sql: Sql, o: { bolsa_centavos?: number; bolsa_assis
   for (let m = 1; m <= 12; m++)
     await sql`insert into competencia_contabil (escritorio_id, cliente_id, competencia, situacao) values (${esc}, 'c-1', ${`2025-${String(m).padStart(2, '0')}`}, 'fechada')`
   const saldo = o.bolsa_centavos ?? 1000
-  await instalarIntegrantes(sql, esc, { bolsas: { ...Object.fromEntries(SETORES.map(([s]) => [s, saldo])), assistente: o.bolsa_assistente ?? saldo } })
+  await instalarIntegrantes(sql, esc, { bolsas: { ...Object.fromEntries(SETORES.map(([s]) => [s, saldo])), assistente: o.bolsa_assistente ?? saldo, piloto: o.bolsa_piloto ?? saldo } })
   for (const p of o.executa_sozinho ?? []) await sql`insert into procedimento_config (escritorio_id, procedimento_id, executa_sozinho) values (${esc}, ${p}, true)`
   return { esc, cliente: 'c-1', cnpj }
 }
@@ -125,6 +125,7 @@ export const RESPOSTAS_SIMULADAS: Record<string, (e: any) => unknown> = {
       const primeira = e.opcoes.find((o) => o.id !== 'nenhuma')
       return { faq_id: primeira?.id ?? 'nenhuma', confianca: 0.95, motivo: 'Mesma pergunta.' }
   },
+  'revisor.ato_irreversivel': () => ({ decisao: 'aprova', motivo: 'Decisão coerente com as evidências.' }),
   'assistente.rotear': (e: { pedido: unknown; opcoes: { id: string; descricao: string }[] }) => {
       const t = normal(conteudo(e.pedido))
       const mapa: [RegExp, string][] = [[/horario|pagamento|sabado/, 'DP-EVENTO-FOLHA'], [/junta|rua|contrato/, 'SOC-ALTERACAO-TRIAR'], [/abertos|horas voces|texto padrao/, 'GES-FAQ-RESPONDER']]

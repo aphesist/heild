@@ -128,8 +128,8 @@ export class Assistente {
       const [p] = await tx`select * from pedido_assistente where id = ${job.pedido_id}`
       if (!p || p.estado !== 'roteando') return null
       const anexos = p.anexos as Anexos
-      const [doc] = anexos.documento_id ? await tx`select tipo from documento where id = ${anexos.documento_id}` : []
-      return { p, anexos, tipoDocumento: (doc?.tipo as string | undefined) ?? null }
+      const [doc] = anexos.documento_id ? await tx`select tipo, left(coalesce(metadados->>'texto_extraido', ''), 600) as trecho from documento where id = ${anexos.documento_id}` : []
+      return { p, anexos, tipoDocumento: (doc?.tipo as string | undefined) ?? null, trecho: (doc?.trecho as string | undefined) || undefined }
     })
     if (!lido) return
     const ctx = await this.contextoDoSolicitante(job.escritorio_id, lido.p.solicitante_id)
@@ -141,7 +141,7 @@ export class Assistente {
       const x = rotearPorRegras(lido.p.texto, lido.tipoDocumento, opcoes)
       r = x.decisao ? { decisao: x.decisao, tentativas: [regraTentativa(x.decisao, x.candidatos)], candidatos: x.candidatos } : null
     } else {
-      r = await rotearEmCascata({ sql: this.d.sql, fornecedor: this.d.fornecedor, cfg: this.d.roteamento }, job.escritorio_id, { texto: lido.p.texto, tipoDocumento: lido.tipoDocumento }, opcoes)
+      r = await rotearEmCascata({ sql: this.d.sql, fornecedor: this.d.fornecedor, cfg: this.d.roteamento }, job.escritorio_id, { texto: lido.p.texto, tipoDocumento: lido.tipoDocumento, trecho: lido.trecho }, opcoes)
     }
     if (!r) return // só regras e sem destino: o worker continua pela fila
     const centavos = r.tentativas.reduce((a, t) => a + t.centavos, 0)
@@ -177,13 +177,27 @@ export class Assistente {
           erro = ${x.erro || x.candidatos || x.falta ? tx.json({ ...(x.erro ?? {}), ...(x.candidatos ? { candidatos: x.candidatos } : {}), ...(x.falta ? { falta: x.falta } : {}) } as never) : null}
         where id = ${job.pedido_id} and estado = 'roteando' returning anexos->>'cliente_id' as cliente_id`
       if (!p) return
+      // B3b: o custo do roteamento é do setor de destino. Sai da bolsa de trânsito e entra na do
+      // setor; sem destino (ou se o setor não tiver saldo para cobrir), fica na bolsa do roteamento.
+      const custo = x.centavos ?? 0
+      let bolsa_pagadora = custo > 0 ? this.d.roteamento.bolsa : null
+      if (custo > 0 && estado === 'encaminhado' && op) {
+        const [mov] = await tx`update bolsa_setor set gasto_centavos = gasto_centavos + ${custo}::numeric
+                               where setor = ${op.setor} and mes = to_char(now() at time zone 'America/Sao_Paulo', 'YYYY-MM') and gasto_centavos + ${custo}::numeric <= saldo_centavos returning 1 as ok`
+        if (mov) {
+          await tx`update bolsa_setor set gasto_centavos = greatest(0, gasto_centavos - ${custo}::numeric)
+                   where setor = ${this.d.roteamento.bolsa} and mes = to_char(now() at time zone 'America/Sao_Paulo', 'YYYY-MM')`
+          bolsa_pagadora = op.setor
+        }
+      }
+      if (bolsa_pagadora) await tx`update pedido_assistente set bolsa_pagadora = ${bolsa_pagadora} where id = ${job.pedido_id}`
       const ator = ctx ?? { escritorio_id: job.escritorio_id, origem: 'chat' as const, ator: { tipo: 'sistema' as const, nome: 'Assistente' } }
       await this.d.eventos.gravar(tx, ator, {
         nome: 'assistente.rotear', ferramenta: 'assistente.pedir', nivel: 'executar', resultado: estado === 'negado' ? 'negado' : estado === 'falhou' ? 'erro' : 'ok',
         texto: estado === 'encaminhado' ? `Assistente encaminhou ao ${op?.integrante_id ?? 'integrante'} (${x.decisao?.camada})` : `Assistente: ${estado}`,
         cliente_id: (p.cliente_id as string | null) ?? null, setor: op?.setor ?? null, execucao_id: x.execucao_id ?? null, resultado_ref: job.pedido_id,
         argumentos_resumo: {
-          pedido_id: job.pedido_id, estado, camada: x.decisao?.camada ?? null, procedimento: x.decisao?.procedimento_id ?? null, confianca: x.decisao?.confianca ?? null,
+          pedido_id: job.pedido_id, estado, bolsa_pagadora, camada: x.decisao?.camada ?? null, procedimento: x.decisao?.procedimento_id ?? null, confianca: x.decisao?.confianca ?? null,
           camadas: (x.tentativas ?? []).map((t) => ({ camada: t.camada, modelo: t.modelo, procedimento: t.procedimento, confianca: t.confianca, aceita: t.aceita })),
         },
         custo: { centavos: x.centavos ?? 0, chamadas: (x.tentativas ?? []).filter((t) => t.modelo).length },
