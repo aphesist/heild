@@ -31,11 +31,11 @@ export interface DefWidget {
   /** Conteúdo; recebe o tamanho atual para se adaptar. */
   conteudo: (tamanho: TamanhoWidget) => ReactNode
   /**
-   * Área de trabalho (kanban, tabela grande, calendário): ocupa a largura
-   * inteira da grade em qualquer tamanho (PADRAO_DE_INTERFACE.md, 3).
+   * Área de trabalho (kanban, tabela grande, calendário): no tamanho XL, ocupa
+   * a largura inteira da grade (PADRAO_DE_INTERFACE.md, 3).
    */
   larguraTotal?: boolean
-  /** Altura mínima em células, para quem precisa de mais altura que o tamanho dá (ex.: kanban com 3). */
+  /** Altura mínima em células no tamanho XL, para quem precisa de mais altura (ex.: kanban com 3). */
   linhasMinimas?: number
 }
 
@@ -60,8 +60,8 @@ export function tamanhoValido(def: Pick<DefWidget, 'tamanhos'>, pedido: TamanhoW
 export function vao(tamanho: TamanhoWidget, colunas: number, def?: Pick<DefWidget, 'larguraTotal' | 'linhasMinimas'>) {
   const d = dimensoes[tamanho]
   const v = d.colunas <= colunas ? { colunas: d.colunas, linhas: d.linhas } : { colunas, linhas: d.linhas * Math.ceil(d.colunas / colunas) }
-  if (def?.larguraTotal) v.colunas = colunas
-  if (def?.linhasMinimas) v.linhas = Math.max(v.linhas, def.linhasMinimas)
+  if (tamanho === 'XL' && def?.larguraTotal) v.colunas = colunas
+  if (tamanho === 'XL' && def?.linhasMinimas) v.linhas = Math.max(v.linhas, def.linhasMinimas)
   return v
 }
 
@@ -168,17 +168,21 @@ export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWi
   const final = new Map<string, Posicao>()
   for (const it of itens) {
     const p = pos.get(it.id)!
-    final.set(it.id, { ...p, efetivo: preencher ? tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho) : it.tamanho })
+    final.set(it.id, { ...p, efetivo: tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho) })
   }
   return final
 }
 
-/** O maior tamanho aceito que cabe em colunas × linhas; se só cabe um bem menor que o espaço, fica o escolhido. */
+/**
+ * O maior tamanho aceito que cabe em colunas × linhas. Se só cabe um bem menor
+ * que o espaço, fica o escolhido; mas se o escolhido nem cabe na largura (L no
+ * celular), vale o que cabe: o conteúdo largo não vaza da grade estreita.
+ */
 function tamanhoQueCabe(def: Pick<DefWidget, 'tamanhos'>, colunas: number, linhas: number, escolhido: TamanhoWidget): TamanhoWidget {
   const area = (t: TamanhoWidget) => dimensoes[t].colunas * dimensoes[t].linhas
   const cabem = def.tamanhos.filter((t) => dimensoes[t].colunas <= colunas && dimensoes[t].linhas <= linhas)
   if (!cabem.length) return escolhido
   const melhor = cabem.reduce((a, b) => (area(b) > area(a) || (area(b) === area(a) && b === escolhido) ? b : a))
-  if (area(melhor) < area(escolhido) && area(melhor) * 2 <= colunas * linhas) return escolhido
+  if (area(melhor) < area(escolhido) && area(melhor) * 2 <= colunas * linhas && dimensoes[escolhido].colunas <= colunas) return escolhido
   return melhor
 }

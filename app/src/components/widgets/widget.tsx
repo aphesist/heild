@@ -49,16 +49,19 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
         )}
         {...(editando ? alca : {})}
       >
-        <header className="flex h-6 shrink-0 items-center gap-2">
+        {/* A ação do cabeçalho desce para a linha de baixo quando não cabe ao lado do título (celular). */}
+        <header className="flex min-h-6 shrink-0 flex-wrap items-center gap-x-2 gap-y-1">
           {Icone && <Icone weight="duotone" className="text-muted-foreground size-[18px] shrink-0" />}
-          <h3 className="min-w-0 truncate text-sm font-medium">{def.titulo}</h3>
+          <h3 className="min-w-0 truncate text-sm font-medium" title={def.titulo}>
+            {def.titulo}
+          </h3>
           <span className="min-w-0 flex-1 truncate">
             {def.atividades && usado !== 'P' && !editando && <code className="text-muted-foreground hidden text-[11px] sm:inline">{def.atividades}</code>}
           </span>
           {!editando && def.acao}
           {editando && <ArrowsOutCardinalIcon className="text-muted-foreground size-4" aria-hidden />}
         </header>
-        <div className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-auto', editando && 'pointer-events-none')}>{def.conteudo(usado)}</div>
+        <div className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-x-hidden overflow-y-auto', editando && 'pointer-events-none')}>{def.conteudo(usado)}</div>
 
         {editando && (
           <>

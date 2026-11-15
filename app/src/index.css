@@ -301,6 +301,15 @@
     @apply outline-2 outline-offset-2 outline-ring;
   }
   /*
+   * Grade sem colunas declaradas na faixa atual (o celular de `grid lg:grid-cols-2`):
+   * uma coluna que encolhe com a tela, em vez da coluna automática que cresce até o
+   * conteúdo mais largo e empurra a página para o lado (PADRAO_DE_INTERFACE.md, 1).
+   * Qualquer grid-cols-* ou estilo da própria peça vale por cima.
+   */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /*
    * Toque (celular e tablet): todo controle pequeno ganha uma área de toque
    * invisível de no mínimo 44px, centrada nele (PADRAO_DE_INTERFACE.md, 8). O
    * desenho continua o mesmo; o dedo acerta. Quem já tem 44px não muda.
@@ -313,6 +322,15 @@
       content: '';
       position: absolute;
       inset: min(0px, calc((100% - var(--alvo-toque)) / 2));
+    }
+    /* Campos de texto e seleção: 44px de altura no toque (a altura fixa da tela vira mínima). */
+    :where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [type='hidden']), select) {
+      min-height: var(--alvo-toque);
+    }
+    /* Caixa e rádio nativos: 24px (WCAG 2.5.8); o rótulo clicável completa o alvo. */
+    :where(input[type='checkbox'], input[type='radio']) {
+      min-width: 1.5rem;
+      min-height: 1.5rem;
     }
   }
 }
