@@ -48,7 +48,7 @@ export function ListaComTeto<T>({
   const mostrados = itens.slice(0, limite)
   return (
     <div className={cn('flex min-w-0 flex-col gap-2', className)}>
-      <ul className={classeLista}>
+      <ul className={classeLista} data-total={itens.length}>
         {mostrados.map((it, i) => (
           <li key={chave(it, i)} className="min-w-0">
             {render(it, i)}
@@ -90,7 +90,9 @@ export function TetoDeFilhos({ children, vazio, teto, classeLista = 'divide-bord
   if (!itens.length) return <>{vazio}</>
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <ul className={classeLista}>{itens.slice(0, limite)}</ul>
+      <ul className={classeLista} data-total={itens.length}>
+        {itens.slice(0, limite)}
+      </ul>
       {itens.length > limite && (
         <Button variant="ghost" size="sm" className="self-start rounded-full" onClick={() => setAberta(true)}>
           Ver todos ({itens.length.toLocaleString('pt-BR')})

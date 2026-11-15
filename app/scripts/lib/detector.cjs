@@ -407,7 +407,8 @@ function detectar(opcoes) {
       const kb = rsG[i]
       if (kb.width < 100) return
       const abaixo = rsG.some((o, j) => j !== i && o.top >= kb.bottom - 2 && o.left < kb.right - 4 && o.right > kb.left + 4)
-      if (!abaixo) {
+      // Coluna lateral sticky (DuasPilhas, CCT no XL): fica parada enquanto a outra rola; o vão é de propósito.
+      if (!abaixo && cs(k).position !== 'sticky') {
         const vizinhos = rsG.filter((o, j) => j !== i && o.top < kb.bottom && o.bottom > kb.top)
         const vao = Math.min(Math.max(kb.bottom, ...vizinhos.map((o) => o.bottom)), gbG.bottom) - kb.bottom
         if (vao > 96) add('vao', `${Math.round(vao)}px vazios sob ${desc(k)}`, k)

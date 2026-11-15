@@ -648,7 +648,8 @@ function Convencoes({ id, t }: { id: string; t: TamanhoWidget }) {
     })
   return (
     <div className={cn('flex flex-col gap-2', t === 'XL' && '@3xl:grid @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-6')}>
-      <div className="flex flex-col gap-1.5 text-sm">
+      {/* No XL lado a lado, a CCT fica parada no topo enquanto a lista de benefícios rola (lateral sticky). */}
+      <div className="flex flex-col gap-1.5 text-sm @3xl:sticky @3xl:top-0">
         <p>
           <span className="font-medium">{e.cct.sindicato}</span>
           <span className="text-muted-foreground"> · vigência {e.cct.vigencia}</span>
