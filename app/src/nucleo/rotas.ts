@@ -15,6 +15,8 @@ import type { Destino, IdModulo } from '@/ambiente/loja'
  *   #/inicio/time?integrante=i-fiscal     o chat de um integrante
  *   #/financeiro/cobranca?fatura=f3       a fatura aberta
  *   #/arquivos?pasta=c1:Fiscal/2026       a pasta (cliente:caminho)
+ *   #/inicio?aprovacoes=todas             a central de aprovações por cima de qualquer tela
+ *   #/inicio?aprovacoes=setor:fiscal      ... de um setor (ou cliente:c1, ou o id do cartão em foco)
  *   #/app                                 o app do cliente
  *   #/kit                                 a vitrine do kit de interação
  *   #/lab/ui                              o UI Lab (componentes e regras, com controles)
@@ -40,6 +42,7 @@ export function destinoParaHash(d: Destino): string {
   if (d.pasta) q.set('pasta', `${d.pasta.clienteId ?? '_escritorio'}:${d.pasta.caminho.join('/')}`)
   // S02 (C1): aba Obrigações filtrada pelo setor dono.
   if (d.filtroSetor) q.set('setor', d.filtroSetor)
+  if (d.aprovacoes) q.set('aprovacoes', d.aprovacoes)
   const busca = q.toString()
   return `#/${d.modulo}${d.aba ? `/${d.aba}` : ''}${busca ? `?${busca}` : ''}`
 }
@@ -52,7 +55,7 @@ export function hashParaDestino(hash: string): Destino | null {
   if (m[2]) d.aba = decodeURIComponent(m[2])
   const cliente = q.get('cliente')
   if (cliente) d.cliente = cliente === 'todos' ? null : cliente
-  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'trilha', 'conversaInterna', 'contrato'] as const) {
+  for (const k of ['conversa', 'integrante', 'tarefa', 'ficha', 'fatura', 'trilha', 'conversaInterna', 'contrato', 'aprovacoes'] as const) {
     const v = q.get(k)
     if (v) d[k] = v
   }
@@ -79,7 +82,8 @@ export function paginaDoHash(hash = typeof window === 'undefined' ? '' : window.
 let base: Destino | null = null
 let sub: Pick<Destino, 'conversa' | 'fatura' | 'pasta' | 'conversaInterna' | 'contrato'> = {}
 let item: Pick<Destino, 'tarefa' | 'ficha' | 'trilha'> = {}
-const composta = (): Destino | null => (base ? { ...base, ...sub, ...item } : null)
+let painel: Pick<Destino, 'aprovacoes'> = {}
+const composta = (): Destino | null => (base ? { ...base, ...sub, ...item, ...painel } : null)
 
 function escrever() {
   if (!base || typeof window === 'undefined' || paginaDoHash() !== 'sistema') return
@@ -116,6 +120,13 @@ export function definirRotaBase(d: Destino) {
 /** As gavetas informam o item aberto (ou `undefined` ao fechar). */
 export function definirItemDaRota(i: Pick<Destino, 'tarefa' | 'ficha' | 'trilha'>) {
   item = i
+  escrever()
+}
+
+/** O painel global aberto por cima (central de aprovações) entra no endereço enquanto está aberto. */
+export function definirPainelDaRota(p: Pick<Destino, 'aprovacoes'>) {
+  if (p.aprovacoes === painel.aprovacoes) return
+  painel = p
   escrever()
 }
 

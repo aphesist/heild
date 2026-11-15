@@ -4,6 +4,7 @@ import { definirRotaBase, destinoInicial } from '@/nucleo/rotas'
 import { MinhaConta } from '@/ambiente/conta'
 import { FluxosProvider } from '@/ambiente/fluxos'
 import { CentralAvisos, Toasts } from '@/ambiente/interface'
+import { CentralAprovacoes } from '@/ambiente/aprovacoes'
 import { LojaOpcional, NavegacaoProvider, useLoja, type Destino } from '@/ambiente/loja'
 import { DocumentosProvider } from '@/ambiente/documentos'
 import { integranteAoVivo } from '@/ambiente/integrante-vivo'
@@ -263,6 +264,8 @@ function PlataformaInterna(props: Props) {
               sino={
                 <>
                   <SeloTempo conta={contaTempo} espera={!!tempo.espera} onde={ondeTempo} />
+                  {/* Fase 6: a central de aprovações, global (os cartões nascem em qualquer tela). */}
+                  <CentralAprovacoes />
                   <CentralAvisos onPreferencias={() => setMinhaConta(true)} />
                 </>
               }

@@ -1,7 +1,9 @@
-import { BabyIcon, BuildingsIcon, CakeIcon, FishIcon, ForkKnifeIcon, LeafIcon, PawPrintIcon, PizzaIcon, TreeIcon, WhatsappLogoIcon, EnvelopeSimpleIcon, DeviceMobileIcon } from '@phosphor-icons/react'
+import { BabyIcon, BuildingsIcon, CakeIcon, ShieldCheckIcon, FishIcon, ForkKnifeIcon, LeafIcon, PawPrintIcon, PizzaIcon, TreeIcon, WhatsappLogoIcon, EnvelopeSimpleIcon, DeviceMobileIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { Caixa } from '@/components/compostos/blocos'
 import { CartaoAprovacao } from '@/components/compostos/cartoes-chat'
+import { PainelAprovacoes, type ItemAprovacao } from '@/ambiente/aprovacoes'
+import type { FiltroAprovacoes } from '@/ambiente/cartoes-aprovacao'
 import { CampoComSuposicoes, FaixaSuposicoes, RascunhoComLacunas, ResumoSuposicoes, ValorEditavel, type ConfigValor, type LinhaSuposicao, type ParteRascunho, type QualquerValor } from '@/components/kit'
 import * as exemplo from '@/dados/exemplo'
 import { suporDoTexto, type CampoSuposicao, type Suposicao } from '@/lib/suposicoes'
@@ -170,6 +172,70 @@ function FichaLacunas({ p }: { p: ParamsLab }) {
   )
 }
 
+/* ---------- Central de aprovações (fase 6) ---------- */
+
+const canais = { tipo: 'escolha' as const, opcoes: [{ valor: 'whatsapp', rotulo: 'WhatsApp', icone: WhatsappLogoIcon }, { valor: 'email', rotulo: 'E-mail', icone: EnvelopeSimpleIcon }, { valor: 'app', rotulo: 'App do cliente', icone: DeviceMobileIcon }], outra: false }
+
+/** Cartões de exemplo (os mesmos tipos que a demonstração produz), repetidos com outro cliente até a quantidade pedida. */
+function itensDaCentral(p: ParamsLab): ItemAprovacao[] {
+  const n = p.estado === 'vazio' ? 0 : quantos(p.itens, 8)
+  const longo = p.texto !== 'curto'
+  const modelos: ((cli: { id: string; nome: string }, i: number) => ItemAprovacao)[] = [
+    (cli, i) => ({ setor: 'fiscal', clienteId: cli.id, origem: 'chat', corrigido: false, cartao: { tipo: 'aprovacao', id: `lab-ap-${i}`, resumo: `Transmitir PGDAS-D 10/2026 · ${cli.nome}`, expiraEm: 'expira em 2 dias', argumentos: [{ rotulo: 'Receita bruta', valor: 'R$ 23.166,67' }, { rotulo: 'DAS', valor: 'R$ 1.390,00 · vence 20/11' }] } }),
+    (cli, i) => ({ setor: 'notas', clienteId: cli.id, origem: 'banco', corrigido: false, cartao: { tipo: 'aprovacao', id: `lab-ap-${i}`, resumo: `Enviar ${longo ? textoDe(p.texto, i) : 'o DANFE 4.512'} ao cliente · ${cli.nome}`, expiraEm: 'expira em 1 dia', argumentos: [{ rotulo: 'Arquivo', valor: longo ? textoDe(p.texto, i + 1) : 'DANFE 4512.pdf' }, { rotulo: 'Canal', valor: 'App do cliente', campo: 'canal', bruto: 'app', editavel: canais }, { rotulo: 'Pedido por', valor: 'Fernanda Lima' }] } }),
+    (cli, i) => ({ setor: 'dp', clienteId: cli.id, origem: 'banco', corrigido: false, cartao: { tipo: 'aprovacao', id: `lab-ap-${i}`, resumo: `Contrato de experiência 45+45 para 2 admissões · ${cli.nome}`, expiraEm: 'expira em 10 h', argumentos: [{ rotulo: 'Início', valor: '23/11/2026', campo: 'inicio', bruto: '2026-11-23', editavel: { tipo: 'data' } }, { rotulo: 'Ferramenta', valor: 'contrato.gerar (executar)' }] } }),
+    (cli, i) => ({ setor: 'contabil', clienteId: cli.id, origem: 'banco', corrigido: false, cartao: { tipo: 'aprovacao', id: `lab-ap-${i}`, resumo: `Enviar o balancete ao cliente · ${cli.nome}`, expiraEm: 'expira em 3 dias', argumentos: [{ rotulo: 'Competência', valor: '10/2026', campo: 'competencia', bruto: '10/2026', editavel: { tipo: 'competencia' } }, { rotulo: 'Canal', valor: 'E-mail', campo: 'canal', bruto: 'email', editavel: canais }] } }),
+    (_cli, i) => ({ setor: 'financeiro_escritorio', clienteId: null, origem: 'banco', corrigido: false, cartao: { tipo: 'aprovacao', id: `lab-ap-${i}`, resumo: 'Gerar as cobranças de dezembro com NFS-e', lote: 142, expiraEm: 'expira em 5 dias', argumentos: [{ rotulo: 'Clientes', valor: '142' }, { rotulo: 'Total', valor: p.texto === 'numeros' ? 'R$ 12.345.678.901,23' : 'R$ 203.120,00' }] } }),
+    (cli, i) => ({ setor: 'societario', clienteId: cli.id, origem: 'chat', corrigido: false, cartao: { tipo: 'aprovacao', id: `lab-ap-${i}`, resumo: `Mandar o instrumento para assinatura eletrônica · ${cli.nome}`, expiraEm: 'expira em 3 dias', argumentos: [{ rotulo: 'Ferramenta', valor: 'enviar_para_assinatura (executar)' }] } }),
+  ]
+  return Array.from({ length: n }, (_, i) => modelos[i % modelos.length](exemplo.clientes[i % exemplo.clientes.length], i))
+}
+
+function FichaCentralAprovacoes({ p }: { p: ParamsLab }) {
+  const todos = useMemo(() => itensDaCentral(p), [p])
+  const [decididos, setDecididos] = useState<Record<string, string>>({})
+  const [filtro, setFiltro] = useState<FiltroAprovacoes>(p.estado === 'selecionado' && todos[2] ? { cartao: todos[2].cartao.id } : {})
+  const itens = todos.filter((i) => !decididos[i.cartao.id])
+  const registro = Object.entries(decididos)
+  return (
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,32rem)_minmax(0,1fr)]">
+      {/* A mesma peça da folha (direita no computador, inteira no celular), numa moldura do tamanho dela. */}
+      <div data-vitrine className="bg-popover text-popover-foreground shadow-campo rounded-cartao flex h-[44rem] max-h-[80dvh] min-w-0 flex-col border">
+        <div className="flex flex-col gap-1 border-b p-4">
+          <p className="font-semibold">Aprovações</p>
+          <p className="text-muted-foreground text-sm">Tudo o que os integrantes prepararam e espera a sua decisão. Decidir aqui vale no chat, no sino e na Visão geral.</p>
+        </div>
+        <PainelAprovacoes
+          itens={itens}
+          carregando={p.estado === 'carregando'}
+          erro={p.estado === 'erro' ? 'Sem conexão com o banco. Os cartões continuam lá: tente de novo.' : null}
+          onTentar={() => {}}
+          filtro={filtro}
+          onFiltro={setFiltro}
+          onDecidir={(item, d, comentario) => setDecididos((x) => ({ ...x, [item.cartao.id]: `${d}${comentario ? ` · “${comentario}”` : ''}` }))}
+          nomeCliente={(id) => exemplo.clientes.find((c) => c.id === id)?.nome}
+        />
+      </div>
+      <Caixa>
+        <p className="flex items-center gap-1.5 text-sm font-medium">
+          <ShieldCheckIcon className="size-4" /> Decisões nesta demonstração
+        </p>
+        {registro.length === 0 ? (
+          <p className="text-muted-foreground text-xs">Corrija um valor sublinhado, aprove, recuse com um porquê ou aprove o lote de um setor: a decisão aparece aqui (nas telas, ela executa e vira lição do integrante).</p>
+        ) : (
+          <ul className="text-muted-foreground flex flex-col gap-1 text-xs" aria-label="Decisões">
+            {registro.map(([id, d]) => (
+              <li key={id} className="break-words">
+                {todos.find((i) => i.cartao.id === id)?.cartao.resumo}: {d}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Caixa>
+    </div>
+  )
+}
+
 export const fichasEdicao: FichaLab[] = [
   {
     id: 'valor-editavel',
@@ -194,5 +260,13 @@ export const fichasEdicao: FichaLab[] = [
     descricao: 'O rascunho vem com lacunas no que o integrante não sabe; cada uma abre um seletor (número, chips, plano de dois eixos) e, preenchida, vira valor editável. "Faltam duas" conta o que falta. E o cartão de aprovação com argumentos editáveis.',
     eixos: { estados: ['padrao', 'selecionado'], texto: true },
     render: (p) => <FichaLacunas p={p} />,
+  },
+  {
+    id: 'central-aprovacoes',
+    nome: 'Central de aprovações',
+    grupo: 'Edição no lugar',
+    descricao: 'Painel global aberto pelo botão "Aprovações" ao lado do sino: tudo o que espera a decisão da pessoa, por setor e cliente. Cada cartão corrige no lugar, aprova ou recusa, com um comentário opcional que vira lição do integrante; o setor com mais de um cartão tem "Aprovar os N". "Selecionado" abre focado num cartão, como o "Corrigir" do sino.',
+    eixos: { estados: ['padrao', 'selecionado', 'carregando', 'vazio', 'erro'], itens: true, texto: true },
+    render: (p) => <FichaCentralAprovacoes key={`${p.estado}-${p.itens}-${p.texto}`} p={p} />,
   },
 ]

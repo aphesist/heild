@@ -7,6 +7,7 @@ import type { Aviso } from '@/dados/tipos'
 import { cn } from '@/lib/utils'
 import { useTema } from '@/theme/ThemeProvider'
 import { useLoja } from '@/ambiente/loja'
+import { abrirAprovacoes } from '@/ambiente/cartoes-aprovacao'
 import { BotoesDecisao, ResultadoDecisao, type Decisao } from './botoes-decisao'
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
   embutido?: boolean
   /** Id do registro da decisão na loja (o cartão no chat): decidir aqui vale na contagem de pendentes e em toda tela. */
   idDecisao?: string
+  /** "Corrigir": padrão, abre a central de aprovações focada no cartão (`idDecisao`). */
+  onCorrigir?: () => void
   className?: string
 }
 
@@ -25,7 +28,7 @@ interface Props {
  * (subplano 02, 3.2; Home, subplano 03, 4.1). Decidido some da Home; aqui
  * mostra o resultado para o laboratório.
  */
-export function AvisoIntegrante({ aviso, onDecidir, onAbrirChat, embutido, idDecisao, className }: Props) {
+export function AvisoIntegrante({ aviso, onDecidir, onAbrirChat, embutido, idDecisao, onCorrigir, className }: Props) {
   const { integrante } = useTema()
   const i = integrante(aviso.setor)
   const loja = useLoja()
@@ -66,8 +69,10 @@ export function AvisoIntegrante({ aviso, onDecidir, onAbrirChat, embutido, idDec
           ) : (
             <BotoesDecisao
               lote={aviso.decisao.lote}
+              // Corrigir no padrão novo: a central abre com este cartão e o argumento se corrige no lugar.
+              onCorrigir={onCorrigir ?? (idDecisao ? () => abrirAprovacoes({ cartao: idDecisao }) : undefined)}
               onDecidir={(d) => {
-                if (d !== 'editar_e_aprovar') setDecidido(d)
+                setDecidido(d)
                 onDecidir?.(d)
               }}
             />

@@ -11,6 +11,7 @@ import { useTabela } from '@/nucleo/react'
 import { repos } from '@/nucleo/repositorios'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { useEfeitosCartao } from './efeitos'
+import { abrirAprovacoes } from './cartoes-aprovacao'
 import { Button } from '@/components/ui/button'
 import { Orb } from '@/components/ui/orb'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -283,12 +284,13 @@ export function CentralAvisos({ onPreferencias }: { onPreferencias?: () => void 
         {pendente && (
           <div className="px-3 pb-3 pl-12">
             <BotoesDecisao
+              // Corrigir no padrão novo: a central de aprovações abre com este cartão, e o argumento se corrige no lugar.
+              onCorrigir={() => {
+                setAberto(false)
+                repos.notificacoes.ler(n.id, usuario.id)
+                abrirAprovacoes({ cartao: pendente.cartao.id })
+              }}
               onDecidir={(d) => {
-                if (d === 'editar_e_aprovar') {
-                  setAberto(false)
-                  nav.irPara({ modulo: 'inicio', aba: 'time', integrante: pendente.integrante })
-                  return
-                }
                 efeitos(pendente.cartao.id, d)
                 repos.notificacoes.ler(n.id, usuario.id)
               }}

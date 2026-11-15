@@ -462,7 +462,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
         tamanhos: ['L', 'G'],
         conteudo: () =>
           faltam.length === 0 ? (
-            <EstadoVazio compacto icone={CheckCircleIcon} titulo="Fase 0 cumprida" descricao="Pode tirar este widget no Editar painel." />
+            <EstadoVazio compacto icone={CheckCircleIcon} titulo="Fase 0 cumprida" descricao="Pode tirar este widget em Organizar." />
           ) : (
             <ol className="flex flex-wrap gap-2">
               {primeiros.map((p, i) => (

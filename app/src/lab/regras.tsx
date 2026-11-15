@@ -77,15 +77,19 @@ function Pagina({ titulo, descricao, children }: { titulo: string; descricao: Re
 
 function Grade() {
   const tamanhosDemo: TamanhoWidget[] = ['P', 'P', 'M', 'G', 'L', 'M', 'P', 'XL']
-  const catalogo: DefWidget[] = tamanhosDemo.map((t, i) => ({
+  const catalogo: DefWidget[] = tamanhosDemo.map((_t, i) => ({
     id: `g${i}`,
-    titulo: `${t} · ${dimensoes[t].rotulo}`,
+    titulo: `Widget ${i + 1}`,
     descricao: '',
-    tamanhos: [t],
-    conteudo: () => <p className="text-muted-foreground text-sm">{dimensoes[t].colunas} coluna(s) de largura; teto de {dimensoes[t].linhas} célula(s). A altura é a do conteúdo.</p>,
+    tamanhos: ['P', 'M', 'G', 'L', 'XL'],
+    conteudo: (tam) => (
+      <p className="text-muted-foreground text-sm">
+        {tam} · {dimensoes[tam].rotulo}: {dimensoes[tam].colunas} coluna(s) de largura; teto de {dimensoes[tam].linhas} célula(s). A altura é a do conteúdo.
+      </p>
+    ),
   }))
   return (
-    <Pagina titulo="Grade" descricao="PADRAO_DE_INTERFACE.md, 1 e 3: colunas pela largura do contêiner (menos de 600px: 2; até 980: 4; até 1320: 6; acima: 8). O tamanho dá a largura e o teto; a altura vem do conteúdo, em módulos de 4px; nenhum widget estica para fechar vão. Mude a largura do quadro para ver as colunas mudarem.">
+    <Pagina titulo="Grade" descricao="PADRAO_DE_INTERFACE.md, 1 e 3: colunas pela largura do contêiner (menos de 600px: 2; até 980: 4; até 1320: 6; acima: 8). O tamanho dá a largura e o teto; a altura vem do conteúdo, em módulos de 4px; nenhum widget estica para fechar vão. Mude a largura do quadro para ver as colunas mudarem. Manipulação direta: passe o mouse num widget e arraste pela alça de cima (troca de lugar) ou pelo canto de baixo (muda o tamanho, com prévia); no toque, segure o widget; pelo teclado, Tab até a alça e Espaço. Cada mudança grava e oferece Desfazer; Organizar é a alternativa por teclado, com esconder, adicionar e restaurar.">
       <GradeWidgets chave="lab:regra-grade" catalogo={catalogo} padrao={catalogo.map((d, i) => ({ id: d.id, tamanho: tamanhosDemo[i] }))} />
     </Pagina>
   )
@@ -309,7 +313,7 @@ function Movimento() {
 }
 
 export const fichasRegras: FichaLab[] = [
-  { id: 'regra-grade', nome: 'Grade', grupo: 'Regras', descricao: 'Colunas, tamanhos P a XL, altura pelo conteúdo.', eixos: { estados: ['padrao'] }, render: () => <Grade /> },
+  { id: 'regra-grade', nome: 'Grade', grupo: 'Regras', descricao: 'Colunas, tamanhos P a XL, altura pelo conteúdo; mover e redimensionar pelas alças.', eixos: { estados: ['padrao'] }, render: () => <Grade /> },
   { id: 'regra-espaco', nome: 'Espaçamento', grupo: 'Regras', descricao: 'Os passos de 4px e onde cada um entra.', eixos: { estados: ['padrao'] }, render: () => <Espacamento /> },
   { id: 'regra-tipografia', nome: 'Tipografia', grupo: 'Regras', descricao: 'A escala do design system.', eixos: { estados: ['padrao'], texto: true }, render: (p) => <Tipografia p={p} /> },
   { id: 'regra-raios', nome: 'Raios', grupo: 'Regras', descricao: 'Os raios e como se aninham.', eixos: { estados: ['padrao'] }, render: () => <Raios /> },

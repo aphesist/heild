@@ -1,7 +1,7 @@
-import { ArrowRightIcon, ArrowBendDownRightIcon, ShieldCheckIcon, TableIcon } from '@phosphor-icons/react'
+import { ArrowRightIcon, ArrowBendDownRightIcon, ShieldCheckIcon, TableIcon, XIcon } from '@phosphor-icons/react'
 import { CartaoRascunho } from './cartao-rascunho'
 import { ArrowsLeftRightIcon, ChatCircleTextIcon, FileTextIcon, ReceiptIcon } from '@phosphor-icons/react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useDocumentos } from '@/ambiente/documentos'
 import { useEfeitosCartao } from '@/ambiente/efeitos'
 import { clientePorNome, integranteDoSetor, useFluxos } from '@/ambiente/fluxos'
@@ -13,6 +13,7 @@ import { banco } from '@/nucleo/banco'
 import { repos } from '@/nucleo/repositorios'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Orb } from '@/components/ui/orb'
 import type { ArgumentoCartao, Cartao } from '@/dados/tipos'
 import type { SetorIntegrante } from '@/theme/tipos'
@@ -37,22 +38,41 @@ function assinatura(args: ArgumentoCartao[]): string {
   return h.toString(16).padStart(8, '0').slice(0, 7)
 }
 
+/** Alterações já registradas no cartão do banco (corrigido em outro lugar: chat, sino, central). */
+function alteracoesGuardadas(id: string): { rotulo: string; de: string; para: string }[] {
+  const lista = (banco.obter('cartao_aprovacao', id)?.extras?.alteracoes as { rotulo: string; de: string; para: string }[] | undefined) ?? []
+  const porRotulo = new Map<string, { rotulo: string; de: string; para: string }>()
+  for (const x of lista) porRotulo.set(x.rotulo, { rotulo: x.rotulo, de: porRotulo.get(x.rotulo)?.de ?? x.de, para: x.para })
+  return [...porRotulo.values()]
+}
+
 /**
  * Cartão de aprovação (Fundações 6.4; fase 6): resumo, argumentos, aprovar ou
  * recusar, expira em. Os argumentos ligados a um campo da ação são editáveis no
  * próprio cartão (ValorEditavel): a correção muda a ação guardada no cartão, a
  * assinatura dos argumentos muda e a alteração fica registrada; aprovar depois
  * de corrigir vale como "aprovado com edição". Não há mais "Editar e aprovar".
+ *
+ * Com `comentario` (central de aprovações), a pessoa pode deixar um porquê:
+ * opcional ao aprovar ("Comentar") e oferecido ao recusar. O comentário segue
+ * com a decisão e vira lição do integrante.
  */
-export function CartaoAprovacao({ cartao, onDecidir, className }: { cartao: Por<'aprovacao'>; onDecidir?: (d: Decisao) => void; semEditar?: boolean; className?: string }) {
+export function CartaoAprovacao({ cartao, onDecidir, comentario: comComentario, className }: { cartao: Por<'aprovacao'>; onDecidir?: (d: Decisao, comentario?: string) => void; semEditar?: boolean; /** Campo curto e opcional de comentário (vira lição do integrante). */ comentario?: boolean; className?: string }) {
   const loja = useLoja()
   const { usuario } = useSessao()
   const [local, setDecidido] = useState<Decisao | null>(null)
   const decidido = (loja.estado.decisoes[cartao.id] as Decisao | undefined) ?? local
   const [args, setArgs] = useState<ArgumentoCartao[]>(cartao.argumentos ?? [])
-  const [alteracoes, setAlteracoes] = useState<{ rotulo: string; de: string; para: string }[]>([])
-  const original = assinatura(cartao.argumentos ?? [])
+  const [alteracoes, setAlteracoes] = useState<{ rotulo: string; de: string; para: string }[]>(() => alteracoesGuardadas(cartao.id))
+  // A assinatura de origem é a de quando o cartão chegou: a correção gravada no banco não a muda.
+  const [original] = useState(() => assinatura(cartao.argumentos ?? []))
   const atual = assinatura(args)
+  const [etapa, setEtapa] = useState<'botoes' | 'comentando' | 'recusando'>('botoes')
+  const [nota, setNota] = useState('')
+  const campoNota = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (etapa !== 'botoes') campoNota.current?.focus()
+  }, [etapa])
   const corrigir = (i: number, v: QualquerValor) => {
     const a = args[i]
     if (!a.editavel || !a.campo) return
@@ -70,13 +90,19 @@ export function CartaoAprovacao({ cartao, onDecidir, className }: { cartao: Por<
         { texto: `${usuario.nome} alterou “${a.rotulo}” de ${a.valor} para ${texto} antes de aprovar: ${cartao.resumo}` },
       )
   }
+  const decidir = (d: Decisao) => {
+    const final: Decisao = d === 'aprovar' && alteracoes.length ? 'editar_e_aprovar' : d
+    setDecidido(final)
+    onDecidir?.(final, nota.trim() || undefined)
+  }
+  const idNota = `nota-${cartao.id}`
   return (
     <div data-cartao-pendente={!decidido || undefined} className={cn(casca, !decidido && 'border-warning/60', className)}>
       <div className="flex items-start gap-2">
         <ShieldCheckIcon className="text-warning mt-0.5 size-4 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="text-muted-foreground text-xs">Pede sua aprovação{cartao.lote ? ` · lote de ${cartao.lote}` : ''}</div>
-          <div className="text-sm font-medium">{cartao.resumo}</div>
+          <div className="text-sm font-medium break-words">{cartao.resumo}</div>
         </div>
         {cartao.expiraEm && !decidido && <span className="text-muted-foreground shrink-0 text-xs">{cartao.expiraEm}</span>}
       </div>
@@ -85,7 +111,7 @@ export function CartaoAprovacao({ cartao, onDecidir, className }: { cartao: Por<
           {args.map((a, i) => (
             <div key={a.rotulo} className="contents">
               <dt className="text-muted-foreground">{a.rotulo}</dt>
-              <dd className="min-w-0 font-medium tabular-nums">{a.editavel && a.campo && !decidido ? <ValorEditavel rotulo={a.rotulo} valor={a.bruto ?? a.valor} config={a.editavel} formatar={() => args[i].valor} desfazer={false} onMudar={(v) => corrigir(i, v)} /> : a.valor}</dd>
+              <dd className="min-w-0 font-medium break-words tabular-nums">{a.editavel && a.campo && !decidido ? <ValorEditavel rotulo={a.rotulo} valor={a.bruto ?? a.valor} config={a.editavel} formatar={() => args[i].valor} desfazer={false} onMudar={(v) => corrigir(i, v)} /> : a.valor}</dd>
             </div>
           ))}
         </dl>
@@ -95,19 +121,45 @@ export function CartaoAprovacao({ cartao, onDecidir, className }: { cartao: Por<
           Você corrigiu {alteracoes.map((x) => `${x.rotulo.toLowerCase()} (${x.de} → ${x.para})`).join(', ')}. Assinatura dos argumentos: <code className="font-mono">{original}</code> → <code className="font-mono">{atual}</code>.
         </p>
       )}
+      {!decidido && comComentario && etapa !== 'botoes' && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={idNota} className="text-xs font-medium">
+            {etapa === 'recusando' ? 'Por quê? O integrante aprende com isso' : 'Comentário'} <span className="text-muted-foreground font-normal">(opcional)</span>
+          </label>
+          <Input
+            ref={campoNota}
+            id={idNota}
+            value={nota}
+            maxLength={280}
+            placeholder={etapa === 'recusando' ? 'Ex.: o cliente pediu para esperar a nota corrigida' : 'Ex.: da próxima vez, mande pelo WhatsApp'}
+            onChange={(e) => setNota(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') (e.preventDefault(), decidir(etapa === 'recusando' ? 'recusar' : 'aprovar'))
+              if (e.key === 'Escape') (e.stopPropagation(), setEtapa('botoes'))
+            }}
+          />
+        </div>
+      )}
       {decidido ? (
         <ResultadoDecisao decisao={decidido} />
+      ) : comComentario && etapa === 'recusando' ? (
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => decidir('recusar')}>
+            <XIcon /> {nota.trim() ? 'Recusar' : 'Recusar sem comentário'}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setEtapa('botoes')}>
+            Voltar
+          </Button>
+        </div>
       ) : (
-        <BotoesDecisao
-          lote={cartao.lote}
-          semEditar
-          rotuloAprovar={alteracoes.length ? 'Aprovar com a correção' : undefined}
-          onDecidir={(d) => {
-            const final: Decisao = d === 'aprovar' && alteracoes.length ? 'editar_e_aprovar' : d
-            setDecidido(final)
-            onDecidir?.(final)
-          }}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <BotoesDecisao lote={cartao.lote} semEditar rotuloAprovar={alteracoes.length ? 'Aprovar com a correção' : undefined} onDecidir={(d) => (comComentario && d === 'recusar' ? setEtapa('recusando') : decidir(d))} />
+          {comComentario && etapa === 'botoes' && (
+            <Button size="sm" variant="link" className="text-muted-foreground px-1" onClick={() => setEtapa('comentando')}>
+              <ChatCircleTextIcon /> Comentar
+            </Button>
+          )}
+        </div>
       )}
     </div>
   )

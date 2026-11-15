@@ -5,19 +5,26 @@ import { Button } from '@/components/ui/button'
 export type Decisao = 'aprovar' | 'recusar' | 'editar_e_aprovar'
 
 /**
- * Aprovar / Editar e aprovar / Recusar. Em produção os três chamam
- * `aprovacao.decidir` (02, 9.3); não há botão de cartão que chame outra coisa.
+ * Aprovar / Recusar. Em produção os dois chamam `aprovacao.decidir` (02, 9.3);
+ * não há botão de cartão que chame outra coisa. O antigo "Editar e aprovar"
+ * saiu (fase 6): onde o cartão não mostra os argumentos (sino, aviso da Home),
+ * `onCorrigir` põe o botão "Corrigir", que leva à central de aprovações com o
+ * cartão aberto, e lá o argumento se corrige no lugar.
  */
 export function BotoesDecisao({
   onDecidir,
+  onCorrigir,
   lote,
   semEditar,
   tamanho = 'sm',
   rotuloAprovar,
 }: {
   onDecidir?: (d: Decisao) => void
+  /** Leva aonde se corrige (a central de aprovações focada no cartão). */
+  onCorrigir?: () => void
   /** Quantidade num cartão em lote ("Aprovar os 14"). */
   lote?: number
+  /** Sem o "Corrigir" mesmo com `onCorrigir` (o cartão já corrige no lugar). */
   semEditar?: boolean
   tamanho?: 'sm' | 'default'
   /** Rótulo próprio do aprovar ("Aprovar com a correção"). */
@@ -28,9 +35,9 @@ export function BotoesDecisao({
       <Button size={tamanho} onClick={() => onDecidir?.('aprovar')}>
         <CheckIcon weight="bold" /> {rotuloAprovar ?? (lote ? `Aprovar os ${lote}` : 'Aprovar')}
       </Button>
-      {!semEditar && (
-        <Button size={tamanho} variant="outline" onClick={() => onDecidir?.('editar_e_aprovar')}>
-          <PencilSimpleIcon /> Editar e aprovar
+      {onCorrigir && !semEditar && (
+        <Button size={tamanho} variant="outline" onClick={onCorrigir}>
+          Corrigir
         </Button>
       )}
       <Button size={tamanho} variant="ghost" onClick={() => onDecidir?.('recusar')}>

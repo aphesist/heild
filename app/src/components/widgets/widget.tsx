@@ -46,13 +46,23 @@ interface Props {
   onRemover?: () => void
   onTamanho?: (t: TamanhoWidget) => void
   className?: string
-  /** Alça de arraste (atributos e eventos do dnd-kit), aplicada ao widget inteiro no modo edição. */
+  /** Alça de arraste (atributos e eventos do dnd-kit), aplicada ao widget inteiro no modo Organizar. */
   alca?: Record<string, unknown>
+  /** Ref da caixa (no modo Organizar, a caixa é a alça do teclado). */
+  refArtigo?: (el: HTMLElement | null) => void
+  /** Fora do modo Organizar: o toque longo que levanta o widget (evento do dnd-kit), no widget inteiro. */
+  toque?: Record<string, unknown>
+  /** Alças de mover e de tamanho (manipulação direta), desenhadas por cima da caixa. */
+  alcas?: ReactNode
+  /** Mostra as alças sem hover nem foco (widget levantado pelo toque, ou no meio do gesto de tamanho). */
+  alcasVisiveis?: boolean
 }
 
 /**
  * A caixa de todo widget: mesma superfície, raio, respiro e cabeçalho.
- * No modo edição treme levemente, ganha o botão de esconder e a escolha de tamanho.
+ * Na grade, ganha as alças de mover e de tamanho ao passar o mouse, no foco
+ * ou levantado pelo toque longo. No modo Organizar treme levemente, ganha o
+ * botão de esconder e a escolha de tamanho.
  */
 /**
  * Contrato de transbordo (PADRAO_DE_INTERFACE.md, 3): passou do teto, o corpo rola
@@ -93,7 +103,7 @@ function useTransbordo(corpo: React.RefObject<HTMLDivElement | null>, ativo: boo
   return estado
 }
 
-export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover, onTamanho, className, alca }: Props) {
+export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover, onTamanho, className, alca, refArtigo, toque, alcas, alcasVisiveis }: Props) {
   const Icone = def.icone
   const usado = conteudo ?? tamanho
   const corpo = useRef<HTMLDivElement>(null)
@@ -104,14 +114,17 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
     <ContextoTamanho.Provider value={usado}>
       <ContextoTituloWidget.Provider value={def.titulo}>
       <article
+        ref={refArtigo}
         aria-label={def.titulo}
+        data-alcas={alcasVisiveis || undefined}
+        data-levantavel={toque ? '' : undefined}
         className={cn(
           'group/widget bg-surface shadow-cartao rounded-cartao relative flex h-full min-h-0 flex-col gap-3 p-4 transition-shadow',
           editando && 'widget-tremendo cursor-grab touch-none select-none active:cursor-grabbing',
           arrastando && 'opacity-40',
           className,
         )}
-        {...(editando ? alca : {})}
+        {...(editando ? alca : toque)}
       >
         {/*
           Cabeçalho: ícone e título numa linha só (o título trunca, nunca empurra o ícone para cima);
@@ -165,6 +178,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
           </Sheet>
         )}
 
+        {!editando && alcas}
         {editando && (
           <>
             <button

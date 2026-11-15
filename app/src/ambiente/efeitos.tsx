@@ -4,16 +4,29 @@ import { useSessao } from './sessao'
 import { useEfeitosS03 } from '@/telas/painel/s03/cartoes'
 import { decidirCartaoFin } from '@/telas/financeiro/cartoes'
 import { efeitoCartaoS02 } from './agente-s02'
-import { aplicarEfeitoS04 } from '@/telas/tarefas/cartoes'
+import { aplicarEfeitoS04, CHAVE_APRENDIZADOS, type Aprendizado } from '@/telas/tarefas/cartoes'
+import { repos } from '@/nucleo/repositorios'
+import { rotuloSetorCurto } from '@/nucleo/permissoes'
+import type { SetorIntegrante } from '@/theme/tipos'
 import { efeitoS09 } from './efeitos-s09'
 import { efeitoCartaoS10 } from '@/cliente/motor' // S10
 import { efeitoCartaoS08a } from '@/telas/bpo/integrantes-s08a' // S08a
+
+/** Opções da decisão (central de aprovações, fase 6). */
+export interface OpcoesDecisao {
+  /** Comentário opcional de quem decidiu: fica no cartão e vira lição do integrante. */
+  comentario?: string
+  /** Setor do integrante que pediu, para o cartão que só existe no chat (o do banco já guarda). */
+  setor?: string
+}
 
 /**
  * O que cada cartão de aprovação faz no escritório quando a pessoa decide.
  * Aprovar executa (a tarefa anda, o cliente recebe, o evento fica com o nome
  * de quem aprovou); recusar devolve o trabalho a uma pessoa; editar e aprovar
- * vale como aprovar, com a edição registrada.
+ * vale como aprovar, com a edição registrada. O comentário (opcional) fica no
+ * cartão e entra nos aprendizados do integrante (`s04:integrantes:aprendizados`,
+ * os mesmos da Governança da IA e da ficha da tarefa).
  */
 export function useEfeitosCartao() {
   const loja = useLoja()
@@ -21,15 +34,39 @@ export function useEfeitosCartao() {
   const conversaDe = useConversaDe()
   const efeitosS03 = useEfeitosS03() // S03: cartões `s03-...` do Painel B
 
-  return (cartao: string, decisao: string) => {
+  return (cartao: string, decisao: string, op: OpcoesDecisao = {}) => {
+    const comentario = op.comentario?.trim() || undefined
+    executar(cartao, decisao, comentario)
+    if (comentario) guardarComentario(cartao, decisao, comentario, op.setor)
+  }
+
+  /** Grava o comentário no cartão decidido e o transforma em lição (o S04 já guarda o da recusa e o da edição). */
+  function guardarComentario(cartao: string, decisao: string, comentario: string, setorDoChat?: string) {
+    const c = repos.cartoes.obter(cartao)
+    // A alçada pode ter barrado a decisão (Financeiro): sem decisão, não há o que comentar.
+    if (!c?.decidido_em) return
+    try {
+      repos.cartoes.atualizar(cartao, { comentario }, { ferramenta: 'aprovacao.decidir', texto: `${usuario.nome} comentou a decisão “${c.resumo_humano || cartao}”: ${comentario}` })
+    } catch {
+      // O comentário é complemento: a decisão já valeu.
+    }
+    if (cartao.startsWith('s04-') && decisao !== 'aprovar') return
+    const setor = String(c.extras?.setor ?? setorDoChat ?? 'geral')
+    const texto = decisao === 'recusar' ? `Recusado: ${comentario}` : decisao === 'editar_e_aprovar' ? `Corrigido antes de aprovar: ${comentario}` : `Aprovado, com a observação: ${comentario}`
+    const lista = (repos.telas.obter(CHAVE_APRENDIZADOS)?.valor as Aprendizado[] | undefined) ?? []
+    const licao: Aprendizado = { integrante: String(c.extras?.integrante ?? rotuloSetorCurto[setor as SetorIntegrante] ?? setor), setor, acao: String(c.extras?.acao ?? (c.argumentos as { tipo?: string })?.tipo ?? c.ferramenta), texto, quando: new Date().toISOString(), por: usuario.nome }
+    repos.telas.lembrar(CHAVE_APRENDIZADOS, [...lista, licao])
+  }
+
+  function executar(cartao: string, decisao: string, comentario?: string) {
     // S07: cartões do Financeiro (s07-* e o lote fik1) conferem a alçada e executam pelas entidades.
     if (decidirCartaoFin(cartao, decisao, { loja, usuario, permissoes })) return
     loja.decidir(cartao, decisao)
     if (efeitosS03(cartao, decisao)) return // S03
     // S02: cartões dos integrantes do Painel A executam a ação guardada no cartão e aprendem com a decisão.
-    if (cartao.startsWith('s02-')) return efeitoCartaoS02(cartao, decisao, { loja, quem: usuario.nome, usuarioId: usuario.id })
+    if (cartao.startsWith('s02-')) return efeitoCartaoS02(cartao, decisao, { loja, quem: usuario.nome, usuarioId: usuario.id, comentario })
     // S04: cartões da S04 (id s04-...) têm o efeito registrado pela tela que os criou.
-    if (cartao.startsWith('s04-') && aplicarEfeitoS04(cartao, decisao, { loja, usuario, conversaDe })) return
+    if (cartao.startsWith('s04-') && aplicarEfeitoS04(cartao, decisao, { loja, usuario, conversaDe, comentario })) return
     // S09: cartões do Raio-X, da implantação e do envio de documentos (chaves s09-*).
     if (efeitoS09(loja, usuario.nome, cartao, decisao)) return
     if (cartao.startsWith('s10-')) return efeitoCartaoS10(loja, cartao, decisao, usuario.nome, conversaDe) // S10: cartões do app do cliente
@@ -42,7 +79,7 @@ export function useEfeitosCartao() {
       return
     }
     if (!aprovou) {
-      loja.registrar(quem, `Recusou o cartão ${cartao}`)
+      loja.registrar(quem, `Recusou o cartão ${cartao}${comentario ? ` (motivo: ${comentario})` : ''}`)
       loja.toast('Recusado. O integrante não executa; a tarefa volta para uma pessoa decidir.')
       return
     }

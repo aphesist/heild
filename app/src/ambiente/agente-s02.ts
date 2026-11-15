@@ -4,6 +4,7 @@ import { repos } from '@/nucleo/repositorios'
 import { nomeDoSetor, type FimFluxo } from '@/dados/simulacao'
 import type { ArgumentoCartao, Cartao } from '@/dados/tipos'
 import type { SetorIntegrante } from '@/theme/tipos'
+import { argumentosParaGuardar } from './cartoes-aprovacao'
 import { integranteDoSetor } from './fluxos'
 import { useLoja, type Destino } from './loja'
 import { useSessao } from './sessao'
@@ -91,8 +92,9 @@ function aprender(setor: SetorIntegrante, tipo: string, rotulo: string, decisao:
 function fraseDoAprendizado(l: LicaoS02, decisao: string, editado: boolean): string {
   const total = l.aprovados + l.editados + l.recusados
   const semEdicao = total ? l.aprovados / total : 0
-  if (decisao === 'recusar') return `Anotei a recusa em “${l.rotulo}”: não executo e devolvo para uma pessoa. Da próxima vez, confiro isso antes de preparar.`
-  const base = editado ? `Anotei a sua edição em “${l.rotulo}”: uso a versão corrigida como modelo nas próximas.` : `Anotei: “${l.rotulo}” aprovado como preparei.`
+  const nota = l.ultima?.nota ? ` Guardei o seu comentário como lição: “${l.ultima.nota}”.` : ''
+  if (decisao === 'recusar') return `Anotei a recusa em “${l.rotulo}”: não executo e devolvo para uma pessoa.${nota || ' Da próxima vez, confiro isso antes de preparar.'}`
+  const base = (editado ? `Anotei a sua edição em “${l.rotulo}”: uso a versão corrigida como modelo nas próximas.` : `Anotei: “${l.rotulo}” aprovado como preparei.`) + nota
   if (nuncaSozinho.test(l.rotulo)) return `${base} Isso continua sempre com aprovação (transmitir, enviar, pagar e assinar não passam a ser sozinhos).`
   if (total >= 30 && semEdicao >= 0.95) return `${base} Já são ${total} cartões, ${Math.round(semEdicao * 100)}% aprovados sem edição: vou perguntar ao Administrador se posso passar a fazer sozinho.`
   return `${base} ${l.aprovados} de ${total} aprovados sem edição até aqui (com 30 e 95%, peço ao Administrador para fazer sozinho).`
@@ -101,16 +103,16 @@ function fraseDoAprendizado(l: LicaoS02, decisao: string, editado: boolean): str
 /* ---------- Efeito dos cartões da S02 (chamado por efeitos.tsx) ---------- */
 
 /** Decide um cartão `s02-…`: executa (ou não), aprende e responde no chat do integrante. */
-export function efeitoCartaoS02(cartaoId: string, decisao: string, ctx: Omit<ContextoExecucao, 'editado'>) {
+export function efeitoCartaoS02(cartaoId: string, decisao: string, ctx: Omit<ContextoExecucao, 'editado'> & { /** Comentário de quem decidiu: entra na lição. */ comentario?: string }) {
   const cartao = banco.ler('cartao_aprovacao').find((c) => c.id === cartaoId)
   const acao = cartao?.argumentos as AcaoS02 | undefined
   const setor = (cartao?.extras?.setor as SetorIntegrante | undefined) ?? 'geral'
   const rotulo = String(cartao?.extras?.rotulo ?? cartao?.resumo_humano ?? 'cartão')
   const editado = decisao === 'editar_e_aprovar'
   const integrante = integranteDoSetor(setor)
-  const licao = aprender(setor, acao?.tipo ?? 'cartao', rotulo, decisao, ctx.quem)
+  const licao = aprender(setor, acao?.tipo ?? 'cartao', rotulo, decisao, ctx.quem, ctx.comentario)
   if (decisao === 'recusar') {
-    ctx.loja.registrar(ctx.quem, `Recusou: ${cartao?.resumo_humano ?? cartaoId}`)
+    ctx.loja.registrar(ctx.quem, `Recusou: ${cartao?.resumo_humano ?? cartaoId}${ctx.comentario ? ` (motivo: ${ctx.comentario})` : ''}`)
     ctx.loja.mensagemTime(integrante, { autor: { tipo: 'integrante', setor }, texto: fraseDoAprendizado(licao, decisao, false) })
     ctx.loja.toast(`Recusado. O ${nomeDoSetor(setor)} não executa e anotou a decisão.`)
     return
@@ -170,6 +172,9 @@ export function useAgenteS02() {
       const id = `s02-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`
       const cartoes: Cartao[] = [...(p.cartoes ?? [])]
       if (p.cartao) {
+        // Os argumentos de exibição também vão para o banco: a central de aprovações monta o mesmo cartão (e corrige no lugar) sem o chat.
+        const exibidos: ArgumentoCartao[] = [...(p.cartao.argumentos ?? []), ['Pedido por', usuario.nome] as [string, string]].map((a) => (Array.isArray(a) ? { rotulo: a[0], valor: a[1] } : a))
+        const expira = p.cartao.expira ?? 'expira em 2 dias'
         // O cartão nasce no banco já com a ação (decidir em qualquer lugar executa a mesma coisa).
         repos.cartoes.criar(
           {
@@ -183,11 +188,11 @@ export function useAgenteS02() {
             pode_aprovar: p.cartao.podeAprovar ?? [],
             status: 'pendente',
             expira_em: null,
-            extras: { setor: p.setor, rotulo: p.cartao.resumo, cliente_id: p.clienteId ?? null, pedido_por_nome: usuario.nome },
+            extras: { setor: p.setor, rotulo: p.cartao.resumo, cliente_id: p.clienteId ?? null, pedido_por_nome: usuario.nome, argumentos_exibidos: argumentosParaGuardar(exibidos), expira },
           },
           { ferramenta: 'aprovacao.decidir', texto: `${nomeDoSetor(p.setor)} preparou para aprovar: ${p.cartao.resumo}${p.cliente ? ` · ${p.cliente}` : ''}` },
         )
-        cartoes.push({ tipo: 'aprovacao', id, resumo: `${p.cartao.resumo}${p.cliente ? ` · ${p.cliente}` : ''}`, argumentos: [...(p.cartao.argumentos ?? []), ['Pedido por', usuario.nome] as [string, string]].map((a) => (Array.isArray(a) ? { rotulo: a[0], valor: a[1] } : a)), expiraEm: p.cartao.expira ?? 'expira em 2 dias' })
+        cartoes.push({ tipo: 'aprovacao', id, resumo: `${p.cartao.resumo}${p.cliente ? ` · ${p.cliente}` : ''}`, argumentos: exibidos, expiraEm: expira })
       }
       loja.iniciarTrabalho({
         id: `s02-${p.titulo}`,

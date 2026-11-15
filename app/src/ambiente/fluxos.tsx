@@ -7,6 +7,7 @@ import type { PedidoNovaTarefa } from '@/dados/tipos'
 import { useAparencia } from '@/hooks/useAparencia'
 import type { SetorIntegrante } from '@/theme/tipos'
 import type { ContatoCliente } from './clientes'
+import { abrirAprovacoes, filtroDoParametro } from './cartoes-aprovacao'
 import { GavetaTrilha } from '@/telas/painel/trilha'
 import { FichaClienteGaveta } from '@/telas/painel/ficha-cliente'
 import { FichaTarefa } from '@/telas/tarefas/FichaTarefa'
@@ -131,6 +132,10 @@ export function FluxosProvider({ children }: { children: ReactNode }) {
   const navInterna = useMemo(
     () => ({
       irPara: (d: Destino) => {
+        // Fase 6: a central de aprovações abre por cima de onde estiver (link, aviso, toast).
+        const aprovacoes = filtroDoParametro(d.aprovacoes)
+        if (aprovacoes) abrirAprovacoes(aprovacoes)
+        if (aprovacoes && !d.aba && !d.tarefa && !d.ficha && !d.trilha) return
         if (d.tarefa) setAberto({ tipo: 'tarefa', id: d.tarefa })
         else if (d.ficha) setAberto({ tipo: 'ficha', clienteId: d.ficha })
         else if (d.trilha) setAberto({ tipo: 'trilha', clienteId: d.trilha })

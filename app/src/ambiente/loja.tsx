@@ -79,6 +79,8 @@ export interface Destino {
   conversaInterna?: string
   /** S07: contrato de honorários aberto (Financeiro › Contratos). */
   contrato?: string
+  /** Fase 6: central de aprovações aberta por cima (`todas`, `setor:fiscal`, `cliente:c1` ou o id do cartão em foco). */
+  aprovacoes?: string
 }
 
 /** Quem a notificação traz: um integrante (orb no estado dele) ou um contato do cliente (foto, canal). */

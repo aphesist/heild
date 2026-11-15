@@ -165,6 +165,15 @@
   }
 }
 
+/* Widget na grade, no toque: o toque longo levanta o widget, sem o menu nem a seleção de texto do sistema. */
+@media (pointer: coarse) {
+  article[data-levantavel] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 /* Esconde a barra de rolagem (faixas que rolam de lado, como as abas). */
 @utility sem-barra {
   scrollbar-width: none;
