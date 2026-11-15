@@ -1,4 +1,4 @@
-import { ArrowsClockwiseIcon, CheckCircleIcon, DownloadSimpleIcon, FileArrowUpIcon, GoogleChromeLogoIcon, KeyIcon, PlusIcon, PuzzlePieceIcon, SpinnerIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { ArrowsClockwiseIcon, CheckCircleIcon, DownloadSimpleIcon, FileArrowUpIcon, GoogleChromeLogoIcon, KeyIcon, PlusIcon, PuzzlePieceIcon, SpinnerIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { useLoja } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
@@ -6,7 +6,7 @@ import { SeloDemonstracao, useAcao } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoArea, CampoEscolha, CampoTexto, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
-import { rotuloAtividade } from '@/dados/timesheet-catalogo'
+import { catalogoTs, rotuloAtividade } from '@/dados/timesheet-catalogo'
 import { agoraDemo, competenciaDe, diaDe, duracaoMin, HOJE_TS, hm, rotuloCompetencia, somarDias, somarMeses } from '@/dados/timesheet-tempo'
 import type { ConectorCore, VinculoExtensao } from '@/nucleo/modelo/entidades'
 import { todosSetores } from '@/nucleo/permissoes/setores'
@@ -69,12 +69,13 @@ export function TermoCiencia({ onFechar, onAceitar, somenteLeitura }: { onFechar
     >
       <div className="flex flex-col gap-4 text-sm leading-relaxed">
         <p>
-          <strong className="font-medium">Para quê:</strong> saber quanto cada cliente custa ao escritório e acabar com o apontamento manual de horas. Ninguém precisa mais apontar; você confirma o que o sistema deduziu, e vê os seus dados primeiro.
+          <strong className="font-medium">Para quê:</strong> saber quanto cada cliente custa ao escritório com o mínimo de esforço. O registro automático faz quase tudo: você confirma o que o sistema deduziu e vê os seus dados primeiro. O que foi feito fora do sistema (uma ligação, uma guia no portal) você pode lançar à mão, com o tempo padrão do escritório já preenchido.
         </p>
         <div>
           <p className="font-medium">O que é registrado</p>
           <ul className="text-muted-foreground list-disc pl-5">
             <li>As ações na plataforma (abrir tarefa, responder conversa, emitir guia), com hora e cliente.</li>
+            <li>O que você lançar à mão, marcado como lançamento manual, separado do que foi captado sozinho.</li>
             <li>Com a extensão: um sinal por minuto de que você está ativo num portal da lista, e o CNPJ do cliente que o portal mostra. A extensão lê a página só para achar esse identificador; o conteúdo não sai do seu navegador.</li>
             <li>Tarefas dos sistemas contábeis conectados e arquivos salvos na pasta do cliente.</li>
           </ul>
@@ -381,7 +382,34 @@ export function ConfiguracoesModulo({ onFechar }: { onFechar: () => void }) {
       <Interruptor ligado={c.extensao} onMudar={(v) => setC({ ...c, extensao: v })} rotulo="Extensão de navegador" detalhe="Cada pessoa vincula e dá ciência; sem ciência, fica inerte." />
       <Interruptor ligado={c.artefatos} onMudar={(v) => setC({ ...c, artefatos: v })} rotulo="Inferir por arquivos e guias (artefatos)" detalhe="Arquivo na pasta do cliente vira sessão estimada com a duração padrão." />
       <Interruptor ligado={c.benchmark} onMudar={(v) => setC({ ...c, benchmark: v })} rotulo="Contribuir com o benchmark anonimizado" detalhe="Medianas por atividade, sem nomes nem clientes, para calibrar o catálogo." />
+      <TemposPadraoEditor lista={c.tempos_padrao} onMudar={(tempos_padrao) => setC({ ...c, tempos_padrao })} />
     </GavetaFormulario>
+  )
+}
+
+/** S06b: tempo padrão do que é feito por fora (ligação, guia no portal...): o lançamento manual já vem com a duração. */
+function TemposPadraoEditor({ lista, onMudar }: { lista: ConfigTimesheet['tempos_padrao']; onMudar: (l: ConfigTimesheet['tempos_padrao']) => void }) {
+  const muda = (i: number, patch: Partial<ConfigTimesheet['tempos_padrao'][number]>) => onMudar(lista.map((x, k) => (k === i ? { ...x, ...patch } : x)))
+  return (
+    <div className="flex flex-col gap-2" data-testid="ts-tempos-padrao">
+      <span className="text-sm font-medium">Tempo padrão do que é feito por fora</span>
+      <p className="text-muted-foreground -mt-1 text-xs">Ao lançar tempo à mão, escolher um destes preenche a duração; a pessoa pode alterar. A captura automática continua sendo o principal.</p>
+      {lista.map((t, i) => (
+        <div key={t.id} className="grid grid-cols-[minmax(0,1fr)_5rem_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_5rem_auto]">
+          <CampoTexto aria-label={`Nome do tempo padrão ${i + 1}`} valor={t.nome} onMudar={(v) => muda(i, { nome: v })} />
+          <span className="hidden sm:block">
+            <CampoEscolha rotulo={`Atividade do tempo padrão ${i + 1}`} valor={t.atividade_id ?? ''} onMudar={(v) => muda(i, { atividade_id: v || null })} opcoes={[{ valor: '', rotulo: 'sem atividade' }, ...catalogoTs.map((a) => ({ valor: a.id, rotulo: `${a.id} · ${a.rotulo}` }))]} />
+          </span>
+          <CampoTexto aria-label={`Minutos do tempo padrão ${i + 1}`} tipo="number" valor={String(t.minutos)} onMudar={(v) => muda(i, { minutos: Math.max(1, Number(v) || 1) })} className="tabular-nums" />
+          <Button type="button" size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Tirar ${t.nome}`} onClick={() => onMudar(lista.filter((_, k) => k !== i))}>
+            <XIcon />
+          </Button>
+        </div>
+      ))}
+      <Button type="button" size="sm" variant="outline" className="w-fit rounded-full" onClick={() => onMudar([...lista, { id: `tp-${Date.now().toString(36)}`, nome: 'Nova tarefa feita por fora', atividade_id: null, minutos: 10 }])}>
+        <PlusIcon /> Acrescentar tempo padrão
+      </Button>
+    </div>
   )
 }
 
@@ -421,8 +449,8 @@ export function Exportar({ papel, onFechar }: { papel: PapelTs; onFechar: () => 
   const noPeriodo = (dia: string) => (periodo === 'mes' || periodo === 'anterior' ? competenciaDe(dia) === comp : dia >= de && dia <= HOJE_TS)
   const setoresVistos = papel === 'admin' ? null : ts.permissoes.gere
   const gerar = () => {
-    const cab = ['dia', 'início', 'fim', 'minutos', 'pessoa', 'setor', 'cliente', 'atividade', 'confiança', 'origem', 'fora da jornada', 'serviço extra', 'contestação']
-    const linha = (s: (typeof ts.sessoes)[number]) => [diaDe(s.inicio), hm(s.inicio), hm(s.fim), duracaoMin(s), ts.nomeUsuario(s.usuario_dono_id), nomeSetor(s.setor_id), s.cliente_id ? ts.nomeCliente(s.cliente_id) : 'interno', `${s.atividade_id ?? ''} ${s.rotulo}`, rotuloConfianca[s.confianca], rotuloOrigem(s), s.fora_da_jornada ? 'sim' : '', ts.ehExtra(s) ? 'sim' : '', s.contestacao ? `${s.contestacao.status}: ${s.contestacao.correcao}` : '']
+    const cab = ['dia', 'início', 'fim', 'minutos', 'pessoa', 'setor', 'cliente', 'atividade', 'confiança', 'origem', 'fora da jornada', 'serviço extra', 'contestação', 'descrição', 'faturável']
+    const linha = (s: (typeof ts.sessoes)[number]) => [diaDe(s.inicio), hm(s.inicio), hm(s.fim), duracaoMin(s), ts.nomeUsuario(s.usuario_dono_id), nomeSetor(s.setor_id), s.cliente_id ? ts.nomeCliente(s.cliente_id) : 'interno', `${s.atividade_id ?? ''} ${s.rotulo}`, rotuloConfianca[s.confianca], rotuloOrigem(s), s.fora_da_jornada ? 'sim' : '', ts.ehExtra(s) ? 'sim' : '', s.contestacao ? `${s.contestacao.status}: ${s.contestacao.correcao}` : '', s.descricao ?? '', s.faturavel == null ? '' : s.faturavel ? 'sim' : 'não']
     if (o === 'csv') {
       const ss = ts.sessoes.filter((s) => s.ator_tipo === 'pessoa' && !s.substituida_por && noPeriodo(diaDe(s.inicio)) && (!setoresVistos || setoresVistos.includes(s.setor_id as never)))
       const nome = `sessoes-${periodo === 'semana' ? 'semana' : comp}.csv`

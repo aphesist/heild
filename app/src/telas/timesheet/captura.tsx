@@ -10,6 +10,7 @@ import { useEscritorio, useRegistro } from '@/nucleo/react'
 import { configTimesheet, foraDaJornada, itemNaoEraEsta, repos } from '@/nucleo/repositorios'
 import { hashParaDestino, useHash } from '@/nucleo/rotas'
 import { OuvinteExtensaoLab } from './lab'
+import { OuvinteLancamento } from './lancamento'
 
 /** Evento do painel da demonstração: abre a sessão em 5 s em vez de 60 s (para mostrar ao vivo). */
 export const EVENTO_CAPTURA_RAPIDA = 'heild:ts-captura-rapida'
@@ -171,7 +172,12 @@ export function CapturaTempo({ conta, espera, modulo, aba, clienteId }: { conta:
 
   // Ao sair (trocar de conta, fechar o app), fecha a sessão aberta.
   useEffect(() => () => fechar('saiu'), []) // eslint-disable-line react-hooks/exhaustive-deps
-  return <OuvinteExtensaoLab />
+  return (
+    <>
+      <OuvinteExtensaoLab />
+      <OuvinteLancamento />
+    </>
+  )
 }
 
 /** Para o "Não era esta" do cabeçalho da tarefa (S04-A52): a sessão ao vivo da tarefa vira item de correção. */

@@ -101,6 +101,16 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
   const { humanas, regs, agentes, semMin } = dados
   const minTotal = regs.reduce((t, s) => t + duracaoMin(s), 0)
   const minAuto = regs.filter((s) => s.confianca === 'automatica').reduce((t, s) => t + duracaoMin(s), 0)
+  // S06b: proporção entre lançamento manual e captura automática, por pessoa.
+  const minManual = regs.filter((s) => s.origem === 'manual').reduce((t, s) => t + duracaoMin(s), 0)
+  const manualPorPessoa = pessoas
+    .map((p) => {
+      const doP = regs.filter((s) => s.usuario_dono_id === p.id)
+      const tot = doP.reduce((t, s) => t + duracaoMin(s), 0)
+      const manual = doP.filter((s) => s.origem === 'manual').reduce((t, s) => t + duracaoMin(s), 0)
+      return { nome: p.nome, manual, pct: tot ? Math.round((manual / tot) * 100) : 0, tot }
+    })
+    .filter((p) => p.tot > 0)
   const diasP = diasUteis(de, ate)
   const capacidade = pessoas.map((p) => {
     const aus = diasAusente(ts.ausencias, p.id, de, ate)
@@ -161,7 +171,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
   const carga = cargaPrevista(ts, setores)
   const dispProx = pessoas.length * 10 * HORAS_DIA - pessoas.reduce((t, p) => t + diasAusente(ts.ausencias, p.id, somarDias(HOJE_TS, 1), somarDias(HOJE_TS, 14)) * HORAS_DIA, 0)
   const ausenciasVisiveis = ts.ausencias.filter((a) => !a.arquivado_em && pessoas.some((p) => p.id === a.usuario_id) && a.fim >= somarDias(HOJE_TS, -30))
-  const origens = ['tarefa aberta', 'conversa no CRM', 'tela do cliente', 'core', 'extensão', 'artefato', 'confirmação']
+  const origens = ['tarefa aberta', 'conversa no CRM', 'tela do cliente', 'core', 'extensão', 'artefato', 'confirmação', 'lançamento manual']
   const temBpo = ts.temBpo && setores.includes('bpo_financeiro')
 
   return (
@@ -233,6 +243,30 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
               <LinhasEmpilhadas dados={porPessoa} onClicar={(n) => setVendoPessoa(porPessoa.find((p) => p.rotulo === n)?.id ?? null)} />
               <Legenda itens={['automatica', 'confirmada', 'estimada']} />
               <p className="text-muted-foreground text-xs">Clique no nome para abrir a pessoa. Horas não são produtividade: não existe ranking.</p>
+            </Caixa>
+            <Caixa>
+              <Pergunta acao={<span className="text-muted-foreground text-xs">S06b</span>}>Quanto foi lançado à mão?</Pergunta>
+              {manualPorPessoa.length ? (
+                <ul className="flex flex-col gap-2 text-sm" data-testid="ts-manual-equipe">
+                  {manualPorPessoa.map((p) => (
+                    <li key={p.nome} className="grid grid-cols-[6rem_1fr_6rem] items-center gap-3 sm:grid-cols-[7.5rem_1fr_7rem]">
+                      <span className="truncate">{p.nome}</span>
+                      <span className="bg-sunken flex h-3 overflow-hidden rounded-full" title={`${p.pct}% manual`}>
+                        <span className="h-full" style={{ width: `${100 - p.pct}%`, background: 'color-mix(in oklab, var(--foreground) 70%, transparent)' }} />
+                        <span className="bg-warning h-full" style={{ width: `${p.pct}%` }} />
+                      </span>
+                      <span className="text-right text-xs tabular-nums">
+                        <span className={cn('font-medium', p.pct > 30 && 'text-warning')}>{p.pct}%</span> <span className="text-muted-foreground">· {fmtHoras(p.manual)}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground text-sm">Ninguém lançou tempo à mão neste período.</p>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Manual × automático das horas registradas: {minTotal ? Math.round((minManual / minTotal) * 100) : 0}% lançado à mão no período. Muito manual costuma ser captura fraca (extensão desligada, tarefa não aberta), não falta da pessoa.
+              </p>
             </Caixa>
             <Caixa>
               <Pergunta>A captura está melhorando? (% das horas por semana)</Pergunta>

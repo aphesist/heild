@@ -24,9 +24,27 @@ export interface ConfigTimesheet {
   valor_hora_cobranca: number
   /** Meta de cobertura automática (05, 11.1). */
   meta_cobertura: number
+  /** S06b: tempo padrão do que é feito por fora (ligação, guia no portal...); preenche a duração no lançamento manual. */
+  tempos_padrao: TempoPadrao[]
 }
 
-export const configPadraoTimesheet: ConfigTimesheet = { itens_dia: 8, fechamento: '18:00', jornada_inicio: '08:00', jornada_fim: '18:00', intervalo_inicio: '12:00', intervalo_fim: '13:00', equipe_apos_semanas: 2, extensao: true, artefatos: true, benchmark: false, valor_hora_cobranca: 450, meta_cobertura: 80 }
+export interface TempoPadrao {
+  id: string
+  nome: string
+  atividade_id?: string | null
+  minutos: number
+}
+
+export const temposPadraoIniciais: TempoPadrao[] = [
+  { id: 'tp-ligacao', nome: 'Ligação com cliente', atividade_id: 'GES-033', minutos: 10 },
+  { id: 'tp-guia', nome: 'Emissão de guia no portal', atividade_id: 'FIS-010', minutos: 15 },
+  { id: 'tp-email', nome: 'E-mail ao cliente', atividade_id: 'GES-027', minutos: 5 },
+  { id: 'tp-documento', nome: 'Conferência de documento do cliente', atividade_id: 'GES-026', minutos: 10 },
+  { id: 'tp-reuniao', nome: 'Reunião com cliente', atividade_id: 'GES-045', minutos: 30 },
+  { id: 'tp-certidao', nome: 'Certidão emitida no portal', atividade_id: 'FIS-006', minutos: 10 },
+]
+
+export const configPadraoTimesheet: ConfigTimesheet = { itens_dia: 8, fechamento: '18:00', jornada_inicio: '08:00', jornada_fim: '18:00', intervalo_inicio: '12:00', intervalo_fim: '13:00', equipe_apos_semanas: 2, extensao: true, artefatos: true, benchmark: false, valor_hora_cobranca: 450, meta_cobertura: 80, tempos_padrao: temposPadraoIniciais }
 
 export function configTimesheet(e?: Escritorio | null): ConfigTimesheet {
   return { ...configPadraoTimesheet, ...((e?.configuracao?.timesheet as Partial<ConfigTimesheet> | undefined) ?? {}) }
@@ -175,6 +193,95 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
     const anomalia = { ...s.anomalia, revisada_em: agora(), revisao }
     return this.atualizar(id, { anomalia, ...(revisao === 'descartada' ? { substituida_por: 'descartada' } : {}) }, { ...op, ctx, ferramenta: 'timesheet.revisar_anomalia', texto: `${nomeDoAtor(ctx.ator)} revisou a sessão anômala de ${s.rotulo} (${hm(s.inicio)}–${hm(s.fim)}): ${revisao}` })
   }
+  /* ---------- S06b · Lançamento manual (fonte "manual", ao lado da captura) ---------- */
+
+  /** Sessões automáticas (não manuais) da pessoa que cruzam o intervalo. */
+  sobrepostas(usuarioId: Id, inicio: string, fim: string, ignorar?: Id) {
+    return this.listar((s) => s.ator_tipo === 'pessoa' && s.usuario_dono_id === usuarioId && !s.substituida_por && s.id !== ignorar && s.origem !== 'manual' && Date.parse(s.inicio) < Date.parse(fim) && Date.parse(s.fim) > Date.parse(inicio))
+  }
+
+  /**
+   * Lança tempo à mão. Sobreposição com sessão capturada exige escolha: `manter` (as duas ficam,
+   * o lançamento leva a marca), `substituir` (a capturada fica substituída pelo lançamento).
+   */
+  lancarManual(d: { cliente_id?: Id | null; atividade_id?: string | null; rotulo: string; tarefa_id?: Id | null; setor_id: Id; inicio: string; fim: string; descricao?: string; faturavel: boolean; pacote?: SessaoTrabalho['pacote']; lancamento_de?: Id | null }, op: OpcoesEscrita & { sobreposicao?: 'manter' | 'substituir'; cfg?: ConfigTimesheet; cronometro?: boolean } = {}): SessaoTrabalho {
+    const ctx = op.ctx ?? contextoAtual()
+    const u = usuarioDoCtx(ctx)
+    if (!u) throw new ErroRegra('Só uma pessoa lança tempo.')
+    if (!op.cronometro && Date.parse(d.fim) <= Date.parse(d.inicio)) throw new ErroRegra('O fim precisa ser depois do início.')
+    if (!d.cliente_id && !d.atividade_id) throw new ErroRegra('Escolha o cliente ou a atividade (ou uma atividade interna).')
+    const cruzam = op.cronometro ? [] : this.sobrepostas(u, d.inicio, d.fim)
+    if (cruzam.length && !op.sobreposicao) throw new ErroRegra(`Cruza ${cruzam.length === 1 ? 'uma sessão capturada' : `${cruzam.length} sessões capturadas`} (${cruzam.map((c) => `${hm(c.inicio)}–${hm(c.fim)} ${c.rotulo}`).join('; ')}): escolha manter as duas ou substituir.`)
+    const quando = agora()
+    const linha: SessaoTrabalho = {
+      id: novoId('sm'),
+      escritorio_id: banco.escritorioId ?? '',
+      criado_em: quando,
+      atualizado_em: quando,
+      ator_tipo: 'pessoa',
+      ator_id: u,
+      usuario_dono_id: u,
+      cliente_id: d.cliente_id ?? null,
+      setor_id: d.setor_id,
+      atividade_id: d.atividade_id ?? null,
+      rotulo: d.rotulo,
+      tarefa_id: d.tarefa_id ?? null,
+      origem: 'manual',
+      inicio: d.inicio,
+      fim: d.fim,
+      confianca: 'confirmada',
+      evidencias: [`lançado à mão por ${nomeDoAtor(ctx.ator)}${d.lancamento_de ? ' (duplicado de outro lançamento)' : ''}`, ...(cruzam.length ? [`cruza ${cruzam.map((c) => `${hm(c.inicio)}–${hm(c.fim)} ${c.rotulo} (${c.origem})`).join('; ')}: ${op.sobreposicao === 'substituir' ? 'substituiu a capturada' : 'as duas ficaram'}`] : [])],
+      pacote: d.pacote ?? (/^(FIN|BPO)-/.test(d.atividade_id ?? '') ? 'bpo' : 'contabil'),
+      fora_da_jornada: op.cfg && !op.cronometro ? foraDaJornada(d.inicio, d.fim, op.cfg) : false,
+      descricao: d.descricao?.trim() || null,
+      faturavel: d.faturavel,
+      lancamento_de: d.lancamento_de ?? null,
+      versoes: [],
+      ao_vivo: op.cronometro ? true : undefined,
+      extras: { ...(op.cronometro ? { cronometro: true } : {}), ...(cruzam.length && op.sobreposicao === 'manter' ? { sobreposta_a: cruzam.map((c) => c.id) } : {}) },
+    }
+    this.autorizar('timesheet.lancar', linha, op)
+    banco.transacao((tx) => {
+      tx.gravar('sessao_trabalho', linha)
+      if (op.sobreposicao === 'substituir') cruzam.forEach((c) => tx.gravar('sessao_trabalho', { ...c, substituida_por: linha.id, ao_vivo: false, atualizado_em: quando }))
+      registrarEvento(tx, ctx, { nome: 'sessao_trabalho.lancar_manual', ferramenta: 'timesheet.lancar', resultado_ref: linha.id, cliente_id: linha.cliente_id ?? null, setor_id: linha.setor_id, visivel_na_linha_do_tempo: false, texto: `${nomeDoAtor(ctx.ator)} ${op.cronometro ? 'iniciou o cronômetro' : 'lançou à mão'}: ${linha.atividade_id ?? ''} ${linha.rotulo}${op.cronometro ? '' : `, ${hm(linha.inicio)}–${hm(linha.fim)}`}` })
+    })
+    return linha
+  }
+
+  /** Editar um lançamento manual: a versão anterior fica guardada em `versoes` (nada se apaga). */
+  editarManual(id: Id, patch: Partial<Pick<SessaoTrabalho, 'cliente_id' | 'atividade_id' | 'rotulo' | 'tarefa_id' | 'setor_id' | 'inicio' | 'fim' | 'descricao' | 'faturavel'>>, op: OpcoesEscrita = {}): SessaoTrabalho {
+    const s = this.exigir(id)
+    const ctx = op.ctx ?? contextoAtual()
+    if (s.origem !== 'manual') throw new ErroRegra('Só lançamento manual se edita assim; sessão capturada se corrige ou contesta.')
+    exigirDono(s.usuario_dono_id, ctx, 'editar o próprio lançamento')
+    if (s.substituida_por) throw new ErroRegra('Este lançamento foi descartado ou substituído.')
+    const inicio = patch.inicio ?? s.inicio
+    const fim = patch.fim ?? s.fim
+    if (Date.parse(fim) <= Date.parse(inicio)) throw new ErroRegra('O fim precisa ser depois do início.')
+    const antes = { cliente_id: s.cliente_id, atividade_id: s.atividade_id, rotulo: s.rotulo, tarefa_id: s.tarefa_id, inicio: s.inicio, fim: s.fim, descricao: s.descricao, faturavel: s.faturavel }
+    const versoes = [...(s.versoes ?? []), { em: agora(), por: idDoAtor(ctx.ator) ?? '', por_nome: nomeDoAtor(ctx.ator), antes }]
+    return this.atualizar(id, { ...patch, versoes }, { ...op, ctx, ferramenta: 'timesheet.lancar', texto: `${nomeDoAtor(ctx.ator)} editou o lançamento ${hm(s.inicio)}–${hm(s.fim)} · ${s.rotulo} (versão ${versoes.length + 1})` })
+  }
+
+  /** Duplicar (para outro dia, mesmo horário) ou lançar de novo o de ontem. */
+  duplicarManual(id: Id, dia: string, op: OpcoesEscrita & { sobreposicao?: 'manter' | 'substituir'; cfg?: ConfigTimesheet } = {}): SessaoTrabalho {
+    const s = this.exigir(id)
+    if (s.origem !== 'manual') throw new ErroRegra('Só lançamento manual se duplica.')
+    const troca = (iso: string) => `${dia}T${hm(iso)}:00-03:00`
+    return this.lancarManual({ cliente_id: s.cliente_id, atividade_id: s.atividade_id, rotulo: s.rotulo, tarefa_id: s.tarefa_id, setor_id: s.setor_id, inicio: troca(s.inicio), fim: troca(s.fim), descricao: s.descricao ?? undefined, faturavel: !!s.faturavel, pacote: s.pacote, lancamento_de: s.id }, op)
+  }
+
+  /** Para o cronômetro: o fim é agora (ou o informado). */
+  pararCronometro(id: Id, fim: string, cfg?: ConfigTimesheet, op: OpcoesEscrita = {}) {
+    const s = this.exigir(id)
+    const ctx = op.ctx ?? contextoAtual()
+    exigirDono(s.usuario_dono_id, ctx, 'parar o próprio cronômetro')
+    if (!s.extras?.cronometro || !s.ao_vivo) throw new ErroRegra('Este cronômetro já parou.')
+    const f = Date.parse(fim) - Date.parse(s.inicio) < 60000 ? new Date(Date.parse(s.inicio) + 60000).toISOString() : fim
+    return this.atualizar(id, { fim: f, ao_vivo: false, fora_da_jornada: cfg ? foraDaJornada(s.inicio, f, cfg) : false, extras: { ...s.extras, cronometro: false } }, { ...op, ctx, ferramenta: 'timesheet.lancar', texto: `${nomeDoAtor(ctx.ator)} parou o cronômetro: ${s.rotulo}, ${hm(s.inicio)}–${hm(f)}` })
+  }
+
   /**
    * Reconstruir período (`timesheet.reconstruir`; Fundações 5.4 e 05, 11.4): relê o período e
    * refaz o que é derivado: fecha sessões ao vivo esquecidas, remarca fora da jornada, detecta
@@ -190,7 +297,7 @@ export class RepositorioSessoes extends Repositorio<'sessao_trabalho'> {
     let fechadas = 0
     for (const s of doPeriodo) {
       let n = { ...s }
-      if (n.ao_vivo && Date.now() - Date.parse(n.atualizado_em) > 10 * 60000) {
+      if (n.ao_vivo && !n.extras?.cronometro && Date.now() - Date.parse(n.atualizado_em) > 10 * 60000) {
         n = { ...n, ao_vivo: false }
         fechadas++
       }
