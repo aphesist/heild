@@ -61,6 +61,23 @@
 | Estado vazio | saber que não há nada e o que fazer | o menor que o widget aceita | — | uma célula; frase e ação no centro |
 
 - Widget declara só os tamanhos que fazem sentido em `tamanhos`; o arranjo padrão escolhe pela tarefa (uma fila de trabalho merece G; uma lista de três relatórios, M).
+
+### Contrato de transbordo **[QA]**
+
+Todo widget aguenta 0, 1, 3, 15, 50 e 200 itens sem crescer sem limite nem cortar seco:
+
+| Quantidade | O que acontece |
+| --- | --- |
+| 0 | Estado vazio com a próxima ação (`EstadoVazio compacto`), o card no menor tamanho |
+| Até o teto do tamanho | Cabe no card, com a altura do conteúdo |
+| Acima do teto de altura | O corpo rola por dentro com o esmaecido do topo e do fim; o rodapé oferece **"Ver tudo (N)"**, que abre o conteúdo inteiro numa gaveta (no tamanho XL). Vem do próprio `Widget` (`components/widgets/widget.tsx`): nenhum widget precisa fazer à mão |
+| Lista com teto por quantidade | `ListaComTeto` (`components/kit/lista-com-teto.tsx`): até P 3, M 5, G 8, L 5, XL 12 itens; além disso "Ver todos (N)" abre a lista inteira numa gaveta |
+| Centenas de itens | Na gaveta, acima de 150 itens, só a janela visível é desenhada (`ListaVirtual`) |
+
+- **Texto:** curto, longo e sem espaço (CNPJ, chave, e-mail) cabem: quebra de palavra na base, truncamento com título, selo que trunca.
+- **Valores e datas extremos:** R$ 0,00, R$ 1.234.567.890,12, negativos, percentuais acima de 100%, datas vencidas, de hoje e futuras: a coluna de valor tem o tamanho do conteúdo (`minmax(Nrem,max-content)`), nada invade o vizinho.
+- **Campos opcionais ausentes, todos os status misturados, serviços falhando e sem permissão:** o widget mostra o que tem e diz o que falta, sem quebrar.
+- **Como conferir:** o UI Lab (`#/lab/ui/widget`) alimenta o widget real com cada cenário (`nucleo/semente/cenario.ts`); o `scripts/ui-lab-qa.cjs --frente=widgets` percorre todos os widgets, com cliente e na carteira, em todos os cenários de quantidade, tamanhos e larguras principais.
 - Fora da grade de widgets, um card de página (`Caixa`) tem altura natural; lista longa vai numa `<AreaRolagem className="max-h-[60vh]">`, não no card inteiro.
 
 ## 4. Largura inteira: só quando o conteúdo pede
