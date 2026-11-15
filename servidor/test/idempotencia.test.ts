@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { api, banco, chave, contarEventos, entrar, ferramenta, operacao } from './ajuda.ts'
+import { api, banco, chave, contarEventos, entrar, ferramenta } from './ajuda.ts'
 
 const app = api()
 let adm: string
