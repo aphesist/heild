@@ -34,6 +34,11 @@ jobs:
       HEILD_TEMPO_PEDIDO_MS: '60000'
       # Ao recarregar, o app envia a fila de gravações antes de abrir; com a API longe do banco leva minutos.
       FUMACA_ESPERA_MS: '300000'
+      # Supabase Auth do projeto (contas da equipe): a URL é pública; a chave de serviço é segredo de
+      # Actions (o GitHub mascara nos logs; nada aqui a imprime). No CI o convite não manda e-mail.
+      HEILD_SUPABASE_URL: https://zfjivmgujytrqaiagvpm.supabase.co
+      HEILD_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.HEILD_SUPABASE_SERVICE_ROLE_KEY }}
+      HEILD_CONVITE_SEM_ENVIO: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -55,6 +60,9 @@ jobs:
 
       - name: Teste de vazamento entre escritórios (modo remoto)
         run: npm test -w @heild/servidor -- test/isolamento.test.ts test/sincronizar.test.ts test/fluxo.test.ts
+
+      - name: Contas da equipe contra o Supabase Auth do projeto (convite e código)
+        run: npm test -w @heild/servidor -- test/contas-nuvem.test.ts
 
       - name: API apontada para o projeto e o app no modo api
         run: |

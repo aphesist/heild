@@ -1164,6 +1164,13 @@ Conferência: testes do servidor 146, da B2 38 e da B3 78; contratos em dia. Scr
 - A conta vira `ativo` no primeiro pedido com o próprio login (`ativarNoPrimeiroAcesso`, na abertura da sessão), e o convite fica aceito. Só ativa se o login for o ligado à conta. Administrador e Gestor só ativam com o segundo fator: `HEILD_MFA_PAPEIS` passou a valer `administrador,gestor` por padrão, porque Administrador e Gestor definem o MFA no primeiro acesso.
 - A chave de serviço do Supabase fica só no servidor (`HEILD_SUPABASE_SERVICE_ROLE_KEY`), nunca no navegador nem no repositório. Sem ela, fora da demonstração, criar conta é recusado com o motivo. Na demonstração e nos testes, a porta do Auth é em memória.
 - Demonstração: `POST /v1/auth/demonstracao/primeiro-acesso` faz as vezes do link do e-mail (a tela "Primeiro acesso" do wireframe chama, no modo `api`).
+- **No HEILD-BACKEND (15/11/2026):** a migração `20261118090000_b5_decisoes.sql` foi aplicada com a autorização do Enzo, pelo `aplicar-projeto --http --aplicar` (a conferência sem `--aplicar` mostrou só ela faltando). A barreira foi conferida no projeto: `codigo_primeiro_acesso` com RLS forçada e sem privilégio de `anon` e `authenticated`; `heild_interno.codigo_por_hash` sem execução para eles; as colunas novas do cartão presentes.
+- **CI da nuvem com o Auth do projeto:** o `backend-nuvem.yml` recebe o segredo de Actions `HEILD_SUPABASE_SERVICE_ROLE_KEY` (a chave secreta nova do projeto, que o GitHub mascara; nada a imprime) e `HEILD_SUPABASE_URL`. O passo novo roda `contas-nuvem.test.ts` contra o Supabase Auth de verdade, nos dois caminhos:
+  - o login nasce na Admin API;
+  - o primeiro acesso define a senha (pelo código, ou como a página do convite faria);
+  - a pessoa entra pelo `/auth/v1/token`, e o gancho de token põe escritório e conta no JWT;
+  - o primeiro pedido à nossa API ativa a conta.
+  No CI o convite roda com `HEILD_CONVITE_SEM_ENVIO=1`: o login convidado nasce pelo `generate_link`, sem e-mail de verdade, porque o envio padrão do Supabase tem limite baixo e o retorno de endereços de teste prejudica o envio do projeto. Os logins criados são apagados no fim.
 - Testes: `contas-equipe.test.ts` (8):
   - código uma vez e só o hash no banco;
   - quem pode criar conta e e-mail repetido;
