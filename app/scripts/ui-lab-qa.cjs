@@ -15,11 +15,16 @@
 //
 // Uso: app servido (npx vite --port 6300 --strictPort) e
 //   URL_APP=http://localhost:6300/ node scripts/ui-lab-qa.cjs <pasta-fora-do-git> [opções]
-//     --frente=lab|telas|ambas   (padrão: ambas)
+//     --frente=lab|telas|widgets|ambas|tudo   (padrão: ambas = lab e telas; tudo = as três)
 //     --filtro=<regex>           fichas (Lab) ou rotas (telas)
 //     --larguras=390,1440        (padrão: 390,768,1024,1440,1920)
 //     --variantes=demo,escuro    (telas; padrão: demo,horizonte,membro,escuro)
 //     --doc                      reescreve a contagem em docs/wireframe/UI_LAB_QA.md
+// Widgets: cada widget real (Início e as oito abas do Painel, com cliente e na carteira) com os
+// cenários de dados (semente/cenario.ts): todo cenário de quantidade (0, 1, 3, 15, 50, 200) roda em
+// todo tamanho que o widget aceita em 390, 1024 e 1440; texto, valores, datas, opcionais, estado
+// (serviços falhando, sem permissão), tema, densidade e as larguras 768 e 1920 entram por pares.
+// Prints: <pasta>/widgets/<aba.widget>/<versao>/<cenario>__<tamanho>__<tema>__<largura>.png
 // Prints: <pasta>/<componente>/<estado>__<itens>__<texto>__<tamanho>__<tema>__<largura>.png
 //         <pasta>/telas/<rota>/<variante>__<largura>.png
 // Relatório: <pasta>/ui-lab-qa.json e <pasta>/resumo.md.
@@ -108,9 +113,52 @@ function porPares(fatores, semente = 7) {
   return casos
 }
 
+/**
+ * Casos que contêm a `base` inteira (produto dos fatores obrigatórios) e cobrem
+ * por pares o resto: cada caso da base ganha, em cada fator livre, o valor que
+ * cobre mais pares ainda faltando; o que sobrar vira caso novo.
+ */
+function cobrirComBase(base, livres, semente = 11) {
+  const rnd = aleatorio(semente)
+  const nomes = [...Object.keys(base[0] || {}), ...livres.map((f) => f.nome)]
+  const valores = Object.fromEntries([...Object.keys(base[0] || {}).map((k) => [k, [...new Set(base.map((c) => c[k]))]]), ...livres.map((f) => [f.nome, f.valores])])
+  const chave = (a, va, b, vb) => (a < b ? `${a}=${va}|${b}=${vb}` : `${b}=${vb}|${a}=${va}`)
+  const falta = new Set()
+  for (const f of livres) for (const v of f.valores) for (const n of nomes) if (n !== f.nome) for (const w of valores[n]) falta.add(chave(f.nome, v, n, w))
+  const preencher = (caso) => {
+    for (const f of [...livres].sort(() => rnd() - 0.5)) {
+      if (caso[f.nome] !== undefined) continue
+      let melhor = f.valores[0]
+      let n = -1
+      for (const v of f.valores) {
+        let c = 0
+        for (const [k, w] of Object.entries(caso)) if (falta.has(chave(f.nome, v, k, w))) c++
+        if (c > n || (c === n && rnd() < 0.3)) {
+          n = c
+          melhor = v
+        }
+      }
+      caso[f.nome] = melhor
+    }
+    const ks = Object.keys(caso)
+    for (let i = 0; i < ks.length; i++) for (let j = i + 1; j < ks.length; j++) falta.delete(chave(ks[i], caso[ks[i]], ks[j], caso[ks[j]]))
+    return caso
+  }
+  const casos = base.map((c) => preencher({ ...c }))
+  // O que ficou de fora: um caso por par, preenchendo o resto (os fatores da base pelo primeiro valor que cobre mais).
+  let guarda = 0
+  while (falta.size && guarda++ < 400) {
+    const [p1, p2] = [...falta][0].split('|')
+    const caso = { [p1.split('=')[0]]: p1.slice(p1.indexOf('=') + 1), [p2.split('=')[0]]: p2.slice(p2.indexOf('=') + 1) }
+    for (const k of Object.keys(base[0] || {})) if (caso[k] === undefined) caso[k] = valores[k][Math.floor(rnd() * valores[k].length)]
+    casos.push(preencher(caso))
+  }
+  return casos
+}
+
 /* ---------- Comum ---------- */
 
-const resultado = { geradoEm: new Date().toISOString(), base, lab: { casos: 0, achados: [] }, telas: { casos: 0, achados: [] }, errosDePagina: [] }
+const resultado = { geradoEm: new Date().toISOString(), base, lab: { casos: 0, achados: [] }, telas: { casos: 0, achados: [] }, widgets: { casos: 0, achados: [], porCaso: [] }, errosDePagina: [] }
 
 async function novoContexto(navegador, largura, extra = {}) {
   const v = todasLarguras[largura]
@@ -270,6 +318,87 @@ async function frenteTelas(navegador) {
   )
 }
 
+/* ---------- Frente 3: os widgets reais com os cenários de dados ---------- */
+
+const PESO = { sobreposicao: 4, 'fora-do-card': 4, 'rolagem-lateral': 3, 'texto-espremido': 3, 'rolagem-sem-esmaecido': 3, 'texto-cortado': 2, vao: 2, toque: 1, contraste: 1, erro: 5 }
+
+async function frenteWidgets(navegador) {
+  const { ctx, p } = await novoContexto(navegador, 1440)
+  await p.goto(base + '#/lab/ui/widget?isolado=1')
+  await p.waitForFunction(() => Array.isArray(window.__widgetsLab) && window.__widgetsLab.length > 0, null, { timeout: 60000 })
+  const widgets = (await p.evaluate(() => window.__widgetsLab)).filter((w) => !filtro || filtro.test(w.chave))
+  await ctx.close()
+  const principais = larguras.filter((l) => [390, 1024, 1440].includes(l))
+  const extras = larguras.filter((l) => !principais.includes(l))
+  const porLargura = Object.fromEntries(larguras.map((l) => [l, []]))
+  for (const w of widgets) {
+    const base = []
+    for (const itens of ['i0', 'i1', 'i3', 'i15', 'i50', 'i200']) for (const tamanho of w.tamanhos) for (const largura of principais) base.push({ itens, tamanho, largura: String(largura) })
+    const livres = [
+      { nome: 'texto', valores: ['', 'tc', 'tl', 'ts'] },
+      { nome: 'valores', valores: ['', 've'] },
+      { nome: 'datas', valores: ['', 'dv', 'dh', 'df'] },
+      { nome: 'opcionais', valores: ['', 'oa'] },
+      { nome: 'estado', valores: ['padrao', 'erro', 'sem-permissao'] },
+      { nome: 'tema', valores: temas.flatMap((t) => [`${t}:claro`, `${t}:escuro`]) },
+      { nome: 'densidade', valores: ['padrao', 'grande'] },
+    ]
+    const casos = cobrirComBase(base, livres, w.chave.length * 13 + 5)
+    // As larguras de fora do produto (768, 1920) entram por pares com estado, tamanho e itens.
+    for (const l of extras) for (const c of porPares([{ nome: 'itens', valores: ['i0', 'i15', 'i200'] }, { nome: 'tamanho', valores: w.tamanhos }, { nome: 'estado', valores: ['padrao', 'erro', 'sem-permissao'] }, { nome: 'tema', valores: ['fabrica:claro', 'fabrica:escuro', 'condesp:claro', 'requinte:escuro'] }], l + w.id.length)) casos.push({ ...c, texto: '', valores: '', datas: '', opcionais: '', densidade: 'padrao', largura: String(l) })
+    for (const c of casos) porLargura[c.largura].push({ w, ...c })
+  }
+  const total = Object.values(porLargura).reduce((s, l) => s + l.length, 0)
+  console.log(`Widgets: ${widgets.length} widgets, ${total} casos`)
+  let feitos = 0
+  await Promise.all(
+    larguras.map(async (largura) => {
+      const { ctx, p } = await novoContexto(navegador, largura)
+      const erros = []
+      p.on('pageerror', (e) => erros.push(e.message))
+      await p.goto(base + '#/lab/ui/widget?isolado=1')
+      await p.waitForFunction(() => Array.isArray(window.__widgetsLab), null, { timeout: 60000 })
+      let desdeRecarga = 0
+      for (const c of porLargura[largura]) {
+        // Recarrega de tempos em tempos: cada cenário abre um escritório novo e a página acumula memória.
+        if (++desdeRecarga > 25) {
+          desdeRecarga = 0
+          await p.goto(base + '#/lab/ui/widget?isolado=1').catch(() => {})
+          await p.waitForFunction(() => Array.isArray(window.__widgetsLab), null, { timeout: 60000 }).catch(() => {})
+        }
+        const [tema, modo] = c.tema.split(':')
+        const cenario = [c.itens, c.texto, c.valores, c.datas, c.opcionais].filter(Boolean).join('.')
+        const q = new URLSearchParams({ isolado: '1', variante: c.w.chave, tamanho: c.tamanho, cenario, estado: c.estado, tema, modo, densidade: c.densidade })
+        erros.length = 0
+        await p.evaluate((h) => (window.location.hash = h), `#/lab/ui/widget?${q}`)
+        await p.waitForSelector(`[data-lab-widget="${c.w.chave}"] article`, { timeout: 15000 }).catch(() => {})
+        await espera(p, 700)
+        let achados
+        try {
+          achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
+        } catch (e) {
+          achados = [{ regra: 'erro', detalhe: String(e).slice(0, 200) }]
+        }
+        if (erros.length) achados.push(...[...new Set(erros)].slice(0, 3).map((e) => ({ regra: 'erro', detalhe: `erro de página: ${e.slice(0, 160)}` })))
+        const nomeCaso = `${cenario || 'base'}${c.estado !== 'padrao' ? `.${c.estado}` : ''}`
+        const arquivo = path.join(pasta, 'widgets', `${c.w.aba}.${c.w.id}`, c.w.versao, `${nomeCaso}__${c.tamanho}__${tema}-${modo}${c.densidade === 'grande' ? '-grande' : ''}__${largura}.png`)
+        fs.mkdirSync(path.dirname(arquivo), { recursive: true })
+        await p
+          .locator(`[data-lab-widget="${c.w.chave}"]`)
+          .screenshot({ path: arquivo, timeout: 8000 })
+          .catch(() => p.screenshot({ path: arquivo, timeout: 8000 }))
+          .catch((e) => achados.push({ regra: 'erro', detalhe: `sem print: ${String(e).slice(0, 120)}` }))
+        const print = path.relative(pasta, arquivo)
+        for (const a of achados) resultado.widgets.achados.push({ widget: `${c.w.aba}.${c.w.id}`, versao: c.w.versao, chave: c.w.chave, cenario: nomeCaso, tamanho: c.tamanho, tema: c.tema, largura, print, ...a })
+        resultado.widgets.porCaso.push({ chave: c.w.chave, print, pontos: achados.reduce((s, a) => s + (PESO[a.regra] || 1), 0), regras: [...new Set(achados.map((a) => a.regra))] })
+        resultado.widgets.casos++
+        if (++feitos % 200 === 0) console.log(`  Widgets: ${feitos}/${total}`)
+      }
+      await ctx.close()
+    }),
+  )
+}
+
 /* ---------- Resumo ---------- */
 
 function tabela(achados, chave, rotuloChave) {
@@ -302,6 +431,18 @@ function resumo() {
     '',
     tabela(telas.achados, 'grupo', 'Grupo de telas'),
     '',
+    ...(resultado.widgets.casos
+      ? [
+          `### Widgets reais com cenários: ${resultado.widgets.casos} casos, ${resultado.widgets.achados.length} achados`,
+          '',
+          tabela(resultado.widgets.achados.map((a) => ({ ...a, linha: `${a.widget} · ${a.versao}` })), 'linha', 'Widget · versão'),
+          '',
+          '**Os 10 piores casos** (pontos: sobreposição e fora do card 4, rolagem 3, texto espremido 3, texto cortado e vão 2, contraste e toque 1):',
+          '',
+          ...[...resultado.widgets.porCaso].sort((a, b) => b.pontos - a.pontos).slice(0, 10).map((c, i) => `${i + 1}. ${c.chave} · ${c.pontos} pontos (${c.regras.join(', ')}) · \`${c.print}\``),
+          '',
+        ]
+      : []),
     `Erros de página (JavaScript): ${resultado.errosDePagina.length}.`,
   ].join('\n')
 }
@@ -309,8 +450,9 @@ function resumo() {
 ;(async () => {
   fs.mkdirSync(pasta, { recursive: true })
   const navegador = await chromium.launch()
-  if (frente === 'lab' || frente === 'ambas') await frenteLab(navegador)
-  if (frente === 'telas' || frente === 'ambas') await frenteTelas(navegador)
+  if (['lab', 'ambas', 'tudo'].includes(frente)) await frenteLab(navegador)
+  if (['telas', 'ambas', 'tudo'].includes(frente)) await frenteTelas(navegador)
+  if (['widgets', 'tudo'].includes(frente)) await frenteWidgets(navegador)
   await navegador.close()
   fs.writeFileSync(path.join(pasta, 'ui-lab-qa.json'), JSON.stringify(resultado, null, 1))
   const md = resumo()

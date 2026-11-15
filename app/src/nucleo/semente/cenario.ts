@@ -228,12 +228,16 @@ export function fotografiaDoCenario(base: Fotografia, c: Cenario, escritorioId: 
     if (c.itens !== undefined && !ESTRUTURA.has(tabela)) {
       if (tabela === 'cliente') novas = c.itens === 0 ? novas.slice(0, 1) : redimensionar(novas, c.itens)
       else {
+        // Os grupos que as telas mostram (os dois primeiros clientes, que são os das versões "cliente", e o
+        // que é do escritório) ficam com `itens` linhas por setor; os outros clientes só encolhem (com 0) ou ficam
+        // como estão. A carteira cresce pela tabela de clientes. Assim o banco do cenário cabe na memória.
+        const principais = new Set(['', ...(base.cliente ?? []).slice(0, 2).map((x) => String(x.id))])
         const grupos = new Map<string, typeof novas>()
         for (const l of novas) {
           const g = `${l.cliente_id ?? ''}|${l.setor_id ?? ''}`
           grupos.set(g, [...(grupos.get(g) ?? []), l])
         }
-        novas = [...grupos.values()].flatMap((g) => redimensionar(g, c.itens!))
+        novas = [...grupos.entries()].flatMap(([g, linhas]) => (principais.has(g.split('|')[0]) || c.itens! < linhas.length ? redimensionar(linhas, c.itens!) : linhas))
       }
     }
     novas = novas.map((l, i) => {

@@ -405,6 +405,6 @@ function detectar(opcoes) {
   return achados
 }
 
-const regras = ['texto-cortado', 'texto-espremido', 'sobreposicao', 'rolagem-sem-esmaecido', 'rolagem-lateral', 'toque', 'contraste', 'vao', 'fora-do-card']
+const regras = ['texto-cortado', 'texto-espremido', 'sobreposicao', 'rolagem-sem-esmaecido', 'rolagem-lateral', 'toque', 'contraste', 'vao', 'fora-do-card', 'erro']
 
 module.exports = { detectar, regras }
