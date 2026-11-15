@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { catalogo, ferramentasTipadas } from '@heild/dominio'
+import { catalogo, ferramentasTipadas, Repositorio } from '@heild/dominio'
 import { PASTA_CONTRATOS, textoDosContratos } from '../src/contratos.ts'
 import { operacoes } from '../src/executor/operacoes.ts'
 
@@ -37,7 +37,7 @@ describe('catálogo das ferramentas tipadas', () => {
   it('toda ferramenta de escrita do catálogo usada pelos repositórios existe no catálogo', () => {
     const nomes = new Set(catalogo.map((c) => c.nome))
     const faltando = new Set<string>()
-    for (const op of operacoes.values()) for (const f of Object.values(op.repositorio.regras.ferramentas)) if (f && !nomes.has(f)) faltando.add(f)
+    for (const op of operacoes.values()) if (op.repositorio instanceof Repositorio) for (const f of Object.values(op.repositorio.regras.ferramentas)) if (f && !nomes.has(f)) faltando.add(f)
     expect([...faltando]).toEqual([])
   })
 })

@@ -9,6 +9,7 @@ import { contextoAtual } from './contexto'
 import { reposFinanceiro } from './financeiro'
 import { agora, definirGeradorId, novoId, novoIdPadrao, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
 import { registrarRepoSessoes, RepositorioItensConfirmacao, RepositorioSessoes } from './s06-timesheet'
+import { operacoesS08b } from './s08b-operacao'
 
 export * from './contexto'
 export * from './repositorio'
@@ -44,7 +45,11 @@ export class RepositorioTarefas extends Repositorio<'tarefa'> {
   /** Troca o status pela ferramenta da transição. Concluída é final: reabrir cria tarefa nova. */
   mudarStatus(id: Id, status: StatusTarefa, op: OpcoesEscrita & { motivo?: string } = {}): Tarefa {
     const t = this.exigir(id)
-    if (t.status === status) return t
+    if (t.status === status) {
+      // Nada muda, mas a resposta não pode dizer "ok" a quem não pode: confere a permissão do mesmo jeito.
+      this.autorizar(op.ferramenta ?? ferramentaDaTransicao[status], t, op)
+      return t
+    }
     if (status === 'cancelada') return this.cancelar(id, op.motivo ?? '', op)
     if (t.status === 'cancelada') throw new ErroRegra('Tarefa cancelada não volta: crie uma tarefa nova.')
     const quando = agora()
@@ -214,7 +219,9 @@ export type Repos = typeof repos
 registrarRepoSessoes(() => repos.sessoes) // S06
 
 // Backend (VITE_HEILD_BANCO=api): cada chamada de repositório da tela vira comando para a API.
-instalarCapturaApi({ repos: repos as unknown as Record<string, unknown>, banco, definirGeradorId, novoIdPadrao, contextoAtual })
+instalarCapturaApi({ repos: repos as unknown as Record<string, unknown>, modulos: operacoesS08b as unknown as Record<string, Record<string, unknown>>, banco, definirGeradorId, novoIdPadrao, contextoAtual })
+
+export { operacoesS08b }
 
 /** Registra um evento avulso (algo que aconteceu sem mudar uma linha: "Começou: conferir PGDAS-D"). */
 export function registrar(texto: string, nome = 'atividade.registrar', op: { ctx?: OpcoesEscrita['ctx']; cliente_id?: Id | null; setor_id?: Id | null } = {}) {

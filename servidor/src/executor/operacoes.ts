@@ -1,4 +1,4 @@
-import { repos, Repositorio, type NomeTabela } from '@heild/dominio'
+import { operacoesS08b, repos, Repositorio, type NomeTabela } from '@heild/dominio'
 
 /**
  * As operações de repositório que viram endpoints: cada método público de escrita de
@@ -9,7 +9,8 @@ import { repos, Repositorio, type NomeTabela } from '@heild/dominio'
 
 export interface Operacao {
   nome: string
-  repositorio: Repositorio<NomeTabela>
+  /** O repositório, ou o objeto de operações (S08b: `filaOperacao`, `documentosBpo`...). */
+  repositorio: Repositorio<NomeTabela> | Record<string, unknown>
   metodo: string
 }
 
@@ -43,6 +44,11 @@ function montar() {
     }
   }
   andar(repos as unknown as Record<string, unknown>, [])
+  // Operações que a S08b deixou fora de `repos`: o repositório de documentos e os objetos de operação.
+  for (const [nome, m] of Object.entries(operacoesS08b as unknown as Record<string, Record<string, unknown>>)) {
+    if (m instanceof Repositorio) andar({ [nome]: m }, [])
+    else for (const [fn, v] of Object.entries(m)) if (typeof v === 'function' && !FORA.has(fn)) operacoes.set(`${nome}.${fn}`, { nome: `${nome}.${fn}`, repositorio: m, metodo: fn })
+  }
   return { operacoes, porTabela }
 }
 

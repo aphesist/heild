@@ -85,7 +85,7 @@ describe('carteira e exceção por tela', () => {
     await banco()`update escritorio set carteira_ligada = true where id = 'esc-andrade'`
     await banco()`insert into carteira_cliente (escritorio_id, id, usuario_id, cliente_id) values ('esc-andrade', 'cc-teste-1', 'u7', 'c1')`
     try {
-      const [fora] = await banco()`select id, cliente_id from tarefa where escritorio_id = 'esc-andrade' and setor_id = 'fiscal' and cliente_id is not null and cliente_id <> 'c1' and status not in ('concluida','cancelada') limit 1`
+      const [fora] = await banco()`select id, cliente_id from tarefa where escritorio_id = 'esc-andrade' and setor_id = 'fiscal' and cliente_id is not null and cliente_id <> 'c1' and status = 'a_fazer' order by id limit 1`
       const r = await ferramenta(app, rafael, 'tarefa.iniciar', { tarefa_id: fora.id })
       expect(r.status).toBe(403)
       expect(r.corpo.codigo).toBe('SEM_CARTEIRA')
@@ -95,6 +95,13 @@ describe('carteira e exceção por tela', () => {
       await banco()`delete from carteira_cliente where escritorio_id = 'esc-andrade' and id = 'cc-teste-1'`
       await banco()`update escritorio set carteira_ligada = false where id = 'esc-andrade'`
     }
+  })
+
+  it('transição que não muda nada também confere a permissão (não responde ok a quem não pode)', async () => {
+    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and setor_id = 'fiscal' and status = 'em_andamento' order by id limit 1`
+    const r = await ferramenta(app, ana, 'tarefa.iniciar', { tarefa_id: t.id })
+    expect(r.status).toBe(403)
+    expect(r.corpo.codigo).toBe('SEM_SETOR')
   })
 
   it('exceção por tela que bloqueia vence o vínculo (BLOQUEADO_POR_EXCECAO)', async () => {

@@ -114,7 +114,7 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       t = chamar('POST', '/v1/auth/demonstracao', pedido).then((r) => {
         if (r.status !== 200) {
           tokens.delete(k)
-          throw new ErroAdaptador('api', `Não entrou na API (${r.status}): ${String(r.json?.mensagem ?? '')}`)
+          throw Object.assign(new ErroAdaptador('api', `Não entrou na API (${r.status}): ${String(r.json?.mensagem ?? '')}`), { status: r.status })
         }
         return String(r.json.token)
       })
@@ -123,9 +123,11 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
     return t
   }
 
+  // Integrante age sempre como integrante, em nome do dono; sem dono no contexto (motor da
+  // demonstração), em nome da pessoa da sessão. O servidor faz a interseção (R4).
   const cabecalhosDe = async (escritorio: Id, ator: AtorComando) => ({
     authorization: `Bearer ${await token(escritorio, ator)}`,
-    ...(ator.tipo === 'integrante' && ator.dono_usuario_id ? { 'x-heild-integrante': ator.integrante_id } : {}),
+    ...(ator.tipo === 'integrante' ? { 'x-heild-integrante': ator.integrante_id } : {}),
   })
 
   const paraFotografia = (tabelas: Partial<Record<NomeTabela, Registro[]>>): Fotografia => {
@@ -145,6 +147,14 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       try {
         r = await chamar('POST', '/v1/operacoes', { comando: item.comando }, { ...(await cabecalhosDe(escritorio, item.ator)), 'idempotency-key': item.chave })
       } catch (e) {
+        // Login recusado (conta inativa, escritório errado) não é rede: o comando é recusado
+        // e sai da fila, senão travaria todos os seguintes.
+        const status = (e as { status?: number }).status
+        if (status && status >= 400 && status < 500) {
+          guardarFila(escritorio, lerFila(escritorio).filter((x) => x.chave !== item.chave))
+          recusas.push(`${item.comando.tipo === 'operacao' ? item.comando.operacao : 'linhas'}: ${e instanceof Error ? e.message : String(e)}`)
+          continue
+        }
         // Rede: fica na fila (mesma chave) para a próxima tentativa.
         throw new ErroAdaptador('api', `Sem resposta da API: ${e instanceof Error ? e.message : String(e)}`)
       }
@@ -233,6 +243,8 @@ const SO_LEITURA = new Set(['constructor', 'listar', 'obter', 'pode', 'exigir', 
 
 interface DependenciasCaptura {
   repos: Record<string, unknown>
+  /** Objetos de operação fora de `repos` (S08b): cada função vira um comando `nome.funcao`. */
+  modulos?: Record<string, Record<string, unknown>>
   banco: Banco
   definirGeradorId: (g: ((prefixo: string) => string) | null) => void
   novoIdPadrao: (prefixo: string) => string
@@ -247,9 +259,13 @@ function atorDe(ctx: Contexto): AtorComando {
   return { tipo: 'sistema' }
 }
 
-/** Argumentos como JSON, sem o `ctx` (quem age vai à parte, e o servidor decide pelo token). */
+/**
+ * Argumentos como JSON, sem o `ctx` (quem age vai à parte, e o servidor decide pelo token).
+ * Campo `undefined` sai (como o JSON faz): no servidor, o valor gravado fica, que é o mesmo
+ * resultado do modo local depois de recarregar. Trocar por `null` apagaria o campo.
+ */
 function serializar(args: unknown[]): unknown[] {
-  return JSON.parse(JSON.stringify(args.map((a) => (a && typeof a === 'object' && !Array.isArray(a) && 'ctx' in a ? (({ ctx: _c, ...resto }) => (void _c, resto))(a as Record<string, unknown>) : a)), (_k, v) => (v === undefined ? null : v))) as unknown[]
+  return JSON.parse(JSON.stringify(args.map((a) => (a && typeof a === 'object' && !Array.isArray(a) && 'ctx' in a ? (({ ctx: _c, ...resto }) => (void _c, resto))(a as Record<string, unknown>) : a)))) as unknown[]
 }
 
 /**
@@ -282,8 +298,9 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
     )
   }
 
-  const embrulhar = (repo: Record<string, unknown>, caminho: string) => {
+  const embrulhar = (repo: Record<string, unknown>, caminho: string, proprios = false) => {
     const metodos = new Set<string>()
+    if (proprios) for (const n of Object.keys(repo)) if (!SO_LEITURA.has(n) && typeof repo[n] === 'function') metodos.add(n)
     for (let p = Object.getPrototypeOf(repo); p && p !== Object.prototype; p = Object.getPrototypeOf(p)) for (const n of Object.getOwnPropertyNames(p)) if (!SO_LEITURA.has(n) && typeof repo[n] === 'function') metodos.add(n)
     for (const m of metodos) {
       const original = repo[m] as (...a: unknown[]) => unknown
@@ -332,4 +349,9 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
     }
   }
   andar(d.repos, [])
+  for (const [nome, m] of Object.entries(d.modulos ?? {})) {
+    const r = m as Record<string, unknown>
+    if (r.regras && typeof r.listar === 'function') embrulhar(r, nome)
+    else embrulhar(r, nome, true)
+  }
 }
