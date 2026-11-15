@@ -3,6 +3,7 @@ import {
   codigoDaNegacao,
   codigoDaRegra,
   comBanco,
+  comColetorDeJobs,
   comoAtor,
   definirGeradorId,
   definirModoAprovacao,
@@ -26,6 +27,7 @@ import { BancoServidor, PrecisaCarregar } from './banco-servidor.ts'
 import { gravarEventos } from './cadeia.ts'
 import { colunasDe, prepararLinha } from './colunas.ts'
 import { ErroApi } from './erro.ts'
+import { enfileirarNaTransacao } from './jobs.ts'
 import { aplicarLinhas } from './linhas.ts'
 import { limparArgumentos, operacoes } from './operacoes.ts'
 
@@ -125,7 +127,7 @@ async function rodar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<unknown> {
   for (let i = 0; i < MAX_TENTATIVAS; i++) {
     bs.recomecar()
     try {
-      return executarSincrono(bs, p)
+      return comColetorDeJobs((j) => bs.jobs.push(j), () => executarSincrono(bs, p))
     } catch (e) {
       if (!(e instanceof PrecisaCarregar)) throw e
       await carregar(tx, bs, e)
@@ -241,6 +243,8 @@ async function aplicar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<Aplicado> 
       anotar(tabela, paraJson(nova))
     }
   }
+  // Jobs pedidos pelo efeito: na mesma transação (encaixe da B2; ver jobs.ts).
+  await enfileirarNaTransacao(tx, bs.jobs)
   if (eventos.length) {
     const gravados = await gravarEventos(tx, esc, eventos, { sessao_auth_id: p.sessao.claims.sid, idempotencia_chave: p.chave })
     for (const g of gravados) {

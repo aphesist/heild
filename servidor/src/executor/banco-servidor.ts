@@ -1,4 +1,4 @@
-import { adaptadorMemoria, Banco, type Id, type NomeTabela, type Registro, type Tabelas, type Transacao } from '@heild/dominio'
+import { adaptadorMemoria, Banco, type Id, type NomeTabela, type PedidoJob, type Registro, type Tabelas, type Transacao } from '@heild/dominio'
 
 /**
  * O banco de um pedido: os mesmos repositórios do app rodam aqui em cima, de forma
@@ -38,6 +38,8 @@ export class BancoServidor extends Banco {
   /** O que a operação gravou (camada por cima da base), em ordem. */
   private camada = new Map<NomeTabela, Map<Id, Registro | null>>()
   escritas: Escrita[] = []
+  /** Jobs que a operação pediu (pedirJob), gravados na mesma transação do efeito. */
+  jobs: PedidoJob[] = []
 
   constructor(escritorioId: Id) {
     super(adaptadorMemoria())
@@ -49,6 +51,7 @@ export class BancoServidor extends Banco {
   recomecar() {
     this.camada = new Map()
     this.escritas = []
+    this.jobs = []
   }
 
   carregarTabela(tabela: NomeTabela, linhas: Registro[]) {
