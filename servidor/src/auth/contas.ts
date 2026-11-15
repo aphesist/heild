@@ -43,7 +43,16 @@ export function authAdminSupabase(url: string, chave: string): AuthAdmin {
     throw new ErroApi('ERRO_INTERNO', { mensagem: `O Supabase Auth recusou (${r.status}).` })
   }
   return {
-    convidar: async (email) => String((await pedir('POST', '/invite', { email })).id),
+    // HEILD_CONVITE_SEM_ENVIO=1 (o CI contra o projeto): o convite nasce igual (login convidado,
+    // link gerado), mas nenhum e-mail sai; o envio do Supabase tem limite baixo e o retorno de
+    // endereços de teste prejudica o envio do projeto.
+    convidar: async (email) => {
+      if (process.env.HEILD_CONVITE_SEM_ENVIO === '1') {
+        const j = (await pedir('POST', '/admin/generate_link', { type: 'invite', email })) as { id?: string; user?: { id?: string } }
+        return String(j.id ?? j.user?.id)
+      }
+      return String((await pedir('POST', '/invite', { email })).id)
+    },
     criar: async (email) => String((await pedir('POST', '/admin/users', { email, email_confirm: true })).id),
     definirSenha: async (id, senha) => void (await pedir('PUT', `/admin/users/${id}`, { password: senha })),
   }
