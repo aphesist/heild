@@ -1,10 +1,12 @@
 import type { ItemGrade, TamanhoWidget } from '@/components/widgets/tipos'
 
 /**
- * Arranjo padrão de cada aba do Painel (com cliente e em carteira). Feito para
- * fechar a grade de 6 colunas sem buracos (a ordem já conta com o
- * `grid-auto-flow: dense`), na ordem de importância do setor, com tamanhos
- * que cabem o conteúdo de exemplo. Assimétrico de propósito.
+ * Arranjo padrão de cada aba do Painel (com cliente e em carteira). A ordem é a
+ * prioridade da tarefa do setor (o que pede decisão, o que se trabalha, o que
+ * se consulta) e o tamanho é o que o conteúdo e a tarefa pedem
+ * (PADRAO_DE_INTERFACE.md, 3). A altura vem do conteúdo e a grade empacota na
+ * ordem: buraco que sobrar se corrige aqui, trocando a ordem ou o tamanho,
+ * nunca esticando o widget.
  */
 const a = (lista: string): ItemGrade[] =>
   lista
