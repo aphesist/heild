@@ -306,7 +306,7 @@ function detectar(opcoes) {
       if (s.backgroundImage && s.backgroundImage !== 'none' && /gradient/.test(s.backgroundImage)) {
         const stops = (s.backgroundImage.match(RE_COR) || []).map(rgba).filter((x) => x[3] > 0.5)
         // Gradiente de cima para baixo com duas cores: a cor na altura do elemento. Outros: o pior caso.
-        if (stops.length === 2 && /^linear-gradient\(/.test(s.backgroundImage) && !/to (right|left|top)|deg|turn|rad/.test(s.backgroundImage)) {
+        if (stops.length === 2 && /^linear-gradient\(/.test(s.backgroundImage) && !/\bto (right|left|top)\b|[\d.](deg|turn|rad|grad)\b/.test(s.backgroundImage)) {
           const gb = a.getBoundingClientRect()
           const eb = el.getBoundingClientRect()
           const t = Math.min(1, Math.max(0, (eb.top + eb.height / 2 - gb.top) / Math.max(1, gb.height)))
