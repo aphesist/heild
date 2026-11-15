@@ -468,7 +468,7 @@ function GavetaItemFila({ e, f, onFechar, onEscolher }: { e: EmpresaVista; f: Bp
         <SheetHeader className="px-5 pt-5">
           <SheetTitle className="text-xl font-light">{f.texto}</SheetTitle>
           <SheetDescription>
-            {e.nome} · {rotuloTipoItem[f.tipo]} · {f.codigo} · chegou pelo {rotuloCanal[f.canal]}
+            {e.nome} · {rotuloTipoItem[f.tipo]} · {f.codigo} · {f.canal === 'interno' ? 'pedido interno' : `chegou pelo ${rotuloCanal[f.canal]}`}
             {typeof f.extras?.pedido_por === 'string' && ` (${f.extras.pedido_por})`}
           </SheetDescription>
         </SheetHeader>
