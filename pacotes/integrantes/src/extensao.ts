@@ -3,6 +3,7 @@ import { comEscritorio, contextoDeIntegrante, definirFerramenta, ErroHeild, inte
 import { Assistente, FILA_ROTEAR } from './assistente.ts'
 import { Anexos, type Integrante } from './contrato.ts'
 import { aprenderComCartao } from './execucao.ts'
+import { CATEGORIAS_DE_ENVIO, CategoriaEnvio, configurarEnvio, ModoEnvio, modosDeEnvio } from './envio.ts'
 import { integrantesContabil } from './integrantes.ts'
 import { metasB3 } from './metas.ts'
 import { ROTEADOR_BARATO_NO_HAIKU } from './modelos.ts'
@@ -86,6 +87,37 @@ export function extensaoIntegrantes(o: OpcoesExtensao = {}): ExtensaoIntegrantes
           executar: async (e, ctx) => {
             const c = await aprenderComCartao(b.sql, b.eventos, ctx, e.execucao_id)
             return { resultado: 'aguardando_aprovacao', cartao_id: c.id, resumo_humano: c.resumo, expira_em: null }
+          },
+        }),
+        definirFerramenta({
+          nome: 'envio_cliente.listar',
+          versao: 1,
+          descricao_modelo: 'Como cada categoria de mensagem padronizada vai ao cliente: cartão (padrão), envio automático ou desligado.',
+          entrada: z.object({}).strict(),
+          meta: meta('envio_cliente.listar'),
+          exposta_mcp: true,
+          recorte: 'geral',
+          executar: async (_e, ctx) => {
+            const modos = await comEscritorio(b.sql, ctx.escritorio_id, (tx) => modosDeEnvio(tx))
+            return { resultado: 'ok', dados: (Object.keys(CATEGORIAS_DE_ENVIO) as CategoriaEnvio[]).map((c) => ({ categoria: c, ...CATEGORIAS_DE_ENVIO[c], modo: modos[c] })) }
+          },
+        }),
+        definirFerramenta({
+          nome: 'envio_cliente.configurar',
+          versao: 1,
+          descricao_modelo: 'Muda o modo de uma categoria de mensagem padronizada ao cliente (só o Administrador). O que não é padronizado continua sempre com cartão.',
+          entrada: z.object({ categoria: CategoriaEnvio, modo: ModoEnvio }).strict(),
+          meta: meta('envio_cliente.configurar'),
+          exposta_mcp: false,
+          recorte: 'geral',
+          executar: async (e, ctx) => {
+            const texto = `Envio ao cliente: categoria ${CATEGORIAS_DE_ENVIO[e.categoria].nome} em ${e.modo === 'cartao' ? 'aprovação no cartão' : e.modo === 'automatico' ? 'envio automático' : 'desligado'}`
+            const modos = await comEscritorio(b.sql, ctx.escritorio_id, async (tx) => {
+              const m = await configurarEnvio(tx, e.categoria, e.modo)
+              await b.eventos.gravar(tx, ctx, { nome: 'envio_cliente.configurar', ferramenta: 'envio_cliente.configurar', nivel: 'executar', resultado: 'ok', texto, argumentos_resumo: { categoria: e.categoria, modo: e.modo } })
+              return m
+            })
+            return { resultado: 'ok', dados: { categoria: e.categoria, modo: modos[e.categoria] } }
           },
         }),
       ]

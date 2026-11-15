@@ -20,7 +20,11 @@ export interface CasoConversa {
   grupo: 'vago' | 'claro' | 'misto' | 'muda_assunto' | 'irritado' | 'delicado' | 'pede_pessoa' | 'sem_certeza' | 'fora_do_horario' | 'contexto' | 'escopo'
   roteiro: string[]
   esperado: Esperado
-  /** Outros finais aceitos como acerto (casos em que mais de um destino é razoável). */
+  /**
+   * Outros finais aceitos como acerto (casos em que mais de um destino é razoável). Chamar uma pessoa
+   * no setor certo (`pessoa:dp`) conta como acerto quando o esperado é o setor, e qualquer pessoa conta
+   * quando o esperado é `pessoa` (04, A.10: assunto delicado vai a uma pessoa na hora).
+   */
   aceitos?: Esperado[]
   /** Relógio da triagem; padrão: segunda-feira, 14h (dentro do horário). */
   agora?: string
@@ -55,6 +59,7 @@ export const gabaritoConversas: CasoConversa[] = [
   { id: 'irritado-demora', grupo: 'irritado', roteiro: ['Já é a terceira vez que eu mando mensagem e ninguém me responde!! Que absurdo'], esperado: 'pessoa' },
   { id: 'irritado-multa', grupo: 'irritado', roteiro: ['Vocês erraram minha guia de novo e eu paguei multa. Tô muito chateado com isso.'], esperado: 'pessoa' },
   { id: 'delicado-falecimento', grupo: 'delicado', roteiro: ['Bom dia. Meu sócio faleceu na semana passada e não sei o que fazer com a empresa.'], esperado: 'pessoa' },
+  { id: 'cancelamento', grupo: 'delicado', roteiro: ['Tô pensando em cancelar o contrato com vocês, não tô satisfeito com o atendimento.'], esperado: 'pessoa' },
   { id: 'pede-pessoa', grupo: 'pede_pessoa', roteiro: ['Quero falar com um atendente de verdade, por favor.'], esperado: 'pessoa' },
   // Nunca esclarece: depois de 3 perguntas, cartão para uma pessoa (ou uma pessoa direto).
   { id: 'evasivo', grupo: 'sem_certeza', roteiro: ['Oi', 'É uma coisa da empresa', 'Depois eu explico direito', 'É meio complicado de falar', 'Tem a ver com uns papéis'], esperado: 'cartao', aceitos: ['pessoa'] },
@@ -64,8 +69,8 @@ export const gabaritoConversas: CasoConversa[] = [
   // Conversa ligada a um setor: pula a triagem.
   { id: 'contexto-aberta', grupo: 'contexto', aberta: 'fiscal', roteiro: ['Oi, e aí, conseguiram ver aquilo?'], esperado: 'fiscal' },
   // Pedidos que puxam para fora do escopo: a triagem não responde, só encaminha.
-  { id: 'escopo-valor', grupo: 'escopo', roteiro: ['Quanto vai dar aquele valor que eu pago todo mês pro governo?'], esperado: 'fiscal' },
-  { id: 'escopo-tecnico', grupo: 'escopo', roteiro: ['Posso lançar a conta de luz da minha casa como despesa da empresa?'], esperado: 'contabil', aceitos: ['fiscal'] },
+  { id: 'escopo-valor', grupo: 'escopo', roteiro: ['Quanto vai dar aquele valor que eu pago todo mês pro governo?', 'Aquele do Simples, que chega todo mês.'], esperado: 'fiscal' },
+  { id: 'escopo-tecnico', grupo: 'escopo', roteiro: ['Posso lançar a conta de luz da minha casa como despesa da empresa?', 'Isso, queria saber se pode entrar nas contas da empresa.'], esperado: 'contabil', aceitos: ['fiscal'] },
 ]
 
 export const hashDoGabaritoConversas = () => createHash('sha256').update(JSON.stringify(gabaritoConversas)).digest('hex').slice(0, 16)

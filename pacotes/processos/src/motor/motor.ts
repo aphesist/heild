@@ -606,6 +606,18 @@ export class Motor {
     const ctx = await this.contextoDaExecucao(tx, ex)
     const dec = autorizarFerramenta(ctx, f, { setor_id: ex.setor, cliente_id: ex.cliente_id })
     if (!dec.permitido) throw new ErroPermissao(passo.ferramenta, dec.motivo)
+    if (passo.exigida === 'por_categoria') {
+      // O escritório escolheu o modo desta categoria de mensagem; sem escolha, vale o cartão (D-33).
+      const [cfg] = await tx`select configuracao->'envio_ao_cliente'->>${passo.categoria!} as modo from escritorio where id = ${ex.escritorio_id}`
+      const modo = cfg?.modo === 'automatico' || cfg?.modo === 'desligado' ? (cfg.modo as string) : 'cartao'
+      if (modo !== 'cartao') {
+        await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, {
+          dispensada: true, por_categoria: passo.categoria, modo, argumentos: parsed.data,
+          motivo: modo === 'automatico' ? `categoria ${passo.categoria} em envio automático` : `categoria ${passo.categoria} desligada: o aviso fica com a pessoa`,
+        })
+        return
+      }
+    }
     if (passo.exigida === 'por_regra' && !exigeCartaoSempre(f) && !dec.aprovacao) {
       const [cfg] = await tx`select executa_sozinho from procedimento_config where procedimento_id = ${p.id}`
       if (cfg?.executa_sozinho) {
@@ -669,7 +681,8 @@ export class Motor {
     const ap = s.saidas[nomePasso] as { dispensada?: boolean; cartao_id?: string; argumentos?: Record<string, unknown> } | undefined
     if (!ap) throw new ErroRegra('SEM_APROVACAO', `${f.nome} só sai depois do passo ${nomePasso}.`)
     if (ap.dispensada) {
-      if (exigeCartaoSempre(f)) throw new ErroRegra('SEM_APROVACAO', `${f.nome} exige cartão humano; não pode ser dispensado.`)
+      // Só a configuração do escritório por categoria dispensa o cartão de uma ferramenta irreversível.
+      if (exigeCartaoSempre(f) && !(ap as { por_categoria?: string }).por_categoria) throw new ErroRegra('SEM_APROVACAO', `${f.nome} exige cartão humano; não pode ser dispensado.`)
       return null
     }
     const [c] = await tx`select id, status, ferramenta, argumentos_hash, decidido_por, execucao_id from cartao_aprovacao where id = ${ap.cartao_id ?? ''}`

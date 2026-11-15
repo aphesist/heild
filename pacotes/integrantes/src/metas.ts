@@ -19,6 +19,9 @@ export const metasB3: Ferramenta[] = [
   // o assunto e encaminham, com os limites de estilo e escopo conferidos por regra. Qualquer outra
   // mensagem da IA ao cliente continua em `conversa.responder` (irreversível, com cartão).
   { nome: 'conversa.triagem_responder', modulo: 'crm', nivel: 'executar', setor: 'alvo', exposta_ao_cliente: true },
+  // Envio ao cliente por categoria (subplano 02, adendo de 15/11/2026): o Administrador escolhe o modo.
+  { nome: 'envio_cliente.listar', modulo: 'agentes', nivel: 'ler', setor: 'geral' },
+  { nome: 'envio_cliente.configurar', modulo: 'agentes', nivel: 'executar', setor: 'geral', papel_minimo: 'administrador' },
 ]
 
 /** As ferramentas transversais do motor (B2), com os mesmos metadados do registro dela. */

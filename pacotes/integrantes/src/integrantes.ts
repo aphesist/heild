@@ -2,9 +2,9 @@ import { ctbCompetenciaDoc, ctbCompetenciaDocV2, ctbEcd, ctbEcdV2, type Procedim
 import { definirIntegrante, type Anexos, type ExecucaoParaDecisao, type Integrante, type PacoteProcedimento } from './contrato.ts'
 import { decisaoDeEscolha, type Escolha } from './escolha.ts'
 import { resolverCom } from './metas.ts'
-import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
+import { BASE_PADRAO, gesFaq, gesFaqV2, gesFaqV3 } from './setores/atendimento.ts'
 import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
-import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
+import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2, fisGuiaConferirV3 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
 import { gesTriarRepassarV2, LIMIAR_ROTEIA } from './setores/triagem.ts'
 import { gesTriarRepassarV1 } from './setores/triagem-v1.ts'
@@ -43,9 +43,9 @@ const entradaDeDocumento: PacoteProcedimento['entrada'] = (a: Anexos) =>
 const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
-const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassarV3].map(P)
+const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV3, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV3, gesTriarRepassarV3].map(P)
 /** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
-const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1, gesTriarRepassarV2].map(P)
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1, gesTriarRepassarV2, fisGuiaConferirV2, gesFaqV2].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
@@ -107,7 +107,7 @@ export const integranteFiscal: Integrante = definirIntegrante(
     ferramentas: [...LEITURA, 'fiscal.guia.conferir_e_enviar', 'fiscal.caixa_postal.triar', 'fiscal.guia.enviar', 'documento.atualizar', 'fiscal.caixa_postal.ler'],
     procedimentos: [
       {
-        procedimento: P(fisGuiaConferirV2),
+        procedimento: P(fisGuiaConferirV3),
         entrada: entradaDeDocumento,
         regras: [/\bguias?\b/i, /\bDARF\b/i, /\bDAS\b/, /\bGPS\b/],
         tipos_documento: ['guia'],
@@ -208,7 +208,7 @@ export const integranteAtendimento: Integrante = definirIntegrante(
     ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.rotear', 'conversa.triagem_divergir', 'conversa.triagem_responder', 'conversa.listar'],
     procedimentos: [
       {
-        procedimento: P(gesFaqV2),
+        procedimento: P(gesFaqV3),
         entrada: entradaDeDocumento,
         regras: [/\bsegunda via\b/i, /\bhor[áa]rio de atendimento\b/i, /\bcertid[ãa]o negativa\b/i, /\bpergunta frequente\b/i, /\bresponder? (o |a )?cliente\b/i],
         aceita_documentos: ['mensagem'],

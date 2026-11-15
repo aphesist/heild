@@ -75,8 +75,15 @@ export type Passo<E = any> =
       tipo: 'aprovacao'
       nome: string
       ferramenta: string
-      /** `sempre`: cartão em qualquer caso. `por_regra`: cartão salvo se a lista do escritório liberar e a ferramenta deixar. */
-      exigida: 'sempre' | 'por_regra'
+      /**
+       * `sempre`: cartão em qualquer caso. `por_regra`: cartão salvo se a lista do escritório liberar e a ferramenta deixar.
+       * `por_categoria`: mensagem padronizada ao cliente; o escritório escolhe por categoria (subplano 02, "Envio ao
+       * cliente: configurável por categoria"): cartão (padrão), envio automático ou desligado. Vale também para
+       * ferramenta irreversível, porque quem libera é o Administrador, categoria por categoria.
+       */
+      exigida: 'sempre' | 'por_regra' | 'por_categoria'
+      /** Com `por_categoria`: a categoria da mensagem (chave de `escritorio.configuracao.envio_ao_cliente`). */
+      categoria?: string
       argumentos: (s: Estado<E>) => Record<string, unknown>
       /** Esquema dos argumentos (também valida a edição feita pela pessoa no cartão). */
       esquema: z.ZodType
@@ -188,7 +195,8 @@ export function definirProcedimento<E extends z.ZodObject>(d: DefinicaoProcedime
       if (!resolver(p.ferramenta)) erros.push(`${p.nome}: ferramenta desconhecida ${p.ferramenta}`)
       for (const v of p.revalidar ?? []) if (!validador(v)) erros.push(`${p.nome}: validador não registrado ${v}`)
       const f = resolver(p.ferramenta)
-      if (f && exigeCartaoSempre(f) && p.exigida !== 'sempre') erros.push(`${p.nome}: ${p.ferramenta} exige aprovação sempre`)
+      if (f && exigeCartaoSempre(f) && p.exigida === 'por_regra') erros.push(`${p.nome}: ${p.ferramenta} exige aprovação sempre`)
+      if (p.exigida === 'por_categoria' && !p.categoria) erros.push(`${p.nome}: aprovação por categoria sem a categoria`)
     }
     if (p.tipo === 'externo' || p.tipo === 'efeito') {
       const f = resolver(p.ferramenta)
@@ -199,7 +207,7 @@ export function definirProcedimento<E extends z.ZodObject>(d: DefinicaoProcedime
         const ap = ref ? d.passos[nomes.get(ref) ?? -1] : undefined
         if (!ref || !antes(ref, i) || !ap || ap.tipo !== 'aprovacao') erros.push(`${p.nome}: precisa de um passo de aprovação anterior`)
         else if (ap.ferramenta !== p.ferramenta) erros.push(`${p.nome}: a aprovação ${ref} é de outra ferramenta (${ap.ferramenta})`)
-        else if (f && exigeCartaoSempre(f) && ap.exigida !== 'sempre') erros.push(`${p.nome}: ${p.ferramenta} é irreversível; a aprovação tem de ser 'sempre'`)
+        else if (f && exigeCartaoSempre(f) && ap.exigida === 'por_regra') erros.push(`${p.nome}: ${p.ferramenta} é irreversível; a aprovação tem de ser 'sempre' ou por categoria`)
       }
     }
   })
@@ -226,7 +234,7 @@ export function descreverPassos(passos: Passo[]) {
     tipo: p.tipo,
     ...(p.tipo === 'operario' ? { contrato: `${p.contrato.id}@${p.contrato.versao}` } : {}),
     ...(p.tipo === 'validar' ? { validadores: p.validadores, ao_falhar: p.ao_falhar } : {}),
-    ...(p.tipo === 'aprovacao' ? { ferramenta: p.ferramenta, exigida: p.exigida } : {}),
+    ...(p.tipo === 'aprovacao' ? { ferramenta: p.ferramenta, exigida: p.exigida, ...(p.categoria ? { categoria: p.categoria } : {}) } : {}),
     ...(p.tipo === 'externo' ? { ferramenta: p.ferramenta, conector: `${p.conector}.${p.metodo}` } : {}),
     ...(p.tipo === 'efeito' ? { ferramenta: p.ferramenta } : {}),
   }))

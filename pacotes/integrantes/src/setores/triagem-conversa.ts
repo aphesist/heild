@@ -95,11 +95,12 @@ export const problemasDeEstilo = (m: string) => REGRAS_DE_ESTILO.filter(([, r]) 
 export const problemasDeEscopo = (m: string) => REGRAS_DE_ESCOPO.filter(([, r]) => r(m)).map(([n]) => n)
 
 /**
- * Sinais de assunto delicado, irritação ou pedido de falar com alguém: a palavra-chave não decide
- * sozinha (o aviso fixo seria frio), e o integrante lê a conversa para chamar uma pessoa.
+ * Sinais de assunto delicado (04, A.10: reclamação, cobrança em atraso, rescisão, autuação, ameaça de
+ * cancelamento, luto), irritação ou pedido de falar com alguém: a palavra-chave não decide sozinha (o
+ * aviso fixo seria frio), e o integrante lê a conversa para chamar uma pessoa na hora.
  */
 const SINAIS_DE_CUIDADO =
-  /\b(faleceu|falecimento|morreu|[óo]bito|vel[óo]rio|doen[çc]a grave|absurdo|ningu[ée]m (me )?respond\w*|cansad[oa] de esperar|vou processar|advogad[oa]|procon|reclama[çc][ãa]o|atendente|falar com (uma pessoa|algu[ée]m)|chatead[oa]|irritad[oa])\b/i
+  /(faleceu|falecimento|morreu|[óo]bito|vel[óo]rio|luto|doen[çc]a grave|absurdo|ningu[ée]m (me )?respond|cansad[oa] de esperar|processar|advogad[oa]|procon|reclama[çc][ãa]o|reclamar|atendente|falar com (uma pessoa|algu[ée]m)|chatead[oa]|irritad[oa]|cancelar|cancelamento|atrasad[oa]|em atraso|rescis[ãa]o|desligar|demitir|demiss[ãa]o|autua[çc][ãa]o|auto de infra[çc][ãa]o|multa)/i
 export const pedeCuidado = (texto: string) => SINAIS_DE_CUIDADO.test(texto)
 
 // ───────────────────────────── contrato do operário ─────────────────────────────
@@ -115,9 +116,9 @@ export const contratoConversa = definirContrato({
     'Faça no máximo uma pergunta por mensagem, aberta e natural, sobre o que o cliente precisa: só um ponto de interrogação na mensagem inteira. Não junte "tudo bem?" com outra pergunta; se o cliente perguntou se está tudo bem, responda "tudo bem sim" sem devolver a pergunta (ex.: "Boa tarde! Tudo bem sim. Me conta o que você precisa?").',
     'Nunca dê opções numeradas, lista ou menu. Não diga que é robô ou assistente virtual, não assine e não use formatação.',
     'Nunca responda dúvida técnica, não diga números, valores, prazos ou datas, não prometa nada e não peça senha, CPF, RG, certificado ou dados bancários.',
-    'acao=repassar quando tiver certeza razoável do setor (confiança de 0,8 ou mais). A mensagem avisa de forma natural que vai passar para o pessoal do setor (ex.: "vou passar para o pessoal do DP, que cuida disso").',
+    'acao=repassar quando tiver certeza razoável do setor (confiança de 0,8 ou mais). A mensagem avisa de forma natural para quem vai passar: com quem_cuida, use o nome e o setor (ex.: "vou passar para a Ana, do DP, que cuida disso"); sem, "o pessoal do DP".',
     'acao=perguntar quando ainda não souber: a mensagem é a sua próxima fala na conversa, com uma pergunta.',
-    'acao=pessoa quando o assunto for delicado (falecimento, doença, briga entre sócios, fiscalização com medo), o cliente estiver irritado ou pedir para falar com alguém: diga, com empatia, que vai chamar alguém da equipe. Informe motivo_pessoa.',
+    'acao=pessoa, na hora e sem continuar a triagem, quando o assunto for delicado (reclamação, cobrança em atraso, rescisão ou demissão, autuação ou multa, ameaça de cancelamento, luto), o cliente estiver irritado ou pedir para falar com alguém: diga, com empatia, que vai chamar alguém da equipe (pelo nome, se souber). Informe motivo_pessoa e o setor quando estiver claro (rescisão: dp; autuação: fiscal); senão, setor=null.',
     'Se a conversa trouxer dois assuntos de setores diferentes, pergunte qual resolver primeiro. Se o cliente mudar de assunto, vale o último pedido.',
   ].join(' '),
   recebe: z
@@ -127,7 +128,7 @@ export const contratoConversa = definirContrato({
       saudacao: z.enum(['Bom dia', 'Boa tarde', 'Boa noite']),
       escritorio_ja_falou: z.boolean(),
       perguntas_feitas: z.number().int().min(0),
-      setores: z.array(z.object({ codigo: z.string(), descricao: z.string() }).strict()).length(5),
+      setores: z.array(z.object({ codigo: z.string(), descricao: z.string(), quem_cuida: z.string().nullable() }).strict()).length(5),
     })
     .strict(),
   devolve: z
@@ -185,9 +186,9 @@ definirValidador({
   nome: 'aviso_de_repasse',
   versao: 1,
   descricao: 'Ao repassar, a mensagem diz ao cliente para qual setor a conversa vai.',
-  dados: z.object({ origem: Origem, acao: z.string().nullable(), setor: z.string().nullable(), mensagem: z.string().nullable() }),
-  conferir: ({ origem, acao, setor, mensagem }) =>
-    origem === 'integrante' && acao === 'repassar' && setor && mensagem && !MENCAO_DO_SETOR[setor as SetorDestino]?.test(mensagem)
+  dados: z.object({ origem: Origem, acao: z.string().nullable(), setor: z.string().nullable(), mensagem: z.string().nullable(), quem_cuida: z.record(z.string(), z.string().nullable()).optional() }),
+  conferir: ({ origem, acao, setor, mensagem, quem_cuida }) =>
+    origem === 'integrante' && acao === 'repassar' && setor && mensagem && !MENCAO_DO_SETOR[setor as SetorDestino]?.test(mensagem) && !(quem_cuida?.[setor] && mensagem.includes(quem_cuida[setor]!))
       ? { ok: false, codigo: 'REPASSE_SEM_AVISO', escalavel: true, mensagem: `Diga ao cliente que vai passar para o ${PESSOAL_DO_SETOR[setor as SetorDestino]}.` }
       : { ok: true },
 })
@@ -231,6 +232,8 @@ interface Lida {
   escritorio_ja_falou: boolean
   perguntas_feitas: number
   regra: { setor: SetorDestino; motivo: MotivoRegra } | null
+  /** Primeiro nome de quem cuida do cliente em cada setor (carteira; senão, o responsável padrão). */
+  quem_cuida: Record<SetorDestino, string | null>
   integrante: { id: string | null; nome: string }
   anterior: QuemFala | null
 }
@@ -262,7 +265,10 @@ function decidida(s: Estado) {
 /** O aviso fixo de repasse (regra ou escolha de uma pessoa): escrito pelo sistema. */
 function avisoFixo(l: Lida, setor: SetorDestino) {
   const oi = l.escritorio_ja_falou ? '' : `${l.saudacao}! `
-  return `${oi}Vou passar sua mensagem para o ${PESSOAL_DO_SETOR[setor]}, que cuida disso. Daqui a pouco eles te respondem por aqui.`
+  const nome = l.quem_cuida[setor]
+  return nome
+    ? `${oi}Vou passar sua mensagem para ${nome}, do ${NOME_DO_SETOR[setor]}, que cuida disso. Daqui a pouco te respondem por aqui.`
+    : `${oi}Vou passar sua mensagem para o ${PESSOAL_DO_SETOR[setor]}, que cuida disso. Daqui a pouco eles te respondem por aqui.`
 }
 
 function resumo(l: Lida, d: Decisao) {
@@ -402,6 +408,17 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
             if (palavras.length === 1) regra = { setor: palavras[0]!, motivo: 'palavra_chave' }
           }
 
+          const nomes = await tx`
+            select s.codigo as setor, coalesce(uc.nome, up.nome) as nome
+            from setor s
+            left join usuario up on up.id = s.responsavel_padrao_id and up.situacao = 'ativo'
+            left join lateral (
+              select u.nome from carteira_cliente cc join usuario u on u.id = cc.usuario_id and u.situacao = 'ativo'
+              where ${cliente_id}::text is not null and cc.cliente_id = ${cliente_id} and cc.setor_id = s.codigo and cc.arquivado_em is null limit 1
+            ) uc on true
+            where s.codigo in ${tx(SETORES_DE_DESTINO as unknown as string[])}`
+          const quem_cuida = Object.fromEntries(SETORES_DE_DESTINO.map((x) => [x, null])) as Record<SetorDestino, string | null>
+          for (const n of nomes) if (n.nome) quem_cuida[n.setor as SetorDestino] = String(n.nome).trim().split(/\s+/)[0]!.slice(0, 40)
           const ultimaSaida = ordem.findLastIndex((m) => m.direcao === 'saida')
           const ultimas = ordem.slice(ultimaSaida + 1).map((m) => String(m.corpo)).join('\n')
           const [integ] = await tx`select id, nome_exibido as nome from integrante where setor = ${setor_entrada} and tipo = 'padrao_setor' and situacao = 'ativo' order by criado_em limit 1`
@@ -431,6 +448,7 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
             escritorio_ja_falou: ordem.some((m) => m.direcao === 'saida'),
             perguntas_feitas: ordem.filter((m) => m.direcao === 'saida' && (m.extras as { tipo?: string } | null)?.tipo === 'triagem_conversa').length,
             regra,
+            quem_cuida,
             integrante: { id: (integ?.id as string | undefined) ?? null, nome: nomeInteg },
             anterior,
           }
@@ -467,7 +485,7 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
             saudacao: l.saudacao,
             escritorio_ja_falou: l.escritorio_ja_falou,
             perguntas_feitas: l.perguntas_feitas,
-            setores: SETORES_DE_DESTINO.map((codigo) => ({ codigo, descricao: DESCRICAO[codigo] })),
+            setores: SETORES_DE_DESTINO.map((codigo) => ({ codigo, descricao: DESCRICAO[codigo], quem_cuida: l.quem_cuida[codigo] })),
           }
         },
       },
@@ -475,7 +493,7 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
         tipo: 'validar',
         nome: 'conferir',
         validadores: ['triagem_conversa_coerente', 'estilo_whatsapp', 'escopo_triagem', 'aviso_de_repasse', 'trocas_no_limite'],
-        dados: (s) => ({ ...decidida(s), perguntas_feitas: lida(s).perguntas_feitas }),
+        dados: (s) => ({ ...decidida(s), perguntas_feitas: lida(s).perguntas_feitas, quem_cuida: lida(s).quem_cuida }),
         sobre: 'conversar',
         ao_falhar: 'escalar',
       },
@@ -495,10 +513,11 @@ export const gesTriarRepassarV3: Procedimento = definirProcedimento(
           }
           if (d.origem === 'pessoa') {
             // Uma pessoa escolheu pelo cartão: o aviso ao cliente é o fixo, não o texto do cartão.
-            if (d.acao === 'pessoa' || !d.setor) return { acao: 'pessoa', setor: l.setor_entrada, origem: 'pessoa', motivo_regra: null, motivo_pessoa: d.motivo_pessoa ?? 'pediu_pessoa', confianca: null, mensagem: null }
+            if (d.acao === 'pessoa' || !d.setor) return { acao: 'pessoa', setor: d.setor ?? l.setor_entrada, origem: 'pessoa', motivo_regra: null, motivo_pessoa: d.motivo_pessoa ?? 'pediu_pessoa', confianca: null, mensagem: null }
             return { acao: 'repassar', setor: d.setor, origem: 'pessoa', motivo_regra: null, motivo_pessoa: null, confianca: null, mensagem: fala(avisoFixo(l, d.setor)) }
           }
-          if (d.acao === 'pessoa') return { acao: 'pessoa', setor: l.setor_entrada, origem: 'integrante', motivo_regra: null, motivo_pessoa: d.motivo_pessoa, confianca: d.confianca, mensagem: fala(d.mensagem!) }
+          // Pessoa na hora: no setor do assunto, quando claro; senão, no setor de entrada.
+          if (d.acao === 'pessoa') return { acao: 'pessoa', setor: d.setor ?? l.setor_entrada, origem: 'integrante', motivo_regra: null, motivo_pessoa: d.motivo_pessoa, confianca: d.confianca, mensagem: fala(d.mensagem!) }
           if (d.acao === 'repassar') return { acao: 'repassar', setor: d.setor!, origem: 'integrante', motivo_regra: null, motivo_pessoa: null, confianca: d.confianca, mensagem: fala(d.mensagem!) }
           return { acao: 'perguntar', setor: null, origem: 'integrante', motivo_regra: null, motivo_pessoa: null, confianca: d.confianca, mensagem: fala(d.mensagem!) }
         },

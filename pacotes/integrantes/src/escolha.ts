@@ -1,6 +1,7 @@
 import './validadores.ts'
 import { z } from 'zod'
 import { contratoRevisar, definirProcedimento, ErroRegra, linhaDaRevisao, type CartaoVisual, type Contrato, type Estado, type Passo, type Procedimento, type ResolverFerramenta } from '@heild/processos'
+import { comQuemFala } from './identificacao.ts'
 
 /**
  * Fábrica dos procedimentos "ler e escolher" dos setores (B3). O caminho é sempre o mesmo, em código:
@@ -52,7 +53,15 @@ export interface OpcoesEscolha {
   validadores: string[]
   aprovacao: {
     ferramenta: string
-    exigida: 'sempre' | 'por_regra'
+    /** `por_categoria`: mensagem padronizada ao cliente, no modo que o escritório escolheu (`envio.ts`). */
+    exigida: 'sempre' | 'por_regra' | 'por_categoria'
+    categoria?: string
+    /**
+     * A mensagem padronizada ao cliente, escrita pelo SISTEMA (modelo do tema). Com conversa ligada ao
+     * documento, o efeito a grava na conversa (o CRM envia), com o prefixo de quem fala, salvo com a
+     * categoria desligada.
+     */
+    mensagem_ao_cliente?: (escolha: Escolha, lido: Lido) => string
     resumo: (escolha: Escolha, lido: Lido) => string
     cartoes?: (escolha: Escolha, lido: Lido) => CartaoVisual[]
     /** Campos extras que vão nos argumentos aprovados (ex.: o texto aprovado da resposta). */
@@ -170,6 +179,7 @@ export function procedimentoDeEscolha(o: OpcoesEscolha): Procedimento {
           nome: 'aprovar',
           ferramenta: o.aprovacao.ferramenta,
           exigida: o.aprovacao.exigida,
+          ...(o.aprovacao.categoria ? { categoria: o.aprovacao.categoria } : {}),
           esquema: Args,
           argumentos: (s) => {
             const e = escolhida(s.saidas, campos).escolha
@@ -188,12 +198,28 @@ export function procedimentoDeEscolha(o: OpcoesEscolha): Procedimento {
             const args = (s.saidas.aprovar as { argumentos: Record<string, unknown> }).argumentos
             const decisao = Object.fromEntries(campos.map((c) => [c, (args[c] ?? null) as ValorEscolha]))
             const origem = escolhida(s.saidas, campos).origem
-            const registro = { ...decisao, ...(args.extras ? { extras: args.extras } : {}), origem, execucao_id: s.execucao.id }
+            // Envio por categoria: o modo que a aprovação aplicou (cartão quando a pessoa aprovou).
+            const modo = (s.saidas.aprovar as { modo?: string }).modo ?? 'cartao'
+            let enviada = false
+            if (o.aprovacao.mensagem_ao_cliente && modo !== 'desligado') {
+              const [cv] = await tx`select m.conversa_id from documento d join mensagem m on m.id = d.mensagem_id where d.id = ${s.entrada.documento_id}`
+              if (cv) {
+                const [integ] = await tx`select id, nome_exibido from integrante where setor = ${o.setor} and tipo = 'padrao_setor' and situacao = 'ativo' order by criado_em limit 1`
+                const texto = comQuemFala({ tipo: 'integrante', nome: String(integ?.nome_exibido ?? o.setor) }, o.aprovacao.mensagem_ao_cliente(escolhida(s.saidas, campos).escolha, lido(s)))
+                await tx`insert into mensagem (escritorio_id, conversa_id, direcao, canal, autor_tipo, autor_id, corpo, extras)
+                         values (${s.execucao.escritorio_id}, ${cv.conversa_id}, 'saida', 'whatsapp', 'integrante', ${integ?.id ?? null}, ${texto},
+                         ${tx.json({ tipo: 'mensagem_padronizada', categoria: o.aprovacao.categoria ?? null, modo, execucao_id: s.execucao.id } as never)})`
+                enviada = true
+              }
+            }
+            const envio = o.aprovacao.exigida === 'por_categoria' ? { envio: { categoria: o.aprovacao.categoria, modo, enviada } } : {}
+            const registro = { ...decisao, ...(args.extras ? { extras: args.extras } : {}), origem, execucao_id: s.execucao.id, ...envio }
             const linhas = await tx`
               update documento set metadados = coalesce(metadados, '{}'::jsonb) || ${tx.json({ [o.chave_metadados]: registro } as never)}
               where id = ${s.entrada.documento_id} and not (coalesce(metadados, '{}'::jsonb) ? ${o.chave_metadados}) returning id`
             if (!linhas.length) throw new ErroRegra('JA_FEITO', 'O documento foi tratado por outra via enquanto esta execução rodava.')
-            return { dados: { decisao, origem }, texto_evento: `${o.nome}: ${campos.map((c) => `${c}=${decisao[c] ?? '-'}`).join(', ')} (${origem})` }
+            const comoEnviou = o.aprovacao.exigida !== 'por_categoria' ? '' : modo === 'desligado' ? '; envio desligado: o aviso fica com a pessoa' : enviada ? `; mensagem na conversa do cliente (${modo})` : `; envio ${modo}, sem conversa ligada`
+            return { dados: { decisao, origem, ...envio }, texto_evento: `${o.nome}: ${campos.map((c) => `${c}=${decisao[c] ?? '-'}`).join(', ')} (${origem})${comoEnviou}` }
           },
         },
         {

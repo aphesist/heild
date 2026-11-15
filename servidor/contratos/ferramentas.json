@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "3fb296ffa93d5e10",
+  "catalogo_hash": "9853695aa046c4e5",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -339,7 +339,7 @@
     {
       "name": "atendimento_conversa_triar_e_repassar",
       "nome": "atendimento.conversa.triar_e_repassar",
-      "description": "Reconhece quem escreve e o assunto da conversa do número compartilhado e a roteia ao setor e ao integrante certos, com resumo; na dúvida, pergunta.",
+      "description": "Conversa com o cliente do número compartilhado até entender o assunto e repassa ao setor e ao integrante certos, com resumo; fora do horário, só a resposta automática.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -348,23 +348,6 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80
-          },
-          "triagem": {
-            "type": "string",
-            "enum": [
-              "integrante",
-              "menu_e_integrante"
-            ]
-          },
-          "menu_escolhido": {
-            "type": "string",
-            "enum": [
-              "contabil",
-              "fiscal",
-              "dp",
-              "societario",
-              "gestao_atendimento"
-            ]
           },
           "setor_entrada": {
             "type": "string",
@@ -375,6 +358,11 @@
               "societario",
               "gestao_atendimento"
             ]
+          },
+          "agora": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
         "required": [
@@ -393,7 +381,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 2,
+      "x-heild-versao": 3,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"
@@ -434,7 +422,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 2,
+      "x-heild-versao": 3,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"
@@ -1967,6 +1955,84 @@
       "x-heild-origem": "catalogo"
     },
     {
+      "name": "envio_cliente_configurar",
+      "nome": "envio_cliente.configurar",
+      "description": "Muda o modo de uma categoria de mensagem padronizada ao cliente (só o Administrador). O que não é padronizado continua sempre com cartão.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "guia_emitida",
+              "resposta_factual",
+              "documento_faltando",
+              "prazo_chegando",
+              "tarefa_concluida",
+              "admissao_feita"
+            ]
+          },
+          "modo": {
+            "type": "string",
+            "enum": [
+              "cartao",
+              "automatico",
+              "desligado"
+            ]
+          }
+        },
+        "required": [
+          "categoria",
+          "modo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "envio_cliente_listar",
+      "nome": "envio_cliente.listar",
+      "description": "Como cada categoria de mensagem padronizada vai ao cliente: cartão (padrão), envio automático ou desligado.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
       "name": "escritorio_atualizar",
       "nome": "escritorio.atualizar",
       "description": "Muda campos editáveis (razao_social, nome_fantasia, cnpj, crc, fuso_horario, inatividade_min, carteira_ligada, modo_bpo, tema_id, configuracao, extras). O resto muda só pela ferramenta da transição.",
@@ -2642,7 +2708,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 2,
+      "x-heild-versao": 3,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"

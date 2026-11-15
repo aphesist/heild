@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { definirContrato } from '@heild/processos'
-import { competenciasDoTexto, datasDoTexto, procedimentoDeEscolha, type Lido, type OpcoesEscolha } from '../escolha.ts'
+import { competenciasDoTexto, datasDoTexto, procedimentoDeEscolha, type Escolha, type Lido, type OpcoesEscolha } from '../escolha.ts'
 import { resolverCom } from '../metas.ts'
 
 /**
@@ -89,16 +89,32 @@ const opcoesGuia = {
 export const fisGuiaConferir = procedimentoDeEscolha(opcoesGuia)
 
 /** v2 (B3b): revisor de risco (Opus) antes do cartão, porque o ato é irreversível. */
-export const fisGuiaConferirV2 = procedimentoDeEscolha({
+const opcoesGuiaV2 = {
   ...opcoesGuia,
   versao: 2,
   orcamento: { centavos: 30, tokens: 12_000 },
-  revisor: { evidencias: (e, l) => [
+  revisor: { evidencias: (e: Escolha, l: Lido) => [
       { rotulo: 'Valor da guia', valor: reais(Number(l.contexto.valor_centavos ?? 0)) },
       { rotulo: 'Apuração do tributo na competência', valor: reais(Number((l.contexto.apuracao as Record<string, Record<string, number>>)[String(e.tributo)]?.[String(e.competencia)] ?? 0)) },
       { rotulo: 'Opções de tributo no texto', valor: (l.candidatas.tributo as string[]).join(', ') },
       { rotulo: 'Competências no texto', valor: (l.candidatas.competencia as string[]).join(', ') || 'nenhuma' },
     ] },
+} satisfies OpcoesEscolha
+export const fisGuiaConferirV2 = procedimentoDeEscolha(opcoesGuiaV2)
+
+/**
+ * v3: o envio da guia ao cliente segue o modo da categoria `guia_emitida` escolhido pelo escritório
+ * (cartão por padrão, envio automático ou desligado), com a mensagem padronizada escrita pelo sistema.
+ */
+export const fisGuiaConferirV3 = procedimentoDeEscolha({
+  ...opcoesGuiaV2,
+  versao: 3,
+  aprovacao: {
+    ...opcoesGuia.aprovacao,
+    exigida: 'por_categoria',
+    categoria: 'guia_emitida',
+    mensagem_ao_cliente: (e, l) => `Sua guia de ${e.tributo} da competência ${String(e.competencia).split('-').reverse().join('/')} está pronta: ${reais(Number(l.contexto.valor_centavos ?? 0))}.`,
+  },
 })
 
 export const CATEGORIAS_CAIXA_POSTAL = ['intimacao', 'malha', 'exclusao_simples', 'cobranca', 'informativo'] as const

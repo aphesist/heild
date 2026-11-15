@@ -150,7 +150,7 @@ export function definirIntegrante(d: DefinicaoIntegrante, resolver: ResolverMeta
       if (passo.tipo === 'aprovacao' || passo.tipo === 'efeito' || passo.tipo === 'externo') {
         if (!noPacote.has(passo.ferramenta)) erros.push(`${p.id}.${passo.nome}: ${passo.ferramenta} fora do pacote do integrante`)
         const f = resolver(passo.ferramenta)
-        if (passo.tipo === 'aprovacao' && f && exigeCartaoSempre(f) && passo.exigida !== 'sempre') erros.push(`${p.id}.${passo.nome}: ${passo.ferramenta} é irreversível`)
+        if (passo.tipo === 'aprovacao' && f && exigeCartaoSempre(f) && passo.exigida === 'por_regra') erros.push(`${p.id}.${passo.nome}: ${passo.ferramenta} é irreversível`)
       }
     }
     if (pp.limiares_do_plano) {

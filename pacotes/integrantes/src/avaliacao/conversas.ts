@@ -43,11 +43,12 @@ export interface LinhaConversa {
 const SETORES = ['contabil', 'fiscal', 'dp', 'societario', 'gestao_atendimento']
 
 export function classificarConversa(c: CasoConversa, obtido: string): { acerto: boolean; erro_critico: boolean } {
-  const aceitos = [c.esperado, ...(c.aceitos ?? [])]
-  const acerto = aceitos.includes(obtido as never)
+  const aceitos: string[] = [c.esperado, ...(c.aceitos ?? [])]
+  const [tipo, setorDaPessoa] = obtido.split(':')
+  const acerto = aceitos.includes(obtido) || (tipo === 'pessoa' && (aceitos.includes('pessoa') || (!!setorDaPessoa && aceitos.includes(setorDaPessoa))))
   // Erro crítico: agir errado com o cliente (repassar ao setor errado, ou repassar quando devia chamar
   // alguém ou não atender). Cartão, pessoa ou conversa sem fim não são críticos: ninguém agiu errado.
-  const erro_critico = !acerto && SETORES.includes(obtido)
+  const erro_critico = !acerto && (SETORES.includes(obtido) || (tipo === 'pessoa' && !!setorDaPessoa && SETORES.includes(c.esperado)))
   return { acerto, erro_critico }
 }
 
@@ -97,7 +98,8 @@ export async function avaliarConversa(a: AmbienteConversa, c: CasoConversa, roda
     if (ex.estado === 'concluida') {
       const acao = ex.saida?.acao as string
       if (acao === 'perguntar') continue
-      obtido = acao === 'repassar' ? String(ex.saida.setor) : acao
+      // Pessoa no setor de entrada: `pessoa`; no setor do assunto: `pessoa:{setor}`.
+      obtido = acao === 'repassar' ? String(ex.saida.setor) : acao === 'pessoa' && ex.saida.setor !== 'gestao_atendimento' ? `pessoa:${ex.saida.setor}` : acao
     } else obtido = ex.estado === 'aguardando_cartao' ? 'cartao' : `${ex.estado}:${ex.erro?.codigo ?? ''}`
     break
   }
