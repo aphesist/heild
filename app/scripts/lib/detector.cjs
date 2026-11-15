@@ -359,6 +359,8 @@ function detectar(opcoes) {
       op *= parseFloat(cs(a).opacity)
       // Opacidade em linha abaixo de 1 é a de uma animação de entrada (Motion): mede depois, não no meio.
       if (a.style && a.style.opacity !== '' && parseFloat(a.style.opacity) < 1) animando = true
+      // Animação em curso pela Web Animations API (o Motion anima a opacidade assim): o aviso ainda está entrando.
+      if (a.getAnimations && a.getAnimations().some((an) => an.playState === 'running' && !(typeof CSSTransition !== 'undefined' && an instanceof CSSTransition) && an.effect?.getComputedTiming?.().iterations !== Infinity)) animando = true
     }
     if (animando) continue
     const { bases, camadas } = fundos(el)
