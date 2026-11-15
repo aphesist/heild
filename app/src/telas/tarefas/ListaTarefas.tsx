@@ -5,7 +5,7 @@ import { useLoja, usePersistente } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { Calendario, isoDeDiaMes } from '@/components/compostos/calendario'
 import { rotuloStatus, statusFinal } from '@/components/compostos/rotulos'
-import { BarraLote, CaixaSelecao, EstadoVazio, Quadro, useAcao, useConfirmar, useSelecao, type ColunaQuadro } from '@/components/kit'
+import { BarraLote, CaixaSelecao, Celula, LinhaColunas, ListaColunas, type ColunaLista, EstadoVazio, Quadro, useAcao, useConfirmar, useSelecao, type ColunaQuadro } from '@/components/kit'
 import { Button } from '@/components/ui/button'
 import { Orb } from '@/components/ui/orb'
 import { nomeCurtoAtividade } from '@/dados/atividades-s04'
@@ -151,21 +151,11 @@ export function ListaTarefas({
 
       {f.visao === 'lista' && (
         <>
-          <div role="table" aria-label="Tarefas" className="flex min-w-0 flex-col">
-            <div role="row" className="text-muted-foreground hidden grid-cols-[minmax(0,1fr)_9rem_5.5rem_9.5rem_6rem_7rem] gap-x-3 border-b px-2 pb-1.5 text-[11px] @4xl:grid">
-              <span role="columnheader">Tarefa</span>
-              <span role="columnheader">Atividade</span>
-              <span role="columnheader">Prazo int. · legal</span>
-              <span role="columnheader">Responsável</span>
-              <span role="columnheader">Origem · dias</span>
-              <span role="columnheader" className="text-right">
-                Status
-              </span>
-            </div>
+          <ListaColunas rotulo="Tarefas" colunas={colunasTarefas} classeCabecalho="px-1">
             {mostradas.map((t) => (
               <LinhaTarefa key={t.id} t={t} cliente={cliente ? undefined : nomeClienteE(t, clientes)} filhas={filhasDe(t.id)} aberta={aberta === t.id} onPrevia={() => setAberta(aberta === t.id ? null : t.id)} onAbrir={() => fluxos.abrirTarefa(t.id)} />
             ))}
-          </div>
+          </ListaColunas>
           {mostradas.length === 0 && <EstadoVazio titulo={`Nenhuma tarefa ${f.status === 'abertas' ? 'aberta ' : ''}${setor ? 'deste setor ' : ''}para ${cliente ?? 'a carteira'}.`} descricao="Mude os filtros ou crie uma tarefa." />}
           {limite && visiveis.length > limite && (
             <Button size="sm" variant="ghost" className="self-start rounded-full" onClick={() => (onVerTodas ? onVerTodas() : setTodasVisiveis(!todasVisiveis))}>
@@ -193,6 +183,17 @@ function Alternar({ rotulo, ligado, onMudar }: { rotulo: string; ligado: boolean
   )
 }
 
+/** Colunas da lista de tarefas: o texto trunca; prazo, origem e estado têm o tamanho do conteúdo (nada invade o vizinho). */
+const colunasTarefas: ColunaLista[] = [
+  { largura: 'conteudo' },
+  { rotulo: 'Tarefa', largura: 'fluida' },
+  { rotulo: 'Atividade', largura: '9rem', largo: true },
+  { rotulo: 'Prazo int. · legal', largura: 'conteudo', largo: true },
+  { rotulo: 'Responsável', largura: '9.5rem', largo: true },
+  { rotulo: 'Origem · dias', largura: 'conteudo', largo: true },
+  { rotulo: 'Status', largura: 'conteudo', alinhar: 'fim' },
+]
+
 /** Linha com pré-visualização (não inicia o tempo) e ação de um toque. */
 function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: { t: TarefaE; cliente?: string; filhas: TarefaE[]; aberta: boolean; onPrevia: () => void; onAbrir: () => void }) {
   const executar = useAcao()
@@ -201,15 +202,17 @@ function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: { t: Tar
   const feitas = filhas.filter((x) => x.status === 'concluida').length
   const rapida = t.status === 'a_fazer' ? { rotulo: 'Iniciar', icone: <PlayIcon />, f: () => executar(() => acoesTarefa.iniciar(t.id), { sucesso: 'Iniciada' }) } : t.status === 'aguardando_cliente' ? { rotulo: 'Cobrar', icone: <PaperPlaneTiltIcon />, f: onAbrir } : t.status === 'em_revisao' ? { rotulo: 'Revisar', icone: <EyeIcon />, f: onAbrir } : !statusFinal(t.status) ? { rotulo: 'Concluir', icone: <CheckIcon />, f: () => executar(() => acoesTarefa.concluir(t.id), { sucesso: 'Concluída' }) } : null
   return (
-    <div role="row" className="border-border/60 border-b last:border-b-0">
-      <div className="hover:bg-accent/50 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 rounded-[10px] px-1 py-2 @4xl:grid-cols-[auto_minmax(0,1fr)_9rem_5.5rem_9.5rem_6rem_7rem]">
+    <div className="border-border/60 border-b last:border-b-0">
+      <LinhaColunas className="hover:bg-accent/50 rounded-md px-1 py-2">
         <button type="button" onClick={onPrevia} aria-expanded={aberta} aria-label={`Pré-visualizar ${t.titulo}`} className="text-muted-foreground hover:text-foreground cursor-pointer rounded p-0.5">
           {aberta ? <CaretDownIcon className="size-3.5" /> : <CaretRightIcon className="size-3.5" />}
         </button>
         <button type="button" role="cell" onClick={onAbrir} className="min-w-0 cursor-pointer text-left">
           <span className="flex items-center gap-1.5 text-sm">
             {filhas.length > 0 && <TreeStructureIcon className="text-muted-foreground size-3.5 shrink-0" aria-label="raiz de trilha" />}
-            <span className="truncate">{t.titulo}</span>
+            <span className="truncate" title={t.titulo}>
+              {t.titulo}
+            </span>
             {filhas.length > 0 && (
               <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
                 · {feitas} de {filhas.length}
@@ -224,20 +227,22 @@ function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: { t: Tar
             {t.competencia ? <span className="hidden @4xl:inline">competência {t.competencia}</span> : null}
           </span>
         </button>
-        <span role="cell" className="text-muted-foreground hidden min-w-0 truncate text-xs @4xl:block" title={nomeCurtoAtividade(t.atividade_id)}>
-          <span className="font-mono">{t.atividade_id}</span> {nomeCurtoAtividade(t.atividade_id)}
-        </span>
-        <span role="cell" className={cn('hidden text-xs tabular-nums @4xl:block', atrasadaE(t) ? 'text-destructive font-medium' : 'text-muted-foreground')}>
+        <Celula coluna={colunasTarefas[2]} className="text-muted-foreground text-xs">
+          <span className="min-w-0 truncate" title={`${t.atividade_id} ${nomeCurtoAtividade(t.atividade_id)}`}>
+            <span className="font-mono">{t.atividade_id}</span> {nomeCurtoAtividade(t.atividade_id)}
+          </span>
+        </Celula>
+        <Celula coluna={colunasTarefas[3]} className={cn('text-xs tabular-nums', atrasadaE(t) ? 'text-destructive font-medium' : 'text-muted-foreground')}>
           {diaMes(t.prazo_interno)}
           {t.prazo_legal && t.prazo_legal !== t.prazo_interno ? ` · ${diaMes(t.prazo_legal)}` : ''}
-        </span>
-        <span role="cell" className="hidden min-w-0 @4xl:block">
+        </Celula>
+        <Celula coluna={colunasTarefas[4]}>
           <ResponsavelDe t={t} />
-        </span>
-        <span role="cell" className="text-muted-foreground hidden text-xs @4xl:block">
+        </Celula>
+        <Celula coluna={colunasTarefas[5]} className="text-muted-foreground text-xs">
           {rotuloOrigem[t.origem]} · {diasNoStatus(t)} d
-        </span>
-        <span role="cell" className="flex items-center justify-end gap-1.5">
+        </Celula>
+        <Celula coluna={colunasTarefas[6]}>
           {cartao && <Orb reacao="needs" tamanho={16} extras={false} cutucavel={false} cor="var(--warning)" rotulo="Cartão pendente" />}
           <StatusE t={t} />
           {rapida && (
@@ -245,8 +250,8 @@ function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: { t: Tar
               {rapida.icone}
             </Button>
           )}
-        </span>
-      </div>
+        </Celula>
+      </LinhaColunas>
       {aberta && (
         <div className="bg-sunken/50 mb-2 ml-6 grid gap-2 rounded-[12px] p-3 text-xs sm:grid-cols-2">
           <span>

@@ -55,16 +55,18 @@ export function ResponsavelTarefa({ responsavel }: { responsavel?: Responsavel }
   if (responsavel.tipo === 'integrante' && responsavel.setor) {
     const i = integrante(responsavel.setor)
     return (
-      <span className="flex items-center gap-1.5 text-xs">
+      <span className="flex min-w-0 items-center gap-1.5 text-xs" title={`${i.nome} (integrante)`}>
         <Orb cor={i.cor} corOlhos={i.corOlhos} tamanho={18} extras={false} cutucavel={false} />
-        {i.nome} <span className="text-muted-foreground">(integrante)</span>
+        <span className="min-w-0 truncate">
+          {i.nome} <span className="text-muted-foreground">(integrante)</span>
+        </span>
       </span>
     )
   }
   return (
-    <span className="flex items-center gap-1.5 text-xs">
-      <Avatar nome={responsavel.nome} tamanho="sm" className="size-5" />
-      {responsavel.nome}
+    <span className="flex min-w-0 items-center gap-1.5 text-xs" title={responsavel.nome}>
+      <Avatar nome={responsavel.nome} tamanho="sm" className="size-5 shrink-0" />
+      <span className="min-w-0 truncate">{responsavel.nome}</span>
     </span>
   )
 }

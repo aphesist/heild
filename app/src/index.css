@@ -254,6 +254,68 @@
   mask-image: linear-gradient(to right, transparent 0, black var(--esmaecer-esquerda, 0px), black calc(100% - var(--esmaecer-direita, 0px)), transparent 100%);
 }
 
+/*
+ * Lista em colunas (<ListaColunas>, components/kit/linha-colunas.tsx): o
+ * cabeçalho e as linhas dividem a mesma grade. A quebra é pela largura do
+ * contêiner: abaixo dela, as colunas .celula-largo somem e as .celula-abaixo
+ * descem para a linha de baixo, sob a coluna fluida.
+ */
+.lista-colunas {
+  container: lista-colunas / inline-size;
+}
+.linha-colunas {
+  display: grid;
+  grid-template-columns: var(--colunas-estreito);
+  align-items: center;
+  column-gap: calc(var(--spacing) * 3);
+  row-gap: calc(var(--spacing) * 1);
+}
+.linha-colunas > .celula-largo {
+  display: none;
+}
+.linha-colunas > .celula-abaixo {
+  grid-column: var(--coluna-abaixo, 1) / -1;
+}
+.linha-colunas[data-cabecalho] > .celula-abaixo {
+  display: none;
+}
+@container lista-colunas (min-width: 40rem) {
+  [data-quebra='media'] .linha-colunas {
+    grid-template-columns: var(--colunas-largo);
+  }
+  [data-quebra='media'] .linha-colunas > .celula-largo {
+    display: flex;
+  }
+  [data-quebra='media'] .linha-colunas > .celula-abaixo {
+    display: flex;
+    grid-column: auto;
+  }
+}
+@container lista-colunas (min-width: 56rem) {
+  [data-quebra='larga'] .linha-colunas {
+    grid-template-columns: var(--colunas-largo);
+  }
+  [data-quebra='larga'] .linha-colunas > .celula-largo {
+    display: flex;
+  }
+  [data-quebra='larga'] .linha-colunas > .celula-abaixo {
+    display: flex;
+    grid-column: auto;
+  }
+}
+@container lista-colunas (min-width: 72rem) {
+  [data-quebra='extra'] .linha-colunas {
+    grid-template-columns: var(--colunas-largo);
+  }
+  [data-quebra='extra'] .linha-colunas > .celula-largo {
+    display: flex;
+  }
+  [data-quebra='extra'] .linha-colunas > .celula-abaixo {
+    display: flex;
+    grid-column: auto;
+  }
+}
+
 @layer base {
   /*
    * Barra de rolagem do sistema (UI kit): trilho invisível, polegar em pílula
