@@ -1,0 +1,81 @@
+# Critério da E1 contra o projeto do backend em São Paulo (HEILD-BACKEND, zfjivmgujytrqaiagvpm):
+# o teste de vazamento entre escritórios e a fumaça do wireframe no modo `api`, com a API
+# conectada ao projeto pelo Session pooler de sa-east-1.
+#
+# Travas (servidor/src/banco/nuvem-ci.ts): só o ref do HEILD-BACKEND; URL e senhas mascaradas;
+# NÃO migra (para se faltar migração); recusa escritório que não seja de demonstração; o login
+# app_api ganha senha nova a cada execução. Nunca contra o HEILD-PROD.
+name: backend-nuvem
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [backend]
+
+permissions:
+  contents: read
+
+# Uma execução por vez: os testes semeiam e restauram os escritórios de demonstração do projeto.
+concurrency:
+  group: backend-nuvem
+  cancel-in-progress: false
+
+jobs:
+  e1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      HEILD_DEMONSTRACAO: '1'
+      HEILD_LOGS: warn
+      HEILD_TESTE_TEMPO_MS: '180000'
+      HEILD_TESTE_TEMPO_PREPARO_MS: '600000'
+      # Cada consulta tem a latência até São Paulo: tetos do banco um pouco maiores que os locais.
+      HEILD_PG_TEMPO_CONSULTA_MS: '15000'
+      HEILD_TEMPO_PEDIDO_MS: '60000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            app/package-lock.json
+      - name: Dependências
+        run: |
+          npm ci
+          (cd app && npm ci && npm install --no-save playwright@1.63.0 && npx playwright install --with-deps chromium)
+
+      - name: Preparar o HEILD-BACKEND (travas, sem migrar)
+        env:
+          HEILD_BACKEND_DATABASE_URL: ${{ secrets.HEILD_BACKEND_DATABASE_URL }}
+        run: npx tsx servidor/src/banco/nuvem-ci.ts
+
+      - name: Teste de vazamento entre escritórios (modo remoto)
+        run: npm test -w @heild/servidor -- test/isolamento.test.ts test/sincronizar.test.ts test/fluxo.test.ts
+
+      - name: API apontada para o projeto e o app no modo api
+        run: |
+          npm run semear -w @heild/servidor
+          (cd servidor && nohup npx tsx src/servidor.ts > ../api.log 2>&1 &)
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:8787/v1/saude > /dev/null && break; sleep 2; done
+          curl -sf http://127.0.0.1:8787/v1/saude > /dev/null
+          (cd app && VITE_HEILD_BANCO=api nohup npx vite --port 6100 --strictPort > ../vite.log 2>&1 &)
+          for i in $(seq 1 60); do curl -sf http://localhost:6100/ > /dev/null && break; sleep 2; done
+
+      - name: Fumaça do wireframe no modo api
+        run: |
+          mkdir -p capturas
+          cd app && node scripts/fundacao-fumaca.cjs ../capturas | tee ../fumaca.txt
+          ! grep -q '^FALHA' ../fumaca.txt
+
+      - name: Guardar o resultado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-nuvem
+          path: |
+            fumaca.txt
+            api.log
+            capturas/
+          retention-days: 14

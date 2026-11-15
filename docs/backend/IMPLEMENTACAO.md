@@ -989,6 +989,8 @@ Depois, pela API de gestão ou no painel:
 
 **Critério da E1 contra o projeto:** a fumaça e o teste de vazamento pela API precisam da API rodando com conexão Postgres ao projeto, e isso não existe deste container. Daqui só dá para conferir a barreira do banco pela API de gestão: RLS forçada em toda tabela, `anon` e `authenticated` sem privilégio, `api_executor` de um escritório sem ver o outro. A fumaça e o vazamento completos rodam onde houver rede para o pooler de São Paulo: a hospedagem, o CI com o segredo do banco ou uma máquina com acesso.
 
+**O critério da E1 pelo CI (`.github/workflows/backend-nuvem.yml`):** roda em push no `backend` e por `workflow_dispatch`, com o segredo de Actions `HEILD_BACKEND_DATABASE_URL` (Session pooler de sa-east-1, porta 5432, usuário `postgres` do HEILD-BACKEND). O preparo (`servidor/src/banco/nuvem-ci.ts`) mascara a URL e as senhas, só segue com o ref `zfjivmgujytrqaiagvpm` e o host de sa-east-1, **não migra** (para se faltar migração; os testes só migram com `HEILD_TESTE_REMOTO_MIGRAR=1`, que o workflow não liga), recusa escritório que não seja de demonstração e dá ao `app_api` uma senha nova a cada execução. Depois: o teste de vazamento em modo remoto (`isolamento`, `sincronizar` e `fluxo`; o `auth-producao` fica de fora porque o `postgres` do Supabase não assume `supabase_auth_admin`), a API apontada para o projeto como `app_api`, o app no modo `api` e a fumaça do wireframe contra ela, com o resultado e as capturas como artefato. Os tetos de tempo dos testes ficam maiores no CI (`HEILD_TESTE_TEMPO_MS`), pela latência até São Paulo.
+
 ### Desvios do desenho, e por quê
 
 | Desenho | Na B5 | Por quê / quando muda |

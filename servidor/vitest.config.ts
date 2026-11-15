@@ -17,7 +17,8 @@ export default defineConfig({
     globalSetup: ['./test/preparar.ts'],
     // Um arquivo por vez: todos dividem o mesmo banco (a cadeia e a idempotência são estado).
     fileParallelism: false,
-    testTimeout: 30_000,
-    hookTimeout: 120_000,
+    // Contra o projeto de São Paulo (CI na nuvem), cada ida ao banco tem a latência do runner: teto maior.
+    testTimeout: Number(process.env.HEILD_TESTE_TEMPO_MS ?? 30_000),
+    hookTimeout: Number(process.env.HEILD_TESTE_TEMPO_PREPARO_MS ?? 120_000),
   },
 })
