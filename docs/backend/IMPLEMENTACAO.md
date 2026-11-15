@@ -324,7 +324,7 @@ O que a B2 recebe pronto, e como se liga:
 7. **Despachante:** o evento enfileira o despacho na mesma transação. O despachante casa o evento com um `gatilho`, roda a checagem sem modelo e inicia o procedimento **direto**. O integrante só é acordado com `execucao_concluida` (em `item_fila`) quando há algo a dizer.
 8. **Runner de operários com contrato:** contexto vazio, só a entrada do contrato, com o conteúdo de fora envelopado como dado. O orçamento é conferido e **reservado antes** de cada chamada: o da execução e o saldo da bolsa do setor, ou da pessoa responsável se o escritório configurar. O acerto é feito pelo custo real, e cada chamada gera `chamada_modelo`. O fornecedor real entra pela interface `FornecedorModelo`.
 9. **Servidor MCP por escritório** (`/mcp` e `/mcp/setor/{codigo}`, Streamable HTTP, sem sessão): uma fachada fina das mesmas ferramentas, com a autorização de quem é dono do token. O escritório vem do token. Decidir cartão **não** é exposto por MCP.
-10. **Testes:** 37 testes da B2 contra Postgres real, com workers de verdade e uma queda real de worker. As 59 da B1 continuam verdes com a migração da B2 junto.
+10. **Testes:** 38 testes da B2 contra Postgres real, com workers de verdade e uma queda real de worker. As 59 da B1 continuam verdes com a migração da B2 junto.
 
 ### Como rodar
 
@@ -368,7 +368,7 @@ npm test              # a suíte da B1, com a migração da B2 aplicada
 | `fila.test.ts` (5) | Limite por setor com posição na fila. Chat na frente de evento, evento na frente de job. Limite de segundo plano por pessoa. RLS: outro escritório não lê nem grava. Pessoa sem o setor não inicia, e a tentativa fica na trilha |
 | `retomada.test.ts` (1) | **Queda real:** o worker morre no meio da chamada ao modelo e outro sobe. O pg-boss reentrega o job, e a execução continua do passo gravado: cada passo é concluído uma vez, há uma `chamada_modelo` e a reserva de orçamento é reaproveitada (sem débito em dobro) |
 | `mcp.test.ts` (5) | Sem token, 401. `tools/list` só traz o que a pessoa pode, em ordem fixa, com esquema estrito, e sem `aprovacao.decidir`. O recorte por setor. `tools/call` inicia pelo mesmo motor, com idempotência e erro por campo. Outro escritório não vê a execução. O integrante inicia, mas o cartão vai para quem gere o setor |
-| `definicao.test.ts` (5) | O que o CI recusaria: irreversível sem cartão `sempre` da mesma ferramenta, entrada aberta, validador desconhecido, escalada sem operário. Procedimento que muda sem subir a versão não publica. Validadores rodam fora do procedimento com o mesmo código. Memória do setor muda só por proposta aprovada por quem gere |
+| `definicao.test.ts` (6) | O que o CI recusaria: irreversível sem cartão `sempre` da mesma ferramenta, entrada aberta, validador desconhecido, escalada sem operário. Procedimento que muda sem subir a versão não publica. Validadores rodam fora do procedimento com o mesmo código. Memória do setor muda só por proposta aprovada por quem gere. O fornecedor real só liga pela variável de ambiente |
 
 ### Como funciona
 
@@ -454,6 +454,49 @@ app/supabase/migrations/20261115210000_b2_processos.sql
 | Aprovação | `contabil.ecd_ecf.transmitir`, **sempre** (irreversível) | `documento.classificar`, por regra (lista do escritório) |
 | Efeito | Transmissão pelo conector `sped` (simulado), chave `ECD:{cliente}:{exercício}`; recibo em `entrega_obrigacao`; conclui a tarefa | Grava a competência no documento, com a origem (regra, modelo ou pessoa) |
 
+### Teste agêntico real (pronto para ligar com a chave)
+
+O roteiro `scripts/agentico-real.ts` roda os dois procedimentos de referência com o **modelo de verdade** no lugar do operário simulado. Ele mede três coisas contra o gabarito `testes/gabarito/contabil.ts`:
+
+- **acerto**, contado assim:
+  - acerto;
+  - erro crítico: classificou errado, ou não apontou a anomalia plantada;
+  - cartão desnecessário: foi ao cartão num caso que dava para decidir;
+  - falha;
+- **custo**, em centavos de real, somado de `chamada_modelo`;
+- **latência**, com p50 e p90, por execução e por chamada.
+
+O simulado continua o padrão de todos os testes. Nada liga sem a variável de ambiente, e a chave nunca está no código.
+
+```bash
+cd pacotes/processos && npm run banco
+npm run agentico -- --simulado      # confere o roteiro sem chave (operário de demonstração)
+
+# com o modelo real (gasta dinheiro: cerca de 15 a 25 chamadas por rodada)
+HEILD_IA_FORNECEDOR=anthropic HEILD_DOLAR_REAIS=5.40 ANTHROPIC_API_KEY=... npm run agentico
+```
+
+| Variável | Para quê |
+| --- | --- |
+| `HEILD_IA_FORNECEDOR=anthropic` | Liga o `FornecedorAnthropic` (`src/operarios/anthropic.ts`). Sem ela, o roteiro recusa rodar sem `--simulado` |
+| `ANTHROPIC_API_KEY` | Lida pelo SDK oficial (`@anthropic-ai/sdk`) no ambiente do serviço `operarios`. Um perfil de `ant auth login` também serve |
+| `HEILD_DOLAR_REAIS` | Cotação para converter o custo em reais (obrigatória: o orçamento e a bolsa são em centavos de real) |
+| `HEILD_IA_ESFORCO_OPERARIO` / `_ESCRITOR` / `_REVISOR` | Esforço por classe (padrões `low`, `medium` e `high`). A escolha final é da frente de IA |
+| `HEILD_AGENTICO_REPETICOES` | Quantas rodadas por caso, para medir a variância |
+
+Como o fornecedor real chama o modelo:
+
+- **Modelos pela decisão 3 do dono:** `claude-sonnet-5-5` como operário e escritor, `claude-opus-5-5` como revisor. Os preços de tabela são convertidos pela cotação. Trocar o modelo de um contrato é configuração (`porContrato`).
+- **Saída estruturada pelo próprio esquema Zod do contrato** (`betaZodOutputFormat`), e o runner valida de novo.
+- **A instrução fixa vai no `system`** (prefixo estável), e só a entrada do contrato vai no `user`, com o conteúdo de fora envelopado como dado.
+- **Fallback de recusa do lado do servidor ligado** (`fallbacks: "default"`). Recusa ou corte por `max_tokens` vira saída nula: o validador barra e o motor escala ou cria o cartão.
+- **O pedido sai com 4× o teto de saída do contrato**, para o raciocínio adaptativo. A **reserva de orçamento conta o mesmo valor** (`multiplicadorSaida`).
+  - Se o orçamento de um procedimento não comportar o custo real, a execução para em `parcial`, e o roteiro mostra isso como `falha`. É o sinal para revisar o `orcamento` do procedimento com o número medido.
+
+O roteiro sai com código 1 se houver **qualquer erro crítico** (critério do dono: o erro custa mais que tudo). O relatório completo fica em `relatorios/agentico-<data>.json`, fora do git. No simulado, a última conferência deu 0 erro crítico, 80% de acerto no CTB-COMPETENCIA-DOC (os 20% restantes foram ao cartão, onde o certo era decidir) e 100% no CTB-ECD-TRANSMITIR. Esses números só provam que o roteiro funciona; os que valem são os do modelo real.
+
+O gabarito tem dez casos de competência (oito decidíveis e dois em que o certo é **não** decidir) e uma ECD com uma anomalia plantada (adiantamento a sócios que sobe 900%). A frente de IA amplia com casos reais anonimizados e com cartões editados por pessoas (02, 14.2), e é com esse conjunto que roda o piloto pré-registrado (AVALIAÇÃO, 11).
+
 ### O encaixe com a B1
 
 1. **Fila na transação.** `bossNaTransacao(tx)` é o `executeSql` que a B1 deixou combinado para `enfileirarNaTransacao` (`servidor/src/executor/jobs.ts`).
@@ -493,5 +536,5 @@ app/supabase/migrations/20261115210000_b2_processos.sql
 - SSE do progresso da execução (`ProgressoTrabalho`).
 - `contexto.carregar` e `cliente.resolver`.
 - Lote por raias. Casos de gabarito por procedimento, com cartões editados virando casos.
-- Fornecedor de modelo real, prompts, modelo por classe e preços (frente de IA). Conectores reais e cofre (sessão futura).
+- Rodar o teste agêntico real com a chave e ajustar os orçamentos dos procedimentos pelo custo medido. Prompts, modelo final por classe e política de revisão (frente de IA). Conectores reais e cofre (sessão futura).
 - Medir sob carga: vazão da admissão e dos passos, e a disputa no elo da cadeia com muitos eventos por escritório.

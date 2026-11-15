@@ -896,8 +896,8 @@ export class Motor {
         if (!preco) throw new ErroRegra('MODELO_SEM_PRECO', `Modelo ${modelo} sem preço configurado.`)
         const pedido = {
           contrato: passo.contrato.id, contrato_versao: passo.contrato.versao, classe, modelo, instrucao: passo.contrato.instrucao,
-          esquema_saida: z.toJSONSchema(passo.contrato.devolve), entrada: envelopar(r.data, passo.contrato.campos_externos ?? []),
-          max_tokens_saida: passo.contrato.max_tokens_saida,
+          esquema_saida: z.toJSONSchema(passo.contrato.devolve), devolve: passo.contrato.devolve, entrada: envelopar(r.data, passo.contrato.campos_externos ?? []),
+          max_tokens_saida: passo.contrato.max_tokens_saida * (this.d.fornecedor.multiplicadorSaida ?? 1),
           ...(escalada ? { falha_anterior: escalada.falhas.map((f) => ({ validador: f.validador, codigo: f.codigo, mensagem: f.mensagem })) } : {}),
         }
         const chave = `${ex.id}:${job.ordem}:${job.tentativa}`

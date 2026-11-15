@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import { ctbEcd, definirProcedimento, rodarValidadores, type Passo } from '../src/index.ts'
 import { esperar, montar, pessoa, semear, sqlAdmin } from './ambiente.ts'
+import { fornecedorDoAmbiente } from '../src/operarios/anthropic.ts'
 
 const base = {
   id: 'CTB-TESTE',
@@ -59,6 +60,17 @@ describe('regras de definição (o que o CI recusa)', () => {
       ['texto_sem_numero', false, 'NUMERO_ESCRITO_PELO_MODELO'],
       ['confianca_minima:0.9', false, 'CONFIANCA_BAIXA'],
     ])
+  })
+})
+
+describe('fornecedor real só por variável de ambiente', () => {
+  it('sem HEILD_IA_FORNECEDOR fica o simulado; ligado, exige a cotação e usa Sonnet operário e Opus revisor', () => {
+    expect(fornecedorDoAmbiente({})).toBeNull()
+    expect(() => fornecedorDoAmbiente({ HEILD_IA_FORNECEDOR: 'anthropic' })).toThrow(/HEILD_DOLAR_REAIS/)
+    const r = fornecedorDoAmbiente({ HEILD_IA_FORNECEDOR: 'anthropic', HEILD_DOLAR_REAIS: '5' })!
+    expect(r.fornecedor.nome).toBe('anthropic')
+    expect(r.modelos.porClasse).toEqual({ operario: 'claude-sonnet-5-5', escritor: 'claude-sonnet-5-5', revisor: 'claude-opus-5-5' })
+    expect(r.modelos.precos['claude-sonnet-5-5']!.entrada).toBe(1000) // US$ 2/MTok × R$ 5 = R$ 10 = 1000 centavos
   })
 })
 

@@ -11,16 +11,18 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "banco": "bash scripts/banco.sh",
-    "demo": "tsx scripts/demo.ts"
+    "demo": "tsx scripts/demo.ts",
+    "agentico": "tsx scripts/agentico-real.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@heild/dominio": "0.1.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@opentelemetry/api": "^1.10.0",
     "fastify": "^5.12.8",
     "pg-boss": "^12.38.2",
     "postgres": "^3.4.9",
-    "zod": "^4.6.7",
-    "@heild/dominio": "0.1.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

@@ -17,6 +17,8 @@ export interface PedidoModelo {
   /** Entrada do contrato, com o conteúdo de fora envelopado como dado. */
   entrada: unknown
   max_tokens_saida: number
+  /** O esquema Zod do contrato (o fornecedor real o usa para a saída estruturada; o runner valida de novo). */
+  devolve?: import('zod').ZodType
   /** Na escalada: o que o validador recusou na tentativa anterior. */
   falha_anterior?: { validador: string; codigo?: string; mensagem?: string }[]
 }
@@ -31,6 +33,8 @@ export interface RespostaModelo {
 
 export interface FornecedorModelo {
   nome: string
+  /** Quantas vezes o teto de saída do contrato o fornecedor pode gastar (raciocínio adaptativo). Entra na reserva de orçamento. */
+  multiplicadorSaida?: number
   chamar(p: PedidoModelo): Promise<RespostaModelo>
 }
 

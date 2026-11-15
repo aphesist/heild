@@ -100,7 +100,7 @@ export interface ContaEcd {
 }
 
 /** Uma ECD lida (o worker de documento já extraiu os saldos). `quebrar` gera o erro pedido. */
-export function ecd(cnpj: string, o: { quebrar?: 'partidas' | 'cnpj' | 'saldo'; sem_atipicas?: boolean } = {}) {
+export function ecd(cnpj: string, o: { quebrar?: 'partidas' | 'cnpj' | 'saldo'; sem_atipicas?: boolean; plantar_adiantamento?: boolean } = {}) {
   const contas: ContaEcd[] = [
     { codigo: '1.1.01', nome: 'Caixa', natureza: 'D', saldo_inicial_centavos: 1_000_000, debitos_centavos: 5_000_000, creditos_centavos: 4_000_000, saldo_final_centavos: 2_000_000 },
     { codigo: '1.1.02', nome: 'Bancos', natureza: 'D', saldo_inicial_centavos: 5_000_000, debitos_centavos: 3_000_000, creditos_centavos: 2_500_000, saldo_final_centavos: 5_500_000 },
@@ -109,6 +109,11 @@ export function ecd(cnpj: string, o: { quebrar?: 'partidas' | 'cnpj' | 'saldo'; 
     { codigo: '4.1.01', nome: 'Custo das mercadorias', natureza: 'D', saldo_inicial_centavos: 4_000_000, debitos_centavos: 4_000_000, creditos_centavos: 0, saldo_final_centavos: 8_000_000 },
   ]
   if (o.sem_atipicas) for (const c of contas) Object.assign(c, { saldo_inicial_centavos: c.saldo_inicial_centavos + 100_000_000, saldo_final_centavos: c.saldo_final_centavos + 100_000_000 })
+  if (o.plantar_adiantamento) {
+    // Adiantamento a sócios que sobe 900% no ano, pago pelo banco: a anomalia que o gabarito exige apontar.
+    contas.push({ codigo: '1.1.05', nome: 'Adiantamento a sócios', natureza: 'D', saldo_inicial_centavos: 100_000, debitos_centavos: 900_000, creditos_centavos: 0, saldo_final_centavos: 1_000_000 })
+    Object.assign(contas[1]!, { creditos_centavos: contas[1]!.creditos_centavos + 900_000, saldo_final_centavos: contas[1]!.saldo_final_centavos - 900_000 })
+  }
   if (o.quebrar === 'saldo') contas[0]!.saldo_final_centavos += 1
   const d = contas.reduce((a, c) => a + c.debitos_centavos, 0)
   const k = contas.reduce((a, c) => a + c.creditos_centavos, 0)
