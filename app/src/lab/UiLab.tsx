@@ -10,6 +10,8 @@ import { temas } from '@/theme/temas'
 import { fichasComponentes, type FichaLab } from './fichas'
 import { densidades, estados, hashDe, larguras, lerParams, quantidades, rotuloDensidade, rotuloEstado, rotuloQuantidade, rotuloTexto, textos, type ParamsLab } from './parametros'
 import { fichasRegras } from './regras'
+import { useListaWidgets } from './widgets'
+import { lerCenario, nomeCenario, QUANTIDADES, type Cenario } from '@/nucleo/semente/cenario'
 
 /** Todas as fichas do Lab: componentes e regras. */
 export const fichas: FichaLab[] = [...fichasComponentes, ...fichasRegras]
@@ -144,6 +146,8 @@ function Casca({ p }: { p: ParamsLab }) {
             {e.itens && <CampoEscolha rotulo="Itens" valor={p.itens} onMudar={(v) => ir({ itens: v })} opcoes={quantidades.map((x) => ({ valor: x, rotulo: `Itens: ${rotuloQuantidade[x]}` }))} />}
             {e.texto && <CampoEscolha rotulo="Texto" valor={p.texto} onMudar={(v) => ir({ texto: v })} opcoes={textos.map((x) => ({ valor: x, rotulo: `Texto: ${rotuloTexto[x]}` }))} />}
             {e.variantes && <CampoEscolha rotulo="Variante" valor={p.variante || e.variantes[0].valor} onMudar={(v) => ir({ variante: v })} opcoes={e.variantes} />}
+            {e.cenario && <ControlesCenario p={p} onMudar={(cenario) => ir({ cenario })} />}
+            {ficha.id === 'widget' && <SeletorWidget valor={p.variante} onMudar={(variante) => ir({ variante })} />}
             <CampoEscolha rotulo="Tema" valor={p.tema || temas[0].id} onMudar={(v) => ir({ tema: v })} opcoes={temas.map((t) => ({ valor: t.id, rotulo: `Tema: ${t.nome_produto}` }))} />
             <CampoEscolha rotulo="Densidade" valor={p.densidade} onMudar={(v) => ir({ densidade: v })} opcoes={densidades.map((x) => ({ valor: x, rotulo: `Densidade: ${rotuloDensidade[x]}` }))} />
           </div>
@@ -167,6 +171,35 @@ function Casca({ p }: { p: ParamsLab }) {
       </main>
     </div>
   )
+}
+
+/** Os eixos do cenário de dados (semente/cenario.ts), compostos no nome que vai no endereço. */
+function ControlesCenario({ p, onMudar }: { p: ParamsLab; onMudar: (cenario: string) => void }) {
+  const c: Cenario = lerCenario(p.cenario) ?? {}
+  const mudar = (m: Partial<Record<keyof Cenario, string>>) => {
+    const novo: Record<string, unknown> = { ...c }
+    for (const [k, v] of Object.entries(m)) {
+      if (!v) delete novo[k]
+      else novo[k] = k === 'itens' ? Number(v) : v
+    }
+    const nome = nomeCenario(novo as Cenario)
+    onMudar(nome === 'base' ? '' : nome)
+  }
+  return (
+    <>
+      <CampoEscolha rotulo="Itens do cenário" valor={c.itens === undefined ? '' : String(c.itens)} onMudar={(v) => mudar({ itens: v })} opcoes={[{ valor: '', rotulo: 'Itens: os de exemplo' }, ...QUANTIDADES.map((q) => ({ valor: String(q), rotulo: `Itens: ${q}` }))]} />
+      <CampoEscolha rotulo="Texto do cenário" valor={c.texto ?? ''} onMudar={(v) => mudar({ texto: v })} opcoes={[{ valor: '', rotulo: 'Texto: o de exemplo' }, { valor: 'curto', rotulo: 'Texto: curto' }, { valor: 'longo', rotulo: 'Texto: longo' }, { valor: 'sem-espaco', rotulo: 'Texto: sem espaço' }]} />
+      <CampoEscolha rotulo="Valores do cenário" valor={c.valores ?? ''} onMudar={(v) => mudar({ valores: v })} opcoes={[{ valor: '', rotulo: 'Valores: os de exemplo' }, { valor: 'extremos', rotulo: 'Valores: extremos' }]} />
+      <CampoEscolha rotulo="Datas do cenário" valor={c.datas ?? ''} onMudar={(v) => mudar({ datas: v })} opcoes={[{ valor: '', rotulo: 'Datas: as de exemplo' }, { valor: 'vencidas', rotulo: 'Datas: vencidas' }, { valor: 'hoje', rotulo: 'Datas: hoje' }, { valor: 'futuras', rotulo: 'Datas: futuras' }]} />
+      <CampoEscolha rotulo="Campos opcionais do cenário" valor={c.opcionais ?? ''} onMudar={(v) => mudar({ opcionais: v })} opcoes={[{ valor: '', rotulo: 'Opcionais: completos' }, { valor: 'ausentes', rotulo: 'Opcionais: ausentes' }]} />
+    </>
+  )
+}
+
+/** Escolha do widget real (todos os do Início e das abas do Painel, com cliente e na carteira). */
+function SeletorWidget({ valor, onMudar }: { valor: string; onMudar: (v: string) => void }) {
+  const lista = useListaWidgets()
+  return <CampoEscolha rotulo="Widget" valor={valor || lista[0]?.chave || ''} onMudar={onMudar} opcoes={lista.map((w) => ({ valor: w.chave, rotulo: `${w.aba === 'inicio' ? 'Início' : w.aba} · ${w.versao} · ${w.titulo}` }))} />
 }
 
 /** A peça isolada num quadro (iframe) da largura de tela escolhida, em escala quando não cabe. */

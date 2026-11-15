@@ -107,8 +107,14 @@ export function adaptadorIndexedDb(): Adaptador {
 }
 
 /** Só memória: nada persiste (Storybook, testes, stories isoladas). */
-export function adaptadorMemoria(): Adaptador {
+/** Em memória. Com `limite`, guarda só os últimos escritórios abertos (o UI Lab abre um por cenário). */
+export function adaptadorMemoria(limite = Infinity): Adaptador {
   const guardado = new Map<Id, Fotografia>()
+  const guardar = (id: Id, foto: Fotografia) => {
+    guardado.delete(id)
+    guardado.set(id, foto)
+    while (guardado.size > limite) guardado.delete(guardado.keys().next().value as Id)
+  }
   return {
     nome: 'memoria',
     descricao: 'Só na memória (some ao recarregar)',
@@ -116,10 +122,10 @@ export function adaptadorMemoria(): Adaptador {
       return guardado.get(id) ?? null
     },
     async persistir(id, _alteracoes, foto) {
-      guardado.set(id, foto)
+      guardar(id, foto)
     },
     async substituir(id, foto) {
-      guardado.set(id, foto)
+      guardar(id, foto)
     },
     async esquecer(id) {
       guardado.delete(id)

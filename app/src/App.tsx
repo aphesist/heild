@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { LojaProvider } from '@/ambiente/loja'
 import { PainelLab, type Visao } from '@/ambiente/PainelLab'
 import { SessaoProvider, useSessaoBruta } from '@/ambiente/sessao'
@@ -16,6 +16,9 @@ import { irParaPagina, paginaDoHash, useHash } from '@/nucleo/rotas'
 import { VitrineKit } from '@/telas/VitrineKit'
 import { FaixaVerComo } from '@/ambiente/ver-como'
 import { lerParams } from '@/lab/parametros'
+import { bancoDoLab } from '@/nucleo/banco'
+import { ID_ANDRADE } from '@/nucleo/semente'
+import { definirCenarioAtivo, lerCenario, nomeCenario, PREFIXO_CENARIO } from '@/nucleo/semente/cenario'
 
 // O UI Lab carrega à parte: não pesa no sistema.
 const UiLab = lazy(() => import('@/lab/UiLab').then((m) => ({ default: m.UiLab })))
@@ -27,8 +30,19 @@ const UiLab = lazy(() => import('@/lab/UiLab').then((m) => ({ default: m.UiLab }
  */
 export default function App() {
   const [modo, setModo] = useState<ModoCor>(() => (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro'))
+  // UI Lab: o escritório vem do endereço (o cenário escolhido), num banco só de memória.
+  const hash = useHash()
+  const lab = paginaDoHash(hash) === 'lab' ? lerParams(hash) : null
+  const cenario = lab ? lerCenario(lab.cenario) : null
+  definirCenarioAtivo(cenario)
+  // Entrar no Lab vindo do sistema (ou sair dele) troca o banco: recarrega para abrir o certo.
+  const trocarBanco = !!lab !== bancoDoLab
+  useEffect(() => {
+    if (trocarBanco) window.location.reload()
+  }, [trocarBanco])
+  if (trocarBanco) return null
   return (
-    <BancoProvider>
+    <BancoProvider escritorioFixo={lab ? (cenario ? PREFIXO_CENARIO + nomeCenario(cenario) : ID_ANDRADE) : undefined}>
       <Escritorios modo={modo} setModo={setModo} />
     </BancoProvider>
   )

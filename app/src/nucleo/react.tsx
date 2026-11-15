@@ -29,8 +29,9 @@ function useEstadoBanco() {
   )
 }
 
-export function BancoProvider({ children, escritorioInicial }: { children: ReactNode; escritorioInicial?: Id }) {
-  const [id, setId] = useState(() => escritorioInicial ?? escritorioAtivoGuardado())
+export function BancoProvider({ children, escritorioInicial, escritorioFixo }: { children: ReactNode; escritorioInicial?: Id; /** Escritório controlado por fora (o UI Lab troca de cenário pelo endereço); nada fica guardado. */ escritorioFixo?: Id }) {
+  const [idLivre, setId] = useState(() => escritorioInicial ?? escritorioAtivoGuardado())
+  const id = escritorioFixo ?? idLivre
   const estado = useEstadoBanco()
   const [tentativa, setTentativa] = useState(0)
   useEffect(() => {

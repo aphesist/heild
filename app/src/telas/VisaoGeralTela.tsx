@@ -175,7 +175,7 @@ export function VisaoGeralTela({ dados, contexto, onAbrirIntegrante }: { dados: 
 }
 
 /** Widget "Time agora": orbs com estado (todos animam se algum diverge do padrão); compacto mostra só os orbs. */
-function TimeAgora({ integrantes, compacto, onAbrir }: { integrantes: Integrante[]; compacto: boolean; onAbrir?: (s: Integrante['setor']) => void }) {
+export function TimeAgora({ integrantes, compacto, onAbrir }: { integrantes: Integrante[]; compacto: boolean; onAbrir?: (s: Integrante['setor']) => void }) {
   const aparencia = useAparencia()
   const divergente = integrantes.some((i) => i.estado !== 'disponivel')
   if (compacto)

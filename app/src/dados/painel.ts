@@ -1,3 +1,4 @@
+import { comCenarioPor } from '@/nucleo/semente/cenario'
 import type { SetorIntegrante } from '@/theme/tipos'
 
 /**
@@ -533,7 +534,7 @@ const fiscalPorCliente: Record<string, Partial<DetalheFiscal>> = {
   },
 }
 
-export function fiscalDe(clienteId?: string): DetalheFiscal {
+function fiscalDeBase(clienteId?: string): DetalheFiscal {
   return { ...fiscalDetalhe, ...(clienteId ? fiscalPorCliente[clienteId] : {}) }
 }
 
@@ -626,7 +627,7 @@ const dpPorCliente: Record<string, Partial<DetalheDP>> = {
   },
 }
 
-export function dpDe(clienteId?: string): DetalheDP {
+function dpDeBase(clienteId?: string): DetalheDP {
   return { ...dpDetalhe, ...(clienteId ? dpPorCliente[clienteId] : {}) }
 }
 
@@ -698,6 +699,21 @@ const contabilPorCliente: Record<string, Partial<DetalheContabil>> = {
   c6: { etapas: [{ id: 'coleta', rotulo: 'Livro-caixa (carnê-leão)', situacao: 'andamento', detalhe: 'recibos de outubro' }], deveChegar: [{ item: 'Recibos de aluguel', chegou: true, quando: 'app · 03/11' }], linhas: [], conciliacoes: [] },
 }
 
-export function contabilDe(clienteId?: string): DetalheContabil {
+function contabilDeBase(clienteId?: string): DetalheContabil {
   return { ...contabilDetalhe, ...(clienteId ? contabilPorCliente[clienteId] : {}) }
+}
+
+/** fiscalDe com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function fiscalDe(clienteId?: string): DetalheFiscal {
+  return comCenarioPor('fiscalDe' + ':' + JSON.stringify(clienteId ?? null), () => fiscalDeBase(clienteId))
+}
+
+/** dpDe com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function dpDe(clienteId?: string): DetalheDP {
+  return comCenarioPor('dpDe' + ':' + JSON.stringify(clienteId ?? null), () => dpDeBase(clienteId))
+}
+
+/** contabilDe com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function contabilDe(clienteId?: string): DetalheContabil {
+  return comCenarioPor('contabilDe' + ':' + JSON.stringify(clienteId ?? null), () => contabilDeBase(clienteId))
 }

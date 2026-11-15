@@ -6,7 +6,7 @@
  * que o QA fotografa); sem ele, a ficha abre com os controles.
  */
 
-export const estados = ['padrao', 'carregando', 'vazio', 'erro', 'desabilitado', 'selecionado', 'hover', 'foco', 'so-leitura'] as const
+export const estados = ['padrao', 'carregando', 'vazio', 'erro', 'desabilitado', 'selecionado', 'hover', 'foco', 'so-leitura', 'sem-permissao'] as const
 export type EstadoLab = (typeof estados)[number]
 export const rotuloEstado: Record<EstadoLab, string> = {
   padrao: 'Padrão',
@@ -18,6 +18,7 @@ export const rotuloEstado: Record<EstadoLab, string> = {
   hover: 'Ponteiro em cima',
   foco: 'Foco (teclado)',
   'so-leitura': 'Só leitura',
+  'sem-permissao': 'Sem permissão',
 }
 
 export const quantidades = ['0', '1', 'poucos', 'muitos', 'dobro'] as const
@@ -46,13 +47,15 @@ export interface ParamsLab {
   tamanho: TamanhoLab
   /** Variante da ficha (aba do Painel, tom do selo...), quando a ficha tem. */
   variante: string
+  /** Cenário de dados (semente/cenario.ts: `i15.tl.ve.dv.oa`); vazio = os dados de exemplo. */
+  cenario: string
   tema: string
   modo: 'claro' | 'escuro'
   densidade: DensidadeLab
   isolado: boolean
 }
 
-export const padraoParams: Omit<ParamsLab, 'ficha'> = { estado: 'padrao', itens: 'poucos', texto: 'curto', tamanho: 'M', variante: '', tema: '', modo: 'claro', densidade: 'padrao', isolado: false }
+export const padraoParams: Omit<ParamsLab, 'ficha'> = { estado: 'padrao', itens: 'poucos', texto: 'curto', tamanho: 'M', variante: '', cenario: '', tema: '', modo: 'claro', densidade: 'padrao', isolado: false }
 
 const de = <T extends string>(lista: readonly T[], v: string | null, padrao: T): T => (v && (lista as readonly string[]).includes(v) ? (v as T) : padrao)
 
@@ -66,6 +69,7 @@ export function lerParams(hash: string): ParamsLab {
     texto: de(textos, q.get('texto'), padraoParams.texto),
     tamanho: de(tamanhos, q.get('tamanho'), padraoParams.tamanho),
     variante: q.get('variante') ?? '',
+    cenario: q.get('cenario') ?? '',
     tema: q.get('tema') ?? '',
     modo: q.get('modo') === 'escuro' ? 'escuro' : 'claro',
     densidade: de(densidades, q.get('densidade'), padraoParams.densidade),
@@ -76,7 +80,7 @@ export function lerParams(hash: string): ParamsLab {
 export function hashDe(p: Partial<ParamsLab> & { ficha: string }): string {
   const q = new URLSearchParams()
   const t = { ...padraoParams, ...p }
-  for (const k of ['estado', 'itens', 'texto', 'tamanho', 'variante', 'tema', 'modo', 'densidade'] as const) if (t[k] && t[k] !== padraoParams[k]) q.set(k, t[k])
+  for (const k of ['estado', 'itens', 'texto', 'tamanho', 'variante', 'cenario', 'tema', 'modo', 'densidade'] as const) if (t[k] && t[k] !== padraoParams[k]) q.set(k, t[k])
   if (t.isolado) q.set('isolado', '1')
   const s = q.toString()
   return `#/lab/ui${p.ficha ? `/${p.ficha}` : ''}${s ? `?${s}` : ''}`

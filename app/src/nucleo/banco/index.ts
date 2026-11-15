@@ -12,6 +12,8 @@ export { fotografiaVazia } from './navegador'
  * (`local` padrão, `indexeddb`, `supabase`, `memoria`). Ver app/.env.exemplo.
  */
 export function adaptadorConfigurado(): Adaptador {
+  // O UI Lab (#/lab) nunca toca nos dados do navegador: abre os escritórios (e os cenários) em memória.
+  if (typeof window !== 'undefined' && /^#\/lab(\/|$|\?)/.test(window.location.hash)) return adaptadorMemoria(6)
   const env = import.meta.env ?? {}
   const nome = (env.VITE_HEILD_BANCO as NomeAdaptador | undefined) ?? (typeof window === 'undefined' ? 'memoria' : 'local')
   if (nome === 'supabase') {
@@ -35,6 +37,9 @@ export function adaptadorConfigurado(): Adaptador {
   if (nome === 'memoria') return adaptadorMemoria()
   return adaptadorLocal()
 }
+
+/** Verdadeiro quando a página abriu no UI Lab (banco em memória, longe dos dados do navegador). */
+export const bancoDoLab = typeof window !== 'undefined' && /^#\/lab(\/|$|\?)/.test(window.location.hash)
 
 /** O banco do app (um só por página). */
 export const banco = new Banco(adaptadorConfigurado())

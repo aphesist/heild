@@ -87,6 +87,18 @@ export function comCenario<T>(dados: T): T {
   return valor
 }
 
+const porChave = new Map<string, { geracao: number; valor: unknown }>()
+
+/** Como `comCenario`, para funções que montam o dado a cada chamada: guarda o resultado por chave enquanto o cenário não muda. */
+export function comCenarioPor<T>(chave: string, gerar: () => T): T {
+  if (!ativo) return gerar()
+  const ja = porChave.get(chave)
+  if (ja && ja.geracao === geracao) return ja.valor as T
+  const valor = transformar(gerar(), ativo, '')
+  porChave.set(chave, { geracao, valor })
+  return valor
+}
+
 /* ---------- Domínio das entidades, lido do próprio entidades.ts ---------- */
 
 /** Campos opcionais (`campo?:`) e domínios de status (`campo: 'a' | 'b'` ou um tipo assim) por interface. */
@@ -212,7 +224,7 @@ export function fotografiaDoCenario(base: Fotografia, c: Cenario, escritorioId: 
   const foto = {} as Fotografia
   for (const [tabela, linhas] of Object.entries(base) as unknown as [NomeTabela, Record<string, unknown>[]][]) {
     const dom = dominio(tabela)
-    let novas: Record<string, unknown>[] = linhas.map((l) => ({ ...l, escritorio_id: escritorioId }))
+    let novas: Record<string, unknown>[] = linhas.map((l) => ({ ...l, escritorio_id: escritorioId, ...(tabela === 'escritorio' ? { id: escritorioId } : {}) }))
     if (c.itens !== undefined && !ESTRUTURA.has(tabela)) {
       if (tabela === 'cliente') novas = c.itens === 0 ? novas.slice(0, 1) : redimensionar(novas, c.itens)
       else {

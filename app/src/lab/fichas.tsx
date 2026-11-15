@@ -28,10 +28,9 @@ import { abasPainel } from '@/dados/painel'
 import type { Tarefa as TarefaTela, StatusTarefa } from '@/dados/tipos'
 import type { Tarefa as TarefaE } from '@/nucleo/modelo/entidades'
 import { Linha, Tabela } from '@/telas/painel/Tabela'
-import { gradePainel } from '@/telas/PainelTela'
-import { catalogoVisaoGeral } from '@/telas/VisaoGeralTela'
 import { colunasTarefas, LinhaTarefa } from '@/telas/tarefas/ListaTarefas'
 import { cn } from '@/lib/utils'
+import { FichaWidget, FichaWidgetsDaAba } from './widgets'
 import { quantos, textoDe, valorDe, type EstadoLab, type ParamsLab, type TamanhoLab } from './parametros'
 
 export interface FichaLab {
@@ -40,7 +39,7 @@ export interface FichaLab {
   grupo: string
   descricao: string
   /** Eixos que mudam esta ficha; os outros não se aplicam a ela. */
-  eixos: { estados: EstadoLab[]; itens?: boolean; texto?: boolean; tamanhos?: TamanhoLab[]; variantes?: { valor: string; rotulo: string }[] }
+  eixos: { estados: EstadoLab[]; itens?: boolean; texto?: boolean; tamanhos?: TamanhoLab[]; variantes?: { valor: string; rotulo: string }[]; /** Lê o banco e as fontes de dados: aceita os cenários (semente/cenario.ts). */ cenario?: boolean }
   render: (p: ParamsLab) => ReactNode
 }
 
@@ -550,25 +549,6 @@ function FichaRolagem({ p }: { p: ParamsLab }) {
   )
 }
 
-/* ---------- Widgets reais das telas ---------- */
-
-const abasLab = ['inicio', ...abasPainel.map((a) => a.id)]
-
-function catalogoReal(variante: string): DefWidget[] {
-  const [abaId, modo] = (variante || 'inicio').split(':')
-  if (abaId === 'inicio')
-    return catalogoVisaoGeral({ indicadores: exemplo.indicadores, progressoMes: exemplo.progressoMes, avisos: exemplo.avisos, dias: exemplo.diasSemana, agenda: exemplo.agenda, hoje: 18, pendencias: exemplo.pendencias, linhaDoTempo: exemplo.linhaDoTempo, integrantes: exemplo.integrantes }, exemplo.clientes[0].nome)
-  const a = abasPainel.find((x) => x.id === abaId) ?? abasPainel[0]
-  const carteira = modo === 'carteira'
-  return gradePainel({ aba: a, cliente: carteira ? undefined : a.id === 'fiscal' ? exemplo.clientes[1] : exemplo.clientes[0], clientesNaCarteira: exemplo.clientes.length, tarefas: exemplo.tarefas, integrante: exemplo.integrantes.find((i) => i.setor === a.setor) }).catalogo
-}
-
-function FichaWidgetsReais({ p }: { p: ParamsLab }) {
-  const catalogo = catalogoReal(p.variante)
-  const t: TamanhoWidget = p.tamanho === 'livre' ? 'M' : p.tamanho
-  return <GradeWidgets key={`${p.variante}:${t}`} chave={`lab:reais:${p.variante}:${t}`} catalogo={catalogo} padrao={catalogo.map((d) => ({ id: d.id, tamanho: tamanhoValido(d, t) }))} />
-}
-
 export const fichasComponentes: FichaLab[] = [
   { id: 'tarefas', nome: 'Lista de tarefas', grupo: 'Listas e tabelas', descricao: 'A linha de tarefa das telas (LinhaTarefa) na ListaColunas: selo e ação com o tamanho do conteúdo, texto truncado com título. Caso de teste da tag "aguard. cliente".', eixos: { estados: ['padrao', 'carregando', 'vazio', 'erro', 'selecionado', 'hover', 'foco'], itens: true, texto: true, tamanhos: ['G', 'L', 'XL', 'livre'] }, render: (p) => <FichaTarefas p={p} /> },
   { id: 'lista-colunas', nome: 'Lista em colunas', grupo: 'Listas e tabelas', descricao: 'ListaColunas, LinhaColunas e Celula: uma grade para cabeçalho e linhas; no estreito, a situação desce para a linha de baixo.', eixos: { estados: ['padrao', 'carregando', 'vazio', 'erro', 'selecionado'], itens: true, texto: true, tamanhos: ['M', 'G', 'L', 'XL', 'livre'] }, render: (p) => <FichaListaColunas p={p} /> },
@@ -594,10 +574,18 @@ export const fichasComponentes: FichaLab[] = [
   { id: 'rolagem', nome: 'Área de rolagem', grupo: 'Rolagem', descricao: 'AreaRolagem vertical, horizontal e tabela com cabeçalho fixo: o esmaecido aparece só do lado em que há mais conteúdo.', eixos: { estados: ['padrao'], itens: true, texto: true }, render: (p) => <FichaRolagem p={p} /> },
   {
     id: 'widgets-reais',
-    nome: 'Widgets reais',
-    grupo: 'Telas',
-    descricao: 'Todos os widgets de uma aba (Início ou Painel, com cliente ou carteira) na grade real, no tamanho escolhido (ou no mais próximo que o widget aceita), com os dados de exemplo.',
-    eixos: { estados: ['padrao'], tamanhos: ['P', 'M', 'G', 'L', 'XL'], variantes: abasLab.flatMap((a) => (a === 'inicio' ? [{ valor: 'inicio', rotulo: 'Início' }] : [{ valor: a, rotulo: `Painel · ${abasPainel.find((x) => x.id === a)?.rotulo ?? a}` }, { valor: `${a}:carteira`, rotulo: `Painel · ${abasPainel.find((x) => x.id === a)?.rotulo ?? a} (carteira)` }])) },
-    render: (p) => <FichaWidgetsReais p={p} />,
+    nome: 'Widgets de uma aba',
+    grupo: 'Widgets reais',
+    descricao: 'Todos os widgets de uma aba (Início ou Painel, com cliente ou na carteira) na grade real, no tamanho escolhido (ou no mais próximo que cada um aceita), com os dados do cenário.',
+    eixos: { estados: ['padrao'], tamanhos: ['P', 'M', 'G', 'L', 'XL'], cenario: true, variantes: ['inicio', ...abasPainel.map((a) => a.id)].flatMap((a) => (a === 'inicio' ? [{ valor: 'inicio', rotulo: 'Início' }] : [{ valor: a, rotulo: `Painel · ${abasPainel.find((x) => x.id === a)?.rotulo ?? a} · cliente` }, { valor: `${a}:carteira`, rotulo: `Painel · ${abasPainel.find((x) => x.id === a)?.rotulo ?? a} · carteira` }])) },
+    render: (p) => <FichaWidgetsDaAba p={p} />,
+  },
+  {
+    id: 'widget',
+    nome: 'Um widget, em todos os estados',
+    grupo: 'Widgets reais',
+    descricao: 'Um widget real por vez, no tamanho escolhido, com o cenário de dados: 0, 1, 3, 15, 50 ou 200 itens; texto curto, longo ou sem espaço; valores e datas extremos; opcionais ausentes; serviços falhando; sem permissão.',
+    eixos: { estados: ['padrao', 'erro', 'sem-permissao'], tamanhos: ['P', 'M', 'G', 'L', 'XL'], cenario: true },
+    render: (p) => <FichaWidget p={p} />,
   },
 ]

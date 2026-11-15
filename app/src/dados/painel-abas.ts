@@ -1,3 +1,4 @@
+import { comCenarioPor } from '@/nucleo/semente/cenario'
 import { contratos, totalContrato } from './financeiro'
 /**
  * Dados das cinco abas do Painel desenhadas como widgets depois de Fiscal,
@@ -272,7 +273,7 @@ const societarioPorCliente: Record<string, Partial<DetalheSocietario>> = {
   },
 }
 
-export function societarioDe(clienteId?: string): DetalheSocietario {
+function societarioDeBase(clienteId?: string): DetalheSocietario {
   return { ...societarioDetalhe, ...(clienteId ? { contrato: contratoDe(clienteId), ...societarioPorCliente[clienteId] } : {}) }
 }
 
@@ -337,6 +338,16 @@ const notasPorCliente: Record<string, Partial<DetalheNotas>> = {
   c6: { captura: [{ item: 'Pessoa física', valor: 'sem captura de notas', situacao: ok }], fluxos: [], completude: [], tributaria: [], lotes: [] },
 }
 
-export function notasDe(clienteId?: string): DetalheNotas {
+function notasDeBase(clienteId?: string): DetalheNotas {
   return { ...notasDetalhe, ...(clienteId ? notasPorCliente[clienteId] : {}) }
+}
+
+/** societarioDe com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function societarioDe(clienteId?: string): DetalheSocietario {
+  return comCenarioPor('societarioDe' + ':' + JSON.stringify(clienteId ?? null), () => societarioDeBase(clienteId))
+}
+
+/** notasDe com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function notasDe(clienteId?: string): DetalheNotas {
+  return comCenarioPor('notasDe' + ':' + JSON.stringify(clienteId ?? null), () => notasDeBase(clienteId))
 }

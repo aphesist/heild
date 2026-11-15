@@ -1,5 +1,6 @@
 // S03: dados das abas Fiscal, Contábil e Consultoria por cliente (Painel B).
 import type { Cliente } from './tipos'
+import { comCenarioPor } from '@/nucleo/semente/cenario'
 
 /**
  * Cada cliente tem os próprios números: os clientes do escritório de exemplo
@@ -241,7 +242,7 @@ export interface FiscalS03 {
 }
 
 
-export function fiscalS03(p: PerfilS03): FiscalS03 {
+function fiscalS03Base(p: PerfilS03): FiscalS03 {
   const s = sorteio(`fiscal:${p.id}`)
   const rec = p.receitaMensal
   const id = (x: string) => `${p.id}:${x}`
@@ -544,7 +545,7 @@ export interface ContabilS03 {
   atrasoDias: number
 }
 
-export function contabilS03(p: PerfilS03): ContabilS03 {
+function contabilS03Base(p: PerfilS03): ContabilS03 {
   const s = sorteio(`contabil:${p.id}`)
   const id = (x: string) => `${p.id}:${x}`
   const rec = p.receitaMensal
@@ -695,7 +696,7 @@ export const baseLegal: Record<string, Trecho> = {
   lei10833: { id: 'lei10833', norma: 'Lei 10.833/2003, art. 3º, II', redacao: 'Do valor apurado, a pessoa jurídica pode descontar créditos sobre bens e serviços utilizados como insumo na prestação de serviços.', vigente: 'desde 01/02/2004' },
 }
 
-export function consultoriaS03(p: PerfilS03): ConsultoriaS03 {
+function consultoriaS03Base(p: PerfilS03): ConsultoriaS03 {
   const s = sorteio(`consultoria:${p.id}`)
   const id = (x: string) => `${p.id}:${x}`
   const contato = p.socios[0]?.nome ?? 'cliente'
@@ -740,7 +741,7 @@ export function consultoriaS03(p: PerfilS03): ConsultoriaS03 {
 }
 
 /** Reforma tributária por ano de transição (CON-016; Calculadora RFB simulada). */
-export function cenariosReforma(p: PerfilS03, margem = 0.3) {
+function cenariosReformaBase(p: PerfilS03, margem = 0.3) {
   const anos = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033]
   const ibsFracao: Record<number, number> = { 2026: 0, 2027: 0, 2028: 0, 2029: 0.1, 2030: 0.2, 2031: 0.3, 2032: 0.4, 2033: 1 }
   const anual = p.receitaMensal * 12
@@ -755,4 +756,24 @@ export function cenariosReforma(p: PerfilS03, margem = 0.3) {
     const antigo = atual * (pisCofins * 0.45 + icmsIss * 0.55)
     return { ano, cbs, ibs, carga: Math.round(novo + antigo), atual: Math.round(atual), calculadoraOficial: Math.round((novo + antigo) * (ano === 2027 ? 1.012 : 1)) }
   })
+}
+
+/** fiscalS03 com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function fiscalS03(p: PerfilS03): FiscalS03 {
+  return comCenarioPor('fiscalS03' + ':' + JSON.stringify(p ?? null), () => fiscalS03Base(p))
+}
+
+/** contabilS03 com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function contabilS03(p: PerfilS03): ContabilS03 {
+  return comCenarioPor('contabilS03' + ':' + JSON.stringify(p ?? null), () => contabilS03Base(p))
+}
+
+/** consultoriaS03 com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function consultoriaS03(p: PerfilS03): ConsultoriaS03 {
+  return comCenarioPor('consultoriaS03' + ':' + JSON.stringify(p ?? null), () => consultoriaS03Base(p))
+}
+
+/** cenariosReforma com o cenário do UI Lab aplicado (fora do Lab, o mesmo de sempre). */
+export function cenariosReforma(p: PerfilS03, margem = 0.3) {
+  return comCenarioPor('cenariosReforma' + ':' + JSON.stringify(p ?? null) + ':' + JSON.stringify(margem ?? null), () => cenariosReformaBase(p, margem))
 }
