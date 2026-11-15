@@ -1,10 +1,12 @@
 import { z } from 'zod'
 
 /**
- * Horário de atendimento do escritório (decisão do Enzo de 15/11/2026: fora do horário, resposta
- * automática fixa, sem IA, e nenhuma triagem até abrir). O plano ainda não fixou o horário (revisão
- * de consistência, D11); até lá, vale `escritorio.configuracao.horario_atendimento`, no fuso do
- * escritório, com o padrão de segunda a sexta, das 8h às 18h.
+ * Horário de atendimento do escritório (decisões do Enzo de 15/11/2026). Fica em
+ * `escritorio.configuracao.horario_atendimento`, no fuso do escritório, e vem DESLIGADO por padrão:
+ * sem horário ligado, a triagem atende a qualquer hora e não há resposta de fora do horário. Ligado
+ * (`{ ligado: true }`), fora do horário vai a resposta automática fixa, sem IA, e nenhuma triagem até
+ * abrir. O padrão sugerido ao ligar é de segunda a sexta, das 8h às 18h; `dias`, `inicio` e `fim`
+ * mudam o padrão.
  */
 export const HorarioAtendimento = z
   .object({
@@ -17,11 +19,19 @@ export const HorarioAtendimento = z
   .refine((h) => h.inicio < h.fim, 'O início vem antes do fim.')
 export type HorarioAtendimento = z.infer<typeof HorarioAtendimento>
 
+/** O padrão sugerido quando o escritório liga o horário sem dizer dias e horas. */
 export const HORARIO_PADRAO: HorarioAtendimento = { dias: [1, 2, 3, 4, 5], inicio: '08:00', fim: '18:00' }
 
-/** Lê da configuração do escritório; inválido ou ausente vira o padrão (nunca derruba a triagem). */
-export function horarioDe(configuracao: unknown): HorarioAtendimento {
-  const h = HorarioAtendimento.safeParse((configuracao as { horario_atendimento?: unknown } | null)?.horario_atendimento)
+/**
+ * Lê da configuração do escritório. Ausente ou com `ligado` diferente de `true`: null (desligado,
+ * atende a qualquer hora). Ligado: o horário dado, ou o padrão sugerido se faltar ou for inválido
+ * (nunca derruba a triagem).
+ */
+export function horarioDe(configuracao: unknown): HorarioAtendimento | null {
+  const cfg = (configuracao as { horario_atendimento?: { ligado?: unknown } & Record<string, unknown> } | null)?.horario_atendimento
+  if (!cfg || cfg.ligado !== true) return null
+  const { ligado: _, ...resto } = cfg
+  const h = HorarioAtendimento.safeParse(resto)
   return h.success ? h.data : HORARIO_PADRAO
 }
 
