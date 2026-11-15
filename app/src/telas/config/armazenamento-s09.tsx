@@ -43,33 +43,36 @@ export function BlocoRaioX() {
   const antigo = useEstadoConector(rx.provedor === 'servidor_local' || banco.escritorioId === ID_HORIZONTE ? 'servidor_local' : 'drive_antigo')
   const pode = usePode('raiox.rodar')
   const r = resumoDoEscritorio()
+  // Faixa compacta (A-2): o Raio-X é um estado e duas ações, não uma lista; não divide a linha com a Manutenção.
   return (
-    <Caixa>
-      <TituloBloco
-        descricao="Diagnóstico das pastas de todos os clientes antes de o mapeamento valer, em qualquer armazenamento (Drive, OneDrive, Dropbox, Box, servidor local). Lê só a lista de pastas e arquivos, nunca o conteúdo (D-10)."
-        acao={
-          pode && (
-            <Button size="sm" className="rounded-full" onClick={() => abrir('raiox')}>
-              <MagnifyingGlassIcon /> {rx.rodado_em ? 'Abrir o Raio-X' : 'Rodar o Raio-X'}
-            </Button>
-          )
-        }
-      >
-        Raio-X das pastas
-      </TituloBloco>
-      <p className="flex flex-wrap items-center gap-2 text-sm">
-        <SeloEstado tom={antigo.tom}>{antigo.nome}: {antigo.rotulo}</SeloEstado>
-        {rx.rodado_em ? (
-          <span>
-            Último em {new Date(rx.rodado_em).toLocaleDateString('pt-BR')}: {r.casaram} de {r.pastasCliente} pastas casaram; {rx.aplicado_em ? 'decisões aplicadas' : `${Object.keys(rx.decisoes).length} decisões tomadas, falta aplicar`}.
-          </span>
-        ) : (
-          <span className="text-muted-foreground">Ainda não rodou.</span>
+    <Caixa className="lg:flex-row lg:items-center lg:gap-6">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <TituloBloco descricao="Diagnóstico das pastas de todos os clientes antes de o mapeamento valer, em qualquer armazenamento (Drive, OneDrive, Dropbox, Box, servidor local). Lê só a lista de pastas e arquivos, nunca o conteúdo (D-10).">
+          Raio-X das pastas
+        </TituloBloco>
+        <p className="flex flex-wrap items-center gap-2 text-sm">
+          <SeloEstado tom={antigo.tom}>
+            {antigo.nome}: {antigo.rotulo}
+          </SeloEstado>
+          {rx.rodado_em ? (
+            <span className="min-w-0 text-pretty">
+              Último em {new Date(rx.rodado_em).toLocaleDateString('pt-BR')}: {r.casaram} de {r.pastasCliente} pastas casaram; {rx.aplicado_em ? 'decisões aplicadas' : `${Object.keys(rx.decisoes).length} decisões tomadas, falta aplicar`}.
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Ainda não rodou.</span>
+          )}
+        </p>
+      </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <Button size="sm" variant="ghost" className="rounded-full" onClick={() => abrir('raiox')}>
+          <BookOpenIcon /> Dicionário de departamentos e órgãos
+        </Button>
+        {pode && (
+          <Button size="sm" className="rounded-full" onClick={() => abrir('raiox')}>
+            <MagnifyingGlassIcon /> {rx.rodado_em ? 'Abrir o Raio-X' : 'Rodar o Raio-X'}
+          </Button>
         )}
-      </p>
-      <Button size="sm" variant="ghost" className="w-fit rounded-full" onClick={() => abrir('raiox')}>
-        <BookOpenIcon /> Dicionário de departamentos e órgãos
-      </Button>
+      </div>
     </Caixa>
   )
 }

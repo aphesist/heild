@@ -177,10 +177,9 @@ export function ArmazenamentoTela() {
             </ul>
           </Caixa>
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <BlocoRaioX />
-          <BlocoManutencao />
-        </div>
+        {/* A-2: o Raio-X em faixa e a Manutenção com a altura da lista, cada um na sua linha. */}
+        <BlocoRaioX />
+        <BlocoManutencao />
       </div>
 
       {modal === 'conectar' && (

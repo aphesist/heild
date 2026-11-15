@@ -263,7 +263,13 @@ export function TemaTela() {
               </TituloBloco>
               <dl className="divide-border/70 flex flex-col divide-y">
                 <Propriedade rotulo="E-mail">
-                  {remetente.nome} &lt;{remetente.email}&gt; {remetente.ok && <Badge variant="sucesso">domínio verificado</Badge>}
+                  <span className="block">{remetente.nome}</span>
+                  <span className="text-muted-foreground block break-all">{remetente.email}</span>
+                  {remetente.ok && (
+                    <Badge variant="sucesso" className="mt-1">
+                      domínio verificado
+                    </Badge>
+                  )}
                 </Propriedade>
                 <Propriedade rotulo="Nome no WhatsApp">por número, no bloco abaixo</Propriedade>
               </dl>
@@ -293,7 +299,7 @@ export function TemaTela() {
             <Previa tema={r} modo={modo} />
             <Caixa>
               <TituloBloco descricao="Nome e cor do orb de cada setor. Cada pessoa pode dar outro nome ao seu. O Assistente é sempre o contraste do tema.">Integrantes padrão</TituloBloco>
-              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <ul className="largo:grid-cols-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
                 {setores.map((s) => {
                   const i = r.integrantes_padrao[s]!
                   return (

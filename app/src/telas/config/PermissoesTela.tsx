@@ -99,6 +99,17 @@ export function PermissoesTela() {
     <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig titulo="Permissões" sub="Calculado agora, pela mesma regra que decide cada ação. Para mudar, edite a pessoa em Usuários." />
+        {/* A-3: o que nunca se libera vem antes da matriz, em faixa: é a regra que vale para todas as células. */}
+        <Caixa>
+          <TituloBloco descricao="Nem exceção por tela libera para quem não é Administrador (09, 10.6).">Nunca liberável</TituloBloco>
+          <ul className="flex flex-wrap gap-2 text-sm">
+            {nuncaLiberavel.map((n) => (
+              <li key={n} className="bg-sunken/60 flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1">
+                <LockSimpleIcon className="text-muted-foreground size-4 shrink-0" /> {n}
+              </li>
+            ))}
+          </ul>
+        </Caixa>
         <Caixa>
           <TituloBloco descricao="Clique numa célula para ver a regra que decidiu. Os integrantes de cada pessoa nunca passam disso.">Matriz usuário × aba × nível</TituloBloco>
           <div className="flex flex-wrap gap-1.5">
@@ -173,35 +184,24 @@ export function PermissoesTela() {
               </table>
             </div>
           )}
+          <p className="text-muted-foreground flex items-start gap-1.5 text-xs">
+            <InfoIcon className="mt-0.5 size-3.5 shrink-0" /> “Simular” mostra o sistema com o papel e os setores da pessoa sem trocar de conta; a faixa no topo avisa e tem o botão para sair.
+          </p>
         </Caixa>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-          <Caixa>
-            <TituloBloco descricao="O que cada papel vê e faz. Recepção, Supervisão e Direção são papéis, não abas (E-05).">Regras por papel</TituloBloco>
-            <ul className="divide-border/70 flex flex-col divide-y">
-              {regrasPapel.map((r) => (
-                <li key={r.papel} className="flex flex-col gap-0.5 py-2.5 text-sm">
-                  <span className="font-medium">{r.papel}</span>
-                  <span>{r.ve}</span>
-                  <span className="text-muted-foreground text-xs">Nunca: {r.nunca}</span>
-                </li>
-              ))}
-            </ul>
-          </Caixa>
-          <Caixa>
-            <TituloBloco descricao="Nem exceção por tela libera para quem não é Administrador (09, 10.6).">Nunca liberável</TituloBloco>
-            <ul className="flex flex-col gap-2 text-sm">
-              {nuncaLiberavel.map((n) => (
-                <li key={n} className="flex items-center gap-2">
-                  <LockSimpleIcon className="text-muted-foreground size-4" /> {n}
-                </li>
-              ))}
-            </ul>
-            <p className="text-muted-foreground flex items-start gap-1.5 text-xs">
-              <InfoIcon className="mt-0.5 size-3.5 shrink-0" /> “Simular” mostra o sistema com o papel e os setores da pessoa sem trocar de conta; a faixa no topo avisa e tem o botão para sair.
-            </p>
-          </Caixa>
-        </div>
+        {/* A-3: as regras por papel em largura inteira, o nome à esquerda e o que vê à direita. */}
+        <Caixa>
+          <TituloBloco descricao="O que cada papel vê e faz. Recepção, Supervisão e Direção são papéis, não abas (E-05).">Regras por papel</TituloBloco>
+          <ul className="divide-border/70 flex flex-col divide-y">
+            {regrasPapel.map((r) => (
+              <li key={r.papel} className="flex flex-col gap-0.5 py-2.5 text-sm sm:grid sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-x-4">
+                <span className="font-medium sm:row-span-2">{r.papel}</span>
+                <span className="min-w-0 text-pretty">{r.ve}</span>
+                <span className="text-muted-foreground text-xs sm:col-start-2">Nunca: {r.nunca}</span>
+              </li>
+            ))}
+          </ul>
+        </Caixa>
       </div>
       {detalhe && (
         <GavetaFormulario aberta onFechar={() => setDetalhe(null)} titulo={`${detalhe.u.nome} · ${detalhe.col.rotulo}`} descricao="A regra que decidiu, na ordem da função única: módulo da assinatura, Administrador, exceção bloquear, exceção liberar, vínculo ao setor, carteira, papel mínimo." acao="Fechar" onAcao={() => setDetalhe(null)}>

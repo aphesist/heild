@@ -131,8 +131,9 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
             )}
           </Caixa>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
-            <Caixa className="max-h-[70vh] overflow-hidden">
+          // A-1: a árvore rola por dentro e fica presa ao topo; a pasta aberta tem a altura do que tem.
+          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+            <Caixa className="max-h-[70vh] overflow-hidden lg:sticky lg:top-0">
               <ul className="area-rolagem-dupla -mx-1 flex min-h-0 flex-col overflow-y-auto px-1 text-sm">
                 {raizes.map((r) => {
                   const aberto = abertos.includes(r.id)
@@ -157,7 +158,7 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
               </ul>
             </Caixa>
 
-            <Caixa className="min-h-[24rem]">
+            <Caixa>
               <nav aria-label="Pasta atual" className="flex flex-wrap items-center gap-1 text-sm">
                 {[pastaDoCliente(clienteId), ...caminho].map((p, i) => (
                   <span key={i} className="flex items-center gap-1">

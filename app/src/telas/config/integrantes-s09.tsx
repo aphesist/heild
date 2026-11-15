@@ -51,71 +51,70 @@ export function LiberacaoAtendimento() {
           <FlaskIcon className="size-4 shrink-0" /> Modo simulação ligado: a equipe testa os integrantes sem gravar nada nem enviar ao cliente.
         </p>
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/* A-5: os dois interruptores do escritório lado a lado, da mesma altura; a liberação por assunto embaixo, em largura inteira. */}
+      <div className="grid gap-4 md:grid-cols-2">
         <Caixa>
-          <TituloBloco descricao="Assuntos em que o integrante pode responder sozinho ao cliente. Começa vazio (D-33): tudo vira rascunho para uma pessoa até você liberar. Uma amostra das respostas volta para revisão (GES-062).">Liberação no atendimento</TituloBloco>
-          <ul className="divide-border/70 flex flex-col divide-y">
-            {cats.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center gap-3 py-2.5">
-                <span className="min-w-0 flex-1 basis-48 text-sm">
-                  <span className="block">{c.nome}</span>
-                  <span className="text-muted-foreground block text-xs">
-                    {c.exemplo}
-                    {c.ligada && ` · revisa ${c.amostragem}% por amostragem`}
-                  </span>
-                </span>
-                {c.ligada && pode && (
-                  <span className="w-28">
-                    <CampoEscolha rotulo={`Amostragem de ${c.nome}`} valor={String(c.amostragem)} onMudar={(v) => setCats((xs) => xs.map((x) => (x.id === c.id ? { ...x, amostragem: Number(v) } : x)))} opcoes={['5', '10', '20', '30', '50', '100'].map((v) => ({ valor: v, rotulo: `${v}% revisado` }))} />
-                  </span>
-                )}
-                <Interruptor
-                  ocultarRotulo
-                  rotulo={`Liberar ${c.nome}`}
-                  ligado={c.ligada}
-                  desabilitado={!pode}
-                  onMudar={(v) => {
-                    setCats((xs) => xs.map((x) => (x.id === c.id ? { ...x, ligada: v } : x)))
-                    registrar(`${usuario.nome} ${v ? 'liberou' : 'tirou'} a resposta sozinha em “${c.nome}”`, 'integrante.configurar')
-                    loja.toast(v ? `Liberado: o integrante responde sozinho sobre ${c.nome.toLowerCase()} (${c.amostragem}% revisado).` : `${c.nome}: volta a ser rascunho para uma pessoa.`)
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
+          <TituloBloco
+            descricao="No começo, a IA só fala com cliente real desta lista (D-31). Os outros clientes recebem resposta de uma pessoa."
+            acao={
+              pode && (
+                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setEditandoPilotos(true)}>
+                  <UsersThreeIcon /> Escolher
+                </Button>
+              )
+            }
+          >
+            Clientes-piloto
+          </TituloBloco>
+          <Interruptor ligado={pilotos.ligado} desabilitado={!pode} onMudar={(v) => setPilotos({ ...pilotos, ligado: v })} rotulo="Só com os clientes-piloto" detalhe={pilotos.ligado ? (nomes.length ? nomes.join(', ') : 'nenhum escolhido: a IA não fala com cliente nenhum') : 'desligado: a IA fala com todos, dentro das categorias liberadas'} />
         </Caixa>
-        <div className="flex flex-col gap-4">
-          <Caixa>
-            <TituloBloco
-              descricao="No começo, a IA só fala com cliente real desta lista (D-31). Os outros clientes recebem resposta de uma pessoa."
-              acao={
-                pode && (
-                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setEditandoPilotos(true)}>
-                    <UsersThreeIcon /> Escolher
-                  </Button>
-                )
-              }
-            >
-              Clientes-piloto
-            </TituloBloco>
-            <Interruptor ligado={pilotos.ligado} desabilitado={!pode} onMudar={(v) => setPilotos({ ...pilotos, ligado: v })} rotulo="Só com os clientes-piloto" detalhe={pilotos.ligado ? (nomes.length ? nomes.join(', ') : 'nenhum escolhido: a IA não fala com cliente nenhum') : 'desligado: a IA fala com todos, dentro das categorias liberadas'} />
-          </Caixa>
-          <Caixa>
-            <TituloBloco descricao="Para treinar a equipe: os integrantes respondem e preparam, mas nada é gravado nem enviado (D-30).">Modo simulação</TituloBloco>
-            <Interruptor
-              ligado={simulacao}
-              desabilitado={!pode}
-              onMudar={(v) => {
-                setSimulacao(v)
-                registrar(`${usuario.nome} ${v ? 'ligou' : 'desligou'} o modo simulação dos integrantes`, 'integrante.configurar')
-                loja.toast(v ? 'Modo simulação ligado para a equipe.' : 'Modo simulação desligado: os integrantes voltam a gravar e preparar envios.')
-              }}
-              rotulo="Ligar o modo simulação"
-              detalhe="Cada tela mostra uma faixa “simulação” enquanto estiver ligado."
-            />
-          </Caixa>
-        </div>
+        <Caixa>
+          <TituloBloco descricao="Para treinar a equipe: os integrantes respondem e preparam, mas nada é gravado nem enviado (D-30).">Modo simulação</TituloBloco>
+          <Interruptor
+            ligado={simulacao}
+            desabilitado={!pode}
+            onMudar={(v) => {
+              setSimulacao(v)
+              registrar(`${usuario.nome} ${v ? 'ligou' : 'desligou'} o modo simulação dos integrantes`, 'integrante.configurar')
+              loja.toast(v ? 'Modo simulação ligado para a equipe.' : 'Modo simulação desligado: os integrantes voltam a gravar e preparar envios.')
+            }}
+            rotulo="Ligar o modo simulação"
+            detalhe="Cada tela mostra uma faixa “simulação” enquanto estiver ligado."
+          />
+        </Caixa>
       </div>
+      <Caixa>
+        <TituloBloco descricao="Assuntos em que o integrante pode responder sozinho ao cliente. Começa vazio (D-33): tudo vira rascunho para uma pessoa até você liberar. Uma amostra das respostas volta para revisão (GES-062).">Liberação no atendimento</TituloBloco>
+        <ul className="divide-border/70 flex flex-col divide-y">
+          {cats.map((c) => (
+            <li key={c.id} className="flex flex-wrap items-center gap-3 py-2.5">
+              <span className="min-w-0 flex-1 basis-48 text-sm">
+                <span className="block">{c.nome}</span>
+                <span className="text-muted-foreground block text-xs">
+                  {c.exemplo}
+                  {c.ligada && ` · revisa ${c.amostragem}% por amostragem`}
+                </span>
+              </span>
+              {c.ligada && pode && (
+                <span className="w-28">
+                  <CampoEscolha rotulo={`Amostragem de ${c.nome}`} valor={String(c.amostragem)} onMudar={(v) => setCats((xs) => xs.map((x) => (x.id === c.id ? { ...x, amostragem: Number(v) } : x)))} opcoes={['5', '10', '20', '30', '50', '100'].map((v) => ({ valor: v, rotulo: `${v}% revisado` }))} />
+                </span>
+              )}
+              <Interruptor
+                ocultarRotulo
+                rotulo={`Liberar ${c.nome}`}
+                ligado={c.ligada}
+                desabilitado={!pode}
+                onMudar={(v) => {
+                  setCats((xs) => xs.map((x) => (x.id === c.id ? { ...x, ligada: v } : x)))
+                  registrar(`${usuario.nome} ${v ? 'liberou' : 'tirou'} a resposta sozinha em “${c.nome}”`, 'integrante.configurar')
+                  loja.toast(v ? `Liberado: o integrante responde sozinho sobre ${c.nome.toLowerCase()} (${c.amostragem}% revisado).` : `${c.nome}: volta a ser rascunho para uma pessoa.`)
+                }}
+              />
+            </li>
+          ))}
+        </ul>
+      </Caixa>
       {editandoPilotos && (
         <GavetaFormulario aberta onFechar={() => setEditandoPilotos(false)} titulo="Clientes-piloto" descricao="Escolha os clientes com quem a IA pode falar no começo." acao="Salvar" onAcao={() => setEditandoPilotos(false)}>
           <div className="flex flex-wrap gap-1.5">
