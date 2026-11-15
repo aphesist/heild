@@ -407,6 +407,12 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
     },
 
     enfileirar(escritorio, comando, ator) {
+      // Integrante que não existe no escritório aberto (o motor da demonstração do escritório
+      // anterior, depois da troca): a ação não vale aqui; o servidor recusaria (NAO_ENCONTRADO).
+      if (ator.tipo === 'integrante' && banco?.escritorioId === escritorio && !banco.obter('integrante', ator.integrante_id)) {
+        console.warn(`[heild] ação do integrante ${ator.integrante_id}, que não é deste escritório, ignorada (${rotuloDe(comando)}).`)
+        return
+      }
       if (ator.tipo === 'pessoa') ultimaPessoa.set(escritorio, ator.usuario_id)
       guardarFila(escritorio, [...lerFila(escritorio), { escritorio, chave: novaChave(), comando, ator }])
     },
