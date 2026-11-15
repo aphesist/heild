@@ -82,4 +82,11 @@ export class ErroPermissao extends Error {
   }
 }
 
-export class ErroRegra extends Error {}
+export class ErroRegra extends Error {
+  /** Código estável para quem chama pela API (TAREFA_FINAL, MOTIVO_OBRIGATORIO...); sem ele, a API deduz pela frase. */
+  readonly codigo?: string
+  constructor(mensagem?: string, codigo?: string) {
+    super(mensagem)
+    this.codigo = codigo
+  }
+}
