@@ -286,6 +286,9 @@ function detectar(opcoes) {
         if (s.content === 'none' || s.position !== 'absolute') continue
         w = Math.max(w, b.width - px(s.left) - px(s.right))
         h = Math.max(h, b.height - px(s.top) - px(s.bottom))
+        // Área com tamanho próprio (ex.: a do .valor-editavel, 44 px centrada no toque).
+        w = Math.max(w, px(s.width), px(s.minWidth))
+        h = Math.max(h, px(s.height), px(s.minHeight))
       }
       const minimo = el.type === 'checkbox' || el.type === 'radio' ? 23.5 : 43.5
       if (w < minimo || h < minimo) add('toque', `${Math.round(w)}×${Math.round(h)}px: ${desc(el)}`, el)

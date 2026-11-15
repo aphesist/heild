@@ -37,8 +37,9 @@ const neueTexto = "'PP Neue Montreal Text', 'PP Neue Montreal', ui-sans-serif, s
 /**
  * Escala de areia do tema de fábrica: um matiz só (OKLCH h 63), do quase branco
  * ao quase preto. Passa exatamente pelas duas cores do Figma: 300 = #d9d2cc
- * (fim do fundo) e 650 = #696665 (texto suave). Todas as cores neutras dos
- * dois modos saem daqui; nenhuma é escolhida solta.
+ * (fim do fundo) e 650 = #696665 (o texto suave do Figma). O texto suave do
+ * claro desceu para 700 (proposta 6, aprovada: 4,95:1 sobre o fim do fundo).
+ * Todas as cores neutras dos dois modos saem daqui; nenhuma é escolhida solta.
  */
 export const areia = {
   50: '#fefbf9',
@@ -68,7 +69,7 @@ export const areia = {
  * | superfície   | 100            | 850            |
  * | elevada      | 50             | 800            |
  * | borda        | 300            | 800            |
- * | texto suave  | 650            | 400            |
+ * | texto suave  | 700            | 400            |
  * | texto        | 850            | 100            |
  * | primária     | 900            | 100            |
  */
@@ -92,7 +93,7 @@ export const temaFabrica: Tema = {
     rebaixada: areia[200],
     rebaixada_fim: areia[300],
     borda: areia[300],
-    texto_suave: areia[650],
+    texto_suave: areia[700],
     fundo_fim: areia[300],
     lateral: areia[150],
     lateral_fim: areia[400],
