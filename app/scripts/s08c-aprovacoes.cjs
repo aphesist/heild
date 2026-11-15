@@ -114,12 +114,13 @@ const { chromium } = require('playwright')
   await ir('configuracao', 'c2')
   ok(await visivel(p.getByText('Regras de conferência')), 'regras de conferência da empresa, com o que sobe de faixa')
   ok(await visivel(p.getByRole('list', { name: 'Aprovadores da ficha' })), 'aprovadores da ficha com a alçada de cada um')
-  await p.locator('section', { hasText: 'SLA da empresa' }).getByRole('button', { name: 'Editar' }).click()
-  await espera(400)
-  await dlg().getByLabel('Meta do mês (% no prazo)').fill('96')
-  await dlg().getByLabel('Lote enviado até quantas horas antes do vencimento').fill('24')
-  await dlg().getByRole('button', { name: 'Salvar', exact: true }).click()
-  await espera(500)
+  // Fase 6: meta e lote se corrigem no próprio valor.
+  for (const [rotulo, valor] of [['Meta de SLA do mês', '96'], ['Lote enviado antes do vencimento', '24']]) {
+    await p.getByRole('button', { name: new RegExp(`^${rotulo}:`) }).click()
+    await p.getByRole('textbox', { name: rotulo }).fill(valor)
+    await p.getByRole('button', { name: 'Aplicar', exact: true }).click()
+    await espera(400)
+  }
   ok(await visivel(p.getByText(/96% no prazo/)), 'SLA da empresa editado e salvo')
   await shot('config-padaria')
 

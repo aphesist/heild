@@ -118,9 +118,10 @@ const { chromium } = require('playwright')
   // 5. Tela real: Configurações › Escritório
   await p.goto(base + '#/config/escritorio')
   await espera(1000)
-  await p.getByRole('button', { name: 'Editar' }).first().click()
-  await p.getByRole('dialog').getByLabel('Razão social').fill('Contábil Andrade & Lima Ltda (fumaça)')
-  await p.getByRole('dialog').getByRole('button', { name: 'Salvar' }).click()
+  // Fase 6: a razão social se corrige no próprio valor (sublinhado), sem gaveta.
+  await p.getByRole('button', { name: /^Razão social:/ }).click()
+  await p.getByRole('textbox', { name: 'Razão social' }).fill('Contábil Andrade & Lima Ltda (fumaça)')
+  await p.getByRole('button', { name: 'Aplicar', exact: true }).click()
   await espera(500)
   ok(await p.getByText('Contábil Andrade & Lima Ltda (fumaça)').count(), 'Configurações › Escritório grava a razão social')
 
