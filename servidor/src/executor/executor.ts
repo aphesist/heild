@@ -116,6 +116,8 @@ export async function executar(sql: Sql, p: Pedido): Promise<Resultado> {
       return { status: 200, corpo }
     }
     let eventoId: string | undefined
+    // Log estruturado da recusa (código, operação, campo; sem dado pessoal), para diagnóstico.
+    if (erro.status >= 400 && erro.status !== 401) console.warn(JSON.stringify({ nivel: 'recusa', status: erro.status, codigo: erro.codigo, rotulo: p.rotulo, ferramenta: erro.ferramenta ?? null, campo: erro.campo, tabelas: p.comando.tipo === 'linhas' ? [...new Set([...p.comando.gravar.map((g) => g.tabela), ...p.comando.remover.map((r) => r.tabela)])] : undefined, ator: p.sessao.ctx.ator.tipo }))
     if (erro.status === 403 || erro.status === 422) eventoId = await registrarFalha(sql, p, erro).catch((x) => (console.error('[heild] evento de falha não gravou:', x), undefined))
     if (erro.status === 500) console.error('[heild] erro interno:', e)
     return { status: erro.status, corpo: erro.corpo(eventoId) }
