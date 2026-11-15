@@ -68,12 +68,13 @@ Todo widget aguenta 0, 1, 3, 15, 50 e 200 itens sem crescer sem limite nem corta
 
 | Quantidade | O que acontece |
 | --- | --- |
-| 0 | Estado vazio com a próxima ação (`EstadoVazio compacto`), o card no menor tamanho |
+| 0 | Estado vazio do widget (`VazioWidget`): centrado, diz o porquê ou o que vem a seguir e, quando há, o botão da próxima ação |
 | Até o teto do tamanho | Cabe no card, com a altura do conteúdo |
 | Acima do teto de altura | O corpo rola por dentro com o esmaecido do topo e do fim; o rodapé oferece **"Ver tudo (N)"**, que abre o conteúdo inteiro numa gaveta (no tamanho XL). Vem do próprio `Widget` (`components/widgets/widget.tsx`): nenhum widget precisa fazer à mão |
 | Lista com teto por quantidade | `ListaComTeto` (`components/kit/lista-com-teto.tsx`): até P 3, M 5, G 8, L 5, XL 12 itens; além disso "Ver todos (N)" abre a lista inteira numa gaveta |
 | Centenas de itens | Na gaveta, acima de 150 itens, só a janela visível é desenhada (`ListaVirtual`) |
 
+- **Estados de dados:** carregando, erro e sem acesso vêm da caixa do widget (`ContextoEstadoWidget`): esqueleto; "Não deu para carregar" com "Tentar de novo"; "Sem acesso a estes dados" com "Pedir acesso". Cabem em uma célula (P, M e L só com título e ação; G e XL com ícone e explicação). Nenhum widget desenha o seu.
 - **Texto:** curto, longo e sem espaço (CNPJ, chave, e-mail) cabem: quebra de palavra na base, truncamento com título, selo que trunca.
 - **Valores e datas extremos:** R$ 0,00, R$ 1.234.567.890,12, negativos, percentuais acima de 100%, datas vencidas, de hoje e futuras: a coluna de valor tem o tamanho do conteúdo (`minmax(Nrem,max-content)`), nada invade o vizinho.
 - **Campos opcionais ausentes, todos os status misturados, serviços falhando e sem permissão:** o widget mostra o que tem e diz o que falta, sem quebrar.
