@@ -15,10 +15,13 @@ export const CODIGOS = {
   NAO_ENCONTRADO: 'O registro não existe neste escritório.',
   FORA_DO_ESCRITORIO: 'O registro é de outro escritório.',
   TABELA_SEM_REGRA: 'Essa tabela não tem repositório: não se grava nela pela API.',
+  USE_FERRAMENTA_TIPADA: 'Essa escrita tem ferramenta tipada: chame /v1/ferramentas/{nome} (o patch livre não é aceito).',
   // Sessão
   SEM_SESSAO: 'Falta o token de acesso (Authorization: Bearer).',
   SESSAO_INVALIDA: 'O token de acesso não vale (vencido, adulterado ou de outro emissor).',
   CONTA_INATIVA: 'A conta não está ativa neste escritório.',
+  EXIGE_MFA: 'Esta conta precisa entrar com o segundo fator (MFA) para usar a API.',
+  CONTA_SEM_VINCULO: 'O login não está ligado a uma conta de escritório (app_metadata).',
   // Permissão (a frase vem da função autorizar)
   NEGADO: 'A função de autorização negou.',
   MODULO_NAO_CONTRATADO: 'Módulo não contratado na assinatura do escritório.',
@@ -107,9 +110,12 @@ export function statusDoCodigo(c: CodigoErro): number {
     case 'ENTRADA_INVALIDA':
     case 'FALTA_CHAVE_IDEMPOTENCIA':
     case 'CURSOR_INVALIDO':
+    case 'USE_FERRAMENTA_TIPADA':
       return 400
     case 'SEM_SESSAO':
     case 'SESSAO_INVALIDA':
+    case 'EXIGE_MFA':
+    case 'CONTA_SEM_VINCULO':
       return 401
     case 'FERRAMENTA_DESCONHECIDA':
     case 'OPERACAO_DESCONHECIDA':

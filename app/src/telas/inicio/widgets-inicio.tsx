@@ -19,7 +19,8 @@ import type { Aviso, Tarefa } from '@/dados/tipos'
 import { semana as semanaTs } from '@/dados/timesheet'
 import { cn } from '@/lib/utils'
 import { rotuloSetorCurto } from '@/nucleo/permissoes'
-import { useTabela, useBanco } from '@/nucleo/react'
+import { useBanco } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { ordemPrazo } from './minha-fila'
 import { useImplantacao } from '@/dados/implantacao'
@@ -95,7 +96,8 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
   const papel = usuario.papel
   const setores = permissoes.setores
   const gere = permissoes.gere
-  const eventos = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: eventos } = useConsulta('evento', { visivel_na_linha_do_tempo: true })
   const { escritorio } = useBanco()
   const implantacao = useImplantacao()
 

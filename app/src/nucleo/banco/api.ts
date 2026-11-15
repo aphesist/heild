@@ -1,8 +1,10 @@
 import type { Contexto } from '../permissoes/perfil'
 import { nomesTabelas, type Fotografia, type Id, type NomeTabela, type Registro } from '../modelo/entidades'
+import { classeDaTabela } from '../permissoes/leitura'
 import { ErroAdaptador, type Adaptador } from './adaptador'
 import type { Banco, MarcaEscrita } from './banco'
 import { fotografiaVazia } from './navegador'
+import { traduzirOperacao, type Traducao } from './traducao'
 
 /**
  * Adaptador da API do backend real (branch `backend`; servidor/). Liga com
@@ -26,6 +28,18 @@ import { fotografiaVazia } from './navegador'
  *   de uma queda de rede é seguro. A fila fica no localStorage até o servidor confirmar.
  * - Sessão de demonstração: o token sai de `POST /v1/auth/demonstracao` com a pessoa que
  *   está na tela (o integrante age em nome dela; o app do cliente, com a pessoa do cliente).
+ *
+ * F1 (B5):
+ * - Os repositórios do núcleo viram clientes das ferramentas tipadas: a chamada da tela
+ *   passa pelo tradutor (`traducao.ts`) e vai para `POST /v1/ferramentas/{nome}`, com os ids
+ *   gerados e a frase do evento no envelope (`heild_tela`). O que não é da F1 segue como
+ *   operação. O servidor recusa o patch genérico da F1 por operação.
+ * - Ler é por classe (ARQUITETURA 6.1): `GET /v1/sincronizar?classes=1,2` traz a configuração
+ *   e o trabalho aberto, já filtrados pela regra de leitura; a classe 3 (evento, mensagem
+ *   interna) nunca vem inteira: o cache dela é a página mais recente que a pessoa pode ver,
+ *   mais o que as telas consultarem (`consultar`, usado pelo `useConsulta`).
+ * - Avisos de mudança pelo SSE (`/v1/eventos/fluxo`, lido com fetch porque precisa do token):
+ *   classe 1 e 2 pedem o delta (`sincronizar?desde=`); classe 3 avisa as consultas abertas.
  */
 
 export interface ConfigApi {
@@ -39,6 +53,7 @@ type AtorComando =
   | { tipo: 'sistema' }
 
 type Comando =
+  | { tipo: 'ferramenta'; ferramenta: string; entrada: Record<string, unknown>; ids: { p: string; id: string }[]; texto?: string }
   | { tipo: 'operacao'; operacao: string; argumentos: unknown[]; ids: { p: string; id: string }[] }
   | { tipo: 'linhas'; gravar: { tabela: NomeTabela; linha: Registro }[]; remover: { tabela: NomeTabela; id: Id }[] }
 
@@ -68,11 +83,33 @@ function guardarFila(escritorioId: Id, fila: ItemFila[]) {
   }
 }
 
-/** O que o adaptador expõe além do Adaptador (para a captura instalada pelos repositórios). */
+/** Resposta de uma consulta paginada (ferramenta de lista). */
+export interface PaginaConsulta {
+  linhas: Registro[]
+  totais: Record<string, number>
+  cursor: string | null
+  haMais: boolean
+  total: number
+}
+
+const rotuloDe = (c: Comando) => (c.tipo === 'ferramenta' ? c.ferramenta : c.tipo === 'operacao' ? c.operacao : 'linhas')
+
+/** O que o adaptador expõe além do Adaptador (para a captura instalada pelos repositórios e para o useConsulta). */
 export interface AdaptadorApi extends Adaptador {
   nome: 'api'
   enfileirar(escritorio: Id, comando: Comando, ator: AtorComando): void
+  /** Uma página de uma ferramenta de lista, como a pessoa da tela; as linhas entram no cache da classe 3. */
+  consultar(ferramenta: string, entrada: Record<string, unknown>): Promise<PaginaConsulta>
+  /** Avisa quando chega mudança de uma tabela da classe 3 (o useConsulta relê a primeira página). */
+  aoMudarConsulta(ouvinte: (tabela: NomeTabela) => void): () => void
+  /** Quem lê agora (a pessoa da tela), para o token das consultas e do SSE. */
+  definirLeitor(quem: () => AtorComando): void
 }
+
+/** Ferramenta de lista de cada tabela da classe 3 (a que o useConsulta e o aquecimento usam). */
+export const LISTA_DA_TABELA: Partial<Record<NomeTabela, string>> = { evento: 'evento.listar', mensagem_interna: 'mensagem_interna.listar' }
+/** Quanto da classe 3 já vem ao abrir: a página mais recente, por tabela (o resto, por consulta). */
+const AQUECER_PAGINAS = 5
 
 export function adaptadorApi(config: ConfigApi): AdaptadorApi {
   const base = config.url.replace(/\/$/, '')
@@ -83,6 +120,11 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
   const recusas: string[] = []
   const geracao = new Map<Id, number>()
   let banco: Banco | null = null
+  /** Última versão sincronizada de cada escritório (para o delta). */
+  const versoes = new Map<Id, number>()
+  const ouvintesConsulta = new Set<(tabela: NomeTabela) => void>()
+  let leitor: (() => AtorComando) | null = null
+  let fluxo: { chave: string; parar: () => void } | null = null
 
   const chamar = async (metodo: 'GET' | 'POST', caminho: string, corpo?: unknown, cabecalhos: Record<string, string> = {}) => {
     const r = await fetch(`${base}${caminho}`, { method: metodo, headers: { ...(corpo !== undefined ? { 'content-type': 'application/json' } : {}), ...cabecalhos }, body: corpo !== undefined ? JSON.stringify(corpo) : undefined, keepalive: metodo === 'POST' && JSON.stringify(corpo ?? '').length < 60_000 })
@@ -144,15 +186,20 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       const item = fila[0]
       if (!item || (geracao.get(escritorio) ?? 0) !== minha) return
       let r: { status: number; json: Record<string, unknown> }
+      const c = item.comando
       try {
-        r = await chamar('POST', '/v1/operacoes', { comando: item.comando }, { ...(await cabecalhosDe(escritorio, item.ator)), 'idempotency-key': item.chave })
+        const cabecalhos = { ...(await cabecalhosDe(escritorio, item.ator)), 'idempotency-key': item.chave }
+        r =
+          c.tipo === 'ferramenta'
+            ? await chamar('POST', `/v1/ferramentas/${c.ferramenta}`, { ...c.entrada, heild_tela: { ids: c.ids, ...(c.texto !== undefined ? { texto: c.texto } : {}) } }, cabecalhos)
+            : await chamar('POST', '/v1/operacoes', { comando: c }, cabecalhos)
       } catch (e) {
         // Login recusado (conta inativa, escritório errado) não é rede: o comando é recusado
         // e sai da fila, senão travaria todos os seguintes.
         const status = (e as { status?: number }).status
         if (status && status >= 400 && status < 500) {
           guardarFila(escritorio, lerFila(escritorio).filter((x) => x.chave !== item.chave))
-          recusas.push(`${item.comando.tipo === 'operacao' ? item.comando.operacao : 'linhas'}: ${e instanceof Error ? e.message : String(e)}`)
+          recusas.push(`${rotuloDe(item.comando)}: ${e instanceof Error ? e.message : String(e)}`)
           continue
         }
         // Rede: fica na fila (mesma chave) para a próxima tentativa.
@@ -169,8 +216,7 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
             Object.entries(removidas).flatMap(([tabela, ids]) => ids.map((id) => ({ tabela: tabela as NomeTabela, id }))),
           )
       } else {
-        const rotulo = item.comando.tipo === 'operacao' ? item.comando.operacao : 'linhas'
-        recusas.push(`${rotulo}: ${String(r.json?.codigo ?? r.status)} · ${String(r.json?.mensagem ?? '')}`)
+        recusas.push(`${rotuloDe(item.comando)}: ${String(r.json?.codigo ?? r.status)} · ${String(r.json?.mensagem ?? '')}`)
       }
     }
   }
@@ -181,12 +227,146 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
     return p
   }
 
+  const atorLeitor = (): AtorComando => leitor?.() ?? { tipo: 'sistema' }
+
+  /** Uma página de ferramenta de lista, como quem está na tela. */
+  const pagina = async (escritorio: Id, ferramenta: string, entrada: Record<string, unknown>): Promise<PaginaConsulta> => {
+    const r = await chamar('POST', `/v1/ferramentas/${ferramenta}`, entrada, await cabecalhosDe(escritorio, atorLeitor()))
+    if (r.status !== 200) throw Object.assign(new ErroAdaptador('api', `A consulta ${ferramenta} falhou (${r.status}): ${String(r.json?.mensagem ?? '')}`), { status: r.status, codigo: r.json?.codigo })
+    const dados = (r.json.dados ?? {}) as { linhas?: Registro[]; totais?: Record<string, number> }
+    const p = (r.json.pagina ?? {}) as { cursor?: string | null; ha_mais?: boolean; total?: number }
+    return { linhas: dados.linhas ?? [], totais: dados.totais ?? {}, cursor: p.cursor ?? null, haMais: !!p.ha_mais, total: Number(p.total ?? 0) }
+  }
+
+  /** A classe 3 ao abrir: a página mais recente que a pessoa pode ver, por tabela (nunca a tabela inteira). */
+  const aquecer = async (escritorio: Id): Promise<Partial<Record<NomeTabela, Registro[]>>> => {
+    const r: Partial<Record<NomeTabela, Registro[]>> = {}
+    for (const [tabela, ferramenta] of Object.entries(LISTA_DA_TABELA) as [NomeTabela, string][]) {
+      const linhas: Registro[] = []
+      let cursor: string | null = null
+      for (let i = 0; i < AQUECER_PAGINAS; i++) {
+        const entrada: Record<string, unknown> = { visao: 'tela', limite: 100, ...(tabela === 'evento' ? { so_linha_do_tempo: false } : {}), ...(cursor ? { cursor } : {}) }
+        const p = await pagina(escritorio, ferramenta, entrada).catch((e) => {
+          console.warn(`[heild] não aqueci ${tabela}:`, e instanceof Error ? e.message : e)
+          return null
+        })
+        if (!p) break
+        linhas.push(...p.linhas)
+        if (!p.haMais) break
+        cursor = p.cursor
+      }
+      // O app lê em ordem de criação (como no banco local).
+      r[tabela] = linhas.sort((a, b) => a.criado_em.localeCompare(b.criado_em) || a.id.localeCompare(b.id))
+    }
+    return r
+  }
+
   const sincronizar = async (escritorio: Id): Promise<Fotografia | null> => {
-    const r = await chamar('GET', '/v1/sincronizar', undefined, await cabecalhosDe(escritorio, { tipo: 'sistema' }))
+    const r = await chamar('GET', '/v1/sincronizar?classes=1,2', undefined, await cabecalhosDe(escritorio, atorLeitor()))
     if (r.status !== 200) throw new ErroAdaptador('api', `Não leu o escritório ${escritorio} (${r.status}): ${String(r.json?.mensagem ?? '')}`)
     const tabelas = (r.json.tabelas ?? {}) as Partial<Record<NomeTabela, Registro[]>>
     if (!tabelas.escritorio?.length) return null
+    versoes.set(escritorio, Number(r.json.versao ?? 0))
+    leitorSincronizado = chaveDoLeitor()
+    // Classe 3: o que já estava no cache fica (é histórico consultado), mais a página mais recente.
+    const quentes = await aquecer(escritorio)
+    for (const t of Object.keys(LISTA_DA_TABELA) as NomeTabela[]) {
+      const antes = banco?.escritorioId === escritorio ? (banco.ler(t) as Registro[]) : []
+      const porId = new Map(antes.map((l) => [l.id, l]))
+      for (const l of quentes[t] ?? []) porId.set(l.id, l)
+      tabelas[t] = [...porId.values()].sort((a, b) => a.criado_em.localeCompare(b.criado_em) || a.id.localeCompare(b.id))
+    }
+    garantirFluxo(escritorio)
     return paraFotografia(tabelas)
+  }
+
+  /** O delta das classes 1 e 2, depois de um aviso do SSE. */
+  let deltaMarcado: ReturnType<typeof setTimeout> | null = null
+  const pedirDelta = (escritorio: Id) => {
+    if (deltaMarcado) return
+    deltaMarcado = setTimeout(() => {
+      deltaMarcado = null
+      void (async () => {
+        const desde = versoes.get(escritorio)
+        if (desde === undefined || banco?.escritorioId !== escritorio) return
+        const r = await chamar('GET', `/v1/sincronizar?classes=1,2&desde=${desde}`, undefined, await cabecalhosDe(escritorio, atorLeitor()))
+        if (r.status !== 200 || banco?.escritorioId !== escritorio) return
+        versoes.set(escritorio, Math.max(desde, Number(r.json.versao ?? desde)))
+        const tabelas = (r.json.tabelas ?? {}) as Record<string, Registro[]>
+        const removidas = (r.json.removidas ?? []) as { tabela: NomeTabela; id: Id }[]
+        banco.aplicarDoServidor(
+          Object.entries(tabelas).flatMap(([tabela, ls]) => ls.map((linha) => ({ tabela: tabela as NomeTabela, linha }))),
+          removidas,
+        )
+      })().catch((e) => console.warn('[heild] delta não veio:', e instanceof Error ? e.message : e))
+    }, 150)
+  }
+
+  /**
+   * A pessoa da tela mudou (login, "agindo como"): o escopo de leitura do servidor é outro, então
+   * o cache das classes 1 e 2 é relido com o token dela e o fluxo troca de token.
+   */
+  let leitorSincronizado: string | null = null
+  const chaveDoLeitor = () => JSON.stringify(atorLeitor())
+  const relogioLeitor = typeof window !== 'undefined' ? window.setInterval(() => {
+    const esc = banco?.escritorioId
+    if (!esc || banco?.estado !== 'pronto' || leitorSincronizado === null) return
+    const chave = chaveDoLeitor()
+    if (chave === leitorSincronizado) return
+    leitorSincronizado = chave
+    void emSerie(() => enviarFila(esc))
+      .then(() => sincronizar(esc))
+      .then((foto) => {
+        if (foto && banco?.escritorioId === esc) banco.recarregarDe(foto)
+      })
+      .catch((e) => console.warn('[heild] não reli o escritório para a pessoa nova:', e instanceof Error ? e.message : e))
+  }, 1000) : null
+  void relogioLeitor
+
+  /** O SSE do escritório, com o token de quem está na tela (troca de pessoa, troca de fluxo). */
+  const garantirFluxo = (escritorio: Id) => {
+    if (typeof fetch === 'undefined' || typeof TextDecoder === 'undefined') return
+    const quem = atorLeitor()
+    const chave = `${escritorio}|${JSON.stringify(quem.tipo === 'integrante' ? { tipo: 'pessoa', usuario_id: quem.dono_usuario_id } : quem)}`
+    if (fluxo?.chave === chave) return
+    fluxo?.parar()
+    const ctl = new AbortController()
+    let vivo = true
+    fluxo = { chave, parar: () => ((vivo = false), ctl.abort()) }
+    const ligar = async (espera: number): Promise<void> => {
+      if (!vivo) return
+      try {
+        const cab = await cabecalhosDe(escritorio, quem.tipo === 'integrante' ? { tipo: 'pessoa', usuario_id: quem.dono_usuario_id ?? '' } : quem)
+        const r = await fetch(`${base}/v1/eventos/fluxo`, { headers: cab, signal: ctl.signal })
+        if (!r.ok || !r.body) throw new Error(`SSE ${r.status}`)
+        const leitor = r.body.getReader()
+        const texto = new TextDecoder()
+        let resto = ''
+        for (;;) {
+          const { value, done } = await leitor.read()
+          if (done) break
+          resto += texto.decode(value, { stream: true })
+          let i: number
+          while ((i = resto.indexOf('\n\n')) >= 0) {
+            const bloco = resto.slice(0, i)
+            resto = resto.slice(i + 2)
+            const evento = /^event: (.+)$/m.exec(bloco)?.[1]
+            const dados = /^data: (.+)$/m.exec(bloco)?.[1]
+            if (evento !== 'mudanca' || !dados || banco?.escritorioId !== escritorio) continue
+            const m = JSON.parse(dados) as { tabela: NomeTabela; ids: Id[]; versao: number; removidas?: boolean }
+            if (classeDaTabela(m.tabela) === 3) {
+              if (m.removidas) banco.aplicarDoServidor([], m.ids.map((id) => ({ tabela: m.tabela, id })))
+              for (const o of ouvintesConsulta) o(m.tabela)
+            } else pedirDelta(escritorio)
+          }
+        }
+        // O servidor fechou (conta mudou, reinício): liga de novo.
+        if (vivo) setTimeout(() => void ligar(1000), 1000)
+      } catch {
+        if (vivo) setTimeout(() => void ligar(Math.min(espera * 2, 30_000)), espera)
+      }
+    }
+    void ligar(1000)
   }
 
   const adaptador: AdaptadorApi = {
@@ -216,7 +396,10 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       guardarFila(escritorioId, [])
       const r = await chamar('POST', '/v1/demonstracao/restaurar', {}, await cabecalhosDe(escritorioId, { tipo: 'sistema' }))
       if (r.status !== 200) throw new ErroAdaptador('api', `Não restaurou o escritório ${escritorioId} (${r.status}): ${String(r.json?.mensagem ?? '')}`)
-      return paraFotografia((r.json.tabelas ?? {}) as Partial<Record<NomeTabela, Registro[]>>)
+      versoes.set(escritorioId, Number(r.json.versao ?? 0))
+      // O servidor devolve as classes 1 e 2 do escritório semeado; a classe 3 começa da página mais recente (o cache antigo não vale mais).
+      const tabelas = { ...((r.json.tabelas ?? {}) as Partial<Record<NomeTabela, Registro[]>>), ...(await aquecer(escritorioId)) }
+      return paraFotografia(tabelas)
     },
 
     async esquecer(escritorioId) {
@@ -224,8 +407,34 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
     },
 
     enfileirar(escritorio, comando, ator) {
+      // Integrante que não existe no escritório aberto (o motor da demonstração do escritório
+      // anterior, depois da troca): a ação não vale aqui; o servidor recusaria (NAO_ENCONTRADO).
+      if (ator.tipo === 'integrante' && banco?.escritorioId === escritorio && !banco.obter('integrante', ator.integrante_id)) {
+        console.warn(`[heild] ação do integrante ${ator.integrante_id}, que não é deste escritório, ignorada (${rotuloDe(comando)}).`)
+        return
+      }
       if (ator.tipo === 'pessoa') ultimaPessoa.set(escritorio, ator.usuario_id)
       guardarFila(escritorio, [...lerFila(escritorio), { escritorio, chave: novaChave(), comando, ator }])
+    },
+
+    async consultar(ferramenta, entrada) {
+      const escritorio = banco?.escritorioId
+      if (!escritorio) throw new ErroAdaptador('api', 'Nenhum escritório aberto.')
+      garantirFluxo(escritorio)
+      const p = await pagina(escritorio, ferramenta, entrada)
+      // As linhas consultadas (visão de tela) entram no cache da classe 3: as telas que leem a tabela as veem.
+      const tabela = (Object.entries(LISTA_DA_TABELA).find(([, f]) => f === ferramenta)?.[0] ?? null) as NomeTabela | null
+      if (tabela && entrada.visao === 'tela' && banco?.escritorioId === escritorio) banco.aplicarDoServidor(p.linhas.map((linha) => ({ tabela, linha })))
+      return p
+    },
+
+    aoMudarConsulta(ouvinte) {
+      ouvintesConsulta.add(ouvinte)
+      return () => ouvintesConsulta.delete(ouvinte)
+    },
+
+    definirLeitor(quem) {
+      leitor = quem
     },
   }
 
@@ -277,6 +486,7 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
   const adaptador = d.banco.adaptador as AdaptadorApi & { ligar?: (b: Banco) => void }
   if (adaptador.nome !== 'api') return
   adaptador.ligar?.(d.banco)
+  adaptador.definirLeitor(() => atorDe(d.contextoAtual()))
   let profundidade = 0
   let capturando: { marcas: MarcaEscrita[] } | null = null
 
@@ -309,6 +519,14 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
         profundidade++
         const ids: { p: string; id: string }[] = []
         const atual = { marcas: [] as MarcaEscrita[] }
+        // A tradução para a ferramenta tipada é feita ANTES de aplicar (o desfazer compara com a linha de agora).
+        const operacao = `${caminho}.${m}`
+        let traducoes: Traducao[] | null = null
+        try {
+          traducoes = traduzirOperacao(operacao, serializar(args), (t, id) => d.banco.obter(t, id) as Registro | undefined)
+        } catch {
+          traducoes = null
+        }
         capturando = atual
         d.definirGeradorId((p) => {
           const id = d.novoIdPadrao(p)
@@ -319,7 +537,10 @@ export function instalarCapturaApi(d: DependenciasCaptura) {
           const esc = d.banco.escritorioId
           if (!atual.marcas.length || !esc || d.banco.estado !== 'pronto') return
           const comCtx = args.find((a) => a && typeof a === 'object' && !Array.isArray(a) && 'ctx' in a && (a as { ctx?: Contexto }).ctx) as { ctx: Contexto } | undefined
-          adaptador.enfileirar(esc, { tipo: 'operacao', operacao: `${caminho}.${m}`, argumentos: serializar(args), ids }, atorDe(comCtx?.ctx ?? d.contextoAtual()))
+          const ator = atorDe(comCtx?.ctx ?? d.contextoAtual())
+          // F1: a chamada vira a ferramenta tipada (os ids gerados vão com a primeira); fora da F1, operação.
+          if (traducoes) traducoes.forEach((t, i) => adaptador.enfileirar(esc, { tipo: 'ferramenta', ferramenta: t.ferramenta, entrada: t.entrada, ids: i === 0 ? ids : [], ...(t.texto !== undefined ? { texto: t.texto } : {}) }, ator))
+          else adaptador.enfileirar(esc, { tipo: 'operacao', operacao, argumentos: serializar(args), ids }, ator)
         }
         try {
           const r = original.apply(repo, args)

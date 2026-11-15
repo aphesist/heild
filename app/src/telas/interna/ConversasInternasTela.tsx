@@ -14,6 +14,7 @@ import { useMedia } from '@/hooks/useMedia'
 import { cn } from '@/lib/utils'
 import type { Id } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { useItemNaRota } from '@/nucleo/rotas'
 import { AvisoPrimeiroUso } from './AvisoPrimeiroUso'
 import { useJanelaFlutuante } from './JanelaFlutuante'
@@ -204,7 +205,8 @@ function ArquivosInternos({ onAbrir }: { onAbrir: (conversa: Id, mensagem: Id) =
   const rotulo = useRotuloConversa()
   const acoes = useAcoesInternas()
   const docs = useDocumentos()
-  const tMsg = useTabela('mensagem_interna')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tMsg } = useConsulta('mensagem_interna', {})
   const [filtro, setFiltro] = useState<'todos' | 'pessoais' | 'canais'>('todos')
   const ids = new Set(conversas.filter((c) => filtro === 'todos' || (filtro === 'pessoais' ? c.tipo === 'pessoal' || c.tipo === 'grupo' : c.tipo.startsWith('canal'))).map((c) => c.id))
   const anexos = tMsg

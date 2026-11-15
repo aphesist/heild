@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import type { Cliente as ClienteE, EstadoCiclo } from '@/nucleo/modelo/entidades'
 import { repos } from '@/nucleo/repositorios'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { comoIntegrante, criarTarefa, diaMes, HOJE_ISO, useTarefasE } from '@/telas/tarefas/modelo'
 import type { CtxAba } from '../tipos'
 import { pedirMudanca } from './index'
@@ -80,7 +81,8 @@ export function CicloDeVida({ clienteId, compacto }: { clienteId: string; compac
   const { usuario, permissoes } = useSessao()
   const c = useClienteE(clienteId)
   const tarefas = useTarefasE()
-  const tEvento = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tEvento } = useConsulta('evento', { cliente_id: c?.id }, { ativo: !!c })
   const tCartao = useTabela('cartao_aprovacao')
   const [servico, setServico] = useState<'contabil' | 'bpo'>('contabil')
   const historico = useMemo(() => (c ? historicoCiclo(c.id).slice(0, 6) : []), [tEvento, c])

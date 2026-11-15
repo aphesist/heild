@@ -9,6 +9,7 @@ import { extrasDe, rotuloTipo } from '@/dados/interna'
 import { cn } from '@/lib/utils'
 import type { ConversaInterna, Id, MensagemInterna } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { Orb } from '@/components/ui/orb'
 import { useTema } from '@/theme/ThemeProvider'
 import type { SetorIntegrante } from '@/theme/tipos'
@@ -39,7 +40,8 @@ export function PainelConversa({ conversa, compacto, destaque, investigacao, onV
   const digitando = useDigitando(conversa.id)
   const { integrante } = useTema()
   const podeFixar = usePode('mensagem_interna.fixar')
-  const tMensagens = useTabela('mensagem_interna')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tMensagens } = useConsulta('mensagem_interna', { conversa_interna_id: conversa.id })
   const tPart = useTabela('participacao')
   const mensagens = useMemo(() => tMensagens.filter((m) => m.conversa_interna_id === conversa.id).sort((a, b) => a.criado_em.localeCompare(b.criado_em)), [tMensagens, conversa.id])
   const raizes = mensagens.filter((m) => !m.responde_a_id)

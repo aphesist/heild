@@ -39,7 +39,9 @@ export class ErroApi extends Error {
 }
 
 /** Zod → primeiro erro por campo, no formato acionável. */
-export function erroDeEntrada(issues: { path: PropertyKey[]; message: string }[], prefixo = ''): ErroApi {
+export function erroDeEntrada(issues: { path: PropertyKey[]; message: string; code?: string; keys?: string[] }[], prefixo = ''): ErroApi {
+  // Campo desconhecido (objeto estrito): o nome do campo vai no `campo`, não só na frase.
+  issues = issues.map((x) => (x.code === 'unrecognized_keys' && x.keys?.length ? { ...x, path: [...x.path, x.keys[0]] } : x))
   const i = issues[0]
   const campo = [prefixo, ...(i?.path ?? []).map(String)].filter(Boolean).join('.') || null
   return new ErroApi('ENTRADA_INVALIDA', {

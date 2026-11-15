@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { canonizar, catalogo, ferramentaDoCatalogo, ferramentasTipadas, PedidoOperacao, RespostaErro, RespostaOk, RespostaValidado, sha256Hex, nomeExposto, type FerramentaTipada } from '@heild/dominio'
 import { operacoes } from './executor/operacoes.ts'
 // As operações de processo da B2 entram no catálogo na carga deste módulo (mesma fonte dos contratos).
-import './b2.ts'
+import { definicoesDoMotor } from './b2.ts'
 
 /**
  * Contratos gerados de uma fonte só (AGENTICO 7): o Zod das ferramentas tipadas e do
@@ -36,17 +36,43 @@ function metadados(f: FerramentaTipada) {
   }
 }
 
+/** As ferramentas do motor (B2) e do Assistente (B3) que a mesma rota serve (as que não são do catálogo tipado). */
+function doMotor() {
+  const tipadas = new Set(ferramentasTipadas.map((f) => f.nome))
+  return definicoesDoMotor()
+    .filter((d) => !tipadas.has(d.nome))
+    .map((d) => ({
+      name: nomeExposto(d.nome),
+      nome: d.nome,
+      description: d.descricao_modelo,
+      inputSchema: json(d.entrada, 'input'),
+      annotations: { readOnlyHint: d.meta.nivel === 'ler', idempotentHint: true, destructiveHint: false, openWorldHint: false },
+      'x-heild-nivel': d.meta.nivel,
+      'x-heild-setor': d.meta.setor,
+      'x-heild-modulo': d.meta.modulo,
+      'x-heild-aprovacao': d.meta.irreversivel ? 'se_integrante' : (d.meta.exige_aprovacao ?? 'nunca'),
+      'x-heild-idempotencia': d.meta.nivel === 'ler' ? 'natural' : 'pelo_motor',
+      'x-heild-versao': d.versao,
+      'x-heild-exposta-mcp': d.exposta_mcp,
+      'x-heild-erros': [] as string[],
+      'x-heild-origem': 'motor',
+      'x-heild-recorte': d.recorte,
+    }))
+}
+
 export function esquemaDasFerramentas() {
-  return ferramentasTipadas
-    .map((f) => ({
+  return [
+    ...ferramentasTipadas.map((f) => ({
       name: nomeExposto(f.nome),
       nome: f.nome,
       description: f.descricao_modelo,
       inputSchema: json(f.entrada, 'input'),
       annotations: { readOnlyHint: f.tipo === 'leitura', idempotentHint: true, destructiveHint: false, openWorldHint: false },
       ...metadados(f),
-    }))
-    .sort((a, b) => a.nome.localeCompare(b.nome))
+      'x-heild-origem': 'catalogo',
+    })),
+    ...doMotor(),
+  ].sort((a, b) => a.nome.localeCompare(b.nome))
 }
 
 export const catalogoHash = () => sha256Hex(canonizar({ ferramentas: esquemaDasFerramentas(), operacoes: [...operacoes.keys()].sort(), catalogo: catalogo.map((c) => c.nome).sort() })).slice(0, 16)
@@ -66,7 +92,7 @@ export function gerarOpenApi() {
     422: { description: 'Regra de negócio (gera evento)', content: { 'application/json': { schema: erro } } },
   }
   for (const f of esquemaDasFerramentas()) {
-    const def = ferramentasTipadas.find((x) => x.nome === f.nome)!
+    const def = ferramentasTipadas.find((x) => x.nome === f.nome) ?? { tipo: f['x-heild-nivel'] === 'ler' ? ('leitura' as const) : ('motor' as const) }
     const entrada = def.tipo === 'escrita' ? { ...f.inputSchema, properties: { ...(f.inputSchema.properties as object), validar_apenas: { type: 'boolean', description: 'Roda esquema, autorizar e regras e devolve os erros, sem efeito e sem evento.' } } } : f.inputSchema
     paths[`/v1/ferramentas/${f.nome}`] = {
       post: {
@@ -77,7 +103,7 @@ export function gerarOpenApi() {
         requestBody: { required: true, content: { 'application/json': { schema: entrada } } },
         responses: {
           200: { description: def.tipo === 'escrita' ? 'ok ou validado' : 'ok', content: { 'application/json': { schema: def.tipo === 'escrita' ? { oneOf: [json(RespostaOk), json(RespostaValidado)] } : { type: 'object' } } } },
-          ...(def.tipo === 'escrita' ? { 202: { description: 'aguardando_aprovacao (cartão criado)' } } : {}),
+          ...(def.tipo === 'escrita' ? { 202: { description: 'aguardando_aprovacao (cartão criado)' } } : def.tipo === 'motor' ? { 202: { description: 'em_execucao ou aguardando_aprovacao (envelope do motor, AGENTICO 8)' } } : {}),
           ...respostasErro,
         },
         ...Object.fromEntries(Object.entries(f).filter(([k]) => k.startsWith('x-heild-'))),
@@ -96,10 +122,11 @@ export function gerarOpenApi() {
   }
   for (const [p, d] of [
     ['/v1/sessao', 'Perfil materializado, permissões e catalogo_hash'],
-    ['/v1/sincronizar', 'Linhas do escritório (inteiro, ou desde uma versão)'],
+    ['/v1/sincronizar', 'Linhas das classes 1 e 2 (classes=1,2), filtradas pela regra de leitura; com desde=versão, só o que mudou e o que saiu do escopo'],
+    ['/v1/eventos/fluxo', 'SSE (text/event-stream): { tabela, ids, versao } só do que a pessoa leria; pulso a cada 10 s'],
     ['/v1/ferramentas', 'Ferramentas tipadas com JSON Schema'],
     ['/v1/operacoes', 'Lista das operações de repositório'],
-  ] as const) (paths[p] as Record<string, unknown> | undefined) ? Object.assign(paths[p] as object, { get: { summary: d, responses: { 200: { description: 'ok' } } } }) : (paths[p] = { get: { summary: d, responses: { 200: { description: 'ok' } } } })
+  ] as const) paths[p] = { ...((paths[p] as object | undefined) ?? {}), get: { summary: d, responses: { 200: { description: 'ok' } } } }
   return {
     openapi: '3.1.0',
     info: { title: 'API da Heild (B1, local)', version: catalogoHash(), description: 'Gerado de pacotes/dominio. Não edite: rode npm run contratos.' },

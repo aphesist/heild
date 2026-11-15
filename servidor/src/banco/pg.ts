@@ -28,9 +28,13 @@ const tipos = {
   numerico: { to: 1700, from: [1700], serialize: (x: unknown) => String(x), parse: (x: string) => Number(x) },
 }
 
+/** Fora da máquina (Supabase), a conexão é sempre com TLS. */
+const local = (url: string) => ['127.0.0.1', 'localhost', '::1'].includes(new URL(url).hostname)
+
 export function conectar(url: string, nome: string, max = 10): Sql {
   return postgres(url, {
     max,
+    ...(local(url) ? {} : { ssl: 'require' as const }),
     onnotice: () => {},
     // Nada espera para sempre: consulta, trava e transação aberta têm teto (padrões, PADROES.md).
     connection: { application_name: nome, TimeZone: 'UTC', statement_timeout: config.pgTempoConsultaMs, lock_timeout: config.pgTempoTravaMs, idle_in_transaction_session_timeout: config.pgTempoTransacaoOciosaMs },

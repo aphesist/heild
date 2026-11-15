@@ -37,6 +37,7 @@ import { useAparencia } from '@/hooks/useAparencia'
 import { cn } from '@/lib/utils'
 import { repos } from '@/nucleo/repositorios'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { CHAVE_APRENDIZADOS, criarCartaoS04, registrarEfeitoS04, useDecidirCartaoS04, type Aprendizado } from './cartoes'
 import {
@@ -88,7 +89,8 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
   const tarefas = useTarefasE()
   const clientes = useClientesE()
   const tCartao = useTabela('cartao_aprovacao')
-  const tEvento = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tEvento } = useConsulta('evento', { resultado_ref: id })
   const tDoc = useTabela('documento')
   const t = tarefas.find((x) => x.id === id)
   const [painel, setPainel] = useState<Painel>(null)

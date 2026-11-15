@@ -79,10 +79,10 @@ Cada item diz onde já está no código. Um PR que não cumpre um item explica p
 - Desligamento gracioso: `servidor/src/servidor.ts`.
 - Fila na transação do efeito: `pedirJob` e `enfileirarNaTransacao` (a B2 instala o pg-boss).
 
-**O que ainda não cumpre o checklist,** e entra na F1:
+**Fechado na F1 (B5):** os três itens que ainda não cumpriam o checklist no B1.
 
-- a sincronização inteira (`/v1/sincronizar`) ainda não filtra por setor e carteira;
-- as operações do adaptador ainda aceitam o patch livre do wireframe;
-- falta o JWT do Supabase.
+- A sincronização (`/v1/sincronizar`) é por classes e filtra linha a linha por setor, carteira, exceção por tela e o que é da pessoa; a classe 3 é só por consulta com cursor.
+- O patch livre acabou: a operação genérica das tabelas da F1 só entra pela ferramenta tipada, e `x.atualizar` aceita só campos editáveis (API3).
+- O JWT do Supabase é verificado pelo JWKS, com MFA para o Administrador (API2); o token de demonstração só vale com `HEILD_DEMONSTRACAO=1` (API8).
 
-Os três estão em [`IMPLEMENTACAO.md`](IMPLEMENTACAO.md), "Desvios do desenho".
+Também na B5: a Data API fechada no banco (`anon` e `authenticated` sem privilégio em tabela), o registro de leituras (`evento_leitura`), o log estruturado de toda resposta de erro e o CI conferindo o retrato dos contratos. Ver [`IMPLEMENTACAO.md`](IMPLEMENTACAO.md), B5.

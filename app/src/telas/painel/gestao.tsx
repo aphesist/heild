@@ -32,6 +32,7 @@ import { permissoesDoPerfil } from '@/nucleo/permissoes/telas'
 import { rotuloSetorCurto, setoresContabeis } from '@/nucleo/permissoes/setores'
 import { repos } from '@/nucleo/repositorios'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { CHAVE_APRENDIZADOS, criarCartaoS04, registrarEfeitoS04, type Aprendizado } from '@/telas/tarefas/cartoes'
 import { acoesTarefa, atrasadaE, criarTarefa, diaMes, HOJE_ISO, nomeClienteE, responsavelE, useClientesE, useTarefasE } from '@/telas/tarefas/modelo'
@@ -742,7 +743,8 @@ function Compliance() {
 
 const auditoria: DefWidget = { id: 'auditoria', titulo: 'Relatórios consolidados e auditoria', atividades: '03, ad. 14, 16, 17', descricao: 'evento.listar com filtros (ator, ferramenta, negado), atendimento, métricas do app, custo; exportar', icone: ListMagnifyingGlassIcon, tamanhos: ['XL', 'G'], conteudo: () => <Auditoria /> }
 function Auditoria() {
-  const tEvento = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: tEvento } = useConsulta('evento', {})
   const { admin } = useEscopo()
   const [ator, setAtor] = useState('')
   const [ferr, setFerr] = useState('')

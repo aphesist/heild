@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "90e62653d9466486",
+  "catalogo_hash": "3fb296ffa93d5e10",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -51,7 +51,8 @@
         "NAO_ENCONTRADO",
         "JA_DECIDIDO",
         "SO_PESSOA_DECIDE"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "aprovacao_listar",
@@ -114,7 +115,226 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "assinatura_atualizar",
+      "nome": "assinatura.atualizar",
+      "description": "Muda campos editáveis (plano, modulos, limites, vigente_ate, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "assinatura_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "plano": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "modulos": {
+                "anyOf": [
+                  {
+                    "maxItems": 500,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "limites": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "vigente_ate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "assinatura_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "assistente_obter",
+      "nome": "assistente.obter",
+      "description": "Estado e resposta padrão de um pedido feito ao Assistente (só de quem pediu).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pedido_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "pedido_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "assistente_pedir",
+      "nome": "assistente.pedir",
+      "description": "Pede ao Assistente: ele roteia ao integrante do setor e devolve a resposta padrão dele, sem reescrever.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "texto": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "anexos": {
+            "type": "object",
+            "properties": {
+              "cliente_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "documento_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "exercicio": {
+                "type": "string",
+                "pattern": "^\\d{4}$"
+              },
+              "competencia": {
+                "type": "string",
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+              },
+              "conversa_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "additionalProperties": false
+          },
+          "chave_idempotencia": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "texto"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "atendimento_conversa_triar_e_repassar",
@@ -175,7 +395,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "atendimento_faq_responder",
@@ -215,7 +436,382 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "cartao_atualizar",
+      "nome": "cartao.atualizar",
+      "description": "Muda campos editáveis (extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cartao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "cartao_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "cartao_criar",
+      "nome": "cartao.criar",
+      "description": "Cria cartao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ferramenta": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "argumentos": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resumo_humano": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "pedido_por_tipo": {
+            "type": "string",
+            "enum": [
+              "integrante",
+              "usuario",
+              "sistema"
+            ]
+          },
+          "pedido_por_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usuario_dono_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pode_aprovar": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pendente"
+            ]
+          },
+          "expira_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "aprovacao",
+                  "escolha_responsavel",
+                  "nao_consegui",
+                  "orcamento",
+                  "memoria"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "opcoes": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "ferramenta",
+          "resumo_humano",
+          "pedido_por_tipo",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "carteira_cliente_criar",
+      "nome": "carteira_cliente.criar",
+      "description": "Cria carteira cliente com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "setor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "societario",
+                  "fiscal",
+                  "notas",
+                  "dp",
+                  "contabil",
+                  "consultor",
+                  "gestao_atendimento",
+                  "financeiro_escritorio",
+                  "bpo_financeiro",
+                  "bpo",
+                  "pf",
+                  "terceiro_setor",
+                  "nichos",
+                  "ciclo_vida"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "usuario_id",
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "carteira_cliente_excluir",
+      "nome": "carteira_cliente.excluir",
+      "description": "Exclui carteira_cliente de vez (a regra da entidade deixa; o evento guarda o que era).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "carteira_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "carteira_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "EXCLUSAO_PROIBIDA"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_arquivar",
@@ -258,7 +854,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_atualizar",
@@ -300,6 +897,44 @@
                   "minLength": 1,
                   "maxLength": 40
                 }
+              },
+              "regime": {
+                "type": "string",
+                "enum": [
+                  "simples",
+                  "presumido",
+                  "real",
+                  "mei",
+                  "imune_isento",
+                  "pf"
+                ]
+              },
+              "grupo_economico_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -328,7 +963,8 @@
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_criar",
@@ -338,6 +974,12 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
           "tipo": {
             "type": "string",
             "enum": [
@@ -401,6 +1043,37 @@
               "minLength": 1,
               "maxLength": 40
             }
+          },
+          "estado_ciclo_desde": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "grupo_economico_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -428,7 +1101,91 @@
       "x-heild-erros": [
         "CAMPO_OBRIGATORIO",
         "RESTRICAO_DO_BANCO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "cliente_desarquivar",
+      "nome": "cliente.desarquivar",
+      "description": "Tira cliente do arquivo.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "cliente_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "cliente_fundir",
+      "nome": "cliente.fundir",
+      "description": "Funde um cliente duplicado em outro (Administrador): o duplicado fica arquivado, apontando para o que fica.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "destino_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "cliente_id",
+          "destino_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_listar",
@@ -504,7 +1261,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_mudar_estado",
@@ -558,7 +1316,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "cliente_obter",
@@ -603,7 +1362,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "contabil_documento_classificar_competencia",
@@ -641,7 +1401,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "contabil_ecd_conferir_e_transmitir",
@@ -684,7 +1445,485 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "conversa_interna_atualizar",
+      "nome": "conversa_interna.atualizar",
+      "description": "Muda campos editáveis (nome, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "conversa_interna_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "nome": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "conversa_interna_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "conversa_interna_criar",
+      "nome": "conversa_interna.criar",
+      "description": "Cria conversa interna com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "pessoal",
+              "grupo",
+              "canal_setor",
+              "canal_geral"
+            ]
+          },
+          "nome": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "setor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "societario",
+                  "fiscal",
+                  "notas",
+                  "dp",
+                  "contabil",
+                  "consultor",
+                  "gestao_atendimento",
+                  "financeiro_escritorio",
+                  "bpo_financeiro",
+                  "bpo",
+                  "pf",
+                  "terceiro_setor",
+                  "nichos",
+                  "ciclo_vida"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "criada_por": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tipo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "convite_atualizar",
+      "nome": "convite.atualizar",
+      "description": "Muda campos editáveis (papel_proposto, setores_propostos, expira_em, aceito_em, recusado_em, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "convite_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "papel_proposto": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "administrador",
+                      "gestor",
+                      "colaborador"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "setores_propostos": {
+                "anyOf": [
+                  {
+                    "maxItems": 500,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expira_em": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aceito_em": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "recusado_em": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "convite_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "convite_criar",
+      "nome": "convite.criar",
+      "description": "Cria convite com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "usuario_escritorio",
+              "conta_cliente"
+            ]
+          },
+          "destino": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "papel_proposto": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "administrador",
+                  "gestor",
+                  "colaborador"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "setores_propostos": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cliente_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expira_em": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "enviado_por": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tipo",
+          "destino",
+          "expira_em",
+          "enviado_por"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "convite_excluir",
+      "nome": "convite.excluir",
+      "description": "Exclui convite de vez (a regra da entidade deixa; o evento guarda o que era).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "convite_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "convite_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "EXCLUSAO_PROIBIDA"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "dp_evento_classificar_e_lancar",
@@ -724,7 +1963,175 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "escritorio_atualizar",
+      "nome": "escritorio.atualizar",
+      "description": "Muda campos editáveis (razao_social, nome_fantasia, cnpj, crc, fuso_horario, inatividade_min, carteira_ligada, modo_bpo, tema_id, configuracao, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "escritorio_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "razao_social": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nome_fantasia": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cnpj": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "crc": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fuso_horario": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "inatividade_min": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1440
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "carteira_ligada": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "modo_bpo": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "tema_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "configuracao": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "escritorio_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "evento_listar",
@@ -767,6 +2174,16 @@
             "default": true,
             "type": "boolean"
           },
+          "resultado_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 120
+          },
           "visao": {
             "default": "compacta",
             "type": "string",
@@ -802,7 +2219,351 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "excecao_tela_atualizar",
+      "nome": "excecao_tela.atualizar",
+      "description": "Muda campos editáveis (efeito, nivel_max, motivo, vigente_de, vigente_ate, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "excecao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "efeito": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "liberar",
+                      "bloquear"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nivel_max": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ler",
+                      "rascunhar",
+                      "executar"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "motivo": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "vigente_de": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "vigente_ate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "excecao_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "excecao_tela_criar",
+      "nome": "excecao_tela.criar",
+      "description": "Cria excecao tela com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "tela_ou_ferramenta": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "efeito": {
+            "type": "string",
+            "enum": [
+              "liberar",
+              "bloquear"
+            ]
+          },
+          "nivel_max": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ler",
+                  "rascunhar",
+                  "executar"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "vigente_de": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "vigente_ate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "usuario_id",
+          "tela_ou_ferramenta",
+          "efeito",
+          "motivo",
+          "vigente_de"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "excecao_tela_excluir",
+      "nome": "excecao_tela.excluir",
+      "description": "Exclui excecao_tela de vez (a regra da entidade deixa; o evento guarda o que era).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "excecao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "excecao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "EXCLUSAO_PROIBIDA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "execucao_obter",
+      "nome": "execucao.obter",
+      "description": "Estado compacto de uma execução de procedimento (para retomar sem transcript).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "execucao_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "execucao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "execucao_retomar",
+      "nome": "execucao.retomar",
+      "description": "Retoma do último passo gravado uma execução que falhou ou parou por orçamento.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "execucao_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "execucao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
     },
     {
       "name": "fiscal_caixa_postal_triar",
@@ -842,7 +2603,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "fiscal_guia_conferir_e_enviar",
@@ -882,7 +2644,374 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "identidade_atualizar",
+      "nome": "identidade.atualizar",
+      "description": "Muda campos editáveis (verificada_em, principal, ativa, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "identidade_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "verificada_em": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "principal": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "ativa": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "identidade_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "identidade_criar",
+      "nome": "identidade.criar",
+      "description": "Cria identidade com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pessoa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "telefone",
+              "email",
+              "cpf",
+              "login_portal",
+              "usuario_app",
+              "whatsapp_id"
+            ]
+          },
+          "valor": {},
+          "verificada_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "principal": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "ativa": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "pessoa_id",
+          "tipo",
+          "valor"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "integrante_aprender",
+      "nome": "integrante.aprender",
+      "description": "Propõe guardar na memória do setor a correção que uma pessoa fez num cartão \"não consegui\" (vira cartão para quem gere).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "execucao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "execucao_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "rascunhar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "integrante_listar",
+      "nome": "integrante.listar",
+      "description": "Os integrantes dos setores: o que cada um faz, procedimentos, limites e papéis de modelo.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor": {
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "memoria_propor",
+      "nome": "memoria.propor",
+      "description": "Propõe mudar a memória do setor; vira cartão para Gestor ou Administrador (decisão 6).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor": {
+            "type": "string"
+          },
+          "chave": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "valor": {},
+          "motivo": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 280
+          }
+        },
+        "required": [
+          "setor",
+          "chave",
+          "valor",
+          "motivo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "rascunhar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "pelo_motor",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "mensagem_interna_atualizar",
+      "nome": "mensagem_interna.atualizar",
+      "description": "Muda campos editáveis (fixada, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "mensagem_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "fixada": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "mensagem_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "mensagem_interna_editar",
@@ -926,7 +3055,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "SO_AUTOR_EDITA"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "mensagem_interna_enviar",
@@ -948,10 +3078,31 @@
             "maxLength": 8000
           },
           "responde_a_id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120,
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -975,12 +3126,13 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CAMPO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "mensagem_interna_listar",
       "nome": "mensagem_interna.listar",
-      "description": "Mensagens de uma conversa interna, das mais novas para as mais antigas.",
+      "description": "Mensagens internas das conversas de que você participa (ou de uma conversa), das mais novas para as mais antigas.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1009,9 +3161,6 @@
             "maxLength": 400
           }
         },
-        "required": [
-          "conversa_interna_id"
-        ],
         "additionalProperties": false
       },
       "annotations": {
@@ -1029,7 +3178,179 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "notificacao_criar",
+      "nome": "notificacao.criar",
+      "description": "Cria notificacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "destinatario_tipo": {
+            "type": "string",
+            "enum": [
+              "usuario",
+              "pessoa",
+              "todos"
+            ]
+          },
+          "destinatario_ids": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cliente_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "setor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 60
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categoria": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "prioridade": {
+            "type": "string",
+            "enum": [
+              "baixa",
+              "normal",
+              "alta",
+              "urgente"
+            ]
+          },
+          "titulo": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "corpo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "acao": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "publicada_por_tipo": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "quando": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "lida_por": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "destinatario_tipo",
+          "categoria",
+          "prioridade",
+          "titulo",
+          "publicada_por_tipo",
+          "quando"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "notificacao_ler",
@@ -1073,7 +3394,167 @@
       "x-heild-exposta-mcp": false,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "notificacao_ler_todas",
+      "nome": "notificacao.ler_todas",
+      "description": "Marca vários avisos como lidos pela conta da sessão.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "notificacao_ids": {
+            "minItems": 1,
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+            }
+          }
+        },
+        "required": [
+          "usuario_id",
+          "notificacao_ids"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "obrigacao_atualizar",
+      "nome": "obrigacao.atualizar",
+      "description": "Muda campos editáveis (nome, regra_prazo, aplicabilidade, vigente_ate, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "obrigacao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "nome": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "regra_prazo": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aplicabilidade": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "vigente_ate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "obrigacao_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_cancelar",
@@ -1117,7 +3598,148 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "MOTIVO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "obrigacao_criar",
+      "nome": "obrigacao.criar",
+      "description": "Cria obrigacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "escopo": {
+            "type": "string",
+            "enum": [
+              "plataforma",
+              "escritorio"
+            ]
+          },
+          "atividade_id": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "periodicidade": {
+            "type": "string",
+            "enum": [
+              "mensal",
+              "trimestral",
+              "anual",
+              "por_evento",
+              "diaria"
+            ]
+          },
+          "regra_prazo": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "aplicabilidade": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gera_tarefa_para_setor": {
+            "type": "string",
+            "enum": [
+              "societario",
+              "fiscal",
+              "notas",
+              "dp",
+              "contabil",
+              "consultor",
+              "gestao_atendimento",
+              "financeiro_escritorio",
+              "bpo_financeiro",
+              "bpo",
+              "pf",
+              "terceiro_setor",
+              "nichos",
+              "ciclo_vida"
+            ]
+          },
+          "vigente_de": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "vigente_ate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "escopo",
+          "atividade_id",
+          "nome",
+          "periodicidade",
+          "regra_prazo",
+          "gera_tarefa_para_setor",
+          "vigente_de"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "obrigacao_listar",
@@ -1191,7 +3813,632 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "obrigacao_reordenar",
+      "nome": "obrigacao.reordenar",
+      "description": "Grava a ordem manual de uma lista de obrigacao (ids na ordem nova).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ids": {
+            "minItems": 1,
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "participacao_atualizar",
+      "nome": "participacao.atualizar",
+      "description": "Muda campos editáveis (saiu_em, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "participacao_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "saiu_em": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "participacao_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "participacao_criar",
+      "nome": "participacao.criar",
+      "description": "Cria participacao com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "conversa_interna_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "entrou_em": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "saiu_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "conversa_interna_id",
+          "usuario_id",
+          "entrou_em"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "pessoa_atualizar",
+      "nome": "pessoa.atualizar",
+      "description": "Muda campos editáveis (nome, cpf, observacoes, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pessoa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "nome": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cpf": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "observacoes": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pessoa_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "pessoa_criar",
+      "nome": "pessoa.criar",
+      "description": "Cria pessoa com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "cpf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "equipe",
+              "cliente",
+              "lead",
+              "terceiro"
+            ]
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "nome",
+          "tipo"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "procedimento_listar",
+      "nome": "procedimento.listar",
+      "description": "O que o setor sabe fazer sozinho: procedimentos, versão e operação.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "setor_atualizar",
+      "nome": "setor.atualizar",
+      "description": "Muda campos editáveis (nome_exibido, tem_equipe, numero_whatsapp, responsavel_padrao_id, ativo, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "setor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "nome_exibido": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tem_equipe": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "numero_whatsapp": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "responsavel_padrao_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ativo": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "setor_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "setor_criar",
+      "nome": "setor.criar",
+      "description": "Cria setor com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "nome_padrao": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "nome_exibido": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "tem_equipe": {
+            "type": "boolean"
+          },
+          "numero_whatsapp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "responsavel_padrao_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ativo": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "codigo",
+          "nome_padrao",
+          "nome_exibido",
+          "tem_equipe"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "societario_alteracao_triar",
@@ -1231,7 +4478,8 @@
       "x-heild-idempotencia": "por_chave",
       "x-heild-versao": 1,
       "x-heild-exposta-mcp": true,
-      "x-heild-erros": []
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_aguardar_cliente",
@@ -1269,7 +4517,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_aguardar_terceiro",
@@ -1307,7 +4556,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_arquivar",
@@ -1350,7 +4600,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_atualizar",
@@ -1375,8 +4626,15 @@
                 "maxLength": 200
               },
               "descricao": {
-                "type": "string",
-                "maxLength": 4000
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "prazo_interno": {
                 "anyOf": [
@@ -1410,8 +4668,114 @@
                 ]
               },
               "competencia": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^(\\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\\/\\d{4})$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quem_conclui": {
                 "type": "string",
-                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                "enum": [
+                  "pessoa",
+                  "agente_sozinho",
+                  "agente_prepara_pessoa_conclui"
+                ]
+              },
+              "conversa_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "checklist": {
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "feito": {
+                      "type": "boolean"
+                    },
+                    "feito_por": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 120
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "feito_em": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 40
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "obrigatorio": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "item",
+                    "feito"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "aguardando_detalhe": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "risco": {
+                "type": "boolean"
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -1439,7 +4803,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "CAMPO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_cancelar",
@@ -1484,7 +4849,8 @@
         "NAO_ENCONTRADO",
         "TAREFA_FINAL",
         "MOTIVO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_concluir",
@@ -1522,7 +4888,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_criar",
@@ -1532,6 +4899,12 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
           "setor_id": {
             "type": "string",
             "enum": [
@@ -1573,7 +4946,7 @@
           },
           "competencia": {
             "type": "string",
-            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            "pattern": "^(\\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\\/\\d{4})$"
           },
           "prazo_interno": {
             "type": "string",
@@ -1614,6 +4987,147 @@
               "agente_sozinho",
               "agente_prepara_pessoa_conclui"
             ]
+          },
+          "origem": {
+            "default": "pessoa",
+            "type": "string",
+            "enum": [
+              "obrigacao",
+              "pedido_cliente",
+              "integrante",
+              "pessoa",
+              "trilha",
+              "core",
+              "conversa"
+            ]
+          },
+          "origem_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "default": "a_fazer",
+            "type": "string",
+            "enum": [
+              "a_fazer",
+              "em_andamento",
+              "aguardando_cliente",
+              "aguardando_terceiro",
+              "em_revisao"
+            ]
+          },
+          "checklist": {
+            "default": [],
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "feito": {
+                  "type": "boolean"
+                },
+                "feito_por": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "feito_em": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 40
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "obrigatorio": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "item",
+                "feito"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "aguardando_detalhe": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tarefa_pai_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "conversa_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "risco": {
+            "default": false,
+            "type": "boolean"
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1638,7 +5152,46 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CAMPO_OBRIGATORIO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "tarefa_desarquivar",
+      "nome": "tarefa.desarquivar",
+      "description": "Tira tarefa do arquivo.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "tarefa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "tarefa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO"
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_enviar_revisao",
@@ -1676,7 +5229,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_iniciar",
@@ -1714,7 +5268,8 @@
       "x-heild-erros": [
         "NAO_ENCONTRADO",
         "TAREFA_FINAL"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_listar",
@@ -1767,7 +5322,7 @@
           },
           "competencia": {
             "type": "string",
-            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            "pattern": "^(\\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\\/\\d{4})$"
           },
           "responsavel_id": {
             "type": "string",
@@ -1810,7 +5365,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "CURSOR_INVALIDO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_obter",
@@ -1855,7 +5411,8 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "tarefa_reatribuir",
@@ -1907,7 +5464,949 @@
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [
         "NAO_ENCONTRADO"
-      ]
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "tarefa_reordenar",
+      "nome": "tarefa.reordenar",
+      "description": "Grava a ordem manual de uma lista de tarefa (ids na ordem nova).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ids": {
+            "minItems": 1,
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "alvo",
+      "x-heild-modulo": "painel",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "tela_esquecer",
+      "nome": "tela.esquecer",
+      "description": "Apaga um estado de tela guardado.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "chave": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "chave"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "tela_lembrar",
+      "nome": "tela.lembrar",
+      "description": "Guarda um estado de tela (filtro, coluna, aba) pela chave. Sem evento.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "chave": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "valor": {}
+        },
+        "required": [
+          "chave",
+          "valor"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "usuario_atualizar",
+      "nome": "usuario.atualizar",
+      "description": "Muda campos editáveis (nome, papel, email_login, situacao, cargo, segundo_fator, ultimo_acesso, preferencias, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "nome": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "papel": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "administrador",
+                      "gestor",
+                      "colaborador"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "email_login": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "situacao": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "convidado",
+                      "ativo",
+                      "bloqueado",
+                      "desativado"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cargo": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "segundo_fator": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "ultimo_acesso": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "preferencias": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "usuario_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "usuario_criar",
+      "nome": "usuario.criar",
+      "description": "Cria usuario com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pessoa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "administrador",
+              "gestor",
+              "colaborador"
+            ]
+          },
+          "email_login": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "convidado",
+              "ativo",
+              "bloqueado",
+              "desativado"
+            ]
+          },
+          "cargo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "segundo_fator": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "ultimo_acesso": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preferencias": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "pessoa_id",
+          "nome",
+          "papel",
+          "email_login",
+          "situacao"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "validador_executar",
+      "nome": "validador.executar",
+      "description": "Roda validadores do domínio sobre dados montados (para o planejador de exceção conferir).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "validadores": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dados": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "validadores",
+          "dados"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "ler",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "agentes",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "natural",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "motor",
+      "x-heild-recorte": "geral"
+    },
+    {
+      "name": "versao_perfil_atualizar",
+      "nome": "versao_perfil.atualizar",
+      "description": "Muda campos editáveis (vigente_ate, municipio_ibge, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "versao_perfil_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "vigente_ate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "municipio_ibge": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "versao_perfil_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "versao_perfil_criar",
+      "nome": "versao_perfil.criar",
+      "description": "Cria versao perfil com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "vigente_de": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "vigente_ate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "regime": {
+            "type": "string",
+            "enum": [
+              "simples",
+              "presumido",
+              "real",
+              "mei",
+              "imune_isento",
+              "pf"
+            ]
+          },
+          "cnaes": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uf": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "municipio_ibge": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "servicos_contratados": {
+            "anyOf": [
+              {
+                "maxItems": 500,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "honorario": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "responsaveis": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "motivo_versao": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "fonte": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "core",
+              "receita_federal",
+              "lead",
+              "importacao"
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "cliente_id",
+          "vigente_de",
+          "regime",
+          "uf",
+          "motivo_versao",
+          "fonte"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "vinculo_setor_atualizar",
+      "nome": "vinculo_setor.atualizar",
+      "description": "Muda campos editáveis (modo, vigente_ate, extras). O resto muda só pela ferramenta da transição.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "vinculo_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "campos": {
+            "type": "object",
+            "properties": {
+              "modo": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "gestao",
+                      "execucao"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "vigente_ate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "vinculo_id",
+          "campos"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "CAMPO_OBRIGATORIO",
+        "VERSAO_DESATUALIZADA"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "vinculo_setor_criar",
+      "nome": "vinculo_setor.criar",
+      "description": "Cria vinculo setor com os campos de negócio (o servidor põe escritório e datas; o id é opcional, e repetido é ID_EM_USO).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "setor_id": {
+            "type": "string",
+            "enum": [
+              "societario",
+              "fiscal",
+              "notas",
+              "dp",
+              "contabil",
+              "consultor",
+              "gestao_atendimento",
+              "financeiro_escritorio",
+              "bpo_financeiro",
+              "bpo",
+              "pf",
+              "terceiro_setor",
+              "nichos",
+              "ciclo_vida"
+            ]
+          },
+          "modo": {
+            "type": "string",
+            "enum": [
+              "gestao",
+              "execucao"
+            ]
+          },
+          "vigente_de": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "vigente_ate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extras": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          }
+        },
+        "required": [
+          "usuario_id",
+          "setor_id",
+          "modo",
+          "vigente_de"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "CAMPO_OBRIGATORIO",
+        "ID_EM_USO",
+        "RESTRICAO_DO_BANCO"
+      ],
+      "x-heild-origem": "catalogo"
+    },
+    {
+      "name": "vinculo_setor_excluir",
+      "nome": "vinculo_setor.excluir",
+      "description": "Exclui vinculo_setor de vez (a regra da entidade deixa; o evento guarda o que era).",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "vinculo_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "vinculo_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 1,
+      "x-heild-exposta-mcp": false,
+      "x-heild-erros": [
+        "NAO_ENCONTRADO",
+        "EXCLUSAO_PROIBIDA"
+      ],
+      "x-heild-origem": "catalogo"
     }
   ]
 }

@@ -9,11 +9,15 @@ import {
   autorizar,
   codigoDaNegacao,
   type ComandoValidado,
+  EnvelopeTela,
+  exigeFerramentaTipada,
+  traduzirOperacao,
 } from '@heild/dominio'
 import { abrirSessao, emitirToken, verificarToken, type Sessao } from './auth/sessao.ts'
 import { config } from './config.ts'
 import { noEscritorio, sqlApi, type Sql } from './banco/pg.ts'
-import { fotografiaDoEscritorio, semearEscritorio } from './banco/semear.ts'
+import { semearEscritorio } from './banco/semear.ts'
+import { sincronizar } from './executor/sincronizar.ts'
 import { lerCadeia } from './executor/cadeia.ts'
 import { ErroApi, erroDeEntrada } from './executor/erro.ts'
 import { executar, traduzir } from './executor/executor.ts'
@@ -23,6 +27,8 @@ import { gerarOpenApi, catalogoHash } from './contratos.ts'
 import { consumir, LIMITES } from './limites.ts'
 import { contextoDaSessao, envelopeParaHttp, operacoesDeProcesso } from './b2.ts'
 import type { Processos } from '@heild/processos'
+import { Fluxo } from './fluxo.ts'
+import { RegistroLeituras } from './leituras.ts'
 
 /**
  * A API (AGENTICO 8). Uma porta de escrita só: `POST /v1/ferramentas/{nome}` (ferramentas
@@ -36,13 +42,24 @@ declare module 'fastify' {
   interface FastifyRequest {
     sessao?: Sessao
   }
+  interface FastifyInstance {
+    /** O fluxo de mudanças (SSE) e o registro de leituras desta instância. */
+    heild: { fluxo: Fluxo; leituras: RegistroLeituras }
+  }
 }
 
 const ChaveIdempotencia = z.string().min(8).max(200).regex(/^[A-Za-z0-9_.:-]+$/)
 
-export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Processos | null } = {}): FastifyInstance {
+export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Processos | null; relogios?: boolean } = {}): FastifyInstance {
   const sql = opcoes.sql ?? sqlApi()
   const b2 = opcoes.processos ?? null
+  const fluxo = new Fluxo(sql)
+  const leituras = new RegistroLeituras(sql)
+  // Os testes chamam o passo do fluxo e o descarregar à mão (sem relógio, sem intermitência).
+  if (opcoes.relogios !== false) {
+    fluxo.iniciar()
+    leituras.iniciar()
+  }
   const app = Fastify({
     logger: opcoes.logs === false ? false : { level: config.logs, redact: ['req.headers.authorization', 'req.headers["idempotency-key"]'] },
     bodyLimit: 2 * 1024 * 1024,
@@ -50,6 +67,16 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     connectionTimeout: config.tempoPedidoMs,
     keepAliveTimeout: 72_000,
     genReqId: () => `rq${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+  })
+
+  app.decorate('heild', { fluxo, leituras })
+  // Toda resposta de erro deixa uma linha no log (método, rota, status; nunca o corpo nem o token).
+  app.addHook('onResponse', async (req, rep) => {
+    if (rep.statusCode >= 400) req.log.warn({ status: rep.statusCode, metodo: req.method, rota: req.routeOptions.url ?? req.url.split('?')[0] }, 'resposta de erro')
+  })
+  app.addHook('onClose', async () => {
+    await fluxo.parar()
+    await leituras.parar()
   })
 
   // Cabeçalhos de segurança e o id do pedido em toda resposta (correlação com o log).
@@ -65,15 +92,19 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     if (origem && config.origens.includes(origem)) {
       rep.header('Access-Control-Allow-Origin', origem)
       rep.header('Vary', 'Origin')
-      rep.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Idempotency-Key, X-Heild-Integrante, X-Heild-Tela, traceparent')
+      rep.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Idempotency-Key, X-Heild-Integrante, X-Heild-Tela, Last-Event-ID, traceparent')
       rep.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
       rep.header('Access-Control-Expose-Headers', 'Idempotent-Replayed')
     }
     if (req.method === 'OPTIONS') return rep.code(204).send()
   })
 
-  app.setErrorHandler((e: Error & { validation?: unknown; statusCode?: number }, _req, rep) => {
-    if (e instanceof ErroApi) return rep.code(e.status).send(e.corpo())
+  app.setErrorHandler((e: Error & { validation?: unknown; statusCode?: number }, req, rep) => {
+    if (e instanceof ErroApi) {
+      // A recusa de entrada (antes do executor) também vai para o log: código e campo, sem o corpo.
+      if (e.status !== 401) app.log.warn({ recusa: e.codigo, campo: e.campo, mensagem: e.message, rota: req.routeOptions.url, ferramenta: (req.params as { nome?: string } | undefined)?.nome }, 'entrada recusada')
+      return rep.code(e.status).send(e.corpo())
+    }
     if (e.statusCode && e.statusCode < 500) return rep.code(400).send(new ErroApi('ENTRADA_INVALIDA', { mensagem: e.message }).corpo())
     app.log.error(e)
     return rep.code(500).send(new ErroApi('ERRO_INTERNO').corpo())
@@ -119,9 +150,48 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
 
   app.get('/v1/sincronizar', async (req) => {
     const s = await sessao(req)
-    const q = z.object({ desde: z.coerce.number().int().min(0).optional() }).strict().safeParse(req.query)
+    const q = z
+      .object({
+        desde: z.coerce.number().int().min(0).optional(),
+        // `classes=1,2` (padrão). A classe 3 não existe aqui: é por consulta paginada (useConsulta).
+        classes: z
+          .string()
+          .regex(/^[12](,[12])?$/, 'classes: 1, 2 ou 1,2 (a classe 3 é por consulta).')
+          .transform((c) => [...new Set(c.split(',').map(Number))] as (1 | 2)[])
+          .optional(),
+      })
+      .strict()
+      .safeParse(req.query)
     if (!q.success) throw erroDeEntrada(q.error.issues)
-    return noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => fotografiaDoEscritorio(tx, q.data.desde))
+    const foto = await noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, (tx) => sincronizar(tx, s, { desde: q.data.desde, classes: q.data.classes }))
+    const quantidade = Object.values(foto.tabelas).reduce((n, ls) => n + (ls?.length ?? 0), 0)
+    leituras.registrar(s, { ferramenta: 'sincronizar', quantidade, filtros: { desde: q.data.desde ?? null, classes: foto.classes } })
+    return foto
+  })
+
+  // SSE (ARQUITETURA 6.3): `{ tabela, ids, versao }`, só do que a pessoa leria. O navegador
+  // lê com fetch (precisa do Authorization, que o EventSource não manda).
+  app.get('/v1/eventos/fluxo', async (req, rep) => {
+    const s = await sessao(req)
+    const integrante = typeof req.headers['x-heild-integrante'] === 'string' ? req.headers['x-heild-integrante'] : undefined
+    rep.hijack()
+    const r = rep.raw
+    req.raw.socket.setTimeout(0)
+    const origem = req.headers.origin
+    r.writeHead(200, {
+      'content-type': 'text/event-stream; charset=utf-8',
+      'cache-control': 'no-store',
+      connection: 'keep-alive',
+      'x-content-type-options': 'nosniff',
+      'x-request-id': req.id,
+      ...(origem && config.origens.includes(origem) ? { 'access-control-allow-origin': origem, vary: 'Origin' } : {}),
+    })
+    try {
+      await fluxo.conectar(s, r, integrante)
+    } catch (e) {
+      const erro = e instanceof ErroApi ? e : new ErroApi('ERRO_INTERNO')
+      r.end(`event: erro\ndata: ${JSON.stringify(erro.corpo())}\n\n`)
+    }
   })
 
   /* ---------- Escrita: operações de repositório (adaptador `api` do app) ---------- */
@@ -133,6 +203,16 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     const corpo = PedidoOperacao.safeParse(req.body)
     if (!corpo.success) throw erroDeEntrada(corpo.error.issues)
     const comando = corpo.data.comando as ComandoValidado
+    // Operação genérica de tabela da F1 (criar, atualizar, reverter...): só pela ferramenta tipada.
+    // É o que fecha o patch livre (ARQUITETURA 6.2); a resposta já diz qual ferramenta chamar.
+    if (comando.tipo === 'operacao' && exigeFerramentaTipada(comando.operacao)) {
+      const sugestao = traduzirOperacao(comando.operacao, comando.argumentos)?.[0]
+      throw new ErroApi('USE_FERRAMENTA_TIPADA', {
+        campo: 'comando.operacao',
+        mensagem: `${comando.operacao} não é aceita por /v1/operacoes: chame ${sugestao ? `/v1/ferramentas/${sugestao.ferramenta}` : 'a ferramenta tipada da entidade'}.`,
+        acao_sugerida: sugestao ? { ferramenta: sugestao.ferramenta, entrada: sugestao.entrada } : null,
+      })
+    }
     const rotulo = comando.tipo === 'operacao' ? comando.operacao : 'linhas.gravar'
     const r = await executar(sql, { sessao: s, comando, chave: chaveDe(req), validarApenas: !!corpo.data.validar_apenas, rotulo, confiavel: false, entradaOriginal: comando })
     return responder(rep, r)
@@ -175,13 +255,27 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     const f = ferramentaTipada(nome)
     if (!f) throw new ErroApi('FERRAMENTA_DESCONHECIDA', { campo: 'nome', mensagem: `Não existe a ferramenta ${nome}.` })
     const bruto = (req.body ?? {}) as Record<string, unknown>
-    const { validar_apenas: validarApenas, ...entradaBruta } = bruto
+    // Envelope (fora do esquema da ferramenta): `validar_apenas` e, da tela, os ids que ela
+    // gerou e a frase do evento (`heild_tela`).
+    const { validar_apenas: validarApenas, heild_tela: telaBruta, ...entradaBruta } = bruto
     if (validarApenas !== undefined && typeof validarApenas !== 'boolean') throw new ErroApi('ENTRADA_INVALIDA', { campo: 'validar_apenas' })
+    const tela = EnvelopeTela.safeParse(telaBruta ?? {})
+    if (!tela.success) throw erroDeEntrada(tela.error.issues, 'heild_tela')
     const entrada = f.entrada.safeParse(entradaBruta)
     if (!entrada.success) throw erroDeEntrada(entrada.error.issues)
-    if (f.tipo === 'leitura') return responder(rep, await ler(sql, s, f, entrada.data as Record<string, unknown>))
-    const chamada = f.chamada(entrada.data as never)
-    const comando: ComandoValidado = { tipo: 'operacao', operacao: chamada.operacao, argumentos: chamada.argumentos, ids: [] }
+    if (f.tipo === 'leitura') {
+      const r = await ler(sql, s, f, entrada.data as Record<string, unknown>)
+      if (r.status === 200) {
+        // Quem leu o quê (P6): as linhas que voltaram, a contagem e os filtros (sem cursor nem visão).
+        const dados = (r.corpo as { dados?: { id?: string; linhas?: { id?: string }[] } }).dados
+        const ids = dados?.linhas ? dados.linhas.map((l) => String(l.id)) : dados?.id ? [String(dados.id)] : []
+        const filtros = Object.fromEntries(Object.entries(entrada.data as Record<string, unknown>).filter(([k]) => k !== 'cursor' && k !== 'visao' && k !== 'limite'))
+        leituras.registrar(s, { ferramenta: f.nome, tabela: f.tabela, ids, quantidade: ids.length, filtros })
+      }
+      return responder(rep, r)
+    }
+    const chamada = f.chamada(entrada.data as never, { texto: tela.data.texto })
+    const comando: ComandoValidado = { tipo: 'operacao', operacao: chamada.operacao, argumentos: chamada.argumentos, ids: tela.data.ids }
     const r = await executar(sql, { sessao: s, comando, chave: chaveDe(req), validarApenas: !!validarApenas, rotulo: f.nome, confiavel: true, entradaOriginal: entradaBruta })
     // Operação de processo: o efeito foi pedir o job; a execução segue no worker (202, AGENTICO 8).
     if (operacoesDeProcesso.has(f.nome) && r.status === 200) {
@@ -240,7 +334,7 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
     const s = await sessao(req)
     return noEscritorio(sql, { sub: s.claims.sub, escritorio_id: s.claims.escritorio_id }, async (tx) => {
       const r = await semearEscritorio(tx, s.claims.escritorio_id)
-      return { ...r, ...(await fotografiaDoEscritorio(tx)) }
+      return { ...r, ...(await sincronizar(tx, s)) }
     })
   })
 

@@ -1,9 +1,18 @@
-import { autorizar, ErroPermissao, ErroRegra, nomeDoAtor, registrarEvento, type ComandoValidado, type Contexto, type NomeTabela, type Registro } from '@heild/dominio'
+import { autorizar, camposEditaveis, canonizar, ENTIDADES_F1, ErroPermissao, ErroRegra, nomeDoAtor, registrarEvento, type ComandoValidado, type Contexto, type NomeTabela, type Registro } from '@heild/dominio'
 import { PrecisaCarregar, type BancoServidor } from './banco-servidor.ts'
 import { ErroApi } from './erro.ts'
 import { repositorioDaTabela } from './operacoes.ts'
 
 type ComandoLinhas = Extract<ComandoValidado, { tipo: 'linhas' }>
+
+/**
+ * Nas tabelas da F1, a linha que a tela regrava direto só pode mudar campos editáveis (os
+ * da ferramenta `x.atualizar`): estado, setor, responsável e cliente mudam pela transição.
+ * Fica de fora o cartão de aprovação, cuja lista de quem aprova a regra de alçada do BPO
+ * (S08c, fase F6) ainda reescreve pela tela.
+ */
+const LIVRES = new Set(['id', 'escritorio_id', 'criado_em', 'atualizado_em', 'versao_linha', 'ordem'])
+const editaveisDaLinha = new Map(ENTIDADES_F1.filter((e) => e.tabela !== 'cartao_aprovacao').map((e) => [e.tabela as string, e]))
 
 /**
  * Escrita que a tela fez direto numa transação, fora de um repositório (o motor da
@@ -37,6 +46,12 @@ export function aplicarLinhas(bs: BancoServidor, ctx: Contexto, c: ComandoLinhas
       const id = g.linha.id as string
       const antes = tx.obter(g.tabela as NomeTabela, id) as Registro | undefined
       let linha = { ...(antes ?? {}), ...g.linha, id } as Registro
+      const entidade = antes ? editaveisDaLinha.get(g.tabela) : undefined
+      if (entidade) {
+        const editaveis = camposEditaveis(entidade)
+        const fora = Object.keys(g.linha).filter((k) => !LIVRES.has(k) && !editaveis.has(k) && canonizar((g.linha as Record<string, unknown>)[k] ?? null) !== canonizar((antes as unknown as Record<string, unknown>)[k] ?? null))
+        if (fora.length) throw new ErroApi('USE_FERRAMENTA_TIPADA', { campo: `${g.tabela}.${fora[0]}`, mensagem: `${g.tabela}.${fora.join(', ')} não muda por linha: use a ferramenta da transição.` })
+      }
       const ferramenta = antes ? r.ferramentas.atualizar : r.ferramentas.criar
       autorizarCom(ferramenta, linha, r.alvo?.(linha as never) ?? {})
       if (antes && r.antesDeAtualizar) linha = r.antesDeAtualizar(antes as never, linha as never, ctx) as Registro

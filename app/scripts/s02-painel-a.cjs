@@ -3,6 +3,19 @@
 //      node scripts/s02-painel-a.cjs <pasta-das-capturas>
 const { chromium } = require('playwright')
 
+/** Modo api: o cliente cadastrado está no servidor (procura pelo documento, como o Administrador, e confere o estado). */
+async function clienteNaApi(escritorio, documento, estado) {
+  const api = process.env.URL_API.replace(/\/$/, '')
+  const login = await (await fetch(`${api}/v1/auth/demonstracao`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ escritorio_id: escritorio, papel: 'administrador' }) })).json()
+  let cursor = null
+  do {
+    const r = await (await fetch(`${api}/v1/ferramentas/cliente.listar`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${login.token}` }, body: JSON.stringify({ visao: 'tela', limite: 100, ...(cursor ? { cursor } : {}) }) })).json()
+    if (r.dados.linhas.some((c) => c.documento === documento && c.estado_ciclo === estado)) return true
+    cursor = r.pagina.ha_mais ? r.pagina.cursor : null
+  } while (cursor)
+  return false
+}
+
 ;(async () => {
   const out = process.argv[2] || '.'
   const base = process.env.URL_APP || 'http://localhost:6100/'
@@ -135,7 +148,10 @@ const { chromium } = require('playwright')
   ok(await p.getByText(/demonstração/i).first().isVisible(), 'consulta CNPJ simulada mostra os dados com o selo de demonstração (S02-A19)')
   await p.getByRole('button', { name: 'Cadastrar', exact: true }).click()
   await espera(p, 7500)
-  const novo = await p.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith(':cliente')).some((k) => localStorage[k].includes('11.222.333/0001-81')))
+  // No modo local, o cliente está no localStorage; no modo api (URL_API definido), no servidor: confere pela própria API.
+  const novo =
+    (await p.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith(':cliente')).some((k) => localStorage[k].includes('11.222.333/0001-81')))) ||
+    (process.env.URL_API ? await clienteNaApi('esc-andrade', '11.222.333/0001-81', 'aceito') : false)
   ok(novo, 'o integrante Societário cadastra o cliente em "aceito" com a primeira versão do perfil')
   await shot(p, 'societario-carteira')
 

@@ -38,8 +38,11 @@ interface Base<E extends z.ZodObject> {
 
 export interface FerramentaEscrita<E extends z.ZodObject = z.ZodObject> extends Base<E> {
   tipo: 'escrita'
-  /** A chamada de repositório que faz o trabalho. */
-  chamada: (e: z.output<E>) => { operacao: string; argumentos: unknown[] }
+  /**
+   * A chamada de repositório que faz o trabalho. `tela.texto` é a frase do evento que a tela
+   * mandou no envelope (só as ferramentas de entidade usam; quem e quando são do servidor).
+   */
+  chamada: (e: z.output<E>, tela?: { texto?: string }) => { operacao: string; argumentos: unknown[] }
 }
 
 export interface FerramentaLeitura<E extends z.ZodObject = z.ZodObject> extends Base<E> {
@@ -69,10 +72,15 @@ export const SetorEsquema = z.enum(['societario', 'fiscal', 'notas', 'dp', 'cont
 export const StatusTarefaEsquema = z.enum(['a_fazer', 'em_andamento', 'aguardando_cliente', 'aguardando_terceiro', 'em_revisao', 'concluida', 'cancelada'])
 export const PrioridadeEsquema = z.enum(['baixa', 'normal', 'alta', 'urgente'])
 export const DataEsquema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data no formato AAAA-MM-DD.')
-export const CompetenciaEsquema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Competência no formato AAAA-MM.')
+// O wireframe grava MM/AAAA (a semente e as telas); o padrão dos agentes é AAAA-MM. Os dois valem.
+export const CompetenciaEsquema = z.string().regex(/^(\d{4}-(0[1-9]|1[0-2])|(0[1-9]|1[0-2])\/\d{4})$/, 'Competência no formato AAAA-MM (ou MM/AAAA).')
 export const RegimeEsquema = z.enum(['simples', 'presumido', 'real', 'mei', 'imune_isento', 'pf'])
 export const TipoClienteEsquema = z.enum(['pj', 'pf', 'mei', 'condominio', 'entidade_terceiro_setor', 'produtor_rural'])
 export const EstadoCicloEsquema = z.enum(['prospect', 'proposta', 'aceito', 'em_implantacao', 'ativo', 'inativo', 'em_saida', 'em_baixa', 'encerrado', 'arquivado', 'eliminado'])
+/** Item do checklist da tarefa (Fundações 4.8), estrito. */
+export const ItemChecklistEsquema = z
+  .object({ item: z.string().trim().min(1).max(300), feito: z.boolean(), feito_por: z.string().max(120).nullable().optional(), feito_em: z.string().max(40).nullable().optional(), obrigatorio: z.boolean().optional() })
+  .strict()
 const Motivo = z.string().trim().min(3, 'Escreva o motivo (vai para o evento).').max(500)
 const Texto = (max: number) => z.string().trim().min(1).max(max)
 
@@ -143,6 +151,8 @@ export const ferramentasTipadas: FerramentaTipada[] = [
     descricao_modelo: 'Cria uma tarefa num setor, ligada a uma atividade do catálogo e, se houver, a um cliente.',
     entrada: z
       .object({
+        // Id escolhido por quem cria (AIP-133), opcional; repetido é ID_EM_USO.
+        id: Id.optional(),
         setor_id: SetorEsquema,
         atividade_id: Texto(60),
         titulo: Texto(200),
@@ -155,12 +165,23 @@ export const ferramentasTipadas: FerramentaTipada[] = [
         responsavel_tipo: z.enum(['usuario', 'integrante']).optional(),
         responsavel_id: Id.optional(),
         quem_conclui: z.enum(['pessoa', 'agente_sozinho', 'agente_prepara_pessoa_conclui']).default('pessoa'),
+        // v1, campos opcionais acrescentados na B5 (compatível): o que a tela já grava ao criar.
+        origem: z.enum(['obrigacao', 'pedido_cliente', 'integrante', 'pessoa', 'trilha', 'core', 'conversa']).default('pessoa'),
+        origem_ref: z.string().max(200).nullable().optional(),
+        // Nasce aberta: concluída e cancelada só pela transição (tarefa.concluir, tarefa.cancelar).
+        status: z.enum(['a_fazer', 'em_andamento', 'aguardando_cliente', 'aguardando_terceiro', 'em_revisao']).default('a_fazer'),
+        checklist: z.array(ItemChecklistEsquema).max(200).default([]),
+        aguardando_detalhe: z.record(z.string(), z.unknown()).nullable().optional(),
+        tarefa_pai_id: Id.nullable().optional(),
+        conversa_id: Id.nullable().optional(),
+        risco: z.boolean().default(false),
+        extras: z.record(z.string(), z.unknown()).nullable().optional(),
       })
       .strict(),
     erros: ['CAMPO_OBRIGATORIO'],
-    chamada: (e) => ({
+    chamada: (e, t) => ({
       operacao: 'tarefas.criar',
-      argumentos: [{ ...e, origem: 'pessoa', status: 'a_fazer', status_desde: new Date().toISOString(), checklist: [], risco: false }],
+      argumentos: [{ ...e, status_desde: new Date().toISOString() }, t?.texto ? { texto: t.texto } : {}],
     }),
   }),
   escrita({
@@ -171,13 +192,29 @@ export const ferramentasTipadas: FerramentaTipada[] = [
       .object({
         tarefa_id: Id,
         campos: z
-          .object({ titulo: Texto(200).optional(), descricao: z.string().max(4000).optional(), prazo_interno: DataEsquema.nullable().optional(), prazo_legal: DataEsquema.nullable().optional(), prioridade: PrioridadeEsquema.optional(), competencia: CompetenciaEsquema.optional() })
+          .object({
+            titulo: Texto(200).optional(),
+            descricao: z.string().max(4000).nullable().optional(),
+            prazo_interno: DataEsquema.nullable().optional(),
+            prazo_legal: DataEsquema.nullable().optional(),
+            prioridade: PrioridadeEsquema.optional(),
+            competencia: CompetenciaEsquema.nullable().optional(),
+            // B5 (compatível): o que a ficha da tarefa edita. Quem conclui é a autonomia da tarefa,
+            // não estado. Status, setor, cliente e responsável ficam de fora.
+            quem_conclui: z.enum(['pessoa', 'agente_sozinho', 'agente_prepara_pessoa_conclui']).optional(),
+            // A conversa do CRM de onde a tarefa saiu (referência, não estado).
+            conversa_id: Id.nullable().optional(),
+            checklist: z.array(ItemChecklistEsquema).max(200).optional(),
+            aguardando_detalhe: z.record(z.string(), z.unknown()).nullable().optional(),
+            risco: z.boolean().optional(),
+            extras: z.record(z.string(), z.unknown()).nullable().optional(),
+          })
           .strict()
           .refine((c) => Object.keys(c).length > 0, 'Informe ao menos um campo.'),
       })
       .strict(),
     erros: ['NAO_ENCONTRADO', 'CAMPO_OBRIGATORIO'],
-    chamada: (e) => ({ operacao: 'tarefas.atualizar', argumentos: [e.tarefa_id, e.campos] }),
+    chamada: (e, t) => ({ operacao: 'tarefas.atualizar', argumentos: [e.tarefa_id, e.campos, t?.texto !== undefined ? { texto: t.texto } : {}] }),
   }),
   transicao('tarefa.iniciar', 'em_andamento', 'Põe a tarefa em andamento.'),
   transicao('tarefa.aguardar_cliente', 'aguardando_cliente', 'Marca a tarefa como aguardando o cliente.'),
@@ -241,19 +278,58 @@ export const ferramentasTipadas: FerramentaTipada[] = [
     nome: 'cliente.criar',
     versao: 1,
     descricao_modelo: 'Cadastra um cliente. O documento (CNPJ ou CPF) é único no escritório.',
-    entrada: z.object({ tipo: TipoClienteEsquema, codigo: Texto(20), documento: Texto(20), nome: Texto(200), regime: RegimeEsquema, estado_ciclo: EstadoCicloEsquema.default('em_implantacao'), servicos_contratados: z.array(Texto(40)).max(30).default([]) }).strict(),
+    entrada: z
+      .object({
+        id: Id.optional(),
+        tipo: TipoClienteEsquema,
+        codigo: Texto(20),
+        documento: Texto(20),
+        nome: Texto(200),
+        regime: RegimeEsquema,
+        estado_ciclo: EstadoCicloEsquema.default('em_implantacao'),
+        servicos_contratados: z.array(Texto(40)).max(30).default([]),
+        // B5 (compatível): o que a tela já grava ao cadastrar.
+        estado_ciclo_desde: DataEsquema.optional(),
+        grupo_economico_id: Id.nullable().optional(),
+        extras: z.record(z.string(), z.unknown()).nullable().optional(),
+      })
+      .strict(),
     erros: ['CAMPO_OBRIGATORIO', 'RESTRICAO_DO_BANCO'],
-    chamada: (e) => ({ operacao: 'clientes.criar', argumentos: [{ ...e, estado_ciclo_desde: hojeIso() }] }),
+    chamada: (e, t) => ({ operacao: 'clientes.criar', argumentos: [{ ...e, estado_ciclo_desde: e.estado_ciclo_desde ?? hojeIso() }, t?.texto ? { texto: t.texto } : {}] }),
   }),
   escrita({
     nome: 'cliente.atualizar',
     versao: 1,
     descricao_modelo: 'Muda campos cadastrais do cliente. O estado do ciclo muda por cliente.mudar_estado.',
     entrada: z
-      .object({ cliente_id: Id, campos: z.object({ nome: Texto(200).optional(), codigo: Texto(20).optional(), documento: Texto(20).optional(), servicos_contratados: z.array(Texto(40)).max(30).optional() }).strict().refine((c) => Object.keys(c).length > 0, 'Informe ao menos um campo.') })
+      .object({
+        cliente_id: Id,
+        campos: z
+          .object({
+            nome: Texto(200).optional(),
+            codigo: Texto(20).optional(),
+            documento: Texto(20).optional(),
+            servicos_contratados: z.array(Texto(40)).max(30).optional(),
+            // B5 (compatível): o regime acompanha a versão do perfil; grupo e extras são cadastro.
+            regime: RegimeEsquema.optional(),
+            grupo_economico_id: Id.nullable().optional(),
+            extras: z.record(z.string(), z.unknown()).nullable().optional(),
+          })
+          .strict()
+          .refine((c) => Object.keys(c).length > 0, 'Informe ao menos um campo.'),
+      })
       .strict(),
     erros: ['NAO_ENCONTRADO', 'CAMPO_OBRIGATORIO', 'RESTRICAO_DO_BANCO'],
-    chamada: (e) => ({ operacao: 'clientes.atualizar', argumentos: [e.cliente_id, e.campos] }),
+    chamada: (e, t) => ({ operacao: 'clientes.atualizar', argumentos: [e.cliente_id, e.campos, t?.texto !== undefined ? { texto: t.texto } : {}] }),
+  }),
+  escrita({
+    nome: 'cliente.fundir',
+    versao: 1,
+    descricao_modelo: 'Funde um cliente duplicado em outro (Administrador): o duplicado fica arquivado, apontando para o que fica.',
+    entrada: z.object({ cliente_id: Id, destino_id: Id }).strict(),
+    erros: ['NAO_ENCONTRADO'],
+    exposta_mcp: false,
+    chamada: (e) => ({ operacao: 'clientes.atualizar', argumentos: [e.cliente_id, { fundido_em: e.destino_id, arquivado_em: new Date().toISOString() }, { ferramenta: 'cliente.fundir' }] }),
   }),
   escrita({
     nome: 'cliente.mudar_estado',
@@ -300,22 +376,22 @@ export const ferramentasTipadas: FerramentaTipada[] = [
   leitura({
     nome: 'mensagem_interna.listar',
     versao: 1,
-    descricao_modelo: 'Mensagens de uma conversa interna, das mais novas para as mais antigas.',
-    entrada: z.object({ conversa_interna_id: Id, ...Paginacao }).strict(),
+    descricao_modelo: 'Mensagens internas das conversas de que você participa (ou de uma conversa), das mais novas para as mais antigas.',
+    entrada: z.object({ conversa_interna_id: Id.optional(), ...Paginacao }).strict(),
     erros: ['CURSOR_INVALIDO'],
     tabela: 'mensagem_interna',
     autorizar_com: 'mensagem_interna.listar',
     alvo: () => ({}),
-    filtros: (e) => [{ coluna: 'conversa_interna_id', op: '=', valor: e.conversa_interna_id }],
-    compacta: (m) => ({ id: m.id, autor_id: m.autor_id, corpo: m.corpo, criado_em: m.criado_em, editada: !!m.editada_em }),
+    filtros: (e) => (e.conversa_interna_id ? [{ coluna: 'conversa_interna_id', op: '=', valor: e.conversa_interna_id }] : []),
+    compacta: (m) => ({ id: m.id, conversa_interna_id: m.conversa_interna_id, autor_id: m.autor_id, corpo: m.corpo, criado_em: m.criado_em, editada: !!m.editada_em }),
   }),
   escrita({
     nome: 'mensagem_interna.enviar',
     versao: 1,
     descricao_modelo: 'Escreve numa conversa interna do escritório.',
-    entrada: z.object({ conversa_interna_id: Id, corpo: Texto(8000), responde_a_id: Id.optional() }).strict(),
+    entrada: z.object({ conversa_interna_id: Id, corpo: Texto(8000), responde_a_id: Id.nullable().optional(), extras: z.record(z.string(), z.unknown()).nullable().optional() }).strict(),
     erros: ['CAMPO_OBRIGATORIO'],
-    chamada: (e) => ({ operacao: 'mensagensInternas.enviar', argumentos: [e.conversa_interna_id, e.corpo, e.responde_a_id ? { respondeA: e.responde_a_id } : {}] }),
+    chamada: (e, t) => ({ operacao: 'mensagensInternas.enviar', argumentos: [e.conversa_interna_id, e.corpo, { ...(e.responde_a_id ? { respondeA: e.responde_a_id } : {}), ...(e.extras ? { extras: e.extras } : {}), ...(t?.texto ? { texto: t.texto } : {}) }] }),
   }),
   escrita({
     nome: 'mensagem_interna.editar',
@@ -368,7 +444,18 @@ export const ferramentasTipadas: FerramentaTipada[] = [
     nome: 'evento.listar',
     versao: 1,
     descricao_modelo: 'Linha do tempo: eventos do escritório (mais novos primeiro), por cliente, setor ou ferramenta.',
-    entrada: z.object({ cliente_id: Id.optional(), setor_id: SetorEsquema.optional(), ferramenta: z.string().max(80).optional(), so_linha_do_tempo: z.boolean().default(true), ...Paginacao }).strict(),
+    entrada: z
+      .object({
+        cliente_id: Id.optional(),
+        setor_id: SetorEsquema.optional(),
+        ferramenta: z.string().max(80).optional(),
+        so_linha_do_tempo: z.boolean().default(true),
+        // B5 (compatível): a ficha de um registro (a tarefa, o lote) e o nome do evento.
+        resultado_ref: Id.optional(),
+        nome: z.string().max(120).optional(),
+        ...Paginacao,
+      })
+      .strict(),
     erros: ['CURSOR_INVALIDO'],
     tabela: 'evento',
     autorizar_com: 'evento.listar',
@@ -378,6 +465,8 @@ export const ferramentasTipadas: FerramentaTipada[] = [
       ...(e.setor_id ? [{ coluna: 'setor_id', op: '=' as const, valor: e.setor_id }] : []),
       ...(e.ferramenta ? [{ coluna: 'ferramenta', op: '=' as const, valor: e.ferramenta }] : []),
       ...(e.so_linha_do_tempo ? [{ coluna: 'visivel_na_linha_do_tempo', op: '=' as const, valor: true }] : []),
+      ...(e.resultado_ref ? [{ coluna: 'resultado_ref', op: '=' as const, valor: e.resultado_ref }] : []),
+      ...(e.nome ? [{ coluna: 'nome', op: '=' as const, valor: e.nome }] : []),
     ],
     compacta: (e) => ({ id: e.id, seq: e.seq ?? null, criado_em: e.criado_em, nome: e.nome, ator_tipo: e.ator_tipo, ator_nome: e.ator_nome, ferramenta: e.ferramenta, resultado: e.resultado, texto: e.texto, cliente_id: e.cliente_id ?? null, setor_id: e.setor_id ?? null }),
     ordem: 'seq',

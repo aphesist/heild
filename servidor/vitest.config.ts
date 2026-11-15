@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   test: {
-    env: { HEILD_PG_BANCO: 'heild_teste', HEILD_DEMONSTRACAO: '1', HEILD_LOGS: 'silent' },
+    env: { HEILD_PG_BANCO: 'heild_teste', HEILD_DEMONSTRACAO: '1', HEILD_LOGS: 'silent', HEILD_CACHE_PERFIL_MS: '0' },
     globalSetup: ['./test/preparar.ts'],
     // Um arquivo por vez: todos dividem o mesmo banco (a cadeia e a idempotência são estado).
     fileParallelism: false,

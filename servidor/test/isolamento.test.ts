@@ -100,4 +100,17 @@ describe('no banco (segunda barreira)', () => {
       }),
     ).rejects.toThrow(/permission denied/)
   })
+
+  it('Data API fechada no banco (B5): o navegador (anon e authenticated) não lê nem grava tabela nenhuma', async () => {
+    const abertas = await banco()`
+      select table_name, grantee, privilege_type from information_schema.role_table_grants
+      where table_schema = 'public' and grantee in ('anon', 'authenticated') order by 1, 2, 3`
+    expect(abertas).toEqual([])
+    await expect(
+      banco().begin(async (tx) => {
+        await tx`select set_config('request.jwt.claims', ${JSON.stringify({ app_metadata: { escritorio_id: 'esc-andrade' } })}, true), set_config('role', 'authenticated', true)`
+        await tx`select id from cliente limit 1`
+      }),
+    ).rejects.toThrow(/permission denied/)
+  })
 })

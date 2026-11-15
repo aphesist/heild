@@ -69,7 +69,7 @@ export const RespostaValidado = z
   .strict()
 export type RespostaValidado = z.infer<typeof RespostaValidado>
 
-export const Pagina = z.object({ cursor: z.string().nullable(), ha_mais: z.boolean(), total: z.number() }).strict()
+export const Pagina = z.object({ cursor: z.string().nullable(), ha_mais: z.boolean(), total: z.number(), total_aproximado: z.boolean().optional() }).strict()
 
 export const RespostaLista = z
   .object({ resultado: z.literal('ok'), dados: z.object({ totais: z.record(z.string(), z.number()), linhas: z.array(z.unknown()) }).strict(), pagina: Pagina })

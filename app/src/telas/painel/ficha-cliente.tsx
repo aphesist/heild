@@ -14,6 +14,7 @@ import { contratos, faturas, totalContrato } from '@/dados/financeiro'
 import { diffFicha, emailValido, papeisPorServico, papelNoServico, resumoEntrega, rotuloModoEntrega, rotuloServicoFicha, telefoneValido } from '@/dados/s02/ficha'
 import { catalogoServicos, rotuloEstadoServico, type EstadoServico } from '@/dados/servicos-extras'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { registrar } from '@/nucleo/repositorios'
 import { cn } from '@/lib/utils'
 import type { SetorIntegrante } from '@/theme/tipos'
@@ -547,7 +548,8 @@ function ResumoRelacao({ clienteId, nome, pacotes }: { clienteId: string; nome: 
 
 /** Histórico das mudanças da ficha (eventos `ficha.atualizar` do cliente, o mais novo em cima). */
 function HistoricoFicha({ clienteId }: { clienteId: string }) {
-  const eventos = useTabela('evento')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: eventos } = useConsulta('evento', { nome: 'ficha.atualizar', cliente_id: clienteId })
   const itens = useMemo(() => eventos.filter((e) => e.nome === 'ficha.atualizar' && e.cliente_id === clienteId).sort((a, b) => b.criado_em.localeCompare(a.criado_em)), [eventos, clienteId])
   if (!itens.length) return <EstadoVazio compacto icone={ClockCounterClockwiseIcon} titulo="Sem mudanças registradas" descricao="Cada vez que alguém salva a ficha, o que mudou entra aqui, com o nome e a hora." />
   return (

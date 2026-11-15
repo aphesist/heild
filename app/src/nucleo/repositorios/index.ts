@@ -87,9 +87,10 @@ export class RepositorioObrigacoes extends Repositorio<'obrigacao'> {
 /* ---------- Mensagem interna: nunca se apaga; editar guarda versões (subplano 11) ---------- */
 
 export class RepositorioMensagensInternas extends Repositorio<'mensagem_interna'> {
-  enviar(conversaId: Id, corpo: string, op: OpcoesEscrita & { respondeA?: Id } = {}): MensagemInterna {
+  enviar(conversaId: Id, corpo: string, op: OpcoesEscrita & { respondeA?: Id; extras?: Record<string, unknown> } = {}): MensagemInterna {
     const ctx = op.ctx ?? contextoAtual()
-    return this.criar({ conversa_interna_id: conversaId, autor_id: idDoAtor(ctx.ator) ?? 'sistema', corpo, responde_a_id: op.respondeA ?? null, versoes: [] }, { ...op, ferramenta: 'mensagem_interna.enviar', texto: `${nomeDoAtor(ctx.ator)} escreveu na conversa interna` })
+    const { extras, respondeA, ...resto } = op
+    return this.criar({ conversa_interna_id: conversaId, autor_id: idDoAtor(ctx.ator) ?? 'sistema', corpo, responde_a_id: respondeA ?? null, versoes: [], ...(extras ? { extras } : {}) }, { ...resto, ferramenta: 'mensagem_interna.enviar', texto: resto.texto ?? `${nomeDoAtor(ctx.ator)} escreveu na conversa interna` })
   }
   editar(id: Id, corpo: string, op: OpcoesEscrita = {}): MensagemInterna {
     return this.atualizar(id, { corpo }, { ...op, ferramenta: 'mensagem_interna.editar' })

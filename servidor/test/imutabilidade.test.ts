@@ -16,8 +16,9 @@ afterAll(() => app.close())
 describe('mensagem interna', () => {
   it('nunca se apaga, nem pelo Administrador', async () => {
     const r = await operacao(app, adm, { tipo: 'operacao', operacao: 'mensagensInternas.excluir', argumentos: ['mn-semente-2'] })
-    expect(r.status).toBe(422)
-    expect(r.corpo.codigo).toBe('EXCLUSAO_PROIBIDA')
+    expect(r.status).toBe(400)
+    expect(r.corpo.codigo).toBe('USE_FERRAMENTA_TIPADA')
+    expect((await ferramenta(app, adm, 'mensagem_interna.excluir', { mensagem_id: 'mn-semente-2' })).corpo.codigo).toBe('FERRAMENTA_DESCONHECIDA')
     const linhas = await operacao(app, adm, { tipo: 'linhas', gravar: [], remover: [{ tabela: 'mensagem_interna', id: 'mn-semente-2' }] })
     expect(linhas.corpo.codigo).toBe('EXCLUSAO_PROIBIDA')
     const [n] = await banco()`select count(*)::int as n from mensagem_interna where escritorio_id = 'esc-andrade' and id = 'mn-semente-2'`
@@ -40,18 +41,22 @@ describe('mensagem interna', () => {
 
   it('desfazer (reverter) não existe para mensagem interna nem evento vindo de fora', async () => {
     const r = await operacao(app, adm, { tipo: 'operacao', operacao: 'mensagensInternas.reverter', argumentos: [{ id: 'mn-semente-2' }] })
-    expect(r.status).toBe(404)
-    expect(r.corpo.codigo).toBe('OPERACAO_DESCONHECIDA')
+    expect(r.status).toBe(400)
+    expect(r.corpo.codigo).toBe('USE_FERRAMENTA_TIPADA')
+    // E não existe ferramenta que desfaça a mensagem interna (só fixar e extras são editáveis).
+    expect((await ferramenta(app, adm, 'mensagem_interna.atualizar', { mensagem_id: 'mn-semente-2', campos: { corpo: 'reescrita' } })).status).toBe(400)
   })
 })
 
 describe('nada se apaga sozinho', () => {
   it('tarefa, cliente e evento não se apagam pela API', async () => {
     const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' order by id limit 1`
+    // Não há ferramenta de excluir para elas, e a operação genérica é recusada.
     for (const [operacaoNome, id] of [['tarefas.excluir', t.id], ['clientes.excluir', 'c1']]) {
       const r = await operacao(app, adm, { tipo: 'operacao', operacao: operacaoNome, argumentos: [id] })
-      expect(r.corpo.codigo, operacaoNome).toBe('EXCLUSAO_PROIBIDA')
+      expect(r.corpo.codigo, operacaoNome).toBe('USE_FERRAMENTA_TIPADA')
     }
+    for (const nome of ['tarefa.excluir', 'cliente.excluir']) expect((await ferramenta(app, adm, nome, { id: 'x' })).corpo.codigo).toBe('FERRAMENTA_DESCONHECIDA')
     const ev = await operacao(app, adm, { tipo: 'linhas', gravar: [], remover: [{ tabela: 'evento', id: 'qualquer' }] })
     expect(ev.corpo.codigo).toBe('EXCLUSAO_PROIBIDA')
   })

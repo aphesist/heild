@@ -316,6 +316,8 @@ O que a B2 recebe pronto, e como se liga:
 
 ### O que falta (depois do B1)
 
+> **B5 (15/11/2026):** a F1 abaixo foi feita, e os desvios da tabela acima de sincronização, patch livre, cache do perfil, `evento_leitura`, SSE e JWT do Supabase foram resolvidos. Ver a seção B5.
+
 - **F1:**
   - classes de tabela no `sincronizar`, filtradas por `autorizar`;
   - `useConsulta` e SSE (`/v1/eventos/fluxo`);
@@ -798,3 +800,188 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
   - "menu e integrante": a escolha prevalece, a divergência é gravada, o cartão "Parece ser do Fiscal. Transferir?" é aprovado e a conversa é transferida;
   - palavras que confirmam o menu dispensam o modelo; o menu fora da opção é recusado;
   - pelo Assistente.
+
+---
+
+## B5 · Fase F1: núcleo pela API (entrega E1)
+
+**15/11/2026 · branch `be5-f1-fundacao` → `backend`.** Fecha a F1 (ARQUITETURA 7) e o que a entrega E1 pede (ORDEM_DE_IMPLEMENTACAO 2.1), sem escopo novo. Tudo local: o mesmo Postgres 16 da B1 (porta 54329), Node 24 e o app no Vite com `VITE_HEILD_BANCO=api`. Nada foi aplicado em projeto Supabase: o projeto do backend em São Paulo ainda não existe (depende do dono), e a migração **não** vai para o HEILD-PROD, que é do wireframe. O caminho para aplicar no projeto novo está pronto (abaixo).
+
+### Resumo, pelos sete itens
+
+1. **`sincronizar` por classes, filtrado pela regra de leitura.** `GET /v1/sincronizar?classes=1,2` (padrão `1,2`; a classe 3 é recusada com 400) traz a configuração e o trabalho aberto, linha a linha pela mesma `podeLerLinha` que o SSE e a leitura tipada usam: setor e carteira pela função `autorizar` no nível ler, exceção por tela, o que é da pessoa (aviso, conversa interna privada) e, no app do cliente, só o que é do cliente dela, com as contas da equipe reduzidas a nome e papel. A classe 2 vem na janela (tarefa aberta ou fechada há 60 dias; cartão pendente ou decidido há 30), no SQL. Com `desde`, só o que mudou, e a linha que mudou e saiu do escopo da pessoa vem em `removidas`. Nada do escritório inteiro.
+2. **Repositórios do frontend como clientes das ferramentas tipadas; o patch livre acabou.** As 19 entidades da F1 têm ferramentas de entidade geradas de uma declaração só (`x.criar`, `x.atualizar({ x_id, campos })` com os campos **editáveis**, `x.arquivar`, `x.desarquivar`, `x.excluir` onde a regra deixa, `x.reordenar`), com Zod estrito e os `check` do banco como enum. O adaptador `api` passa cada chamada de repositório pelo tradutor (`app/src/nucleo/banco/traducao.ts`) e manda `POST /v1/ferramentas/{nome}`; os ids gerados pela tela e a frase do evento vão no envelope `heild_tela`. O servidor recusa por `/v1/operacoes` toda operação genérica das tabelas da F1 (`USE_FERRAMENTA_TIPADA`, com `acao_sugerida` já montada) e, pela escrita direta de linhas, a mudança de campo não editável. Desfazer é a operação inversa: o editável volta por `x.atualizar`, o status pela transição dele. O catálogo tipado foi de 34 para 75 ferramentas (as 27 da B1, as operações de processo da B2 e da B3 e as 41 novas da F1), e o retrato dos contratos tem mais 9 do motor e do Assistente.
+3. **`useConsulta` e SSE, com cursor em toda listagem.** `GET /v1/eventos/fluxo` (SSE) manda `{ tabela, ids, versao }` só do que a pessoa leria; cada instância lê a cauda de mudanças a cada 400 ms. O app lê o SSE com `fetch` (precisa do token) e pede o delta das classes 1 e 2 ou avisa as consultas da classe 3. O hook `useConsulta(tabela, filtro)` lê evento e mensagem interna pela ferramenta de lista, com cursor, e os 12 pontos de tela da F1 que liam essas tabelas inteiras passaram a ele. Toda lista tipada é por cursor (nunca `offset`), e os totais contam na primeira página e seguem no cursor.
+4. **Cache do perfil e `evento_leitura`.** O perfil fica em memória por 5 minutos ou até a cauda de mudanças trazer uma linha das tabelas de que ele sai (usuário, vínculo, exceção, carteira, escritório, assinatura), de qualquer instância; a escrita local invalida na hora. Toda leitura tipada e todo `sincronizar` viram uma linha de `evento_leitura` (quem, ferramenta, ids, contagem, filtros), gravada em lote fora da transação da leitura (até 500 ou a cada 2 s) e selada por lote com o hash do lote anterior (`selo_leitura`), sem travar a cadeia do evento (decisão P6).
+5. **Autenticação de produção.** O JWT do Supabase Auth (ES256 ou RS256) verificado pelo JWKS do projeto, com emissor `<projeto>/auth/v1` e público `authenticated`; o escritório, a conta e o tipo vêm de `app_metadata`, que o gancho de token em SQL (`heild_interno.gancho_token`) preenche a partir de `conta_auth`. O Administrador só entra com `aal2` (MFA). O token HS256 de demonstração só vale com `HEILD_DEMONSTRACAO=1`. Testado com um emissor de JWKS de teste, sem nuvem.
+6. **Contratos.** O OpenAPI 3.1 e o esquema das ferramentas (formato do `tools/list` do MCP) agora trazem também as ferramentas do motor da B2 (`execucao.obter`, `execucao.retomar`, `procedimento.listar`, `validador.executar`, `memoria.propor`) e do Assistente da B3, geradas das mesmas definições, sem banco. O CI (`.github/workflows/backend.yml`) roda typecheck, lint sem aviso, a conferência do retrato (`npm run contratos:conferir`) e as suítes da B1/B5, B2 e B3 contra o Postgres do runner.
+7. **Vazamento e fumaça.** O teste de vazamento cobre agora o `sincronizar`, o SSE, a leitura tipada (conversa privada), o JWT de outro escritório e a Data API fechada no banco (`anon` e `authenticated` sem privilégio em tabela nenhuma). A fumaça e os scripts das sessões no modo `api`: ver a tabela abaixo.
+
+### Cobertura das ferramentas do Contábil (API_INTERNA)
+
+A F1 cobre as **operações de entidade** do núcleo que a API_INTERNA lista para o Contábil (5.1 a 5.8, linhas "entidade"; 6.3 e 6.7): tarefas (`tarefa.*` com as transições, `reordenar` e `desarquivar`), clientes (`cliente.*`, com `mudar_estado`, `fundir` e `arquivar`), pessoas e identidades, versões do perfil, obrigações (`criar`, `atualizar`, `cancelar`, `reordenar`), cartões, avisos, conversa e mensagem interna, e a configuração (escritório, assinatura, setores, contas, vínculos, exceções, carteira, convites). As de contexto que dependem só do núcleo também (`evento.listar` com a ficha do registro, `mensagem_interna.listar` das conversas da pessoa). Todas com Zod estrito, erro acionável (código, campo e, quando há, `acao_sugerida`), `validar_apenas` e idempotência pela chave.
+
+Ficam para as fases delas, como o desenho manda: as **operações de processo** (uma por procedimento; as dos integrantes do Contábil já estão no catálogo pela B2 e pela B3), as de **conector** (F4) e as de contexto que leem dado de conector (`captura.saude`, `nota.listar_*`, `folha.listar_totais`). `cliente.resolver`, `pessoa.resolver` e `contexto.carregar` são da F3 (B2, "O que falta").
+
+### Como rodar
+
+Os mesmos passos da B1 (Node 24, Postgres 16 no `PATH` ou em `/usr/lib/postgresql/*/bin`, sem Docker):
+
+```bash
+npm install && (cd app && npm install)
+npm run preparar -w @heild/servidor      # Postgres local, migrações (com a da B5) e semente
+npm run dev                              # API em http://127.0.0.1:8787
+cd app && VITE_HEILD_BANCO=api npx vite --port 6100
+```
+
+Variáveis novas (todas opcionais no ambiente local):
+
+| Variável | Padrão | Para quê |
+| --- | --- | --- |
+| `HEILD_SUPABASE_URL` | vazio | URL do projeto Supabase (ou da stack local do `supabase start`). Liga a verificação do JWT de produção pelo JWKS (`<url>/auth/v1/.well-known/jwks.json`, emissor `<url>/auth/v1`, público `authenticated`) |
+| `HEILD_SUPABASE_JWKS_URL` | vazio | Outro endereço para as chaves (testes) |
+| `HEILD_MFA_PAPEIS` | `administrador` | Papéis que só entram com o segundo fator (`aal2`) |
+| `HEILD_DEMONSTRACAO` | `1` | Fora do ambiente local, `0`: o token HS256 de demonstração deixa de valer |
+| `HEILD_CACHE_PERFIL_MS` | `300000` | Validade do perfil em cache (0 desliga; os testes de regra usam 0) |
+| `HEILD_FLUXO_MS` / `HEILD_FLUXO_POR_CONTA` | `400` / `5` | Intervalo da leitura da cauda de mudanças e conexões de SSE por conta |
+| `HEILD_LEITURA_LOTE` / `HEILD_LEITURA_MS` | `500` / `2000` | Lote e intervalo do registro de leituras |
+
+Chamar à mão (o SSE é uma resposta aberta; o `-N` desliga o buffer do curl):
+
+```bash
+T=$(curl -s -XPOST localhost:8787/v1/auth/demonstracao -H 'content-type: application/json' \
+      -d '{"escritorio_id":"esc-andrade","usuario_id":"u7"}' | jq -r .token)
+curl -s "localhost:8787/v1/sincronizar?classes=1,2" -H "authorization: Bearer $T" | jq '.tabelas | map_values(length)'
+curl -sN localhost:8787/v1/eventos/fluxo -H "authorization: Bearer $T"
+curl -s -XPOST localhost:8787/v1/ferramentas/evento.listar -H "authorization: Bearer $T" \
+     -H 'content-type: application/json' -d '{"resultado_ref":"t18","so_linha_do_tempo":false}'
+```
+
+### Como testar
+
+```bash
+npm test                    # B1 + B5 contra Postgres real (recria heild_teste a cada rodada)
+npm run test:b2 && npm run test:b3
+npm run typecheck && npm run lint
+(cd app && npx tsc --noEmit -p tsconfig.app.json)
+npm run contratos:conferir  # o retrato de servidor/contratos está em dia (o CI roda igual)
+```
+
+| Arquivo novo em `servidor/test/` | O que prova |
+| --- | --- |
+| `auth-producao.test.ts` | O JWT do Supabase pelo JWKS (emissor de teste com chave ES256): a conta sai de `app_metadata`; emissor, público, assinatura ou validade errados caem; token sem escritório é `CONTA_SEM_VINCULO`; o Administrador sem `aal2` é `EXIGE_MFA`; conta inativa não entra; a pessoa do cliente; um login da Horizonte não lê a Andrade; fora da demonstração, o HS256 não vale. O gancho de token em SQL põe e tira o vínculo, e o navegador não lê `conta_auth` |
+| `sincronizar.test.ts` | Classes (a 3 nunca vem; `classes=3` é 400); o Membro só recebe tarefa dos setores dele; aviso de outra pessoa não chega; conversa privada só para quem participa; carteira ligada tira o cliente e a tarefa dele; exceção por tela que bloqueia a aba tira as linhas do setor; a pessoa do cliente só recebe o cliente dela; no delta, a linha que saiu do escopo vem em `removidas`. Na leitura tipada: conversa pessoal de outros não aparece nem passando o id; o cursor leva o total; `evento.listar` por `resultado_ref` |
+| `fluxo.test.ts` | O SSE num servidor HTTP de verdade: o Membro recebe a tarefa do setor dele e não a de outro; outro escritório não recebe nada; uma segunda volta não repete; sem token 401; limite de conexões por conta; conta desativada tem o fluxo desligado. O cache do perfil é invalidado pela cauda (mudança feita por fora da instância). O registro de leituras: a linha com os ids e os filtros, o selo confere e descobre adulteração feita pelo superusuário, lotes simultâneos encadeiam sem buraco, restaurar a demonstração recomeça leituras e selos juntos, o `sincronizar` também fica registrado |
+| `ferramentas-tipadas.test.ts` | `/v1/operacoes` recusa a operação genérica da F1 com a ferramenta sugerida; status, setor e responsável não mudam por `tarefa.atualizar` nem pela linha; toda entidade tem as ferramentas declaradas, e os editáveis do núcleo são os do esquema; criar com o id da tela e a frase do evento; a regra do repositório continua mandando; exclusão só onde a regra deixa; o tradutor (transições, mover no quadro, desfazer, mensagem interna, o que não é da F1) e a tradução de uma chamada de tela de ponta a ponta |
+| `aplicar-projeto.test.ts` | As travas do caminho de aplicar no projeto novo (projeto pela URL, confirmação, senha do login da API) |
+
+Os testes antigos que mandavam operação genérica de tabela da F1 por `/v1/operacoes` passaram a usar a ferramenta tipada (é o comportamento novo, de propósito), e o `isolamento.test.ts` ganhou a Data API fechada no banco.
+
+**Resultado (15/11/2026):** 124 testes da API (B1 e B5) verdes em três rodadas seguidas, contra o Postgres local com RLS; 38 da B2 e 62 da B3 (depois do merge da B3b), sem mudança nelas. Typecheck e lint sem aviso (o `npm run lint` passou a cobrir também `servidor/`, `pacotes/dominio` e o que a B5 escreveu no app, com `--deny-warnings`).
+
+**Planos das consultas novas** (`EXPLAIN ANALYZE` com a semente): a ficha de um registro (`evento.listar` por `resultado_ref`) usa `evento_por_ref`; a cauda do SSE são duas buscas, pela chave `(escritorio_id, versao)` e por `mudanca_recentes`; as listas de mensagem interna por conversa e de tarefa por setor têm índice próprio (com a semente, pequena, o Postgres ainda prefere a varredura). O `sincronizar` lê por tabela, com a janela da classe 2 no SQL.
+
+### Onde mora cada coisa
+
+```
+app/src/nucleo/permissoes/leitura.ts            classes de tabela, janela, podeLerLinha (navegador e servidor)
+app/src/nucleo/permissoes/ferramentas-entidade.ts as entidades da F1 e os campos editáveis (dado puro)
+app/src/nucleo/banco/traducao.ts                o tradutor: chamada de repositório → ferramenta tipada
+app/src/nucleo/banco/api.ts                     adaptador api: ferramentas, sincronizar por classe, delta, SSE, consultar
+app/src/nucleo/consulta.ts                      useConsulta
+pacotes/dominio/src/ferramentas-entidade.ts     os esquemas Zod gerados das declarações
+pacotes/dominio/src/cadeia.ts                   + o selo dos lotes de leitura
+servidor/src/auth/sessao.ts, cache-perfil.ts    JWT por JWKS, MFA, cache do perfil
+servidor/src/executor/sincronizar.ts            sincronizar por classes
+servidor/src/fluxo.ts                           SSE e a cauda de mudanças
+servidor/src/leituras.ts                        registro de leituras e verificação dos selos
+servidor/src/banco/aplicar-projeto.ts           aplicar no projeto Supabase novo
+app/supabase/migrations/20261117090000_b5_fundacao.sql
+.github/workflows/backend.yml
+```
+
+### O banco (migração `20261117090000_b5_fundacao.sql`)
+
+- `conta_auth` (login do Supabase → conta do escritório) e `heild_interno.gancho_token(jsonb)`, o *custom access token hook*. RLS forçada; o navegador não lê; só o papel do servidor do Auth lê para montar o token.
+- `mudanca`: a cauda que o SSE lê. Gatilho **por comando** (tabelas de transição) em toda tabela com `versao_linha`, uma inserção em lote por comando. `heild_interno.limpar_mudancas()` guarda 2 dias.
+- `evento_leitura`, particionada por mês (`heild_interno.criar_particao_leitura`, mais uma partição padrão), e `selo_leitura`. Só de inserção (gatilho), RLS forçada, FK para o escritório.
+- Índices das listas novas (mensagem interna por conversa, tarefa por setor e status, por cliente, evento por cliente e por `resultado_ref`, cartão por status).
+- **Data API fechada no banco:** `anon` e `authenticated` perdem todo privilégio em tabela do `public` (o `api_executor` tem os dele). Toda migração nova que criar tabela revoga também; o teste confere.
+
+### Aplicar no projeto novo (quando ele existir)
+
+1. Criar o projeto em **sa-east-1** (P4) e pegar a conexão do painel (Connect › direta ou *session pooler*).
+2. Conferir sem mudar nada, depois aplicar:
+   ```bash
+   HEILD_PG_URL_ADMIN='postgres://postgres.<ref>:<senha>@aws-0-sa-east-1.pooler.supabase.com:5432/postgres' \
+   HEILD_CONFIRMAR_PROJETO=<ref> npm run aplicar-projeto -w @heild/servidor
+   HEILD_PG_URL_ADMIN=... HEILD_CONFIRMAR_PROJETO=<ref> HEILD_PG_SENHA_API=<24+ caracteres> \
+     npm run aplicar-projeto -w @heild/servidor -- --aplicar
+   ```
+   Recusa se o `<ref>` não bater, se o banco já tiver o esquema do app sem o registro da ferramenta (a marca do projeto do wireframe) e se faltar a senha do login `app_api`. Não aplica `00_supabase_local.sql`.
+3. No painel: **Authentication › Hooks › Custom Access Token** → `heild_interno.gancho_token`; **MFA (TOTP)** ligado; **Settings › API › Data API** desligada.
+4. Na API: `HEILD_SUPABASE_URL=https://<ref>.supabase.co`, `HEILD_DEMONSTRACAO=0`, `HEILD_PG_URL_API` com o login `app_api`.
+5. Critério da E1, contra o projeto de **homologação** (ou um branch dele; nunca o de produção):
+   ```bash
+   HEILD_TESTE_URL_ADMIN='postgres://postgres.<ref>:<senha>@aws-0-sa-east-1.pooler.supabase.com:5432/postgres' \
+   HEILD_CONFIRMAR_PROJETO=<ref> HEILD_PG_SENHA_API=<a mesma do passo 2> npm test -- test/isolamento.test.ts test/sincronizar.test.ts test/fluxo.test.ts
+   ```
+   O modo remoto do `globalSetup` aplica as migrações pelo mesmo caminho do passo 2, recusa projeto com escritório que não seja de demonstração, semeia os dois escritórios de exemplo e conecta a API como `app_api`, com TLS. Depois, a fumaça: a API com `HEILD_PG_URL_API` do projeto e `HEILD_DEMONSTRACAO=1` (homologação), o app com `VITE_HEILD_BANCO=api` e `node scripts/fundacao-fumaca.cjs`. Alguns testes de barreira usam poder de superusuário (adulterar a cadeia, desligar gatilho); no Supabase o papel `postgres` não é superusuário, e esses podem precisar de ajuste quando rodarem lá pela primeira vez.
+
+### A fumaça e os scripts das sessões no modo `api`
+
+Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), um por vez, com a semente regravada no servidor antes de cada um, depois de todas as correções. A coluna B1 é o resultado registrado na seção B1.
+
+| Script | B1 (`api`) | B5 (`api`) | Observação |
+| --- | --- | --- | --- |
+| `fundacao-fumaca.cjs` | passa | **passa** (26 ok) | Três rodadas seguidas verdes, depois da correção do integrante de outro escritório (abaixo) |
+| `s01-inicio` | 37 ok | **37 ok** | |
+| `s02-painel-a` | 28 ok, 1 falha | **29 ok** | O script confere o cliente novo pela própria API quando `URL_API` está definido (no modo local, segue lendo o `localStorage`) |
+| `s03-painel-b` | 53 ok | **53 ok** | |
+| `s04-painel-c` | 43 ok | **43 ok** | |
+| `s05-crm-interna` | 42 ok | **42 ok** | |
+| `s06-timesheet` | 76 ok | **76 ok** | |
+| `s07-financeiro` | 72 ok | **72 ok** | |
+| `s08-bpo` | 49 ok, 2 falhas | **51 ok** | |
+| `s08a-bpo-visao` | 76 ok | **76 ok** | |
+| `s08b-operacao` | 39 ok, 2 falhas | 39 ok, 2 falhas | **As mesmas duas da B1, com a mesma causa, aceita pelo desenho.** `bpo.relatorio_mensal` exige aprovação se for integrante: o servidor devolve o cartão (202) em vez de gravar o rascunho, e o passo "o Gestor aprova o rascunho" não acha rascunho. A outra é o rótulo do integrante ("Contas a Pagar", o oficial do servidor, contra o "(integrante)" que a tela montava). Muda quando o cartão do executor rodar o comando aprovado (ver "O que falta") |
+| `s08c-aprovacoes` | 36 ok, 1 falha | **37 ok** | |
+| `s09-arquivos-config` | 47 ok, 1 falha | 47 ok, 1 falha | **A mesma da B1, aceita pelo desenho:** a pessoa convidada (situação "convidado") aceita o convite e a tela grava em nome dela; a API não entra com conta inativa. No produto, aceitar o convite é o fluxo do Supabase Auth, que cria o login e a linha de `conta_auth` |
+| `s10-app-cliente` | 41 ok | **41 ok** | |
+
+**O que as rodadas acharam e foi corrigido:**
+
+- **Campos legítimos que o esquema ainda não aceitava,** trazidos do que a tela grava e dos `check` do banco: competência MM/AAAA, origem da tarefa, `quem_conclui` e `conversa_id` editáveis, `lida_por` e o setor livre do aviso, `ultimo_acesso` na criação da conta, o cartão que nasce pendente.
+- **O patch levava a linha inteira:** o tradutor passou a mandar só o que muda e a tirar os campos da transição (hora do status, quem concluiu), que vão pela ferramenta da transição.
+- **Id escolhido pela tela:** a criação aceita o id de quem cria (AIP-133); antes, o servidor criava com outro id e a aprovação seguinte não achava o cartão (s07).
+- **Desfazer uma exclusão** recria a linha como era (s09).
+- **Cadastro da equipe e o que é da pessoa:** vínculos, carteira e exceções de outras contas não são dado do setor (montam os perfis e o "agindo como"); a sessão de trabalho da própria pessoa sempre vem (s06).
+- **Troca da pessoa na tela:** o adaptador relê as classes 1 e 2 com o token da pessoa nova e troca o token do SSE.
+- **Aviso do app do cliente preso na tela:** o tempo de 5 s era cancelado a cada mudança da lista de avisos (bug latente da tela, que o delta do SSE fez aparecer; s10).
+- **Integrante de outro escritório:** depois de trocar de escritório, um temporizador do motor da demonstração do escritório anterior ainda pedia uma ação de um integrante que não existe no novo (o servidor recusava com `NAO_ENCONTRADO`, e a fumaça falhava às vezes no "sem erros no console"). O adaptador descarta essa ação antes de sair, com um aviso no console.
+
+### Desvios do desenho, e por quê
+
+| Desenho | Na B5 | Por quê / quando muda |
+| --- | --- | --- |
+| SSE lê a cauda de `evento` (ARQUITETURA 6.3) | Lê a cauda de `mudanca` (tabela, id, versão), gravada por gatilho por comando na mesma transação | O evento não diz tabela nem id, e as tabelas sem evento (aviso, fila do integrante, estado de tela) também precisam avisar. O custo é uma inserção em lote por comando |
+| Uma consulta por instância para todos os escritórios conectados (6.3) | Uma consulta por escritório acompanhado, sob a RLS dele | A API não tem papel que leia todos os escritórios (sem `BYPASSRLS`, de propósito). Com poucos escritórios por instância, é barato; acima disso, um papel de leitura da cauda só para o fluxo |
+| Aviso de exclusão "só a quem veria" | A exclusão avisa só o id a todos do escritório | A linha já não existe para conferir o setor. Só se exclui o que a regra deixa (convite, vínculo, exceção, carteira) |
+| Classe 3 nunca no navegador | O cache da classe 3 começa com a página mais recente que a pessoa pode ver (até 500 por tabela, pela ferramenta de lista e pela regra de leitura) e cresce com o que as telas consultam | Os 12 pontos de tela da F1 passaram ao `useConsulta`; outros ainda leem a tabela (o "feito por" de cada item, que viraria uma consulta por linha; telas do BPO e do Financeiro, das fases F6). Quando eles migrarem, o aquecimento pode cair |
+| Tabelas das fases seguintes | Seguem na classe 1 de transição, filtradas por setor e carteira | ARQUITETURA 5: a tabela ainda não migrada segue como está, com dado de demonstração. A classe do desenho de cada uma está em `CLASSE_DESENHO` |
+| Métodos específicos sem ferramenta tipada | Seguem por `/v1/operacoes` | Assinatura fixa, sem patch, com a regra do repositório. Só o genérico (o patch livre) foi fechado. Viram ferramenta na fase de cada módulo |
+| Linha direta do cartão de aprovação | A lista de quem aprova ainda muda pela linha | A regra de alçada do BPO (S08c, F6) reescreve `pode_aprovar` pela tela |
+| Texto do evento é do sistema (AGENTICO) | A tela manda a frase do evento no envelope (`heild_tela.texto`, até 500 caracteres) | É a frase que a linha do tempo do wireframe já mostra. Quem, quando, ferramenta e resultado continuam do servidor |
+| Competência AAAA-MM | `CompetenciaEsquema` aceita AAAA-MM e MM/AAAA | A semente e as telas do wireframe gravam MM/AAAA. Unificar é migração de dado, fora da F1 |
+| Partição antiga de `evento_leitura` vai para o S3 em 90 dias | Particionada por mês, sem o arquivamento | O arquivamento frio é da hospedagem (F7) |
+| JWT verificado por JWKS do projeto | Testado com um emissor de JWKS de teste (mesma rota e formato do Supabase) | A stack local do `supabase start` precisa de Docker, e o projeto de São Paulo não existe ainda |
+| Perda de leituras numa queda | O registro de leituras guarda até 2 s na memória antes de gravar | É o preço de não travar a leitura (STACK 8: "fora da transação de leitura"). Desligar a API grava o que estiver na memória |
+
+### O que falta (depois da B5)
+
+- **Projeto Supabase em São Paulo** (depende do dono): aplicar a migração pelo `aplicar-projeto`, ligar o gancho de token e o MFA, desligar a Data API e rodar o vazamento e a fumaça contra ele (critério da E1).
+- **Retomada do cartão do executor da B1:** o cartão que o executor cria quando um integrante pede algo que exige aprovação ainda não roda o comando guardado quando a pessoa aprova (encaixe 4 da B1). Os cartões de execução da B2 já retomam. É o que falta para o s08b (abaixo).
+- **Fluxo de convite pelo Supabase Auth:** quem aceita o convite cria o login e a linha de `conta_auth`. Hoje a ligação é feita por quem administra (é o que o s09 esbarra).
+- Os pontos de tela que ainda leem evento e mensagem interna inteiros, nas telas das fases seguintes.
+- Ferramenta tipada para os métodos específicos dos módulos das fases seguintes, junto com cada fase.
+- Medir sob carga o fluxo (muitos escritórios por instância) e o gatilho da cauda de mudanças nas importações grandes.

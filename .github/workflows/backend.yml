@@ -1,0 +1,52 @@
+# CI do backend (branch `backend` e os das sessões): o que o PADROES.md pede de todo PR.
+# Typecheck e lint sem aviso, o retrato dos contratos conferido (OpenAPI e esquema das
+# ferramentas no formato do MCP, gerados do Zod) e as suítes contra Postgres real com RLS
+# (o Postgres 16 do próprio runner, pelo servidor/scripts/pg-local.sh; sem Docker).
+name: backend
+
+on:
+  pull_request:
+    branches: [backend]
+  push:
+    branches: [backend]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      HEILD_DEMONSTRACAO: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            app/package-lock.json
+      - name: Dependências
+        run: |
+          npm ci
+          (cd app && npm ci)
+      - name: Typecheck (servidor, processos, integrantes e o app)
+        run: |
+          npm run typecheck
+          (cd app && npx tsc --noEmit -p tsconfig.app.json)
+      - name: Lint
+        run: npm run lint
+      - name: Retrato dos contratos (OpenAPI e esquemas MCP)
+        run: npm run contratos:conferir
+      - name: Testes da API contra Postgres real (B1 e B5)
+        run: npm test
+      - name: Testes do motor (B2)
+        run: npm run test:b2
+      - name: Testes dos integrantes (B3)
+        run: npm run test:b3

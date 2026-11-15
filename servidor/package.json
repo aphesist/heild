@@ -15,7 +15,8 @@
     "preparar": "scripts/pg-local.sh iniciar && tsx src/banco/migrar.ts && tsx src/banco/semear.ts",
     "contratos": "tsx src/contratos.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "aplicar-projeto": "tsx src/banco/aplicar-projeto.ts"
   },
   "dependencies": {
     "@noble/hashes": "^2.4.0",

@@ -3,6 +3,7 @@ import { extrasDe, falasInternas, pareceUmPedido, type Anexo, type Citacao, type
 import type { ConversaInterna, Id, MensagemInterna, Participacao, Tarefa } from '@/nucleo/modelo/entidades'
 import type { Contexto } from '@/nucleo/permissoes'
 import { useTabela } from '@/nucleo/react'
+import { useConsulta } from '@/nucleo/consulta'
 import { agora, registrar, repos } from '@/nucleo/repositorios'
 import { servicos } from '@/servicos'
 import { rotuloSetorCurto } from '@/nucleo/permissoes'
@@ -130,7 +131,8 @@ export function usePreferenciasInternas() {
 export function useNaoLidasInternas(): { total: number; porConversa: Record<Id, number> } {
   const { usuario } = useSessao()
   const conversas = useMinhasConversasInternas()
-  const mensagens = useTabela('mensagem_interna')
+  // Classe 3 (B5): pela consulta paginada, não pela tabela inteira.
+  const { linhas: mensagens } = useConsulta('mensagem_interna', {})
   const { lidas } = useLidas()
   const [silenciadas] = usePersistente<Id[]>(`s05:interna:silenciadas:${usuario.id}`, [])
   return useMemo(() => {

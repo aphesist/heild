@@ -87,3 +87,4 @@ export function useVersaoBanco(): number {
 export function useEscritorio() {
   return useTabela('escritorio')[0]
 }
+
