@@ -114,7 +114,7 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       t = chamar('POST', '/v1/auth/demonstracao', pedido).then((r) => {
         if (r.status !== 200) {
           tokens.delete(k)
-          throw new ErroAdaptador('api', `Não entrou na API (${r.status}): ${String(r.json?.mensagem ?? '')}`)
+          throw Object.assign(new ErroAdaptador('api', `Não entrou na API (${r.status}): ${String(r.json?.mensagem ?? '')}`), { status: r.status })
         }
         return String(r.json.token)
       })
@@ -145,6 +145,14 @@ export function adaptadorApi(config: ConfigApi): AdaptadorApi {
       try {
         r = await chamar('POST', '/v1/operacoes', { comando: item.comando }, { ...(await cabecalhosDe(escritorio, item.ator)), 'idempotency-key': item.chave })
       } catch (e) {
+        // Login recusado (conta inativa, escritório errado) não é rede: o comando é recusado
+        // e sai da fila, senão travaria todos os seguintes.
+        const status = (e as { status?: number }).status
+        if (status && status >= 400 && status < 500) {
+          guardarFila(escritorio, lerFila(escritorio).filter((x) => x.chave !== item.chave))
+          recusas.push(`${item.comando.tipo === 'operacao' ? item.comando.operacao : 'linhas'}: ${e instanceof Error ? e.message : String(e)}`)
+          continue
+        }
         // Rede: fica na fila (mesma chave) para a próxima tentativa.
         throw new ErroAdaptador('api', `Sem resposta da API: ${e instanceof Error ? e.message : String(e)}`)
       }
@@ -247,9 +255,13 @@ function atorDe(ctx: Contexto): AtorComando {
   return { tipo: 'sistema' }
 }
 
-/** Argumentos como JSON, sem o `ctx` (quem age vai à parte, e o servidor decide pelo token). */
+/**
+ * Argumentos como JSON, sem o `ctx` (quem age vai à parte, e o servidor decide pelo token).
+ * Campo `undefined` sai (como o JSON faz): no servidor, o valor gravado fica, que é o mesmo
+ * resultado do modo local depois de recarregar. Trocar por `null` apagaria o campo.
+ */
 function serializar(args: unknown[]): unknown[] {
-  return JSON.parse(JSON.stringify(args.map((a) => (a && typeof a === 'object' && !Array.isArray(a) && 'ctx' in a ? (({ ctx: _c, ...resto }) => (void _c, resto))(a as Record<string, unknown>) : a)), (_k, v) => (v === undefined ? null : v))) as unknown[]
+  return JSON.parse(JSON.stringify(args.map((a) => (a && typeof a === 'object' && !Array.isArray(a) && 'ctx' in a ? (({ ctx: _c, ...resto }) => (void _c, resto))(a as Record<string, unknown>) : a)))) as unknown[]
 }
 
 /**
