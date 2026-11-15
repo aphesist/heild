@@ -96,7 +96,8 @@ const { chromium } = require('playwright');
 
   // S10-T08: Pix, contestação
   await ir('financeiro'); await p.getByRole('button', { name: 'Pagar' }).first().click(); await espera(200);
-  await p.getByRole('button', { name: /Gerar Pix/ }).click(); await espera(1200);
+  // O Pix simulado responde em 600 a 1400 ms: espera o código aparecer (até 5 s) em vez de um tempo fixo.
+  await p.getByRole('button', { name: /Gerar Pix/ }).click(); await p.getByText(/br.gov.bcb.pix/).first().waitFor({ timeout: 5000 }).catch(() => {});
   ok(await tem(/br.gov.bcb.pix/), 'A43 Pix copia e cola gerado (simulado)'); await shot('pix'); await p.keyboard.press('Escape');
   await p.getByRole('button', { name: 'Contestar' }).first().click(); await p.getByLabel('Motivo').fill('O valor do BPO veio duplicado'); await p.getByRole('button', { name: 'Enviar contestação' }).click(); await espera(300);
   ok(await tem(/pausa/i), 'A45 contestação pausa a régua');

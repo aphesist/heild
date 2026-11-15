@@ -949,6 +949,8 @@ Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), um por vez, com a sem
 | `s09-arquivos-config` | 47 ok, 1 falha | 47 ok, 1 falha | **A mesma da B1, aceita pelo desenho:** a pessoa convidada (situação "convidado") aceita o convite e a tela grava em nome dela; a API não entra com conta inativa. No produto, aceitar o convite é o fluxo do Supabase Auth, que cria o login e a linha de `conta_auth` |
 | `s10-app-cliente` | 41 ok | **41 ok** | |
 
+**Depois da integração no `backend` (33761ed, com a triagem v2 do #36):** typecheck e lint sem aviso, retrato dos contratos em dia, 124 + 38 + 62 testes, a fumaça (26 ok) e os scripts como na tabela. O s10 falhou uma vez em três no A43 por tempo do script: o Pix simulado responde em 600 a 1400 ms, e o script esperava 1200 ms fixos. Agora ele espera o código aparecer, e passou três vezes seguidas.
+
 **O que as rodadas acharam e foi corrigido:**
 
 - **Campos legítimos que o esquema ainda não aceitava,** trazidos do que a tela grava e dos `check` do banco: competência MM/AAAA, origem da tarefa, `quem_conclui` e `conversa_id` editáveis, `lida_por` e o setor livre do aviso, `ultimo_acesso` na criação da conta, o cartão que nasce pendente.
@@ -959,6 +961,33 @@ Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), um por vez, com a sem
 - **Troca da pessoa na tela:** o adaptador relê as classes 1 e 2 com o token da pessoa nova e troca o token do SSE.
 - **Aviso do app do cliente preso na tela:** o tempo de 5 s era cancelado a cada mudança da lista de avisos (bug latente da tela, que o delta do SSE fez aparecer; s10).
 - **Integrante de outro escritório:** depois de trocar de escritório, um temporizador do motor da demonstração do escritório anterior ainda pedia uma ação de um integrante que não existe no novo (o servidor recusava com `NAO_ENCONTRADO`, e a fumaça falhava às vezes no "sem erros no console"). O adaptador descarta essa ação antes de sair, com um aviso no console.
+
+### O projeto HEILD-BACKEND (São Paulo)
+
+O projeto do backend existe desde 15/11/2026: **HEILD-BACKEND**, ref `zfjivmgujytrqaiagvpm`, sa-east-1, Postgres 17. O HEILD-PROD (`jccwtyeqookthkonbbxn`) continua sendo só do wireframe.
+
+- **Daqui não há conexão Postgres** (o container só sai por HTTPS, pelo proxy). Por isso o `aplicar-projeto` ganhou `--http`: aplica pela API de gestão do Supabase (`POST /v1/projects/<ref>/database/query`), com as mesmas travas e mais uma, a região conferida na própria API de gestão (só sa-east-1). O Node só usa o proxy com `NODE_USE_ENV_PROXY=1`.
+- **Conferido (só leitura):** projeto saudável, vazio, `postgres` cria papéis, MFA por TOTP já ligado, gancho de token desligado, Data API exposta (`public, graphql_public`). A simulação lista as 10 migrações, de `fundacoes` a `b5_fundacao`.
+- **Ainda não aplicado:** a aplicação de verdade pede uma autorização que este ambiente não deu.
+
+**Aplicar** (do diretório `servidor/`, com a senha do login `app_api` num `.env.projeto`, que o git ignora; nunca imprima nem commite):
+
+```bash
+set -a; . ./.env.projeto; set +a
+export NODE_USE_ENV_PROXY=1 HEILD_CONFIRMAR_PROJETO=zfjivmgujytrqaiagvpm
+npx tsx src/banco/aplicar-projeto.ts --http             # simulação: lista o que falta
+npx tsx src/banco/aplicar-projeto.ts --http --aplicar   # aplica, uma migração por transação, e cria o app_api
+```
+
+Depois, pela API de gestão ou no painel:
+- **gancho de token:** `PATCH /v1/projects/<ref>/config/auth` com `hook_custom_access_token_enabled: true` e `hook_custom_access_token_uri: "pg-functions://postgres/heild_interno/gancho_token"`;
+- **Data API desligada:** painel › Settings › API. No banco ela já está fechada pela migração da B5.
+
+**Semente de demonstração:** sem conexão Postgres, ela vai como SQL de dados (`pg_dump --data-only --column-inserts` do banco local recém-semeado, sem `idempotencia`, `mudanca`, `evento_leitura` e `selo_leitura`), em lotes pela mesma API de gestão, e depois `setval` da sequência `versao_linha`. Só no projeto de homologação, e só com a demonstração ligada.
+
+**Reverter:** `servidor/sql/reverter_projeto.sql` apaga tudo o que as migrações e a semente criaram (o `public`, `heild_interno` e `pgboss`) e os papéis da B1, e devolve os privilégios padrão do Supabase. Depois, desligar o gancho de token. Só enquanto não houver dado real.
+
+**Critério da E1 contra o projeto:** a fumaça e o teste de vazamento pela API precisam da API rodando com conexão Postgres ao projeto, e isso não existe deste container. Daqui só dá para conferir a barreira do banco pela API de gestão: RLS forçada em toda tabela, `anon` e `authenticated` sem privilégio, `api_executor` de um escritório sem ver o outro. A fumaça e o vazamento completos rodam onde houver rede para o pooler de São Paulo: a hospedagem, o CI com o segredo do banco ou uma máquina com acesso.
 
 ### Desvios do desenho, e por quê
 
@@ -979,7 +1008,7 @@ Rodados com a API e o Vite no ar (`VITE_HEILD_BANCO=api`), um por vez, com a sem
 
 ### O que falta (depois da B5)
 
-- **Projeto Supabase em São Paulo** (depende do dono): aplicar a migração pelo `aplicar-projeto`, ligar o gancho de token e o MFA, desligar a Data API e rodar o vazamento e a fumaça contra ele (critério da E1).
+- **Projeto HEILD-BACKEND:** aplicar as migrações (`aplicar-projeto --http --aplicar`, pendente de autorização), a semente, o gancho de token e a Data API desligada, e rodar o vazamento e a fumaça onde houver conexão Postgres com ele (critério da E1).
 - **Retomada do cartão do executor da B1:** o cartão que o executor cria quando um integrante pede algo que exige aprovação ainda não roda o comando guardado quando a pessoa aprova (encaixe 4 da B1). Os cartões de execução da B2 já retomam. É o que falta para o s08b (abaixo).
 - **Fluxo de convite pelo Supabase Auth:** quem aceita o convite cria o login e a linha de `conta_auth`. Hoje a ligação é feita por quem administra (é o que o s09 esbarra).
 - Os pontos de tela que ainda leem evento e mensagem interna inteiros, nas telas das fases seguintes.

@@ -19,6 +19,11 @@ import { opcoesConexao } from './migrar.ts'
  *  - sem `--aplicar`, só lista as migrações que faltam;
  *  - não aplica `servidor/sql/00_supabase_local.sql` (papéis e esquema `auth` já existem no Supabase).
  *
+ * Sem acesso ao Postgres (o container só sai por HTTPS), `--http` aplica pela API de gestão do
+ * Supabase (`POST /v1/projects/<ref>/database/query`), com as mesmas travas:
+ *   HEILD_CONFIRMAR_PROJETO=<ref> npm run aplicar-projeto -w @heild/servidor -- --http [--aplicar]
+ * O token da API de gestão vem do ambiente (SUPABASE_ACCESS_TOKEN) ou do proxy que o injeta.
+ *
  * Depois: o gancho de token (Authentication › Hooks › Custom Access Token →
  * `heild_interno.gancho_token`) e a Data API desligada (Settings › API) no painel do projeto.
  * O passo a passo está em docs/backend/IMPLEMENTACAO.md (B5).
@@ -31,6 +36,70 @@ const MIGRACOES = path.join(RAIZ, 'app/supabase/migrations')
 export function refDoProjeto(url: string): string | null {
   const u = new URL(url)
   return /^db\.([a-z0-9]{20})\.supabase\.co$/.exec(u.hostname)?.[1] ?? /^postgres\.([a-z0-9]{20})$/.exec(decodeURIComponent(u.username))?.[1] ?? null
+}
+
+/** Quem roda o SQL: a conexão Postgres ou a API de gestão do Supabase. */
+export interface Consulta {
+  (sql: string): Promise<Record<string, unknown>[]>
+  fim(): Promise<void>
+}
+
+/** A API de gestão do Supabase como transporte (HTTPS; o SQL roda como `postgres`). */
+export function consultaHttp(ref: string): Consulta {
+  const token = process.env.SUPABASE_ACCESS_TOKEN
+  const c = (async (sql: string) => {
+    const r = await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ query: sql }),
+      signal: AbortSignal.timeout(120_000),
+    })
+    const texto = await r.text()
+    if (!r.ok) throw new Error(`A API de gestão recusou o SQL (${r.status}): ${texto.slice(0, 500)}`)
+    return (texto ? JSON.parse(texto) : []) as Record<string, unknown>[]
+  }) as Consulta
+  c.fim = async () => {}
+  return c
+}
+
+/** Texto como literal SQL (só para valores nossos: nomes de migração, a senha gerada). */
+const literal = (v: string) => `'${v.replace(/'/g, "''")}'`
+
+/** Pela API de gestão: as mesmas travas e os mesmos passos de `aplicarProjeto`, sem conexão Postgres. */
+export async function aplicarProjetoHttp(o: { ref: string; confirmar: string | undefined; senhaApi: string | undefined; aplicar: boolean; dizer?: (m: string) => void; consulta?: Consulta }) {
+  const dizer = o.dizer ?? console.log
+  if (o.confirmar !== o.ref) throw new Error(`HEILD_CONFIRMAR_PROJETO precisa ser ${o.ref}. Confira que é o projeto NOVO do backend, em sa-east-1.`)
+  if (o.aplicar && (!o.senhaApi || o.senhaApi.length < 24)) throw new Error('HEILD_PG_SENHA_API: a senha do login app_api, com 24 caracteres ou mais.')
+  const q = o.consulta ?? consultaHttp(o.ref)
+  if (!o.consulta) {
+    // Só o projeto do backend em São Paulo (P4): a região vem da própria API de gestão.
+    const token = process.env.SUPABASE_ACCESS_TOKEN
+    const info = (await (await fetch(`https://api.supabase.com/v1/projects/${o.ref}`, { headers: token ? { authorization: `Bearer ${token}` } : {} })).json()) as { region?: string; name?: string }
+    if (info.region !== 'sa-east-1') throw new Error(`O projeto ${o.ref} (${info.name ?? '?'}) não está em sa-east-1 (${info.region ?? 'região desconhecida'}). Nada foi aplicado.`)
+    dizer(`Projeto ${info.name} (${o.ref}), ${info.region}.`)
+  }
+  const [marca] = await q(`select to_regclass('public.escritorio') is not null as tem_app, to_regclass('heild_interno.migracao') is not null as tem_registro`)
+  if (marca.tem_app && !marca.tem_registro) throw new Error('Este banco já tem o esquema do app sem o registro desta ferramenta: parece o projeto do wireframe. Nada foi aplicado.')
+  const feitas = new Set(marca.tem_registro ? (await q('select nome from heild_interno.migracao')).map((r) => String(r.nome)) : [])
+  const faltam = readdirSync(MIGRACOES).filter((a) => a.endsWith('.sql')).sort().filter((a) => !feitas.has(a))
+  dizer(`Projeto ${o.ref}: ${feitas.size} migrações já aplicadas, ${faltam.length} faltando.`)
+  for (const a of faltam) dizer(`  ${o.aplicar ? 'aplicando' : 'faltaria'} ${a}`)
+  if (!o.aplicar) {
+    dizer('Nada mudou (rode de novo com --aplicar).')
+    return { ref: o.ref, faltam }
+  }
+  await q('create schema if not exists heild_interno; create table if not exists heild_interno.migracao (nome text primary key, aplicada_em timestamptz not null default now())')
+  for (const a of faltam) {
+    const texto = readFileSync(path.join(MIGRACOES, a), 'utf8')
+    // Uma migração por pedido, numa transação só com o registro dela.
+    await q(`begin;\n${texto}\n;insert into heild_interno.migracao (nome) values (${literal(a)});\ncommit;`)
+    dizer(`  aplicada ${a}`)
+  }
+  await q(`do $$ begin
+    if not exists (select 1 from pg_roles where rolname = 'app_api') then create role app_api login noinherit nobypassrls; end if;
+  end $$; alter role app_api with password ${literal(o.senhaApi!)}; grant api_executor to app_api; grant usage on schema public to app_api;`)
+  dizer('Pronto. Falta: gancho de token (heild_interno.gancho_token) e Data API desligada.')
+  return { ref: o.ref, faltam }
 }
 
 export async function aplicarProjeto(o: { url: string; confirmar: string | undefined; senhaApi: string | undefined; aplicar: boolean; dizer?: (m: string) => void }) {
@@ -74,7 +143,13 @@ export async function aplicarProjeto(o: { url: string; confirmar: string | undef
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${process.argv[1]}` && process.argv.includes('--http')) {
+  const ref = process.env.HEILD_CONFIRMAR_PROJETO ?? ''
+  aplicarProjetoHttp({ ref, confirmar: ref, senhaApi: process.env.HEILD_PG_SENHA_API, aplicar: process.argv.includes('--aplicar') }).catch((e) => {
+    console.error(e instanceof Error ? e.message : e)
+    process.exit(1)
+  })
+} else if (import.meta.url === `file://${process.argv[1]}`) {
   const url = process.env.HEILD_PG_URL_ADMIN
   if (!url) {
     console.error('Defina HEILD_PG_URL_ADMIN com a conexão do projeto novo (painel › Connect).')

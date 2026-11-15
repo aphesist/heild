@@ -6,3 +6,8 @@ dist/
 
 # Postgres local do servidor (servidor/scripts/pg-local.sh)
 servidor/.pgdata/
+
+# Segredos locais (senha do login da API no projeto Supabase, etc.): nunca no git
+.env
+.env.*
+servidor/.env*
