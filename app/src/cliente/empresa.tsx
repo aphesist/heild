@@ -48,7 +48,7 @@ export function Empresa({ ctx }: { ctx: Ctx }) {
       <TituloTela voltar={() => ctx.ir('mais')}>Empresa</TituloTela>
       <RevisaoAnual ctx={ctx} />
       {visiveis.map((s) => (
-        <button key={s.id} type="button" onClick={() => ctx.ir('empresa', s.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm">
+        <button key={s.id} type="button" onClick={() => ctx.ir('empresa', s.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left text-sm">
           <s.icone className="size-5" /> <span className="flex-1">{s.titulo}</span>
           <CaretRightIcon className="text-muted-foreground size-4" />
         </button>
@@ -77,7 +77,7 @@ function Dados({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
     ['Perfil vigente desde', perfil?.vigente_de?.split('-').reverse().join('/') ?? '—'],
   ]
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Dados da empresa</TituloTela>
       <Bloco titulo="Perfil vigente" acao={<Selo>só leitura</Selo>}>
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
@@ -150,7 +150,7 @@ function Pessoas({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
     ctx.avisarApp('Pedido enviado. O escritório revoga o acesso e confirma.')
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Pessoas e papéis</TituloTela>
       <Bloco titulo="Quem tem contato com o escritório">
         {contatos.map((c) => {
@@ -312,7 +312,7 @@ function Certificado({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
     ctx.avisarApp('Certificado revogado. O escritório foi avisado.')
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Certificado digital</TituloTela>
       {c.enviadoNovo && (
         <Faixa tom="ok" icone={<CheckCircleIcon weight="fill" />}>
@@ -448,7 +448,7 @@ function FolhaEnvioCertificado({ ctx, onFechar, onOk }: { ctx: Ctx; onFechar: ()
         <>
           <p className="text-muted-foreground text-xs">Escolha o arquivo .pfx ou .p12 (na demonstração, um destes):</p>
           {['certificado-a1-2027.pfx', 'certificado-de-outra-empresa.pfx', 'certificado-vence-em-3-dias.pfx'].map((a) => (
-            <button key={a} type="button" aria-pressed={arquivo === a} onClick={() => setArquivo(a)} className={cn('flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm', arquivo === a ? 'bg-raised shadow-contorno' : 'bg-sunken')}>
+            <button key={a} type="button" aria-pressed={arquivo === a} onClick={() => setArquivo(a)} className={cn('flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm', arquivo === a ? 'bg-raised shadow-contorno' : 'bg-sunken')}>
               <KeyIcon className="size-4" /> {a}
             </button>
           ))}
@@ -485,7 +485,7 @@ function Procuracoes({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
   const [passos, setPassos] = useState<string | null>(null)
   const def = itensPorCodigo['SOC-011']
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Procurações</TituloTela>
       <p className="text-muted-foreground text-xs">O que o escritório pode fazer por você em cada órgão, com a validade. Serve também para revogar tudo se um dia vocês saírem.</p>
       {lista.map((p) => (
@@ -538,7 +538,7 @@ function Termos({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
   const [recibo, setRecibo] = useState<Recibo | null>(null)
   const termos = [...extras.termos.map((t) => (t.titulo === 'Termo de uso do app' && acesso.termo ? { ...t, versao: acesso.termo.versao.split(' ')[0], em: acesso.termo.em } : t)), ...extras.cert.versoes.slice(0, -1).map((v) => ({ titulo: 'Autorização de uso do certificado A1', versao: `v${v.versao}`, em: v.em }))]
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Termos e recibos</TituloTela>
       <Bloco titulo="Termos aceitos">
         {termos.map((t) => (
@@ -586,7 +586,7 @@ function Acessos({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
   }
   const acessosLinks = links.flatMap((l) => l.acessos.map((a) => ({ ...a, nome: l.nomes[0], para: l.para })))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Acessos e aparelhos</TituloTela>
       <Bloco titulo="Sessões">
         {sessoes.map((s) => (
@@ -705,7 +705,7 @@ function PreferenciasAviso({ ctx, voltar }: { ctx: Ctx; voltar: () => void }) {
   ]
   const alternar = (cat: CategoriaAviso, c: CanalAviso) => setPref((p) => ({ ...p, canais: { ...p.canais, [cat]: p.canais[cat].includes(c) ? p.canais[cat].filter((x) => x !== c) : [...p.canais[cat], c] } }))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>Preferências de aviso</TituloTela>
       <Bloco titulo="Avisos no aparelho" acao={<Selo tom={acesso.push === 'permitido' ? 'ok' : 'neutro'}>{acesso.push === 'permitido' ? 'permitidos' : 'desligados'}</Selo>}>
         {acesso.push !== 'permitido' ? (

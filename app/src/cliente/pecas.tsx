@@ -14,7 +14,7 @@ import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 export function Bloco({ titulo, acao, children, className, id }: { titulo: ReactNode; acao?: ReactNode; children: ReactNode; className?: string; id?: string }) {
   return (
-    <section id={id} className={cn('bg-surface shadow-cartao flex flex-col gap-2 rounded-[20px] p-3.5', className)}>
+    <section id={id} className={cn('bg-surface shadow-cartao rounded-cartao flex flex-col gap-3 p-4', className)}>
       <header className="flex items-center gap-2">
         <h2 className="min-w-0 flex-1 text-sm font-medium">{titulo}</h2>
         {acao}
@@ -69,7 +69,7 @@ export function Chip({ ativo, onClick, children, contagem }: { ativo?: boolean; 
 
 export function Chips({ children, rotulo }: { children: ReactNode; rotulo?: string }) {
   return (
-    <AreaRolagem eixo="x" role="group" aria-label={rotulo} className="-mx-4 flex gap-1.5 px-4 pb-0.5">
+    <AreaRolagem eixo="x" role="group" aria-label={rotulo} className="sem-barra -mx-4 flex snap-x scroll-px-4 gap-1.5 px-4 pb-0.5 [&>*]:snap-start">
       {children}
     </AreaRolagem>
   )
@@ -89,7 +89,7 @@ export function Linha({ icone, titulo, apoio, direita, onClick, destaque, rotulo
   )
   if (!onClick) return <div className="flex items-center gap-2.5 py-1">{corpo}</div>
   return (
-    <button type="button" onClick={onClick} aria-label={rotulo} className="hover:bg-sunken/60 -mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-[12px] px-1.5 py-1.5 text-left">
+    <button type="button" onClick={onClick} aria-label={rotulo} className="hover:bg-sunken/60 -mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left">
       {corpo}
     </button>
   )
@@ -105,7 +105,7 @@ export function Folha({ titulo, onFechar, children, rodape, rotulo }: { titulo: 
   const corpo = (
     <div className="pointer-events-auto absolute inset-0 z-40 flex flex-col justify-end" role="dialog" aria-modal="true" aria-label={rotulo ?? (typeof titulo === 'string' ? titulo : undefined)}>
       <button type="button" aria-label="Fechar" tabIndex={-1} onClick={onFechar} className="absolute inset-0 cursor-default bg-black/30" />
-      <div className="bg-background shadow-painel relative flex max-h-[88%] flex-col rounded-t-[26px] md:mx-auto md:mb-6 md:w-[min(30rem,92%)] md:rounded-[26px]">
+      <div className="bg-background shadow-painel relative flex max-h-[88%] flex-col rounded-t-xl md:mx-auto md:mb-6 md:w-[min(30rem,92%)] md:rounded-xl">
         <div className="bg-border mx-auto mt-2 h-1 w-10 rounded-full md:hidden" aria-hidden />
         <header className="flex items-center gap-2 px-4 pt-2 pb-1">
           <h2 className="min-w-0 flex-1 text-base font-medium">{titulo}</h2>
@@ -123,7 +123,7 @@ export function Folha({ titulo, onFechar, children, rodape, rotulo }: { titulo: 
   return camada ? createPortal(corpo, camada) : corpo
 }
 
-export const classeCampo = 'bg-raised shadow-contorno h-11 w-full rounded-[12px] px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring'
+export const classeCampo = 'bg-raised shadow-contorno h-11 w-full rounded-md px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
 export function Campo({ rotulo, valor, onMudar, tipo = 'text', placeholder, ajuda, erro, inputMode, autoFocus }: { rotulo: string; valor: string; onMudar: (v: string) => void; tipo?: string; placeholder?: string; ajuda?: string; erro?: string | null; inputMode?: 'numeric' | 'decimal' | 'text' | 'email' | 'tel'; autoFocus?: boolean }) {
   return (
@@ -139,7 +139,7 @@ export function AreaTexto({ rotulo, valor, onMudar, placeholder, linhas = 3 }: {
   return (
     <label className="flex flex-col gap-1">
       <span className="text-muted-foreground text-xs">{rotulo}</span>
-      <textarea aria-label={rotulo} value={valor} onChange={(e) => onMudar(e.target.value)} rows={linhas} placeholder={placeholder} className="bg-raised shadow-contorno focus-visible:ring-ring rounded-[12px] px-3 py-2 text-sm outline-none focus-visible:ring-2" />
+      <textarea aria-label={rotulo} value={valor} onChange={(e) => onMudar(e.target.value)} rows={linhas} placeholder={placeholder} className="bg-raised shadow-contorno focus-visible:ring-ring rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2" />
     </label>
   )
 }
@@ -249,7 +249,7 @@ export function QrFicticio({ codigo, tamanho = 132 }: { codigo: string; tamanho?
     return cx === 0 || cy === 0 || cx === 6 || cy === 6 || (cx >= 2 && cx <= 4 && cy >= 2 && cy <= 4)
   }
   return (
-    <svg viewBox={`0 0 ${n} ${n}`} width={tamanho} height={tamanho} role="img" aria-label="QR Code do Pix (demonstração)" className="bg-raised rounded-[10px] p-2">
+    <svg viewBox={`0 0 ${n} ${n}`} width={tamanho} height={tamanho} role="img" aria-label="QR Code do Pix (demonstração)" className="bg-raised rounded-md p-2">
       {Array.from({ length: n * n }, (_, i) => {
         const x = i % n
         const y = Math.floor(i / n)
@@ -263,7 +263,7 @@ export function QrFicticio({ codigo, tamanho = 132 }: { codigo: string; tamanho?
 /** Faixa de aviso dentro de uma tela (modo leitura, pausa parcial, fora do horário). */
 export function Faixa({ tom = 'neutro', icone, children, acao }: { tom?: Tom; icone?: ReactNode; children: ReactNode; acao?: ReactNode }) {
   return (
-    <div className={cn('bg-sunken flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm', tom === 'atencao' && 'shadow-contorno')}>
+    <div className={cn('bg-sunken flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm', tom === 'atencao' && 'shadow-contorno')}>
       {icone && <span className={cn('mt-0.5 shrink-0 [&_svg]:size-4', tom === 'erro' ? 'text-destructive' : tom === 'atencao' ? 'text-warning' : tom === 'ok' ? 'text-success' : 'text-muted-foreground')}>{icone}</span>}
       <span className="min-w-0 flex-1">{children}</span>
       {acao}

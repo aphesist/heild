@@ -33,7 +33,7 @@ export function EstadoComplemento() {
     )
   return (
     <Caixa className="ring-warning/40 flex-row flex-wrap items-center ring-1">
-      <LockSimpleIcon className="size-6 shrink-0" weight="duotone" />
+      <LockSimpleIcon className="size-6 shrink-0" />
       <span className="min-w-0 flex-1 basis-64 text-sm">
         <span className="block font-medium">Sem marca branca: o escritório usa a identidade da plataforma</span>
         <span className="text-muted-foreground block text-xs">Dá para ver e testar tudo nesta tela, mas publicar, domínio próprio e remetente com o seu domínio dependem do complemento ({precoComplemento.marca_branca}). O App do cliente continua incluído no plano.</span>
@@ -48,7 +48,7 @@ export function EstadoComplemento() {
 /** Mini prévia de um tema num modo (as variáveis do tema aplicadas só no recorte). */
 function Miniatura({ t, modo }: { t: Tema; modo: ModoCor }) {
   return (
-    <span style={variaveisCss(t, modo) as CSSProperties} className={cn('from-background to-background-end flex h-14 flex-1 flex-col justify-between overflow-hidden rounded-[10px] bg-gradient-to-b p-1.5', modo === 'escuro' && 'dark')}>
+    <span style={variaveisCss(t, modo) as CSSProperties} className={cn('from-background to-background-end flex h-14 flex-1 flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b p-1.5', modo === 'escuro' && 'dark')}>
       <span className="text-foreground text-[10px] font-semibold" style={{ fontFamily: t.tokens.fonte_titulo }}>
         {t.sigla}
       </span>
@@ -95,7 +95,7 @@ export function SeletorTema() {
                   }
                   window.location.reload()
                 }}
-                className={cn('bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer flex-col gap-2 rounded-[14px] p-2.5 text-left disabled:cursor-not-allowed disabled:opacity-50', atual && 'ring-foreground/40 ring-2')}
+                className={cn('bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer flex-col gap-2 rounded-lg p-2.5 text-left disabled:cursor-not-allowed disabled:opacity-50', atual && 'ring-foreground/40 ring-2')}
               >
                 <span className="flex gap-1.5">
                   <Miniatura t={t} modo="claro" />
@@ -139,8 +139,8 @@ export function ModelosDocumento() {
       <ul className="grid gap-2 sm:grid-cols-2">
         {modelos.map((m) => (
           <li key={m.id}>
-            <button type="button" onClick={() => setEd(m)} className="bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer flex-col gap-2 rounded-[14px] p-2.5 text-left">
-              <span className="flex aspect-[1/0.55] w-full flex-col gap-1 rounded-[6px] bg-white p-2 text-black shadow-[0_1px_2px_rgba(0,0,0,.12)]">
+            <button type="button" onClick={() => setEd(m)} className="bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer flex-col gap-2 rounded-lg p-2.5 text-left">
+              <span className="flex aspect-[1/0.55] w-full flex-col gap-1 rounded-sm bg-white p-2 text-black shadow-[0_1px_2px_rgba(0,0,0,.12)]">
                 <span className="flex items-center gap-1 border-b border-black/10 pb-1 text-[9px]">
                   <strong>{tema.sigla}</strong> <span className="truncate text-black/60">{m.titulo}</span>
                 </span>

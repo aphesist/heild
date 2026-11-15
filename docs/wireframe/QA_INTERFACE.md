@@ -171,3 +171,27 @@ Números de `qa-interface.cjs` (67 rotas por largura). **Antes** é a versão de
 - O script não pega T-1 (vão sob a coluna larga, ao lado de uma lateral mais alta): confira no print.
 - Padrão que se repete e pede componente no UI Lab: "duas colunas de `Caixa` com alturas diferentes" (Timesheet, Financeiro, BPO). Um componente de página com duas pilhas e lateral opcional `sticky` resolveria F-1, F-2, F-4, B-2, B-4, B-6 de uma vez.
 - Não rodados ainda: build, suíte completa e prints de depois.
+
+## 7. Sessão UI-3 (S09, S09b e S10): pausada em 15/11/2026
+
+Parada a pedido do coordenador (a abordagem mudou para um UI Lab de componentes antes das correções por tela). Branch `wf-ui-3`, sem PR. O que já está feito, em três commits:
+
+| Item | Situação | O que mudou |
+| --- | --- | --- |
+| X-1 | feito nas telas do grupo | 139 raios soltos viraram tokens em `telas/config`, `telas/arquivos`, `ArquivosTela` e `cliente/`: bloco no cartão `rounded-lg`, item `rounded-md`, miniatura `rounded-sm`, cartão `rounded-cartao`, diálogo e folha `rounded-xl`. Ficaram dois, de propósito: a moldura do aparelho em `MolduraCliente.tsx` (`rounded-[48px]` e `[40px]`), que desenha o celular e não é forma da marca |
+| X-2 | feito | 10 duotone tirados; o sino do app do cliente fica regular no inativo e preenchido no ativo (proposta 5) |
+| A-1 | parcial | Pastas: grade `lg:items-start`, a árvore rola por dentro e fica presa ao topo (`lg:sticky`), a pasta aberta tem altura natural (saiu o `min-h-[24rem]`). O QA ainda acusa 313px sob a pasta aberta, ao lado da árvore alta (18 linhas): falta decidir se a árvore fica mais curta ou se a pasta mostra os arquivos dela |
+| A-2 | feito | Armazenamento: Raio-X virou faixa compacta (estado à esquerda, Dicionário e Rodar à direita) e a Manutenção vem embaixo com a altura da lista. Funciona com Drive, OneDrive, Dropbox, Box e servidor local (o texto e o selo vêm do conector) |
+| A-3 | feito | Permissões: "Nunca liberável" em faixa de selos antes da matriz; a nota do "Simular" foi para dentro da matriz; Regras por papel em largura inteira (papel à esquerda, o que vê à direita) |
+| A-4 | feito | Tema: nome e e-mail do remetente em linhas próprias, o e-mail com `break-all`; integrantes padrão em 2 colunas de `lg` até `largo` |
+| A-5 | feito | Integrantes: Clientes-piloto e Modo simulação lado a lado (mesma altura); Liberação no atendimento embaixo, em largura inteira |
+| A-6 | não conferido | — |
+| K-1 | feito | Atalhos e chips do app (`inicio.tsx`, `pecas.tsx`, `servicos.tsx`) com `esmaecer-lados`, sem barra e com encaixe (`snap-x`, `snap-start`) |
+| K-2 | feito | A rolagem e o aviso numa camada acima do menu inferior (o aviso deixou de cobrir o menu) e 32px de respiro no fim da lista; ritmo de 16px entre cards (`gap-4`) e `p-4` / `gap-3` no `Bloco` do app |
+| X-3 | junto com A-1 a A-5 | — |
+
+**qa-interface, só nas rotas do grupo (18 por largura):** antes 4 / 4 / 0 / 0 (1440 / 1024 / 768 / 390), depois 1 / 1 / 0 / 0. O que sobra é o A-1 acima.
+
+**Não rodado ainda:** `npm run build` e a suíte (s09, s09b, s10 e as outras). O typecheck (`tsc -b`) está limpo. Nada foi registrado no DECISOES.md.
+
+**O que descobri e pode ir para o UI Lab:** o `Bloco` do app do cliente tinha padding e espaço diferentes da `Caixa` (p-3.5 e gap-2); o aviso do app ficava em cima do menu inferior; as faixas de chips do app não usavam o padrão de faixa que rola de lado; os diálogos das telas usavam 20, 24 e 28px para o mesmo papel. Esses quatro valem como componente (cartão do app, aviso, faixa de chips, diálogo) e não como correção por tela.

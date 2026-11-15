@@ -131,8 +131,9 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
             )}
           </Caixa>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
-            <Caixa className="max-h-[70vh] overflow-hidden">
+          // A-1: a árvore rola por dentro e fica presa ao topo; a pasta aberta tem a altura do que tem.
+          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+            <Caixa className="max-h-[70vh] overflow-hidden lg:sticky lg:top-0">
               <AreaRolagem as="ul" className="-mx-1 flex flex-col px-1 text-sm">
                 {raizes.map((r) => {
                   const aberto = abertos.includes(r.id)
@@ -144,10 +145,10 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
                           setAbertos((xs) => (aberto && raiz === r.id ? xs.filter((x) => x !== r.id) : xs.includes(r.id) ? xs : [...xs, r.id]))
                           irPara(r.id, [])
                         }}
-                        className={cn('hover:bg-sunken/60 flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] px-1.5 py-1.5 text-left', raiz === r.id && caminho.length === 0 && 'bg-sunken font-medium')}
+                        className={cn('hover:bg-sunken/60 flex w-full cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-1.5 text-left', raiz === r.id && caminho.length === 0 && 'bg-sunken font-medium')}
                       >
                         {aberto ? <CaretDownIcon className="size-3.5 shrink-0" /> : <CaretRightIcon className="size-3.5 shrink-0" />}
-                        {aberto ? <FolderOpenIcon className="text-muted-foreground size-4 shrink-0" weight="duotone" /> : <FolderIcon className="text-muted-foreground size-4 shrink-0" weight="duotone" />}
+                        {aberto ? <FolderOpenIcon className="text-muted-foreground size-4 shrink-0" /> : <FolderIcon className="text-muted-foreground size-4 shrink-0" />}
                         <span className="min-w-0 flex-1 truncate">{r.nome}</span>
                       </button>
                       {aberto && raiz === r.id && <Ramo base={[]} filhas={filhas} caminho={caminho} onIr={(c) => irPara(r.id, c)} />}
@@ -157,12 +158,12 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
               </AreaRolagem>
             </Caixa>
 
-            <Caixa className="min-h-[24rem]">
+            <Caixa>
               <nav aria-label="Pasta atual" className="flex flex-wrap items-center gap-1 text-sm">
                 {[pastaDoCliente(clienteId), ...caminho].map((p, i) => (
                   <span key={i} className="flex items-center gap-1">
                     {i > 0 && <CaretRightIcon className="text-muted-foreground size-3" />}
-                    <button type="button" onClick={() => setCaminho(caminho.slice(0, i))} className={cn('cursor-pointer rounded-[8px] px-1.5 py-0.5', i === caminho.length ? 'font-medium' : 'text-muted-foreground hover:text-foreground')}>
+                    <button type="button" onClick={() => setCaminho(caminho.slice(0, i))} className={cn('cursor-pointer rounded-sm px-1.5 py-0.5', i === caminho.length ? 'font-medium' : 'text-muted-foreground hover:text-foreground')}>
                       {p}
                     </button>
                   </span>
@@ -177,8 +178,8 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
               <ul className="divide-border/70 flex flex-col divide-y">
                 {filhas(caminho).map((p) => (
                   <li key={p.join('/')}>
-                    <button type="button" onClick={() => setCaminho(p)} className="hover:bg-sunken/50 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-3 rounded-[10px] px-2 py-2 text-left text-sm">
-                      <FolderIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
+                    <button type="button" onClick={() => setCaminho(p)} className="hover:bg-sunken/50 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-left text-sm">
+                      <FolderIcon className="text-muted-foreground size-5 shrink-0" />
                       <span className="min-w-0 flex-1 truncate">{p[p.length - 1]}</span>
                       {clienteId && pastaVisivel(p) && <EyeIcon className="text-success size-4 shrink-0" aria-label="visível ao cliente" />}
                       <span className="text-muted-foreground shrink-0 text-xs tabular-nums">{contagem(p)} arquivo(s)</span>
@@ -235,10 +236,10 @@ function Ramo({ base, filhas, caminho, onIr }: { base: string[]; filhas: (b: str
             <button
               type="button"
               onClick={() => onIr(p)}
-              className={cn('hover:bg-sunken/60 flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1 pr-1.5 text-left', ativo && 'bg-sunken font-medium')}
+              className={cn('hover:bg-sunken/60 flex w-full cursor-pointer items-center gap-1.5 rounded-md py-1 pr-1.5 text-left', ativo && 'bg-sunken font-medium')}
               style={{ paddingLeft: 10 + p.length * 14 }}
             >
-              {dentro ? <FolderOpenIcon className="text-muted-foreground size-4 shrink-0" weight="duotone" /> : <FolderIcon className="text-muted-foreground size-4 shrink-0" weight="duotone" />}
+              {dentro ? <FolderOpenIcon className="text-muted-foreground size-4 shrink-0" /> : <FolderIcon className="text-muted-foreground size-4 shrink-0" />}
               <span className="min-w-0 flex-1 truncate">{p[p.length - 1]}</span>
               {pastaVisivel(p) && p.length <= 2 && <EyeIcon className="text-success size-3.5 shrink-0" aria-label="visível ao cliente" />}
             </button>
@@ -290,8 +291,8 @@ function ListaArquivos({ itens, comCaminho, onAbrir, onPasta }: { itens: Documen
         const con = conectorDe(d.conector)
         return (
           <MenuContexto key={d.id} acoes={acoesDe(d)} rotulo={`Ações de ${d.nome}`}>
-          <li data-doc={d.nome} className="hover:bg-sunken/50 -mx-2 flex items-center gap-3 rounded-[10px] px-2 py-2 text-sm">
-            <FileTextIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
+          <li data-doc={d.nome} className="hover:bg-sunken/50 -mx-2 flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+            <FileTextIcon className="text-muted-foreground size-5 shrink-0" />
             <button type="button" onClick={() => onAbrir(d)} className="min-w-0 flex-1 cursor-pointer text-left">
               <span className="block truncate">{d.nome}</span>
               <span className="text-muted-foreground block truncate text-xs">

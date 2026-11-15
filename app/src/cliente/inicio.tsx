@@ -62,7 +62,7 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
   const vazio = !abertas.length && !guias.length && !lotes.length && !novos.length && !paraAssinar.length && !honorarios.length && !aguardandoVoce.length
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <p className="text-lg font-light">
         Olá, {primeiroNome(pessoa.nome)}. Hoje é 18/11.
       </p>
@@ -70,7 +70,7 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
       {!ctx.leitura && <Instalar ctx={ctx} />}
 
       {servicosAtivos.length > 0 && !ctx.leitura && (
-        <AreaRolagem eixo="x" className="-mx-4 flex gap-1.5 px-4 pb-0.5">
+        <AreaRolagem eixo="x" className="sem-barra -mx-4 flex snap-x scroll-px-4 gap-1.5 px-4 pb-0.5 [&>*]:snap-start">
           {servicosAtivos.map((sv) => (
             <button key={sv.id} type="button" onClick={() => ctx.abrirServico(sv.id)} className="bg-surface shadow-cartao flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs whitespace-nowrap">
               <SparkleIcon className="size-3.5" /> {sv.atalho ?? sv.nome}
@@ -242,7 +242,7 @@ export function Inicio({ ctx, pessoa }: { ctx: Ctx; pessoa: PessoaApp }) {
                 entrega(d, 'visto')
                 ctx.ir('documentos', d.id)
               }}
-              className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-[12px] px-1.5 py-1 text-left text-sm"
+              className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm"
             >
               <FileTextIcon className="text-muted-foreground size-5 shrink-0" />
               <span className="min-w-0 flex-1 truncate">{d.nome}</span>
@@ -370,7 +370,7 @@ function Instalar({ ctx }: { ctx: Ctx }) {
       </Faixa>
       {aberto && (
         <Folha titulo="Instalar o app" onFechar={() => setAberto(false)}>
-          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[16px] p-3 text-sm">
+          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3 text-sm">
             <p className="flex items-center gap-2 font-medium">
               <AndroidLogoIcon className="size-5" /> Android
             </p>
@@ -388,7 +388,7 @@ function Instalar({ ctx }: { ctx: Ctx }) {
               Instalar
             </Button>
           </div>
-          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[16px] p-3 text-sm">
+          <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3 text-sm">
             <p className="flex items-center gap-2 font-medium">
               <AppleLogoIcon className="size-5" /> iPhone
             </p>

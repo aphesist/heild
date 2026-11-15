@@ -52,7 +52,7 @@ export function Financeiro({ ctx }: { ctx: Ctx }) {
   if (!ctx.areas.includes('financeiro')) return <EstadoVazio icone={WalletIcon} titulo="Esta área não é do seu papel" descricao="Honorários e boletos do escritório ficam com o sócio e o financeiro da empresa." />
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Financeiro com o escritório</TituloTela>
       {contrato && (
         <Bloco titulo="Contrato" acao={<Selo tom={contrato.situacao === 'reajuste_agendado' ? 'atencao' : 'ok'}>{contrato.situacao === 'reajuste_agendado' ? 'reajuste agendado' : 'vigente'}</Selo>}>
@@ -249,7 +249,7 @@ function FolhaPagar({ f, ctx, onFechar, onSegundaVia }: { f: Fatura; ctx: Ctx; o
   return (
     <Folha titulo={`Pagar ${f.competencia}`} onFechar={onFechar}>
       {via && (
-        <div className="bg-sunken rounded-[12px] px-3 py-2 text-xs">
+        <div className="bg-sunken rounded-md px-3 py-2 text-xs">
           <p className="font-medium">2ª via atualizada ({via.dias} dias de atraso)</p>
           <p>
             Original {brl(f.valor)} + multa {brl(via.multa)} + juros {brl(via.juros)} = <strong className="font-medium">{brl(via.total)}</strong>, vence {via.vencimento}.
@@ -273,7 +273,7 @@ function FolhaPagar({ f, ctx, onFechar, onSegundaVia }: { f: Fatura; ctx: Ctx; o
         (pix ? (
           <div className="flex flex-col items-center gap-2">
             <QrFicticio codigo={pix.copia} />
-            <code className="bg-sunken w-full rounded-[10px] px-3 py-2 text-[10px] break-all">{pix.copia}</code>
+            <code className="bg-sunken w-full rounded-md px-3 py-2 text-[10px] break-all">{pix.copia}</code>
             <div className="flex items-center gap-2">
               <BotaoCopiar texto={pix.copia} rotulo="Copiar Pix" aoCopiar={() => ctx.avisarApp('Código Pix copiado.')} />
               <SeloDemonstracao fonte={pix.fonte} />
@@ -287,7 +287,7 @@ function FolhaPagar({ f, ctx, onFechar, onSegundaVia }: { f: Fatura; ctx: Ctx; o
       {modo === 'boleto' &&
         (boleto ? (
           <div className="flex flex-col gap-2">
-            <code className="bg-sunken rounded-[10px] px-3 py-2 text-xs break-all">{boleto.linha}</code>
+            <code className="bg-sunken rounded-md px-3 py-2 text-xs break-all">{boleto.linha}</code>
             <div className="flex items-center gap-2">
               <BotaoCopiar texto={boleto.linha} rotulo="Copiar código" />
               <SeloDemonstracao fonte={boleto.fonte} />

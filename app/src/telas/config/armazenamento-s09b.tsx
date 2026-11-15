@@ -33,7 +33,7 @@ export function FaixaOndeFicam({ padrao }: { padrao?: ConectorArmazenamento }) {
   const naHeild = padrao?.tipo === 'plataforma'
   return (
     <Caixa className="flex-row flex-wrap items-start">
-      <ShieldCheckIcon className="text-success size-6 shrink-0" weight="duotone" />
+      <ShieldCheckIcon className="text-success size-6 shrink-0" />
       <span className="min-w-0 flex-1 basis-64 text-sm">
         <span className="block font-medium">Os arquivos ficam no armazenamento do escritório</span>
         <span className="text-muted-foreground block text-xs">
@@ -64,7 +64,7 @@ export function JanelaAutorizacao({ tipo, workspace, liberadoPeloAdmin, onFechar
     <DialogPrimitive.Root open onOpenChange={(v) => !v && onFechar()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[70] bg-black/40" />
-        <DialogPrimitive.Content aria-describedby={undefined} className="bg-raised text-foreground shadow-cartao fixed top-1/2 left-1/2 z-[70] flex w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-[20px] p-5 outline-none">
+        <DialogPrimitive.Content aria-describedby={undefined} className="bg-raised text-foreground shadow-cartao fixed top-1/2 left-1/2 z-[70] flex w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-xl p-5 outline-none">
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <LockKeyIcon className="size-3.5" /> janela de {p.empresa} (simulada)
             <DialogPrimitive.Close asChild>
@@ -125,7 +125,7 @@ export function AutorizarNuvem({ tipo, onAutorizado }: { tipo: TipoArmazenamento
         </Campo>
       )}
       {workspace && (
-        <div className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3" data-workspace>
+        <div className="bg-sunken/60 flex flex-col gap-2 rounded-lg p-3" data-workspace>
           <span className="flex items-center gap-1.5 font-medium">
             <InfoIcon className="size-4" /> Peça ao administrador do Workspace para liberar a Heild
           </span>
@@ -136,7 +136,7 @@ export function AutorizarNuvem({ tipo, onAutorizado }: { tipo: TipoArmazenamento
             ))}
           </ol>
           <span className="flex flex-wrap items-center gap-2 text-xs">
-            <code className="bg-raised rounded-[8px] px-2 py-1 break-all">{ID_CLIENTE_OAUTH_HEILD}</code>
+            <code className="bg-raised rounded-sm px-2 py-1 break-all">{ID_CLIENTE_OAUTH_HEILD}</code>
             <Button type="button" size="sm" variant="ghost" className="h-7 rounded-full" onClick={() => loja.toast('ID do cliente OAuth copiado.')}>
               <CopyIcon /> Copiar ID
             </Button>
@@ -213,7 +213,7 @@ export function ParearAgente({ onPareado }: { onPareado: (a: { dispositivo: stri
   }
   return (
     <div className="flex flex-col gap-3 text-sm" data-agente-pareamento>
-      <p className="bg-sunken/60 flex items-start gap-2 rounded-[14px] p-3 text-xs">
+      <p className="bg-sunken/60 flex items-start gap-2 rounded-lg p-3 text-xs">
         <ShieldCheckIcon className="text-success mt-0.5 size-4 shrink-0" /> O agente só abre conexão de saída (HTTPS) para a Heild: nenhuma porta é aberta no escritório e nenhum acesso de fora chega ao servidor. Os arquivos continuam no servidor; a Heild guarda só o índice e o texto.
       </p>
       <Segmentado
@@ -236,7 +236,7 @@ export function ParearAgente({ onPareado }: { onPareado: (a: { dispositivo: stri
         <li className="flex flex-wrap items-center gap-2">
           <span className="bg-sunken flex size-6 shrink-0 items-center justify-center rounded-full text-xs">2</span>
           Na instalação, digite o código de pareamento (vale 15 minutos, uma vez só):
-          <code className="bg-raised shadow-contorno rounded-[10px] px-3 py-1 font-mono text-base tracking-widest" aria-label="Código de pareamento">
+          <code className="bg-raised shadow-contorno rounded-md px-3 py-1 font-mono text-base tracking-widest" aria-label="Código de pareamento">
             {codigo}
           </code>
         </li>
@@ -316,7 +316,7 @@ export function CartaoAgente({ agenteId, onRevogado }: { agenteId: string; onRev
     }
   }
   return (
-    <div className="bg-raised/60 flex flex-col gap-2 rounded-[12px] p-2.5 text-xs" data-agente={a.id}>
+    <div className="bg-raised/60 flex flex-col gap-2 rounded-md p-2.5 text-xs" data-agente={a.id}>
       <span className="flex flex-wrap items-center gap-2">
         <HardDrivesIcon className="size-4" />
         <span className="font-medium">{a.dispositivo}</span>

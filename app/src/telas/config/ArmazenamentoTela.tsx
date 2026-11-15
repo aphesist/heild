@@ -82,7 +82,7 @@ export function ArmazenamentoTela() {
           </TituloBloco>
           <ul className="flex flex-col gap-3">
             {conectores.map((c) => (
-              <li key={c.id} className="bg-sunken/50 flex flex-col gap-2 rounded-[16px] p-3">
+              <li key={c.id} className="bg-sunken/50 flex flex-col gap-2 rounded-lg p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {c.tipo === 'plataforma' ? <DatabaseIcon className="text-muted-foreground size-5" /> : iconeProvedor(c.tipo)}
                   <span className="min-w-0 grow basis-40">
@@ -107,7 +107,7 @@ export function ArmazenamentoTela() {
               </li>
             ))}
           </ul>
-          <div className="bg-sunken/50 flex flex-col gap-2.5 rounded-[14px] p-3">
+          <div className="bg-sunken/50 flex flex-col gap-2.5 rounded-lg p-3">
             <span className="text-sm">
               <span className="font-medium">Pastas sem cliente</span>
               <span className="text-muted-foreground block text-xs">Não casaram com nenhum cliente pelo nome ou CNPJ. Até você decidir, ficam fora da busca.</span>
@@ -165,7 +165,7 @@ export function ArmazenamentoTela() {
                       setDestinoEd(i)
                       setModal('destino')
                     }}
-                    className="hover:bg-sunken/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-col rounded-[10px] px-2 py-2 text-left text-sm"
+                    className="hover:bg-sunken/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-col rounded-md px-2 py-2 text-left text-sm"
                   >
                     <span>{d.tipo}</span>
                     <span className="text-muted-foreground font-mono text-[11px]">
@@ -177,10 +177,9 @@ export function ArmazenamentoTela() {
             </ul>
           </Caixa>
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <BlocoRaioX />
-          <BlocoManutencao />
-        </div>
+        {/* A-2: o Raio-X em faixa e a Manutenção com a altura da lista, cada um na sua linha. */}
+        <BlocoRaioX />
+        <BlocoManutencao />
       </div>
 
       {modal === 'conectar' && (
@@ -299,7 +298,7 @@ function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConec
       {passo === 0 && <p className="text-muted-foreground text-xs">{provedores.find((p) => p.tipo === tipo)?.descricao}. Os arquivos continuam no armazenamento do escritório; a Heild guarda só o índice e o texto.</p>}
       {passo === 1 &&
         (autorizado ? (
-          <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+          <p className="bg-success/10 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm">
             <CheckCircleIcon weight="fill" className="text-success size-5" /> {agente ? `${agente.dispositivo} pareado; ${agente.pastas.length} pasta(s) compartilhada(s).` : conta ? `Acesso autorizado: ${conta.conta}.` : 'Acesso autorizado.'} A credencial fica no cofre.
           </p>
         ) : credencial ? (
@@ -333,7 +332,7 @@ function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConec
       )}
       {passo === 3 && (
         <div className="flex flex-col gap-3 text-sm">
-          <p className="bg-success/10 rounded-[14px] px-3 py-2.5">
+          <p className="bg-success/10 rounded-lg px-3 py-2.5">
             <strong className="font-medium">412 pastas casaram sozinhas</strong> pelo CNPJ no nome, pelo ano (4 dígitos) e pela competência (AAAA-MM, MM-AAAA ou nome do mês).
           </p>
           <span className="font-medium">Não casaram ({mapas.length}):</span>

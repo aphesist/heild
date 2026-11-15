@@ -102,10 +102,10 @@ export function PushSimulado({ ctx }: { ctx: Ctx }) {
         setMostrando(null)
         if (mostrando.destino) ctx.ir(mostrando.destino.tela as Tela, mostrando.destino.item ?? null)
       }}
-      className="bg-raised shadow-painel absolute top-2 right-2 left-2 z-50 flex cursor-pointer items-start gap-2.5 rounded-[18px] px-3 py-2.5 text-left"
+      className="bg-raised shadow-painel absolute top-2 right-2 left-2 z-50 flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-left"
       aria-label={`Notificação: ${mostrando.titulo}`}
     >
-      <span className="bg-sunken flex size-8 shrink-0 items-center justify-center rounded-[10px]">{mostrando.canal === 'push' ? <BellIcon className="size-4" weight="fill" /> : <ChatCircleTextIcon className="size-4" weight="fill" />}</span>
+      <span className="bg-sunken flex size-8 shrink-0 items-center justify-center rounded-md">{mostrando.canal === 'push' ? <BellIcon className="size-4" weight="fill" /> : <ChatCircleTextIcon className="size-4" weight="fill" />}</span>
       <span className="min-w-0 flex-1">
         <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
           {mostrando.canal === 'push' ? produto : 'WhatsApp'} · agora{mostrando.prioridade === 'urgente' && ' · urgente'}
@@ -128,7 +128,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
   const naoLidos = central.filter((a) => !a.lido && !a.silenciado).length
   const hoje = central.filter((a) => a.quando.startsWith('18/11') || a.quando.startsWith('hoje'))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela
         voltar={() => ctx.ir('inicio')}
         acao={
@@ -140,7 +140,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
         Avisos
       </TituloTela>
       {pref.resumoDiario.ligado && hoje.length > 0 && (
-        <p className="bg-sunken rounded-[14px] px-3 py-2 text-xs">
+        <p className="bg-sunken rounded-lg px-3 py-2 text-xs">
           Resumo de hoje (às {pref.resumoDiario.hora}): {hoje.length} {hoje.length === 1 ? 'novidade' : 'novidades'}, {hoje.filter((a) => a.categoria === 'conversa').length} na conversa. Urgente chega na hora, mesmo no silêncio.
         </p>
       )}
@@ -165,7 +165,7 @@ export function Avisos({ ctx }: { ctx: Ctx }) {
       {lista.length === 0 && <EstadoVazio compacto icone={BellIcon} titulo="Nada por aqui" descricao="Quando o escritório mandar algo, aparece aqui e no aparelho." />}
       <div className="flex flex-col gap-1.5">
         {lista.map((a) => (
-          <div key={a.id} className={cn('bg-surface shadow-cartao flex flex-col gap-1 rounded-[16px] px-3 py-2.5', a.silenciado && 'opacity-70')}>
+          <div key={a.id} className={cn('bg-surface shadow-cartao flex flex-col gap-1 rounded-lg px-3 py-2.5', a.silenciado && 'opacity-70')}>
             <button
               type="button"
               className="flex cursor-pointer items-start gap-2 text-left"

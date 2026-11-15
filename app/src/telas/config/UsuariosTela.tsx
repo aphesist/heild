@@ -414,7 +414,7 @@ function EditarUsuario({ u, onFechar, onSalvar }: { u: UsuarioCfg; onFechar: () 
           })
         }
       >
-        <p className="bg-warning/10 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-warning/10 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" />
           <span>Tem 7 tarefas abertas, 2 conversas em atendimento e é responsável padrão de 0 setores. Os integrantes dela pausam.</span>
         </p>
@@ -511,7 +511,7 @@ function EditarUsuario({ u, onFechar, onSalvar }: { u: UsuarioCfg; onFechar: () 
           {d.vinculos.some((v) => v.setor === 'gestao_atendimento') && !telasApoio.every((t) => d.excecoes.some((x) => x.tela === t)) && (
             <button
               type="button"
-              className="bg-sunken/60 hover:bg-sunken flex cursor-pointer items-start gap-2 rounded-[12px] px-3 py-2 text-left text-sm"
+              className="bg-sunken/60 hover:bg-sunken flex cursor-pointer items-start gap-2 rounded-md px-3 py-2 text-left text-sm"
               onClick={() => setD({ ...d, excecoes: [...d.excecoes.filter((x) => !telasApoio.includes(x.tela)), ...perfilApoio()] })}
             >
               <PlusIcon className="mt-0.5 size-4 shrink-0" />
@@ -523,7 +523,7 @@ function EditarUsuario({ u, onFechar, onSalvar }: { u: UsuarioCfg; onFechar: () 
           )}
           {d.excecoes.length ? (
             d.excecoes.map((x) => (
-              <div key={x.id} className="bg-sunken/60 flex items-start gap-2 rounded-[12px] px-3 py-2 text-sm">
+              <div key={x.id} className="bg-sunken/60 flex items-start gap-2 rounded-md px-3 py-2 text-sm">
                 <span className="min-w-0 flex-1">
                   <span className="block">
                     {x.efeito === 'liberar' ? `Libera até ${x.nivel}` : 'Bloqueia'}: {telasSistema.find((t) => t.id === x.tela)?.rotulo}

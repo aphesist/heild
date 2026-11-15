@@ -184,7 +184,7 @@ function Conexoes({ conectores }: { conectores: SaudeConector[] }) {
                 .filter((c) => c.familia === f)
                 .map((c) => (
                   <li key={c.id} data-conector={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
-                    <PlugsConnectedIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />
+                    <PlugsConnectedIcon className="text-muted-foreground size-5 shrink-0" />
                     <span className="min-w-0 flex-1 basis-56">
                       <span className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
                         {c.nome}
@@ -312,7 +312,7 @@ function Conectar({ c, onFechar }: { c: SaudeConector; onFechar: () => void }) {
       {c.estado === 'captcha' ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm">O portal pediu uma verificação humana. A rotina fica esperando; quando você responder, ela segue de onde parou.</p>
-          <div className="bg-sunken flex h-16 items-center justify-center rounded-[12px] font-mono text-2xl tracking-[0.4em] select-none" aria-label="Imagem do CAPTCHA (simulada)">
+          <div className="bg-sunken flex h-16 items-center justify-center rounded-md font-mono text-2xl tracking-[0.4em] select-none" aria-label="Imagem do CAPTCHA (simulada)">
             7KQ2M
           </div>
           <Campo rotulo="O que aparece na imagem" ajuda="Na demonstração, qualquer texto com 4 letras ou mais segue.">
@@ -471,7 +471,7 @@ function Cofre() {
               const dias = diasAte(c.validade)
               return (
                 <li key={c.id} data-credencial={c.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-2 py-3', sit === 'revogada' && 'opacity-60')}>
-                  {c.tipo.includes('procuracao') ? <ShieldCheckIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" /> : c.tipo === 'ecnpj_escritorio' || c.tipo === 'a1_cliente' ? <CertificateIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" /> : <KeyIcon className="text-muted-foreground size-5 shrink-0" weight="duotone" />}
+                  {c.tipo.includes('procuracao') ? <ShieldCheckIcon className="text-muted-foreground size-5 shrink-0" /> : c.tipo === 'ecnpj_escritorio' || c.tipo === 'a1_cliente' ? <CertificateIcon className="text-muted-foreground size-5 shrink-0" /> : <KeyIcon className="text-muted-foreground size-5 shrink-0" />}
                   <span className="min-w-0 flex-1 basis-60">
                     <span className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
                       {c.titular}
@@ -683,7 +683,7 @@ function Rotinas() {
         <GavetaFormulario aberta onFechar={() => setVendo(null)} titulo={`Com erro · ${vendo.nome}`} descricao="O que a rotina não conseguiu na última execução. Reprocessar tenta de novo." acao="Fechar" onAcao={() => setVendo(null)}>
           <ul className="flex flex-col gap-2 text-sm">
             {vendo.arquivos_com_erro.map((a) => (
-              <li key={a} className="bg-sunken/60 flex items-center gap-2 rounded-[12px] px-3 py-2">
+              <li key={a} className="bg-sunken/60 flex items-center gap-2 rounded-md px-3 py-2">
                 <WarningIcon className="text-warning size-4" /> {a}
               </li>
             ))}

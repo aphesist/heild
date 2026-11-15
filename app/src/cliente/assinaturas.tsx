@@ -31,7 +31,7 @@ export function Assinaturas({ ctx }: { ctx: Ctx }) {
   if (aberto) return <DetalheAssinatura a={aberto} ctx={ctx} />
   const vis = lista.filter((a) => (filtro === 'aguardando' ? a.situacao === 'aguardando' || a.situacao === 'em_conferencia' : a.situacao === 'assinado' || a.situacao === 'recusado'))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Assinaturas</TituloTela>
       <Chips rotulo="Filtrar assinaturas">
         <Chip ativo={filtro === 'aguardando'} onClick={() => setFiltro('aguardando')} contagem={lista.filter((a) => a.situacao === 'aguardando').length}>
@@ -43,7 +43,7 @@ export function Assinaturas({ ctx }: { ctx: Ctx }) {
       </Chips>
       {vis.length === 0 && <EstadoVazio compacto icone={PenNibIcon} titulo={filtro === 'aguardando' ? 'Nada para assinar' : 'Nada assinado ainda'} descricao="Termos, ciências e documentos que o escritório pedir para assinar aparecem aqui." />}
       {vis.map((a) => (
-        <button key={a.id} type="button" onClick={() => ctx.ir('assinaturas', a.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-[18px] px-3.5 py-3 text-left">
+        <button key={a.id} type="button" onClick={() => ctx.ir('assinaturas', a.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-3 text-left">
           <PenNibIcon className="text-muted-foreground size-5 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-medium">{a.titulo}</span>
@@ -104,7 +104,7 @@ function DetalheAssinatura({ a, ctx }: { a: DocAssinar; ctx: Ctx }) {
       .catch((e: Error) => setErro(e.message))
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('assinaturas')} acao={<SeloSituacao a={a} />}>
         {rotuloNivel[a.nivel].replace(/^./, (c) => c.toUpperCase())}
       </TituloTela>
@@ -113,7 +113,7 @@ function DetalheAssinatura({ a, ctx }: { a: DocAssinar; ctx: Ctx }) {
           O documento foi assinado pelo contador e a assinatura foi conferida no PDF antes de chegar aqui.
         </Faixa>
       )}
-      <article className="bg-raised shadow-cartao flex flex-col gap-3 rounded-[18px] p-4">
+      <article className="bg-raised shadow-cartao flex flex-col gap-3 rounded-lg p-4">
         <header className="flex items-center justify-between gap-2 border-b pb-2">
           <span className="text-muted-foreground text-xs">{textos.produto}</span>
           <span className="text-muted-foreground text-xs">{a.enviadoEm}</span>
@@ -124,7 +124,7 @@ function DetalheAssinatura({ a, ctx }: { a: DocAssinar; ctx: Ctx }) {
           {ctx.clienteNome} · {ctx.contato.nome} ({ctx.contato.papel})
         </p>
         {a.situacao === 'assinado' && (
-          <footer className="bg-sunken flex flex-col gap-0.5 rounded-[12px] px-3 py-2 text-xs">
+          <footer className="bg-sunken flex flex-col gap-0.5 rounded-md px-3 py-2 text-xs">
             <span className="flex items-center gap-1 font-medium">
               <FingerprintIcon className="size-3.5" /> Assinado por {a.assinadoPor} em {a.assinadoEm}
             </span>

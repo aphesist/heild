@@ -169,7 +169,7 @@ export function TemaTela() {
                 <Campo rotulo="Sigla">{(id) => <CampoTexto id={id} valor={r.sigla} onMudar={(v) => setR({ ...r, sigla: v.slice(0, 3).toUpperCase() })} />}</Campo>
               </div>
               <div className="flex items-center gap-3">
-                <span className="bg-sunken flex size-14 items-center justify-center rounded-[14px] text-xl font-semibold">{r.sigla}</span>
+                <span className="bg-sunken flex size-14 items-center justify-center rounded-lg text-xl font-semibold">{r.sigla}</span>
                 <span className="text-muted-foreground min-w-0 flex-1 text-xs">Logotipo, ícone do app e favicon. Sem logotipo, usamos a sigla.</span>
                 <Button size="sm" variant="outline" className="rounded-full" onClick={() => setModal('logo')}>
                   <ImageIcon /> Enviar
@@ -199,7 +199,7 @@ export function TemaTela() {
                   const valor = (t[c.chave] as string) || '#999999'
                   return (
                     <li key={c.chave}>
-                      <label className="bg-sunken/50 flex cursor-pointer items-center gap-3 rounded-[12px] px-2.5 py-2">
+                      <label className="bg-sunken/50 flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-2">
                         <input
                           type="color"
                           value={valor.length === 7 ? valor : '#999999'}
@@ -263,7 +263,13 @@ export function TemaTela() {
               </TituloBloco>
               <dl className="divide-border/70 flex flex-col divide-y">
                 <Propriedade rotulo="E-mail">
-                  {remetente.nome} &lt;{remetente.email}&gt; {remetente.ok && <Badge variant="sucesso">domínio verificado</Badge>}
+                  <span className="block">{remetente.nome}</span>
+                  <span className="text-muted-foreground block break-all">{remetente.email}</span>
+                  {remetente.ok && (
+                    <Badge variant="sucesso" className="mt-1">
+                      domínio verificado
+                    </Badge>
+                  )}
                 </Propriedade>
                 <Propriedade rotulo="Nome no WhatsApp">por número, no bloco abaixo</Propriedade>
               </dl>
@@ -293,12 +299,12 @@ export function TemaTela() {
             <Previa tema={r} modo={modo} />
             <Caixa>
               <TituloBloco descricao="Nome e cor do orb de cada setor. Cada pessoa pode dar outro nome ao seu. O Assistente é sempre o contraste do tema.">Integrantes padrão</TituloBloco>
-              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <ul className="largo:grid-cols-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
                 {setores.map((s) => {
                   const i = r.integrantes_padrao[s]!
                   return (
                     <li key={s}>
-                      <button type="button" onClick={() => setIntegranteEd(s)} className="bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-[12px] px-2.5 py-2 text-left">
+                      <button type="button" onClick={() => setIntegranteEd(s)} className="bg-sunken/50 hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left">
                         <Orb cor={(modo === 'escuro' && i.avatar.cor_escuro) || i.avatar.cor} corOlhos={i.avatar.cor_olhos} tamanho={26} cutucavel={false} extras={false} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm">{i.nome}</span>
@@ -352,7 +358,7 @@ export function TemaTela() {
               <ul className="divide-border/70 flex flex-col divide-y">
                 {modelos.map((m) => (
                   <li key={m.chave}>
-                    <button type="button" onClick={() => setModeloEd(m.chave)} className="hover:bg-sunken/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-col rounded-[10px] px-2 py-2 text-left">
+                    <button type="button" onClick={() => setModeloEd(m.chave)} className="hover:bg-sunken/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-col rounded-md px-2 py-2 text-left">
                       <span className="flex items-center gap-2 text-sm">
                         <code>{m.chave}</code> <span className="text-muted-foreground text-xs">{m.grupo}</span>
                       </span>
@@ -387,7 +393,7 @@ export function TemaTela() {
       {modal === 'logo' && (
         <GavetaFormulario aberta onFechar={() => setModal(null)} titulo="Logotipo e ícones" descricao="Viram documentos do escritório. O ícone do app e o favicon saem do ícone." acao="Salvar" onAcao={() => setModal(null)}>
           {['Logotipo (SVG ou PNG, fundo transparente)', 'Ícone quadrado (512 px)', 'Logotipo para o modo escuro (opcional)'].map((x) => (
-            <div key={x} className="border-border flex items-center gap-3 rounded-[14px] border border-dashed px-3 py-4 text-sm">
+            <div key={x} className="border-border flex items-center gap-3 rounded-lg border border-dashed px-3 py-4 text-sm">
               <ImageIcon className="text-muted-foreground size-6" />
               <span className="flex-1">{x}</span>
               <BotaoFeito type="button" size="sm" variant="outline" className="rounded-full" texto={`${x.split(' (')[0]}: arquivo carregado. Entra na próxima versão do tema.`}>
@@ -459,12 +465,12 @@ function Previa({ tema, modo }: { tema: Tema; modo: ModoCor }) {
   const vars = variaveisCss(tema, modo) as CSSProperties
   return (
     <section aria-label="Prévia do tema" style={vars} className={modo === 'escuro' ? 'dark' : undefined}>
-      <div className="from-background to-background-end text-foreground overflow-hidden rounded-[24px] bg-gradient-to-b p-3 shadow-cartao" style={{ fontFamily: tema.tokens.fonte_texto }}>
+      <div className="from-background to-background-end text-foreground overflow-hidden rounded-cartao bg-gradient-to-b p-3 shadow-cartao" style={{ fontFamily: tema.tokens.fonte_texto }}>
         <div className="flex gap-3">
-          <div className="from-sidebar to-sidebar-end hidden w-28 shrink-0 flex-col gap-1 rounded-[16px] bg-gradient-to-b p-2 text-[11px] sm:flex">
+          <div className="from-sidebar to-sidebar-end hidden w-28 shrink-0 flex-col gap-1 rounded-lg bg-gradient-to-b p-2 text-[11px] sm:flex">
             <span className="mb-1 px-1.5 text-base font-semibold">{tema.sigla}</span>
             {['Início', 'Painel', 'CRM', 'Timesheet'].map((m, i) => (
-              <span key={m} className={i === 1 ? 'bg-raised rounded-[8px] px-1.5 py-1 font-medium' : 'text-muted-foreground px-1.5 py-1'}>
+              <span key={m} className={i === 1 ? 'bg-raised rounded-sm px-1.5 py-1 font-medium' : 'text-muted-foreground px-1.5 py-1'}>
                 {m}
               </span>
             ))}
@@ -549,7 +555,7 @@ function Dominios({ inicial, onFechar, onSalvar }: { inicial: Dom; onFechar: () 
               />
             )}
           </Campo>
-          <div className="bg-sunken/60 rounded-[12px] px-3 py-2 font-mono text-[11px]">
+          <div className="bg-sunken/60 rounded-md px-3 py-2 font-mono text-[11px]">
             {d[k].host.split('.')[0]} CNAME {k}.plataforma-contabil.com.br
           </div>
           {d[k].ok ? (
@@ -616,7 +622,7 @@ function Remetente({ inicial, onFechar, onSalvar }: { inicial: Rem; onFechar: ()
       <div className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium">Registros para {dominio || 'o domínio'}</span>
         {['SPF  TXT  v=spf1 include:mail.plataforma-contabil.com.br ~all', 'DKIM CNAME pc._domainkey → dkim.plataforma-contabil.com.br'].map((x) => (
-          <code key={x} className="bg-sunken/60 rounded-[10px] px-3 py-1.5 text-[11px]">
+          <code key={x} className="bg-sunken/60 rounded-md px-3 py-1.5 text-[11px]">
             {x}
           </code>
         ))}

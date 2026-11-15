@@ -97,13 +97,13 @@ export function EntradaApp({ pessoas, onEntrar }: { pessoas: PessoaApp[]; onEntr
           </button>
           <div className="mt-1 flex flex-col gap-1.5">
             <p className="text-muted-foreground text-xs">Na demonstração, toque em uma pessoa:</p>
-            {pessoas.length === 0 && <p className="bg-sunken rounded-[14px] px-3 py-2 text-sm">Nenhum contato deste escritório usa o app ainda. O escritório liga o app de cada contato na ficha do cliente e manda o convite.</p>}
+            {pessoas.length === 0 && <p className="bg-sunken rounded-lg px-3 py-2 text-sm">Nenhum contato deste escritório usa o app ainda. O escritório liga o app de cada contato na ficha do cliente e manda o convite.</p>}
             {pessoas.map((x) => (
               <button
                 key={x.nome}
                 type="button"
                 onClick={() => setContato(x.empresas[0].contato.whatsapp ?? x.empresas[0].contato.email ?? '')}
-                className="bg-raised shadow-cartao flex cursor-pointer flex-col rounded-[14px] px-3 py-2 text-left text-sm"
+                className="bg-raised shadow-cartao flex cursor-pointer flex-col rounded-lg px-3 py-2 text-left text-sm"
               >
                 <span className="font-medium">{x.nome}</span>
                 <span className="text-muted-foreground text-xs">{x.empresas.map((e) => `${loja.clientes.find((c) => c.id === e.clienteId)?.nome} (${e.contato.papel})`).join(' · ')}</span>
@@ -118,7 +118,7 @@ export function EntradaApp({ pessoas, onEntrar }: { pessoas: PessoaApp[]; onEntr
           <Voltar onClick={() => setPasso({ p: 'contato' })} />
           <h1 className="text-2xl font-light tracking-tight">Convites</h1>
           <p className="text-muted-foreground text-sm">O link do convite vale 7 dias e abre aqui, já com a marca do escritório. Na demonstração, escolha um convite enviado:</p>
-          {convites.filter((c) => c.situacao !== 'cancelado').length === 0 && <p className="bg-sunken rounded-[14px] px-3 py-2 text-sm">Nenhum convite enviado.</p>}
+          {convites.filter((c) => c.situacao !== 'cancelado').length === 0 && <p className="bg-sunken rounded-lg px-3 py-2 text-sm">Nenhum convite enviado.</p>}
           {convites
             .filter((c) => c.situacao !== 'cancelado' && loja.clientes.some((x) => x.id === c.clienteId))
             .map((c) => (
@@ -191,7 +191,7 @@ function Voltar({ onClick }: { onClick: () => void }) {
 
 function ConviteCartao({ c, empresa, onAbrir, onPedirNovo }: { c: ConviteApp; empresa: string; onAbrir: () => void; onPedirNovo: () => void }) {
   return (
-    <div className="bg-raised shadow-cartao flex flex-col gap-1.5 rounded-[16px] px-3.5 py-3 text-sm">
+    <div className="bg-raised shadow-cartao flex flex-col gap-1.5 rounded-lg px-3.5 py-3 text-sm">
       <span className="font-medium">
         {c.nome} <span className="text-muted-foreground font-normal">· {c.papel}</span>
       </span>
@@ -312,7 +312,7 @@ function PassoCodigo({ alvo, onVoltar, onOk, onBloqueado, primeiroAcesso, onEntr
       )}
       {!envio && !erroEnvio && <p className="text-muted-foreground text-sm">Enviando o código…</p>}
       {envio && (
-        <div className="bg-sunken flex items-start gap-2 rounded-[16px] px-3 py-2.5 text-sm">
+        <div className="bg-sunken flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           {alvo.canal === 'whatsapp' ? <ChatCircleTextIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" /> : <EnvelopeSimpleIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />}
           <span className="min-w-0 flex-1">
             <span className="text-muted-foreground block text-[11px]">Mensagem recebida no {alvo.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'}</span>
@@ -378,7 +378,7 @@ function PassoTermo({ alvo, textos, onAceitar }: { alvo: Alvo; textos: ReturnTyp
       <p className="text-muted-foreground text-xs">
         {textos.produto} · versão {textos.termoVersao}
       </p>
-      <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[18px] p-3.5 text-sm">
+      <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3.5 text-sm">
         {textos.termo.map((t) => (
           <p key={t}>{t}</p>
         ))}
@@ -404,7 +404,7 @@ function PassoTermo({ alvo, textos, onAceitar }: { alvo: Alvo; textos: ReturnTyp
 
 function OpcaoForma({ ativo, onClick, icone, titulo, texto }: { ativo: boolean; onClick: () => void; icone: ReactNode; titulo: string; texto: string }) {
   return (
-    <button type="button" onClick={onClick} aria-pressed={ativo} className={cn('flex cursor-pointer items-start gap-3 rounded-[16px] px-3.5 py-3 text-left text-sm', ativo ? 'bg-raised shadow-contorno' : 'bg-sunken')}>
+    <button type="button" onClick={onClick} aria-pressed={ativo} className={cn('flex cursor-pointer items-start gap-3 rounded-lg px-3.5 py-3 text-left text-sm', ativo ? 'bg-raised shadow-contorno' : 'bg-sunken')}>
       <span className="text-muted-foreground mt-0.5 [&_svg]:size-5">{icone}</span>
       <span className="min-w-0 flex-1">
         <span className="block font-medium">{titulo}</span>
@@ -425,7 +425,7 @@ function PassoForma({ alvo, onPronto }: { alvo: Alvo; onPronto: () => void }) {
       <OpcaoForma ativo={senha === 'nao'} onClick={() => setSenha('nao')} icone={<ChatCircleTextIcon />} titulo="Só com código (recomendado)" texto={`Um código novo por ${alvo.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'} quando trocar de aparelho. Nada para lembrar.`} />
       <OpcaoForma ativo={senha === 'sim'} onClick={() => setSenha('sim')} icone={<KeyIcon />} titulo="Código ou senha" texto="Crie uma senha, se preferir. Ela nunca é obrigatória." />
       {senha === 'sim' && <Campo rotulo="Crie uma senha (mínimo 8)" tipo="password" valor={valor} onMudar={setValor} erro={valor && valor.length < 8 ? 'Use pelo menos 8 caracteres.' : null} />}
-      <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[18px] p-3.5 text-sm">
+      <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3.5 text-sm">
         <p className="flex items-center gap-2 font-medium">
           <FingerprintIcon className="size-5" /> Usar a biometria deste aparelho?
         </p>
@@ -470,7 +470,7 @@ function PassoInstalar({ alvo, onPronto }: { alvo: Alvo; onPronto: (a: AcessoPes
         <OpcaoForma ativo={como === 'ios'} onClick={() => setComo('ios')} icone={<AppleLogoIcon />} titulo="iPhone" texto="Três passos" />
       </div>
       {como === 'android' && (
-        <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[18px] p-3.5 text-sm">
+        <div className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3.5 text-sm">
           <p>O Chrome mostra "Instalar app". Toque em Instalar e pronto.</p>
           <Button className="w-fit rounded-full" onClick={() => fim('android')}>
             Instalar
@@ -478,7 +478,7 @@ function PassoInstalar({ alvo, onPronto }: { alvo: Alvo; onPronto: (a: AcessoPes
         </div>
       )}
       {como === 'ios' && (
-        <ol className="bg-surface shadow-cartao flex flex-col gap-2 rounded-[18px] p-3.5 text-sm">
+        <ol className="bg-surface shadow-cartao flex flex-col gap-2 rounded-lg p-3.5 text-sm">
           <li className="flex items-center gap-2">
             <span className="bg-sunken flex size-6 items-center justify-center rounded-full text-xs">1</span> No Safari, toque em <ShareIcon className="size-4" /> Compartilhar.
           </li>

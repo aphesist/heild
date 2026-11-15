@@ -141,7 +141,7 @@ export function AssinaturaTela() {
           </div>
         </Caixa>
 
-        <section className="border-destructive/30 flex flex-col gap-2 rounded-[24px] border border-dashed p-4 text-sm">
+        <section className="border-destructive/30 flex flex-col gap-2 rounded-cartao border border-dashed p-4 text-sm">
           <h2 className="flex items-center gap-2 font-medium">
             <WarningIcon className="text-destructive size-4" /> Encerrar a assinatura
           </h2>
@@ -233,7 +233,7 @@ function TrocarPlano({ atual, uso, onFechar, onTrocar }: { atual: string; uso: t
             type="button"
             onClick={() => setP(x.id)}
             aria-pressed={p === x.id}
-            className={cn('flex cursor-pointer flex-col gap-1 rounded-[16px] p-3 text-left text-sm', p === x.id ? 'bg-raised shadow-cartao ring-foreground/30 ring-2' : 'bg-sunken/60')}
+            className={cn('flex cursor-pointer flex-col gap-1 rounded-lg p-3 text-left text-sm', p === x.id ? 'bg-raised shadow-cartao ring-foreground/30 ring-2' : 'bg-sunken/60')}
           >
             <span className="font-medium">
               {x.nome} {x.id === atual && <Badge variant="outline">atual</Badge>}
@@ -246,7 +246,7 @@ function TrocarPlano({ atual, uso, onFechar, onTrocar }: { atual: string; uso: t
         ))}
       </div>
       {estoura && (
-        <p className="bg-destructive/8 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-destructive/8 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
           <WarningIcon className="text-destructive mt-0.5 size-4 shrink-0" /> O escritório já usa mais do que esse plano permite ({uso.clientes} clientes, {uso.gb.toLocaleString('pt-BR')} GB). Reduza antes de trocar.
         </p>
       )}
@@ -292,7 +292,7 @@ function Encerrar({ onFechar }: { onFechar: () => void }) {
       onAcao={() => (pedido ? onFechar() : setPedido(true))}
     >
       {pedido ? (
-        <p className="bg-sunken rounded-[14px] px-3 py-2.5 text-sm">
+        <p className="bg-sunken rounded-lg px-3 py-2.5 text-sm">
           Pedido registrado. A exportação completa fica pronta em até 24 h e chega ao e-mail dos administradores. Até 01/03/2027, o escritório funciona só para leitura. Dá para desistir até lá.
         </p>
       ) : (

@@ -80,7 +80,7 @@ export function Pedidos({ ctx }: { ctx: Ctx }) {
   if (aberto) return <DetalhePedido t={aberto} ctx={ctx} />
   const lista = meus.filter((t) => (filtro === 'abertos' ? t.status !== 'concluida' && t.status !== 'cancelada' : filtro === 'concluidos' ? t.status === 'concluida' : t.status === 'cancelada'))
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Pedidos</TituloTela>
       {ctx.leitura ? (
         <Faixa>App em modo leitura: não dá para abrir pedidos novos. O histórico continua aqui.</Faixa>
@@ -104,7 +104,7 @@ export function Pedidos({ ctx }: { ctx: Ctx }) {
       {lista.map((t) => {
         const st = statusPedido(t, extras[t.id])
         return (
-          <button key={t.id} type="button" onClick={() => ctx.ir('pedidos', t.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-[18px] px-3.5 py-3 text-left">
+          <button key={t.id} type="button" onClick={() => ctx.ir('pedidos', t.id)} className="bg-surface shadow-cartao flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-3 text-left">
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">{t.titulo}</span>
               <span className="text-muted-foreground block text-xs">
@@ -193,7 +193,7 @@ function NovoPedido({ ctx, onFechar, tipoInicial }: { ctx: Ctx; onFechar: () => 
             setTipo(e.target.value)
             form.limpar()
           }}
-          className="bg-raised shadow-contorno h-11 rounded-[12px] px-3 text-sm outline-none"
+          className="bg-raised shadow-contorno h-11 rounded-md px-3 text-sm outline-none"
         >
           {permitidos.map((t) => (
             <option key={t.tipo} value={t.tipo}>
@@ -202,7 +202,7 @@ function NovoPedido({ ctx, onFechar, tipoInicial }: { ctx: Ctx; onFechar: () => 
           ))}
         </select>
       </label>
-      <p className="bg-sunken flex items-start gap-2 rounded-[12px] px-3 py-2 text-xs">
+      <p className="bg-sunken flex items-start gap-2 rounded-md px-3 py-2 text-xs">
         <SparkleIcon className="mt-0.5 size-3.5 shrink-0" /> {def.integranteFaz} Previsão: {previsaoEm(def.previsaoDias)}.
         {def.avulso ? ` Fora do contrato: serviço avulso de ${brl(def.avulso)}, só com a sua autorização.` : ''}
       </p>
@@ -238,7 +238,7 @@ function DetalhePedido({ t, ctx }: { t: Tarefa; ctx: Ctx }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('pedidos')}>{def?.tipo ?? 'Pedido'}</TituloTela>
       <Bloco titulo={t.titulo} acao={<Selo tom={st.tom}>{st.rotulo}</Selo>}>
         <p className="text-muted-foreground text-xs">
@@ -357,7 +357,7 @@ function DetalhePedido({ t, ctx }: { t: Tarefa; ctx: Ctx }) {
       )}
 
       {(def?.destaque === 'C2-02' || def?.destaque === 'C2-14') && !extra?.simulado && !extra?.declaracao && !fim && (
-        <p className="bg-sunken flex items-start gap-2 rounded-[12px] px-3 py-2 text-xs">
+        <p className="bg-sunken flex items-start gap-2 rounded-md px-3 py-2 text-xs">
           <SparkleIcon className="mt-0.5 size-3.5 shrink-0" /> {def.integranteFaz} Chega aqui depois que uma pessoa do escritório aprovar.
         </p>
       )}

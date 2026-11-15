@@ -92,7 +92,7 @@ export function Documentos({ ctx }: { ctx: Ctx }) {
     ctx.ir('documentos', d.id)
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela
         acao={
           <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setPacote(true)}>
@@ -150,7 +150,7 @@ function LinhaDoc({ d, ctx, onAbrir }: { d: Documento; ctx: Ctx; onAbrir: () => 
   const est = estadoDoc(d, ctx.contato.nome)
   const enviado = d.origem === 'upload_cliente_app'
   return (
-    <button type="button" onClick={onAbrir} className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-[12px] px-1.5 py-1 text-left text-sm">
+    <button type="button" onClick={onAbrir} className="hover:bg-sunken/50 -mx-1.5 flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm">
       {indisponivel(d) ? <CloudSlashIcon className="text-muted-foreground size-5 shrink-0" /> : <FileTextIcon className="text-muted-foreground size-5 shrink-0" />}
       <span className="min-w-0 flex-1">
         <span className="block truncate">{d.nome}</span>
@@ -246,7 +246,7 @@ function DetalheDocumento({ d, ctx }: { d: Documento; ctx: Ctx }) {
       .finally(() => setEnviando(null))
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={voltar}>{d.nome.replace(/\.\w+$/, '')}</TituloTela>
       {assinadoPeloContador(d) && (
         <Faixa tom="ok" icone={<SealCheckIcon weight="fill" />}>
@@ -384,7 +384,7 @@ function FolhaCompartilhar({ d, ctx, onFechar }: { d: Documento; ctx: Ctx; onFec
           <p className="flex items-center gap-2 text-sm">
             <CheckCircleIcon className="text-success size-4" weight="fill" /> Link pronto, vale {validade} dias.
           </p>
-          <code className="bg-sunken rounded-[10px] px-3 py-2 text-xs break-all">{gerado.url}</code>
+          <code className="bg-sunken rounded-md px-3 py-2 text-xs break-all">{gerado.url}</code>
           {gerado.senha && <p className="text-sm">Senha: <strong className="font-mono font-medium">{gerado.senha}</strong> (mande por outro canal)</p>}
           <SeloDemonstracao fonte={gerado.fonte} />
           <Button variant="outline" className="rounded-full" onClick={onFechar}>
@@ -438,7 +438,7 @@ function FolhaPacote({ ctx, docs, onFechar }: { ctx: Ctx; docs: Documento[]; onF
           <p className="flex items-center gap-2 text-sm">
             <CheckCircleIcon className="text-success size-4" weight="fill" /> {res.nome} · {res.tamanho}
           </p>
-          <div className="bg-sunken rounded-[12px] p-2.5">
+          <div className="bg-sunken rounded-md p-2.5">
             <p className="text-muted-foreground mb-1 text-[11px]">manifesto.txt (protocolo {protocolo()})</p>
             {res.manifesto.map((m) => (
               <p key={m.nome} className={cn('flex gap-2 text-[11px]')}>

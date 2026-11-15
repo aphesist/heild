@@ -87,7 +87,7 @@ export function EscritorioTela() {
                   type="button"
                   onClick={() => setSetorEd(s)}
                   className={cn(
-                    'hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-0.5 rounded-[12px] px-2 py-2.5 text-left text-sm sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]',
+                    'hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-0.5 rounded-md px-2 py-2.5 text-left text-sm sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]',
                     !s.ativo && 'opacity-60',
                   )}
                 >
@@ -155,7 +155,7 @@ export function EscritorioTela() {
             {e.modoBpo && (
               <ul className="flex flex-col gap-2">
                 {subs.map((s) => (
-                  <li key={s.id} className="bg-sunken/60 flex items-center gap-3 rounded-[12px] px-3 py-2 text-sm">
+                  <li key={s.id} className="bg-sunken/60 flex items-center gap-3 rounded-md px-3 py-2 text-sm">
                     <BuildingsIcon className="text-muted-foreground size-5" />
                     <span className="min-w-0 flex-1">
                       <span className="block">{s.nome}</span>
@@ -218,7 +218,7 @@ export function EscritorioTela() {
             setModal(null)
           }}
         >
-          <p className="bg-warning/10 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+          <p className="bg-warning/10 flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
             <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" />
             <span>
               <strong className="font-medium">3 colaboradores ainda não têm carteira</strong> (Ana Souza, Bruno Costa, Carla Mendes). Ao ligar, eles deixam de ver qualquer cliente até você atribuir. Administradores e Gestores continuam

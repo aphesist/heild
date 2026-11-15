@@ -92,7 +92,7 @@ export function Agenda({ ctx }: { ctx: Ctx }) {
 
   const minhas = reunioes.filter((r) => r.situacao !== 'cancelada')
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <TituloTela voltar={() => ctx.ir('mais')}>Agenda</TituloTela>
       {minhas.length > 0 && (
         <Bloco titulo="Suas reuniões">
@@ -110,7 +110,7 @@ export function Agenda({ ctx }: { ctx: Ctx }) {
                 </span>
                 {r.situacao === 'remarcada' && <Selo>remarcada</Selo>}
               </div>
-              <div className="bg-sunken rounded-[12px] px-3 py-2 text-xs">
+              <div className="bg-sunken rounded-md px-3 py-2 text-xs">
                 <span className="text-muted-foreground mb-0.5 flex items-center gap-1">
                   <SparkleIcon className="size-3" /> Pauta preparada pelo assistente
                 </span>
@@ -159,7 +159,7 @@ export function Agenda({ ctx }: { ctx: Ctx }) {
             {erro && <EstadoErro titulo="O calendário não respondeu" descricao={erro} onTentar={carregar} />}
             {livres?.horarios.length === 0 && <EstadoVazio compacto icone={CalendarBlankIcon} titulo="Sem horários nesta semana" descricao="Escreva na conversa que o escritório propõe outro dia." />}
             {livres?.horarios.map((h) => (
-              <button key={h} type="button" onClick={() => setHora(h)} aria-pressed={hora === h} className={cn('flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm', hora === h ? 'bg-foreground text-background' : 'bg-sunken/60')}>
+              <button key={h} type="button" onClick={() => setHora(h)} aria-pressed={hora === h} className={cn('flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm', hora === h ? 'bg-foreground text-background' : 'bg-sunken/60')}>
                 <VideoCameraIcon className="size-4" /> {h} · {duracao}
               </button>
             ))}
@@ -187,7 +187,7 @@ export function Agenda({ ctx }: { ctx: Ctx }) {
             De {remarcar.quando} para:
           </p>
           {(livres?.horarios ?? janelasReuniao.filter((h) => !/feriado/.test(h))).filter((h) => h !== remarcar.quando).map((h) => (
-            <button key={h} type="button" onClick={() => mudar(remarcar, 'remarcar', h)} className="bg-sunken cursor-pointer rounded-[12px] px-3 py-2 text-left text-sm">
+            <button key={h} type="button" onClick={() => mudar(remarcar, 'remarcar', h)} className="bg-sunken cursor-pointer rounded-md px-3 py-2 text-left text-sm">
               {h}
             </button>
           ))}

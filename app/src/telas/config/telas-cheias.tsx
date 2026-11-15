@@ -33,7 +33,7 @@ export function MolduraTelaCheia({ titulo, sub, onFechar, children, acao }: { ti
     <DialogPrimitive.Root open onOpenChange={(v) => !v && onFechar()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[45] bg-black/45" />
-        <DialogPrimitive.Content aria-describedby={undefined} className="from-background to-background-end text-foreground fixed inset-0 z-[45] flex flex-col overflow-hidden bg-gradient-to-b outline-none sm:inset-4 sm:rounded-[28px] sm:shadow-2xl">
+        <DialogPrimitive.Content aria-describedby={undefined} className="from-background to-background-end text-foreground fixed inset-0 z-[45] flex flex-col overflow-hidden bg-gradient-to-b outline-none sm:inset-4 sm:rounded-xl sm:shadow-2xl">
           <header className="flex shrink-0 items-center gap-2 border-b px-4 py-2.5 sm:px-5">
             <div className="min-w-0 flex-1">
               <DialogPrimitive.Title className="truncate text-base font-medium sm:text-lg">{titulo}</DialogPrimitive.Title>
