@@ -104,7 +104,9 @@ export function variaveisCss(tema: Tema, modo: ModoCor): Record<string, string> 
   // Camadas em hexadecimal, para garantir o contraste do que é derivado (temas de escritório).
   // Inclui a barra lateral (o texto suave dos rótulos e ícones dela) e o fim do gradiente do fundo.
   const camadasTexto = [t.fundo, camada(t.superficie, t.fundo, t.texto, escuro ? 94 : 97), camada(t.elevada, t.fundo, t.texto, escuro ? 89 : 100), camada(t.rebaixada, t.fundo, t.texto, escuro ? 97 : 90), ...[fundoFim, lateral, lateralFim].filter((c) => /^#[0-9a-f]{6}$/i.test(c))]
-  const textoSuave = t.texto_suave ?? comContraste(camada(undefined, t.texto, t.fundo, 60), camadasTexto, t.texto)
+  // Texto suave de tema de escritório: levado a 4,5:1 em todas as camadas, mesmo quando o tema define o próprio
+  // valor (proposta 6b). O da Heild (fábrica) vem do design system como está: já passa onde aparece (proposta 6).
+  const textoSuave = tema.id === 'fabrica' && t.texto_suave ? t.texto_suave : comContraste(t.texto_suave ?? camada(undefined, t.texto, t.fundo, 60), camadasTexto, t.texto)
   const atencao = t.atencao ?? (escuro ? '#e2a845' : '#b7791f')
 
   return {
