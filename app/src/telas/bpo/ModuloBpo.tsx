@@ -19,6 +19,7 @@ import { useEfeitosBpo } from './integrantes'
 import { FilaBpoTela, RotinasBpoTela } from './OperacaoBpo'
 import { PortalConvidado } from './PortalConvidado'
 import { CarteiraBpoTela, VisaoBpoTela } from './VisaoBpo'
+import { useEfeitosS08d } from './efeitos-s08d' // S08d
 
 export type Frente = 'empresas' | 'contratantes'
 
@@ -46,6 +47,7 @@ export function ModuloBpo({ aba, clienteId, onEscolher }: { aba: string; cliente
     if (temBanco()) garantirSementeBpo()
   }, [escritorio.id, versao])
   useEfeitosBpo()
+  useEfeitosS08d() // S08d: integrantes de Entregas, Volume, Rentabilidade e da frente entre escritórios
   const loja = useLoja()
   const contratantes = useContratantes()
   const empresa = useEmpresaBpo(clienteId)
