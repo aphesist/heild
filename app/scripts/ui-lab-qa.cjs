@@ -343,7 +343,9 @@ async function frenteWidgets(navegador) {
       { nome: 'tema', valores: temas.flatMap((t) => [`${t}:claro`, `${t}:escuro`]) },
       { nome: 'densidade', valores: ['padrao', 'grande'] },
     ]
-    const casos = cobrirComBase(base, livres, w.chave.length * 13 + 5)
+    // Volume (50 e 200) mede quantidade: texto, valores, datas e opcionais ficam no padrão (as variações de
+    // conteúdo já passam por 0, 1, 3 e 15). Assim cada largura monta um banco de cenário por volume, não um por caso.
+    const casos = cobrirComBase(base, livres, w.chave.length * 13 + 5).map((c) => (c.itens === 'i50' || c.itens === 'i200' ? { ...c, texto: '', valores: '', datas: '', opcionais: '' } : c))
     // As larguras de fora do produto (768, 1920) entram por pares com estado, tamanho e itens.
     for (const l of extras) for (const c of porPares([{ nome: 'itens', valores: ['i0', 'i15', 'i200'] }, { nome: 'tamanho', valores: w.tamanhos }, { nome: 'estado', valores: ['padrao', 'carregando', 'erro', 'sem-permissao'] }, { nome: 'tema', valores: ['fabrica:claro', 'fabrica:escuro', 'condesp:claro', 'requinte:escuro'] }], l + w.id.length)) casos.push({ ...c, texto: '', valores: '', datas: '', opcionais: '', densidade: 'padrao', largura: String(l) })
     for (const c of casos) porLargura[c.largura].push({ w, ...c })

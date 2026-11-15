@@ -67,7 +67,13 @@ function useTransbordo(corpo: React.RefObject<HTMLDivElement | null>, ativo: boo
     const medir = () => {
       const transborda = el.scrollHeight > el.clientHeight + 4
       let n = 0
-      for (const lista of el.querySelectorAll('ul, ol, tbody, [role="table"]')) n = Math.max(n, [...lista.children].filter((f) => !f.hasAttribute('data-cabecalho') && !f.hasAttribute('data-estado-vazio')).length)
+      // N é o total de verdade: o `data-total` da lista, ou os itens mais o "e mais N" da lista compacta.
+      for (const lista of el.querySelectorAll<HTMLElement>('ul, ol, tbody, [role="table"]')) {
+        const filhos = [...lista.children].filter((f) => !f.hasAttribute('data-cabecalho') && !f.hasAttribute('data-estado-vazio'))
+        const mais = filhos.map((f) => /^\s*e mais ([\d.]+)/i.exec(f.textContent ?? '')).find(Boolean)
+        const total = Number(lista.dataset.total) || (mais ? filhos.length - 1 + Number(mais[1].replace(/\./g, '')) : filhos.length)
+        n = Math.max(n, total)
+      }
       // Rede de segurança: corpo sem texto e sem nada para ver ou usar vira o estado vazio padrão (nunca um card em branco).
       const proprio = el.querySelector<HTMLElement>('[data-conteudo-widget]')
       const vazio = !!proprio && !proprio.innerText.trim() && !proprio.querySelector('button, input, select, textarea, a[href], img, svg, canvas, [role="status"], [data-estado-vazio]')
