@@ -82,9 +82,10 @@ export class PortaEventos {
     return ev.id
   }
 
-  /** Só eventos de sucesso acordam gatilhos; negado e erro ficam na trilha. */
+  /** Eventos de sucesso e decisões de pessoa acordam gatilhos; negado e erro ficam na trilha. */
   async aoGravarEvento(tx: Tx, escritorio_id: string, evento_id: string, resultado: string) {
-    if (resultado !== 'ok' && resultado !== 'aprovado') return
+    // `recusado` também vai: é decisão de pessoa (o integrante é acordado na recusa, gatilho 18), não erro.
+    if (resultado !== 'ok' && resultado !== 'aprovado' && resultado !== 'recusado') return
     await enfileirar(this.boss, tx, FILAS.despachar, { escritorio_id, evento_id }, { singleton: `${escritorio_id}:${evento_id}` })
   }
 }

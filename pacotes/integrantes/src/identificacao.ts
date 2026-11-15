@@ -25,7 +25,8 @@ export const NOME_DO_SETOR: Record<string, string> = {
 export function prefixoDeQuemFala(q: QuemFala): string {
   const limpo = (t: string) => t.replace(/[*_~\n]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60)
   if (q.tipo === 'pessoa') return `*${limpo(NOME_DO_SETOR[q.setor] ?? q.setor)} · ${limpo(q.nome)}*`
-  if (q.tipo === 'integrante') return `*${limpo(q.nome)} (IA)*`
+  // O servidor marca o integrante com " (integrante)" nos textos; ao cliente, a marca é "(IA)".
+  if (q.tipo === 'integrante') return `*${limpo(q.nome.replace(/\s*\(integrante\)\s*$/i, ''))} (IA)*`
   return `*${limpo(q.escritorio)}*`
 }
 

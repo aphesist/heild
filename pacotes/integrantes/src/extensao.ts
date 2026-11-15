@@ -3,6 +3,7 @@ import { comEscritorio, contextoDeIntegrante, definirFerramenta, ErroHeild, inte
 import { Assistente, FILA_ROTEAR } from './assistente.ts'
 import { Anexos, type Integrante } from './contrato.ts'
 import { aprenderComCartao } from './execucao.ts'
+import { observadorDeDecisoes } from './decisoes.ts'
 import { FORMATOS_RESPOSTA } from './resposta.ts'
 import { CATEGORIAS_DE_ENVIO, CategoriaEnvio, configurarEnvio, ModoEnvio, modosDeEnvio } from './envio.ts'
 import { integrantesContabil } from './integrantes.ts'
@@ -150,6 +151,8 @@ export function extensaoIntegrantes(o: OpcoesExtensao = {}): ExtensaoIntegrantes
         }),
       ]
     },
+    // Gatilho 18: acordar o integrante quando uma pessoa recusa ou altera o pedido dele no cartão.
+    observadores: (b) => [observadorDeDecisoes(b)],
     criarFilas: async (b) => {
       const opcoes = { expireInSeconds: 300, retryLimit: 3, retryDelay: 5, retryBackoff: true, notify: true }
       for (const fila of [FILA_ROTEAR, FILA_RETOMAR_TRIAGEM]) {

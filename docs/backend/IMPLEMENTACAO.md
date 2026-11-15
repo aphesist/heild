@@ -840,6 +840,16 @@ As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-
       - Quem preencheu fica no cartão (`decidido_por`, comentário "Lacuna preenchida: …"), com os argumentos editados, e na cadeia.
     - **Divisão com a B5:** aprovar um cartão de **ato** com argumentos alterados (recalcular o hash, revalidar e registrar quem alterou o quê) e "aprovar executa a ação guardada" ficam com a B5, no executor. A lacuna usa só o cartão "não consegui" do motor.
 
+14. **Gatilho 18: decisão de pessoa sobre o pedido do integrante** (`src/decisoes.ts`). O executor da B5 grava `aprovacao.decidir` quando uma pessoa decide um cartão de ato (`aprovacao_id` aponta o cartão; `argumentos_resumo.diferenca` traz `{campo: {de, para}}`).
+    - **Recusado ou alterado** (`recusado` ou `editado_e_aprovado`), num cartão pedido por um integrante: o integrante é **acordado**, com um item na fila dele (`aprovacao_recusada` ou `aprovacao_editada`) que leva o cartão, a ferramenta, o comentário, a diferença e quem decidiu.
+    - **Com comentário:** o integrante **propõe guardar a lição** na memória do setor (`licao:{ferramenta}:{assinatura}`), por `proporMemoria`. Vira cartão para quem gere aprovar; nada muda sozinho.
+    - **O que não acorda por aqui:** aprovação sem alteração, cartões das execuções do motor (o motor já acorda o integrante) e pedidos de pessoa.
+    - **Idempotente:** o mesmo evento acorda uma vez e propõe uma vez.
+    - **B2, só acréscimos:**
+      - o despachante aceita **observadores de evento** vindos das extensões (`ObservadorEvento`), para reações que não são procedimentos de setor;
+      - eventos com resultado `recusado` também chegam ao despachante, porque são decisão de pessoa e não erro; `negado` e `erro` continuam só na trilha.
+    - **Nome do integrante:** o servidor passou a marcar o integrante com " (integrante)" nos textos. Para o cliente, o prefixo continua `*{nome} (IA)*`, sem esse sufixo.
+
 ### Resultado real (15/11/2026)
 
 Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
@@ -873,6 +883,7 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
   - a prévia por regra (sem modelo, sem abrir pedido nem execução, com a lacuna do anexo que falta);
   - a prévia pelo barato, com cache, sem modelo em texto curto ou com `usar_modelo: false`;
   - o "não consegui" do DP sem quantidade vira lacuna; preencher retoma, conclui com a quantidade, sem chamar o operário de novo, e registra quem preencheu.
+- `decisoes.test.ts` (4): alterado com comentário acorda o integrante com a diferença e propõe a lição, sem duplicar quando o evento repete; recusado sem comentário acorda e não propõe; aprovado sem alteração, cartão do motor ou pedido de pessoa não acordam; o prefixo "(IA)" ignora o sufixo " (integrante)".
 - `envio.test.ts` (5): todas as categorias começam em cartão e só o Administrador muda, com evento; FAQ em cartão (aprovar grava a mensagem na conversa, com prefixo), em automático (sem cartão, com o revisor) e desligado (nada sai); a guia em automático sai sem cartão, e a categoria de outra mensagem não mexe nela.
 
 ---
