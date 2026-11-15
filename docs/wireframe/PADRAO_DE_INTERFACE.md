@@ -7,9 +7,9 @@
 | Faixa | Largura da janela | Variante Tailwind | Barra lateral | Grade de widgets | Grade de cards fora dos widgets |
 | --- | --- | --- | --- | --- | --- |
 | Celular | < 640 | (base) | menu inferior com 5 destinos | 2 colunas | 1 coluna |
-| Tablet | 640 a 1023 | `sm:` `md:` | fechada (76px), abre por cima | 4 colunas | 2 colunas |
+| Tablet | 640 a 1023 | `sm:` `md:` | menu inferior até 767; de 768, fechada (76px), abre por cima | 2 ou 4 colunas | 2 colunas |
 | Computador | 1024 a 1439 | `lg:` `xl:` | fixa a partir de 1280 | 4 ou 6 colunas | 2 ou 3 colunas |
-| Largo | ≥ 1440 | `largo:` (e `ultra:` ≥ 1800) | fixa | 6 ou 8 colunas | 3 ou 4 colunas |
+| Largo | ≥ 1440 | `largo:` (e `ultra:` ≥ 1800) | fixa | 6 colunas (8 no ultrawide) | 3 ou 4 colunas |
 
 - **Contêiner da tela:** `pagina` (utilitário em `index.css`): centrado, até 1152px (1600px no ultrawide), como manda o design system. Dentro dele as peças podem ocupar a largura inteira; "80% da tela" é isso: o card de trabalho ocupa a largura toda do contêiner.
 - **Margem lateral:** `px-4 sm:px-5` na área de rolagem da tela (16px no celular, nunca menos).
