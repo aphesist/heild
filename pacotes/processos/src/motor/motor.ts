@@ -403,6 +403,11 @@ export class Motor {
         const retomandoExterno = ex.estado === 'aguardando_externo' && passo.tipo === 'externo'
         if (ex.estado !== 'executando' && !retomandoExterno) return
         const s = await this.estado(tx, ex, p)
+        // Caminhos alternativos (B3b, triagem): cartão e efeito fora do caminho escolhido são pulados, sem evento.
+        if ((passo.tipo === 'aprovacao' || passo.tipo === 'efeito') && passo.pular_se?.(s)) {
+          await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, { pulado: true, motivo: 'fora do caminho escolhido' })
+          return
+        }
         switch (passo.tipo) {
           case 'deterministico': {
             const ctx = await this.contextoDaExecucao(tx, ex)
@@ -702,6 +707,12 @@ export class Motor {
   private async parcialPorOrcamento(tx: Tx, ex: LinhaExecucao, e: ErroOrcamento, job: JobPasso) {
     const p = this.versao(ex.procedimento_id, ex.versao)
     await this.registrarPassoFalho(tx, ex, job.ordem, job.tentativa, p.passos[job.ordem]!, { codigo: e.codigo, mensagem: e.message })
+    if (ex.sombra) {
+      // Sombra sem saldo na bolsa do piloto: encerra sem cartão (ninguém precisa decidir uma medição).
+      await tx`update execucao set estado = 'cancelada', concluida_em = now(), erro = ${tx.json({ codigo: e.codigo, mensagem: e.message } as never)} where id = ${ex.id}`
+      await enfileirar(this.d.boss, tx, FILAS.admitir, { escritorio_id: ex.escritorio_id })
+      return
+    }
     const f = { nome: 'execucao.retomar', modulo: 'painel', nivel: 'executar', setor: ex.setor, gestao: true } as Ferramenta
     const pode = await this.aprovadores(tx, { ...ex, responsavel_id: null }, f)
     const [c] = await tx`

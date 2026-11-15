@@ -5,6 +5,7 @@ import { Anexos, type Integrante } from './contrato.ts'
 import { aprenderComCartao } from './execucao.ts'
 import { integrantesContabil } from './integrantes.ts'
 import { metasB3 } from './metas.ts'
+import { ROTEADOR_BARATO_NO_HAIKU } from './modelos.ts'
 import { configRoteamentoPadrao, type ConfigRoteamento } from './roteador.ts'
 
 /**
@@ -32,7 +33,7 @@ export function extensaoIntegrantes(o: OpcoesExtensao = {}): ExtensaoIntegrantes
     ferramentas: (b: BaseExtensao): DefinicaoFerramenta[] => {
       // Com os modelos reais, a cascata é Haiku → Sonnet; na demonstração, os modelos de demonstração.
       const padrao = b.modelos.precos['claude-haiku-5-5']
-        ? configRoteamentoPadrao(b.modelos.precos)
+        ? { ...configRoteamentoPadrao(b.modelos.precos), ...(ROTEADOR_BARATO_NO_HAIKU.liberado ? {} : { barato: 'claude-sonnet-5-5' }) }
         : { ...configRoteamentoPadrao(b.modelos.precos), barato: b.modelos.porClasse.operario, caro: b.modelos.porClasse.escritor }
       const assistente = new Assistente({ sql: b.sql, boss: b.boss, motor: b.motor, eventos: b.eventos, fornecedor: b.fornecedor, roteamento: { ...padrao, ...o.roteamento }, integrantes, aguardar_ms: o.aguardar_ms })
       ext.assistente = assistente

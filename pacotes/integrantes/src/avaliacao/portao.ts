@@ -46,7 +46,7 @@ export function decidirPortaoHaiku(contrato: string, sonnet: LinhaAvaliacao[], h
         : piores.length
           ? `Haiku errou onde o Sonnet acertou: ${[...new Set(piores)].join(', ')}.`
           : 'Sem casos para comparar.'
-  const escaladas = (ls: LinhaAvaliacao[]) => ls.filter((l) => (l.chamadas ?? []).some((c) => c.classe !== 'operario')).length
+  const escaladas = (ls: LinhaAvaliacao[]) => ls.filter((l) => (l.chamadas ?? []).some((c) => c.classe === 'escritor')).length
   const custo = (ls: LinhaAvaliacao[]) => Math.round(ls.reduce((a, l) => a + (l.centavos ?? 0), 0) * 10_000) / 10_000
   return {
     contrato, liberado, motivo, acerto_sonnet, acerto_haiku, erro_critico_haiku, casos_piores: [...new Set(piores)],

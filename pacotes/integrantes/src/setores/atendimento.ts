@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { definirContrato } from '@heild/processos'
-import { procedimentoDeEscolha } from '../escolha.ts'
+import { procedimentoDeEscolha, type OpcoesEscolha } from '../escolha.ts'
 import { resolverCom } from '../metas.ts'
 
 /**
@@ -56,7 +56,7 @@ const baseDe = (memoria: Readonly<Record<string, unknown>>) => {
   return m.success && m.data.length ? m.data : BASE_PADRAO
 }
 
-export const gesFaq = procedimentoDeEscolha({
+const opcoesFaq = {
   id: 'GES-FAQ-RESPONDER',
   versao: 1,
   nome: 'Responder pergunta frequente do cliente',
@@ -88,4 +88,20 @@ export const gesFaq = procedimentoDeEscolha({
   },
   orcamento: { centavos: 8, tokens: 8_000 },
   resolver: resolverCom(),
+} satisfies OpcoesEscolha
+
+export const gesFaq = procedimentoDeEscolha(opcoesFaq)
+
+/** v2 (B3b): revisor de risco (Opus) antes do cartão, porque o ato é irreversível. */
+export const gesFaqV2 = procedimentoDeEscolha({
+  ...opcoesFaq,
+  versao: 2,
+  orcamento: { centavos: 30, tokens: 12_000 },
+  revisor: { evidencias: (e, l) => {
+      const f = (l.contexto.base as PerguntaFrequente[]).find((x) => x.id === e.faq_id)
+      return [
+        { rotulo: 'Pergunta da base escolhida', valor: f?.pergunta ?? String(e.faq_id) },
+        { rotulo: 'Resposta aprovada que vai ao cliente', valor: (f?.resposta ?? '').slice(0, 300) },
+      ]
+    } },
 })

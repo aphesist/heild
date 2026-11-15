@@ -127,7 +127,7 @@ describe('integrante: pacote, bolsa e roteamento opcional', () => {
     const [aprov] = await admin`select pode_aprovar from cartao_aprovacao where id = ${depois.cartao_id}`
     expect(aprov!.pode_aprovar).toEqual(['u-fiscal'])
     const [b] = await admin`select gasto_centavos from bolsa_setor where escritorio_id = ${s.esc} and setor = 'fiscal'`
-    const [cm] = await admin`select centavos from chamada_modelo where execucao_id = ${execucao_id}`
+    const [cm] = await admin`select coalesce(sum(centavos), 0)::float8 as centavos from chamada_modelo where execucao_id = ${execucao_id}`
     expect(b!.gasto_centavos).toBeCloseTo(cm!.centavos, 6)
     expect(Number.isInteger(cm!.centavos)).toBe(false)
   })

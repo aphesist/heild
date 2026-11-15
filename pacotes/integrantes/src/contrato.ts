@@ -27,6 +27,8 @@ export const Anexos = z
     documento_id: z.string().min(1).max(80).optional(),
     exercicio: z.string().regex(/^\d{4}$/).optional(),
     competencia: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional(),
+    /** A conversa do CRM (triar e repassar o número único de WhatsApp). */
+    conversa_id: z.string().min(1).max(80).optional(),
   })
   .strict()
 export type Anexos = z.infer<typeof Anexos>
@@ -63,6 +65,12 @@ export interface PacoteProcedimento {
   apresentar: (saida: Record<string, unknown>) => Apresentacao
   /** A decisão comparável (gabarito, sombra). `cartao` quando o integrante não decidiu. */
   decisao: (e: ExecucaoParaDecisao) => string
+  /**
+   * Limiares próprios, quando o plano define outros para este trabalho (ex.: a triagem do número
+   * compartilhado roteia com 0,8 e marca incerta entre 0,6 e 0,8). Sem isto, o procedimento tem de
+   * conferir a confiança com pelo menos o limiar do integrante. `fonte` diz onde o plano decide.
+   */
+  limiares_do_plano?: { roteia: number; incerta: number; fonte: string }
 }
 
 export interface PapeisIntegrante {
@@ -145,7 +153,10 @@ export function definirIntegrante(d: DefinicaoIntegrante, resolver: ResolverMeta
         if (passo.tipo === 'aprovacao' && f && exigeCartaoSempre(f) && passo.exigida !== 'sempre') erros.push(`${p.id}.${passo.nome}: ${passo.ferramenta} é irreversível`)
       }
     }
-    if (temOperario && (limiar === null || limiar < d.limiar_confianca)) erros.push(`${p.id}: confere a confiança abaixo do limiar do integrante (${limiar ?? 'nenhum'} < ${d.limiar_confianca})`)
+    if (pp.limiares_do_plano) {
+      const l = pp.limiares_do_plano
+      if (!(l.incerta >= 0.5 && l.incerta <= l.roteia && l.roteia <= 1) || !l.fonte.trim()) erros.push(`${p.id}: limiares do plano inválidos`)
+    } else if (temOperario && (limiar === null || limiar < d.limiar_confianca)) erros.push(`${p.id}: confere a confiança abaixo do limiar do integrante (${limiar ?? 'nenhum'} < ${d.limiar_confianca})`)
   }
   if (erros.length) throw new Error(`Integrante ${d.id} inválido:\n- ${erros.join('\n- ')}`)
   return { ...d, pacote }

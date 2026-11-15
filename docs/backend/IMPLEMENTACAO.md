@@ -715,6 +715,94 @@ app/supabase/migrations/20261116090000_b3_integrantes.sql
 
 ---
 
+## B3b · Ajustes dos integrantes
+
+**16/11/2026 · branch `be3b-integrantes-ajustes` → `backend`.** O Enzo aprovou as nove recomendações da B3. Esta sessão implementa as seis que mudam código e mede o resultado com o modelo de verdade. Migração `20261116120000_b3b_integrantes_ajustes.sql`.
+
+### O que mudou
+
+1. **Gabarito ampliado** (`pacotes/integrantes/src/avaliacao/gabarito-ampliado.ts`): 30 casos distintos por contrato de operário (7 contratos, 210 casos) e 32 de roteamento. Entram casos difíceis: várias datas no mesmo texto, palavras que puxam para a resposta errada, a guia sem tributo definido, o pedido com dois eventos de folha, a mensagem que cita "boleto" mas não pede segunda via. Entram também os casos em que o certo é **não** decidir: ao todo 26 casos `cartao` e 4 de roteamento em que o certo é perguntar. Nas 30 ECDs, a conta plantada muda de conta e de valor, e metade tem um distrator (estoque que sobe por compra normal).
+2. **Portão do Haiku com margem**: o Haiku só fica num contrato se, no gabarito ampliado com 2 repetições, acertar todo caso em que o Sonnet acertou, sem erro crítico e dentro da margem de −3 pontos na taxa de erro. O resultado por contrato está em `src/modelos.ts` (`CONTRATOS_NO_HAIKU`, cada linha com a evidência), aplicado pelo worker dos integrantes (`modelosDosIntegrantes`). O portão registra também as escaladas e o custo de cada lado.
+3. **Custo do roteamento no setor de destino.** A estimativa continua sendo reservada antes da chamada na bolsa de trânsito `assistente`, porque o setor ainda não é conhecido. Com o destino decidido, o custo real sai dela e entra na bolsa do setor de destino, na mesma transação que grava a decisão. **Sem destino** (pergunta à pessoa, pedido sem procedimento, negado ou falha), o custo fica na bolsa `assistente`, que é o custo de atender o chat sem setor. Se a bolsa do setor de destino não tiver saldo para receber, o custo também fica na `assistente`. O pedido guarda de onde saiu (`pedido_assistente.bolsa_pagadora`), e o evento `assistente.rotear` também.
+4. **Roteador com trecho do documento** (contrato `assistente.rotear` v2): pode receber os primeiros 600 caracteres do documento anexado, como dado externo. A chave é `com_trecho` na configuração do roteamento; ela só fica ligada se o gabarito mostrar ganho.
+5. **Competência v2** (`CTB-COMPETENCIA-DOC` v2, contrato `ctb.competencia.escolher` v2): a instrução passa a dar a ordem de precedência das datas. Primeiro a referência escrita, depois o período, depois o mês do fato; quando há só o vencimento de uma parcela, vale o mês do vencimento; nunca a data de pagamento ou de chegada quando houver outra. Candidatas, validadores e limiar não mudam.
+6. **Revisor de risco (Opus)** só nos procedimentos irreversíveis: `CTB-ECD-TRANSMITIR` v2 (transmissão ao governo), `FIS-GUIA-CONFERIR` v2 e `GES-FAQ-RESPONDER` v2 (envio ao cliente). O passo `revisar` (contrato `revisor.ato_irreversivel`, classe revisor) recebe só o compacto: o ato, o resumo escrito pelo sistema, a decisão, as evidências conferidas e o trecho. Ele responde `aprova` ou `devolve` com o motivo. Se devolver, o caso vai ao cartão "não consegui" com o motivo; a pessoa pode liberar com uma justificativa ou encerrar, e o revisor não é chamado de novo sobre a decisão dela. O cartão de aprovação mostra o parecer, porque a aprovação humana continua obrigatória. Pontos de atenção que a pessoa vai ver no cartão não são motivo para devolver: a instrução diz isso depois que a rodada pequena mostrou o revisor devolvendo toda ECD com contas atípicas.
+7. **Bolsa do piloto.** A execução em sombra paga com a bolsa `piloto` (constante `BOLSA_PILOTO`), nunca com a do setor. Sem saldo, a sombra para sem cartão (`BOLSA_SEM_SALDO`): ninguém precisa decidir uma medição.
+8. **Correção na ECD v2:** uma conta que começa o exercício zerada (receita, custo, conta nova) passa a medir a variação contra o saldo final (100%). A v1 dividia por 1 centavo e mostrava ao operário e ao revisor variações como "500.000.000%".
+
+As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-GUIA-CONFERIR` v1, `GES-FAQ-RESPONDER` v1) continuam carregadas no motor: execuções em andamento terminam na versão em que começaram. A operação de processo é uma só por procedimento e inicia sempre a versão mais nova. A lista de referência da B2 (`procedimentosDeReferencia`) continua com as v1; as v2 de referência estão em `procedimentosDeReferenciaV2`, e os integrantes usam as v2.
+9. **DP-EVENTO-FOLHA v2:** o gabarito ampliado pegou o Sonnet e o Haiku lançando hora extra sem quantidade. O validador `quantidade_quando_exigida` barra por regra hora extra, falta e adiantamento sem quantidade.
+
+10. **Triagem do número compartilhado** (`GES-TRIAR-REPASSAR` v2, `src/setores/triagem.ts`; desenho no PR #33: subplano 04, adendo A, e subplano 02, "Triagem do número compartilhado", com as respostas do Enzo de 15/11/2026). O integrante de Atendimento lê a conversa que entrou pelo número compartilhado de WhatsApp e a roteia ao setor e ao integrante certos.
+    - **Forma de triagem** (entrada `triagem`): `integrante` é o padrão com integrantes contratados, sem menu, e o integrante decide. `menu_e_integrante` é opção: a escolha do cliente (`menu_escolhido`) prevalece, e o integrante só **sugere**. Ele registra a divergência (evento `conversa.triagem_divergir`) e, com confiança de 0,8 ou mais, deixa a quem atende o cartão "Parece ser do {setor}. Transferir?", sem mensagem ao cliente. `menu` e `manual` não passam por aqui: o chatbot sem IA é do CRM e é a reserva de quem não contrata integrantes. Escolha de menu fora da opção `menu_e_integrante` é recusada (`MENU_SEM_MENU`).
+    - **Quem escreve:** a conversa já ligada ao cliente ou, se não estiver, outra conversa da mesma pessoa que já esteja ligada a um cliente só.
+    - **Regras, sem modelo, nesta ordem:**
+      1. a escolha do menu;
+      2. a resposta do cliente à pergunta da triagem (o número da opção ou o nome do setor);
+      3. o contexto do cliente identificado (04, A.4):
+         - conversa aberta já num setor (não resolvida, ou com a última mensagem há menos de 24 h; a que espera triagem no setor de entrada não conta);
+         - resposta a algo que o escritório mandou nos últimos 7 dias;
+         - um só setor ativo na carteira;
+      4. palavra-chave de um setor só.
+    - **Modelo barato** (contrato `ges.triagem.classificar` v2, que devolve também a `alternativa`):
+      - com confiança de 0,8 ou mais, roteia;
+      - entre 0,6 e 0,8, roteia e marca `triagem_incerta`;
+      - abaixo de 0,6, ou com assunto misto, pergunta.
+
+      Esses limiares do plano entram no pacote pelo campo `limiares_do_plano`, porque a regra geral do integrante (confiança mínima de 0,9) não vale para este trabalho. O modelo caro só entra pela escalada do motor, quando o setor sai das opções.
+    - **Quando pergunta:**
+      - Sem responsável na conversa, pergunta **ao cliente**, com uma pergunta fechada de até dois setores prováveis mais "Outro assunto". A mensagem vai com `extras.tipo = pergunta_triagem` e as opções, e a conversa fica `aguardando_cliente`.
+      - O limite é de duas perguntas por conversa. Depois disso, a conversa vai ao setor de entrada com `triagem_sem_acordo`.
+      - Com responsável, pergunta **à pessoa**, pelo cartão "não consegui" (validador `triagem_decidivel`).
+      - A pergunta usa `conversa.responder`, que é irreversível no catálogo, e por isso sai sempre com cartão. Isso vale até o catálogo liberar a categoria de mensagem por modelo do tema (GES-062). A pergunta é um texto fixo montado pelo sistema, sem conteúdo do modelo; por isso não passa pelo revisor.
+    - **Quem fala** (`src/identificacao.ts`, 04, A.6): toda mensagem ao cliente leva o prefixo de quem fala.
+      - Pessoa: `*{Setor} · {Nome}*`.
+      - Integrante: `*{Nome} (IA)*`, por exemplo `*Atendimento (IA)*`. O "(IA)" não pode ser desligado.
+      - Sistema: `*{Escritório}*`.
+
+      O prefixo não se repete quando a mesma voz fala em sequência.
+    - **O roteamento** (`conversa.rotear`, executar e reversível, por regra do escritório ou por cartão):
+      - define o setor, o responsável da carteira ou o padrão do setor, as etiquetas (`triada`, `triagem_incerta`, `triagem_sem_acordo`) e `conversa.extras` (`origem_roteamento`, `escolha_cliente`, `sugestao_integrante`), até o CRM ganhar as colunas de A.7;
+      - grava o resumo escrito pelo sistema e o repete como nota interna;
+      - acorda o integrante do setor de destino; tudo isso entra na cadeia.
+    - **Motor:** `aprovacao` e `efeito` ganharam `pular_se` (antes só o operário tinha), para os caminhos alternativos (perguntar, rotear, sugerir). O passo pulado não grava evento.
+    - **Limites conhecidos:**
+      - O cartão de sugestão vai a quem pode aprovar no setor da execução, ainda não ao atendente da conversa.
+      - Recusar esse cartão encerra a execução como recusada, e o roteamento pelo menu continua valendo.
+      - A v1 (menu como regra principal, limiar 0,9), integrada com o PR #34, continua carregada (`src/setores/triagem-v1.ts`, com o mesmo hash publicado), para as execuções que começaram nela terminarem. A operação inicia a v2.
+    - Pelo chat, o Assistente encaminha "triar e repassar esta conversa" com a conversa anexada (`anexos.conversa_id`).
+
+### Resultado real (15/11/2026)
+
+Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
+
+- **Portão do Haiku:** os 8 contratos de operário (com o da triagem) e o roteador barato igualaram o Sonnet caso a caso, sem erro crítico. A triagem foi medida de novo na v2: 84 × 84 em 42 casos com 2 repetições. O DP só depois do v2: na v1, os dois modelos erraram o mesmo caso.
+- **O que foi trocado:** o Haiku como operário nos 8 contratos e como roteador barato. Sonnet continua escritor, Opus continua revisor. No total do operário, o custo caiu 18 vezes (R$ 5,66 para R$ 0,32 em 420 chamadas).
+- **Roteador com trecho:** acerto de 71,9% para 87,5%, sem erro crítico; o trecho fica **ligado**.
+- **Revisor de risco:** R$ 0,041 e 2,6 s (p50) por revisão. Aprovou as 302 revisões; o ganho dele ainda não está medido neste gabarito.
+- **Custo da sessão:** R$ 25,28 (≈ US$ 4,68), contra o teto de US$ 15.
+
+### Testes da B3b
+
+- `contrato.test.ts`: o gabarito ampliado tem 30 casos distintos por contrato e 30 ou mais de roteamento; as ECDs do gabarito fecham por regra; o validador de quantidade do DP v2.
+- `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
+- `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
+- `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.
+- `triagem.test.ts` (11):
+  - o prefixo de quem fala;
+  - palavra-chave por regra; integrante decidindo, com a nota interna e o evento `conversa.rotear`;
+  - a faixa incerta;
+  - as três regras de contexto;
+  - a pergunta ao cliente: cartão, prefixo "(IA)", opções e "2" que roteia sem modelo;
+  - duas perguntas sem acordo, que levam ao setor de entrada sem repetir o prefixo;
+  - com responsável, o cartão à pessoa;
+  - remetente desconhecido e o histórico;
+  - "menu e integrante": a escolha prevalece, a divergência é gravada, o cartão "Parece ser do Fiscal. Transferir?" é aprovado e a conversa é transferida;
+  - palavras que confirmam o menu dispensam o modelo; o menu fora da opção é recusado;
+  - pelo Assistente.
+
+---
+
 ## B5 · Fase F1: núcleo pela API (entrega E1)
 
 **15/11/2026 · branch `be5-f1-fundacao` → `backend`.** Fecha a F1 (ARQUITETURA 7) e o que a entrega E1 pede (ORDEM_DE_IMPLEMENTACAO 2.1), sem escopo novo. Tudo local: o mesmo Postgres 16 da B1 (porta 54329), Node 24 e o app no Vite com `VITE_HEILD_BANCO=api`. Nada foi aplicado em projeto Supabase: o projeto do backend em São Paulo ainda não existe (depende do dono), e a migração **não** vai para o HEILD-PROD, que é do wireframe. O caminho para aplicar no projeto novo está pronto (abaixo).

@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "e16ce5d487b18926",
+  "catalogo_hash": "3fb296ffa93d5e10",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -299,6 +299,11 @@
               "competencia": {
                 "type": "string",
                 "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+              },
+              "conversa_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
               }
             },
             "additionalProperties": false
@@ -330,6 +335,68 @@
       "x-heild-erros": [],
       "x-heild-origem": "motor",
       "x-heild-recorte": "geral"
+    },
+    {
+      "name": "atendimento_conversa_triar_e_repassar",
+      "nome": "atendimento.conversa.triar_e_repassar",
+      "description": "Reconhece quem escreve e o assunto da conversa do número compartilhado e a roteia ao setor e ao integrante certos, com resumo; na dúvida, pergunta.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "conversa_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "triagem": {
+            "type": "string",
+            "enum": [
+              "integrante",
+              "menu_e_integrante"
+            ]
+          },
+          "menu_escolhido": {
+            "type": "string",
+            "enum": [
+              "contabil",
+              "fiscal",
+              "dp",
+              "societario",
+              "gestao_atendimento"
+            ]
+          },
+          "setor_entrada": {
+            "type": "string",
+            "enum": [
+              "contabil",
+              "fiscal",
+              "dp",
+              "societario",
+              "gestao_atendimento"
+            ]
+          }
+        },
+        "required": [
+          "conversa_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "x-heild-nivel": "executar",
+      "x-heild-setor": "geral",
+      "x-heild-modulo": "plataforma",
+      "x-heild-aprovacao": "nunca",
+      "x-heild-idempotencia": "por_chave",
+      "x-heild-versao": 2,
+      "x-heild-exposta-mcp": true,
+      "x-heild-erros": [],
+      "x-heild-origem": "catalogo"
     },
     {
       "name": "atendimento_faq_responder",
@@ -367,7 +434,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"
@@ -1332,7 +1399,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"
@@ -1376,7 +1443,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"
@@ -1894,7 +1961,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"
@@ -2575,7 +2642,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": [],
       "x-heild-origem": "catalogo"

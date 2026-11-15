@@ -1,11 +1,27 @@
-import { ctbCompetenciaDoc, ctbEcd, type Procedimento } from '@heild/processos'
+import { ctbCompetenciaDoc, ctbCompetenciaDocV2, ctbEcd, ctbEcdV2, type Procedimento } from '@heild/processos'
 import { definirIntegrante, type Anexos, type ExecucaoParaDecisao, type Integrante, type PacoteProcedimento } from './contrato.ts'
 import { decisaoDeEscolha, type Escolha } from './escolha.ts'
 import { resolverCom } from './metas.ts'
-import { BASE_PADRAO, gesFaq } from './setores/atendimento.ts'
-import { dpEventoFolha } from './setores/dp.ts'
-import { fisCaixaPostal, fisGuiaConferir } from './setores/fiscal.ts'
+import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
+import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
+import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
+import { gesTriarRepassar, LIMIAR_INCERTA, LIMIAR_ROTEIA } from './setores/triagem.ts'
+import { gesTriarRepassarV1 } from './setores/triagem-v1.ts'
+
+/**
+ * Decisão comparável da triagem: o setor; `pergunta` quando perguntou ao cliente; `sem_acordo` no
+ * setor de entrada; `{menu}>{sugerido}` quando o cartão de sugestão transferiu; `cartao` quando foi à pessoa.
+ */
+export function decisaoDaTriagem(e: { estado: string; saida: Record<string, unknown> | null; erro: { codigo?: string } | null }): string {
+  if (e.estado === 'concluida' && e.saida) {
+    const x = e.saida
+    if (x.acao === 'perguntar') return 'pergunta'
+    if (x.acao === 'entrada_padrao') return 'sem_acordo'
+    return x.transferido ? `${String(x.setor_roteado)}>${String(x.setor)}` : String(x.setor)
+  }
+  return e.estado === 'aguardando_cartao' || e.erro?.codigo === 'SOMBRA_NAO_DECIDIU' ? 'cartao' : `${e.estado}:${e.erro?.codigo ?? ''}`
+}
 
 /**
  * Os integrantes do pacote Contábil (B3): um por setor, compartilhado pelas pessoas do setor.
@@ -24,12 +40,14 @@ const entradaDeDocumento: PacoteProcedimento['entrada'] = (a: Anexos) =>
 const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
-const TODOS = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, fisCaixaPostal, dpEventoFolha, socAlteracao, gesFaq].map(P)
+const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2, gesTriarRepassar].map(P)
+/** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha, gesTriarRepassarV1].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
 const competencia: PacoteProcedimento = {
-  procedimento: P(ctbCompetenciaDoc),
+  procedimento: P(ctbCompetenciaDocV2),
   entrada: entradaDeDocumento,
   regras: [/\bcompet[êe]ncia\b/i, /\bclassific\w* (o |este |esse )?(documento|recibo|lan[çc]amento)/i, /\bm[êe]s de refer[êe]ncia\b/i],
   descricao_roteamento: 'Classificar a competência (o mês) de um documento recebido do cliente.',
@@ -38,7 +56,7 @@ const competencia: PacoteProcedimento = {
 }
 
 const ecd: PacoteProcedimento = {
-  procedimento: P(ctbEcd),
+  procedimento: P(ctbEcdV2),
   entrada: (a) =>
     a.cliente_id && a.documento_id && a.exercicio
       ? { ok: true, entrada: { cliente_id: a.cliente_id, documento_id: a.documento_id, exercicio: a.exercicio } }
@@ -86,7 +104,7 @@ export const integranteFiscal: Integrante = definirIntegrante(
     ferramentas: [...LEITURA, 'fiscal.guia.conferir_e_enviar', 'fiscal.caixa_postal.triar', 'fiscal.guia.enviar', 'documento.atualizar', 'fiscal.caixa_postal.ler'],
     procedimentos: [
       {
-        procedimento: P(fisGuiaConferir),
+        procedimento: P(fisGuiaConferirV2),
         entrada: entradaDeDocumento,
         regras: [/\bguias?\b/i, /\bDARF\b/i, /\bDAS\b/, /\bGPS\b/],
         tipos_documento: ['guia'],
@@ -129,7 +147,7 @@ export const integranteDp: Integrante = definirIntegrante(
     ferramentas: [...LEITURA, 'dp.evento.classificar_e_lancar', 'dp.evento.lancar'],
     procedimentos: [
       {
-        procedimento: P(dpEventoFolha),
+        procedimento: P(dpEventoFolhaV2),
         entrada: entradaDeDocumento,
         regras: [/\bhoras? extras?\b/i, /\bf[ée]rias\b/i, /\bfolha\b/i, /\badmiss[ãa]o\b/i, /\brescis[ãa]o\b/i, /\badiantamento\b/i, /\bfaltou\b|\bfalta\b/i],
         aceita_documentos: ['mensagem', 'email', 'solicitacao'],
@@ -180,14 +198,14 @@ export const integranteAtendimento: Integrante = definirIntegrante(
     setor: 'gestao_atendimento',
     nome: 'Atendimento',
     descricao: 'Responde as perguntas frequentes dos clientes com as respostas aprovadas da base.',
-    papeis: { operario: true, escritor: true, revisor: false },
+    papeis: { operario: true, escritor: true, revisor: true },
     limites: { simultaneas: 10, segundo_plano_por_pessoa: 3 },
     limiar_confianca: 0.9,
     perguntar_responsavel: false,
-    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'conversa.responder', 'conversa.listar'],
+    ferramentas: [...LEITURA, 'atendimento.faq.responder', 'atendimento.conversa.triar_e_repassar', 'conversa.responder', 'conversa.transferir', 'conversa.rotear', 'conversa.triagem_divergir', 'conversa.listar'],
     procedimentos: [
       {
-        procedimento: P(gesFaq),
+        procedimento: P(gesFaqV2),
         entrada: entradaDeDocumento,
         regras: [/\bsegunda via\b/i, /\bhor[áa]rio de atendimento\b/i, /\bcertid[ãa]o negativa\b/i, /\bpergunta frequente\b/i, /\bresponder? (o |a )?cliente\b/i],
         aceita_documentos: ['mensagem'],
@@ -198,6 +216,24 @@ export const integranteAtendimento: Integrante = definirIntegrante(
         },
         decisao: decisaoDeEscolha(['faq_id']),
       },
+      {
+        procedimento: P(gesTriarRepassar),
+        entrada: (a) => (a.conversa_id ? { ok: true, entrada: { conversa_id: a.conversa_id } } : { ok: false, falta: ['conversa_id'] }),
+        regras: [/\b(triar|triagem|repassar|repasse)\b.*\bconversa\b/i, /\bconversa\b.*\b(triar|repassar)\b/i],
+        // Trabalha sobre a conversa do CRM, não sobre um documento anexado.
+        aceita_documentos: [],
+        descricao_roteamento: 'Triar a conversa que chegou pelo número compartilhado de WhatsApp e repassar ao setor certo, com resumo (ou perguntar o assunto ao cliente).',
+        apresentar: (s) =>
+          s.acao === 'perguntar'
+            ? { titulo: 'Perguntei o assunto ao cliente', texto: 'Não deu para saber o setor pela mensagem; perguntei ao cliente, com opções.', dados: { acao: 'perguntar' } as Record<string, string | boolean> }
+            : {
+                titulo: `Conversa repassada ao setor ${String(s.setor)}`,
+                texto: `Repassei a conversa ao setor ${String(s.setor)}${s.incerta ? ' (triagem incerta: confira)' : ''}${s.cliente_id ? '' : ', com o remetente ainda não identificado'}.`,
+                dados: { setor: String(s.setor), origem: String(s.origem), cliente_identificado: s.cliente_id !== null } as Record<string, string | boolean>,
+              },
+        decisao: decisaoDaTriagem,
+        limiares_do_plano: { roteia: LIMIAR_ROTEIA, incerta: LIMIAR_INCERTA, fonte: 'subplano 02, "Triagem do número compartilhado"' },
+      },
     ],
   },
   resolver,
@@ -206,7 +242,7 @@ export const integranteAtendimento: Integrante = definirIntegrante(
 export const integrantesContabil: Integrante[] = [integranteContabil, integranteFiscal, integranteDp, integranteSocietario, integranteAtendimento]
 
 /** Todos os procedimentos dos integrantes (para o motor, a API e o worker). */
-export const procedimentosDosIntegrantes: Procedimento[] = integrantesContabil.flatMap((i) => i.procedimentos.map((p) => p.procedimento))
+export const procedimentosDosIntegrantes: Procedimento[] = [...integrantesContabil.flatMap((i) => i.procedimentos.map((p) => p.procedimento)), ...ANTERIORES]
 
 export const integranteDoSetor = (setor: string) => integrantesContabil.find((i) => i.setor === setor)
 export const integrantePorId = (id: string) => integrantesContabil.find((i) => i.id === id)

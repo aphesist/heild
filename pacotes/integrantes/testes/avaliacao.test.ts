@@ -60,6 +60,10 @@ describe('gabarito por setor em modo sombra', () => {
     }
     expect(r.total.acerto_pct).toBeGreaterThanOrEqual(90)
     expect(r.porPapel.find((p) => p.papel === 'operario')!.chamadas).toBeGreaterThan(20)
+    // A sombra paga com a bolsa do piloto, nunca com a do setor.
+    const bolsas = await admin`select setor, gasto_centavos from bolsa_setor where escritorio_id = ${a.escritorio_id}`
+    expect(bolsas.find((b) => b.setor === 'piloto')!.gasto_centavos).toBeGreaterThan(0)
+    for (const b of bolsas.filter((x) => x.setor !== 'piloto')) expect(b.gasto_centavos, b.setor).toBe(0)
     // Sombra: nada saiu.
     expect(await admin`select 1 from cartao_aprovacao where escritorio_id = ${a.escritorio_id}`).toHaveLength(0)
     expect(await admin`select 1 from item_fila where escritorio_id = ${a.escritorio_id}`).toHaveLength(0)
@@ -85,6 +89,18 @@ describe('gabarito por setor em modo sombra', () => {
     } finally {
       h.fornecedor.responder('soc.alteracao.classificar', RESPOSTAS_SIMULADAS['soc.alteracao.classificar']!)
     }
+  })
+})
+
+describe('bolsa do piloto', () => {
+  it('sem saldo no piloto, a sombra para sem cartão e sem tocar a bolsa do setor', async () => {
+    const s = await semear(admin, { bolsa_piloto: 0 })
+    const a: AmbienteAvaliacao = { sql: admin, motor: h.motor, escritorio_id: s.esc, cliente_id: s.cliente, cnpj: s.cnpj, ctx: await pessoa(admin, s.esc, 'u-ana') }
+    const l = await avaliarCaso(a, gabaritoDp[0]!)
+    expect(l).toMatchObject({ estado: 'cancelada', resultado: 'falha', obtido: 'cancelada:BOLSA_SEM_SALDO' })
+    expect(await admin`select 1 from cartao_aprovacao where escritorio_id = ${s.esc}`).toHaveLength(0)
+    const [dp] = await admin`select gasto_centavos from bolsa_setor where escritorio_id = ${s.esc} and setor = 'dp'`
+    expect(dp!.gasto_centavos).toBe(0)
   })
 })
 

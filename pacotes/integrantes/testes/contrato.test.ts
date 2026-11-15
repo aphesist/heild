@@ -142,3 +142,44 @@ describe('avaliação: classificação, margem e portão do Haiku', () => {
     expect(decidirPortaoHaiku('x', sonnet, [l('a', 'acerto')]).liberado).toBe(false)
   })
 })
+
+describe('gabarito ampliado (portão do Haiku)', () => {
+  it('30 casos distintos por contrato de operário e 30 ou mais de roteamento, com casos em que o certo é não decidir', async () => {
+    const { ampliadoPorContrato, roteamentoAmpliado } = await import('../src/avaliacao/gabarito-ampliado.ts')
+    expect(Object.keys(ampliadoPorContrato).sort()).toEqual(['ctb.competencia.escolher', 'ctb.ecd.apontar_atencao', 'dp.evento.classificar', 'fis.caixa_postal.classificar', 'fis.guia.identificar', 'ges.faq.escolher', 'ges.triagem.classificar', 'soc.alteracao.classificar'])
+    for (const [contrato, casos] of Object.entries(ampliadoPorContrato)) {
+      expect(new Set(casos.map((c) => c.id)).size, contrato).toBeGreaterThanOrEqual(30)
+      // ECD: o certo é sempre apontar a conta plantada. Caixa postal: toda mensagem tem categoria; os
+      // casos difíceis ali são os de várias datas (o prazo é uma delas), não os de não decidir.
+      if (contrato === 'fis.caixa_postal.classificar') expect(casos.filter((c) => c.id.includes('duas-datas') || c.id.includes('efeitos')).length).toBeGreaterThanOrEqual(4)
+      // Triagem: não decidir é perguntar ao cliente (sem responsável) ou ir à pessoa (com responsável).
+      else if (contrato === 'ges.triagem.classificar') expect(casos.filter((c) => ['cartao', 'pergunta', 'sem_acordo'].includes(c.esperado)).length).toBeGreaterThanOrEqual(10)
+      else if (contrato !== 'ctb.ecd.apontar_atencao') expect(casos.filter((c) => c.esperado === 'cartao').length, contrato).toBeGreaterThanOrEqual(3)
+    }
+    expect(new Set(roteamentoAmpliado.map((c) => c.id)).size).toBeGreaterThanOrEqual(30)
+    expect(roteamentoAmpliado.filter((c) => c.esperado === 'pergunta').length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('as ECDs do gabarito fecham por regra (partidas e saldos), para o caso chegar ao operário', async () => {
+    const { ampliadoEcd } = await import('../src/avaliacao/gabarito-ampliado.ts')
+    for (const c of ampliadoEcd) {
+      const { ecd } = (c.documento.metadados as (a: { cnpj: string }) => { ecd: { contas: { natureza: string; saldo_inicial_centavos: number; debitos_centavos: number; creditos_centavos: number; saldo_final_centavos: number }[]; total_debitos_centavos: number; total_creditos_centavos: number } })({ cnpj: '12345678000190' })
+      expect(ecd.total_debitos_centavos, c.id).toBe(ecd.total_creditos_centavos)
+      for (const x of ecd.contas) {
+        const mov = x.natureza === 'D' ? x.debitos_centavos - x.creditos_centavos : x.creditos_centavos - x.debitos_centavos
+        expect(x.saldo_inicial_centavos + mov, c.id).toBe(x.saldo_final_centavos)
+      }
+    }
+  })
+})
+
+describe('DP v2: quantidade obrigatória', () => {
+  it('hora extra, falta e adiantamento sem quantidade são barrados (escalável); férias não precisam', async () => {
+    const { rodarValidadores } = await import('@heild/processos')
+    const r = (escolha: Record<string, unknown>) => rodarValidadores(['quantidade_quando_exigida'], { escolha }, null)
+    expect((await r({ tipo_evento: 'hora_extra', quantidade: null }))[0]).toMatchObject({ ok: false, codigo: 'SEM_QUANTIDADE', escalavel: true })
+    expect((await r({ tipo_evento: 'falta', quantidade: '' }))[0]!.ok).toBe(false)
+    expect((await r({ tipo_evento: 'hora_extra', quantidade: '10' }))[0]!.ok).toBe(true)
+    expect((await r({ tipo_evento: 'ferias', quantidade: null }))[0]!.ok).toBe(true)
+  })
+})
