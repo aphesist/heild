@@ -1,4 +1,5 @@
-import { bancoAtual } from '../banco'
+import { banco, bancoAtual } from '../banco'
+import { instalarCapturaApi } from '../banco/api'
 import type { Banco } from '../banco/banco'
 import type { CartaoAprovacao, Id, MensagemInterna, NomeTabela, Notificacao, StatusTarefa, Tabelas, Tarefa } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
@@ -6,7 +7,7 @@ import { idDoAtor, nomeDoAtor } from '../permissoes/perfil'
 import { criarReposBpo } from './bpo'
 import { contextoAtual } from './contexto'
 import { reposFinanceiro } from './financeiro'
-import { agora, novoId, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
+import { agora, definirGeradorId, novoId, novoIdPadrao, registrarEvento, Repositorio, type OpcoesEscrita, type RegrasEntidade } from './repositorio'
 import { registrarRepoSessoes, RepositorioItensConfirmacao, RepositorioSessoes } from './s06-timesheet'
 
 export * from './contexto'
@@ -211,6 +212,9 @@ export const repos = {
 export type Repos = typeof repos
 
 registrarRepoSessoes(() => repos.sessoes) // S06
+
+// Backend (VITE_HEILD_BANCO=api): cada chamada de repositório da tela vira comando para a API.
+instalarCapturaApi({ repos: repos as unknown as Record<string, unknown>, banco, definirGeradorId, novoIdPadrao, contextoAtual })
 
 /** Registra um evento avulso (algo que aconteceu sem mudar uma linha: "Começou: conferir PGDAS-D"). */
 export function registrar(texto: string, nome = 'atividade.registrar', op: { ctx?: OpcoesEscrita['ctx']; cliente_id?: Id | null; setor_id?: Id | null } = {}) {
