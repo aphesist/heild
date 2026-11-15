@@ -752,6 +752,89 @@ Formato de cada registro:
 - **Arquivos compartilhados:** `PainelLab.tsx` (uma linha).
 - **Situação:** proposta.
 
+### S08c · BPO › Aprovações e Configuração
+
+#### 2026-11-14 · S08c · Estado novo das duas telas em `extras`, sem migração
+
+- **Decisão:** o que as telas Aprovações e Configuração passaram a guardar fica no campo `extras` (jsonb) das tabelas que já existem: `bpo_configuracao.extras.s08c` (alçada de conferência por pessoa e ações "faz sozinho" desligadas), `bpo_perfil.extras.s08c_sla` (prazos do SLA), `bpo_lote.extras.s08c_escalonamento` e `s08c_excecao`, `bpo_alcada.extras` (`limite_dia`, `limite_mes`, `reforcada`, `vigencia_ate`). As regras e simulações ficam em `src/telas/bpo/regras-s08c.ts`.
+- **Por quê:** nenhuma coluna nova; funciona nos dois modos de dados sem migração (a `20261114180000_s08_bpo.sql` já tem `extras` em todas as tabelas). A sessão decidiu.
+- **Telas e ações:** S08-T05, S08-T07.
+- **Impacto no plano:** nenhum (no backend real, `limite_dia`, `limite_mes`, `pode_conferir_ate` e `pode_aprovar_reforcada` viram colunas da alçada e do vínculo, 10, 3.9).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Lote com exceção vai à aprovação reforçada
+
+- **Decisão:** as exceções da 3.7 (fornecedor novo, dados bancários alterados, valor 30% acima da média do fornecedor, duplicidade suspeita, fracionamento por fornecedor e dia, pessoa física) aparecem na conta como "sobe de faixa". Lote enviado com exceção leva `extras.s08c_excecao` e pede duas aprovações mesmo abaixo da faixa 2 (linha "Com exceção" da 3.7). No repositório, `aprovar` passou a considerar `s08c_excecao` ao recalcular quantas aprovações faltam (uma linha). "Fora do horário" e "urgência" ficam listados nas regras, sem detecção na demonstração.
+- **Por quê:** 10, 3.7 manda subir de faixa; sem isso, fornecedor novo passava com um aprovador.
+- **Telas e ações:** S08-A22, A24, A27; no app (S08d), o lote com exceção mostra "falta a segunda aprovação" depois da primeira, sem mudança na tela do app.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/repositorios/bpo.ts` (uma linha em `RepositorioLotesBpo.aprovar`, comentada "S08c"). Aviso à S08d: quem aprova continua vindo de `aprovadoresPara` (alçada para o total); a reforçada por exceção pede duas dessas pessoas.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Fornecedor novo só entra em lote com os dados confirmados por segundo canal
+
+- **Decisão:** conta conferida de fornecedor novo ou alterado sem `dados_bancarios_confirmados_em` não tem "Pôr no próximo lote": no lugar, "Confirmar dados" pede o canal (vai para a trilha) e troca o alerta das contas em aberto do fornecedor. O integrante, ao sugerir o lote, também pula essas contas.
+- **Por quê:** 10, 3.13 (troca de conta do fornecedor é a fraude mais comum) e 3.8 (cadastrar ou alterar dados bancários exige confirmação por segundo canal).
+- **Telas e ações:** S08-A23.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Alçada de conferência da pessoa do BPO e limites da alçada da empresa
+
+- **Decisão:** em Configuração › Equipe do BPO, o Gestor do BPO (ou o Administrador) define até quanto cada pessoa confere (`pode_conferir_ate`, 10, 3.9); vale a menor entre ela e a faixa da conta, e o botão "Conferir" desliga com o motivo. A proposta de alçada ganhou limite por dia e por mês, revisão anual e quem entra na reforçada; o limite diário aceito trava "Montar lote e enviar" quando o que já está com o cliente mais o lote passa dele. A marca "reforçada" por pessoa só vale com o aceite (o `aceitar` do repositório aplica `extras.reforcada` na ficha, junto com as alçadas).
+- **Por quê:** 10, 3.9 fala em limites por pagamento, dia e mês e em alçada da pessoa do BPO por vínculo; a forma é da sessão. A regra do limite de conferência é conferida na tela (o repositório comum segue com a segregação B2).
+- **Telas e ações:** S08-A22, A24, A36.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/repositorios/bpo.ts` (função nova `aplicarReforcadaS08c` e a chamada dela em `RepositorioAlcadasBpo.aceitar`). Aviso à S08d: o cartão "o escritório propôs novas alçadas" pode mostrar `extras.limite_dia` e `extras.reforcada` (hoje não mostra; o aceite funciona igual).
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · M2 só até o teto; acima, o lote vai como M1
+
+- **Decisão:** na empresa em M2, o lote com alguma conta acima do teto é enviado como M1 (o cliente libera no banco), com o aviso na montagem e no cartão.
+- **Por quê:** 10, 3.4 põe teto no M2; o plano não diz o que fazer com a conta acima dele. A sessão escolheu o caminho que nunca paga sem o cliente.
+- **Telas e ações:** S08-A24, A35.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Escalonamento avançado pelo relógio da demonstração
+
+- **Decisão:** o cartão do lote aberto mostra os passos do escalonamento (10, 3.6 e Q3) com o que já aconteceu e o próximo. O Gestor do BPO (ou o Administrador) tem "Avançar o relógio" (selo de demonstração): lembrete ao aprovador; substituto (se tiver alçada na ficha, entra no `pode_aprovar` do cartão; sem alçada, só acompanha e o alerta vai ao Gestor); alerta da véspera ao Gestor e ao sócio com a lista; vencido, só alerta, o cartão expira pelo `expirar` do repositório e as contas voltam para um lote novo. Cada passo vira aviso no sino e entra na trilha. O sócio que recebe os alertas é escolhido no escalonamento.
+- **Por quê:** o mapa pedia a linha do tempo do escalonamento visível no cartão; sem relógio, ninguém via os passos acontecerem. Fica no cartão (e não no painel Demonstração, arquivo comum do BPO) para não conflitar com as outras sessões.
+- **Telas e ações:** S08-A25, A37.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Integrantes por função na Configuração do BPO
+
+- **Decisão:** a Configuração lista os quatro integrantes do BPO com o que cada um faz sozinho (S), o que prepara (P) e o que nunca faz (travado: pagar, conferir, alterar dados bancários, mudar alçada, fechar o mês, revogar credencial, cobrança firme). Só o Administrador tira item do "faz sozinho" (01, 3.3: a lista vem cheia e ele só tira). Nas telas da S08c o efeito é real em dois pontos: a captura do ERP fica desligada com o motivo e "sugerir o lote" respeita a lista. As outras sessões podem ler `acaoLigada(config, integrante, acao)` de `regras-s08c.ts`.
+- **Por quê:** o pedido da S08c inclui "integrantes por função e o que cada um faz sozinho"; a classe vem do 10, 6.2 e 6.3.
+- **Telas e ações:** S08-T07.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/telas/bpo/integrantes.ts` (efeito novo `sugerir_lote`, no fim, comentado "S08c").
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Ferramentas próprias do BPO para capturar, cancelar e confirmar baixa
+
+- **Decisão:** `conta_pagar.capturar`, `conta_pagar.cancelar` e `conciliacao.confirmar` existem nos dois catálogos (BPO e Financeiro do escritório, S07); o índice guarda a última, a do Financeiro (setor `financeiro_escritorio`), e por isso a equipe do BPO sem o Financeiro (Marina, Lucas) não lançava conta nem confirmava baixa. Acrescentei `bpo.conta.capturar`, `bpo.conta.cancelar` e `bpo.conciliacao.confirmar` no fim do catálogo e o repositório do BPO passou a usá-las. Os nomes antigos continuam com o significado do Financeiro.
+- **Por quê:** permissão é por ferramenta e titular (10, 5.4, F1); o mesmo nome com dois setores é ambíguo.
+- **Telas e ações:** S08-A22 (lançar conta), A25 (baixa).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/nucleo/permissoes/ferramentas.ts` (três linhas no fim); `src/nucleo/repositorios/bpo.ts` (cinco nomes de ferramenta trocados). **Pedido à coordenação (ou à S08b):** `src/telas/bpo/OperacaoBpo.tsx`, no botão de lançar conta (`SePode ferramenta="conta_pagar.capturar"`), trocar para `bpo.conta.capturar`; não mexi para não conflitar.
+- **Situação:** proposta.
+
+#### 2026-11-14 · S08c · Trilha do lote com impressão encadeada de demonstração
+
+- **Decisão:** "Trilha" no cartão do lote lista os eventos do lote, das contas e do cartão (quem, quando, ferramenta) com uma impressão curta encadeada (FNV, não criptográfica) para mostrar a ideia da cadeia de hashes das Fundações (5.2). O backend real usa o hash das Fundações.
+- **Por quê:** 10, 3.11 pede a trilha como entregável ao cliente e ao auditor.
+- **Telas e ações:** S08-A25.
+- **Impacto no plano:** nenhum (só desenho).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
 ### S09 · Arquivos, Configurações, entrada e implantação
 
 #### 2026-11-14 · S09 · Contrato C9: estado dos conectores no `registro_tela`

@@ -30,6 +30,8 @@ export type EfeitoBpo =
   | { tipo: 'relatorio'; clienteId: string; competencia: string }
   | { tipo: 'cobrar'; clienteId: string }
   | { tipo: 'completude'; filaId: string }
+  // S08c: Contas a Pagar sugere o próximo lote (prepara; o Gestor manda ao cliente).
+  | { tipo: 'sugerir_lote'; clienteId: string; contaIds: string[] }
 
 const CHAVE = 's08:efeitos'
 const pendentes = () => (banco.obter('registro_tela', CHAVE)?.valor as Record<string, { integrante: IntegranteBpo; efeito: EfeitoBpo }> | undefined) ?? {}
@@ -59,6 +61,13 @@ function aplicar(integrante: IntegranteBpo, ef: EfeitoBpo) {
     if (ef.tipo === 'cobrar') {
       for (const c of banco.ler('bpo_conta').filter((x) => x.cliente_id === ef.clienteId && x.tipo === 'receber' && x.etapa === 'atrasada'))
         banco.transacao((tx) => tx.gravar('bpo_conta', { ...c, alerta: 'lembrete de cobrança enviado pelo Atendimento (régua amigável)', atualizado_em: agora() }))
+    }
+    // S08c: só põe no próximo lote o que já está conferido; não confere, não manda, não aprova.
+    if (ef.tipo === 'sugerir_lote') {
+      for (const id of ef.contaIds) {
+        const c = banco.obter('bpo_conta', id)
+        if (c && c.etapa === 'conferida') repos.bpo.contas.porNoProximoLote(id, { texto: `${nomeDe[integrante]} pôs ${c.contraparte} no próximo lote sugerido` })
+      }
     }
     if (ef.tipo === 'completude') {
       const f = banco.obter('bpo_item_fila', ef.filaId)

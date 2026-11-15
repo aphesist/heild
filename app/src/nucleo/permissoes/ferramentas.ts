@@ -250,6 +250,11 @@ export const ferramentas: Ferramenta[] = [
   f('painel.acao_lote', 'painel', 'executar', 'alvo', { papel_minimo: 'gestor', gestao: true }),
   // S10: app do cliente (06, 4.3, regra 5: o cliente cancela o pedido enquanto ninguém iniciou)
   f('pedido.cancelar', 'painel', 'executar', 'alvo', { exposta_ao_cliente: true }),
+  // S08c · BPO: os nomes conta_pagar.capturar, conta_pagar.cancelar e conciliacao.confirmar também
+  // existem no Financeiro do escritório (S07), que vence no índice; o BPO usa estes, do setor dele.
+  f('bpo.conta.capturar', 'bpo', 'executar', 'bpo_financeiro'),
+  f('bpo.conta.cancelar', 'bpo', 'executar', 'bpo_financeiro', { exige_aprovacao: 'se_integrante' }),
+  f('bpo.conciliacao.confirmar', 'bpo', 'executar', 'bpo_financeiro'),
 ]
 
 const indice = new Map(ferramentas.map((x) => [x.nome, x]))
