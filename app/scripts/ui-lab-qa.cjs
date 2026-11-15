@@ -37,7 +37,7 @@ const { rotas, rotasApp } = require('./lib/rotas-qa.cjs')
 
 const pasta = process.argv[2]
 if (!pasta || pasta.startsWith('--')) {
-  console.error('Uso: node scripts/ui-lab-qa.cjs <pasta> [--frente=lab|telas|ambas] [--filtro=] [--larguras=] [--variantes=] [--doc]')
+  console.error('Uso: node scripts/ui-lab-qa.cjs <pasta> [--frente=lab|telas|widgets|ambas|tudo] [--filtro=] [--larguras=] [--variantes=] [--doc] [--resumo]  (a mesma pasta retoma de onde parou)')
   process.exit(2)
 }
 const opcao = (nome, padrao) => {
@@ -348,53 +348,114 @@ async function frenteWidgets(navegador) {
     for (const l of extras) for (const c of porPares([{ nome: 'itens', valores: ['i0', 'i15', 'i200'] }, { nome: 'tamanho', valores: w.tamanhos }, { nome: 'estado', valores: ['padrao', 'erro', 'sem-permissao'] }, { nome: 'tema', valores: ['fabrica:claro', 'fabrica:escuro', 'condesp:claro', 'requinte:escuro'] }], l + w.id.length)) casos.push({ ...c, texto: '', valores: '', datas: '', opcionais: '', densidade: 'padrao', largura: String(l) })
     for (const c of casos) porLargura[c.largura].push({ w, ...c })
   }
+  // Ordena por cenário: o banco em memória do Lab guarda os últimos escritórios de cenário, e casos vizinhos o reaproveitam.
+  const nomeDoCenario = (c) => [c.itens, c.texto, c.valores, c.datas, c.opcionais].filter(Boolean).join('.')
+  for (const l of Object.keys(porLargura)) porLargura[l].sort((a, b) => nomeDoCenario(a).localeCompare(nomeDoCenario(b)) || a.w.chave.localeCompare(b.w.chave))
   const total = Object.values(porLargura).reduce((s, l) => s + l.length, 0)
-  console.log(`Widgets: ${widgets.length} widgets, ${total} casos`)
-  let feitos = 0
+  // Retomada: cada caso feito vai para widgets.jsonl; uma nova rodada na mesma pasta pula os já feitos.
+  const diario = path.join(pasta, 'widgets.jsonl')
+  const feitosAntes = new Set()
+  if (fs.existsSync(diario))
+    for (const linha of fs.readFileSync(diario, 'utf8').split('\n')) {
+      if (!linha.trim()) continue
+      const r = JSON.parse(linha)
+      feitosAntes.add(r.print)
+      resultado.widgets.achados.push(...r.achados)
+      resultado.widgets.porCaso.push(r.caso)
+      resultado.widgets.casos++
+    }
+  console.log(`Widgets: ${widgets.length} widgets, ${total} casos${feitosAntes.size ? ` (${feitosAntes.size} já feitos)` : ''}`)
+  let feitos = feitosAntes.size
+  const caiu = (e) => /crash|closed|Target|has been disconnected/i.test(String(e))
+
+  async function rodarCaso(s, c, largura) {
+    const { p } = s
+    const [tema, modo] = c.tema.split(':')
+    const cenario = nomeDoCenario(c)
+    const q = new URLSearchParams({ isolado: '1', variante: c.w.chave, tamanho: c.tamanho, cenario, estado: c.estado, tema, modo, densidade: c.densidade })
+    s.erros.length = 0
+    await p.evaluate((h) => (window.location.hash = h), `#/lab/ui/widget?${q}`)
+    await p.waitForSelector(`[data-lab-widget="${c.w.chave}"] article, [data-qa-raiz] [data-estado-vazio]`, { timeout: 15000 }).catch((e) => {
+      if (caiu(e)) throw e
+    })
+    await espera(p, 500)
+    let achados
+    try {
+      achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
+    } catch (e) {
+      if (caiu(e)) throw e
+      achados = [{ regra: 'erro', detalhe: String(e).slice(0, 200) }]
+    }
+    if (s.erros.length) achados.push(...[...new Set(s.erros)].slice(0, 3).map((e) => ({ regra: 'erro', detalhe: `erro de página: ${e.slice(0, 160)}` })))
+    const nomeCaso = `${cenario || 'base'}${c.estado !== 'padrao' ? `.${c.estado}` : ''}`
+    const arquivo = path.join(pasta, 'widgets', `${c.w.aba}.${c.w.id}`, c.w.versao, `${nomeCaso}__${c.tamanho}__${tema}-${modo}${c.densidade === 'grande' ? '-grande' : ''}__${largura}.png`)
+    fs.mkdirSync(path.dirname(arquivo), { recursive: true })
+    await p
+      .locator(`[data-lab-widget="${c.w.chave}"]`)
+      .screenshot({ path: arquivo, timeout: 8000 })
+      .catch((e) => {
+        if (caiu(e)) throw e
+        return p.screenshot({ path: arquivo, timeout: 8000 })
+      })
+      .catch((e) => {
+        if (caiu(e)) throw e
+        achados.push({ regra: 'erro', detalhe: `sem print: ${String(e).slice(0, 120)}` })
+      })
+    return { arquivo, nomeCaso, achados }
+  }
+
+  function registrar(c, largura, print, nomeCaso, achados) {
+    const lista = achados.map((a) => ({ widget: `${c.w.aba}.${c.w.id}`, versao: c.w.versao, chave: c.w.chave, cenario: nomeCaso, tamanho: c.tamanho, tema: c.tema, largura, print, ...a }))
+    const caso = { chave: c.w.chave, print, pontos: achados.reduce((s, a) => s + (PESO[a.regra] || 1), 0), regras: [...new Set(achados.map((a) => a.regra))] }
+    resultado.widgets.achados.push(...lista)
+    resultado.widgets.porCaso.push(caso)
+    resultado.widgets.casos++
+    fs.appendFileSync(diario, JSON.stringify({ print, achados: lista, caso }) + '\n')
+    if (++feitos % 200 === 0) console.log(`  Widgets: ${feitos}/${total}`)
+  }
+
+  const printDe = (c, largura) => {
+    const [tema, modo] = c.tema.split(':')
+    const cenario = nomeDoCenario(c)
+    const nomeCaso = `${cenario || 'base'}${c.estado !== 'padrao' ? `.${c.estado}` : ''}`
+    return { nomeCaso, print: path.join('widgets', `${c.w.aba}.${c.w.id}`, c.w.versao, `${nomeCaso}__${c.tamanho}__${tema}-${modo}${c.densidade === 'grande' ? '-grande' : ''}__${largura}.png`) }
+  }
+
   await Promise.all(
     larguras.map(async (largura) => {
-      const { ctx, p } = await novoContexto(navegador, largura)
-      const erros = []
-      p.on('pageerror', (e) => erros.push(e.message))
-      await p.goto(base + '#/lab/ui/widget?isolado=1')
-      await p.waitForFunction(() => Array.isArray(window.__widgetsLab), null, { timeout: 60000 })
+      let s = null
       let desdeRecarga = 0
-      for (const c of porLargura[largura]) {
-        // Recarrega de tempos em tempos: cada cenário abre um escritório novo e a página acumula memória.
-        if (++desdeRecarga > 25) {
-          desdeRecarga = 0
-          await p.goto(base + '#/lab/ui/widget?isolado=1').catch(() => {})
-          await p.waitForFunction(() => Array.isArray(window.__widgetsLab), null, { timeout: 60000 }).catch(() => {})
-        }
-        const [tema, modo] = c.tema.split(':')
-        const cenario = [c.itens, c.texto, c.valores, c.datas, c.opcionais].filter(Boolean).join('.')
-        const q = new URLSearchParams({ isolado: '1', variante: c.w.chave, tamanho: c.tamanho, cenario, estado: c.estado, tema, modo, densidade: c.densidade })
-        erros.length = 0
-        await p.evaluate((h) => (window.location.hash = h), `#/lab/ui/widget?${q}`)
-        await p.waitForSelector(`[data-lab-widget="${c.w.chave}"] article, [data-qa-raiz] [data-estado-vazio]`, { timeout: 15000 }).catch(() => {})
-        await espera(p, 700)
-        let achados
-        try {
-          achados = await p.evaluate(detectar, { toque: !!todasLarguras[largura].toque })
-        } catch (e) {
-          achados = [{ regra: 'erro', detalhe: String(e).slice(0, 200) }]
-        }
-        if (erros.length) achados.push(...[...new Set(erros)].slice(0, 3).map((e) => ({ regra: 'erro', detalhe: `erro de página: ${e.slice(0, 160)}` })))
-        const nomeCaso = `${cenario || 'base'}${c.estado !== 'padrao' ? `.${c.estado}` : ''}`
-        const arquivo = path.join(pasta, 'widgets', `${c.w.aba}.${c.w.id}`, c.w.versao, `${nomeCaso}__${c.tamanho}__${tema}-${modo}${c.densidade === 'grande' ? '-grande' : ''}__${largura}.png`)
-        fs.mkdirSync(path.dirname(arquivo), { recursive: true })
-        await p
-          .locator(`[data-lab-widget="${c.w.chave}"]`)
-          .screenshot({ path: arquivo, timeout: 8000 })
-          .catch(() => p.screenshot({ path: arquivo, timeout: 8000 }))
-          .catch((e) => achados.push({ regra: 'erro', detalhe: `sem print: ${String(e).slice(0, 120)}` }))
-        const print = path.relative(pasta, arquivo)
-        for (const a of achados) resultado.widgets.achados.push({ widget: `${c.w.aba}.${c.w.id}`, versao: c.w.versao, chave: c.w.chave, cenario: nomeCaso, tamanho: c.tamanho, tema: c.tema, largura, print, ...a })
-        resultado.widgets.porCaso.push({ chave: c.w.chave, print, pontos: achados.reduce((s, a) => s + (PESO[a.regra] || 1), 0), regras: [...new Set(achados.map((a) => a.regra))] })
-        resultado.widgets.casos++
-        if (++feitos % 200 === 0) console.log(`  Widgets: ${feitos}/${total}`)
+      const abrir = async () => {
+        if (s) await s.ctx.close().catch(() => {})
+        s = { ...(await novoContexto(navegador, largura)), erros: [] }
+        s.p.on('pageerror', (e) => s.erros.push(e.message))
+        await s.p.goto(base + '#/lab/ui/widget?isolado=1')
+        await s.p.waitForFunction(() => Array.isArray(window.__widgetsLab), null, { timeout: 60000 })
+        desdeRecarga = 0
       }
-      await ctx.close()
+      const pendentes = porLargura[largura].filter((c) => !feitosAntes.has(printDe(c, largura).print))
+      if (!pendentes.length) return
+      await abrir()
+      for (const c of pendentes) {
+        // Recarrega de tempos em tempos (cada cenário abre um escritório novo e a página acumula memória).
+        if (++desdeRecarga > 30) await abrir().catch(() => abrir())
+        let feito = false
+        for (let tentativa = 0; tentativa < 2 && !feito; tentativa++) {
+          try {
+            const r = await rodarCaso(s, c, largura)
+            registrar(c, largura, path.relative(pasta, r.arquivo), r.nomeCaso, r.achados)
+            feito = true
+          } catch (e) {
+            // A página caiu (memória): abre outra e tenta o caso de novo; na segunda queda, registra o erro.
+            await abrir().catch(() => {})
+            if (tentativa === 1) {
+              const { print, nomeCaso } = printDe(c, largura)
+              registrar(c, largura, print, nomeCaso, [{ regra: 'erro', detalhe: `a página caiu: ${String(e).slice(0, 120)}` }])
+            }
+          }
+        }
+      }
+      await s.ctx.close().catch(() => {})
     }),
   )
 }
@@ -449,12 +510,38 @@ function resumo() {
 
 ;(async () => {
   fs.mkdirSync(pasta, { recursive: true })
-  const navegador = await chromium.launch()
-  if (['lab', 'ambas', 'tudo'].includes(frente)) await frenteLab(navegador)
-  if (['telas', 'ambas', 'tudo'].includes(frente)) await frenteTelas(navegador)
-  if (['widgets', 'tudo'].includes(frente)) await frenteWidgets(navegador)
-  await navegador.close()
-  fs.writeFileSync(path.join(pasta, 'ui-lab-qa.json'), JSON.stringify(resultado, null, 1))
+  const arquivoJson = path.join(pasta, 'ui-lab-qa.json')
+  // Retomada: o que uma rodada anterior na mesma pasta já fez (Lab e Telas) fica; os widgets vêm do widgets.jsonl.
+  if (fs.existsSync(arquivoJson)) {
+    const antes = JSON.parse(fs.readFileSync(arquivoJson, 'utf8'))
+    for (const k of ['lab', 'telas']) if (antes[k]?.casos) resultado[k] = antes[k]
+    resultado.errosDePagina = antes.errosDePagina || []
+  }
+  const salvar = () => fs.writeFileSync(arquivoJson, JSON.stringify({ ...resultado, widgets: { casos: resultado.widgets.casos, achados: [], porCaso: [], noDiario: 'widgets.jsonl' } }, null, 1))
+  const somenteResumo = process.argv.includes('--resumo')
+  const navegador = somenteResumo ? null : await chromium.launch()
+  if (!somenteResumo && ['lab', 'ambas', 'tudo'].includes(frente) && !resultado.lab.casos) {
+    await frenteLab(navegador)
+    salvar()
+  }
+  if (!somenteResumo && ['telas', 'ambas', 'tudo'].includes(frente) && !resultado.telas.casos) {
+    await frenteTelas(navegador)
+    salvar()
+  }
+  if (somenteResumo || ['widgets', 'tudo'].includes(frente)) {
+    if (somenteResumo) {
+      const diario = path.join(pasta, 'widgets.jsonl')
+      if (fs.existsSync(diario))
+        for (const linha of fs.readFileSync(diario, 'utf8').split('\n').filter((l) => l.trim())) {
+          const r = JSON.parse(linha)
+          resultado.widgets.achados.push(...r.achados)
+          resultado.widgets.porCaso.push(r.caso)
+          resultado.widgets.casos++
+        }
+    } else await frenteWidgets(navegador)
+    salvar()
+  }
+  if (navegador) await navegador.close()
   const md = resumo()
   fs.writeFileSync(path.join(pasta, 'resumo.md'), md + '\n')
   console.log('\n' + md)
