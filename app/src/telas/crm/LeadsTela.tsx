@@ -43,7 +43,7 @@ export function LeadsTela({ leads: iniciais, onAbrirConversa }: { leads: Lead[];
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 px-3 pb-3 sm:px-5 sm:pb-4">
+    <div className="flex h-full flex-col gap-3 px-4 pb-3 sm:px-5 sm:pb-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="bg-sunken flex rounded-full p-0.5 text-xs">
           {(['quadro', 'lista', 'metricas'] as const).map((v) => (

@@ -57,8 +57,8 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
   if (ts.vazio) return <TimesheetVazio />
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoTs titulo="Confirmações" sub={`${pendentes.length} pendentes · leva uns 2 min · o que não for confirmado em 7 dias fica como sem classificação, sem cobrança`} papel={papel} />
         <div className={cn('grid gap-4', gestor && 'lg:grid-cols-[minmax(0,1fr)_20rem]')}>
           <div className="flex min-w-0 flex-col gap-4">

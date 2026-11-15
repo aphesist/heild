@@ -47,7 +47,7 @@ export function ImplantacaoTela({ onFechar }: { onFechar: () => void }) {
 
   return (
     <MolduraTelaCheia titulo="Implantação do escritório" sub={e.concluida_em ? `Concluída em ${new Date(e.concluida_em).toLocaleDateString('pt-BR')}` : `${prontos} de ${passosImplantacao.length} passos · o Assistente conduz`} onFechar={onFechar}>
-      <div className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <div className="pagina grid gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
         <Caixa className="h-fit">
           <ol className="flex flex-col gap-0.5" aria-label="Passos">
             {passosImplantacao.map((p, i) => (

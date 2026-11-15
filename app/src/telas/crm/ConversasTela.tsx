@@ -476,7 +476,7 @@ function Conversa({
   return (
     <section aria-label="Conversa" className="flex min-w-0 flex-1 flex-col">
       {/* Cabeçalho */}
-      <header className="flex flex-col gap-2 border-b px-3 pt-3 pb-2.5 sm:px-5">
+      <header className="flex flex-col gap-2 border-b px-4 pt-3 pb-2.5 sm:px-5">
         <div className="flex items-start gap-2">
           {!largo && (
             <Button size="icon-sm" variant="ghost" onClick={onVoltar} aria-label="Voltar à lista">
@@ -743,7 +743,7 @@ function Conversa({
       </header>
 
       {/* Histórico */}
-      <AreaRolagem className="area-rolagem-dupla flex-1 px-3 py-4 sm:px-5">
+      <AreaRolagem className="area-rolagem-dupla flex-1 px-4 py-4 sm:px-5">
         <div className="mx-auto flex max-w-3xl flex-col gap-3">
           {c.resumo && (
             <div className="bg-sunken/70 rounded-[14px] px-3 py-2 text-sm">
@@ -824,7 +824,7 @@ function Conversa({
       </AreaRolagem>
 
       {/* Campo (deixa o canto livre para o botão Chat) */}
-      <div className="px-3 pb-3 sm:px-5 sm:pb-4">
+      <div className="px-4 pb-3 sm:px-5 sm:pb-4">
         <div className="mx-auto max-w-3xl">
           {somenteLeitura ? (
             <div className="bg-sunken flex items-start gap-2.5 rounded-[16px] px-4 py-3 text-sm">

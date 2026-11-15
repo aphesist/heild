@@ -35,7 +35,7 @@ export function CabecalhoModulo({
   return (
     <header
       className={cn(
-        'grid shrink-0 grid-cols-[auto_1fr] items-center gap-x-2 gap-y-2 px-3 pt-3 pb-2 sm:px-5',
+        'grid shrink-0 grid-cols-[auto_1fr] items-center gap-x-2 gap-y-2 px-4 pt-3 pb-2 sm:px-5',
         'md:h-16 md:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(17rem,1fr)] md:gap-x-3 md:py-0 baixa:md:h-14',
         className,
       )}

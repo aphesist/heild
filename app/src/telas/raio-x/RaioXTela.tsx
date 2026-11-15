@@ -107,7 +107,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
 
   return (
     <MolduraTelaCheia titulo="Raio-X do Drive" sub="Lê só os nomes de pastas e arquivos, nunca o conteúdo (D-10)" onFechar={onFechar} acao={<SeloDemonstracao fonte="Google Drive (só a lista)" className="hidden sm:inline-flex" />}>
-      <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <div className="pagina flex flex-col gap-4">
         {!rx.rodado_em || fase !== 'parado' ? (
           <Caixa className="items-start">
             <TituloBloco descricao="O Geral percorre as pastas de todos os clientes no Drive antigo, casa cada uma com o cadastro e aponta o que precisa de decisão. Ele não abre nenhum documento e não muda nada no Drive.">Diagnóstico das pastas</TituloBloco>

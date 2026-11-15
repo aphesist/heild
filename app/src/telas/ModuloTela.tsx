@@ -51,8 +51,8 @@ interface Props {
 export function ModuloTela({ titulo, aba, cliente, tarefas, chat, children }: Props) {
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      <div className="area-rolagem flex-1 overflow-y-auto px-3 py-4 sm:px-5">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 ultra:max-w-[1600px]">
+      <div className="area-rolagem flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+        <div className="pagina flex flex-col gap-6">
           <header>
             <h1 className="text-3xl font-light tracking-tight">{aba ?? titulo}</h1>
             <p className="text-muted-foreground text-sm">

@@ -165,8 +165,8 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
   const temBpo = ts.temBpo && setores.includes('bpo_financeiro')
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoTs titulo="Equipe" sub={`${periodo === 'semana' ? 'Esta semana' : periodo === 'mes' ? rotuloCompetencia(competenciaDe(HOJE_TS)) : rotuloCompetencia(somarMeses(competenciaDe(HOJE_TS), -1))} · ${admin ? 'todos os setores' : 'os setores que você gere'}${clienteNome ? ` · só ${clienteNome}` : ''}`} papel={papel}>
           {chip}
         </CabecalhoTs>

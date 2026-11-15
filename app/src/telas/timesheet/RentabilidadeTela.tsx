@@ -53,8 +53,8 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
   if (ts.vazio) return <TimesheetVazio />
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoTs
           titulo="Rentabilidade"
           sub={`${rotuloCompetencia(competencia)}${competencia === atual ? ' (até hoje, honorário proporcional)' : ''} · horas medidas × custo-hora do escritório (todos os pacotes)${loja.estado.custoPorPacote ? '; BPO com o custo-hora do pacote' : ''}, contra o honorário do contrato vigente`}

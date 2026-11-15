@@ -212,7 +212,7 @@ function ArquivosInternos({ onAbrir }: { onAbrir: (conversa: Id, mensagem: Id) =
     .flatMap((m) => (extrasDe(m).anexos ?? []).map((a) => ({ ...a, m })))
     .sort((a, b) => b.m.criado_em.localeCompare(a.m.criado_em))
   return (
-    <div className="area-rolagem h-full overflow-y-auto px-3 pb-6 sm:px-5">
+    <div className="area-rolagem h-full overflow-y-auto px-4 pb-6 sm:px-5">
       <div className="mx-auto flex max-w-5xl flex-col gap-4">
         <header className="flex flex-wrap items-end justify-between gap-3 pt-2">
           <div>

@@ -43,8 +43,8 @@ export function ArmazenamentoTela() {
     })
 
   return (
-    <AreaRolagem className="h-full px-3 pb-10 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-10 sm:px-5">
+      <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoConfig
           titulo="Armazenamento"
           sub="A nuvem é uma só; o cliente vê o recorte que você marca."

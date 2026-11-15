@@ -81,8 +81,8 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
 
   return (
     <div className="flex h-full flex-col">
-      <BarraConversa className="mx-auto w-full max-w-3xl px-3 pb-1 sm:px-5 ultra:max-w-4xl" atual={atual} historico={historico} contexto={contexto} onAbrir={abrir} onNova={criar} onLimpar={limparMantendo} />
-      <div className="area-rolagem-dupla flex-1 overflow-y-auto px-3 sm:px-5">
+      <BarraConversa className="mx-auto w-full max-w-3xl px-4 pb-1 sm:px-5 ultra:max-w-4xl" atual={atual} historico={historico} contexto={contexto} onAbrir={abrir} onNova={criar} onLimpar={limparMantendo} />
+      <div className="area-rolagem-dupla flex-1 overflow-y-auto px-4 sm:px-5">
         {vazia ? (
           <div className="mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center gap-6 py-8 sm:gap-8 baixa:gap-4 baixa:py-4">
             <h1 className="text-muted-foreground flex items-center gap-3 text-center text-3xl font-light tracking-tight sm:gap-4 sm:text-4xl lg:text-5xl baixa:lg:text-4xl">
@@ -170,7 +170,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
           <ListaMensagens className="mx-auto max-w-3xl pt-6 pb-8 ultra:max-w-4xl" mensagens={mensagens} acoes={acoes} />
         )}
       </div>
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-3 pb-3 sm:px-5 sm:pb-5 ultra:max-w-4xl">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-4 pb-3 sm:px-5 sm:pb-5 ultra:max-w-4xl">
         {limiteAtingido && !semIa && (
           <p role="status" className="bg-sunken flex items-center gap-2 rounded-[16px] px-4 py-2.5 text-sm">
             <HourglassMediumIcon weight="duotone" className="text-destructive size-5 shrink-0" />

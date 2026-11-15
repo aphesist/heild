@@ -36,8 +36,8 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
   }
 
   return (
-    <AreaRolagem className="h-full px-3 pb-8 sm:px-5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 pt-1 ultra:max-w-[1600px]">
+    <AreaRolagem className="h-full px-4 pb-8 sm:px-5">
+      <div className="pagina flex flex-col gap-6 pt-1">
         <section className="flex flex-col gap-3">
           <header className="flex flex-wrap items-end gap-2">
             <div className="min-w-0 flex-1">
