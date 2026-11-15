@@ -4,7 +4,7 @@
 #
 # Travas (servidor/src/banco/nuvem-ci.ts): só o ref do HEILD-BACKEND; URL e senhas mascaradas;
 # NÃO migra (para se faltar migração); recusa escritório que não seja de demonstração; o login
-# app_api ganha senha nova a cada execução. Nunca contra o HEILD-PROD.
+# app_api tem senha estável derivada do segredo (só trocada se o login falhar). Nunca contra o HEILD-PROD.
 name: backend-nuvem
 
 on:
