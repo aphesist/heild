@@ -731,21 +731,54 @@ app/supabase/migrations/20261116090000_b3_integrantes.sql
 As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-GUIA-CONFERIR` v1, `GES-FAQ-RESPONDER` v1) continuam carregadas no motor: execuções em andamento terminam na versão em que começaram. A operação de processo é uma só por procedimento e inicia sempre a versão mais nova. A lista de referência da B2 (`procedimentosDeReferencia`) continua com as v1; as v2 de referência estão em `procedimentosDeReferenciaV2`, e os integrantes usam as v2.
 9. **DP-EVENTO-FOLHA v2:** o gabarito ampliado pegou o Sonnet e o Haiku lançando hora extra sem quantidade. O validador `quantidade_quando_exigida` barra por regra hora extra, falta e adiantamento sem quantidade.
 
-10. **Triar e repassar** (`GES-TRIAR-REPASSAR`, `src/setores/triagem.ts`): para o escritório com um número só de WhatsApp, o integrante do Atendimento lê a conversa do CRM.
+10. **Triagem do número compartilhado** (`GES-TRIAR-REPASSAR` v2, `src/setores/triagem.ts`; desenho no PR #33: subplano 04, adendo A, e subplano 02, "Triagem do número compartilhado", com as respostas do Enzo de 15/11/2026). O integrante de Atendimento lê a conversa que entrou pelo número compartilhado de WhatsApp e a roteia ao setor e ao integrante certos.
+    - **Forma de triagem** (entrada `triagem`): `integrante` é o padrão com integrantes contratados, sem menu, e o integrante decide. `menu_e_integrante` é opção: a escolha do cliente (`menu_escolhido`) prevalece, e o integrante só **sugere**. Ele registra a divergência (evento `conversa.triagem_divergir`) e, com confiança de 0,8 ou mais, deixa a quem atende o cartão "Parece ser do {setor}. Transferir?", sem mensagem ao cliente. `menu` e `manual` não passam por aqui: o chatbot sem IA é do CRM e é a reserva de quem não contrata integrantes. Escolha de menu fora da opção `menu_e_integrante` é recusada (`MENU_SEM_MENU`).
     - **Quem escreve:** a conversa já ligada ao cliente ou, se não estiver, outra conversa da mesma pessoa que já esteja ligada a um cliente só.
-    - **Para onde vai:** cascata em quatro degraus. (1) A escolha do menu do chatbot, sempre respeitada. (2) Palavra-chave de um setor só. (3) O modelo barato e, abaixo do limiar, o caro. (4) Assunto misto ou dúvida que continua vira cartão para uma pessoa do Atendimento.
-    - **O repasse:** a conversa vai ao setor (`conversa.transferir`, por regra do escritório ou cartão), com o responsável da carteira ou o padrão do setor. Leva um resumo escrito pelo sistema e um aviso quando o remetente não foi identificado. O integrante do setor de destino é acordado com o resumo, e o repasse vai à cadeia.
-    - **O que fica fora:** o chatbot de menu (sem IA) é do CRM e do conector; o procedimento recebe a escolha como `menu_escolhido`. Pelo chat, o Assistente encaminha "triar e repassar esta conversa" com a conversa anexada (`anexos.conversa_id`).
+    - **Regras, sem modelo, nesta ordem:**
+      1. a escolha do menu;
+      2. a resposta do cliente à pergunta da triagem (o número da opção ou o nome do setor);
+      3. o contexto do cliente identificado (04, A.4):
+         - conversa aberta já num setor (não resolvida, ou com a última mensagem há menos de 24 h; a que espera triagem no setor de entrada não conta);
+         - resposta a algo que o escritório mandou nos últimos 7 dias;
+         - um só setor ativo na carteira;
+      4. palavra-chave de um setor só.
+    - **Modelo barato** (contrato `ges.triagem.classificar` v2, que devolve também a `alternativa`):
+      - com confiança de 0,8 ou mais, roteia;
+      - entre 0,6 e 0,8, roteia e marca `triagem_incerta`;
+      - abaixo de 0,6, ou com assunto misto, pergunta.
+
+      Esses limiares do plano entram no pacote pelo campo `limiares_do_plano`, porque a regra geral do integrante (confiança mínima de 0,9) não vale para este trabalho. O modelo caro só entra pela escalada do motor, quando o setor sai das opções.
+    - **Quando pergunta:**
+      - Sem responsável na conversa, pergunta **ao cliente**, com uma pergunta fechada de até dois setores prováveis mais "Outro assunto". A mensagem vai com `extras.tipo = pergunta_triagem` e as opções, e a conversa fica `aguardando_cliente`.
+      - O limite é de duas perguntas por conversa. Depois disso, a conversa vai ao setor de entrada com `triagem_sem_acordo`.
+      - Com responsável, pergunta **à pessoa**, pelo cartão "não consegui" (validador `triagem_decidivel`).
+      - A pergunta usa `conversa.responder`, que é irreversível no catálogo, e por isso sai sempre com cartão. Isso vale até o catálogo liberar a categoria de mensagem por modelo do tema (GES-062). A pergunta é um texto fixo montado pelo sistema, sem conteúdo do modelo; por isso não passa pelo revisor.
+    - **Quem fala** (`src/identificacao.ts`, 04, A.6): toda mensagem ao cliente leva o prefixo de quem fala.
+      - Pessoa: `*{Setor} · {Nome}*`.
+      - Integrante: `*{Nome} (IA)*`, por exemplo `*Atendimento (IA)*`. O "(IA)" não pode ser desligado.
+      - Sistema: `*{Escritório}*`.
+
+      O prefixo não se repete quando a mesma voz fala em sequência.
+    - **O roteamento** (`conversa.rotear`, executar e reversível, por regra do escritório ou por cartão):
+      - define o setor, o responsável da carteira ou o padrão do setor, as etiquetas (`triada`, `triagem_incerta`, `triagem_sem_acordo`) e `conversa.extras` (`origem_roteamento`, `escolha_cliente`, `sugestao_integrante`), até o CRM ganhar as colunas de A.7;
+      - grava o resumo escrito pelo sistema e o repete como nota interna;
+      - acorda o integrante do setor de destino; tudo isso entra na cadeia.
+    - **Motor:** `aprovacao` e `efeito` ganharam `pular_se` (antes só o operário tinha), para os caminhos alternativos (perguntar, rotear, sugerir). O passo pulado não grava evento.
+    - **Limites conhecidos:**
+      - O cartão de sugestão vai a quem pode aprovar no setor da execução, ainda não ao atendente da conversa.
+      - Recusar esse cartão encerra a execução como recusada, e o roteamento pelo menu continua valendo.
+      - A v1 (menu como regra principal, limiar 0,9) nunca foi integrada e foi substituída pela v2.
+    - Pelo chat, o Assistente encaminha "triar e repassar esta conversa" com a conversa anexada (`anexos.conversa_id`).
 
 ### Resultado real (15/11/2026)
 
 Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
 
-- **Portão do Haiku:** os 8 contratos de operário (com o do triar e repassar) e o roteador barato igualaram o Sonnet caso a caso, sem erro crítico. O DP só depois do v2: na v1, os dois modelos erraram o mesmo caso.
+- **Portão do Haiku:** os 8 contratos de operário (com o da triagem) e o roteador barato igualaram o Sonnet caso a caso, sem erro crítico. A triagem foi medida de novo na v2: 84 × 84 em 42 casos com 2 repetições. O DP só depois do v2: na v1, os dois modelos erraram o mesmo caso.
 - **O que foi trocado:** o Haiku como operário nos 8 contratos e como roteador barato. Sonnet continua escritor, Opus continua revisor. No total do operário, o custo caiu 18 vezes (R$ 5,66 para R$ 0,32 em 420 chamadas).
 - **Roteador com trecho:** acerto de 71,9% para 87,5%, sem erro crítico; o trecho fica **ligado**.
 - **Revisor de risco:** R$ 0,041 e 2,6 s (p50) por revisão. Aprovou as 302 revisões; o ganho dele ainda não está medido neste gabarito.
-- **Custo da sessão:** R$ 24,43 (≈ US$ 4,52), contra o teto de US$ 15.
+- **Custo da sessão:** R$ 25,28 (≈ US$ 4,68), contra o teto de US$ 15.
 
 ### Testes da B3b
 
@@ -753,4 +786,15 @@ Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/int
 - `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
 - `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
 - `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.
-- `triagem.test.ts` (5): o menu é respeitado mesmo contra o texto, sem modelo, e o integrante de destino recebe o resumo; palavra-chave decide por regra; sem palavra-chave, o modelo decide; assunto misto vai ao cartão e a pessoa escolhe o setor; remetente desconhecido segue com o aviso, e o histórico reconhece o cliente; pelo Assistente, "triar e repassar esta conversa" vai ao Atendimento.
+- `triagem.test.ts` (11):
+  - o prefixo de quem fala;
+  - palavra-chave por regra; integrante decidindo, com a nota interna e o evento `conversa.rotear`;
+  - a faixa incerta;
+  - as três regras de contexto;
+  - a pergunta ao cliente: cartão, prefixo "(IA)", opções e "2" que roteia sem modelo;
+  - duas perguntas sem acordo, que levam ao setor de entrada sem repetir o prefixo;
+  - com responsável, o cartão à pessoa;
+  - remetente desconhecido e o histórico;
+  - "menu e integrante": a escolha prevalece, a divergência é gravada, o cartão "Parece ser do Fiscal. Transferir?" é aprovado e a conversa é transferida;
+  - palavras que confirmam o menu dispensam o modelo; o menu fora da opção é recusado;
+  - pelo Assistente.

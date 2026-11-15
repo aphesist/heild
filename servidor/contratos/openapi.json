@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "06a955905848b865",
+    "version": "90e62653d9466486",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -1570,7 +1570,7 @@
     "/v1/ferramentas/atendimento.conversa.triar_e_repassar": {
       "post": {
         "operationId": "atendimento_conversa_triar_e_repassar",
-        "summary": "Reconhece quem escreve e o assunto da conversa do número único e a repassa ao setor e ao integrante certos, com resumo.",
+        "summary": "Reconhece quem escreve e o assunto da conversa do número compartilhado e a roteia ao setor e ao integrante certos, com resumo; na dúvida, pergunta.",
         "tags": [
           "plataforma"
         ],
@@ -1608,7 +1608,24 @@
                     "minLength": 1,
                     "maxLength": 80
                   },
+                  "triagem": {
+                    "type": "string",
+                    "enum": [
+                      "integrante",
+                      "menu_e_integrante"
+                    ]
+                  },
                   "menu_escolhido": {
+                    "type": "string",
+                    "enum": [
+                      "contabil",
+                      "fiscal",
+                      "dp",
+                      "societario",
+                      "gestao_atendimento"
+                    ]
+                  },
+                  "setor_entrada": {
                     "type": "string",
                     "enum": [
                       "contabil",
@@ -2395,7 +2412,7 @@
         "x-heild-modulo": "plataforma",
         "x-heild-aprovacao": "nunca",
         "x-heild-idempotencia": "por_chave",
-        "x-heild-versao": 1,
+        "x-heild-versao": 2,
         "x-heild-exposta-mcp": true,
         "x-heild-erros": []
       }
