@@ -59,7 +59,8 @@ export function padraoDoPapel(papel: 'administrador' | 'gestor' | 'colaborador')
   if (papel === 'administrador')
     return [{ id: 'primeiros', tamanho: 'L' }, { id: 'faixas', tamanho: 'M' }, ...comum, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'implantacoes', tamanho: 'G' }, { id: 'sla', tamanho: 'G' }, { id: 'linha', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'time', tamanho: 'G' }]
   if (papel === 'gestor') return [{ id: 'faixas', tamanho: 'M' }, ...comum, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'sla', tamanho: 'G' }, { id: 'carga', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'linha', tamanho: 'G' }]
-  return [...comum, { id: 'ind-horas', tamanho: 'P' }, { id: 'medidor', tamanho: 'M' }, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'faixas', tamanho: 'M' }, { id: 'linha', tamanho: 'G' }, { id: 'time', tamanho: 'G' }]
+  // Cada faixa fecha as seis colunas (P-9): quatro indicadores e o medidor; o calendário; avisos, pendências e prazos; horas, linha do tempo e time.
+  return [...comum, { id: 'medidor', tamanho: 'M' }, { id: 'calendario', tamanho: 'XL' }, { id: 'avisos', tamanho: 'G' }, { id: 'pendencias', tamanho: 'G' }, { id: 'faixas', tamanho: 'M' }, { id: 'ind-horas', tamanho: 'M' }, { id: 'linha', tamanho: 'G' }, { id: 'time', tamanho: 'G' }]
 }
 
 /** Widgets de outras sessões para a galeria da Visão geral (S11: saúde da captura, prazos do Jurídico). Acrescente no fim. */
