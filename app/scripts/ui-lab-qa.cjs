@@ -339,13 +339,13 @@ async function frenteWidgets(navegador) {
       { nome: 'valores', valores: ['', 've'] },
       { nome: 'datas', valores: ['', 'dv', 'dh', 'df'] },
       { nome: 'opcionais', valores: ['', 'oa'] },
-      { nome: 'estado', valores: ['padrao', 'erro', 'sem-permissao'] },
+      { nome: 'estado', valores: ['padrao', 'carregando', 'erro', 'sem-permissao'] },
       { nome: 'tema', valores: temas.flatMap((t) => [`${t}:claro`, `${t}:escuro`]) },
       { nome: 'densidade', valores: ['padrao', 'grande'] },
     ]
     const casos = cobrirComBase(base, livres, w.chave.length * 13 + 5)
     // As larguras de fora do produto (768, 1920) entram por pares com estado, tamanho e itens.
-    for (const l of extras) for (const c of porPares([{ nome: 'itens', valores: ['i0', 'i15', 'i200'] }, { nome: 'tamanho', valores: w.tamanhos }, { nome: 'estado', valores: ['padrao', 'erro', 'sem-permissao'] }, { nome: 'tema', valores: ['fabrica:claro', 'fabrica:escuro', 'condesp:claro', 'requinte:escuro'] }], l + w.id.length)) casos.push({ ...c, texto: '', valores: '', datas: '', opcionais: '', densidade: 'padrao', largura: String(l) })
+    for (const l of extras) for (const c of porPares([{ nome: 'itens', valores: ['i0', 'i15', 'i200'] }, { nome: 'tamanho', valores: w.tamanhos }, { nome: 'estado', valores: ['padrao', 'carregando', 'erro', 'sem-permissao'] }, { nome: 'tema', valores: ['fabrica:claro', 'fabrica:escuro', 'condesp:claro', 'requinte:escuro'] }], l + w.id.length)) casos.push({ ...c, texto: '', valores: '', datas: '', opcionais: '', densidade: 'padrao', largura: String(l) })
     for (const c of casos) porLargura[c.largura].push({ w, ...c })
   }
   // Ordena por cenário: o banco em memória do Lab guarda os últimos escritórios de cenário, e casos vizinhos o reaproveitam.

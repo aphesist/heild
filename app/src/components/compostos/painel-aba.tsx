@@ -1,3 +1,4 @@
+import { VazioWidget } from '@/components/widgets/widget'
 import { createContext, useContext, useState } from 'react'
 import { integranteDoSetor, useFluxos } from '@/ambiente/fluxos'
 import { useLoja, usePersistente } from '@/ambiente/loja'
@@ -132,7 +133,7 @@ export function PendenciasAba({ itens: todos, compacto }: { itens: PendenciaSeto
     loja.registrar(usuario.nome, `Marcou como recebida: ${p.item}${ctx.cliente ? ` (${ctx.cliente})` : ''}`)
     loja.toastDesfazer(`${p.item}: recebida. A tarefa volta a andar.`, () => setRecebidas((xs) => xs.filter((x) => x !== p.id)))
   }
-  if (!itens.length) return <p className="text-muted-foreground py-2 text-sm">Nenhuma pendência deste setor.</p>
+  if (!itens.length) return <VazioWidget>Nenhuma pendência deste setor.</VazioWidget>
   if (compacto)
     return (
       <ul className="flex flex-col gap-1">

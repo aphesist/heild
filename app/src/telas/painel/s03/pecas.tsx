@@ -127,15 +127,8 @@ export function useConectorParado(id: IdConector) {
   return c.funcionando ? undefined : `${c.nome} ${c.rotulo.toLowerCase()}`
 }
 
-/** Bloco vazio de um widget, com o porquê. */
-export function Vazio({ children }: { children: ReactNode }) {
-  // Estado vazio (PADRAO_DE_INTERFACE.md, 9): sozinho no widget, fica no centro em vez de deixar o card vazio embaixo.
-  return (
-    <p data-estado-vazio className="text-muted-foreground flex h-full min-h-10 items-center justify-center py-2 text-center text-sm">
-      {children}
-    </p>
-  )
-}
+/** Bloco vazio de um widget, com o porquê (o mesmo VazioWidget de todos os widgets). */
+export { VazioWidget as Vazio } from '@/components/widgets/widget'
 
 /** Mini-barra de progresso com rótulo. */
 export function Barra({ valor, total, alerta, rotulo }: { valor: number; total: number; alerta?: boolean; rotulo: string }) {

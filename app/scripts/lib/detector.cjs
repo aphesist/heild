@@ -209,6 +209,13 @@ function detectar(opcoes) {
         // Pilha de propósito (o rótulo em negrito invisível sob o visível; o mesmo lugar da grade).
         const gi = cs(filhos[i]).gridArea
         if (gi && gi !== 'auto' && gi === cs(filhos[j]).gridArea && !/auto/.test(gi)) continue
+        // Texto corrido: um span em linha que quebra tem a caixa da largura toda; o que conta são as caixas de cada linha.
+        if (cs(filhos[i]).display === 'inline' || cs(filhos[j]).display === 'inline') {
+          const li = [...filhos[i].getClientRects()]
+          const lj = [...filhos[j].getClientRects()]
+          const cruza = li.some((x) => lj.some((y) => Math.min(x.right, y.right) - Math.max(x.left, y.left) > 2 && Math.min(x.bottom, y.bottom) - Math.max(x.top, y.top) > 2))
+          if (!cruza) continue
+        }
         add('sobreposicao', `${desc(filhos[i])} × ${desc(filhos[j])} (${Math.round(ix)}×${Math.round(iy)}px)`, filhos[j])
       }
   }

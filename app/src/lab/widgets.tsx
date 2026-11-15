@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react'
 import { useLoja } from '@/ambiente/loja'
-import { useSessaoBruta } from '@/ambiente/sessao'
 import { AbaCtx } from '@/components/compostos/painel-aba'
 import { EstadoVazio } from '@/components/kit'
 import { GradeWidgets } from '@/components/widgets/grade'
+import { ContextoEstadoWidget, type EstadoDadosWidget } from '@/components/widgets/widget'
 import { tamanhoValido, type DefWidget, type TamanhoWidget } from '@/components/widgets/tipos'
 import * as exemplo from '@/dados/exemplo'
 import { abasPainel } from '@/dados/painel'
@@ -79,36 +79,33 @@ export function useListaWidgets(): WidgetLab[] {
   return lista
 }
 
-/** Estados que o Lab força nos widgets reais: serviços falhando e "ver como" sem acesso ao setor. */
-function useEstadoForcado(p: ParamsLab, setor: SetorIntegrante) {
-  const sessao = useSessaoBruta()
+/** Estados que o Lab força nos widgets reais: carregando, erro (também nos serviços) e sem permissão, pelo contexto da caixa do widget. */
+function useEstadoForcado(p: ParamsLab): EstadoDadosWidget {
   useEffect(() => {
     if (p.estado === 'erro') definirInstabilidade(1)
     return () => definirInstabilidade(0)
   }, [p.estado])
-  useEffect(() => {
-    if (p.estado !== 'sem-permissao' || !sessao?.definirVerComo) return
-    const outro: SetorIntegrante = setor === 'dp' ? 'fiscal' : 'dp'
-    sessao.definirVerComo({ papel: 'colaborador', vinculos: [{ setor: outro, modo: 'execucao' }] })
-    return () => sessao.definirVerComo(null)
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.estado, setor])
+  return p.estado === 'carregando' || p.estado === 'erro' || p.estado === 'sem-permissao' ? p.estado : 'pronto'
 }
 
-function GradeDeUm({ def, tamanho, chave }: { def: DefWidget; tamanho: TamanhoWidget; chave: string }) {
+function GradeDeUm({ def, tamanho, chave, estado }: { def: DefWidget; tamanho: TamanhoWidget; chave: string; estado: EstadoDadosWidget }) {
   const t = tamanhoValido(def, tamanho)
-  return <GradeWidgets key={`${chave}:${t}`} chave={`lab:w:${chave}:${t}`} catalogo={[def]} padrao={[{ id: def.id, tamanho: t }]} />
+  return (
+    <ContextoEstadoWidget.Provider value={{ estado, onTentar: () => {}, onPedirAcesso: () => {} }}>
+      <GradeWidgets key={`${chave}:${t}`} chave={`lab:w:${chave}:${t}`} catalogo={[def]} padrao={[{ id: def.id, tamanho: t }]} />
+    </ContextoEstadoWidget.Provider>
+  )
 }
 
 function WidgetPainel({ p, abaId, versao, id }: { p: ParamsLab; abaId: string; versao: 'cliente' | 'carteira'; id: string }) {
   const { catalogo, cliente, setor } = useCatalogoPainel(abaId, versao)
-  useEstadoForcado(p, setor)
+  const estado = useEstadoForcado(p)
   const def = catalogo.find((d) => d.id === id)
   if (!def) return <EstadoVazio titulo="Este widget não existe nesta versão" descricao={`${abaId} · ${versao} · ${id}`} />
   return (
     <AbaCtx.Provider value={{ cliente: cliente?.nome, setor, clienteId: cliente?.id, somenteLeitura: false }}>
       <div data-lab-widget={`${abaId}|${versao}|${id}`}>
-        <GradeDeUm def={def} tamanho={p.tamanho === 'livre' ? 'M' : p.tamanho} chave={`${abaId}|${versao}|${id}`} />
+        <GradeDeUm def={def} tamanho={p.tamanho === 'livre' ? 'M' : p.tamanho} chave={`${abaId}|${versao}|${id}`} estado={estado} />
       </div>
     </AbaCtx.Provider>
   )
@@ -116,12 +113,12 @@ function WidgetPainel({ p, abaId, versao, id }: { p: ParamsLab; abaId: string; v
 
 function WidgetInicio({ p, id }: { p: ParamsLab; id: string }) {
   const catalogo = useCatalogoInicio()
-  useEstadoForcado(p, 'geral' as SetorIntegrante)
+  const estado = useEstadoForcado(p)
   const def = catalogo.find((d) => d.id === id)
   if (!def) return <EstadoVazio titulo="Este widget não existe no Início" descricao={id} />
   return (
     <div data-lab-widget={`inicio|amb|${id}`}>
-      <GradeDeUm def={def} tamanho={p.tamanho === 'livre' ? 'M' : p.tamanho} chave={`inicio|amb|${id}`} />
+      <GradeDeUm def={def} tamanho={p.tamanho === 'livre' ? 'M' : p.tamanho} chave={`inicio|amb|${id}`} estado={estado} />
     </div>
   )
 }

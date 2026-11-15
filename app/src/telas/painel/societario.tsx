@@ -1,3 +1,4 @@
+import { VazioWidget } from '@/components/widgets/widget'
 import { useContext, useMemo, useState } from 'react'
 import { ArrowsClockwiseIcon, BuildingsIcon, CertificateIcon, ClockCounterClockwiseIcon, CopyIcon, DeviceMobileIcon, GavelIcon, HandshakeIcon, IdentificationCardIcon, KeyIcon, PackageIcon, PlusIcon, StampIcon, TreeStructureIcon, WarningIcon } from '@phosphor-icons/react'
 import { registrarExecutor, useAgenteS02 } from '@/ambiente/agente-s02'
@@ -875,7 +876,7 @@ function Repetidos() {
   const docs = useDocumentos()
   const { usuario } = useSessao()
   if (!cliente) return null
-  if (!lista.length) return <p className="text-muted-foreground text-sm">Nenhum arquivo salvo duas vezes.</p>
+  if (!lista.length) return <VazioWidget>Nenhum arquivo salvo duas vezes.</VazioWidget>
   return (
     <ul className="flex flex-col gap-2">
       {lista.map((r) => (

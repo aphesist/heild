@@ -2,7 +2,7 @@ import { useContext, useMemo, useState } from 'react'
 import { EyeIcon, EyeSlashIcon, FileTextIcon, SealQuestionIcon } from '@phosphor-icons/react'
 import { registrarExecutor, useAgenteS02 } from '@/ambiente/agente-s02'
 import { useDocumentos } from '@/ambiente/documentos'
-import { useLoja } from '@/ambiente/loja'
+import { useLoja, useNavegacao } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
 import { AbaCtx } from '@/components/compostos/painel-aba'
 import { BotaoAcoes, usePode, type AcaoMenu } from '@/components/kit'
@@ -13,6 +13,7 @@ import { visivelAoCliente, type Documento, type TipoDocumento } from '@/dados/ar
 import type { DocumentoAba } from '@/dados/painel'
 import type { SetorIntegrante } from '@/theme/tipos'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
+import { VazioWidget } from '@/components/widgets/widget'
 
 /**
  * D. Documentos da aba (03, 5 D; S02-A06 a A11): os mesmos arquivos de
@@ -80,6 +81,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
   const ctx = useContext(AbaCtx)
   const loja = useLoja()
   const docs = useDocumentos()
+  const nav = useNavegacao()
   const { usuario } = useSessao()
   const trabalhar = useAgenteS02()
   const podeForcar = usePode('documento.forcar_visibilidade', { cliente_id: ctx.clienteId ?? null })
@@ -130,7 +132,18 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
       {origem?.doc && <GavetaOrigem d={origem} onFechar={() => setOrigem(null)} />}
     </>
   )
-  if (!itens.length) return <p className="text-muted-foreground py-2 text-sm">Nenhum documento desta aba.</p>
+  if (!itens.length)
+    return (
+      <VazioWidget
+        acao={
+          <Button size="sm" variant="outline" className="rounded-full" onClick={() => nav.irPara({ modulo: 'arquivos', aba: 'pastas', ...(ctx.clienteId ? { pasta: { clienteId: ctx.clienteId, caminho: [] } } : {}) })}>
+            Abrir Arquivos
+          </Button>
+        }
+      >
+        Nenhum documento desta aba. Os que chegam pelo app, e-mail ou portal entram aqui sozinhos.
+      </VazioWidget>
+    )
   const filaAviso = fila.length > 0 && (
     <button type="button" onClick={() => setOrigem(fila[0])} className="bg-warning/10 flex w-full cursor-pointer items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-left text-xs">
       <SealQuestionIcon className="text-warning size-4 shrink-0" /> {fila.length} {fila.length === 1 ? 'arquivo da nuvem sem origem' : 'arquivos da nuvem sem origem'}: confirmar quem enviou

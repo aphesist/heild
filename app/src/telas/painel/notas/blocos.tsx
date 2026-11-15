@@ -1,3 +1,4 @@
+import { VazioWidget } from '@/components/widgets/widget'
 import { useState } from 'react'
 import { ArrowClockwiseIcon, ArrowsInLineHorizontalIcon, ChatsCircleIcon, CloudArrowDownIcon, FileArrowUpIcon, FileZipIcon, GearSixIcon, HandPointingIcon, MagnifyingGlassIcon, PackageIcon, PercentIcon, ReceiptIcon, SirenIcon } from '@phosphor-icons/react'
 import { useAgenteS02 } from '@/ambiente/agente-s02'
@@ -257,7 +258,7 @@ function Manifestacao({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
       resumos: x.resumos.map((y) => (y.id === id ? { ...y, cartao } : y)),
     }))
   }
-  if (!e.resumos.length) return <p className="text-muted-foreground py-2 text-sm">Nenhum resumo a manifestar.</p>
+  if (!e.resumos.length) return <VazioWidget>Nenhum resumo a manifestar.</VazioWidget>
   if (t === 'P') return <Numero valor={semConclusao.length} legenda="sem conclusão" alerta={semConclusao.length > 0} />
   return (
     <div className="flex h-full flex-col gap-2">
@@ -344,7 +345,7 @@ function Completude({ clienteId, t }: { clienteId: string; t: TamanhoWidget }) {
     fluxos.abrirTarefa(tarefa)
   }
   const lista = t === 'M' ? e.completude.filter((c) => c.situacao !== 'ok') : e.completude
-  if (!e.completude.length) return <p className="text-muted-foreground py-2 text-sm">Nada a conferir nesta competência.</p>
+  if (!e.completude.length) return <VazioWidget>Nada a conferir nesta competência.</VazioWidget>
   return (
     <ul className="divide-border/70 flex flex-col divide-y">
       {lista.map((c) => (
@@ -375,7 +376,7 @@ function ConferenciaTributaria({ clienteId, t }: { clienteId: string; t: Tamanho
   const [aberta, setAberta] = useState<string | null>(null)
   const abertas = e.tributaria.filter((x) => x.situacao === 'aberta')
   if (t === 'P') return <Numero valor={abertas.length} legenda="divergências" alerta={abertas.length > 0} />
-  if (!e.tributaria.length) return <p className="text-muted-foreground py-2 text-sm">Nenhuma divergência tributária nas notas.</p>
+  if (!e.tributaria.length) return <VazioWidget>Nenhuma divergência tributária nas notas.</VazioWidget>
   const item = e.tributaria.find((x) => x.id === aberta)
   return (
     <ul className="divide-border/70 flex flex-col divide-y">
@@ -467,7 +468,7 @@ function EventosPosteriores({ clienteId, t }: { clienteId: string; t: TamanhoWid
     }))
   }
   const acao = (tipo: string) => (tipo === 'cancelada_apos_importacao' ? 'Ajustar · com aprovação' : tipo === 'cte_contestar' ? 'Contestar · com aprovação' : tipo === 'mdfe_aberto' ? 'Cobrar encerramento' : 'Ciente')
-  if (!e.eventos.length) return <p className="text-muted-foreground py-2 text-sm">Nenhum evento depois da importação; fornecedores regulares (conferido hoje às 03:20).</p>
+  if (!e.eventos.length) return <VazioWidget>Nenhum evento depois da importação; fornecedores regulares (conferido hoje às 03:20).</VazioWidget>
   if (t === 'P') return <Numero valor={e.eventos.filter((x) => x.situacao === 'aberto').length} legenda="eventos a tratar" alerta />
   return (
     <ul className="divide-border/70 flex flex-col divide-y">
@@ -1017,7 +1018,7 @@ function EventosCarteira() {
   const todos = useNotasTodos()
   const nav = useNavegacao()
   const abertos = todos.flatMap((e) => e.eventos.filter((x) => x.situacao === 'aberto').map((x) => ({ ...x, clienteId: e.id })))
-  if (!abertos.length) return <p className="text-muted-foreground py-2 text-sm">Nenhum evento depois da importação na carteira.</p>
+  if (!abertos.length) return <VazioWidget>Nenhum evento depois da importação na carteira.</VazioWidget>
   return (
     <ul className="divide-border/70 flex flex-col divide-y">
       {abertos.map((x) => (

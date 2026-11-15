@@ -525,13 +525,14 @@ function Processos({ t }: { t: TamanhoWidget }) {
       { sucesso: `Tarefas de “${p.nome}” geradas com o checklist padrão` },
     )
   return (
-    <div className={cn('flex flex-col gap-3', t === 'XL' && 'grid grid-cols-2 gap-x-6')}>
+    // Duas colunas só quando o widget tem largura para o nome do processo não truncar (container, não a tela).
+    <div className={cn('flex flex-col gap-3', t === 'XL' && '@3xl:grid @3xl:grid-cols-2 @3xl:items-start @3xl:gap-x-6')}>
       <div className="flex flex-col gap-2">
         <ul className="flex flex-col gap-1.5">
           {g.processos.map((p) => (
             <li key={p.id} className="bg-raised flex flex-col gap-1 rounded-[12px] px-3 py-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="min-w-0 grow basis-40">
                   <span className="block truncate">{p.nome}</span>
                   <span className="text-muted-foreground block truncate text-xs">
                     {p.regra} · {rotuloSetorCurto[p.setor as SetorIntegrante]} · {p.clientes === 'todos' ? 'todos os ativos' : p.clientes.length ? `${p.clientes.length} clientes` : 'interna'} · {p.geradas} geradas

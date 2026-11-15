@@ -1,4 +1,4 @@
-import { ArrowsOutCardinalIcon, MinusIcon } from '@phosphor-icons/react'
+import { ArrowClockwiseIcon, ArrowsOutCardinalIcon, LockSimpleIcon, MinusIcon, WarningCircleIcon } from '@phosphor-icons/react'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetCorpo, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -7,6 +7,16 @@ import { dimensoes, type DefWidget, type TamanhoWidget } from './tipos'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 const ContextoTamanho = createContext<TamanhoWidget>('M')
+
+/**
+ * Estado dos dados de um widget (PADRAO_DE_INTERFACE.md, 3): pronto, carregando,
+ * com erro ou sem permissão. Quem busca os dados (a tela, ou o Lab ao forçar o
+ * estado) põe o contexto; a caixa do widget desenha o estado padrão, igual em
+ * todos, no lugar do conteúdo: esqueleto, erro com "Tentar de novo" e sem acesso
+ * com "Pedir acesso". Nada de cada widget inventar o seu.
+ */
+export type EstadoDadosWidget = 'pronto' | 'carregando' | 'erro' | 'sem-permissao'
+export const ContextoEstadoWidget = createContext<{ estado: EstadoDadosWidget; onTentar?: () => void; onPedirAcesso?: () => void }>({ estado: 'pronto' })
 
 /** Tamanho do widget em que o componente está; para o conteúdo se adaptar. */
 export function useTamanhoWidget() {
@@ -73,6 +83,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
   const corpo = useRef<HTMLDivElement>(null)
   const { transborda, n } = useTransbordo(corpo, !editando)
   const [tudo, setTudo] = useState(false)
+  const dados = useContext(ContextoEstadoWidget)
   return (
     <ContextoTamanho.Provider value={usado}>
       <article
@@ -106,7 +117,9 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
           {!editando && def.acao && <div className="ml-auto flex shrink-0 items-center">{def.acao}</div>}
           {editando && <ArrowsOutCardinalIcon className="text-muted-foreground ml-auto size-4" aria-hidden />}
         </header>
-        <AreaRolagem ref={corpo} data-corpo-widget className={cn('@container flex-1', editando && 'pointer-events-none')}>{def.conteudo(usado)}</AreaRolagem>
+        <AreaRolagem ref={corpo} data-corpo-widget className={cn('@container flex-1', editando && 'pointer-events-none')}>
+          {dados.estado === 'pronto' ? def.conteudo(usado) : <EstadoDoWidget {...dados} titulo={def.titulo} tamanho={usado} />}
+        </AreaRolagem>
         {transborda && !editando && (
           <footer className="-mt-1 flex shrink-0 justify-end">
             <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setTudo(true)}>
@@ -168,7 +181,58 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
   )
 }
 
-/** Estado vazio padrão de conteúdo de widget. */
-export function VazioWidget({ children }: { children: ReactNode }) {
-  return <p data-estado-vazio className="text-muted-foreground flex h-full items-center justify-center px-2 text-center text-sm">{children}</p>
+/**
+ * Carregando, erro e sem acesso dentro do widget. Cabe em uma célula (P, M e L
+ * têm uma linha de altura): ali só o título do estado e a ação; no G e no XL,
+ * com o ícone e a explicação.
+ */
+function EstadoDoWidget({ estado, titulo, tamanho, onTentar, onPedirAcesso }: { estado: EstadoDadosWidget; titulo: string; tamanho: TamanhoWidget; onTentar?: () => void; onPedirAcesso?: () => void }) {
+  const alto = tamanho === 'G' || tamanho === 'XL'
+  if (estado === 'carregando')
+    return (
+      <div role="status" aria-label={`Carregando ${titulo}`} className="flex flex-col gap-2">
+        {Array.from({ length: alto ? 5 : tamanho === 'P' ? 2 : 3 }, (_, i) => (
+          <div key={i} className={cn('bg-sunken animate-pulse rounded-md motion-reduce:animate-none', i === 0 ? 'h-6 w-2/3' : 'h-4')} style={{ animationDelay: `${i * 90}ms` }} />
+        ))}
+      </div>
+    )
+  const erro = estado === 'erro'
+  const Icone = erro ? WarningCircleIcon : LockSimpleIcon
+  return (
+    <div role={erro ? 'alert' : 'status'} data-estado-widget={estado} className="flex h-full flex-col items-center justify-center gap-2 text-center">
+      {alto && (
+        <span className={cn('flex size-9 items-center justify-center rounded-full', erro ? 'bg-destructive/15 text-destructive-text' : 'bg-sunken text-muted-foreground')}>
+          <Icone className="size-5" aria-hidden />
+        </span>
+      )}
+      <p className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-balance">
+        {!alto && <Icone className={cn('size-4 shrink-0', erro ? 'text-destructive-text' : 'text-muted-foreground')} aria-hidden />}
+        {erro ? 'Não deu para carregar' : 'Sem acesso a estes dados'}
+      </p>
+      {alto && <p className="text-muted-foreground max-w-xs text-sm text-pretty">{erro ? 'O resto da tela continua funcionando. Tente de novo em instantes.' : 'Quem administra o escritório libera o acesso a este setor.'}</p>}
+      <Button variant="outline" size="sm" className="rounded-full" onClick={erro ? onTentar : onPedirAcesso}>
+        {erro ? (
+          <>
+            <ArrowClockwiseIcon /> Tentar de novo
+          </>
+        ) : (
+          'Pedir acesso'
+        )}
+      </Button>
+    </div>
+  )
+}
+
+/**
+ * Estado vazio de widget (PADRAO_DE_INTERFACE.md, 9): sozinho no corpo, fica no
+ * centro; diz o porquê ou o que vem a seguir e, quando há uma ação que cria o
+ * primeiro item ou leva aonde ele está, mostra o botão. Um só para todos.
+ */
+export function VazioWidget({ children, acao }: { children: ReactNode; acao?: ReactNode }) {
+  return (
+    <div data-estado-vazio role="status" className="flex h-full min-h-10 flex-col items-center justify-center gap-2 py-2 text-center">
+      <p className="text-muted-foreground text-sm text-pretty">{children}</p>
+      {acao}
+    </div>
+  )
 }
