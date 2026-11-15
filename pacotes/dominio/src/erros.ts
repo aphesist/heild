@@ -22,6 +22,7 @@ export const CODIGOS = {
   CONTA_INATIVA: 'A conta não está ativa neste escritório.',
   EXIGE_MFA: 'Esta conta precisa entrar com o segundo fator (MFA) para usar a API.',
   CONTA_SEM_VINCULO: 'O login não está ligado a uma conta de escritório (app_metadata).',
+  CODIGO_INVALIDO: 'O código de primeiro acesso não vale (errado, vencido, já usado ou revogado), ou não é deste e-mail.',
   // Permissão (a frase vem da função autorizar)
   NEGADO: 'A função de autorização negou.',
   MODULO_NAO_CONTRATADO: 'Módulo não contratado na assinatura do escritório.',
@@ -116,6 +117,7 @@ export function statusDoCodigo(c: CodigoErro): number {
     case 'SESSAO_INVALIDA':
     case 'EXIGE_MFA':
     case 'CONTA_SEM_VINCULO':
+    case 'CODIGO_INVALIDO':
       return 401
     case 'FERRAMENTA_DESCONHECIDA':
     case 'OPERACAO_DESCONHECIDA':

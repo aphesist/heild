@@ -4,6 +4,7 @@ import { config } from '../config.ts'
 import { noEscritorio, type Sql, type Tx } from '../banco/pg.ts'
 import { ErroApi } from '../executor/erro.ts'
 import { guardarPerfil, lerPerfil } from './cache-perfil.ts'
+import { ativarNoPrimeiroAcesso } from './contas.ts'
 
 /**
  * Sessão: quem chama e de que escritório. O escritório vem SÓ do token (R3), nunca da URL
@@ -166,11 +167,18 @@ export async function abrirSessao(sql: Sql, claims: ClaimsToken, integranteId?: 
   }
   // Perfil em cache: o pedido comum não abre transação só para montar a sessão.
   const guardado = lerPerfil(claims.escritorio_id, claims.sub)
-  const precisaBanco = guardado === undefined || !!integranteId
+  // Conta inativa no cache com login de produção: pode ser o primeiro acesso (abre o banco para ativar).
+  const precisaBanco = guardado === undefined || (guardado === null && !!claims.auth_sub) || !!integranteId
   const montar = async (tx: Tx | null): Promise<Sessao> => {
     let perfil = guardado
-    if (perfil === undefined) {
+    if (perfil === undefined || (perfil === null && tx)) {
       perfil = await carregarPerfil(tx!, claims.sub)
+      guardarPerfil(claims.escritorio_id, claims.sub, perfil)
+    }
+    // Conta `convidado` entrando pela primeira vez com o próprio login (convite aceito no
+    // Supabase ou senha definida pelo código): ativa aqui (Administrador e Gestor, só com MFA).
+    if (!perfil && tx && claims.auth_sub && (await ativarNoPrimeiroAcesso(tx, { escritorio_id: claims.escritorio_id, usuario_id: claims.sub, auth_sub: claims.auth_sub, aal: claims.aal }))) {
+      perfil = await carregarPerfil(tx, claims.sub)
       guardarPerfil(claims.escritorio_id, claims.sub, perfil)
     }
     if (!perfil) throw new ErroApi('CONTA_INATIVA')

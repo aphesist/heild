@@ -25,8 +25,15 @@ export const config = {
    */
   supabaseUrl: env.HEILD_SUPABASE_URL ? env.HEILD_SUPABASE_URL.replace(/\/$/, '') : null,
   supabaseJwksUrl: env.HEILD_SUPABASE_JWKS_URL ?? null,
+  /**
+   * Chave de serviço do projeto (só no servidor, nunca no navegador nem no repositório): é o que
+   * convida por e-mail, cria o login sem e-mail e define a senha no primeiro acesso por código
+   * (Admin API do Supabase Auth). Sem ela, fora da demonstração, criar conta é recusado com o motivo.
+   */
+  supabaseChaveServico: env.HEILD_SUPABASE_SERVICE_ROLE_KEY ?? null,
   /** Papéis que só entram com o segundo fator (`aal2`). O desenho pede o Administrador (STACK 3.2, PADROES API2). */
-  mfaPapeis: (env.HEILD_MFA_PAPEIS ?? 'administrador').split(',').map((x) => x.trim()).filter(Boolean),
+  // Decisão do Enzo de 15/11/2026: Administrador e Gestor definem o MFA no primeiro acesso.
+  mfaPapeis: (env.HEILD_MFA_PAPEIS ?? 'administrador,gestor').split(',').map((x) => x.trim()).filter(Boolean),
   /** Liga login por papel, restaurar demonstração e o cabeçalho de integrante simulado. */
   demonstracao: (env.HEILD_DEMONSTRACAO ?? '1') === '1',
   /** Origens aceitas pelo CORS (o Vite do app). */

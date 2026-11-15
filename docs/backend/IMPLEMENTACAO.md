@@ -1082,11 +1082,69 @@ Depois, pela API de gestão ou no painel:
 | JWT verificado por JWKS do projeto | Testado com um emissor de JWKS de teste (mesma rota e formato do Supabase) | A stack local do `supabase start` precisa de Docker, e o projeto de São Paulo não existe ainda |
 | Perda de leituras numa queda | O registro de leituras guarda até 2 s na memória antes de gravar | É o preço de não travar a leitura (STACK 8: "fora da transação de leitura"). Desligar a API grava o que estiver na memória |
 
+### Decisões a, b e c do Enzo (15/11/2026)
+
+Transmitidas pela coordenação depois da E1. Branch `be5h-decisoes`, migração `20261118090000_b5_decisoes.sql` (por cima das outras; não vai para o HEILD-PROD).
+
+**a) Aprovar um cartão executa a ação guardada** (encaixe 4 da B1; fecha o s08b). `servidor/src/executor/aprovacao.ts`.
+
+- O cartão que o executor cria quando um integrante pede algo que exige aprovação guarda:
+  - o comando exato e o hash dele (`argumentos_hash`, a coluna da B2);
+  - a entrada da ferramenta tipada, quando o pedido veio de uma;
+  - a versão da linha que o integrante ia mudar (e das linhas lidas uma a uma).
+- `aprovacao.decidir` num cartão do executor (sem `execucao_id`, com hash):
+  - só pessoa, e só quem está em `pode_aprovar`;
+  - recusar grava a decisão e o evento, sem executar nada;
+  - aprovar confere o hash e executa exatamente o comando guardado, com o integrante como ator e as permissões do dono conferidas de novo na hora (R4);
+  - a linha do cartão fica travada na transação; o segundo clique, ou a mesma decisão repetida, recebe a resposta guardada (`resposta`, coluna nova), sem executar de novo;
+  - os eventos do comando executado e o da decisão levam `aprovacao_id` (na cadeia de hash; a coluna já existia e é do servidor);
+  - se a linha que o integrante ia mudar mudou desde o pedido, não executa: o cartão fica `cancelado`, o integrante pede de novo com o estado de agora (cartão novo) e a resposta é 409 `VERSAO_DESATUALIZADA`, com `detalhes.cartao_novo` e `acao_sugerida`;
+  - comando adulterado no banco (hash não confere) não executa.
+- `argumentos_editados` (Desenho e Fundações 6.4, adendo de 15/11; planos no main, PR #47): a pessoa altera campos antes de aprovar.
+  - Pedido de ferramenta tipada: a entrada nova passa pelo esquema da ferramenta.
+  - Pedido de operação: só os campos que já existem no objeto principal do comando; a operação limpa e valida ao rodar.
+  - O cartão fica `editado_e_aprovado` e grava `argumentos_editados`; o evento da decisão traz `argumentos_resumo.diferenca` (`{campo: {de, para}}`) e o texto "aprovou com alterações (campos)".
+- Os cartões de execução e de memória da B2 seguem com o motor, que já aceitava `argumentos_editados`. Acordar o integrante na recusa e na edição (gatilho 18) e o aprendizado do comentário são da B3, combinados pela coordenação.
+- No servidor, o nome do integrante leva o sufixo " (integrante)", como no wireframe e na semente (era a outra falha do s08b).
+- Testes: `aprovacao-executor.test.ts` (8): executa uma vez, duplo clique, recusa, quem não está em `pode_aprovar`, edição com diferença, campo que o integrante não mandou, estado mudado (409 com cartão novo) e hash adulterado.
+
+**b) Contas da equipe, dois caminhos** (fecha o s09). `servidor/src/auth/contas.ts`.
+
+- `POST /v1/equipe/convidar` (quem tem `conta.usuario.salvar`, o Administrador): cria pessoa, usuário `convidado`, setores, carteira e o convite pelo executor, liga o login ao cadastro em `conta_auth` e dá o acesso:
+  - `metodo: "email"`: o Supabase Auth manda o convite (Admin API, `/auth/v1/invite`);
+  - `metodo: "codigo"`: o login nasce sem e-mail enviado (`/auth/v1/admin/users`) e a resposta traz, uma vez só, o código de primeiro acesso: 12 caracteres sem os que se confundem (`K7QH-2M9X-PL4D`), válido por 48 h. O banco guarda só o hash (`codigo_primeiro_acesso`).
+- `POST /v1/equipe/acesso` reenvia o convite ou gera outro código (o anterior deixa de valer). `POST /v1/equipe/acesso/revogar` revoga. Os dois só valem antes do primeiro acesso, e cada ação vira evento, sem o código.
+- `POST /v1/auth/primeiro-acesso` (sem sessão, com limite por endereço): recebe e-mail, código e senha nova (8 caracteres ou mais, com número).
+  - A mesma resposta (401 `CODIGO_INVALIDO`) para código errado, vencido, usado, revogado ou de outro e-mail: saber o e-mail não basta para tomar a conta.
+  - O código é achado pelo hash por uma função `security definer` que devolve só aquela linha (`heild_interno.codigo_por_hash`).
+  - Com o código certo, a senha é definida pela Admin API e o código fica usado.
+- A conta vira `ativo` no primeiro pedido com o próprio login (`ativarNoPrimeiroAcesso`, na abertura da sessão), e o convite fica aceito. Só ativa se o login for o ligado à conta. Administrador e Gestor só ativam com o segundo fator: `HEILD_MFA_PAPEIS` passou a valer `administrador,gestor` por padrão, porque Administrador e Gestor definem o MFA no primeiro acesso.
+- A chave de serviço do Supabase fica só no servidor (`HEILD_SUPABASE_SERVICE_ROLE_KEY`), nunca no navegador nem no repositório. Sem ela, fora da demonstração, criar conta é recusado com o motivo. Na demonstração e nos testes, a porta do Auth é em memória.
+- Demonstração: `POST /v1/auth/demonstracao/primeiro-acesso` faz as vezes do link do e-mail (a tela "Primeiro acesso" do wireframe chama, no modo `api`).
+- Testes: `contas-equipe.test.ts` (8):
+  - código uma vez e só o hash no banco;
+  - quem pode criar conta e e-mail repetido;
+  - primeiro acesso com código errado, de outro e-mail, senha fraca, o certo e o reuso;
+  - gerar outro, revogar e vencido;
+  - convite por e-mail;
+  - ativação no primeiro login, com o login certo e com outro;
+  - Gestor só com MFA;
+  - a demonstração.
+
+**c) Lista da equipe visível a toda a equipe** (`app/src/nucleo/permissoes/leitura.ts`).
+
+- Continua de todos, como o diretório do Teams: contas, setores de cada um, papéis e carteiras. É o `CADASTRO_DA_EQUIPE`.
+- Custo-hora (`custo_hora`) e fechamento do timesheet por cliente (`fechamento_timesheet`, que leva o custo-hora e o honorário): só Gestor e Administrador.
+- O timesheet de cada pessoa (`sessao_trabalho`, `item_confirmacao`): a própria pessoa, o Administrador e o Gestor que gere o setor da linha. De outro setor, o Gestor vê só o próprio.
+- Salário e avaliações ainda não têm tabela; quando tiverem, entram no mesmo bloco da regra.
+- É a mesma regra no `sincronizar`, no SSE e no `useConsulta`. O teste de vazamento por regra (`sincronizar.test.ts`) prova as duas metades: o Membro recebe a equipe inteira e nenhum custo nem timesheet alheio; o Administrador vê tudo; o Gestor vê o setor que gere.
+
 ### O que falta (depois da B5)
 
 - **Projeto HEILD-BACKEND:** migrações, semente, gancho de token e Data API desligada aplicados; vazamento e fumaça pela API contra ele passam no CI (`backend-nuvem.yml`): **E1 cumprida** em 15/11/2026.
-- **Retomada do cartão do executor da B1:** o cartão que o executor cria quando um integrante pede algo que exige aprovação ainda não roda o comando guardado quando a pessoa aprova (encaixe 4 da B1). Os cartões de execução da B2 já retomam. É o que falta para o s08b (abaixo).
-- **Fluxo de convite pelo Supabase Auth:** quem aceita o convite cria o login e a linha de `conta_auth`. Hoje a ligação é feita por quem administra (é o que o s09 esbarra).
+- ~~Retomada do cartão do executor da B1~~ e ~~fluxo de convite pelo Supabase Auth~~: feitos nas decisões a e b (acima).
+- **Central de cartões do executor na tela:** o wireframe não tem a lista dos cartões do executor com os botões; no s08b (modo `api`), quem pode aprovar decide pela API. É tela do Painel (03), do branch `prototipo`.
+- **Aplicar a migração `20261118090000_b5_decisoes.sql` no HEILD-BACKEND** e pôr a chave de serviço do Supabase no ambiente da API (segredo, nunca no repositório).
 - Os pontos de tela que ainda leem evento e mensagem interna inteiros, nas telas das fases seguintes.
 - Ferramenta tipada para os métodos específicos dos módulos das fases seguintes, junto com cada fase.
 - Medir sob carga o fluxo (muitos escritórios por instância) e o gatilho da cauda de mudanças nas importações grandes.

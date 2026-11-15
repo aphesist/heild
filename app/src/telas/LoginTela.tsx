@@ -1,6 +1,8 @@
 import { ArrowLeftIcon, BuildingsIcon, EnvelopeOpenIcon, EyeIcon, EyeSlashIcon, LockKeyIcon, ShieldCheckIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { salvarContas, usePersistente } from '@/ambiente/loja'
+import { banco } from '@/nucleo/banco'
+import type { AdaptadorApi } from '@/nucleo/banco/api'
 import { subinquilinos as subIniciais, type UsuarioCfg } from '@/dados/configuracoes'
 import { useTabela } from '@/nucleo/react'
 import { repos } from '@/nucleo/repositorios'
@@ -85,7 +87,15 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
               convite={convites.find((c) => c.destino === convite.email && !c.aceito_em)}
               escritorio={escritorio.razaoSocial}
               onVoltar={() => setConvite(null)}
-              onAceito={(u) => {
+              onAceito={async (u) => {
+                // Modo api: quem ativa a conta é o servidor (o convite da demonstração faz as vezes do link do e-mail).
+                const api = banco.adaptador as Partial<AdaptadorApi>
+                if (api.nome === 'api' && api.primeiroAcessoDemonstracao && banco.escritorioId) {
+                  await api.primeiroAcessoDemonstracao(banco.escritorioId, u.id, u.nome)
+                  setConvite(null)
+                  onEntrar(u.id)
+                  return
+                }
                 salvarContas(usuariosCfg.map((x) => (x.id === u.id ? u : x)))
                 const cv = convites.find((c) => c.destino === u.email && !c.aceito_em)
                 if (cv) repos.convites.atualizar(cv.id, { aceito_em: new Date().toISOString() }, { texto: `${u.nome} aceitou o convite` })

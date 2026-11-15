@@ -22,6 +22,7 @@ import { lerCadeia } from './executor/cadeia.ts'
 import { ErroApi, erroDeEntrada } from './executor/erro.ts'
 import { executar, traduzir } from './executor/executor.ts'
 import { cartaoDoExecutor, decidirCartaoDoExecutor, type DecisaoExecutor } from './executor/aprovacao.ts'
+import { ativarNoPrimeiroAcesso, convidar, novoAcesso, primeiroAcesso, revogarCodigo } from './auth/contas.ts'
 import { ler } from './executor/leitura.ts'
 import { operacoes, tabelasComRepositorio } from './executor/operacoes.ts'
 import { gerarOpenApi, catalogoHash } from './contratos.ts'
@@ -340,6 +341,28 @@ export function criarApp(opcoes: { sql?: Sql; logs?: boolean; processos?: Proces
       const t = await emitirToken({ sub: String(u.id), escritorio_id: b.escritorio_id, tipo: 'equipe' })
       return { ...t, tipo: 'equipe', usuario: u }
     })
+  })
+
+  /* ---------- Contas da equipe (decisão (b) do Enzo, 15/11/2026) ---------- */
+
+  app.post('/v1/equipe/convidar', async (req, rep) => responder(rep, await convidar(sql, await sessao(req), req.body ?? {}, chaveDe(req))))
+  app.post('/v1/equipe/acesso', async (req, rep) => responder(rep, await novoAcesso(sql, await sessao(req), req.body ?? {})))
+  app.post('/v1/equipe/acesso/revogar', async (req, rep) => responder(rep, await revogarCodigo(sql, await sessao(req), req.body ?? {})))
+  // Sem sessão (a pessoa ainda não tem senha): limite por endereço, como o login.
+  app.post('/v1/auth/primeiro-acesso', async (req, rep) => {
+    const espera = consumir(`primeiro-acesso:${req.ip}`, LIMITES.login)
+    if (espera) throw new ErroApi('LIMITE_TAXA', { detalhes: { tentar_de_novo_em: espera } })
+    return responder(rep, await primeiroAcesso(sql, req.body ?? {}))
+  })
+  // Demonstração: tocar na conta convidada é abrir o link do convite (o e-mail da demonstração).
+  app.post('/v1/auth/demonstracao/primeiro-acesso', async (req) => {
+    if (!config.demonstracao) throw new ErroApi('DEMONSTRACAO_DESLIGADA')
+    const b = z.object({ escritorio_id: z.string().min(1).max(80), usuario_id: z.string().min(1).max(80), nome: z.string().trim().min(1).max(120).optional() }).strict().safeParse(req.body ?? {})
+    if (!b.success) throw erroDeEntrada(b.error.issues)
+    const ativou = await noEscritorio(sql, { sub: b.data.usuario_id, escritorio_id: b.data.escritorio_id }, (tx) => ativarNoPrimeiroAcesso(tx, { ...b.data, demonstracao: true }))
+    if (!ativou) throw new ErroApi('CONTA_INATIVA', { mensagem: 'Essa conta não tem convite pendente.' })
+    const t = await emitirToken({ sub: b.data.usuario_id, escritorio_id: b.data.escritorio_id, tipo: 'equipe' })
+    return { ...t, tipo: 'equipe', usuario_id: b.data.usuario_id }
   })
 
   app.post('/v1/demonstracao/restaurar', async (req) => {
