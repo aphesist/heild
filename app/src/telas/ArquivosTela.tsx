@@ -131,9 +131,9 @@ export function ArquivosTela({ aba, inicial, onConfigurar }: { aba: 'pastas' | '
             )}
           </Caixa>
         ) : (
-          // A-1: a árvore rola por dentro e fica presa ao topo; a pasta aberta tem a altura do que tem.
-          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
-            <Caixa className="max-h-[70vh] overflow-hidden lg:sticky lg:top-0">
+          // A-1: a árvore tem a altura da pasta aberta (no mínimo 20rem) e rola por dentro; nenhum vão ao lado da árvore alta.
+          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-stretch">
+            <Caixa className="max-h-[70vh] overflow-hidden lg:h-0 lg:max-h-none lg:min-h-[max(100%,20rem)]">
               <AreaRolagem as="ul" className="-mx-1 flex flex-col px-1 text-sm">
                 {raizes.map((r) => {
                   const aberto = abertos.includes(r.id)

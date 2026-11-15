@@ -157,7 +157,7 @@ function SecaoHoje({ e, onSecao, onEscolher }: { e: EmpresaVista; onSecao: (s: S
         {ativas.length === 0 ? (
           <EstadoVazio compacto icone={ListChecksIcon} titulo="Nenhuma rotina ativa" descricao="O Gestor configura as rotinas desta empresa em “Configurar rotinas”." />
         ) : (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid items-start gap-4 md:grid-cols-3">
             {cadencias.map((c) => {
               const rs = ativas.filter((r) => r.cadencia === c)
               return (

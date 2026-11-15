@@ -100,7 +100,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
       <CabecalhoBpo titulo="Configuração" sub={`${e.nome} · vale só para esta empresa`}>
         <SeloTitular titular={{ tipo: 'empresa', clienteId: e.clienteId, nome: e.nome }} />
       </CabecalhoBpo>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Caixa>
           <TituloBloco
             descricao="A plataforma lê e escreve no ERP que a empresa já usa; o que não tem API entra por arquivo. A credencial fica no cofre do escritório, com o escopo mínimo."
@@ -509,7 +509,7 @@ function ParametrosEscritorio() {
   return (
     <>
       <PesosAudit />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <EquipeBpo />
         <AprovacaoWhatsapp />
       </div>

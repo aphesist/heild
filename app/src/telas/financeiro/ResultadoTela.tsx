@@ -185,7 +185,7 @@ export function ResultadoTela() {
         </Caixa>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Caixa>
           <Pergunta acao={<Badge variant="outline">fase 4 · desligado</Badge>} descricao="Montado e desligado na v1: ainda não há dados suficientes para ativar (09, 7.4).">
             Orçado × realizado

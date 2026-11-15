@@ -13,3 +13,6 @@ export { BarraLote, CaixaSelecao, useSelecao, type AcaoLote, type Selecao } from
 export { SeloDemonstracao } from './selo-demonstracao'
 export { SePode, useAcao, usePermissao, usePode } from './permissao'
 export { Celula, LinhaColunas, ListaColunas, type ColunaLista, type LarguraColuna, type QuebraLista } from './linha-colunas'
+export { DuasPilhas } from './duas-pilhas'
+export { ListaComTeto, ListaVirtual, TETO_ITENS } from './lista-com-teto'
+export { Aviso, Bloco, Busca, Deslizante, Kpi, type TomAviso } from './pecas'

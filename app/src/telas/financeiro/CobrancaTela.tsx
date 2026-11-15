@@ -17,6 +17,7 @@ import { brl, CabecalhoFin, Caixa, CartoesDaAba, Nota, Numero, PaginaFin, Pergun
 import { EditarPassoRegua, ListaRegua } from './configuracao'
 import { useFin, useIntegranteFin, usePodeFin, type Fin } from './dados'
 import { atualizarValor, COMPETENCIA_ATUAL, dataCurta, diasDeAtraso, etapaDaRegua, HOJE, PROXIMA_COMPETENCIA, rotuloCompetencia, rotuloDia, rotuloMeio, somarDias } from './dominio'
+import { DuasPilhas } from '@/components/kit/duas-pilhas'
 
 const numero = (s: string) => Number(s.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0
 
@@ -171,14 +172,21 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string }) {
         )}
       </Caixa>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Devedores fin={fin} pode={pode} onAbrir={setAberta} />
-        <RecebimentosSoltos fin={fin} pode={podeVincular} />
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Regua fin={fin} />
-        <NotasEscritorio fin={fin} pode={pode} />
-      </div>
+      {/* Duas pilhas pelo topo (F-1): quem deve e a régua; o que entrou sem cobrança e as notas. */}
+      <DuasPilhas
+        esquerda={
+          <>
+            <Devedores fin={fin} pode={pode} onAbrir={setAberta} />
+            <Regua fin={fin} />
+          </>
+        }
+        direita={
+          <>
+            <RecebimentosSoltos fin={fin} pode={podeVincular} />
+            <NotasEscritorio fin={fin} pode={pode} />
+          </>
+        }
+      />
       <Provedor fin={fin} />
 
       {fatura && <DetalheFatura fin={fin} c={fatura} pode={pode} onFechar={() => setAberta(undefined)} />}

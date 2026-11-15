@@ -226,7 +226,7 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
         </div>
       </Caixa>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Caixa>
           <TituloBloco descricao="Só o que pede uma pessoa; captura, conciliação e lembretes o integrante faz sozinho.">Precisa de decisão</TituloBloco>
           {decisoes.length === 0 && (
@@ -409,7 +409,7 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
       )}
 
       {empresa && (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <Caixa>
             <TituloBloco descricao="Em mil reais; dois meses de histórico e quatro projetados (Gerencial).">Fluxo de caixa</TituloBloco>
             <FluxoMensal d={{ meses: ['set', 'out', 'nov', 'dez', 'jan', 'fev'], entradas: empresa.perfil.fluxo.entradas, saidas: empresa.perfil.fluxo.saidas, inicio: 2, marcos: [{ mes: 3, texto: '13º e férias' }] }} />
