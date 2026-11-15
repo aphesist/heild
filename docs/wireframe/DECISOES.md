@@ -919,6 +919,22 @@ Formato de cada registro:
 - **Decisão:** quem não reatribui (Membro) abre a fila com "só as minhas" ligado (guardado por pessoa); o Gestor abre com tudo. Pedido com o canal "da equipe" entra completo (a completude do BPO-009 é do pedido do cliente), com a visibilidade "interna do BPO" e quem pediu.
 - **Por quê:** 10, 5.4: o Colaborador "executa as suas"; o mapa pede pedidos dos clientes e da equipe.
 - **Telas e ações:** S08-A13, A14.
+### S08d · BPO: gestão (Entregas, Volume, Rentabilidade), entre escritórios e app
+
+#### 2026-11-15 · S08d · Integrantes do grupo num arquivo próprio, montado por uma linha no módulo
+
+- **Decisão:** o trabalho simulado dos integrantes nas telas da S08d (redistribuição sugerida pelo Gerencial, rascunho do relatório do contratante pelo Atendimento, cobrança da bola parada) mora em `src/telas/bpo/efeitos-s08d.ts`, com a chave própria `s08d:efeitos`, no mesmo mecanismo do `integrantes.ts`. O hook `useEfeitosS08d()` é montado no `ModuloBpo.tsx` por uma linha acrescentada (e um import), com o comentário "S08d".
+- **Por quê:** quatro sessões do BPO em paralelo; acrescentar tipos ao `switch` comum do `integrantes.ts` geraria conflito certo.
+- **Telas e ações:** S08-A32, S08-T09 (Entregas e Visão do contratante).
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `src/telas/bpo/ModuloBpo.tsx` (duas linhas acrescentadas, nada mudado).
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Relatório do mês como folha revisada pelo Gestor, com recibo
+
+- **Decisão:** o relatório da empresa (e o do contratante) abre como folha com a marca de quem envia: o da empresa com a do escritório; o do contratante com a dele, nunca a do BPO. O Gerencial (ou o Atendimento, no C2) rascunha; o Gestor revisa o resumo, guarda o rascunho ou fecha e envia. Enviado, a folha mostra o recibo (hash, versão e cada entrega). "Fechar e enviar" direto na lista continua valendo para quem já revisou. O resumo revisado vai junto do documento e aparece no app.
+- **Por quê:** 10, 7.4 e 6.2 (FIN-006 é P: rascunha; BPO-012 é S, mas nada sai ao cliente sem uma pessoa no início, mapa 0.7).
+- **Telas e ações:** S08-A28, S08-A44, S08-A52.
 - **Impacto no plano:** nenhum.
 - **Arquivos compartilhados:** nenhum.
 - **Situação:** proposta.
@@ -928,6 +944,20 @@ Formato de cada registro:
 - **Decisão:** sem empresa escolhida, as Rotinas mostram a carteira por exceção (checklist do dia, o que falta conferir, extrato, lançar no ERP, a receber em atraso e o mês aberto ou fechado, com atalho para a seção). Com uma empresa, seis seções: Hoje (checklist em três colunas e o calendário único, com a seta que leva aonde cada rotina se faz pelo código da atividade), Contas a pagar, A receber, Conciliação, Lançamentos no ERP e Fechamento. O integrante do cabeçalho muda com a seção (Contas a Pagar, Contas a Receber, Conciliação, Gerencial). No celular, as seções viram uma lista de escolha.
 - **Por quê:** 10, 3.1 e 3.2 descrevem a operação do dia; o mapa não diz como dividir a tela **[sem regra no plano]**.
 - **Telas e ações:** S08-A18 a A21.
+#### 2026-11-15 · S08d · Crédito de SLA: 1% do honorário por ponto abaixo da meta, até 10%, só com desvio do BPO
+
+- **Decisão:** o fechamento do SLA (BPO-011) é revisado pelo Gestor do BPO, que classifica cada desvio como do BPO ou do cliente. Com o SLA abaixo da meta e ao menos um desvio do BPO, o crédito do contrato é 1% do honorário do BPO por ponto abaixo da meta, no máximo 10%. Desvio do cliente não gera crédito. Fechado, o Financeiro recebe o aviso do desconto na próxima fatura (lançar o desconto é tela do Financeiro, S07). Multa não entra no wireframe.
+- **Por quê:** 10, 4.3 manda aplicar "créditos e multas do contrato", revisado por pessoa, sem dizer a regra; o valor é hipótese da sessão, a validar no contrato modelo.
+- **Telas e ações:** S08-A29.
+- **Impacto no plano:** 10, 3.14 e 4.3 (regra de crédito a validar).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Auditoria de qualidade: amostra de três contas; divergência vira item na fila
+
+- **Decisão:** uma pessoa sorteia três contas do mês (documento, valor, conferência e aprovação) e marca cada uma como OK ou divergência, com motivo. A divergência vira item da fila (`BPO-013`, interno, prazo de dois dias) para o analista da empresa. As últimas cinco amostras ficam no histórico (`s08d:qualidade`).
+- **Por quê:** BPO-013 é P (o integrante confere por regra e sorteia; pessoa revisa); o tamanho da amostra não está no plano.
+- **Telas e ações:** S08-A29.
 - **Impacto no plano:** nenhum.
 - **Arquivos compartilhados:** nenhum.
 - **Situação:** proposta.
@@ -966,6 +996,85 @@ Formato de cada registro:
 - **Telas e ações:** S08-T03, S08-T04.
 - **Impacto no plano:** nenhum.
 - **Arquivos compartilhados:** os três citados, uma linha cada.
+#### 2026-11-15 · S08d · Extrato de volume enviado ao cliente com três dias úteis para contestar
+
+- **Decisão:** o Gestor envia o extrato do mês ao app da empresa; o cliente tem três dias úteis para contestar (no "hoje" do BPO, de 18/11 a 23/11), pelo app (Fluxo de caixa › Extrato do BPO do mês). A contestação traz item, quantidade e motivo quando registrada pela equipe ou pelo portal; pelo app, só o motivo (o escritório quantifica ao decidir). Aceitar vira glosa; recusar exige motivo, que o cliente vê. Quem decide é o Gestor do BPO.
+- **Por quê:** 10, 7.2 diz que a empresa vê o extrato antes da fatura; a tabela 5.4 diz "só a fatura" para o cliente do BPO. A sessão seguiu o 7.2 (ver antes de pagar) e manteve a fatura no Financeiro do app (S10). O prazo é hipótese da sessão.
+- **Telas e ações:** S08-A30, S08-A52.
+- **Impacto no plano:** 10, 5.4 (linha "Volume e faturamento" do cliente) e 7.2 (prazo a validar).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Excedente vira serviço avulso do Financeiro; aditivo de faixa é proposta ao Financeiro
+
+- **Decisão:** "Lançar o extra" cria um `servico_avulso` (entidade da S07) com origem `faixa`, situação `a_faturar` e o ok de quem lançou em `aceite_ref`; ele aparece em Financeiro › Contratos (avulsos) e entra na próxima fatura única, numa linha própria. Desfazer cancela o avulso e volta o volume. "Propor aditivo de faixa" (`faixa.estourar`) marca o volume e avisa o Financeiro; o contrato muda lá. Volume do contratante segue só marcado como faturado: o contratante não está no cadastro de clientes do Financeiro no wireframe.
+- **Por quê:** 10, 7.3: o BPO usa as estruturas do 09 e não cria motor novo.
+- **Telas e ações:** S08-A31.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum (só usa `repos.servicosAvulsos`).
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · O que o BPO conta na assinatura da plataforma
+
+- **Decisão:** em Volume, o Administrador vê o que o escritório paga à plataforma pelo BPO, com os valores de teste do 10, 9.1: pacote BPO Financeiro, R$ 390 + R$ 65 por empresa incluída (conta a partir do paralelo; em implantação ainda não conta); modo BPO, R$ 490 + R$ 120 por contratante; os clientes finais somam na faixa de clientes; convidados sem preço por usuário (teto de abuso, não cobrança). Atalho para Configurações › Assinatura.
+- **Por quê:** "faturar por inclusão de empresa e por contratante" é o que o 9.1 descreve; o momento em que a empresa passa a contar não está no plano (hipótese da sessão).
+- **Telas e ações:** S08-T06 (Volume), S08-T09.
+- **Impacto no plano:** 10, 9.1 (início da contagem a validar).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Rentabilidade: custos variáveis, base faturado ou recebido, capacidade e redistribuição
+
+- **Decisão:** margem = honorário − horas × custo-hora − custos variáveis (R$ 9 do pacote por empresa, R$ 3 do conector de ERP e R$ 1 por conta no Open Finance, o custo provável do 10, 9.2), sobre o faturado ou sobre o recebido (recebido quando a fatura de novembro está paga). Capacidade de cada pessoa no mês, editável pelo Gestor (`s08d:capacidade`). Carga das quatro semanas: fila 1 h por item no prazo; rotina diária 6 min por dia útil, semanal 15 min, mensal 1 h na semana do dia; no C2, folha (dia 5), DCTFWeb e EFD-Reinf (dia 15) e Simples (dia 20) por empresa do departamento. O Gerencial sugere a redistribuição (BPO-016, P) e só o Gestor aplica. Horas poupadas (GES-056) em série separada: captura 6 min, conciliação por regra 2 min (60% das conciliações do mês casam por regra), rascunho do relatório 45 min. Margem por departamento do contratante: honorário pelas empresas do departamento; custo metade pela carteira e metade pela fila dele.
+- **Por quê:** 10, 7.4 e BPO-016; as durações e os pesos são hipóteses da sessão (o plano manda calibrar pelo Timesheet).
+- **Telas e ações:** S08-A32.
+- **Impacto no plano:** 10, 7.4 (premissas de carga a calibrar).
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Contratante entra e sai em passos; nunca se apaga
+
+- **Decisão:** "Novo contratante" (Administrador) cria o subinquilino em "entrada" com sete passos: contrato (BPO-003), acordo LGPD e suboperadores (BPO-004), empresas importadas (carteira em bloco, BPO-017, colando da planilha: nome; CNPJ; regime), credenciais pedidas, pendências levantadas (SOC-022), responsável técnico convidado e um mês em paralelo. Importar e convidar o RT marcam os passos sozinhos. Só ativa com todos. "Encerrar contratante" pede o motivo e abre a saída em seis passos (BPO-019); concluir revoga os convidados e arquiva o contratante (fica no histórico). Novo contratante mostra SLA e margem como "—" até ter histórico.
+- **Por quê:** 10, 4.6 lista o que a carteira em bloco e o encerramento fazem, sem a ordem; a ordem é da sessão.
+- **Telas e ações:** S08-A39, S08-A43, S08-T09.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Revisão do responsável técnico com estado próprio; transmitir bloqueado sem o "pode transmitir"
+
+- **Decisão:** o item de revisão guarda o estado em `extras.revisao` (preparando, com o RT, ajuste pedido, aprovada), com o resumo do que mudou e o hash da entrega. "Mandar ao RT" passa a bola ao contratante; o RT aprova ou pede ajuste (comentário obrigatório) no portal; ajuste volta como "Ajustar e reenviar ao RT". Na transferência parcial, "Transmitir e concluir" só libera com a revisão aprovada. Corrige o comportamento anterior, em que "pedir ajuste" devolvia a bola e já liberava a transmissão. Um pedido novo pode nascer marcado como "precisa da revisão do RT".
+- **Por quê:** 10, 4.4 (NBC PG 01, item 5 c; BPO-005).
+- **Telas e ações:** S08-A44, S08-T05 (frente E), S08-T09.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Conversa BPO e contratante, primeiro acesso, procedimentos e trilha por contratante
+
+- **Decisão:** (1) uma conversa por contratante (BPO-022), vista pela equipe na Visão do contratante e pelo convidado no portal, guardada em `s08d:conversa:<contratante>`; o cliente final não vê. Simplificação: o plano põe a conversa na tarefa. (2) Convidado com convite pendente cai no primeiro acesso do portal e aceita (passa a ativo). (3) Convidado manda o que falta e devolve a bola pela ferramenta exposta `fila.responder`. (4) Procedimentos do contratante (BPO-021) em `extras.procedimentos`, editáveis em linha. (5) Registro de operações (LGPD, BPO-004 e BPO-020): a trilha dos eventos que citam o contratante. (6) Teto de convidados editado em linha (antes gravava a cada tecla), convite reenviável e convidado reativável.
+- **Por quê:** 10, 4.1.1, 4.2, 4.5 e 4.6; o formato de cada um é da sessão.
+- **Telas e ações:** S08-A44, S08-A45, S08-T09.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · App do cliente: escalonamento, vencidas, baixas e saldo atualizado sem gravar
+
+- **Decisão:** no cartão do lote, "Se ninguém responder" mostra o escalonamento com os horários da empresa (janela, lembrete, substituto ou "sem substituto", véspera ao Gestor e ao sócio, vencida só alerta, expiração). Conta vencida sem aprovação aparece como alerta no topo das Aprovações (B3). Lotes decididos vão para "Decididos". Depois de liberado (M1) ou agendado (M2), cada conta mostra a baixa no extrato. Em Fluxo de caixa, "Atualizar" lê o saldo pelo serviço simulado de bancos (com selo de demonstração e estado de erro com "Tentar de novo") sem gravar: conectar banco não é ferramenta exposta ao cliente. O relatório do BPO abre em Documentos e a proposta de alçada mostra os valores de hoje riscados.
+- **Por quê:** 10, 3.6 e 14; 06, ad. 19 e 20. Contrato C10 mantido: `AprovacoesApp`, `CaixaApp`, `PropostaAlcadaApp` e `useLotesAbertos` com os mesmos pontos de uso.
+- **Telas e ações:** S08-A47 a A52.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
+- **Situação:** proposta.
+
+#### 2026-11-15 · S08d · Sem migração nova
+
+- **Decisão:** tudo o que a S08d acrescentou cabe nas colunas que já existem (`extras` das tabelas do BPO, `registro_tela` e `servico_avulso` da S07); nenhuma migração nova. A migração da S08 (`20261114180000_s08_bpo.sql`) continua pendente de aplicação no projeto Supabase: esta sessão não tem permissão de leitura no projeto para conferir.
+- **Por quê:** ARQUITETURA, 9: esquema novo só com migração nova e aplicar pede o dono.
+- **Telas e ações:** S08-T06, T09, T10.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** nenhum.
 - **Situação:** proposta.
 
 ### S09 · Arquivos, Configurações, entrada e implantação
