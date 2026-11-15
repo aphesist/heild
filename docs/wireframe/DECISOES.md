@@ -1429,3 +1429,12 @@ Formato de cada registro:
 - **Impacto no plano:** 02, 9.3 e Fundações 6.4 ganham o lugar único para decidir fora do chat; nenhuma regra de decisão muda.
 - **Arquivos compartilhados:** `ambiente/{efeitos,agente-s02,fluxos,interface,loja}.tsx|ts` (comentário na decisão, argumentos de exibição, `Destino.aprovacoes`, "Corrigir"), `nucleo/rotas.ts` (parâmetro `aprovacoes`), `components/compostos/{cartoes-chat,botoes-decisao,aviso-integrante}.tsx`, `telas/Plataforma.tsx`, `lab/fichas-edicao.tsx`; novos `ambiente/aprovacoes.tsx` e `ambiente/cartoes-aprovacao.ts`.
 - **Situação:** proposta.
+
+#### 2026-11-15 · UI Lab · Fase 6 · Texto suave dos temas: Heild em areia-700 (proposta 6) e piso de 4,5:1 nos temas de escritório (6b)
+
+- **Decisão:** (1) o texto suave do claro da Heild (tema de fábrica) passa a areia-700 (#585552), aprovado pelo dono, com o mesmo valor do branch design-system. (2) Todo tema de escritório tem o texto suave levado a pelo menos 4,5:1 em todas as camadas (fundo, superfície, elevada, rebaixada, fim do fundo, barra lateral), também quando o tema define o próprio valor. Antes, o valor definido pelo tema passava sem conferência. A Heild fica de fora do ajuste automático porque o valor vem do design system já conferido; a lateral-fim dela não leva texto suave.
+- **Por quê:** o QA tinha 46 achados de contraste. Os 45 do claro da Heild zeraram com o areia-700. O que sobrou era do tema Requinte. Por ser tema de escritório e não marca da Heild, o coordenador pediu a regra direto no app, sem passar pelo dono.
+- **Telas e ações:** todas, no tema claro da Heild e nos temas de escritório.
+- **Impacto no plano:** nenhum.
+- **Arquivos compartilhados:** `theme/temas.ts` (areia-700 no claro da fábrica), `theme/variaveis.ts` (`comContraste` também sobre o `texto_suave` definido pelo tema).
+- **Situação:** (1) aprovada; (2) decidida pelo coordenador.
