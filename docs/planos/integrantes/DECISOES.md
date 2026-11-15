@@ -19,3 +19,7 @@
 ## Custo com a decisão 3
 
 A recomendação da AVALIACAO.md (custo relativo 0,43) supunha Haiku como operário. Com Sonnet operário, o custo por tarefa sobe; a conta será refeita com `modelo_de_custo.py` quando o piloto disser qual modelo fica em cada papel.
+
+## Adendo: trabalho novo do integrante de Atendimento (15/11/2026)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação: com o número de WhatsApp único compartilhado entre setores, o integrante de Atendimento ganha a **triagem do número compartilhado**. Ele reconhece quem escreve e o assunto, repassa ao setor e ao integrante certos com resumo e pergunta quando estiver em dúvida. **Resposta do Enzo às perguntas do desenho (15/11/2026):** com integrantes contratados, a triagem pelo integrante, sem menu, é o modo padrão ("o principal ainda é o integrante decidindo"); o chatbot sem IA é a reserva para o escritório sem integrantes; no modo opcional menu e integrante, vale a escolha do cliente e o integrante sugere por cartão. As mensagens do integrante ao cliente saem identificadas como IA. Segue as decisões acima: procedimento por processo (2), roteamento em cascata e resposta no formato padrão (4), bolsa do setor (5) e piloto automatizado (7). Desenho no [subplano 02](../subplanos/02-Time-de-Agentes.md) e no [subplano 04](../subplanos/04-CRM.md), adendos de 15/11/2026.
