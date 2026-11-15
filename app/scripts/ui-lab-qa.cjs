@@ -507,7 +507,7 @@ function resumo() {
   const lab = resultado.lab
   const telas = resultado.telas
   return [
-    `Gerado em ${resultado.geradoEm} contra ${base}. Larguras: ${larguras.join(', ')}.`,
+    `Gerado em ${resultado.geradoEm} contra ${resultado.base}. Larguras: ${larguras.join(', ')}.`,
     '',
     `### Lab: ${lab.casos} casos, ${lab.achados.length} achados`,
     '',
@@ -540,6 +540,7 @@ function resumo() {
   if (fs.existsSync(arquivoJson)) {
     const antes = JSON.parse(fs.readFileSync(arquivoJson, 'utf8'))
     for (const k of ['lab', 'telas']) if (antes[k]?.casos) resultado[k] = antes[k]
+    if (process.argv.includes('--resumo')) Object.assign(resultado, { base: antes.base ?? resultado.base, geradoEm: antes.geradoEm ?? resultado.geradoEm })
     resultado.errosDePagina = antes.errosDePagina || []
   }
   const salvar = () => fs.writeFileSync(arquivoJson, JSON.stringify({ ...resultado, widgets: { casos: resultado.widgets.casos, achados: [], porCaso: [], noDiario: 'widgets.jsonl' } }, null, 1))

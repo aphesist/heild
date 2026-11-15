@@ -37,6 +37,8 @@ Cada rodada parte do build do momento; o que ela acha vira correção num compon
 2. **Rodada completa de widgets (23.744 casos, 20 achados em 5 widgets):** selo e rótulo de situação que não truncavam (Rotulo, Selo), Contagem ("-5 dias", "NaN dias", sem truncar), duas colunas no XL com lista longa (vão sob a coluna curta), Numero espremido pelo texto ao lado, a grade de fluxos da captura por cima de "Rodadas", Simples quebrando sem a PGDAS-D, "Abrir chat" com 3,64:1 no Condesp escuro. Antes dela já tinham saído os vazios em branco (rede de segurança na caixa do widget) e o "Ver tudo (3)" com 200 itens.
 3. **Lab (1.860 casos, 243 achados) e telas reais (1.260 casos, 407 achados):** cards esticados em grades de duas colunas, opacidade no texto de registro inativo (28 lugares), `text-warning-foreground` fora do fundo amarelo (18), contador de não lidas com 3,2:1 no escuro, calendário sem rolagem lateral, célula de lista em colunas vazando, buracos na grade de widgets (empacotamento denso), texto suave sem garantia sobre a barra lateral e o fim do gradiente.
 
+4. **Rodada final (build do PR):** Lab 1.860 casos e 25 achados, telas reais 1.260 e 21, widgets 23.744 e 1 (um print que não saiu no tempo, infraestrutura). Os 46 de contraste que sobram são todos o texto suave da Heild sobre o rebaixado ou o fim do gradiente da página no claro (3,8 a 4,45:1): a proposta 6, que espera o dono. Nenhum vão, sobreposição, texto cortado, conteúdo fora do card ou rolagem sem esmaecido.
+
 ## Exceções aceitas
 
 - **Controles desabilitados** (e o rótulo que os envolve): fora do contraste, como no WCAG 1.4.3.
@@ -49,4 +51,46 @@ Cada rodada parte do build do momento; o que ela acha vira correção num compon
 ## Contagem
 
 <!-- contagem:inicio -->
+Gerado em 2026-11-15T14:30:37.805Z contra http://localhost:6320/ (cópia do build do PR). Larguras: 390, 768, 1024, 1440, 1920.
+
+### Lab: 1860 casos, 25 achados
+
+| Componente | texto-cortado | texto-espremido | sobreposicao | rolagem-sem-esmaecido | rolagem-lateral | toque | contraste | vao | fora-do-card | erro | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| campos | 0 | 0 | 0 | 0 | 0 | 0 | 18 | 0 | 0 | 0 | 18 |
+| avatares | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 4 |
+| abas | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 |
+| botoes | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| **Total** | **0** | **0** | **0** | **0** | **0** | **0** | **25** | **0** | **0** | **0** | **25** |
+
+### Telas reais: 1260 casos, 21 achados
+
+| Grupo de telas | texto-cortado | texto-espremido | sobreposicao | rolagem-sem-esmaecido | rolagem-lateral | toque | contraste | vao | fora-do-card | erro | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Início | 0 | 0 | 0 | 0 | 0 | 0 | 10 | 0 | 0 | 0 | 10 |
+| CRM e interna | 0 | 0 | 0 | 0 | 0 | 0 | 8 | 0 | 0 | 0 | 8 |
+| BPO | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 3 |
+| **Total** | **0** | **0** | **0** | **0** | **0** | **0** | **21** | **0** | **0** | **0** | **21** |
+
+### Widgets reais com cenários: 23744 casos, 1 achados
+
+| Widget · versão | texto-cortado | texto-espremido | sobreposicao | rolagem-sem-esmaecido | rolagem-lateral | toque | contraste | vao | fora-do-card | erro | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| fiscal.caixas · carteira | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+| **Total** | **0** | **0** | **0** | **0** | **0** | **0** | **0** | **0** | **0** | **1** | **1** |
+
+**Os 10 piores casos** (pontos: sobreposição e fora do card 4, rolagem 3, texto espremido 3, texto cortado e vão 2, contraste e toque 1):
+
+1. fiscal|carteira|caixas · 5 pontos (erro) · `widgets/fiscal.caixas/carteira/i200__XL__condesp-claro__768.png`
+2. consultoria|carteira|acoes · 0 pontos () · `widgets/consultoria.acoes/carteira/i0.carregando__G__requinte-escuro__768.png`
+3. consultoria|cliente|entrada-saida · 0 pontos () · `widgets/consultoria.entrada-saida/cliente/i0.sem-permissao__M__verde-campo-escuro__390.png`
+4. consultoria|carteira|carteira-consultoria · 0 pontos () · `widgets/consultoria.carteira-consultoria/carteira/i0.erro__XL__condesp-escuro__1024.png`
+5. consultoria|carteira|documentos · 0 pontos () · `widgets/consultoria.documentos/carteira/i0.sem-permissao__G__condesp-claro-grande__1440.png`
+6. consultoria|carteira|acoes · 0 pontos () · `widgets/consultoria.acoes/carteira/i0.erro__G__fabrica-escuro__1920.png`
+7. consultoria|carteira|acoes · 0 pontos () · `widgets/consultoria.acoes/carteira/i0.erro__G__fabrica-escuro__768.png`
+8. contabil|carteira|fila-assinatura · 0 pontos () · `widgets/contabil.fila-assinatura/carteira/i0.sem-permissao__M__verde-campo-escuro__390.png`
+9. consultoria|carteira|pendencias · 0 pontos () · `widgets/consultoria.pendencias/carteira/i0.sem-permissao__G__condesp-claro-grande__1440.png`
+10. consultoria|carteira|pedir · 0 pontos () · `widgets/consultoria.pedir/carteira/i0.erro__G__horizonte-escuro-grande__1024.png`
+
+Erros de página (JavaScript): 0.
 <!-- contagem:fim -->
