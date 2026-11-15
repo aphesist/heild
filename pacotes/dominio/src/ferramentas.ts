@@ -368,14 +368,14 @@ export const ferramentasTipadas: FerramentaTipada[] = [
   leitura({
     nome: 'mensagem_interna.listar',
     versao: 1,
-    descricao_modelo: 'Mensagens de uma conversa interna, das mais novas para as mais antigas.',
-    entrada: z.object({ conversa_interna_id: Id, ...Paginacao }).strict(),
+    descricao_modelo: 'Mensagens internas das conversas de que você participa (ou de uma conversa), das mais novas para as mais antigas.',
+    entrada: z.object({ conversa_interna_id: Id.optional(), ...Paginacao }).strict(),
     erros: ['CURSOR_INVALIDO'],
     tabela: 'mensagem_interna',
     autorizar_com: 'mensagem_interna.listar',
     alvo: () => ({}),
-    filtros: (e) => [{ coluna: 'conversa_interna_id', op: '=', valor: e.conversa_interna_id }],
-    compacta: (m) => ({ id: m.id, autor_id: m.autor_id, corpo: m.corpo, criado_em: m.criado_em, editada: !!m.editada_em }),
+    filtros: (e) => (e.conversa_interna_id ? [{ coluna: 'conversa_interna_id', op: '=', valor: e.conversa_interna_id }] : []),
+    compacta: (m) => ({ id: m.id, conversa_interna_id: m.conversa_interna_id, autor_id: m.autor_id, corpo: m.corpo, criado_em: m.criado_em, editada: !!m.editada_em }),
   }),
   escrita({
     nome: 'mensagem_interna.enviar',
@@ -436,7 +436,18 @@ export const ferramentasTipadas: FerramentaTipada[] = [
     nome: 'evento.listar',
     versao: 1,
     descricao_modelo: 'Linha do tempo: eventos do escritório (mais novos primeiro), por cliente, setor ou ferramenta.',
-    entrada: z.object({ cliente_id: Id.optional(), setor_id: SetorEsquema.optional(), ferramenta: z.string().max(80).optional(), so_linha_do_tempo: z.boolean().default(true), ...Paginacao }).strict(),
+    entrada: z
+      .object({
+        cliente_id: Id.optional(),
+        setor_id: SetorEsquema.optional(),
+        ferramenta: z.string().max(80).optional(),
+        so_linha_do_tempo: z.boolean().default(true),
+        // B5 (compatível): a ficha de um registro (a tarefa, o lote) e o nome do evento.
+        resultado_ref: Id.optional(),
+        nome: z.string().max(120).optional(),
+        ...Paginacao,
+      })
+      .strict(),
     erros: ['CURSOR_INVALIDO'],
     tabela: 'evento',
     autorizar_com: 'evento.listar',
@@ -446,6 +457,8 @@ export const ferramentasTipadas: FerramentaTipada[] = [
       ...(e.setor_id ? [{ coluna: 'setor_id', op: '=' as const, valor: e.setor_id }] : []),
       ...(e.ferramenta ? [{ coluna: 'ferramenta', op: '=' as const, valor: e.ferramenta }] : []),
       ...(e.so_linha_do_tempo ? [{ coluna: 'visivel_na_linha_do_tempo', op: '=' as const, valor: true }] : []),
+      ...(e.resultado_ref ? [{ coluna: 'resultado_ref', op: '=' as const, valor: e.resultado_ref }] : []),
+      ...(e.nome ? [{ coluna: 'nome', op: '=' as const, valor: e.nome }] : []),
     ],
     compacta: (e) => ({ id: e.id, seq: e.seq ?? null, criado_em: e.criado_em, nome: e.nome, ator_tipo: e.ator_tipo, ator_nome: e.ator_nome, ferramenta: e.ferramenta, resultado: e.resultado, texto: e.texto, cliente_id: e.cliente_id ?? null, setor_id: e.setor_id ?? null }),
     ordem: 'seq',

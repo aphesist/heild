@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "2d15361bb87a2a88",
+  "catalogo_hash": "b1df6286aefc5598",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -1944,6 +1944,16 @@
             "default": true,
             "type": "boolean"
           },
+          "resultado_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 120
+          },
           "visao": {
             "default": "compacta",
             "type": "string",
@@ -2685,7 +2695,7 @@
     {
       "name": "mensagem_interna_listar",
       "nome": "mensagem_interna.listar",
-      "description": "Mensagens de uma conversa interna, das mais novas para as mais antigas.",
+      "description": "Mensagens internas das conversas de que você participa (ou de uma conversa), das mais novas para as mais antigas.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -2714,9 +2724,6 @@
             "maxLength": 400
           }
         },
-        "required": [
-          "conversa_interna_id"
-        ],
         "additionalProperties": false
       },
       "annotations": {

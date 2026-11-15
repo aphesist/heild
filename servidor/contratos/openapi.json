@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "2d15361bb87a2a88",
+    "version": "b1df6286aefc5598",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -21623,6 +21623,16 @@
                     "default": true,
                     "type": "boolean"
                   },
+                  "resultado_ref": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.-]*$"
+                  },
+                  "nome": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
                   "visao": {
                     "default": "compacta",
                     "type": "string",
@@ -31049,7 +31059,7 @@
     "/v1/ferramentas/mensagem_interna.listar": {
       "post": {
         "operationId": "mensagem_interna_listar",
-        "summary": "Mensagens de uma conversa interna, das mais novas para as mais antigas.",
+        "summary": "Mensagens internas das conversas de que você participa (ou de uma conversa), das mais novas para as mais antigas.",
         "tags": [
           "plataforma"
         ],
@@ -31086,9 +31096,6 @@
                     "maxLength": 400
                   }
                 },
-                "required": [
-                  "conversa_interna_id"
-                ],
                 "additionalProperties": false
               }
             }

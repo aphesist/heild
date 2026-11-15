@@ -121,3 +121,41 @@ describe('delta', () => {
     expect(delta.tabelas.tarefa.map((x) => x.id)).not.toContain(t.id)
   })
 })
+
+describe('consulta paginada (classe 3), pela mesma regra de leitura', () => {
+  it('conversa pessoal de outros não aparece na lista nem pelo id, mesmo passando a conversa', async () => {
+    // Rafael (u7) não participa da conversa pessoal entre u1 e u2.
+    const r = await ferramenta(app, rafael, 'mensagem_interna.listar', { conversa_interna_id: 'ci-s05-pessoal-u1-u2' }, { chave: null })
+    expect(r.status).toBe(200)
+    expect(r.corpo.dados.linhas).toEqual([])
+    expect(r.corpo.pagina.total).toBe(0)
+    const da = await ferramenta(app, adm, 'mensagem_interna.listar', { conversa_interna_id: 'ci-s05-pessoal-u1-u2' }, { chave: null })
+    expect(da.corpo.dados.linhas.length).toBeGreaterThan(0)
+    // Sem a conversa: só as das conversas dele (canais e o grupo de que participa).
+    const todas = await ferramenta(app, rafael, 'mensagem_interna.listar', { visao: 'tela', limite: 100 }, { chave: null })
+    expect(todas.corpo.dados.linhas.every((m: { conversa_interna_id: string }) => m.conversa_interna_id !== 'ci-s05-pessoal-u1-u2')).toBe(true)
+  })
+
+  it('o cursor leva o total: as páginas seguintes não recontam, e o total bate com o percorrido', async () => {
+    let cursor: string | undefined
+    const vistos = new Set<string>()
+    let total = -1
+    for (let i = 0; i < 50; i++) {
+      const r = await ferramenta(app, adm, 'evento.listar', { limite: 20, so_linha_do_tempo: false, ...(cursor ? { cursor } : {}) }, { chave: null })
+      expect(r.status).toBe(200)
+      if (total < 0) total = r.corpo.pagina.total
+      else expect(r.corpo.pagina.total).toBe(total)
+      for (const l of r.corpo.dados.linhas) vistos.add(l.id)
+      if (!r.corpo.pagina.ha_mais) break
+      cursor = r.corpo.pagina.cursor
+    }
+    expect(vistos.size).toBe(total)
+  })
+
+  it('evento.listar filtra pela ficha do registro (resultado_ref)', async () => {
+    const [t] = await banco()`select resultado_ref from evento where escritorio_id = 'esc-andrade' and resultado_ref is not null group by 1 order by count(*) desc limit 1`
+    const r = await ferramenta(app, adm, 'evento.listar', { resultado_ref: t.resultado_ref, so_linha_do_tempo: false, visao: 'tela' }, { chave: null })
+    expect(r.corpo.dados.linhas.length).toBeGreaterThan(0)
+    expect(r.corpo.dados.linhas.every((e: { resultado_ref: string }) => e.resultado_ref === t.resultado_ref)).toBe(true)
+  })
+})

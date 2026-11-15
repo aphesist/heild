@@ -183,3 +183,5 @@ create index if not exists tarefa_por_cliente on public.tarefa (escritorio_id, c
 create index if not exists evento_por_cliente_seq on public.evento (escritorio_id, cliente_id, seq desc);
 create index if not exists cartao_por_status on public.cartao_aprovacao (escritorio_id, status, criado_em desc, id desc);
 create index if not exists notificacao_recentes on public.notificacao (escritorio_id, criado_em desc, id desc);
+-- A ficha de um registro (a tarefa, o lote) lê os eventos dele pelo `resultado_ref` (evento.listar).
+create index if not exists evento_por_ref on public.evento (escritorio_id, resultado_ref, seq desc) where resultado_ref is not null;

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { z } from 'zod'
 import { ENTIDADES_F1, ferramentaTipada, ferramentasTipadas, traduzirOperacao } from '@heild/dominio'
 import { api, banco, chave, entrar, ferramenta, operacao } from './ajuda.ts'
 
@@ -61,6 +62,15 @@ describe('ferramentas de entidade da F1', () => {
       if (e.excluir) expect(ferramentaTipada(`${e.nome}.excluir`)).toBeDefined()
     }
     expect(ferramentasTipadas.length).toBeGreaterThan(70)
+  })
+
+  it('os editáveis declarados no núcleo (o tradutor do navegador usa) são os do esquema da ferramenta', () => {
+    for (const e of ENTIDADES_F1) {
+      const nome = e.manuais?.atualizar ?? (e.editaveis ? `${e.nome}.atualizar` : null)
+      if (!nome) continue
+      const esquema = z.toJSONSchema(ferramentaTipada(nome)!.entrada, { io: 'input' }) as unknown as { properties: { campos: { properties: Record<string, unknown> } } }
+      expect(Object.keys(esquema.properties.campos.properties).sort(), nome).toEqual([...(e.editaveis ?? [])].sort())
+    }
   })
 
   it('criar com o id que a tela gerou e a frase do evento (envelope heild_tela)', async () => {
