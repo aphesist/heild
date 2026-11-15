@@ -383,7 +383,7 @@ function ConferenciaTributaria({ clienteId, t }: { clienteId: string; t: Tamanho
         <Linha
           key={x.id}
           inicio={
-            <Badge variant="outline" className="w-16 shrink-0 justify-center">
+            <Badge variant="outline" className="min-w-16 justify-center">
               {x.tipo}
             </Badge>
           }

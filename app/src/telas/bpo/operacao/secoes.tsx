@@ -128,7 +128,7 @@ export function SecaoPagar({ e, onEscolher }: { e: EmpresaVista; onEscolher: Ir 
                   </span>
                   <Badge variant={c.etapa === 'capturada' ? 'destaque' : c.etapa === 'paga' ? 'sucesso' : c.etapa === 'recusada' ? 'erro' : 'outline'}>{rotuloEtapa[c.etapa]}</Badge>
                   <span className={cn('w-14 text-right text-xs', contaAberta(c) && diasAte(c.vencimento) < 0 ? 'text-destructive' : 'text-muted-foreground')}>{quando(c.vencimento)}</span>
-                  <span className="w-24 text-right tabular-nums">{brl(c.valor)}</span>
+                  <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
                   {c.etapa === 'capturada' && (
                     <Button size="sm" variant="ghost" className="rounded-full" title={voceDigitou ? 'Você digitou: outra pessoa confere' : undefined} onClick={() => onEscolher(e.clienteId, 'aprovacoes')}>
                       {voceDigitou ? 'Outra pessoa confere' : 'Conferir'} <ArrowRightIcon />
@@ -269,7 +269,7 @@ export function SecaoReceber({ e, onEscolher }: { e: EmpresaVista; onEscolher: I
                   {t && <span className="text-success block text-xs">o extrato tem {t.descricao} ({brl(t.valor)}): pode ser este</span>}
                 </span>
                 <Badge variant={c.etapa === 'atrasada' ? 'erro' : c.etapa === 'recebida' ? 'sucesso' : 'outline'}>{rotuloEtapa[c.etapa]}</Badge>
-                <span className="w-24 text-right tabular-nums">{brl(c.valor)}</span>
+                <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
                 {c.etapa !== 'recebida' && (
                   <SePode ferramenta="conta_receber.baixar" alvo={{ cliente_id: e.clienteId }}>
                     <Button
@@ -419,7 +419,7 @@ export function SecaoConciliacao({ e }: { e: EmpresaVista }) {
                       </span>
                     </span>
                     <Badge variant={b === 'manual_pendente' ? 'destaque' : 'outline'}>{b === 'erp' ? `baixa no ${e.erp.provedor}` : b === 'manual_pendente' ? 'lançar no ERP' : b === 'manual_feita' ? 'lançada à mão' : 'conciliada'}</Badge>
-                    <span className="w-24 text-right tabular-nums">{brl(t.valor, true)}</span>
+                    <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(t.valor, true)}</span>
                     {b !== 'manual_feita' && (
                       <SePode ferramenta="conciliacao.confirmar" alvo={{ cliente_id: e.clienteId }}>
                         <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Desfazer a conciliação de ${t.descricao}`} title="Desfazer" onClick={() => executar(() => conciliacaoOperacao.desfazer(t.id), { sucesso: 'Conciliação desfeita: voltou para conferir' })}>
@@ -505,7 +505,7 @@ export function SecaoLancamentos({ e }: { e: EmpresaVista }) {
                   {c.categoria} · vence {dataCurta(c.vencimento)} · lançada na plataforma por {c.digitado_por_nome}
                 </span>
               </span>
-              <span className="w-24 text-right tabular-nums">{brl(c.valor)}</span>
+              <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
               <SePode ferramenta="erp.lancar" alvo={{ cliente_id: e.clienteId }}>
                 <Button size="sm" variant="outline" className="rounded-full" onClick={() => executar(() => conciliacaoOperacao.marcarContaLancada(c.id), { sucesso: `${c.contraparte} lançada no ${e.erp.provedor}` })}>
                   <CheckIcon /> Lancei no {e.erp.provedor}
@@ -521,7 +521,7 @@ export function SecaoLancamentos({ e }: { e: EmpresaVista }) {
                   {dataCurta(t.data)} · {t.categoria} · conciliada por {t.conciliada_por}
                 </span>
               </span>
-              <span className="w-24 text-right tabular-nums">{brl(t.valor, true)}</span>
+              <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(t.valor, true)}</span>
               <SePode ferramenta="erp.baixar" alvo={{ cliente_id: e.clienteId }}>
                 <Button size="sm" variant="outline" className="rounded-full" onClick={() => executar(() => conciliacaoOperacao.marcarBaixaLancada(t.id), { sucesso: `Baixa lançada no ${e.erp.provedor} (manual)` })}>
                   <CheckIcon /> Lancei no {e.erp.provedor}

@@ -141,13 +141,13 @@ export function VisaoFinTela() {
             <FluxoMensal d={prox} altura="h-28" />
             <ul className="flex flex-col gap-1 text-sm">
               {saldos.map((s) => (
-                <li key={s.m} className="grid grid-cols-[3rem_minmax(0,1fr)_7rem] items-center gap-2">
+                <li key={s.m} className="grid grid-cols-[3rem_minmax(0,1fr)_minmax(7rem,max-content)] items-center gap-2">
                   <span className="text-muted-foreground">{s.m}</span>
                   <span className="bg-sunken relative h-2 overflow-hidden rounded-full">
                     <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(100, (s.v / (MINIMO_CAIXA * 2.5)) * 100)}%`, background: 'color-mix(in oklab, var(--foreground) 55%, transparent)' }} />
                     <span className="bg-warning absolute inset-y-0 w-0.5" style={{ left: `${100 / 2.5}%` }} title="mínimo" />
                   </span>
-                  <span className="text-right tabular-nums">
+                  <span className="flex items-center justify-end gap-1 whitespace-nowrap tabular-nums">
                     {brl(s.v)} {s.v < MINIMO_CAIXA && <Badge variant="erro">abaixo</Badge>}
                   </span>
                 </li>
@@ -158,7 +158,7 @@ export function VisaoFinTela() {
             <Pergunta>Vencidas por idade</Pergunta>
             <ul className="flex flex-col gap-2">
               {idades.map((i) => (
-                <li key={i.faixa} className="grid grid-cols-[7rem_minmax(0,1fr)_6rem] items-center gap-3 text-sm">
+                <li key={i.faixa} className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)_minmax(6rem,max-content)] items-center gap-3 text-sm">
                   <span className="text-muted-foreground">{i.faixa}</span>
                   <span className="bg-sunken h-2.5 overflow-hidden rounded-full">
                     <span className="block h-full rounded-full" style={{ width: `${(i.valor / maxIdade) * 100}%`, background: 'color-mix(in oklab, var(--foreground) 60%, transparent)' }} />

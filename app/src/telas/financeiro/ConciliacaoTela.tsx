@@ -140,7 +140,7 @@ export function ConciliacaoTela() {
           ) : (
             <ul className="divide-border/70 flex flex-col divide-y">
               {sugeridos.map((l) => (
-                <li key={l.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,14rem)_7rem_auto]">
+                <li key={l.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,14rem)_minmax(7rem,max-content)_auto]">
                   <span className="min-w-0">
                     <span className="block truncate font-mono text-xs">{l.descricao_extrato}</span>
                     <span className="text-muted-foreground block text-xs">

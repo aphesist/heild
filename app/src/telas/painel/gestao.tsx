@@ -95,7 +95,7 @@ function Equipe({ t }: { t: TamanhoWidget }) {
                 <span className="bg-sunken h-1.5 flex-1 overflow-hidden rounded-full">
                   <span className={cn('block h-full rounded-full', abertasDe(u) / max > 0.8 ? 'bg-warning' : 'bg-foreground/60')} style={{ width: `${(abertasDe(u) / max) * 100}%` }} />
                 </span>
-                <span className="w-5 text-right text-xs tabular-nums">{abertasDe(u)}</span>
+                <span className="min-w-5 shrink-0 whitespace-nowrap text-right text-xs tabular-nums">{abertasDe(u)}</span>
               </span>
               {admin && t !== 'M' && (
                 <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer text-xs underline" onClick={() => setEditando(editando === u.id ? null : u.id)}>

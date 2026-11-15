@@ -561,7 +561,7 @@ function PesosAudit() {
               {c.rotulo}
             </label>
             <input id={`peso-${k}`} type="range" min={0} max={10} step={1} value={pesos[k] ?? 0} disabled={!pode} onChange={(ev) => salvar({ pesos: { ...pesos, [k]: Number(ev.target.value) } })} className="accent-foreground w-24 sm:w-28" />
-            <span className="w-6 text-right tabular-nums">{pesos[k] ?? 0}</span>
+            <span className="min-w-6 shrink-0 whitespace-nowrap text-right tabular-nums">{pesos[k] ?? 0}</span>
           </li>
         ))}
       </ul>

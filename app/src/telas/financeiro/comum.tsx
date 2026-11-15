@@ -212,7 +212,7 @@ export function BarrasReais({ dados }: { dados: { nome: string; h: number }[] })
   return (
     <ul className="flex flex-col gap-2">
       {dados.map((d) => (
-        <li key={d.nome} className="grid grid-cols-[minmax(0,8rem)_1fr_minmax(0,7.5rem)] items-center gap-3 text-sm">
+        <li key={d.nome} className="grid grid-cols-[minmax(0,8rem)_1fr_minmax(7.5rem,max-content)] items-center gap-3 text-sm">
           <span className="truncate">{d.nome}</span>
           <span className="h-3 rounded-r-[4px]" style={{ width: `${(d.h / max) * 100}%`, background: 'color-mix(in oklab, var(--foreground) 55%, transparent)' }} title={`${d.nome}: ${brl(d.h)}`} />
           <span className="text-right tabular-nums">

@@ -208,7 +208,7 @@ export function Divergente({ dados, selecionado, onSelecionar }: { dados: { nome
     <ul className="flex flex-col gap-1">
       {dados.map((d) => (
         <li key={d.nome}>
-          <button type="button" onClick={() => onSelecionar?.(d.nome)} className={cn('grid w-full cursor-pointer grid-cols-[minmax(0,8rem)_1fr_1fr_minmax(0,7.5rem)] sm:grid-cols-[minmax(0,13rem)_1fr_1fr_minmax(0,9rem)] items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm', selecionado === d.nome ? 'bg-raised shadow-cartao' : 'hover:bg-sunken/60')}>
+          <button type="button" onClick={() => onSelecionar?.(d.nome)} className={cn('grid w-full cursor-pointer grid-cols-[minmax(0,8rem)_1fr_1fr_minmax(7.5rem,max-content)] sm:grid-cols-[minmax(0,13rem)_1fr_1fr_minmax(0,9rem)] items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm', selecionado === d.nome ? 'bg-raised shadow-cartao' : 'hover:bg-sunken/60')}>
             <span className={cn('truncate', selecionado === d.nome && 'font-medium')}>{d.nome}</span>
             <span className="flex h-4 justify-end border-r" style={{ borderColor: 'color-mix(in oklab, var(--foreground) 35%, transparent)' }}>
               {d.valor < 0 && <span className="bg-destructive/75 h-full rounded-l-[4px]" style={{ width: `${(Math.abs(d.valor) / max) * 100}%` }} />}

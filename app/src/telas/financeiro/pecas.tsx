@@ -219,7 +219,7 @@ export function FilaContasPagar({
               <Badge variant={c.situacao === 'a_aprovar' ? 'destaque' : c.situacao === 'paga' ? 'sucesso' : 'outline'} className="hidden sm:inline-flex">
                 {rotuloConta[c.situacao]}
               </Badge>
-              <span className="w-24 text-right tabular-nums">{brl(c.valor, true)}</span>
+              <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor, true)}</span>
               {c.situacao === 'a_aprovar' && (acima || c.alerta) && (
                 <Button size="sm" variant="ghost" className="rounded-full" onClick={() => onPedir(c)}>
                   {c.alerta ? 'Conferir' : 'Pedir aprovação'}
@@ -275,7 +275,7 @@ export function PendentesConciliacao({
       ) : (
         <ul className="divide-border/70 flex flex-col divide-y">
           {transacoes.map((t) => (
-            <li key={t.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,15rem)_7rem_auto]">
+            <li key={t.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,15rem)_minmax(7rem,max-content)_auto]">
               <span className="min-w-0">
                 <span className="block truncate font-mono text-xs">{t.descricao}</span>
                 <span className="text-muted-foreground block text-xs">

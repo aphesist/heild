@@ -157,7 +157,7 @@ export function ContasPagarTela() {
                     <Badge variant={c.situacao === 'aguardando_aprovacao' ? 'destaque' : c.situacao === 'paga' ? 'sucesso' : 'outline'} className="hidden sm:inline-flex">
                       {rotuloSituacao[c.situacao]}
                     </Badge>
-                    <span className="w-24 text-right tabular-nums">{brl(c.valor, true)}</span>
+                    <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor, true)}</span>
                     {podeCapturar && c.situacao === 'aguardando_aprovacao' && c.alerta && (
                       <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setModal({ tipo: 'conferir', c })}>
                         Conferir

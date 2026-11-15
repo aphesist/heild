@@ -142,7 +142,7 @@ export function CobrancaTela({ faturaInicial }: { faturaInicial?: string }) {
               const servicosLinha = c.linhas.filter((l) => l.tipo === 'item').length
               return (
                 <li key={c.id}>
-                  <button type="button" onClick={() => setAberta(c.id)} className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_8rem_10rem]">
+                  <button type="button" onClick={() => setAberta(c.id)} className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(8rem,max-content)_minmax(10rem,max-content)]">
                     <span className="min-w-0">
                       <span className="block truncate font-medium">{fin.nomeCliente(c.cliente_id)}</span>
                       <span className="text-muted-foreground block text-xs">

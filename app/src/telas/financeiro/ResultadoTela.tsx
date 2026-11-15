@@ -257,7 +257,7 @@ export function ResultadoTela() {
                     <span className="block">{c.cliente}</span>
                     <span className="text-muted-foreground block text-xs">{c.itens}</span>
                   </span>
-                  <span className="w-16 text-right tabular-nums">{brl(c.valor)}</span>
+                  <span className="min-w-16 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
                   {admin ? (
                     <Segmentado
                       rotulo={`Decisão para ${c.cliente}`}

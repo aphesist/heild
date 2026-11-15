@@ -316,7 +316,7 @@ export function ContratosTela({ somenteLeitura = false, contratoInicial }: { som
                 <button
                   type="button"
                   onClick={() => setAberto(c.id)}
-                  className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_10rem_8rem]"
+                  className="hover:bg-sunken/60 -mx-2 grid w-[calc(100%+1rem)] cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(10rem,max-content)_minmax(8rem,max-content)]"
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{c.cliente}</span>
@@ -723,7 +723,7 @@ function ExtrasAFaturar({ fin, podeEditar, onRegistrar }: { fin: Fin; podeEditar
                 </span>
               </span>
               {a.fase ? <Badge variant="outline">fase {a.fase} · depois</Badge> : <Badge variant={a.situacao === 'proposto' ? 'destaque' : 'outline'}>{a.situacao === 'proposto' ? 'sem aceite' : a.situacao === 'a_faturar' ? 'a faturar' : a.situacao}</Badge>}
-              <span className="w-24 text-right tabular-nums">{brl(a.valor, true)}</span>
+              <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(a.valor, true)}</span>
               {podeEditar && (
                 <BotaoAcoes
                   rotulo={`Ações de ${a.descricao}`}
@@ -773,7 +773,7 @@ function ExtrasAFaturar({ fin, podeEditar, onRegistrar }: { fin: Fin; podeEditar
                 </span>
               </span>
               <Badge variant="outline">reembolso</Badge>
-              <span className="w-24 text-right tabular-nums">{brl(d.valor, true)}</span>
+              <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(d.valor, true)}</span>
               {podeEditar && (
                 <BotaoAcoes
                   rotulo={`Ações de ${d.descricao}`}
@@ -1031,7 +1031,7 @@ function CampanhaReajuste({ fin, onFechar, onEnviado }: { fin: Fin; onFechar: ()
                   <span className="text-muted-foreground block text-xs">margem {x.m === undefined ? 'sem medição' : `${x.m}%`} · hoje {brl(x.c.total)}</span>
                 </span>
                 <Badge variant={x.grupo === 'cheio' ? 'outline' : 'destaque'}>{x.grupo === 'cheio' ? 'índice cheio' : x.grupo === 'acima' ? 'acima do índice' : 'renegociar escopo'}</Badge>
-                <span className="w-20 text-right tabular-nums">{x.grupo === 'renegociar' ? 'conversa' : `${x.percentual.toLocaleString('pt-BR')}%`}</span>
+                <span className="min-w-20 shrink-0 whitespace-nowrap text-right tabular-nums">{x.grupo === 'renegociar' ? 'conversa' : `${x.percentual.toLocaleString('pt-BR')}%`}</span>
               </li>
             ))}
           </ul>

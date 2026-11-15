@@ -811,7 +811,7 @@ function Reforma({ ctx }: { ctx: Ctx }) {
           <div className="bg-sunken h-2 flex-1 overflow-hidden rounded-full">
             <div className="bg-foreground h-full rounded-full" style={{ width: `${(f / 1.1) * 100}%` }} />
           </div>
-          <span className="w-24 text-right tabular-nums">{brl(hoje * f)}</span>
+          <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(hoje * f)}</span>
         </div>
       ))}
       <p className="text-muted-foreground text-xs">Cenário com o seu mix de vendas de outubro. Mudanças grandes, a Consultoria explica em reunião.</p>

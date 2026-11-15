@@ -290,7 +290,7 @@ function LinhaConferir({ e, c, mostrarEmpresa, marcado, onMarcar }: { e: Empresa
           </span>
         )}
       </span>
-      <span className="w-24 text-right tabular-nums">{brl(c.valor, true)}</span>
+      <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor, true)}</span>
       <Tooltip conteudo={motivo ?? 'Confere fornecedor, valor, vencimento e dados bancários contra o documento.'}>
         <span>
           <Button size="sm" className="rounded-full" disabled={!!motivo} aria-label={`Conferir ${c.contraparte}`} onClick={() => executar(() => repos.bpo.contas.conferir(c.id), { sucesso: `${c.contraparte} conferida por ${usuario.nome}` })}>
@@ -391,7 +391,7 @@ function ProximoLote({ e, mostrarEmpresa }: { e: EmpresaVista; mostrarEmpresa: b
                 </span>
                 {bloqueio && <span className="text-warning-foreground block text-xs">{bloqueio}</span>}
               </span>
-              <span className="w-24 text-right tabular-nums">{brl(c.valor)}</span>
+              <span className="min-w-24 shrink-0 whitespace-nowrap text-right tabular-nums">{brl(c.valor)}</span>
               {c.etapa === 'em_lote' ? (
                 <Button size="sm" variant="ghost" className="rounded-full" onClick={() => executar(() => repos.bpo.contas.tirarDoLote(c.id))}>
                   Tirar do lote

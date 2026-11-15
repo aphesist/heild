@@ -643,7 +643,7 @@ export function VolumeBpoTela({ empresa }: PropsBpo) {
                       <span className="w-full sm:w-56">
                         <BarraUso rotulo="Lançamentos" usado={e.perfil.volume.lancamentos - glosaDe(v)} total={e.perfil.volume.limite} />
                       </span>
-                      <span className="w-24 text-right text-sm tabular-nums">{brl(e.perfil.honorario)}</span>
+                      <span className="min-w-24 shrink-0 whitespace-nowrap text-right text-sm tabular-nums">{brl(e.perfil.honorario)}</span>
                       <span className="flex w-full flex-wrap justify-end gap-1 sm:w-auto sm:min-w-44">
                         {v?.situacao === 'faturado' ? (
                           <Badge variant="sucesso">extra de {brl(v.extra_valor)} lançado{avulso ? (avulso.situacao === 'faturado' ? ' · faturado' : avulso.situacao === 'cancelado' ? ' · cancelado' : ' · na próxima fatura') : ''}</Badge>
@@ -888,7 +888,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <Caixa className="gap-0">
             <TituloBloco descricao={base === 'faturado' ? 'Honorário do BPO no mês menos as horas da equipe e os custos variáveis.' : 'O que já entrou no caixa do escritório (fatura de novembro paga) menos os mesmos custos.'}>Margem por empresa</TituloBloco>
-            <div className="text-muted-foreground mt-2 hidden grid-cols-[minmax(0,1fr)_5rem_4rem_5rem_4rem_3.5rem] gap-3 text-[11px] sm:grid">
+            <div className="text-muted-foreground mt-2 hidden grid-cols-[minmax(0,1fr)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(3.5rem,max-content)] gap-3 text-[11px] sm:grid">
               <span />
               <span className="text-right">{base === 'faturado' ? 'faturado' : 'recebido'}</span>
               <span className="text-right">horas</span>
@@ -898,7 +898,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
             </div>
             <ul className="divide-border/70 flex flex-col divide-y" aria-label="Margem por empresa">
               {linhas.map(({ e, custoHoras, variaveis, receita, margem }) => (
-                <li key={e.clienteId} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 py-2.5 text-sm sm:grid-cols-[minmax(0,1fr)_5rem_4rem_5rem_4rem_3.5rem]">
+                <li key={e.clienteId} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 py-2.5 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(3.5rem,max-content)]">
                   <span className="truncate">{e.nome}</span>
                   <span className="text-muted-foreground hidden text-right text-xs tabular-nums sm:block">{brl(receita)}</span>
                   <span className="text-muted-foreground hidden text-right text-xs tabular-nums sm:block">{e.perfil.horas_mes.toLocaleString('pt-BR')} h</span>

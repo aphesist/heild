@@ -648,7 +648,7 @@ export function CarteiraBpoTela({ empresa, onEscolher }: PropsBpo) {
                         </span>
                       </button>
                       <SeloErp e={e} />
-                      <span className="w-32 text-right text-sm tabular-nums">
+                      <span className="min-w-32 shrink-0 whitespace-nowrap text-right text-sm tabular-nums">
                         {e.bancos.length ? <span className={e.caixa < e.perfil.caixa_minimo ? 'text-destructive' : undefined}>{brl(e.caixa)}</span> : <span className="text-muted-foreground text-xs">sem banco</span>}
                         <span className="text-muted-foreground block text-[11px]">mínimo {brl(e.perfil.caixa_minimo)}</span>
                       </span>
