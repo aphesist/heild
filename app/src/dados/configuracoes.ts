@@ -207,10 +207,14 @@ export const subinquilinos = [{ id: 'b1', nome: 'Andrade BPO Financeiro', cnpj: 
 export interface ConectorArmazenamento {
   id: string
   nome: string
-  tipo: 'google_drive' | 'onedrive_sharepoint' | 'plataforma' | 's3_compativel' | 'webdav' | 'sftp'
+  tipo: 'google_drive' | 'onedrive_sharepoint' | 'dropbox' | 'box' | 'servidor_local' | 'plataforma' | 's3_compativel' | 'webdav' | 'sftp'
   raiz: string
   padrao: boolean
-  situacao: 'ativo' | 'somente_leitura' | 'erro_credencial' | 'migrando'
+  situacao: 'ativo' | 'somente_leitura' | 'erro_credencial' | 'migrando' | 'offline'
+  /** Servidor local: o agente que serve este conector (S09b). */
+  agente_id?: string
+  /** Google: conta do Workspace (precisa da liberação do administrador). */
+  workspace?: boolean
   sincronizacao: string
   arquivos: number
   usadoGb?: number
@@ -220,6 +224,9 @@ export interface ConectorArmazenamento {
 export const rotuloTipoArmazenamento: Record<ConectorArmazenamento['tipo'], string> = {
   google_drive: 'Google Drive',
   onedrive_sharepoint: 'OneDrive / SharePoint',
+  dropbox: 'Dropbox',
+  box: 'Box',
+  servidor_local: 'Servidor local (agente Heild)',
   plataforma: 'Armazenamento da plataforma',
   s3_compativel: 'S3 compatível',
   webdav: 'WebDAV',

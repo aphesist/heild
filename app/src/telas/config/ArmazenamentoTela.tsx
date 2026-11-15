@@ -1,4 +1,4 @@
-import { ArrowsLeftRightIcon, CheckCircleIcon, CloudIcon, DatabaseIcon, EyeIcon, EyeSlashIcon, FolderIcon, FolderOpenIcon, PlusIcon, SpinnerIcon } from '@phosphor-icons/react'
+import { ArrowsLeftRightIcon, CheckCircleIcon, DatabaseIcon, EyeIcon, EyeSlashIcon, FolderIcon, FolderOpenIcon, PlusIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { BarraUso, Caixa, TituloBloco } from '@/components/compostos/blocos'
 import { useNavegacao, usePersistente } from '@/ambiente/loja'
@@ -6,11 +6,16 @@ import { AreaRolagem } from '@/components/ui/area-rolagem'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario, Interruptor, Segmentado } from '@/components/ui/formulario'
-import { arvoreModelo, conectoresArmazenamento, destinoPorTipo as destinosIniciais, pastasSemCasamento, rotuloTipoArmazenamento, type ConectorArmazenamento } from '@/dados/configuracoes'
-import { clientes } from '@/dados/exemplo'
+import { arvoreModelo, destinoPorTipo as destinosIniciais, rotuloTipoArmazenamento, type ConectorArmazenamento } from '@/dados/configuracoes'
 import { cn } from '@/lib/utils'
 import { CabecalhoConfig } from './EscritorioTela'
 import { BlocoManutencao, BlocoRaioX } from './armazenamento-s09'
+import { AutorizarNuvem, CartaoAgente, FaixaOndeFicam, iconeProvedor, ParearAgente, useAgentes } from './armazenamento-s09b'
+import { conectoresDoEscritorio, pastasSemCasamentoDoEscritorio, provedores, type AgenteLocal } from '@/dados/armazenamento'
+import { definirEstadoConector } from '@/dados/conectores'
+import { useSessao } from '@/ambiente/sessao'
+import { useLoja } from '@/ambiente/loja'
+import { registrar } from '@/nucleo/repositorios'
 
 /**
  * Configurações › Armazenamento (Fundações 7): onde ficam os documentos
@@ -18,17 +23,20 @@ import { BlocoManutencao, BlocoRaioX } from './armazenamento-s09'
  * pastas visíveis ao cliente, o destino de cada tipo de documento, a
  * migração entre backends e a cota.
  */
-const opcoesCliente = [{ valor: 'ignorar', rotulo: 'ignorar esta pasta' }, ...clientes.map((c) => ({ valor: c.nome, rotulo: c.nome }))]
 
 export function ArmazenamentoTela() {
   const nav = useNavegacao()
-  const [conectores, setConectores] = usePersistente('cfg.arm.conectores', conectoresArmazenamento)
+  const [conectores, setConectores] = usePersistente('cfg.arm.conectores', conectoresDoEscritorio)
   const [arvore, setArvore] = usePersistente('cfg.arm.arvore', arvoreModelo)
   const [destinos, setDestinos] = usePersistente('cfg.arm.destinos', destinosIniciais)
   const [modal, setModal] = useState<'conectar' | 'migrar' | 'destino' | null>(null)
   const [destinoEd, setDestinoEd] = useState<number | null>(null)
   const plataforma = conectores.find((c) => c.tipo === 'plataforma')
-  const [semCliente, setSemCliente] = usePersistente('cfg.arm.semCliente', pastasSemCasamento.map((p) => ({ ...p, escolha: p.sugestao })))
+  const [semCliente, setSemCliente] = usePersistente('cfg.arm.semCliente', () => pastasSemCasamentoDoEscritorio().map((p) => ({ ...p, escolha: p.sugestao })))
+  const [, setAgentes] = useAgentes()
+  const loja = useLoja()
+  const { usuario } = useSessao()
+  const opcoesCliente = [{ valor: 'ignorar', rotulo: 'ignorar esta pasta' }, ...loja.clientes.map((c) => ({ valor: c.nome, rotulo: c.nome }))]
 
   // Marcar uma pasta: as filhas herdam.
   const alternar = (i: number) =>
@@ -60,6 +68,7 @@ export function ArmazenamentoTela() {
           }
         />
 
+        <FaixaOndeFicam padrao={conectores.find((c) => c.padrao)} />
         <Caixa>
           <TituloBloco
             acao={
@@ -75,7 +84,7 @@ export function ArmazenamentoTela() {
             {conectores.map((c) => (
               <li key={c.id} className="bg-sunken/50 flex flex-col gap-2 rounded-[16px] p-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  {c.tipo === 'plataforma' ? <DatabaseIcon className="text-muted-foreground size-5" /> : <CloudIcon className="text-muted-foreground size-5" />}
+                  {c.tipo === 'plataforma' ? <DatabaseIcon className="text-muted-foreground size-5" /> : iconeProvedor(c.tipo)}
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium">{c.nome}</span>
                     <span className="text-muted-foreground block text-xs">
@@ -85,6 +94,8 @@ export function ArmazenamentoTela() {
                   {c.padrao && <Badge variant="sucesso">padrão para novos</Badge>}
                   {c.situacao === 'somente_leitura' && <Badge variant="outline">somente leitura</Badge>}
                   {c.situacao === 'migrando' && <Badge variant="destaque">migrando</Badge>}
+                  {c.situacao === 'offline' && <Badge variant="erro">agente revogado</Badge>}
+                  {c.workspace && <Badge variant="outline">Google Workspace</Badge>}
                   {!c.padrao && c.situacao === 'ativo' && (
                     <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setConectores((xs) => xs.map((x) => ({ ...x, padrao: x.id === c.id })))}>
                       Tornar padrão
@@ -92,12 +103,13 @@ export function ArmazenamentoTela() {
                   )}
                 </div>
                 {c.cotaGb && <BarraUso rotulo="Cota da plataforma" usado={c.usadoGb!} total={c.cotaGb} unidade=" GB" />}
+                {c.tipo === 'servidor_local' && c.agente_id && <CartaoAgente agenteId={c.agente_id} onRevogado={() => setConectores((xs) => xs.map((x) => (x.id === c.id ? { ...x, situacao: 'offline', padrao: false } : x)))} />}
               </li>
             ))}
           </ul>
           <div className="bg-sunken/50 flex flex-col gap-2.5 rounded-[14px] p-3">
             <span className="text-sm">
-              <span className="font-medium">Drive antigo: pastas sem cliente</span>
+              <span className="font-medium">Pastas sem cliente</span>
               <span className="text-muted-foreground block text-xs">Não casaram com nenhum cliente pelo nome ou CNPJ. Até você decidir, ficam fora da busca.</span>
             </span>
             <ul className="grid gap-2.5 md:grid-cols-3">
@@ -174,8 +186,13 @@ export function ArmazenamentoTela() {
       {modal === 'conectar' && (
         <ConectarNuvem
           onFechar={() => setModal(null)}
-          onConectar={(c) => {
-            setConectores((xs) => [...xs, c])
+          onConectar={(c, agente) => {
+            if (agente) setAgentes((xs) => [...xs, agente])
+            setConectores((xs) => [...(c.padrao ? xs.map((x) => ({ ...x, padrao: false })) : xs), c])
+            const con = provedores.find((p) => p.tipo === c.tipo)?.conector
+            if (con) definirEstadoConector(con, { estado: 'ativo', ultima_execucao: new Date().toISOString(), erros: 0, mensagem: undefined })
+            registrar(`${usuario.nome} conectou ${c.nome} ao armazenamento${c.padrao ? ' (padrão para novos)' : ''}`, 'armazenamento.configurar')
+            loja.toast(`${c.nome} conectado. Os arquivos ficam lá; a Heild indexa a lista e o texto.`)
             setModal(null)
           }}
         />
@@ -208,15 +225,19 @@ export function ArmazenamentoTela() {
 const passos = ['Tipo', 'Autorizar', 'Raiz', 'Mapear pastas', 'Pronto'] as const
 
 /** Conectar uma nuvem (Fundações 7.1 e 7.3): autoriza, escolhe a raiz e casa as pastas com os clientes. */
-function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConectar: (c: ConectorArmazenamento) => void }) {
+function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConectar: (c: ConectorArmazenamento, agente?: AgenteLocal) => void }) {
+  const { usuario } = useSessao()
+  const { clientes } = useLoja()
   const [passo, setPasso] = useState(0)
+  const [conta, setConta] = useState<{ conta: string; workspace: boolean } | null>(null)
+  const [agente, setAgente] = useState<AgenteLocal | null>(null)
   const [tipo, setTipo] = useState<ConectorArmazenamento['tipo']>('onedrive_sharepoint')
   const [autorizado, setAutorizado] = useState(false)
-  const [autorizando, setAutorizando] = useState(false)
   const [raiz, setRaiz] = useState('Documentos compartilhados/Clientes')
-  const [mapas, setMapas] = useState(pastasSemCasamento.map((p) => ({ ...p, escolha: p.sugestao })))
+  const [mapas, setMapas] = useState(pastasSemCasamentoDoEscritorio().map((p) => ({ ...p, escolha: p.sugestao })))
   const [padrao, setPadrao] = useState(false)
   const credencial = tipo === 's3_compativel' || tipo === 'webdav' || tipo === 'sftp'
+  const agenteLocal = tipo === 'servidor_local'
   const ok = [true, autorizado, raiz.trim().length > 1, true, true][passo]
   const ultimo = passo === passos.length - 1
   return (
@@ -230,16 +251,21 @@ function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConec
       acaoDesabilitada={!ok}
       onAcao={() =>
         ultimo
-          ? onConectar({
-              id: `a${Date.now()}`,
-              nome: rotuloTipoArmazenamento[tipo],
-              tipo,
-              raiz,
-              padrao,
-              situacao: 'ativo',
-              sincronizacao: credencial ? 'varredura a cada 15 min' : 'notificação da nuvem',
-              arquivos: 0,
-            })
+          ? onConectar(
+              {
+                id: `a${Date.now()}`,
+                nome: agenteLocal && agente ? `Servidor local · ${agente.dispositivo}` : rotuloTipoArmazenamento[tipo],
+                tipo,
+                raiz,
+                padrao,
+                situacao: 'ativo',
+                sincronizacao: credencial ? 'varredura a cada 15 min' : agenteLocal ? 'agente: alterações em tempo real' : 'notificação da nuvem',
+                arquivos: 0,
+                ...(agente ? { agente_id: agente.id } : {}),
+                ...(conta?.workspace ? { workspace: true } : {}),
+              },
+              agente ?? undefined,
+            )
           : setPasso((p) => p + 1)
       }
       secundaria={
@@ -265,15 +291,16 @@ function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConec
               id={id}
               valor={tipo}
               onMudar={setTipo}
-              opcoes={(Object.keys(rotuloTipoArmazenamento) as ConectorArmazenamento['tipo'][]).filter((t) => t !== 'plataforma').map((t) => ({ valor: t, rotulo: rotuloTipoArmazenamento[t] }))}
+              opcoes={provedores.filter((p) => p.tipo !== 'plataforma').map((p) => ({ valor: p.tipo, rotulo: p.nome }))}
             />
           )}
         </Campo>
       )}
+      {passo === 0 && <p className="text-muted-foreground text-xs">{provedores.find((p) => p.tipo === tipo)?.descricao}. Os arquivos continuam no armazenamento do escritório; a Heild guarda só o índice e o texto.</p>}
       {passo === 1 &&
         (autorizado ? (
           <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2.5 text-sm">
-            <CheckCircleIcon weight="fill" className="text-success size-5" /> Acesso autorizado. A credencial fica no cofre.
+            <CheckCircleIcon weight="fill" className="text-success size-5" /> {agente ? `${agente.dispositivo} pareado; ${agente.pastas.length} pasta(s) compartilhada(s).` : conta ? `Acesso autorizado: ${conta.conta}.` : 'Acesso autorizado.'} A credencial fica no cofre.
           </p>
         ) : credencial ? (
           <>
@@ -282,27 +309,25 @@ function ConectarNuvem({ onFechar, onConectar }: { onFechar: () => void; onConec
               Testar acesso
             </Button>
           </>
+        ) : agenteLocal ? (
+          <ParearAgente
+            onPareado={(a) => {
+              setAgente({ id: `ag${Date.now()}`, dispositivo: a.dispositivo, so: a.so, versao: a.versao, online: true, ultima_sincronizacao: new Date().toISOString(), pastas: a.pastas, pareado_em: new Date().toISOString(), pareado_por: usuario.nome, arquivos: 0 })
+              setRaiz(a.pastas.join(' ; '))
+              setAutorizado(true)
+            }}
+          />
         ) : (
-          <div className="flex flex-col gap-3 text-sm">
-            <p>Abre a janela da {tipo === 'google_drive' ? 'Google' : 'Microsoft'} para você entrar com a conta do escritório e permitir acesso só à pasta escolhida.</p>
-            <Button
-              type="button"
-              className="w-fit rounded-full"
-              disabled={autorizando}
-              onClick={() => {
-                setAutorizando(true)
-                setTimeout(() => {
-                  setAutorizando(false)
-                  setAutorizado(true)
-                }, 1200)
-              }}
-            >
-              {autorizando ? <SpinnerIcon className="animate-spin" /> : <CloudIcon />} {autorizando ? 'Aguardando…' : 'Autorizar acesso'}
-            </Button>
-          </div>
+          <AutorizarNuvem
+            tipo={tipo}
+            onAutorizado={(r) => {
+              setConta(r)
+              setAutorizado(true)
+            }}
+          />
         ))}
       {passo === 2 && (
-        <Campo rotulo="Pasta raiz dos clientes" ajuda="Tudo abaixo dela é lido; nada acima.">
+        <Campo rotulo={agenteLocal ? 'Pastas do servidor' : 'Pasta raiz dos clientes'} ajuda={agenteLocal ? 'As pastas compartilhadas no agente, separadas por ;.' : 'Tudo abaixo dela é lido; nada acima.'}>
           {(id) => <CampoTexto id={id} mono valor={raiz} onMudar={setRaiz} />}
         </Campo>
       )}

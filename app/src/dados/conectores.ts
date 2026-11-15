@@ -122,11 +122,14 @@ export type IdConector =
   | 'onedrive'
   | 's3'
   | 'drive_antigo'
+  | 'dropbox'
+  | 'box'
+  | 'servidor_local'
   | 'whatsapp'
   | 'email'
 
 /** Como conecta (08, 2.2): token, OAuth, certificado ou termo do Integra; robô quando o portal não tem API. */
-export type ModoConexao = 'termo' | 'certificado' | 'oauth' | 'token' | 'robo' | 'arquivo' | 'chave'
+export type ModoConexao = 'termo' | 'certificado' | 'oauth' | 'token' | 'robo' | 'arquivo' | 'chave' | 'agente'
 
 export interface DefConector {
   id: IdConector
@@ -166,6 +169,9 @@ export const catalogoConectores: DefConector[] = [
   { id: 'google_drive', nome: 'Google Drive', familia: 'nuvem', api: 'API-24', modo: 'oauth', para: 'Armazenamento padrão dos documentos', pago: false },
   { id: 'onedrive', nome: 'OneDrive / SharePoint', familia: 'nuvem', api: 'API-24', modo: 'oauth', para: 'Armazenamento de documentos', pago: false },
   { id: 's3', nome: 'S3 compatível', familia: 'nuvem', api: 'API-24', modo: 'chave', para: 'Arquivo morto e cópia de segurança', pago: true },
+  { id: 'dropbox', nome: 'Dropbox', familia: 'nuvem', api: 'API-24', modo: 'oauth', para: 'Armazenamento de documentos no Dropbox do escritório', pago: false },
+  { id: 'box', nome: 'Box', familia: 'nuvem', api: 'API-24', modo: 'oauth', para: 'Armazenamento de documentos no Box do escritório', pago: false },
+  { id: 'servidor_local', nome: 'Servidor local (agente Heild)', familia: 'nuvem', api: 'API-24', modo: 'agente', para: 'Servidor de arquivos do escritório; o agente só abre conexão de saída', pago: false },
   { id: 'drive_antigo', nome: 'Drive antigo (servidor)', familia: 'nuvem', api: 'API-24', modo: 'oauth', para: 'Pastas de antes da Heild, só leitura até migrar', pago: false },
   { id: 'whatsapp', nome: 'WhatsApp Cloud API', familia: 'mensageria', api: 'API-03', modo: 'oauth', para: 'Conversas do CRM, régua e comunicados', pago: true },
   { id: 'email', nome: 'E-mail do escritório', familia: 'mensageria', api: 'API-05', modo: 'oauth', para: 'Lê tudo: entrada, enviados e anexos', pago: false },
@@ -208,7 +214,7 @@ const horasAtras = (h: number) => new Date(Date.now() - h * 3_600_000).toISOStri
 function padraoDoEscritorio(): Partial<Record<IdConector, SituacaoConector>> {
   const s = (estado: EstadoConexao, h: number | null, fila = 0, erros = 0): SituacaoConector => ({ estado, ultima_execucao: h === null ? null : horasAtras(h), fila, erros })
   if (banco.escritorioId === ID_HORIZONTE) {
-    return { google_drive: s('ativo', 1), email: s('ativo', 0.2), cnpj: s('ativo', 30) }
+    return { google_drive: s('ativo', 1), email: s('ativo', 0.2), cnpj: s('ativo', 30), servidor_local: s('ativo', 0.07) }
   }
   return {
     integra_contador: s('ativo', 0.5, 3),

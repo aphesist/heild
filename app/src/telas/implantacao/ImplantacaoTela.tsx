@@ -341,6 +341,7 @@ function PassoClientes({ e, setE }: { e: EstadoImplantacao; setE: (f: (x: Estado
 function PassoArmazenamento({ onFeito }: { onFeito: () => void }) {
   const drive = useEstadoConector('google_drive')
   const antigo = useEstadoConector('drive_antigo')
+  const local = useEstadoConector('servidor_local')
   const { abrir } = useTelasCheias()
   const [rx] = usePersistente<EstadoRaioX>(CHAVE_RAIOX, estadoRaioXInicial)
   const nav = useNavegacao()
@@ -364,17 +365,20 @@ function PassoArmazenamento({ onFeito }: { onFeito: () => void }) {
           )}
         </li>
         <li className="flex flex-wrap items-center gap-2">
-          {rx.rodado_em ? <CheckCircleIcon weight="fill" className="text-success size-4" /> : <CircleIcon className="size-4" />} Raio-X do Drive: {rx.rodado_em ? (rx.aplicado_em ? 'rodado e aplicado' : 'rodado, achados esperando decisão') : 'ainda não rodou'}
+          {local.funcionando ? <CheckCircleIcon weight="fill" className="text-success size-4" /> : <CircleIcon className="size-4" />} Servidor local (agente Heild): {local.rotulo} · também Dropbox, Box e OneDrive em Armazenamento
+        </li>
+        <li className="flex flex-wrap items-center gap-2">
+          {rx.rodado_em ? <CheckCircleIcon weight="fill" className="text-success size-4" /> : <CircleIcon className="size-4" />} Raio-X das pastas: {rx.rodado_em ? (rx.aplicado_em ? 'rodado e aplicado' : 'rodado, achados esperando decisão') : 'ainda não rodou'}
         </li>
       </ul>
       <div className="flex flex-wrap gap-2">
-        <Button className="rounded-full" disabled={!antigo.funcionando} onClick={() => abrir('raiox')}>
+        <Button className="rounded-full" disabled={!antigo.funcionando && !drive.funcionando && !local.funcionando} onClick={() => abrir('raiox')}>
           <MagnifyingGlassIcon /> Rodar o Raio-X
         </Button>
         <Button variant="ghost" className="rounded-full" onClick={() => nav.irPara({ modulo: 'config', aba: 'armazenamento' })}>
           Abrir Armazenamento
         </Button>
-        <Button variant="outline" className="rounded-full" disabled={!drive.funcionando} onClick={onFeito}>
+        <Button variant="outline" className="rounded-full" disabled={!drive.funcionando && !local.funcionando} onClick={onFeito}>
           <CheckIcon /> Armazenamento pronto
         </Button>
       </div>

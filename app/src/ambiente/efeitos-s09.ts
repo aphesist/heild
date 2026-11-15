@@ -28,7 +28,7 @@ export function efeitoS09(loja: Loja, quem: string, cartao: string, decisao: str
     const decisoes: Record<string, Decisao> = { ...rx.decisoes }
     for (const a of achados) if (!decisoes[a.id]) decisoes[a.id] = a.tipo === 'ex_cliente' ? 'ex_cliente' : a.tipo === 'ignorar' ? 'ignorado' : 'aprovado'
     repos.telas.lembrar(CHAVE_RAIOX, { ...rx, decisoes, aplicado_em: new Date().toISOString() })
-    loja.registrar(quem, `Aprovou em lote as ${achados.length} sugestões do Raio-X do Drive (D-10)`)
+    loja.registrar(quem, `Aprovou em lote as ${achados.length} sugestões do Raio-X das pastas (D-10)`)
     loja.toast(`${achados.length} sugestões do Raio-X aplicadas. O mapeamento do Drive passou a valer.`, { modulo: 'arquivos', aba: 'pastas' }, 'Ver em Arquivos')
     return true
   }

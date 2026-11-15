@@ -7,7 +7,8 @@ import { BarraLote, CaixaSelecao, EstadoErro, EstadoVazio, SeloDemonstracao, use
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoEscolha, CampoTexto, GavetaFormulario } from '@/components/ui/formulario'
-import { useEstadoConector } from '@/dados/conectores'
+import { useConectores, type IdConector } from '@/dados/conectores'
+import { CampoEscolha as Escolha } from '@/components/ui/formulario'
 import {
   achadosDe,
   CHAVE_RAIOX,
@@ -47,8 +48,13 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
   const podeRodar = usePode('raiox.rodar')
   const podeDecidir = usePode('raiox.decidir')
   const veNomes = usePode('raiox.ver_nomes')
-  const drive = useEstadoConector('drive_antigo')
+  // S09b: o Raio-X lê qualquer armazenamento conectado (nuvens, servidor local, S3).
+  const nuvens = useConectores().filter((c) => c.familia === 'nuvem')
   const [rx, setRx] = usePersistente<EstadoRaioX>(CHAVE_RAIOX, estadoRaioXInicial)
+  const prontos = nuvens.filter((c) => c.funcionando)
+  const [provedor, setProvedor] = useState<IdConector>((rx.provedor as IdConector | undefined) ?? prontos.find((c) => c.id === 'drive_antigo' || c.id === 'servidor_local')?.id ?? prontos[0]?.id ?? 'drive_antigo')
+  const drive = nuvens.find((c) => c.id === provedor) ?? nuvens[0]
+  const nomeOrigem = drive?.nome ?? 'Drive'
   const [fase, setFase] = useState<'parado' | 'lendo' | 'erro'>('parado')
   const [progresso, setProgresso] = useState({ lidas: 0, total: 1 })
   const [erro, setErro] = useState('')
@@ -69,26 +75,26 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
         id: `s09-raiox-${Date.now()}`,
         integrante: 'i-geral',
         setor: 'geral',
-        titulo: 'Raio-X do Drive',
-        inicio: 'Vou ler só a lista de pastas e arquivos do Drive, sem abrir nenhum documento.',
+        titulo: `Raio-X de ${nomeOrigem}`,
+        inicio: `Vou ler só a lista de pastas e arquivos de ${nomeOrigem}, sem abrir nenhum documento.`,
         etapas: ['Lendo a lista de pastas e arquivos', 'Casando pastas com clientes pelo CNPJ e pelo nome', 'Reconhecendo departamentos e órgãos', 'Comparando os padrões de nome', 'Montando os achados para você decidir'],
         seg: 1.1,
         fim: {
           texto: `Raio-X pronto: ${resumo.pastasCliente} pastas de cliente; ${resumo.casaram} casaram pelo CNPJ ou nome; ${resumo.semCliente} sem cliente; ${resumo.exClientes} parecem ex-clientes; Fiscal em ${resumo.padroesFiscal} padrões; ${resumo.mesesFora} pastas de mês fora do padrão. Nada muda sem o seu sim.`,
-          cartoes: [{ tipo: 'aprovacao', id: 's09-raiox-lote', resumo: `Aceitar as ${achados.length} sugestões do Raio-X do Drive`, argumentos: [{ rotulo: 'Ligar a clientes', valor: String(achados.filter((a) => a.cliente_id).length) }, { rotulo: 'Ex-clientes', valor: String(achados.filter((a) => a.tipo === 'ex_cliente').length) }, { rotulo: 'Padrões e dicionário', valor: String(achados.filter((a) => ['padrao', 'mes_fora', 'departamento', 'orgao'].includes(a.tipo)).length) }], lote: achados.length, expiraEm: 'expira em 7 dias' }],
-          aviso: 'Raio-X do Drive pronto para decidir',
+          cartoes: [{ tipo: 'aprovacao', id: 's09-raiox-lote', resumo: `Aceitar as ${achados.length} sugestões do Raio-X (${nomeOrigem})`, argumentos: [{ rotulo: 'Ligar a clientes', valor: String(achados.filter((a) => a.cliente_id).length) }, { rotulo: 'Ex-clientes', valor: String(achados.filter((a) => a.tipo === 'ex_cliente').length) }, { rotulo: 'Padrões e dicionário', valor: String(achados.filter((a) => ['padrao', 'mes_fora', 'departamento', 'orgao'].includes(a.tipo)).length) }], lote: achados.length, expiraEm: 'expira em 7 dias' }],
+          aviso: `Raio-X de ${nomeOrigem} pronto para decidir`,
         },
       },
-      { origem: 'Raio-X do Drive' },
+      { origem: 'Raio-X das pastas' },
     )
     try {
-      await servicos.arvore.ler('Meu Drive/Clientes', (lidas, total) => setProgresso({ lidas, total }))
-      setRx((x) => ({ ...x, rodado_em: new Date().toISOString(), decisoes: {}, aplicado_em: null }))
-      registrar(`${usuario.nome} rodou o Raio-X do Drive (só a lista de pastas e arquivos)`, 'raiox.rodar')
+      await servicos.arvore.ler(provedor === 'servidor_local' ? 'pastas compartilhadas do agente' : 'Clientes', (lidas, total) => setProgresso({ lidas, total }), provedor)
+      setRx((x) => ({ ...x, rodado_em: new Date().toISOString(), decisoes: {}, aplicado_em: null, provedor }))
+      registrar(`${usuario.nome} rodou o Raio-X em ${nomeOrigem} (só a lista de pastas e arquivos)`, 'raiox.rodar')
       setFase('parado')
     } catch (e) {
       setFase('erro')
-      setErro(e instanceof Error ? e.message : 'A leitura do Drive não respondeu.')
+      setErro(e instanceof Error ? e.message : 'A leitura das pastas não respondeu.')
     }
   }
 
@@ -101,18 +107,23 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
   const aplicar = () => {
     const n = Object.keys(rx.decisoes).length
     setRx((x) => ({ ...x, aplicado_em: new Date().toISOString() }))
-    registrar(`${usuario.nome} aplicou ${n} decisões do Raio-X do Drive`, 'raiox.decidir')
-    loja.toast(`${n} decisões aplicadas: o mapeamento do Drive passa a valer e os arquivos entram na árvore.`, { modulo: 'arquivos', aba: 'pastas' }, 'Ver em Arquivos')
+    registrar(`${usuario.nome} aplicou ${n} decisões do Raio-X (${nomeOrigem})`, 'raiox.decidir')
+    loja.toast(`${n} decisões aplicadas: o mapeamento das pastas passa a valer e os arquivos entram na árvore.`, { modulo: 'arquivos', aba: 'pastas' }, 'Ver em Arquivos')
   }
 
   return (
-    <MolduraTelaCheia titulo="Raio-X do Drive" sub="Lê só os nomes de pastas e arquivos, nunca o conteúdo (D-10)" onFechar={onFechar} acao={<SeloDemonstracao fonte="Google Drive (só a lista)" className="hidden sm:inline-flex" />}>
+    <MolduraTelaCheia titulo="Raio-X das pastas" sub={`${nomeOrigem} · lê só os nomes de pastas e arquivos, nunca o conteúdo (D-10)`} onFechar={onFechar} acao={<SeloDemonstracao fonte={`${nomeOrigem} (só a lista)`} className="hidden sm:inline-flex" />}>
       <div className="pagina flex flex-col gap-4">
         {!rx.rodado_em || fase !== 'parado' ? (
           <Caixa className="items-start">
-            <TituloBloco descricao="O Geral percorre as pastas de todos os clientes no Drive antigo, casa cada uma com o cadastro e aponta o que precisa de decisão. Ele não abre nenhum documento e não muda nada no Drive.">Diagnóstico das pastas</TituloBloco>
-            {!drive.funcionando ? (
-              <EstadoErro titulo="O Drive antigo não está conectado" descricao={drive.frase} onTentar={() => (onFechar(), nav.irPara({ modulo: 'config', aba: 'conectores' }))} />
+            <TituloBloco descricao="O Geral percorre as pastas de todos os clientes no armazenamento escolhido (Google Drive, OneDrive/SharePoint, Dropbox, Box, servidor local, S3), casa cada uma com o cadastro e aponta o que precisa de decisão. Ele não abre nenhum documento e não muda nada na origem.">Diagnóstico das pastas</TituloBloco>
+            {fase !== 'lendo' && nuvens.length > 0 && (
+              <span className="w-full max-w-sm">
+                <Escolha rotulo="Onde ler" valor={provedor} onMudar={setProvedor} opcoes={nuvens.map((c) => ({ valor: c.id, rotulo: `${c.nome}${c.funcionando ? '' : ` · ${c.rotulo.toLowerCase()}`}` }))} />
+              </span>
+            )}
+            {!drive?.funcionando ? (
+              <EstadoErro titulo={`${nomeOrigem} não está conectado`} descricao={drive?.frase} onTentar={() => (onFechar(), nav.irPara({ modulo: 'config', aba: 'armazenamento' }))} />
             ) : fase === 'erro' ? (
               <EstadoErro titulo="A leitura parou" descricao={erro} onTentar={() => void rodar()} />
             ) : fase === 'lendo' ? (
