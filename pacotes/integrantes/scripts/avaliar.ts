@@ -167,7 +167,8 @@ try {
         const r = await rotearEmCascata({ sql: admin, fornecedor, cfg }, a.escritorio_id, { texto: c.texto, tipoDocumento: c.documento.tipo, trecho }, opcoesDeRota(integrantesContabil, c.documento.tipo))
         const centavos = r.tentativas.reduce((x, t) => x + t.centavos, 0)
         conferirTeto(centavos)
-        const obtido = r.decisao ? r.decisao.procedimento_id : 'pergunta'
+        // "nenhum" registra o pedido sem procedimento: nenhuma ação, como a pergunta à pessoa.
+        const obtido = r.decisao && r.decisao.procedimento_id !== 'nenhum' ? r.decisao.procedimento_id : 'pergunta'
         const resultado = classificar(c.esperado === 'pergunta' ? 'cartao' : c.esperado, obtido === 'pergunta' ? 'cartao' : obtido)
         destino.push({ caso: `${c.grupo}:${c.id}`, esperado: c.esperado, obtido, camada: r.decisao?.camada ?? null, resultado, centavos, latencia_ms: Date.now() - t0, modelos: r.tentativas.map((t) => t.modelo).filter(Boolean).join('>') })
         console.log(`rota ${nome.padEnd(18)} ${c.id.padEnd(16)} ${resultado.padEnd(20)} esperado=${c.esperado} obtido=${obtido} camada=${r.decisao?.camada ?? '-'} R$ ${(centavos / 100).toFixed(4)}`)

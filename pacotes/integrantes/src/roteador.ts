@@ -75,8 +75,9 @@ export const configRoteamentoPadrao = (precos: Record<string, PrecoModelo>): Con
   limiar: 0.9,
   precos,
   bolsa: 'assistente',
-  // Medido em 15/11/2026 (relatorios/integrantes-ajustes-2026-11-15-real.md): ver a decisão lá.
-  com_trecho: false,
+  // Medido em 15/11/2026 (relatorios/integrantes-ajustes-2026-11-15-real.md): com o trecho, o acerto
+  // do Haiku foi de 71,9% para 87,5% no gabarito de roteamento, sem erro crítico. Ligado.
+  com_trecho: true,
 })
 
 /** As opções de roteamento de uma pessoa: procedimentos dos integrantes, filtrados pelo documento anexado. */

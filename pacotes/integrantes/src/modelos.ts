@@ -10,10 +10,18 @@ import type { ConfigModelos } from '@heild/processos'
  */
 export const RELATORIO_DO_PORTAO = 'docs/backend/relatorios/integrantes-ajustes-2026-11-15-real.md'
 
-export const CONTRATOS_NO_HAIKU: { contrato: string; evidencia: string }[] = []
+export const CONTRATOS_NO_HAIKU: { contrato: string; evidencia: string }[] = [
+  { contrato: 'ctb.competencia.escolher', evidencia: '60 × 60 acertos (v2), 0 erro crítico; escaladas 14 Sonnet × 21 Haiku' },
+  { contrato: 'ctb.ecd.apontar_atencao', evidencia: '60 × 60, 0 erro crítico' },
+  { contrato: 'fis.guia.identificar', evidencia: '60 × 60, 0 erro crítico' },
+  { contrato: 'fis.caixa_postal.classificar', evidencia: '60 × 60, 0 erro crítico' },
+  { contrato: 'dp.evento.classificar', evidencia: '60 × 60 no DP-EVENTO-FOLHA v2 (com o validador de quantidade), 0 erro crítico' },
+  { contrato: 'soc.alteracao.classificar', evidencia: '60 × 60, 0 erro crítico' },
+  { contrato: 'ges.faq.escolher', evidencia: '55 × 55 (os mesmos 5 cartões desnecessários nos dois), 0 erro crítico' },
+]
 
 /** O roteador barato do Assistente: Haiku só se o portão do roteador liberar (decisão 4 com a 3). */
-export const ROTEADOR_BARATO_NO_HAIKU = { liberado: false, evidencia: '' }
+export const ROTEADOR_BARATO_NO_HAIKU = { liberado: true, evidencia: 'com o trecho: Haiku 28 × Sonnet 26 de 32, 0 erro crítico, e o Haiku acertou todo caso que o Sonnet acertou' }
 
 /** Aplica a lista sobre a configuração de produção (só onde há preço do Haiku, isto é, com o fornecedor real). */
 export function modelosDosIntegrantes(base: ConfigModelos): ConfigModelos {

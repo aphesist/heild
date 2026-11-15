@@ -710,3 +710,40 @@ app/supabase/migrations/20261116090000_b3_integrantes.sql
 | Correções aprendidas | A proposta de memória `correcao:*` é gravada depois de aprovada, mas nenhum procedimento a lê ainda (o GES-FAQ lê a base `faq`) | Como cada procedimento usa a correção é decisão de conteúdo da frente de IA |
 | Efeitos dos procedimentos novos | Gravam a decisão no `documento.metadados`; não há conector real de envio (WhatsApp, Junta, folha) | Os conectores são de uma sessão futura. O cartão e a trilha já são os definitivos |
 | Gabarito | 36 casos fictícios | O piloto pré-registrado pede 400 a 700 por estrato, com casos reais anonimizados (AVALIAÇÃO 11.5) |
+
+---
+
+## B3b · Ajustes dos integrantes
+
+**16/11/2026 · branch `be3b-integrantes-ajustes` → `backend`.** O Enzo aprovou as nove recomendações da B3. Esta sessão implementa as seis que mudam código e mede o resultado com o modelo de verdade. Migração `20261116120000_b3b_integrantes_ajustes.sql`.
+
+### O que mudou
+
+1. **Gabarito ampliado** (`pacotes/integrantes/src/avaliacao/gabarito-ampliado.ts`): 30 casos distintos por contrato de operário (7 contratos, 210 casos) e 32 de roteamento. Entram casos difíceis: várias datas no mesmo texto, palavras que puxam para a resposta errada, a guia sem tributo definido, o pedido com dois eventos de folha, a mensagem que cita "boleto" mas não pede segunda via. Entram também os casos em que o certo é **não** decidir: ao todo 26 casos `cartao` e 4 de roteamento em que o certo é perguntar. Nas 30 ECDs, a conta plantada muda de conta e de valor, e metade tem um distrator (estoque que sobe por compra normal).
+2. **Portão do Haiku com margem**: o Haiku só fica num contrato se, no gabarito ampliado com 2 repetições, acertar todo caso em que o Sonnet acertou, sem erro crítico e dentro da margem de −3 pontos na taxa de erro. O resultado por contrato está em `src/modelos.ts` (`CONTRATOS_NO_HAIKU`, cada linha com a evidência), aplicado pelo worker dos integrantes (`modelosDosIntegrantes`). O portão registra também as escaladas e o custo de cada lado.
+3. **Custo do roteamento no setor de destino.** A estimativa continua sendo reservada antes da chamada na bolsa de trânsito `assistente`, porque o setor ainda não é conhecido. Com o destino decidido, o custo real sai dela e entra na bolsa do setor de destino, na mesma transação que grava a decisão. **Sem destino** (pergunta à pessoa, pedido sem procedimento, negado ou falha), o custo fica na bolsa `assistente`, que é o custo de atender o chat sem setor. Se a bolsa do setor de destino não tiver saldo para receber, o custo também fica na `assistente`. O pedido guarda de onde saiu (`pedido_assistente.bolsa_pagadora`), e o evento `assistente.rotear` também.
+4. **Roteador com trecho do documento** (contrato `assistente.rotear` v2): pode receber os primeiros 600 caracteres do documento anexado, como dado externo. A chave é `com_trecho` na configuração do roteamento; ela só fica ligada se o gabarito mostrar ganho.
+5. **Competência v2** (`CTB-COMPETENCIA-DOC` v2, contrato `ctb.competencia.escolher` v2): a instrução passa a dar a ordem de precedência das datas. Primeiro a referência escrita, depois o período, depois o mês do fato; quando há só o vencimento de uma parcela, vale o mês do vencimento; nunca a data de pagamento ou de chegada quando houver outra. Candidatas, validadores e limiar não mudam.
+6. **Revisor de risco (Opus)** só nos procedimentos irreversíveis: `CTB-ECD-TRANSMITIR` v2 (transmissão ao governo), `FIS-GUIA-CONFERIR` v2 e `GES-FAQ-RESPONDER` v2 (envio ao cliente). O passo `revisar` (contrato `revisor.ato_irreversivel`, classe revisor) recebe só o compacto: o ato, o resumo escrito pelo sistema, a decisão, as evidências conferidas e o trecho. Ele responde `aprova` ou `devolve` com o motivo. Se devolver, o caso vai ao cartão "não consegui" com o motivo; a pessoa pode liberar com uma justificativa ou encerrar, e o revisor não é chamado de novo sobre a decisão dela. O cartão de aprovação mostra o parecer, porque a aprovação humana continua obrigatória. Pontos de atenção que a pessoa vai ver no cartão não são motivo para devolver: a instrução diz isso depois que a rodada pequena mostrou o revisor devolvendo toda ECD com contas atípicas.
+7. **Bolsa do piloto.** A execução em sombra paga com a bolsa `piloto` (constante `BOLSA_PILOTO`), nunca com a do setor. Sem saldo, a sombra para sem cartão (`BOLSA_SEM_SALDO`): ninguém precisa decidir uma medição.
+8. **Correção na ECD v2:** uma conta que começa o exercício zerada (receita, custo, conta nova) passa a medir a variação contra o saldo final (100%). A v1 dividia por 1 centavo e mostrava ao operário e ao revisor variações como "500.000.000%".
+
+As versões anteriores (`CTB-COMPETENCIA-DOC` v1, `CTB-ECD-TRANSMITIR` v1, `FIS-GUIA-CONFERIR` v1, `GES-FAQ-RESPONDER` v1) continuam carregadas no motor: execuções em andamento terminam na versão em que começaram. A operação de processo é uma só por procedimento e inicia sempre a versão mais nova. A lista de referência da B2 (`procedimentosDeReferencia`) continua com as v1; as v2 de referência estão em `procedimentosDeReferenciaV2`, e os integrantes usam as v2.
+9. **DP-EVENTO-FOLHA v2:** o gabarito ampliado pegou o Sonnet e o Haiku lançando hora extra sem quantidade. O validador `quantidade_quando_exigida` barra por regra hora extra, falta e adiantamento sem quantidade.
+
+### Resultado real (15/11/2026)
+
+Relatório: [`relatorios/integrantes-ajustes-2026-11-15-real.md`](relatorios/integrantes-ajustes-2026-11-15-real.md).
+
+- **Portão do Haiku:** os 7 contratos de operário e o roteador barato igualaram o Sonnet caso a caso, sem erro crítico. O DP só depois do v2: na v1, os dois modelos erraram o mesmo caso.
+- **O que foi trocado:** o Haiku como operário nos 7 contratos e como roteador barato. Sonnet continua escritor, Opus continua revisor. No total do operário, o custo caiu 18 vezes (R$ 5,66 para R$ 0,32 em 420 chamadas).
+- **Roteador com trecho:** acerto de 71,9% para 87,5%, sem erro crítico; o trecho fica **ligado**.
+- **Revisor de risco:** R$ 0,041 e 2,6 s (p50) por revisão. Aprovou as 302 revisões; o ganho dele ainda não está medido neste gabarito.
+- **Custo da sessão:** R$ 23,85 (≈ US$ 4,42), contra o teto de US$ 15.
+
+### Testes da B3b
+
+- `contrato.test.ts`: o gabarito ampliado tem 30 casos distintos por contrato e 30 ou mais de roteamento; as ECDs do gabarito fecham por regra; o validador de quantidade do DP v2.
+- `setores.test.ts`: o revisor devolve com motivo → cartão "não consegui" → a pessoa libera com motivo → cartão de envio com o parecer, sem chamar o revisor de novo; a guia decidida por regra só chama o revisor.
+- `assistente.test.ts`: o custo do roteamento sai da bolsa de trânsito e entra na do setor de destino (`bolsa_pagadora`); sem destino, fica na bolsa `assistente`.
+- `avaliacao.test.ts`: a sombra paga com a bolsa do piloto e não toca a do setor; sem saldo no piloto, para sem cartão.

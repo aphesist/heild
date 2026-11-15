@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "API da Heild (B1, local)",
-    "version": "a054ec445a718065",
+    "version": "0f258379840e2196",
     "description": "Gerado de pacotes/dominio. Não edite: rode npm run contratos."
   },
   "servers": [
@@ -2391,7 +2391,7 @@
         "x-heild-modulo": "plataforma",
         "x-heild-aprovacao": "nunca",
         "x-heild-idempotencia": "por_chave",
-        "x-heild-versao": 1,
+        "x-heild-versao": 2,
         "x-heild-exposta-mcp": true,
         "x-heild-erros": []
       }
@@ -8038,7 +8038,7 @@
         "x-heild-modulo": "plataforma",
         "x-heild-aprovacao": "nunca",
         "x-heild-idempotencia": "por_chave",
-        "x-heild-versao": 1,
+        "x-heild-versao": 2,
         "x-heild-exposta-mcp": true,
         "x-heild-erros": []
       }
@@ -8870,7 +8870,7 @@
         "x-heild-modulo": "plataforma",
         "x-heild-aprovacao": "nunca",
         "x-heild-idempotencia": "por_chave",
-        "x-heild-versao": 1,
+        "x-heild-versao": 2,
         "x-heild-exposta-mcp": true,
         "x-heild-erros": []
       }
@@ -9699,7 +9699,7 @@
         "x-heild-modulo": "plataforma",
         "x-heild-aprovacao": "nunca",
         "x-heild-idempotencia": "por_chave",
-        "x-heild-versao": 1,
+        "x-heild-versao": 2,
         "x-heild-exposta-mcp": true,
         "x-heild-erros": []
       }
@@ -12073,7 +12073,7 @@
         "x-heild-modulo": "plataforma",
         "x-heild-aprovacao": "nunca",
         "x-heild-idempotencia": "por_chave",
-        "x-heild-versao": 1,
+        "x-heild-versao": 2,
         "x-heild-exposta-mcp": true,
         "x-heild-erros": []
       }

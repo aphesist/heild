@@ -1,5 +1,5 @@
 {
-  "catalogo_hash": "a054ec445a718065",
+  "catalogo_hash": "0f258379840e2196",
   "ferramentas": [
     {
       "name": "aprovacao_decidir",
@@ -152,7 +152,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": []
     },
@@ -578,7 +578,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": []
     },
@@ -621,7 +621,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": []
     },
@@ -661,7 +661,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": []
     },
@@ -819,7 +819,7 @@
       "x-heild-modulo": "plataforma",
       "x-heild-aprovacao": "nunca",
       "x-heild-idempotencia": "por_chave",
-      "x-heild-versao": 1,
+      "x-heild-versao": 2,
       "x-heild-exposta-mcp": true,
       "x-heild-erros": []
     },
