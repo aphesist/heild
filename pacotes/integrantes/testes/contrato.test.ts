@@ -170,3 +170,14 @@ describe('gabarito ampliado (portão do Haiku)', () => {
     }
   })
 })
+
+describe('DP v2: quantidade obrigatória', () => {
+  it('hora extra, falta e adiantamento sem quantidade são barrados (escalável); férias não precisam', async () => {
+    const { rodarValidadores } = await import('@heild/processos')
+    const r = (escolha: Record<string, unknown>) => rodarValidadores(['quantidade_quando_exigida'], { escolha }, null)
+    expect((await r({ tipo_evento: 'hora_extra', quantidade: null }))[0]).toMatchObject({ ok: false, codigo: 'SEM_QUANTIDADE', escalavel: true })
+    expect((await r({ tipo_evento: 'falta', quantidade: '' }))[0]!.ok).toBe(false)
+    expect((await r({ tipo_evento: 'hora_extra', quantidade: '10' }))[0]!.ok).toBe(true)
+    expect((await r({ tipo_evento: 'ferias', quantidade: null }))[0]!.ok).toBe(true)
+  })
+})

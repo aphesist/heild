@@ -3,7 +3,7 @@ import { definirIntegrante, type Anexos, type ExecucaoParaDecisao, type Integran
 import { decisaoDeEscolha, type Escolha } from './escolha.ts'
 import { resolverCom } from './metas.ts'
 import { BASE_PADRAO, gesFaq, gesFaqV2 } from './setores/atendimento.ts'
-import { dpEventoFolha } from './setores/dp.ts'
+import { dpEventoFolha, dpEventoFolhaV2 } from './setores/dp.ts'
 import { fisCaixaPostal, fisGuiaConferir, fisGuiaConferirV2 } from './setores/fiscal.ts'
 import { EXIGE_JUNTA, rotuloAlteracao, socAlteracao } from './setores/societario.ts'
 
@@ -24,9 +24,9 @@ const entradaDeDocumento: PacoteProcedimento['entrada'] = (a: Anexos) =>
 const decisao = (e: ExecucaoParaDecisao) => e.saida?.decisao as Escolha
 
 /** Todas as operações de processo (para resolver o pacote de cada integrante). */
-const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolha, socAlteracao, gesFaqV2].map(P)
+const TODOS = [ctbCompetenciaDocV2, ctbEcdV2, fisGuiaConferirV2, fisCaixaPostal, dpEventoFolhaV2, socAlteracao, gesFaqV2].map(P)
 /** Versões anteriores, carregadas para as execuções em andamento terminarem na versão em que começaram. */
-const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq].map(P)
+const ANTERIORES = [ctbCompetenciaDoc, ctbEcd, fisGuiaConferir, gesFaq, dpEventoFolha].map(P)
 const resolver = resolverCom(TODOS.map((p) => p.ferramenta))
 const LEITURA = ['documento.listar', 'tarefa.listar', 'execucao.obter', 'procedimento.listar', 'validador.executar', 'memoria.propor']
 
@@ -131,7 +131,7 @@ export const integranteDp: Integrante = definirIntegrante(
     ferramentas: [...LEITURA, 'dp.evento.classificar_e_lancar', 'dp.evento.lancar'],
     procedimentos: [
       {
-        procedimento: P(dpEventoFolha),
+        procedimento: P(dpEventoFolhaV2),
         entrada: entradaDeDocumento,
         regras: [/\bhoras? extras?\b/i, /\bf[ée]rias\b/i, /\bfolha\b/i, /\badmiss[ãa]o\b/i, /\brescis[ãa]o\b/i, /\badiantamento\b/i, /\bfaltou\b|\bfalta\b/i],
         aceita_documentos: ['mensagem', 'email', 'solicitacao'],

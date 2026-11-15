@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { definirContrato } from '@heild/processos'
-import { competenciasDoTexto, numerosDoTexto, procedimentoDeEscolha } from '../escolha.ts'
+import { competenciasDoTexto, numerosDoTexto, procedimentoDeEscolha, type OpcoesEscolha } from '../escolha.ts'
 import { resolverCom } from '../metas.ts'
 
 /**
@@ -35,7 +35,7 @@ export const contratoEventoFolha = definirContrato({
   campos_externos: ['trecho'],
 })
 
-export const dpEventoFolha = procedimentoDeEscolha({
+const opcoesDp = {
   id: 'DP-EVENTO-FOLHA',
   versao: 1,
   nome: 'Registrar evento de folha pedido pelo cliente',
@@ -67,4 +67,17 @@ export const dpEventoFolha = procedimentoDeEscolha({
   },
   orcamento: { centavos: 8, tokens: 8_000 },
   resolver: resolverCom(),
+} satisfies OpcoesEscolha
+
+export const dpEventoFolha = procedimentoDeEscolha(opcoesDp)
+
+/**
+ * v2 (B3b): o gabarito ampliado pegou o Sonnet lançando hora extra sem quantidade ("ainda não sei
+ * quantas"). O validador `quantidade_quando_exigida` barra por regra: escala uma vez e, sem a
+ * quantidade no texto, vai ao cartão.
+ */
+export const dpEventoFolhaV2 = procedimentoDeEscolha({
+  ...opcoesDp,
+  versao: 2,
+  validadores: [...opcoesDp.validadores, 'quantidade_quando_exigida'],
 })
