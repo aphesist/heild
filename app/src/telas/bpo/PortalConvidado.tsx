@@ -9,7 +9,7 @@ import type { Contexto } from '@/nucleo/permissoes'
 import { comoAtor, repos } from '@/nucleo/repositorios'
 import { ConversaContratante, estadoRevisao, rotuloDepto } from './Contratantes'
 import { agoraBpo, hojeBpo, quando, useContratantes } from './dados'
-import { GavetaContestacao } from './GestaoBpo'
+import { GavetaContestacao, qtdUnidade } from './GestaoBpo'
 import { useVariaveisContratante } from './ModuloBpo'
 import { rotuloBola, slaDe } from './OperacaoBpo'
 import { COMPETENCIA_FECHAR, RelatorioContratante, rotuloCompetencia, siglaDe } from './RelatorioBpo'
@@ -300,7 +300,7 @@ export function PortalConvidado({ contratanteId, onFechar }: { contratanteId: st
                     </ul>
                     {c.volume.contestacoes.map((x) => (
                       <span key={x.id} className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                        <ScalesIcon /> {x.quantidade} {x.unidade}: {x.motivo} · {x.situacao === 'aberta' ? 'em análise' : x.situacao === 'aceita' ? 'aceita (sai da fatura)' : 'recusada'}
+                        <ScalesIcon /> {qtdUnidade(x.quantidade, x.unidade)}: {x.motivo} · {x.situacao === 'aberta' ? 'em análise' : x.situacao === 'aceita' ? 'aceita (sai da fatura)' : 'recusada'}
                       </span>
                     ))}
                     {c.volume.situacao !== 'faturado' ? (

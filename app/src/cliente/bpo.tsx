@@ -428,7 +428,7 @@ function ExtratoVolumeApp({ ctx }: { ctx: Ctx }) {
       </span>
       {v.contestacoes.map((x) => (
         <span key={x.id} className="text-muted-foreground flex items-center gap-1.5 text-xs">
-          <ScalesIcon /> {x.quantidade} {x.unidade}: {x.motivo} · {x.situacao === 'aberta' ? 'em análise' : x.situacao === 'aceita' ? 'aceita, sai da fatura' : 'recusada'}
+          <ScalesIcon /> {x.motivo} · {x.situacao === 'aberta' ? 'em análise' : x.situacao === 'aceita' ? 'aceita, sai da fatura' : 'recusada'}
         </span>
       ))}
       {v.situacao !== 'faturado' && dentro && !contestando && (

@@ -63,9 +63,20 @@ export function margemPorDepto(c: ContratanteVista) {
   const custo = c.honorario_mes * (1 - c.margem / 100)
   return deptos.map((d, i) => {
     const hon = (c.honorario_mes * empresas[i]) / somaE
-    const cst = (custo * fila[i]) / somaF
-    return { depto: d, honorario: Math.round(hon), horas: Math.round((c.horas_mes * fila[i]) / somaF), margem: hon > 0 ? Math.round(((hon - cst) / hon) * 100) : 0 }
+    // O custo segue metade pela carteira do departamento e metade pela fila dele (a fila do mês é pequena para pesar sozinha).
+    const peso = 0.5 * (empresas[i] / somaE) + 0.5 * (fila[i] / somaF)
+    const cst = custo * peso
+    return { depto: d, honorario: Math.round(hon), horas: Math.round(c.horas_mes * peso), margem: hon > 0 ? Math.round(((hon - cst) / hon) * 100) : 0 }
   })
+}
+
+/** "1 lançamento", "3 admissões": a quantidade com a unidade do extrato no número certo. */
+export function qtdUnidade(q: number, unidade: string) {
+  if (q !== 1) return `${q.toLocaleString('pt-BR')} ${unidade}`
+  return `1 ${unidade
+    .split(' ')
+    .map((w) => w.replace(/ões$/, 'ão').replace(/ns$/, 'm').replace(/s$/, ''))
+    .join(' ')}`
 }
 
 export const rotuloDeptoG: Record<string, string> = { dp: 'DP', fiscal: 'Fiscal', contabil: 'Contábil', societario: 'Societário' }
@@ -99,7 +110,7 @@ export function EntregasBpoTela({ empresa }: PropsBpo) {
     if (!rel) return
     executar(() => {
       const doc = docDe(e) ?? loja.adicionarDocumento({ clienteId: e.clienteId, nome: 'Relatório financeiro 10-2026.pdf', pasta: P.bpo, tipo: 'relatorio', competencia: '10/2026', origem: 'gerado_plataforma', conector: 'a1', tamanho: '312 KB', quando: '18/11/2026', por: 'Gerencial (integrante)', dados: { caixa: brl(e.caixa), pagamentos: String(e.perfil.volume.pagamentos), resumo: resumo ?? resumoPadraoEmpresa(e) } })
-      loja.ajustarDocumento(doc.id, { entregas: [...(doc.entregas ?? []), { quem: e.ficha?.contatos[0]?.nome ?? 'cliente', acao: 'enviado', quando: '18/11 ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }] })
+      loja.ajustarDocumento(doc.id, { dados: { ...doc.dados, resumo: resumo ?? String(rel.extras?.resumo ?? resumoPadraoEmpresa(e)) }, entregas: [...(doc.entregas ?? []), { quem: e.ficha?.contatos[0]?.nome ?? 'cliente', acao: 'enviado', quando: '18/11 ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }] })
       return repos.bpo.entregas.atualizar(rel.id, { situacao: 'enviado', enviado_em: agoraBpo(), enviado_por: usuario.nome, documento_id: doc.id, extras: { ...rel.extras, resumo: resumo ?? rel.extras?.resumo ?? resumoPadraoEmpresa(e) } }, { texto: `${usuario.nome} fechou e enviou o relatório de outubro de ${e.nome}` })
     }, { sucesso: `Relatório de outubro no app de ${e.nome} e em Arquivos › Entregáveis › BPO financeiro` })
   }
@@ -667,7 +678,7 @@ export function VolumeBpoTela({ empresa }: PropsBpo) {
                           <div key={c.id} className="flex flex-wrap items-center gap-2 text-xs">
                             <ScalesIcon className="size-4" />
                             <span className="min-w-0 flex-1">
-                              {c.quantidade} {c.unidade}: {c.motivo} · {c.por}
+                              {qtdUnidade(c.quantidade, c.unidade)}: {c.motivo} · {c.por}
                             </span>
                             {c.situacao === 'aberta' ? (
                               gestor ? (
@@ -911,8 +922,8 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
                     <BarraUso rotulo={p} usado={Math.round(usado * 10) / 10} total={capacidade[p]} unidade=" h" />
                     {gestor ? (
                       <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                        capacidade no mês:
-                        <EdicaoEmLinha rotulo={`Capacidade de ${p} (horas no mês)`} valor={String(capacidade[p])} validar={(v) => (Number(v) > 0 && Number(v) <= 220 ? null : 'Entre 1 e 220 horas.')} onSalvar={(v) => setCapacidade({ ...capacidade, [p]: Number(v) })} className="w-14" />h
+                        capacidade no mês, em horas:
+                        <EdicaoEmLinha rotulo={`Capacidade de ${p} (horas no mês)`} valor={String(capacidade[p])} validar={(v) => (Number(v) > 0 && Number(v) <= 220 ? null : 'Entre 1 e 220 horas.')} onSalvar={(v) => setCapacidade({ ...capacidade, [p]: Number(v) })} className="w-16" />
                       </span>
                     ) : null}
                   </li>

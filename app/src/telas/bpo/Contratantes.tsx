@@ -15,7 +15,7 @@ import { temas } from '@/theme/temas'
 import { brl, CabecalhoBpo, Caixa, Numero, PaginaBpo, Propriedade, Regra, TituloBloco } from './comum'
 import { agoraBpo, dataCurta, dataHora, diasAte, hojeBpo, quando, type ContratanteVista } from './dados'
 import { usePedirS08d, useTrabalhandoS08d } from './efeitos-s08d'
-import { BlocoAssinatura, margemPorDepto } from './GestaoBpo'
+import { BlocoAssinatura, margemPorDepto, qtdUnidade } from './GestaoBpo'
 import { rotuloBola, slaDe, useAcoesFila } from './OperacaoBpo'
 import { COMPETENCIA_FECHAR, RelatorioContratante } from './RelatorioBpo'
 
@@ -852,7 +852,7 @@ function EntregasContratantes({ contratantes }: { contratantes: ContratanteVista
                   <span className="text-muted-foreground block text-xs">{rel?.situacao === 'enviado' ? `enviado ${dataHora(rel.enviado_em)} por ${rel.enviado_por}` : rascunho ? `rascunho de ${String(rel?.extras?.rascunho_por ?? 'Atendimento')} pronto para revisar` : 'ainda sem rascunho'}</span>
                 </span>
                 {(rel?.situacao === 'enviado' || rascunho) && (
-                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setVer(c.id)} aria-label={`Ver o relatório de ${c.nome}`}>
+                  <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setVer(c.id)} aria-label={`${rel?.situacao === 'enviado' ? 'Ver' : 'Revisar'} o relatório de ${c.nome}`}>
                     <EyeIcon /> {rel?.situacao === 'enviado' ? 'Ver' : 'Revisar'}
                   </Button>
                 )}
@@ -940,7 +940,7 @@ function VolumeContratantes({ contratantes, todos }: { contratantes: Contratante
                 <div key={x.id} className="flex flex-wrap items-center gap-2 text-xs">
                   <ScalesIcon className="size-4" />
                   <span className="min-w-0 flex-1">
-                    {x.quantidade} {x.unidade}: {x.motivo} · {x.por}
+                    {qtdUnidade(x.quantidade, x.unidade)}: {x.motivo} · {x.por}
                   </span>
                   {x.situacao === 'aberta' && gestor ? (
                     <>
@@ -1025,7 +1025,7 @@ function RentabilidadeContratantes({ contratantes }: { contratantes: Contratante
 /** Registro das operações por contratante (LGPD, BPO-004 e BPO-020): a trilha que cita o contratante. */
 function TrilhaContratante({ c }: { c: ContratanteVista }) {
   const tEvento = useTabela('evento')
-  const eventos = useMemo(() => tEvento.filter((e) => typeof e.texto === 'string' && e.texto.includes(c.nome)).sort((a, b) => b.criado_em.localeCompare(a.criado_em)).slice(0, 8), [tEvento, c.nome])
+  const eventos = useMemo(() => tEvento.filter((e) => typeof e.texto === 'string' && e.texto.includes(c.nome)).sort((a, b) => b.criado_em.localeCompare(a.criado_em)).slice(0, 12), [tEvento, c.nome])
   return (
     <Caixa>
       <TituloBloco descricao="Registro das operações deste contratante (LGPD, arts. 37 e 39). A mesma trilha sustenta o relatório de controles (BPO-020).">Registro de operações</TituloBloco>

@@ -24,8 +24,9 @@ export const rotuloCompetencia = (c: string) => `${['janeiro', 'fevereiro', 'mar
 
 /** Resumo que o Gerencial escreve no rascunho (o Gestor edita antes de fechar). */
 export function resumoPadraoEmpresa(e: EmpresaVista) {
-  const ent = e.perfil.fluxo.entradas[1] ?? 0
-  const sai = e.perfil.fluxo.saidas[1] ?? 0
+  // O fluxo do perfil está em milhares (o mesmo da peça FluxoMensal do Financeiro).
+  const ent = (e.perfil.fluxo.entradas[1] ?? 0) * 1000
+  const sai = (e.perfil.fluxo.saidas[1] ?? 0) * 1000
   const riscos = e.audit.motivos.slice(0, 2).map((m) => m.texto)
   return `Outubro fechou com ${brl(ent)} de entradas e ${brl(sai)} de saídas (${ent - sai >= 0 ? 'sobra' : 'falta'} de ${brl(Math.abs(ent - sai))}). ${riscos.length ? `Pontos de atenção: ${riscos.join('; ')}.` : 'Nenhum ponto de atenção no mês.'}`
 }
@@ -84,11 +85,11 @@ export function RelatorioEmpresa({ e, entrega, aberto, onFechar, podeFechar, onF
   const [resumo, setResumo] = useState<string | null>(null)
   const texto = resumo ?? (entrega?.extras?.resumo as string | undefined) ?? resumoPadraoEmpresa(e)
   const pagas = e.contas.filter((c) => ['aprovada', 'liberada', 'paga'].includes(c.etapa))
-  const ent = e.perfil.fluxo.entradas[1] ?? 0
-  const sai = e.perfil.fluxo.saidas[1] ?? 0
+  const ent = (e.perfil.fluxo.entradas[1] ?? 0) * 1000
+  const sai = (e.perfil.fluxo.saidas[1] ?? 0) * 1000
   const atrasadas = e.receber.filter((c) => c.etapa === 'atrasada')
   const doc = entrega?.documento_id ? loja.documentos.find((d) => d.id === entrega.documento_id) : undefined
-  const marca = escritorio?.nome_fantasia ?? 'Escritório'
+  const marca = escritorio?.razao_social || escritorio?.nome_fantasia || 'Escritório'
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
       <DialogContent className="bg-surface max-h-[92dvh] overflow-y-auto rounded-[24px] border-0 p-4 sm:max-w-2xl sm:p-5">
@@ -112,7 +113,8 @@ export function RelatorioEmpresa({ e, entrega, aberto, onFechar, podeFechar, onF
             </Secao>
           </div>
           <Secao titulo="Pagamentos">
-            <Linha rotulo={`${pagas.length} pagamento${pagas.length === 1 ? '' : 's'} aprovado${pagas.length === 1 ? '' : 's'} por vocês`} valor={brl(pagas.reduce((s, c) => s + c.valor, 0))} />
+            <Linha rotulo="Pagamentos preparados e aprovados por vocês no mês" valor={e.perfil.volume.pagamentos} />
+            {pagas.length > 0 && <Linha rotulo={`Aprovados e ainda não baixados no extrato (${pagas.length})`} valor={brl(pagas.reduce((s, c) => s + c.valor, 0))} />}
             <p className="text-muted-foreground text-xs">Nenhum pagamento saiu sem a aprovação de uma pessoa da empresa.</p>
           </Secao>
           <Secao titulo="Riscos e pendências">
