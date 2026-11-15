@@ -71,8 +71,15 @@ export function modeloPara(cfg: ConfigModelos, contrato: string, classe: Classe)
 
 export const tokensDe = (v: unknown) => Math.ceil(JSON.stringify(v ?? null).length / 4)
 
+/**
+ * Centavos com seis casas (frações de centavo, coluna numeric(18,6)): a bolsa debita o custo da
+ * chamada, sem arredondar cada uma para o centavo de cima (B3; o teste real de 15/11 mostrou ~60%
+ * a mais por causa do arredondamento em chamadas tão pequenas).
+ */
+export const arredondarCentavos = (c: number) => Math.round(c * 1_000_000) / 1_000_000
+
 export function centavosDe(preco: PrecoModelo, t: { tokens_entrada: number; tokens_saida: number; tokens_cache: number }) {
-  return Math.ceil((t.tokens_entrada * preco.entrada + t.tokens_saida * preco.saida + t.tokens_cache * preco.cache) / 1_000_000)
+  return arredondarCentavos((t.tokens_entrada * preco.entrada + t.tokens_saida * preco.saida + t.tokens_cache * preco.cache) / 1_000_000)
 }
 
 /** Estimativa conservadora (entrada inteira sem cache + teto de saída): é o que se reserva antes. */

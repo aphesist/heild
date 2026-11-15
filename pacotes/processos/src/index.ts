@@ -26,6 +26,9 @@ export * from './operarios/fornecedor.ts'
 export * from './validadores/registro.ts'
 export { Despachante } from './despachante.ts'
 export * from './ligacao-api.ts'
+export { proporMemoria, decidirMemoria } from './memoria.ts'
+export * from './operarios/orcamento.ts'
+export { FornecedorAnthropic, configAnthropic, fornecedorDoAmbiente } from './operarios/anthropic.ts'
 export { ctbEcd, ctbCompetenciaDoc }
 
 /** Os procedimentos de referência do Contábil (AGENTICO 4; ARQUITETURA 7, F3). */
@@ -50,6 +53,32 @@ export interface OpcoesProcessos {
   modo?: 'worker' | 'api'
   /** Papéis que podem enfileirar na transação do efeito (modo worker). */
   papeisProdutores?: string[]
+  /**
+   * Extensões (B3, integrantes): ferramentas a mais no mesmo registro (servidas pela mesma rota e
+   * pelo MCP) e consumidores de filas próprias. Recebem o motor já montado.
+   */
+  extensoes?: ExtensaoProcessos[]
+}
+
+export interface BaseExtensao {
+  sql: Sql
+  boss: import('pg-boss').PgBoss
+  eventos: PortaEventos
+  motor: Motor
+  registro: RegistroFerramentas
+  fornecedor: FornecedorModelo
+  modelos: ConfigModelos
+  modo: 'worker' | 'api'
+}
+
+export interface ExtensaoProcessos {
+  nome: string
+  /** Metadados de autorização de ferramentas novas que os passos citam (fora do catálogo do wireframe). */
+  metas?: import('./dominio.ts').Ferramenta[]
+  ferramentas?: (b: BaseExtensao) => import('./ferramentas.ts').DefinicaoFerramenta[]
+  /** Só no modo worker: cria as filas próprias (dono do esquema). */
+  criarFilas?: (b: BaseExtensao) => Promise<void>
+  iniciarWorkers?: (b: BaseExtensao, intervalo?: number) => Promise<void>
 }
 
 /**
@@ -68,6 +97,7 @@ export async function criarProcessos(o: OpcoesProcessos) {
   }
   const eventos = new PortaEventos(boss)
   let registro: RegistroFerramentas
+  const metasExtras = new Map((o.extensoes ?? []).flatMap((x) => (x.metas ?? []).map((m) => [m.nome, m] as const)))
   const motor = new Motor({
     sql,
     boss,
@@ -76,7 +106,7 @@ export async function criarProcessos(o: OpcoesProcessos) {
     modelos: o.modelos ?? configDemonstracao,
     conectores: o.conectores,
     limites: o.limites,
-    resolverFerramenta: (nome) => registro.meta(nome),
+    resolverFerramenta: (nome) => registro.definicao(nome)?.meta ?? metasExtras.get(nome) ?? registro.meta(nome),
   })
   registro = new RegistroFerramentas(sql, eventos)
   for (const p of o.procedimentos ?? procedimentosDeReferencia) {
@@ -84,7 +114,13 @@ export async function criarProcessos(o: OpcoesProcessos) {
     registro.registrar(operacaoDeProcesso(motor, sql, p, { aguardar_ms: o.aguardar_ms }))
   }
   for (const f of ferramentasDoMotor(motor, sql, eventos)) registro.registrar(f)
-  if (modo === 'worker') await motor.publicarVersoes()
+  const base: BaseExtensao = { sql, boss, eventos, motor, registro, fornecedor: o.fornecedor, modelos: o.modelos ?? configDemonstracao, modo }
+  for (const x of o.extensoes ?? []) for (const f of x.ferramentas?.(base) ?? []) registro.registrar(f)
+  if (modo === 'worker') {
+    await motor.publicarVersoes()
+    for (const x of o.extensoes ?? []) await x.criarFilas?.(base)
+    if (o.extensoes?.some((x) => x.criarFilas)) await concederFila(sql, o.papeisProdutores ?? ['api_executor', 'app_api'])
+  }
   const despachante = new Despachante(sql, boss, motor)
   return {
     sql,
@@ -98,6 +134,7 @@ export async function criarProcessos(o: OpcoesProcessos) {
       await motor.iniciarWorkers(w)
       await despachante.iniciarWorker(w.intervalo)
       await iniciarPedidosDaApi(boss, sql, motor, w.intervalo)
+      for (const x of o.extensoes ?? []) await x.iniciarWorkers?.(base, w.intervalo)
     },
     async parar(opcoes: { graceful?: boolean; fecharSql?: boolean } = {}) {
       await boss.stop({ graceful: opcoes.graceful ?? true, timeout: 5_000 })

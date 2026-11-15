@@ -1,0 +1,32 @@
+{
+  "name": "@heild/integrantes",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Integrantes dos setores (contrato padrão, procedimentos por setor, Assistente e roteador, avaliação automatizada) sobre o motor da B2 (sessão B3).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint -c ../../app/.oxlintrc.json src testes scripts",
+    "test": "vitest run",
+    "banco": "HEILD_PG_BANCO=heild_b3 bash ../processos/scripts/banco.sh",
+    "avaliar": "tsx scripts/avaliar.ts"
+  },
+  "dependencies": {
+    "@heild/dominio": "0.1.0",
+    "@heild/processos": "0.1.0",
+    "zod": "^4.6.7",
+    "pg-boss": "^12.38.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

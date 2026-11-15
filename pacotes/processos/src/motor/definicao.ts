@@ -93,6 +93,8 @@ export type Passo<E = any> =
       chave: (s: Estado<E>) => string
       /** Esquema da resposta do órgão: fora dele é `ESQUEMA_EXTERNO` (OWASP API10; 08, 2.5). */
       resultado: z.ZodObject
+      /** No modo sombra o órgão nunca é chamado: o que o passo devolve no lugar (marcado como sombra). */
+      sombra?: (s: Estado<E>) => Record<string, unknown>
     }
   | {
       tipo: 'efeito'

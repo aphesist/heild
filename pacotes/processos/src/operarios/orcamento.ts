@@ -1,5 +1,6 @@
 import type { Tx } from '../banco.ts'
 import { ErroRegra } from '../contexto.ts'
+import { arredondarCentavos } from './fornecedor.ts'
 
 /** Orçamento estourado: o passo para, a execução fica `parcial` e nasce um cartão (AGENTICO 4.3). */
 export class ErroOrcamento extends ErroRegra {}
@@ -26,14 +27,14 @@ export async function reservar(tx: Tx, ex: ExecucaoPagadora, chave: string, esti
   const [ja] = await tx`select centavos, tokens, bolsa_setor, bolsa_mes from reserva_orcamento where chave = ${chave}`
   if (ja) return ja
   const [exec] = await tx`
-    update execucao set gasto_centavos = gasto_centavos + ${estimativa.centavos}, gasto_tokens = gasto_tokens + ${estimativa.tokens}
-    where id = ${ex.id} and gasto_centavos + ${estimativa.centavos} <= orcamento_centavos and gasto_tokens + ${estimativa.tokens} <= orcamento_tokens
+    update execucao set gasto_centavos = gasto_centavos + ${estimativa.centavos}::numeric, gasto_tokens = gasto_tokens + ${estimativa.tokens}
+    where id = ${ex.id} and gasto_centavos + ${estimativa.centavos}::numeric <= orcamento_centavos and gasto_tokens + ${estimativa.tokens} <= orcamento_tokens
     returning id`
   if (!exec) throw new ErroOrcamento('ORCAMENTO_EXECUCAO', 'O orçamento desta execução acabou antes da próxima chamada de modelo.')
   const bolsa = bolsaDe(ex)
   const [b] = await tx.unsafe(
-    `update bolsa_setor set gasto_centavos = gasto_centavos + $1
-     where setor = $2 and mes = ${MES} and gasto_centavos + $1 <= saldo_centavos returning mes`,
+    `update bolsa_setor set gasto_centavos = gasto_centavos + $1::numeric
+     where setor = $2 and mes = ${MES} and gasto_centavos + $1::numeric <= saldo_centavos returning mes`,
     [estimativa.centavos, bolsa],
   )
   if (!b) throw new ErroOrcamento('BOLSA_SEM_SALDO', `A bolsa ${bolsa.startsWith('pessoa:') ? 'da pessoa responsável' : `do setor ${bolsa}`} não tem saldo para a próxima chamada de modelo.`)
@@ -71,12 +72,12 @@ export async function acertar(
   if (!r) throw new Error(`Reserva de orçamento não encontrada: ${chave}`)
   // A estimativa é um teto (entrada inteira + saída máxima); se o real passar, a diferença é cobrada
   // de forma condicional ao saldo, como a reserva.
-  const dc = r.centavos - real.centavos
+  const dc = arredondarCentavos(r.centavos - real.centavos)
   const dt = r.tokens - real.tokens
-  const [b] = await tx`update bolsa_setor set gasto_centavos = gasto_centavos - ${dc}
-                       where setor = ${r.bolsa_setor} and mes = ${r.bolsa_mes} and gasto_centavos - ${dc} <= saldo_centavos returning 1 as ok`
-  const [e] = await tx`update execucao set gasto_centavos = gasto_centavos - ${dc}, gasto_tokens = greatest(0, gasto_tokens - ${dt})
-                       where id = ${ex.id} and gasto_centavos - ${dc} <= orcamento_centavos returning 1 as ok`
+  const [b] = await tx`update bolsa_setor set gasto_centavos = gasto_centavos - ${dc}::numeric
+                       where setor = ${r.bolsa_setor} and mes = ${r.bolsa_mes} and gasto_centavos - ${dc}::numeric <= saldo_centavos returning 1 as ok`
+  const [e] = await tx`update execucao set gasto_centavos = gasto_centavos - ${dc}::numeric, gasto_tokens = greatest(0, gasto_tokens - ${dt})
+                       where id = ${ex.id} and gasto_centavos - ${dc}::numeric <= orcamento_centavos returning 1 as ok`
   if (!b || !e) throw new ErroOrcamento('ORCAMENTO_EXECUCAO', 'O custo real passou do orçamento reservado.')
   await tx`
     insert into chamada_modelo (escritorio_id, chave, execucao_id, passo_ordem, tentativa, contrato, contrato_versao, classe, fornecedor, modelo,

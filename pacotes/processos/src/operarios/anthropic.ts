@@ -34,11 +34,12 @@ export class FornecedorAnthropic implements FornecedorModelo {
   async chamar(p: PedidoModelo): Promise<RespostaModelo> {
     if (!p.devolve) throw new Error(`Contrato ${p.contrato} sem esquema Zod para a saída estruturada.`)
     const esforco = this.opcoes.esforco?.[p.classe] ?? 'medium'
+    // O Haiku não tem fallback de recusa do lado do servidor: a recusa vira saída nula, e o motor escala.
+    const comFallback = !p.modelo.startsWith('claude-haiku')
     const resposta = await this.api().beta.messages.parse({
       model: p.modelo,
       max_tokens: p.max_tokens_saida, // já multiplicado pelo runner (multiplicadorSaida), o mesmo valor reservado no orçamento
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
+      ...(comFallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
       output_config: { effort: esforco, format: betaZodOutputFormat(p.devolve) },
       system: p.instrucao,
       messages: [
@@ -65,7 +66,8 @@ export class FornecedorAnthropic implements FornecedorModelo {
  * centavos de real por milhão de tokens, convertidos pela cotação do ambiente (HEILD_DOLAR_REAIS).
  */
 export function configAnthropic(dolarEmReais: number): ConfigModelos {
-  const c = (usd: number) => Math.round(usd * dolarEmReais * 100)
+  // Centavos de real por milhão de tokens, sem arredondar (o débito é em frações de centavo).
+  const c = (usd: number) => usd * dolarEmReais * 100
   return {
     porClasse: { operario: 'claude-sonnet-5-5', escritor: 'claude-sonnet-5-5', revisor: 'claude-opus-5-5' },
     precos: {

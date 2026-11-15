@@ -68,6 +68,12 @@ export interface OpcoesInicio {
   /** Pergunta "Para quem quer rotear esta atividade?" antes de começar (evento e job). */
   perguntar_responsavel?: boolean
   segundo_plano?: boolean
+  /**
+   * Modo sombra (decisão 8, piloto automatizado): roda o procedimento inteiro em paralelo à pessoa,
+   * SEM efeito: cartões não são criados, o efeito roda num savepoint desfeito, o conector externo
+   * nunca é chamado e o integrante não é acordado. Só código liga (nunca entrada de API).
+   */
+  sombra?: boolean
 }
 
 export interface ResultadoInicio {
@@ -112,6 +118,7 @@ interface LinhaExecucao {
   contexto: any
   cartao_id: string | null
   saida: any
+  sombra: boolean
 }
 
 interface JobPasso {
@@ -206,7 +213,8 @@ export class Motor {
       )
       throw new ErroPermissao(p.operacao, dec.motivo)
     }
-    const hash_entrada = hashDe(dados)
+    // A sombra nunca se junta a uma execução de verdade (nem a outra sombra com outra chave).
+    const hash_entrada = o.sombra ? hashDe({ entrada: dados, sombra: o.chave_idempotencia ?? true }) : hashDe(dados)
     return comEscritorio(this.d.sql, ctx.escritorio_id, async (tx) => {
       // Pedido igual em andamento (mesmo procedimento, mesma entrada) vira a mesma execução:
       // duas pessoas pedindo a mesma entrega do mesmo cliente não abrem duas.
@@ -239,22 +247,22 @@ export class Motor {
       const responsavel_id = o.responsavel_id ?? solicitante_id
       const pagador = await this.pagadorPara(tx, responsavel_id)
       const memoria = await this.lerMemoria(tx, p)
-      const perguntar = Boolean(o.perguntar_responsavel) && !responsavel_id && (ctx.origem === 'evento' || ctx.origem === 'job')
+      const perguntar = !o.sombra && Boolean(o.perguntar_responsavel) && !responsavel_id && (ctx.origem === 'evento' || ctx.origem === 'job')
       const [ex] = await tx`
         insert into execucao (escritorio_id, id, procedimento_id, versao, setor, cliente_id, tarefa_id, entrada, hash_entrada, estado,
           ator_tipo, ator_id, ator_nome, solicitante_id, responsavel_id, integrante_id, origem, prioridade, segundo_plano,
-          causado_por_evento_id, pagador_tipo, pagador_id, orcamento_centavos, orcamento_tokens, chave_idempotencia, contexto)
+          causado_por_evento_id, pagador_tipo, pagador_id, orcamento_centavos, orcamento_tokens, chave_idempotencia, contexto, sombra)
         values (${ctx.escritorio_id}, ${o.execucao_id ?? `ex${crypto.randomUUID().replaceAll('-', '')}`}, ${p.id}, ${p.versao}, ${p.setor}, ${cliente_id}, ${o.tarefa_id ?? null}, ${tx.json(dados as never)}, ${hash_entrada},
           ${perguntar ? 'aguardando_cartao' : 'pendente'}, ${tipoDoAtor(ctx.ator)}, ${idDoAtor(ctx.ator)}, ${nomeDoAtor(ctx.ator)}, ${solicitante_id},
           ${responsavel_id}, ${integrante_id}, ${ctx.origem}, ${prioridadePorOrigem[ctx.origem]}, ${o.segundo_plano ?? ctx.origem === 'job'},
           ${o.causado_por_evento_id ?? null}, ${pagador.tipo}, ${pagador.id}, ${orcamento_centavos}, ${p.orcamento.tokens},
-          ${o.chave_idempotencia ?? `auto:${crypto.randomUUID()}`}, ${tx.json({ memoria } as never)})
+          ${o.chave_idempotencia ?? `auto:${crypto.randomUUID()}`}, ${tx.json({ memoria } as never)}, ${Boolean(o.sombra)})
         returning *`
       const linha = ex as unknown as LinhaExecucao
       await this.d.eventos.gravar(tx, ctx, {
         nome: p.operacao, ferramenta: p.operacao, nivel: p.nivel_maximo, resultado: 'ok', setor: p.setor, cliente_id, execucao_id: linha.id,
-        causado_por_evento_id: o.causado_por_evento_id ?? null, texto: `${nomeDoAtor(ctx.ator)} iniciou ${p.nome}`,
-        argumentos_resumo: { procedimento: `${p.id}@${p.versao}`, hash_entrada },
+        causado_por_evento_id: o.causado_por_evento_id ?? null, texto: `${nomeDoAtor(ctx.ator)} iniciou ${p.nome}${o.sombra ? ' (sombra, sem efeito)' : ''}`,
+        argumentos_resumo: { procedimento: `${p.id}@${p.versao}`, hash_entrada, ...(o.sombra ? { sombra: true } : {}) },
       })
       if (perguntar) await this.cartaoEscolhaResponsavel(tx, linha, p)
       else await enfileirar(this.d.boss, tx, FILAS.admitir, { escritorio_id: ctx.escritorio_id })
@@ -430,6 +438,12 @@ export class Motor {
           case 'efeito': {
             const ctx = await this.contextoDaExecucao(tx, ex)
             const f = this.ferramenta(passo.ferramenta)
+            if (ex.sombra) {
+              // Sombra: o efeito roda num savepoint que é sempre desfeito; fica só o que ele teria feito.
+              const r = await desfazendo(tx, (sp) => passo.executar(s, { tx: sp, ctx }))
+              await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, r.dados)
+              return
+            }
             const dec = autorizarFerramenta(ctx, f, { setor_id: ex.setor, cliente_id: ex.cliente_id })
             if (!dec.permitido) throw new ErroPermissao(passo.ferramenta, dec.motivo)
             let aprovacao_id: string | null = null
@@ -448,6 +462,11 @@ export class Motor {
             return
           }
           case 'externo': {
+            if (ex.sombra) {
+              // Sombra: o órgão nunca é chamado.
+              await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, { ...(passo.sombra?.(s) ?? {}), sombra: true, ja_feito: false })
+              return
+            }
             const f = this.ferramenta(passo.ferramenta)
             const ap = s.saidas[passo.aprovacao] as { argumentos?: Record<string, unknown>; cartao_id?: string } | undefined
             const argumentos = ap?.argumentos
@@ -574,6 +593,11 @@ export class Motor {
     const argumentos = passo.argumentos(s)
     const parsed = passo.esquema.safeParse(argumentos)
     if (!parsed.success) throw new ErroRegra('ARGUMENTOS_INVALIDOS', `Argumentos do cartão inválidos: ${parsed.error.issues.map((i) => i.path.join('.') + ' ' + i.message).join('; ')}`)
+    if (ex.sombra) {
+      // Sombra: nenhum cartão chega a uma pessoa; registra o que seria pedido e segue (o efeito será desfeito).
+      await this.concluirPasso(tx, ex, job.ordem, job.tentativa, passo, { dispensada: true, sombra: true, cartao_id: 'sombra', decidido_por: 'sombra', argumentos: parsed.data, resumo: passo.resumo(s) })
+      return
+    }
     const ctx = await this.contextoDaExecucao(tx, ex)
     const dec = autorizarFerramenta(ctx, f, { setor_id: ex.setor, cliente_id: ex.cliente_id })
     if (!dec.permitido) throw new ErroPermissao(passo.ferramenta, dec.motivo)
@@ -653,6 +677,13 @@ export class Motor {
   }
 
   private async cartaoNaoConsegui(tx: Tx, ex: LinhaExecucao, p: Procedimento, sobre: string, falhas: ResultadoNomeado[], ultima: unknown) {
+    if (ex.sombra) {
+      // Sombra: o integrante não decidiu (iria ao cartão "não consegui"). A comparação conta isso como "cartão".
+      await tx`update execucao set estado = 'cancelada', concluida_em = now(),
+               erro = ${tx.json({ codigo: 'SOMBRA_NAO_DECIDIU', mensagem: 'Iria ao cartão "não consegui".', passo: sobre, falhas } as never)} where id = ${ex.id}`
+      await enfileirar(this.d.boss, tx, FILAS.admitir, { escritorio_id: ex.escritorio_id })
+      return
+    }
     const f = { nome: 'execucao.resolver', modulo: 'painel', nivel: 'executar', setor: ex.setor } as Ferramenta
     const pode = await this.aprovadores(tx, ex, f)
     const resumo = `Não consegui concluir ${p.nome}: ${falhas.map((x) => x.mensagem).join(' ')}`
@@ -1003,20 +1034,20 @@ export class Motor {
       }
       return {
         execucao_id: ex.id, procedimento: `${ex.procedimento_id}@${ex.versao}`, estado: ex.estado as EstadoExecucao, passo: ex.passo_nome,
-        passo_atual: ex.passo_atual, cliente_id: ex.cliente_id, cartao_id: ex.cartao_id, posicao_na_fila, saida: ex.saida, erro: ex.erro,
+        passo_atual: ex.passo_atual, cliente_id: ex.cliente_id, cartao_id: ex.cartao_id, posicao_na_fila, saida: ex.saida, erro: ex.erro, sombra: Boolean(ex.sombra), setor: ex.setor,
         custo: { centavos: ex.gasto_centavos, tokens: ex.gasto_tokens, orcamento_centavos: ex.orcamento_centavos }, passos,
       }
     })
   }
 
   private async custoDe(tx: Tx, execucao_id: string) {
-    const [r] = await tx`select coalesce(sum(centavos), 0)::int as centavos, count(*)::int as chamadas from chamada_modelo where execucao_id = ${execucao_id}`
+    const [r] = await tx`select coalesce(sum(centavos), 0)::float8 as centavos, count(*)::int as chamadas from chamada_modelo where execucao_id = ${execucao_id}`
     return r
   }
 
   /** O integrante só é acordado com `execucao_concluida` quando há algo a dizer (AGENTICO 12, encaixe 7). */
   private async acordarIntegrante(tx: Tx, ex: LinhaExecucao, estado: string, resumo: ResumoParaIntegrante) {
-    if (!ex.integrante_id) return
+    if (!ex.integrante_id || ex.sombra) return
     await tx`insert into item_fila (escritorio_id, integrante_id, tipo, status, enfileirado_em, execucao_id, prioridade, causado_por_evento_id, resumo)
              values (${ex.escritorio_id}, ${ex.integrante_id}, 'execucao_concluida', 'pendente', now(), ${ex.id}, ${ex.prioridade}, ${ex.causado_por_evento_id},
              ${tx.json({ estado, ...resumo } as never)})`
@@ -1038,6 +1069,24 @@ export class Motor {
   }
 
   estaTerminada = (e: EstadoExecucao) => TERMINAIS.includes(e)
+}
+
+/** Desfaz sempre o que `fn` gravou (savepoint), devolvendo o que ela calculou: o efeito da sombra. */
+class Desfeito extends Error {
+  constructor(readonly valor: unknown) {
+    super('desfeito')
+  }
+}
+async function desfazendo<T>(tx: Tx, fn: (sp: Tx) => Promise<T>): Promise<T> {
+  try {
+    await tx.savepoint(async (sp) => {
+      throw new Desfeito(await fn(sp as unknown as Tx))
+    })
+  } catch (e) {
+    if (e instanceof Desfeito) return e.valor as T
+    throw e
+  }
+  throw new Error('inalcançável')
 }
 
 /** Conteúdo de fora vai ao modelo como dado, nunca como instrução (R5). */
