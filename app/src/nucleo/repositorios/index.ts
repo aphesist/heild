@@ -44,7 +44,11 @@ export class RepositorioTarefas extends Repositorio<'tarefa'> {
   /** Troca o status pela ferramenta da transição. Concluída é final: reabrir cria tarefa nova. */
   mudarStatus(id: Id, status: StatusTarefa, op: OpcoesEscrita & { motivo?: string } = {}): Tarefa {
     const t = this.exigir(id)
-    if (t.status === status) return t
+    if (t.status === status) {
+      // Nada muda, mas a resposta não pode dizer "ok" a quem não pode: confere a permissão do mesmo jeito.
+      this.autorizar(op.ferramenta ?? ferramentaDaTransicao[status], t, op)
+      return t
+    }
     if (status === 'cancelada') return this.cancelar(id, op.motivo ?? '', op)
     if (t.status === 'cancelada') throw new ErroRegra('Tarefa cancelada não volta: crie uma tarefa nova.')
     const quando = agora()

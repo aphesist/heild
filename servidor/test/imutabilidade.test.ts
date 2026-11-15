@@ -47,7 +47,7 @@ describe('mensagem interna', () => {
 
 describe('nada se apaga sozinho', () => {
   it('tarefa, cliente e evento não se apagam pela API', async () => {
-    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' limit 1`
+    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' order by id limit 1`
     for (const [operacaoNome, id] of [['tarefas.excluir', t.id], ['clientes.excluir', 'c1']]) {
       const r = await operacao(app, adm, { tipo: 'operacao', operacao: operacaoNome, argumentos: [id] })
       expect(r.corpo.codigo, operacaoNome).toBe('EXCLUSAO_PROIBIDA')
@@ -57,7 +57,7 @@ describe('nada se apaga sozinho', () => {
   })
 
   it('evento é imutável: regravar um evento existente é recusado', async () => {
-    const criado = await ferramenta(app, adm, 'tarefa.atualizar', { tarefa_id: (await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and status = 'a_fazer' limit 1`)[0].id, campos: { prioridade: 'alta' } })
+    const criado = await ferramenta(app, adm, 'tarefa.atualizar', { tarefa_id: (await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and status = 'a_fazer' order by id limit 1`)[0].id, campos: { titulo: `Título único ${Date.now()}` } })
     expect(criado.status).toBe(200)
     const evId = criado.corpo.evento_id
     const r = await operacao(app, adm, { tipo: 'linhas', gravar: [{ tabela: 'evento', linha: { id: evId, nome: 'tarefa.concluir', ferramenta: 'evento.listar', texto: 'reescrito' } }], remover: [] })
@@ -82,7 +82,7 @@ describe('nada se apaga sozinho', () => {
   })
 
   it('status não muda por tarefa.atualizar: só pela ferramenta da transição', async () => {
-    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and status = 'a_fazer' limit 1`
+    const [t] = await banco()`select id from tarefa where escritorio_id = 'esc-andrade' and status = 'a_fazer' order by id limit 1`
     const r = await ferramenta(app, adm, 'tarefa.atualizar', { tarefa_id: t.id, campos: { status: 'concluida' } })
     expect(r.status).toBe(400)
     expect(r.corpo.codigo).toBe('ENTRADA_INVALIDA')

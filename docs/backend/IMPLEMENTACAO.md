@@ -31,7 +31,7 @@ O wireframe de demonstração (branch `wireframe`, na Vercel, com dados fictíci
    - no banco: gatilhos novos para as entidades centrais e para a decisão do cartão.
 7. **O app fala com a API sem mudar as telas** (`VITE_HEILD_BANCO=api`). O `fundacao-fumaca.cjs` passa inteiro nesse modo.
 8. **Contratos gerados de uma fonte só:** o OpenAPI 3.1 e o esquema das ferramentas, no formato do `tools/list` do MCP, saem do Zod do pacote de domínio. O retrato fica em `servidor/contratos/`, e um teste falha se ele estiver velho.
-9. **61 testes da API contra Postgres real:** autorização, isolamento entre escritórios, idempotência, imutabilidade, cadeia e contratos.
+9. **62 testes da API contra Postgres real:** autorização, isolamento entre escritórios, idempotência, imutabilidade, cadeia e contratos.
 10. **Padrões profissionais registrados** em [`PADROES.md`](PADROES.md), com um checklist por endpoint e serviço. No código: timeouts no HTTP e no Postgres, pool, limite de taxa por ator, cabeçalhos de segurança, id do pedido e desligamento gracioso.
 11. **Fora do B1, por combinação:** o motor de procedimentos, a fila, o servidor MCP e os conectores. O encaixe com a B2 está no fim desta seção.
 
