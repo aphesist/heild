@@ -387,6 +387,20 @@ export const ferramentasTipadas: FerramentaTipada[] = [
 const indice = new Map(ferramentasTipadas.map((f) => [f.nome, f]))
 export const ferramentaTipada = (nome: string): FerramentaTipada | undefined => indice.get(nome)
 
+/**
+ * Registro de fora (B2): as operações de processo dos procedimentos entram no mesmo catálogo
+ * (aparecem em /v1/ferramentas, no OpenAPI e no MCP) sem este pacote depender do motor.
+ * Nome repetido é erro: o catálogo não troca uma ferramenta em silêncio.
+ */
+export function registrarFerramentaTipada(f: FerramentaEscrita): void {
+  if (indice.has(f.nome)) {
+    if (indice.get(f.nome) === f) return
+    throw new Error(`Ferramenta tipada repetida: ${f.nome}`)
+  }
+  ferramentasTipadas.push(f)
+  indice.set(f.nome, f)
+}
+
 /** Nome exposto a APIs de modelo que só aceitam [a-zA-Z0-9_-] (AGENTICO 7): `tarefa.concluir` ↔ `tarefa_concluir`. */
 export const nomeExposto = (nome: string) => nome.replace(/\./g, '_')
 export const nomeDoExposto = (exposto: string) => ferramentasTipadas.find((f) => nomeExposto(f.nome) === exposto)?.nome

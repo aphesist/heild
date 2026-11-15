@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Motor de procedimentos, fila, runner de operários e servidor MCP do backend da Heild (sessão B2).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "engines": {
     "node": ">=24"
   },
@@ -12,7 +15,8 @@
     "test": "vitest run",
     "banco": "bash scripts/banco.sh",
     "demo": "tsx scripts/demo.ts",
-    "agentico": "tsx scripts/agentico-real.ts"
+    "agentico": "tsx scripts/agentico-real.ts",
+    "worker": "tsx scripts/worker.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

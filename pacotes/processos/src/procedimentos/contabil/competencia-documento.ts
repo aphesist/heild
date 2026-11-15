@@ -57,7 +57,7 @@ export const ctbCompetenciaDoc = definirProcedimento({
   orcamento: { centavos: 5, tokens: 6_000 },
   cliente: (e) => e.cliente_id,
   gatilho: {
-    evento: 'documento.registrar',
+    evento: 'documento.criar',
     entrada: (ev) => {
       const documento_id = ev.argumentos_resumo?.documento_id ?? ev.resultado_ref
       return documento_id && ev.cliente_id ? { documento_id, cliente_id: ev.cliente_id } : null

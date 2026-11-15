@@ -13,8 +13,9 @@
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["../app/src/*"],
-      "@heild/dominio": ["../pacotes/dominio/src/index.ts"]
+      "@heild/dominio": ["../pacotes/dominio/src/index.ts"],
+      "@heild/processos": ["../pacotes/processos/src/index.ts"]
     }
   },
-  "include": ["src", "test", "scripts", "../pacotes/dominio/src"]
+  "include": ["src", "test", "scripts", "../pacotes/dominio/src", "../pacotes/processos/src"]
 }

@@ -57,6 +57,8 @@ export interface DependenciasMotor {
 
 export interface OpcoesInicio {
   chave_idempotencia?: string
+  /** Id já devolvido a quem pediu (a API responde 202 com ele antes de o worker abrir a execução). */
+  execucao_id?: string
   causado_por_evento_id?: string | null
   tarefa_id?: string | null
   /** Integrante que conduz (acorda com `execucao_concluida`). Padrão: o integrante do setor. */
@@ -217,6 +219,16 @@ export class Motor {
         }
       }
       const [emVoo] = await tx`select id, estado from execucao where procedimento_id = ${p.id} and hash_entrada = ${hash_entrada} and estado in ${tx(EM_VOO)} order by criado_em limit 1`
+      if (emVoo && o.execucao_id) {
+        // Quem pediu já recebeu este id: fica registrado como pedido repetido, apontando a execução que segue.
+        await tx`insert into execucao (escritorio_id, id, procedimento_id, versao, setor, cliente_id, entrada, hash_entrada, estado, ator_tipo, ator_id, ator_nome,
+                   origem, prioridade, pagador_tipo, orcamento_centavos, orcamento_tokens, chave_idempotencia, saida, erro, concluida_em)
+                 values (${ctx.escritorio_id}, ${o.execucao_id}, ${p.id}, ${p.versao}, ${p.setor}, ${cliente_id}, ${tx.json(dados as never)}, ${hash_entrada}, 'cancelada',
+                   ${tipoDoAtor(ctx.ator)}, ${idDoAtor(ctx.ator)}, ${nomeDoAtor(ctx.ator)}, ${ctx.origem}, ${prioridadePorOrigem[ctx.origem]}, 'bolsa_setor', 0, 0,
+                   ${o.chave_idempotencia ?? `auto:${crypto.randomUUID()}`}, ${tx.json({ mesma_execucao: emVoo.id } as never)},
+                   ${tx.json({ codigo: 'PEDIDO_REPETIDO', mensagem: 'Já havia uma execução igual em andamento; ela segue.', execucao_existente: emVoo.id } as never)}, now())`
+        return { execucao_id: emVoo.id, estado: emVoo.estado, nova: false }
+      }
       if (emVoo) return { execucao_id: emVoo.id, estado: emVoo.estado, nova: false }
 
       const [cfg] = await tx`select ativo, limite_centavos_execucao from procedimento_config where procedimento_id = ${p.id}`
@@ -229,10 +241,10 @@ export class Motor {
       const memoria = await this.lerMemoria(tx, p)
       const perguntar = Boolean(o.perguntar_responsavel) && !responsavel_id && (ctx.origem === 'evento' || ctx.origem === 'job')
       const [ex] = await tx`
-        insert into execucao (escritorio_id, procedimento_id, versao, setor, cliente_id, tarefa_id, entrada, hash_entrada, estado,
+        insert into execucao (escritorio_id, id, procedimento_id, versao, setor, cliente_id, tarefa_id, entrada, hash_entrada, estado,
           ator_tipo, ator_id, ator_nome, solicitante_id, responsavel_id, integrante_id, origem, prioridade, segundo_plano,
           causado_por_evento_id, pagador_tipo, pagador_id, orcamento_centavos, orcamento_tokens, chave_idempotencia, contexto)
-        values (${ctx.escritorio_id}, ${p.id}, ${p.versao}, ${p.setor}, ${cliente_id}, ${o.tarefa_id ?? null}, ${tx.json(dados as never)}, ${hash_entrada},
+        values (${ctx.escritorio_id}, ${o.execucao_id ?? `ex${crypto.randomUUID().replaceAll('-', '')}`}, ${p.id}, ${p.versao}, ${p.setor}, ${cliente_id}, ${o.tarefa_id ?? null}, ${tx.json(dados as never)}, ${hash_entrada},
           ${perguntar ? 'aguardando_cartao' : 'pendente'}, ${tipoDoAtor(ctx.ator)}, ${idDoAtor(ctx.ator)}, ${nomeDoAtor(ctx.ator)}, ${solicitante_id},
           ${responsavel_id}, ${integrante_id}, ${ctx.origem}, ${prioridadePorOrigem[ctx.origem]}, ${o.segundo_plano ?? ctx.origem === 'job'},
           ${o.causado_por_evento_id ?? null}, ${pagador.tipo}, ${pagador.id}, ${orcamento_centavos}, ${p.orcamento.tokens},

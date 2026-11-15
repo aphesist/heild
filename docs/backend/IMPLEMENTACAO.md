@@ -447,7 +447,7 @@ app/supabase/migrations/20261115210000_b2_processos.sql
 | | CTB-ECD-TRANSMITIR | CTB-COMPETENCIA-DOC |
 | --- | --- | --- |
 | Operação | `contabil.ecd.conferir_e_transmitir` | `contabil.documento.classificar_competencia` |
-| Disparo | Pessoa (chat, tela, MCP) ou integrante | Evento `documento.registrar` → gatilho, direto no motor |
+| Disparo | Pessoa (chat, tela, MCP) ou integrante | Evento `documento.criar` (o que o repositório de documentos grava) → gatilho, direto no motor |
 | Determinístico | Carrega o arquivo lido, confere CNPJ, exercício, partidas, saldos por conta, 12 competências fechadas e entrega repetida; separa as contas atípicas | Campo de competência, data de emissão de nota e período informado; candidatas extraídas do texto |
 | Operário | `ctb.ecd.apontar_atencao@1`: aponta, entre as atípicas, o que olhar (sem número) | `ctb.competencia.escolher@1`: escolhe entre as candidatas; só quando a regra não resolve |
 | Validadores | `apontamentos_nas_candidatas`, `texto_sem_numero` | `competencia_nas_candidatas`, `confianca_minima:0.9`, `competencia_nao_futura`, `competencia_aberta` |
@@ -497,24 +497,55 @@ O roteiro sai com código 1 se houver **qualquer erro crítico** (critério do d
 
 O gabarito tem dez casos de competência (oito decidíveis e dois em que o certo é **não** decidir) e uma ECD com uma anomalia plantada (adiantamento a sócios que sobe 900%). A frente de IA amplia com casos reais anonimizados e com cartões editados por pessoas (02, 14.2), e é com esse conjunto que roda o piloto pré-registrado (AVALIAÇÃO, 11).
 
-### O encaixe com a B1
+### O encaixe com a B1 (ligado)
 
-1. **Fila na transação.** `bossNaTransacao(tx)` é o `executeSql` que a B1 deixou combinado para `enfileirarNaTransacao` (`servidor/src/executor/jobs.ts`).
-   - Para os pedidos de `pedirJob` dos repositórios entrarem na fila, o corpo dessa função passa a ser `boss.send(fila, dados, { db: bossNaTransacao(tx), singletonKey, startAfter, priority })`.
-   - Nenhuma operação da B1 pede job hoje, então a B2 não mexeu no executor dela.
-2. **Eventos.** A B2 grava os eventos dela na **mesma cadeia** (`cadeia_evento`), com `geneseDaCadeia` e `hashDoEvento` do `@heild/dominio`, e o teste confere com `verificarCadeia`.
-   - Para o despachante ver também os eventos das telas, o executor da B1 chama `PortaEventos.aoGravarEvento(tx, escritorio_id, evento_id, resultado)` depois de gravar cada evento. Isso falta ligar.
-   - Enquanto não estiver ligado, os testes gravam o `documento.registrar` pela porta da B2.
-3. **Ferramentas.** As ferramentas da B2 ficam num registro próprio (`RegistroFerramentas`), com o envelope do AGENTICO 8: as operações de processo, `execucao.obter`, `execucao.retomar`, `aprovacao.decidir` para cartões de execução, `procedimento.listar`, `validador.executar` e `memoria.propor`.
-   - Falta registrá-las no catálogo tipado da B1 (`pacotes/dominio/src/ferramentas.ts`), para aparecerem em `/v1/ferramentas` e no OpenAPI, com `chamada` apontando para `motor.iniciar` (a rota responde 202 `em_execucao`).
-   - Falta também o `aprovacao.decidir` da B1 delegar a `motor.decidirCartao` quando o cartão tem `execucao_id`.
-   - Os nomes, os esquemas e o envelope já são os do catálogo.
-4. **Autorização.** É a `autorizar` do `@heild/dominio`.
-   - As ferramentas novas da B2 ainda não estão no catálogo do wireframe e passam pela mesma ordem do 3.2 em `autorizarFerramenta` (`src/dominio.ts`), com a definição na mão.
-   - O desvio some quando o catálogo aceitar registro de fora, ou quando essas ferramentas entrarem nele.
-5. **Perfil e tokens.** `carregarPerfil` (`src/contexto.ts`) é mínimo e lê vínculos, exceções, carteira e assinatura sob RLS; trocar por `perfilDeConta` da B1.
-   - O MCP recebe `autenticar(req) → ContextoExec` por injeção.
-   - O token de serviço e o token de integrante de 15 minutos são da B1, e o cabeçalho de demonstração dela serve até lá.
+A B2 roda **dentro da API da B1** e pelo **executor dela**. O pedido de processo segue este caminho:
+
+```
+POST /v1/ferramentas/contabil.ecd.conferir_e_transmitir   (Idempotency-Key)
+  → executor da B1: Zod, autorizar (a mesma da tela), idempotência
+  → operação procedimentos.CTB-ECD-TRANSMITIR.iniciar: pedirJob('procedimento.iniciar') + evento do pedido
+  → na MESMA transação: idempotência, evento na cadeia e job no pg-boss
+  → 202 { resultado: 'em_execucao', execucao_id }
+worker da B2 → abre a execução com esse id → passos → cartão
+POST /v1/ferramentas/aprovacao.decidir → motor da B2 retoma → transmissão → eventos na mesma cadeia
+```
+
+| Peça da B1 | O que a B2 ligou |
+| --- | --- |
+| `enfileirarNaTransacao` (`servidor/src/executor/jobs.ts`) | Com a fila ligada (`ligarFila`), cada `pedirJob` vai para o pg-boss pela mesma conexão e o mesmo commit (`bossNaTransacao`). Sem fila ligada, continua recusando a transação inteira |
+| Eventos gravados pelo executor | `despacharEventos` (chamado em `aplicar`, depois da cadeia) enfileira o despacho de cada evento, na mesma transação. Os gatilhos da B2 veem os eventos das telas. O teste prova com um `documentos.criar` pela API |
+| Catálogo tipado (`@heild/dominio`) | `registrarFerramentaTipada`, que é só acréscimo. Cada procedimento vira uma ferramenta de escrita e entra em `/v1/ferramentas`, no OpenAPI e em `servidor/contratos/`. A operação de servidor que ela chama fica no registro de operações. Os dois são feitos em `servidor/src/b2.ts` |
+| `aprovacao.decidir` | Na rota, o cartão com `execucao_id` (ou de memória do setor) vai ao motor da B2, que confere a pessoa e o `pode_aprovar` e retoma a execução. O vocabulário da B1 (`aprovado`, `recusado`, `editado_e_aprovado`) é aceito. Os outros cartões seguem o executor da B1 |
+| Ferramentas do motor | `execucao.obter`, `execucao.retomar`, `procedimento.listar`, `validador.executar` e `memoria.propor` são servidas pela mesma rota `/v1/ferramentas/{nome}`, com a sessão da B1 e o envelope do AGENTICO 8 |
+| Banco | O pg-boss do processo da API conecta como `app_api` no modo produtor: só enfileira, sem criar esquema, migrar ou supervisionar. O worker, dono do esquema `pgboss`, concede só DML na fila ao `api_executor` e ao `app_api` (`concederFila`). Os gatilhos de imutabilidade da B2 respeitam a restauração da demonstração (`heild.restaurando`) |
+
+Para rodar tudo junto localmente:
+
+```bash
+npm run preparar -w @heild/servidor      # banco heild com a semente (B1)
+npm run worker -w @heild/processos       # worker da B2: filas, passos, operários, despachante
+npm run dev                              # API da B1 com a fila ligada (sem worker, sobe sem as operações de processo)
+```
+
+O teste `servidor/test/b2-ponta-a-ponta.test.ts`, na suíte da B1, roda a API (login `app_api`, pg-boss produtor) e o worker da B2 lado a lado. Ele prova:
+
+- as operações de processo no catálogo, no OpenAPI e na lista de ferramentas;
+- **o caminho inteiro:**
+  - 202 com o id;
+  - o evento do pedido na cadeia;
+  - a repetição pela mesma chave, que devolve a mesma execução;
+  - o cartão só para a pessoa (o integrante recebe 403);
+  - a aprovação pela API e uma transmissão só, com o `aprovacao_id` no evento;
+  - `auditoria.verificar_cadeia` conferindo os eventos da B1 e da B2 juntos;
+- pessoa sem o setor recebe 403 na hora, sem execução;
+- um documento criado pela API acorda o gatilho da B2, que classifica a competência sem modelo e com `causado_por_evento_id`.
+
+Ainda mínimos, para trocar quando a B1 entregar o equivalente:
+
+- `carregarPerfil` (`src/contexto.ts`), que deve passar a usar `perfilDeConta`;
+- `autorizarFerramenta` (`src/dominio.ts`) para as ferramentas da B2 fora do catálogo do wireframe;
+- o token de integrante de 15 minutos no MCP.
 
 ### Desvios do desenho, e por quê
 
@@ -531,7 +562,8 @@ O gabarito tem dez casos de competência (oito decidíveis e dois em que o certo
 
 ### O que falta (depois da B2)
 
-- Ligar no executor da B1: `enfileirarNaTransacao` com o pg-boss, `aoGravarEvento` no despachante, as ferramentas da B2 no catálogo tipado e `aprovacao.decidir` delegando os cartões de execução.
+- Pôr no OpenAPI as ferramentas do motor (`execucao.*`, `procedimento.listar`, `validador.executar`, `memoria.propor`). Hoje elas aparecem em `GET /v1/ferramentas` e respondem pela rota, mas não estão no retrato dos contratos.
+- Montar o MCP (`rotasMcp`) no app da B1, com o token de serviço e o de integrante dela.
 - Token de integrante (15 minutos) e fila do integrante com espera longa e pulso (`/v1/interno/fila/integrantes/pegar`): a fila já existe em `item_fila`, mas falta a rota.
 - SSE do progresso da execução (`ProgressoTrabalho`).
 - `contexto.carregar` e `cliente.resolver`.

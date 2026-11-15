@@ -116,7 +116,7 @@ describe('registro das operações e encaixe da fila', () => {
     const pedidos: unknown[] = []
     comColetorDeJobs((j) => pedidos.push(j), () => pedirJob({ fila: 'coletor.dfe', dados: { cliente_id: 'c1' }, singleton: 'c1:2026-10' }))
     expect(pedidos).toEqual([{ fila: 'coletor.dfe', dados: { cliente_id: 'c1' }, singleton: 'c1:2026-10' }])
-    await expect(enfileirarNaTransacao(null as never, pedidos as never)).rejects.toThrow(/sessão B2/)
+    await expect(enfileirarNaTransacao(null as never, pedidos as never)).rejects.toThrow(/fila não está ligada/)
     await expect(enfileirarNaTransacao(null as never, [])).resolves.toBeUndefined()
   })
 })

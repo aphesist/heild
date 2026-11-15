@@ -255,8 +255,11 @@ alter table public.evento add column if not exists custo jsonb;
 create trigger tocar before update on public.execucao for each row execute function public.tocar_atualizado_em();
 create trigger tocar before update on public.efeito_externo for each row execute function public.tocar_atualizado_em();
 create trigger tocar before update on public.bolsa_setor for each row execute function public.tocar_atualizado_em();
-create trigger so_insercao before update or delete on public.chamada_modelo for each row execute function public.recusar_operacao('chamada_modelo é só de inserção');
-create trigger so_insercao before update or delete on public.entrega_obrigacao for each row execute function public.recusar_operacao('entrega_obrigacao é só de inserção');
+-- A restauração da demonstração (marca heild.restaurando, da B1) apaga o escritório inteiro em cascata.
+create trigger so_insercao before update or delete on public.chamada_modelo for each row
+  when (current_setting('heild.restaurando', true) is distinct from 'sim') execute function public.recusar_operacao('chamada_modelo é só de inserção');
+create trigger so_insercao before update or delete on public.entrega_obrigacao for each row
+  when (current_setting('heild.restaurando', true) is distinct from 'sim') execute function public.recusar_operacao('entrega_obrigacao é só de inserção');
 
 create or replace function public.passo_concluido_imutavel() returns trigger language plpgsql as $$
 begin
@@ -266,7 +269,8 @@ begin
   if tg_op = 'DELETE' then return old; end if;
   return new;
 end $$;
-create trigger passo_imutavel before update or delete on public.passo_execucao for each row execute function public.passo_concluido_imutavel();
+create trigger passo_imutavel before update or delete on public.passo_execucao for each row
+  when (current_setting('heild.restaurando', true) is distinct from 'sim') execute function public.passo_concluido_imutavel();
 
 create or replace function public.efeito_confirmado_imutavel() returns trigger language plpgsql as $$
 begin
@@ -276,7 +280,8 @@ begin
   if tg_op = 'DELETE' then return old; end if;
   return new;
 end $$;
-create trigger efeito_imutavel before update or delete on public.efeito_externo for each row execute function public.efeito_confirmado_imutavel();
+create trigger efeito_imutavel before update or delete on public.efeito_externo for each row
+  when (current_setting('heild.restaurando', true) is distinct from 'sim') execute function public.efeito_confirmado_imutavel();
 
 do $$
 declare t text;

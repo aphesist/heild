@@ -27,7 +27,7 @@ import { BancoServidor, PrecisaCarregar } from './banco-servidor.ts'
 import { gravarEventos } from './cadeia.ts'
 import { colunasDe, prepararLinha } from './colunas.ts'
 import { ErroApi } from './erro.ts'
-import { enfileirarNaTransacao } from './jobs.ts'
+import { despacharEventos, enfileirarNaTransacao } from './jobs.ts'
 import { aplicarLinhas } from './linhas.ts'
 import { limparArgumentos, operacoes } from './operacoes.ts'
 
@@ -251,6 +251,8 @@ async function aplicar(tx: Tx, bs: BancoServidor, p: Pedido): Promise<Aplicado> 
       anotar('evento', g)
       r.eventos.push(String(g.id))
     }
+    // Os gatilhos da B2 veem também os eventos das telas, na mesma transação.
+    await despacharEventos(tx, esc, gravados)
   }
   return r
 }

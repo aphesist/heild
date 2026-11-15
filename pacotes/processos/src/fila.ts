@@ -6,6 +6,8 @@ import { bossNaTransacao } from './banco.ts'
 export const FILAS = {
   /** Um job por passo de procedimento, chave (execução, passo, tentativa). */
   passo: 'procedimento.passo',
+  /** Pedido de processo vindo da API (executor da B1): abre a execução no worker. */
+  iniciar: 'procedimento.iniciar',
   /** Passos de modelo: runner dos operários (o único serviço com a chave do fornecedor). */
   operario: 'operario.executar',
   /** Admissão: tira execuções `pendente` da fila respeitando prioridade e limites. */
@@ -25,11 +27,16 @@ export interface OpcoesFila {
   esperaInicialSegundos?: number
 }
 
-export async function criarBoss(url: string, opcoes: { supervisaoSegundos?: number } = {}) {
+/**
+ * `produtor`: só enfileira (o processo da API). Não cria nem migra o esquema, não supervisiona
+ * e não agenda: isso é do worker, dono do esquema `pgboss`.
+ */
+export async function criarBoss(url: string, opcoes: { supervisaoSegundos?: number; produtor?: boolean } = {}) {
   const boss = new PgBoss({
     connectionString: url,
     schema: 'pgboss',
     max: 5,
+    ...(opcoes.produtor ? { supervise: false, migrate: false, createSchema: false, schedule: false } : {}),
     ...(opcoes.supervisaoSegundos ? { superviseIntervalSeconds: opcoes.supervisaoSegundos, monitorIntervalSeconds: opcoes.supervisaoSegundos } : {}),
   } as ConstructorParameters<typeof PgBoss>[0])
   boss.on('error', (e: unknown) => {
@@ -37,6 +44,23 @@ export async function criarBoss(url: string, opcoes: { supervisaoSegundos?: numb
   })
   await boss.start()
   return boss
+}
+
+/**
+ * Quem pode enfileirar sem ser dono do esquema: o papel de escrita (`api_executor`, a transação do
+ * efeito) e o login da API (o pool do próprio pg-boss). Só DML nas tabelas da fila; nada de DDL.
+ * Roda no worker, que é o dono do esquema.
+ */
+export async function concederFila(sql: import('./banco.ts').Sql, papeis: string[]) {
+  for (const papel of papeis) {
+    const [existe] = await sql`select 1 from pg_roles where rolname = ${papel}`
+    if (!existe) continue
+    const p = sql(papel)
+    await sql`grant usage on schema pgboss to ${p}`
+    await sql`grant select, insert, update, delete on all tables in schema pgboss to ${p}`
+    await sql`grant usage, select on all sequences in schema pgboss to ${p}`
+    await sql`grant execute on all functions in schema pgboss to ${p}`
+  }
 }
 
 export async function criarFilas(boss: PgBoss, o: OpcoesFila = {}) {
@@ -48,6 +72,7 @@ export async function criarFilas(boss: PgBoss, o: OpcoesFila = {}) {
     [FILAS.passo, { expireInSeconds: expira, deadLetter: FILAS.falha, ...retry }],
     [FILAS.operario, { expireInSeconds: expira, deadLetter: FILAS.falha, ...retry }],
     [FILAS.admitir, { expireInSeconds: 60, retryLimit: 10, retryDelay: 1, notify: true }],
+    [FILAS.iniciar, { expireInSeconds: 120, ...retry }],
     [FILAS.despachar, { expireInSeconds: 120, ...retry }],
     [FILAS.expirarCartao, { expireInSeconds: 60, retryLimit: 5 }],
   ]

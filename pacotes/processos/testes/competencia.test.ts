@@ -20,7 +20,7 @@ afterAll(async () => {
 
 async function preparar(o: { executa_sozinho?: boolean; perguntar?: boolean; custo?: 'responsavel' } = {}) {
   const s = await semear(admin)
-  await admin`insert into gatilho (escritorio_id, evento_nome, procedimento_id, setor, perguntar_responsavel) values (${s.esc}, 'documento.registrar', 'CTB-COMPETENCIA-DOC', 'contabil', ${o.perguntar ?? false})`
+  await admin`insert into gatilho (escritorio_id, evento_nome, procedimento_id, setor, perguntar_responsavel) values (${s.esc}, 'documento.criar', 'CTB-COMPETENCIA-DOC', 'contabil', ${o.perguntar ?? false})`
   await admin`insert into procedimento_config (escritorio_id, procedimento_id, executa_sozinho) values (${s.esc}, 'CTB-COMPETENCIA-DOC', ${o.executa_sozinho ?? true})`
   if (o.custo) await admin`update escritorio set configuracao = ${admin.json({ custo_integrante: o.custo })} where id = ${s.esc}`
   return s
@@ -31,7 +31,7 @@ async function registrarDocumento(sql: Sql, s: Semente, documento_id: string, ti
   const ctx = await pessoa(sql, s.esc, 'u-ana', 'tela')
   return comEscritorio(sql, s.esc, (tx) =>
     h.eventos.gravar(tx, ctx, {
-      nome: 'documento.registrar', ferramenta: 'documento.registrar', nivel: 'executar', resultado: 'ok', texto: 'Documento recebido',
+      nome: 'documento.criar', ferramenta: 'documento.registrar', nivel: 'executar', resultado: 'ok', texto: 'Documento recebido',
       cliente_id: s.cliente, argumentos_resumo: { documento_id, tipo }, resultado_ref: documento_id,
     }),
   )

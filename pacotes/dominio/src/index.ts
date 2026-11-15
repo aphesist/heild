@@ -19,8 +19,9 @@ export { ferramentas as catalogo, ferramenta as ferramentaDoCatalogo, type Ferra
 export { permissoesDoPerfil, type Permissoes } from '@/nucleo/permissoes/telas'
 export { nomeDoAtor, idDoAtor, type Ator, type Contexto, type Perfil } from '@/nucleo/permissoes/perfil'
 export { contaParaTela, perfilDeConta } from '@/nucleo/mapeadores'
-export { Banco, comBanco, type Transacao } from '@/nucleo/banco'
+export { Banco, bancoAtual, comBanco, type Transacao } from '@/nucleo/banco'
 export { adaptadorMemoria, fotografiaVazia } from '@/nucleo/banco/navegador'
+export { contextoAtual } from '@/nucleo/repositorios/contexto'
 export { repos, comoAtor, definirGeradorId, definirModoAprovacao, ErroAprovacao, novoIdPadrao, registrarEvento, Repositorio, type Repos, type RegrasEntidade } from '@/nucleo/repositorios'
 export { escritoriosDeExemplo, escritorioDeExemplo } from '@/nucleo/semente'
 

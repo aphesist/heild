@@ -48,20 +48,14 @@ export async function comEscritorio<T>(sql: Sql, escritorio_id: string, fn: (tx:
 
 /**
  * Adaptador do pg-boss para a transação atual: o job entra na MESMA transação do efeito e do
- * evento (o outbox é a própria fila, STACK 4). O esquema `pgboss` não é do papel do escritório,
- * então o SQL do pg-boss roda com o papel da conexão (o do worker) e volta ao `api_executor`.
- * É a implementação de `enfileirarNaTransacao` que a B1 deixou combinada (servidor/src/executor/jobs.ts).
+ * evento (o outbox é a própria fila, STACK 4). É a implementação de `enfileirarNaTransacao` que a B1 deixou combinada (servidor/src/executor/jobs.ts).
  */
 export function bossNaTransacao(tx: Tx) {
   return {
     async executeSql(text: string, values: unknown[] = []) {
-      await tx`set local role none`
-      try {
-        const rows = await tx.unsafe(text, values as never[])
-        return { rows: rows as unknown as any[] }
-      } finally {
-        await tx`select set_config('role', ${PAPEL_ESCRITA}, true)`
-      }
+      // Roda com o papel da transação (api_executor), que recebeu só DML nas tabelas da fila (concederFila).
+      const rows = await tx.unsafe(text, values as never[])
+      return { rows: rows as unknown as any[] }
     },
   }
 }
