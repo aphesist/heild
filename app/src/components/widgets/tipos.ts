@@ -55,11 +55,12 @@ export function tamanhoValido(def: Pick<DefWidget, 'tamanhos'>, pedido: TamanhoW
 /**
  * Vão que o widget ocupa numa grade de `colunas`. Quando a grade é mais
  * estreita que o widget (L e XL no celular), ele ganha altura em vez de ficar
- * achatado: L vira 2×2, XL vira 2×4.
+ * achatado: L vira 2×2, XL vira 2×3.
  */
 export function vao(tamanho: TamanhoWidget, colunas: number, def?: Pick<DefWidget, 'larguraTotal' | 'linhasMinimas'>) {
   const d = dimensoes[tamanho]
-  const v = d.colunas <= colunas ? { colunas: d.colunas, linhas: d.linhas } : { colunas, linhas: d.linhas * Math.ceil(d.colunas / colunas) }
+  // Mais estreita que o widget (L e XL no celular): ganha uma linha por faixa extra de largura (L 2×2, XL 2×3).
+  const v = d.colunas <= colunas ? { colunas: d.colunas, linhas: d.linhas } : { colunas, linhas: d.linhas + Math.ceil(d.colunas / colunas) - 1 }
   if (tamanho === 'XL' && def?.larguraTotal) v.colunas = colunas
   if (tamanho === 'XL' && def?.linhasMinimas) v.linhas = Math.max(v.linhas, def.linhasMinimas)
   return v

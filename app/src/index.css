@@ -324,7 +324,7 @@
       inset: min(0px, calc((100% - var(--alvo-toque)) / 2));
     }
     /* Campos de texto e seleção: 44px de altura no toque (a altura fixa da tela vira mínima). */
-    :where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [type='hidden']), select) {
+    :where(input:not([type='checkbox'], [type='radio'], [type='color'], [type='file'], [type='hidden']), select) {
       min-height: var(--alvo-toque);
     }
     /* Caixa e rádio nativos: 24px (WCAG 2.5.8); o rótulo clicável completa o alvo. */
