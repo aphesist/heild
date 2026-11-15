@@ -909,3 +909,19 @@ Respostas do Enzo em 15/11/2026, transmitidas pela coordenação, na última col
 | P3 | Escritório misto: transferir do número compartilhado para um setor com número próprio troca o número do cliente? | **Não, por padrão**: continua no número em que o cliente está; trocar é opção de quem transfere | **Aprovada.** A mistura deve ser rara; o cliente fica no mesmo número, e as mensagens dizem quem fala (regra de identificação em A.6) |
 | P4 | Quem edita e publica o fluxo do chatbot? | **Administrador e Gestor de Gestão e Atendimento**, com versão, simulador e evento ao publicar | **Aprovada** |
 | P5 | Menu por texto numerado ou por botões? | **Texto numerado no WAHA**, que funciona em qualquer aparelho e não depende de recurso interativo; botões e listas interativas onde o escritório usa a API oficial. Testar no piloto se botões pela integração não oficial chegam bem **[a confirmar]** | **Aprovada** |
+
+### A.10 Triagem conversando, como uma pessoa (15/11/2026, mais tarde)
+
+Decisão do Enzo de 15/11/2026, transmitida pela coordenação. Nas palavras dele: "os clientes odeiam menu e falar com robô". **Substitui**, na triagem pelo integrante, a pergunta fechada com opções e os limiares de confiança da versão anterior (A.5 e o subplano 02); o resto do adendo continua.
+
+- **A pergunta de escolher o setor só existe no chatbot sem IA** (A.2), que é a reserva para o escritório sem integrantes. O integrante de Atendimento **não manda menu nem lista de opções**.
+- **O integrante faz a triagem conversando no WhatsApp, como uma pessoa:** pergunta de forma natural, **uma pergunta por vez**, até ter certeza razoável de quem é e de qual é o assunto. Então repassa ao setor e ao integrante certos, com o resumo, e **avisa o cliente** ("Vou passar para a Ana, do DP, que cuida da folha; ela já recebe o seu recado").
+- **Escopo restrito à triagem:** não responde dúvida técnica, não informa número, valor nem prazo, não promete nada. Assunto delicado (reclamação, cobrança em atraso, rescisão, autuação, ameaça de cancelamento, luto) vai a uma pessoa na hora, sem continuar a triagem.
+- **Identificação:** todas as mensagens saem com o prefixo "*Integrante de Atendimento (IA)*" (ou o nome do tema, com "(IA)"), como em A.6.
+- **Aprovação:** as mensagens **de triagem** saem **sem aprovação**, dentro desse escopo. As outras mensagens da IA ao cliente continuam com aprovação (cartão), como em 8.3 e no subplano 02.
+- **Custo:** é mais caro que o menu e que a pergunta fechada, porque cada troca chama o modelo; o Enzo aceitou o custo. Ele sai da bolsa do setor de Gestão e Atendimento.
+- **Fora do horário:** resposta automática **fixa, sem IA**, com o horário de trabalho (modelo `fora_de_horario` de 4.5). **Nada de triagem até abrir o expediente**: a conversa fica `nova` no setor de entrada padrão e o integrante começa a triagem no primeiro horário.
+- **O cartão "Parece ser do X. Transferir?"** (A.5) vai ao **atendente da conversa**; sem atendente, **a quem aprova no setor** (Gestor do setor ou quem tem a alçada de aprovar ali).
+- **Aprovar um cartão executa a ação guardada** (Fundações 6.4): o clique em aprovar faz a transferência, o envio ou o que o cartão descreve; o irreversível pede uma confirmação antes.
+
+Respostas do Enzo de 15/11/2026 (mais tarde), que revêem a P2 de A.9 na parte da triagem pelo integrante: a P1 (quem passa pelo menu) continua valendo só para o chatbot.
