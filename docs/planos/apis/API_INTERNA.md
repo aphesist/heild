@@ -531,3 +531,19 @@ Riscos:
 
 - **Antes do piloto:** o servidor OAuth e o MCP remoto para Claude, ChatGPT e Copilot Studio (~3,5 sp), só com leitura e propostas aprovadas por pessoa, desligados por padrão e ligados pelo Administrador.
 - **Durante o piloto, se um dos dois escritórios usar:** o agente do Microsoft 365 Copilot e o complemento do Google Workspace (+3,5 sp).
+
+---
+
+## Adendo: número compartilhado, fluxo do chatbot e roteamento (15/11/2026)
+
+Decisão do Enzo de 15/11/2026; desenho no [subplano 04](../subplanos/04-CRM.md) (A.7) e no [subplano 02](../subplanos/02-Time-de-Agentes.md), adendos "número único compartilhado" e "triagem do número compartilhado". Acréscimos à seção 6.2:
+
+| Ferramenta | Nível | Exposição | Notas |
+| --- | --- | --- | --- |
+| `canal.configurar` (muda) | executar | E | Aceita `modo` (`setor`, `compartilhado`), `setores_atendidos`, `setor_entrada_id`, `triagem` (`menu`, `integrante`, `menu_e_integrante`, `manual`) e `quem_passa_pelo_menu` (`todos`, `desconhecidos`, `por_contexto`) |
+| `fluxo.editar`, `fluxo.simular`, `fluxo.publicar` (novas) | executar (`simular` é ler) | E | Administrador e Gestor de Gestão e Atendimento. Blocos validados por esquema; publicar grava evento e versão |
+| `conversa.rotear` (nova) | executar | E, A | Abre ou retoma a conversa no setor, com `origem` (`menu`, `integrante`, `regra`, `pessoa`), `resumo` e `confianca`. Interna e reversível |
+| `atendimento.triar_numero_compartilhado` (nova; processo) | executar | A | O trabalho do integrante de Atendimento: regras, depois operário barato, depois modelo caro só no ambíguo; devolve a saída padrão do 02 e chama `conversa.rotear` ou pergunta. Em dúvida, devolve `AMBIGUO` com os setores candidatos |
+| `conversa.transferir` (muda) | executar | E, X | Ganha `manter_numero` (padrão verdadeiro no número compartilhado) |
+
+Eventos novos (gravados pelo executor): `fluxo.iniciar`, `fluxo.opcao_escolher`, `fluxo.lembrar`, `fluxo.expirar`, `fluxo.pedir_pessoa`, `fluxo.publicar`, `conversa.rotear`, `conversa.triagem_divergir`. O motor do fluxo é um consumidor do evento `mensagem.receber` no `worker`; ele chama as mesmas ferramentas, com o ator `servico` (audiência de serviço, seção 1).

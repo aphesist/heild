@@ -147,3 +147,16 @@ Registro do aceite:
 | Custo por mensagem | R$ 0 |
 | Infraestrutura no piloto | 1 tarefa Fargate ARM de 0,5 vCPU e 1 GB ≈ US$ 24,80 por mês (preço da tabela de HOSPEDAGEM, 4); o banco das sessões cabe numa instância pequena separada ou num schema isolado [decidir na implementação] |
 | Infraestrutura em escala | ~US$ 50 a 200 por mês por centena de escritórios (GOWS e NOWEB não usam navegador) [estimativa; medir RAM por sessão no piloto] |
+
+---
+
+## Adendo: número compartilhado entre setores (15/11/2026)
+
+Decisão do Enzo de 15/11/2026 (desenho no [subplano 04](../subplanos/04-CRM.md), adendo "número único compartilhado"): um número pode atender vários setores, com um chatbot sem IA e a triagem pelo integrante de Atendimento. O que muda aqui:
+
+- **Sessão:** continua uma por número. O número compartilhado é uma sessão do WAHA que serve vários setores; o roteamento é do CRM, não do WAHA. "Um número por setor ou por escritório" (seção 2) passa a ser escolha por número.
+- **Motor do fluxo:** roda no `worker`, sem modelo. O webhook de entrada grava a mensagem e, se o número é compartilhado e não há conversa aberta nem regra que decida, entrega ao motor do fluxo, que responde pelo mesmo `whatsapp_web.enviar` com o ritmo da seção 3.
+- **Menu por texto numerado** na integração não oficial ("1, 2, 3"), com palavras-chave aceitas. Botões e listas interativas ficam para a Cloud API; o uso deles pela integração não oficial fica para teste no piloto **[a confirmar]**.
+- **Risco do número:** as mensagens do fluxo são respostas a quem puxou a conversa (o perfil de menor risco, item 6 do resumo); mesmo assim, no máximo três mensagens automáticas seguidas sem resposta do cliente e nenhuma mensagem do fluxo para quem não escreveu.
+- **Saúde:** num número compartilhado, sessão caída para todos os setores de uma vez. O alerta de "sessão caída por mais de 15 min" vai ao Administrador e aos Gestores dos setores atendidos, e o fluxo fica pausado até a sessão voltar.
+- **Transferência:** entre setores do mesmo número, a conversa continua na mesma sessão; nada muda no WAHA.

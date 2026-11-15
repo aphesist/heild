@@ -764,3 +764,135 @@ Fonte: branch `wireframe`, `docs/wireframe/entregas/S05.md` e `DECISOES.md` (S05
 ### Respostas do Enzo ao plano de APIs e decisões do mesmo dia (15/11/2026)
 
 Fonte: [`../apis/PERGUNTAS.md`](../apis/PERGUNTAS.md), Q5, e [`../apis/WHATSAPP.md`](../apis/WHATSAPP.md) (branch `wf-backend-apis`, 15/11/2026). **O WhatsApp do dia a dia (atendimento, suporte, recados) vai por integração não oficial com o WhatsApp Web (WAHA com a engine GOWS)**, sem custo por mensagem, com cláusula de aceite e responsabilidade do escritório pelo banimento por mau uso (aceite registrado como evento). A API oficial da Meta fica para envio em massa grande, contratada e paga pelo escritório. As opções comparadas e as boas práticas contra banimento estão em WHATSAPP.md.
+
+---
+
+## Adendo: número único compartilhado, chatbot sem IA e triagem pelo integrante (15/11/2026)
+
+**Decisão do Enzo, de 15/11/2026, transmitida pela coordenação.** Nas palavras dele: "O CRM atualmente assume que cada setor tem seu número próprio de WhatsApp, mas alguns escritórios usam um número apenas. Temos duas opções para resolver isso, e as duas têm que existir, para arcar com todos os casos: (1) fluxo de chatbot (não IA): o fluxo padrão de mensagem automática, configurável, para o próprio cliente escolher o setor e o atendimento que vai receber no mesmo número. Sistema e CRM redirecionam isso automaticamente, de forma organizada. Basicamente o funcionamento padrão de CRM com chatbot do mercado, antes da IA. (2) O integrante de Atendimento ganha um trabalho a mais: falar com o cliente, reconhecer o assunto e repassar a mensagem ou a conversa para o setor e o integrante certos. Ou o funcionário faz a mesma coisa, com o botão de repassar na conversa, que já existe."
+
+**O que isso revê.** A decisão "um número de WhatsApp por setor" (seção 10 do Desenho; 3.1 deste subplano), a regra "transferir muda o número e avisa o cliente" (2.2 e 4.3) e "menu só para número desconhecido" (2.2 e 5.2) deixam de ser o único caminho. O que está acima continua valendo para o número de setor; o número compartilhado ganha as regras abaixo. Onde as duas coisas se tocam, vale este adendo. O desenho a seguir é proposta; as perguntas ao dono estão em A.9 e seguem a recomendação até resposta.
+
+### A.1 Dois modos de número, que podem se misturar
+
+| Modo | Para quem | Como a conversa chega ao setor |
+| --- | --- | --- |
+| **Número de setor** (como hoje) | Escritório que já tem um número por setor | O número é do setor; a conversa nasce nele (3.1 e 5.1) |
+| **Número compartilhado** (novo) | Escritório com um número só, ou um número principal que atende vários setores | O número atende uma lista de setores; a conversa nasce no setor escolhido pelo cliente no menu, pela triagem do integrante, por regra ou por uma pessoa |
+
+O escritório escolhe **por número** e pode misturar os dois: por exemplo, um número compartilhado para Fiscal, Contábil, Societário e Gestão e Atendimento, e um número próprio só do DP. Cada número compartilhado tem:
+
+- **setores atendidos** (lista; pelo menos um);
+- **setor de entrada padrão** (onde cai o que ninguém roteou; padrão: Gestão e Atendimento, que já é o papel dele em 3.1, regra 1);
+- **forma de triagem**: `menu` (só o chatbot), `integrante` (só a triagem pelo integrante de Atendimento), `menu_e_integrante` (o menu primeiro; o integrante cuida do que o menu não resolve) ou `manual` (tudo cai no setor de entrada e uma pessoa repassa). Padrão recomendado: `menu_e_integrante`;
+- **quem passa pelo menu** (A.4).
+
+A regra 1 de 3.1 ("escritório com um número só usa o número no Gestão e Atendimento e transfere") vira o caso `manual` do número compartilhado; a regra 2 (setor sem número usa o principal) continua.
+
+### A.2 O construtor do fluxo do chatbot, sem IA
+
+O fluxo é configuração do número, montado numa tela de **Fluxo de atendimento** dentro de CRM › Números (Administrador e Gestor de Gestão e Atendimento; A.9, P4). Nenhum passo usa modelo: é a árvore de mensagens e opções do mercado, executada por código.
+
+| Bloco | O que faz | Configuração |
+| --- | --- | --- |
+| **Mensagem** | Envia um texto do tema (com variáveis: nome da pessoa, nome do escritório, horário) | Texto; atraso opcional |
+| **Menu** | Pergunta e lista opções numeradas; cada opção leva a outro bloco | Até 10 opções; cada uma com número, rótulo e palavras-chave aceitas ("1", "fiscal", "imposto", "guia") |
+| **Submenu** | Um menu dentro de uma opção (ex.: DP › Admissão · Férias · Rescisão · Folha) | Profundidade máxima de 3 níveis, para o cliente não se perder |
+| **Coletar** | Pergunta um dado e guarda na conversa (CNPJ, nome da empresa, nome do funcionário) | Tipo do dado e validação simples (CNPJ com dígito); duas tentativas |
+| **Horário** | Ramifica entre dentro e fora do horário do setor de destino (4.5) | Usa o horário e os feriados do setor |
+| **Rotear** | Fecha o fluxo e abre (ou retoma) a conversa no setor escolhido | Setor; etiqueta opcional; responsável (o da carteira do cliente naquele setor, ou a fila do setor) |
+| **Falar com uma pessoa** | Fecha o fluxo e manda ao setor de entrada padrão, com a etiqueta `pediu_pessoa` | Mensagem de confirmação |
+| **Fim** | Encerra sem conversa (ex.: "o boleto está no app") | Texto |
+
+Regras fixas do fluxo:
+
+- **Sempre há saída para uma pessoa:** todo menu tem a opção "Falar com uma pessoa" (a última), e as palavras "atendente", "pessoa" e "humano" levam a ela de qualquer ponto. "0" ou "menu" volta ao menu anterior.
+- **Fora do horário:** o bloco Horário manda a mensagem de fora de horário do setor escolhido (o modelo `fora_de_horario` de 4.5, com o horário dele) e roteia mesmo assim; a conversa fica `nova` e o SLA começa no primeiro horário (4.6).
+- **Resposta que não é opção:** na primeira vez, o fluxo repete o menu com "Não entendi; responda com o número da opção"; na segunda, segue a forma de triagem: em `menu_e_integrante` e `integrante`, o texto vai ao integrante (A.5); em `menu`, vai ao setor de entrada padrão com a etiqueta `fora_do_menu`.
+- **Tempo limite:** sem resposta em 10 minutos, um único lembrete ("Ainda está aí? Responda com o número da opção"); sem resposta em 30 minutos, o fluxo fecha e a conversa vai ao setor de entrada padrão com a etiqueta `sem_escolha`, sem nova mensagem ao cliente. Os dois tempos são configuráveis. Se o cliente voltar depois, a mensagem nova recomeça pela regra de A.4.
+- **Limite de mensagens automáticas:** no máximo três mensagens do fluxo seguidas sem resposta do cliente, para não parecer robô insistente nem pesar no risco de banimento do número não oficial ([`../apis/WHATSAPP.md`](../apis/WHATSAPP.md), 3).
+- **Versão e prévia:** o fluxo tem rascunho e versão publicada; a tela tem um simulador que percorre o fluxo como se fosse o cliente; publicar grava evento e vale para as conversas novas (quem está no meio do fluxo termina na versão em que começou).
+- **Métricas:** quantos entram, onde saem, opção mais escolhida, quantos pedem pessoa, quantos expiram, tempo até rotear. Servem para o Gestor encurtar o menu.
+- As mensagens do fluxo aparecem na conversa com ⚙ (como as automáticas de 4.5) e **não contam como primeira resposta** no SLA.
+
+Fluxo de partida que vem pronto (o escritório edita):
+
+```
+⚙ Olá, {nome}! Aqui é o atendimento do {escritório}. Sobre o que você quer falar?
+   1. Impostos, guias e notas (Fiscal)
+   2. Funcionários, folha e férias (DP)
+   3. Contabilidade, balanço e documentos do mês (Contábil)
+   4. Abertura, alteração ou encerramento da empresa (Societário)
+   5. Financeiro, boletos e outros assuntos (Gestão e Atendimento)
+   6. Falar com uma pessoa
+```
+
+### A.3 Roteamento para a caixa do setor, com o mesmo número
+
+- A opção escolhida (ou a triagem) abre a conversa **no setor de destino**, com o `canal` igual ao número compartilhado. Ela entra na lista do setor (4.1) como qualquer outra, com o selo do número e a origem do roteamento: `menu`, `integrante`, `regra` ou `pessoa`.
+- **O cliente continua falando com o mesmo número.** As respostas do setor saem por ele; o nome exibido é o do número (o escritório). Para o cliente saber com quem fala, vale o "nome de quem atende" (C2-07; ex.: "*Ana · DP*").
+- **Responsável:** o da carteira do cliente naquele setor (5.1); sem carteira ou com lead, a conversa fica "sem responsável" na fila do setor, como hoje.
+- **Duas conversas abertas do mesmo cliente em setores diferentes no mesmo número:** a mensagem nova vai para a conversa certa pela regra 3 de 3.1 (triagem pelo assunto; empate, a de última mensagem, com aviso e **mover mensagem**). Se o integrante não tiver confiança, o fluxo pergunta ao cliente por um menu gerado das conversas abertas ("É sobre: 1. a admissão da Ana (DP) · 2. o DAS de outubro (Fiscal)").
+- O que muda em 5.1: com número compartilhado, "mensagem chega no número N (setor S)" lê-se "mensagem chega no número N (setores S1…Sn)"; o setor da conversa nova sai do roteamento, não do número. O desconhecido continua virando lead (5.2), mas passa pelo menu antes: a opção 5 ou "Falar com uma pessoa" o leva ao Gestão e Atendimento; as outras abrem a conversa do lead no setor escolhido, com a etiqueta `lead`.
+
+### A.4 Quem passa pelo menu
+
+Opção por número, com três valores:
+
+| Valor | Quem recebe o menu |
+| --- | --- |
+| `todos` | Toda conversa nova, de qualquer pessoa |
+| `desconhecidos` | Só número desconhecido; o cliente identificado vai direto ao setor de entrada padrão e o integrante faz a triagem |
+| `por_contexto` (**recomendado como padrão**) | O cliente identificado **pula o menu quando há contexto que diz o setor**; os demais recebem o menu |
+
+No `por_contexto`, a regra sem modelo, nesta ordem:
+
+1. **Conversa aberta** do cliente (não resolvida, ou resolvida há menos de 24 h) → a mensagem vai a ela, sem menu.
+2. **Resposta a algo que o escritório mandou** nos últimos 7 dias pelo mesmo número (guia, pendência, régua, comunicado) → vai ao setor que mandou.
+3. **Cliente com um único setor ativo** na carteira (ex.: só DP) → vai a esse setor.
+4. Nenhuma das três → menu.
+
+"Pular direto para o setor da carteira" sem esses sinais não é recomendado: o cliente comum de escritório contábil tem responsável em quatro ou cinco setores, e a carteira não diz qual é o assunto de hoje.
+
+### A.5 Convivência com a triagem pelo integrante
+
+- Em `menu_e_integrante`, o menu vem primeiro; o integrante de Atendimento entra quando: o cliente responde com texto em vez de opção (segunda vez); escolhe "Falar com uma pessoa" ou a opção de outros assuntos; a conversa cai no setor de entrada por tempo limite (`sem_escolha`); ou o cliente identificado chega sem contexto em `desconhecidos`. Em `integrante`, não há menu: a primeira mensagem já vai à triagem.
+- A triagem é o trabalho novo do integrante de Atendimento descrito no subplano 02 (adendo de 15/11/2026, "Triagem do número compartilhado"): reconhece quem escreve e o assunto, roteia ao setor e ao integrante certos com resumo e pergunta quando estiver em dúvida.
+- **Quando o integrante e o menu discordam** (o cliente escolheu "Fiscal", e pelo texto o assunto é do DP): **vale a escolha do cliente para o roteamento**; o integrante não move a conversa sozinho. Com confiança alta (≥ 0,8), ele deixa na conversa um cartão para quem atende no setor escolhido: "Parece ser do DP (admissão). Transferir?", com um clique, sem mensagem ao cliente. Abaixo de 0,8, só registra a sugestão (métrica para o Gestor rever o texto do menu). A divergência grava `conversa.triagem_divergir`. Exceção: quando o cliente não escolheu um setor (texto livre, "outro assunto", "falar com uma pessoa", tempo limite), o integrante roteia, e uma pessoa corrige em um clique, como em 8.1.
+- **A pessoa sempre pode repassar ou transferir pela conversa**, com os botões que já existem (4.3). No número compartilhado, transferir não troca de número (A.6).
+
+### A.6 Transferência entre setores sem trocar de número
+
+| Origem → destino | O que acontece |
+| --- | --- |
+| Número compartilhado → setor atendido pelo mesmo número | `conversa.transferir` resolve a origem (`transferida`) e abre a conversa no destino com `conversa_anterior_id`, histórico e notas, **no mesmo número**. Ao cliente, só se quem transfere quiser: "Seu assunto passou ao DP; continue por aqui." Se ninguém tinha assumido, transfere sem avisar, como em 8.1 |
+| Número compartilhado → setor com número próprio | Pergunta a quem transfere: **continuar neste número** (padrão recomendado; A.9, P3) ou passar ao número do setor, com a mensagem de 4.3 ("fale por {número}") |
+| Número de setor → outro setor | Como hoje (4.3): troca o número e avisa |
+
+A regra 4 de 3.1 (cliente que insiste no número antigo) não se aplica quando o número é o mesmo. A origem mostra "transferida para o DP, com Beltrano"; as próximas mensagens do cliente sobre o assunto vão ao destino pela regra de A.3 (conversa aberta).
+
+### A.7 Modelo de dados, ferramentas e eventos
+
+- **Canal do escritório** (Fundações 4.10) ganha: `modo` (`setor` ou `compartilhado`), `setores_atendidos[]`, `setor_entrada_id`, `triagem` (`menu`, `integrante`, `menu_e_integrante`, `manual`), `quem_passa_pelo_menu` (`todos`, `desconhecidos`, `por_contexto`), `fluxo_id`.
+- **Fluxo de atendimento** (entidade nova): escritório, canal, versão, estado (rascunho, publicado, arquivado), blocos (árvore em JSON validada por esquema), tempos (lembrete, expiração), publicado por e em.
+- **Execução de fluxo** (entidade nova, uma por conversa no fluxo): fluxo e versão, bloco atual, dados coletados, tentativas, lembrete enviado, expira em, resultado (`roteado`, `pediu_pessoa`, `expirou`, `fim`).
+- **Conversa** ganha: `origem_roteamento` (`menu`, `integrante`, `regra`, `pessoa`), `escolha_cliente` (opção do menu), `sugestao_integrante` (setor e confiança).
+- **Ferramentas novas:** `fluxo.editar`, `fluxo.simular`, `fluxo.publicar` (executar; Administrador e Gestor de Gestão e Atendimento), `conversa.rotear` (executar; motor do fluxo, integrante e pessoa) e a operação de processo `atendimento.triar_numero_compartilhado` (integrante). `canal.configurar` passa a aceitar os campos novos. `conversa.transferir` ganha `manter_numero` (padrão verdadeiro no número compartilhado).
+- **Eventos novos:** `fluxo.iniciar`, `fluxo.opcao_escolher`, `fluxo.lembrar`, `fluxo.expirar`, `fluxo.pedir_pessoa`, `fluxo.publicar`, `conversa.rotear` (com a origem), `conversa.triagem_divergir`.
+- **API e WhatsApp:** o que muda no WAHA, nas ferramentas e no webhook está nos adendos de 15/11/2026 de [`../apis/WHATSAPP.md`](../apis/WHATSAPP.md) e [`../apis/API_INTERNA.md`](../apis/API_INTERNA.md).
+
+### A.8 Tempo, permissões e ordem de construção
+
+- O fluxo não conta tempo de ninguém; a triagem do integrante entra como trabalho de máquina do integrante de Atendimento no Timesheet (05, 7.3), paga pela bolsa do setor de Gestão e Atendimento (integrantes, decisão 5).
+- Quem vê a conversa: só depois do roteamento ela entra na caixa do setor; até lá, a conversa no fluxo fica visível ao Gestor e aos atendentes do setor de entrada, em "No fluxo" (filtro novo da lista, 4.1).
+- Construção: entra com o CRM (fase F5 do backend), como etapa nova **C3a · Número compartilhado e fluxo** de 13.1, depois da caixa (C3) e antes da identidade e da triagem pelo integrante (C4 e C6), que passam a cobrir também a triagem do número compartilhado; a tela do fluxo fica junto da Configuração dos números (C7). Critério de pronto: no número do piloto, cliente identificado com conversa aberta não vê menu; desconhecido escolhe a opção 2 e a conversa nasce na caixa do DP em menos de 5 s; transferir do DP para o Fiscal mantém o número.
+
+### A.9 Perguntas ao dono
+
+| # | Pergunta | Recomendação (vale até a resposta) |
+| --- | --- | --- |
+| P1 | Quem passa pelo menu no número compartilhado: todos, só os desconhecidos ou o cliente identificado pula quando há contexto? | **Por contexto** (A.4): conversa aberta, resposta a envio do escritório nos últimos 7 dias ou um único setor ativo vão direto; o resto recebe o menu. Pular só pela carteira erraria muito, porque o cliente tem responsável em vários setores |
+| P2 | Quando o integrante discorda da opção que o cliente escolheu, quem decide? | **A escolha do cliente roteia**; o integrante só sugere a transferência por cartão a quem atende, com confiança ≥ 0,8, e nunca move sozinho. Ele só roteia quando o cliente não escolheu um setor |
+| P3 | Escritório misto: transferir do número compartilhado para um setor com número próprio troca o número do cliente? | **Não, por padrão**: continua no número em que o cliente está; trocar é opção de quem transfere |
+| P4 | Quem edita e publica o fluxo do chatbot? | **Administrador e Gestor de Gestão e Atendimento**, com versão, simulador e evento ao publicar |
+| P5 | Menu por texto numerado ou por botões? | **Texto numerado no WAHA**, que funciona em qualquer aparelho e não depende de recurso interativo; botões e listas interativas onde o escritório usa a API oficial. Testar no piloto se botões pela integração não oficial chegam bem **[a confirmar]** |
