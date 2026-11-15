@@ -6,6 +6,7 @@ import type { CanalCrm, ConversaCrm, ItemConversa } from '@/dados/crm'
 import type { NotaEmitida as NotaTela } from '@/dados/servicos-extras'
 import type { Cliente as ClienteTela, Mensagem as MensagemTela, Tarefa as TarefaTela } from '@/dados/tipos'
 import type { SetorIntegrante } from '@/theme/tipos'
+import type { Perfil } from '../permissoes/perfil'
 import type {
   CanalMensagem,
   Cliente,
@@ -304,6 +305,23 @@ export function contaParaModelo(u: UsuarioCfg): { pessoa: SemRegistro<Pessoa>; u
     vinculos: u.vinculos.map((v) => ({ id: `vs-${u.id}-${v.setor}`, usuario_id: u.id, setor_id: v.setor, modo: v.modo, vigente_de: `${ANO}-01-01` })),
     excecoes: u.excecoes.map((x) => ({ id: x.id, usuario_id: u.id, tela_ou_ferramenta: x.tela, efeito: x.efeito, nivel_max: x.nivel, motivo: x.motivo, vigente_de: `${ANO}-01-01`, vigente_ate: x.ate ? (dataDeDiaMes(x.ate) ?? null) : null })),
     carteira: u.carteira.map((c) => ({ id: `cc-${u.id}-${c}`, usuario_id: u.id, cliente_id: c })),
+  }
+}
+
+/**
+ * O perfil materializado de uma conta (Fundações 3.2), o que a função `autorizar` lê.
+ * A sessão do app e o servidor montam o perfil por aqui: a mesma conta tem o mesmo
+ * perfil nos dois lados.
+ */
+export function perfilDeConta(u: UsuarioCfg, extra: Pick<Perfil, 'carteira_ligada' | 'modulos'>): Perfil {
+  return {
+    usuario_id: u.id,
+    nome: u.nome,
+    papel: u.papel,
+    vinculos: u.vinculos,
+    excecoes: u.excecoes.map((x) => ({ tela: x.tela, efeito: x.efeito, nivel_max: x.nivel, motivo: x.motivo })),
+    carteira: u.carteira,
+    ...extra,
   }
 }
 

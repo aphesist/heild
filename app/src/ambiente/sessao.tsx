@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { usuariosCfg, type UsuarioCfg } from '@/dados/configuracoes'
 import type { Papel } from '@/nucleo/modelo/entidades'
 import { permissoesDoPerfil, rotuloSetorCurto, type Contexto, type Perfil, type Permissoes } from '@/nucleo/permissoes'
+import { perfilDeConta } from '@/nucleo/mapeadores'
 import { definirContexto } from '@/nucleo/repositorios'
 import { useTabela } from '@/nucleo/react'
 import type { SetorIntegrante } from '@/theme/tipos'
@@ -27,15 +28,7 @@ export function permissoesDe(u: UsuarioCfg, extra: Pick<Perfil, 'carteira_ligada
 }
 
 export function perfilDe(u: UsuarioCfg, extra: Pick<Perfil, 'carteira_ligada' | 'modulos'>): Perfil {
-  return {
-    usuario_id: u.id,
-    nome: u.nome,
-    papel: u.papel,
-    vinculos: u.vinculos,
-    excecoes: u.excecoes.map((x) => ({ tela: x.tela, efeito: x.efeito, nivel_max: x.nivel, motivo: x.motivo })),
-    carteira: u.carteira,
-    ...extra,
-  }
+  return perfilDeConta(u, extra)
 }
 
 /** Nome do papel nas telas: Administrador, Gestor (com os setores que gere) e Membro. */

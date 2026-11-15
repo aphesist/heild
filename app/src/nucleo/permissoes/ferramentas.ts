@@ -267,6 +267,10 @@ export const ferramentas: Ferramenta[] = [
   f('bpo.conta.capturar', 'bpo', 'executar', 'bpo_financeiro'),
   f('bpo.conta.cancelar', 'bpo', 'executar', 'bpo_financeiro', { exige_aprovacao: 'se_integrante' }),
   f('bpo.conciliacao.confirmar', 'bpo', 'executar', 'bpo_financeiro'),
+  // Backend B1: leituras que as ferramentas tipadas da API autorizam linha a linha, e a verificação da cadeia.
+  f('mensagem_interna.listar', 'plataforma', 'ler', 'geral'),
+  f('aprovacao.listar', 'agentes', 'ler', 'geral', { exposta_ao_cliente: true }),
+  f('auditoria.verificar_cadeia', 'plataforma', 'ler', 'geral', { papel_minimo: 'gestor' }),
 ]
 
 const indice = new Map(ferramentas.map((x) => [x.nome, x]))

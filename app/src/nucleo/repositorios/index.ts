@@ -1,4 +1,4 @@
-import { banco } from '../banco'
+import { bancoAtual } from '../banco'
 import type { Banco } from '../banco/banco'
 import type { CartaoAprovacao, Id, MensagemInterna, NomeTabela, Notificacao, StatusTarefa, Tabelas, Tarefa } from '../modelo/entidades'
 import { ErroRegra } from '../permissoes/autorizar'
@@ -15,7 +15,7 @@ export * from './s06-timesheet'
 export { ehGestorBpo, eventoBpo } from './bpo'
 export { competenciaDe } from './financeiro'
 
-const b = (): Banco => banco
+const b = (): Banco => bancoAtual()
 
 /* ---------- Tarefa: cada transição é ferramenta própria (Fundações 4.8) ---------- */
 
@@ -120,7 +120,7 @@ export class RepositorioNotificacoes extends Repositorio<'notificacao'> {
   lerTodas(usuarioId: Id, ids: Id[]) {
     const alvo = ids.map((id) => this.obter(id)).filter((n): n is Notificacao => !!n && !n.lida_por.includes(usuarioId))
     if (!alvo.length) return
-    banco.transacao((tx) => alvo.forEach((n) => tx.gravar('notificacao', { ...n, lida_por: [...n.lida_por, usuarioId], atualizado_em: agora() })))
+    bancoAtual().transacao((tx) => alvo.forEach((n) => tx.gravar('notificacao', { ...n, lida_por: [...n.lida_por, usuarioId], atualizado_em: agora() })))
   }
 }
 
@@ -129,10 +129,10 @@ export class RepositorioNotificacoes extends Repositorio<'notificacao'> {
 export class RepositorioTela extends Repositorio<'registro_tela'> {
   lembrar(chave: string, valor: unknown) {
     const atual = this.obter(chave)
-    banco.transacao((tx) => tx.gravar('registro_tela', { ...(atual ?? { id: chave, escritorio_id: banco.escritorioId ?? '', criado_em: agora() }), valor, atualizado_em: agora() }))
+    bancoAtual().transacao((tx) => tx.gravar('registro_tela', { ...(atual ?? { id: chave, escritorio_id: bancoAtual().escritorioId ?? '', criado_em: agora() }), valor, atualizado_em: agora() }))
   }
   esquecer(chave: string) {
-    if (this.obter(chave)) banco.transacao((tx) => tx.remover('registro_tela', chave))
+    if (this.obter(chave)) bancoAtual().transacao((tx) => tx.remover('registro_tela', chave))
   }
 }
 
@@ -214,13 +214,13 @@ registrarRepoSessoes(() => repos.sessoes) // S06
 
 /** Registra um evento avulso (algo que aconteceu sem mudar uma linha: "Começou: conferir PGDAS-D"). */
 export function registrar(texto: string, nome = 'atividade.registrar', op: { ctx?: OpcoesEscrita['ctx']; cliente_id?: Id | null; setor_id?: Id | null } = {}) {
-  banco.transacao((tx) => registrarEvento(tx, op.ctx ?? contextoAtual(), { nome, ferramenta: 'evento.listar', texto, cliente_id: op.cliente_id ?? null, setor_id: op.setor_id ?? null }))
+  bancoAtual().transacao((tx) => registrarEvento(tx, op.ctx ?? contextoAtual(), { nome, ferramenta: 'evento.listar', texto, cliente_id: op.cliente_id ?? null, setor_id: op.setor_id ?? null }))
 }
 
 /** Linha nova com os campos de registro preenchidos, para gravar direto numa transação (semente, migração). */
 export function linhaNova<K extends NomeTabela>(_tabela: K, dados: Omit<Tabelas[K], 'escritorio_id' | 'criado_em' | 'atualizado_em'> & Partial<Pick<Tabelas[K], 'criado_em'>>): Tabelas[K] {
   const quando = dados.criado_em ?? agora()
-  return { ...dados, escritorio_id: banco.escritorioId ?? '', criado_em: quando, atualizado_em: quando } as Tabelas[K]
+  return { ...dados, escritorio_id: bancoAtual().escritorioId ?? '', criado_em: quando, atualizado_em: quando } as Tabelas[K]
 }
 
 export { novoId }
