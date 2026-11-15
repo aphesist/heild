@@ -291,9 +291,11 @@ do `prefers-reduced-motion`): `node scripts/temas-logo.cjs <pasta> http://localh
 - **A página da marca da Condesp não traz códigos de cor nem fonte;** as cores vêm
   do CSS do site e dos pixels da logo (amostrados em blocos, com margem de alguns
   pontos por causa da compressão).
-- **Raio de borda parcial.** Muitos componentes do protótipo usam raio fixo
-  (`rounded-[26px]`, `rounded-[14px]`), então o `raio_borda` do tema só muda parte
-  dos cantos.
+- **Raio de borda (resolvido no `wf-ui-lab`).** Os raios fixos do protótipo
+  (`rounded-[26px]`, `rounded-[14px]` e outros 280) viraram os tokens de `forma.md`
+  pelo mais próximo (6 a 10px → `sm`; 12 e 14 → `md`; 16 e 18 → `lg`; 20 e 22 →
+  `cartao`; 24 a 28 → `campo`; 34 → `painel`), e todos saem do `raio_borda` do tema.
+  Fica fixa só a moldura do aparelho no app do cliente (desenho do hardware).
 - **Botão desabilitado no escuro.** O botão primário desabilitado (opacidade 50%)
   fica com pouco contraste no escuro, como nos outros temas; estado desabilitado não
   entra no critério do WCAG.

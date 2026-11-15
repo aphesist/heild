@@ -16,7 +16,7 @@ export const Coluna: StoryObj = {
   render: function Render() {
     const [sel, setSel] = useState('i-dp')
     return (
-      <div className="h-[640px] w-80 overflow-hidden rounded-[24px]">
+      <div className="h-[640px] w-80 overflow-hidden rounded-campo">
         <ListaIntegrantes variante="coluna" className="h-full" integrantes={d.integrantes} selecionado={sel} onSelecionar={(i) => setSel(i.id)} onCriar={() => {}} />
       </div>
     )

@@ -286,7 +286,7 @@ function NovoCliente({ aberta, onFechar, todos, bpoPuro, podeBpo, executar, quem
         {(id) => <CampoTexto id={id} mono valor={r.documento} onMudar={(v) => setR((s) => ({ ...s, documento: v }))} />}
       </Campo>
       {(existente || mesmoNome) && (
-        <div className="bg-warning/10 flex flex-col gap-2 rounded-[14px] p-3 text-sm" role="alert">
+        <div className="bg-warning/10 flex flex-col gap-2 rounded-md p-3 text-sm" role="alert">
           <span>{existente ? `Este documento já está no cadastro: ${existente.codigo} · ${existente.nome}. O cadastro é um só.` : `Já existe um cliente com esse nome: ${mesmoNome!.codigo} · ${mesmoNome!.nome}. Confira antes de cadastrar outro.`}</span>
           <Button size="sm" variant="outline" className="w-fit rounded-full" onClick={() => onAbrirExistente((existente ?? mesmoNome)!.id)}>
             Abrir a ficha existente

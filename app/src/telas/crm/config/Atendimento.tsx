@@ -28,7 +28,7 @@ export function Horario() {
       <ul className="divide-border/70 flex flex-col divide-y">
         {horarios.map((h) => (
           <li key={h.setor}>
-            <button type="button" onClick={() => setEd(h)} className="hover:bg-sunken/60 flex w-full cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-[12px] px-2 py-2.5 text-left text-sm">
+            <button type="button" onClick={() => setEd(h)} className="hover:bg-sunken/60 flex w-full cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-2.5 text-left text-sm">
               <span className="w-40 font-medium">{rotuloSetor[h.setor]}</span>
               <span>
                 {resumoDias(h.dias)} · {h.inicio} às {h.fim}
@@ -222,7 +222,7 @@ export function MensagensAutomaticas() {
   return (
     <div className="flex flex-col gap-3">
       <CabecalhoSecao titulo="Mensagens automáticas" descricao="O que sai sem ninguém escrever. Nunca contam como primeira resposta. E-mail não recebe mensagem automática." />
-      <div className="bg-sunken flex flex-wrap items-center gap-3 rounded-[14px] px-3 py-2.5 text-sm">
+      <div className="bg-sunken flex flex-wrap items-center gap-3 rounded-md px-3 py-2.5 text-sm">
         <span>Espera antes do “já vamos atender”:</span>
         <CampoTexto tipo="number" min={0} valor={espera} onMudar={setEspera} className="h-8 w-20" />
         <span className="text-muted-foreground text-xs">minutos · 0 = na hora (se alguém responder antes, não sai)</span>
@@ -230,7 +230,7 @@ export function MensagensAutomaticas() {
       <ul className="divide-border/70 flex flex-col divide-y">
         {lista.map((m) => (
           <li key={m.id} className="flex items-start gap-3 py-2.5">
-            <button type="button" onClick={() => setEd(m)} className="hover:bg-sunken/60 -mx-2 min-w-0 flex-1 cursor-pointer rounded-[12px] px-2 py-1 text-left">
+            <button type="button" onClick={() => setEd(m)} className="hover:bg-sunken/60 -mx-2 min-w-0 flex-1 cursor-pointer rounded-md px-2 py-1 text-left">
               <span className="block text-sm font-medium">{m.momento}</span>
               <span className="text-muted-foreground block text-xs">{m.quando.replace('{espera}', espera)}</span>
               <span className="mt-1 block text-sm">{m.texto}</span>

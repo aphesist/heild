@@ -15,7 +15,7 @@ export function useDemoS01() {
 }
 
 
-const linha = 'text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm'
+const linha = 'text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm'
 
 export function DemonstracaoS01({ onFechar }: { onFechar: () => void }) {
   const loja = useLoja()

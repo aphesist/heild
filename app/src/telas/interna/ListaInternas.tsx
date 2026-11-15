@@ -157,7 +157,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
                   const c = conversas.find((x) => x.id === m.conversa_interna_id)!
                   return (
                     <li key={m.id}>
-                      <button type="button" onClick={() => onAbrir(c.id, m.id)} className="hover:bg-sunken flex w-full cursor-pointer flex-col gap-0.5 rounded-[14px] px-3 py-2 text-left">
+                      <button type="button" onClick={() => onAbrir(c.id, m.id)} className="hover:bg-sunken flex w-full cursor-pointer flex-col gap-0.5 rounded-md px-3 py-2 text-left">
                         <span className="text-muted-foreground flex justify-between gap-2 text-xs">
                           <span className="truncate">
                             {rotulo(c)} · {nomeAutor(m)}
@@ -202,7 +202,7 @@ export function ListaInternas({ ativa, onAbrir, onNova, compacto }: { ativa?: Id
                           type="button"
                           aria-current={ativa === c.id ? 'true' : undefined}
                           onClick={() => onAbrir(c.id)}
-                          className={cn('flex w-full cursor-pointer items-center gap-3 rounded-[16px] px-3 py-2 text-left', ativa === c.id ? 'bg-raised shadow-pilula' : 'hover:bg-sunken')}
+                          className={cn('flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left', ativa === c.id ? 'bg-raised shadow-pilula' : 'hover:bg-sunken')}
                         >
                           <span className="bg-sunken text-muted-foreground relative flex size-8 shrink-0 items-center justify-center rounded-full">
                             <Icone className="size-4" />

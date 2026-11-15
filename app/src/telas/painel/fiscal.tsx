@@ -159,7 +159,7 @@ function SimplesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
 
 function Dado({ rotulo, valor, detalhe }: { rotulo: string; valor: ReactNode; detalhe?: string }) {
   return (
-    <div className="bg-raised min-w-0 rounded-[12px] px-3 py-2">
+    <div className="bg-raised min-w-0 rounded-md px-3 py-2">
       <dt className="text-muted-foreground truncate text-xs">{rotulo}</dt>
       <dd className="truncate font-medium tabular-nums">{valor}</dd>
       {detalhe && <dd className="text-muted-foreground truncate text-xs">{detalhe}</dd>}
@@ -217,7 +217,7 @@ function CaixasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
           const dias = diasAte(tacita)
           const pend = estado.pendentes[`abrir:${m.id}`]
           return (
-            <li key={m.id} className="bg-raised flex flex-col gap-1.5 rounded-[14px] px-3 py-2.5">
+            <li key={m.id} className="bg-raised flex flex-col gap-1.5 rounded-md px-3 py-2.5">
               <button type="button" className="flex cursor-pointer items-start gap-3 text-left" onClick={() => setAberta(aberta === m.id ? null : m.id)} aria-expanded={aberta === m.id}>
                 {ciencia ? <EnvelopeOpenIcon weight="duotone" className="text-muted-foreground mt-0.5 size-5 shrink-0" /> : <EnvelopeSimpleIcon weight="duotone" className="mt-0.5 size-5 shrink-0" />}
                 <span className="min-w-0 flex-1">
@@ -235,7 +235,7 @@ function CaixasBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
                     {m.resumo}
                   </p>
                   {ciencia ? (
-                    <p className="bg-sunken rounded-[10px] px-3 py-2 text-xs leading-relaxed">
+                    <p className="bg-sunken rounded-sm px-3 py-2 text-xs leading-relaxed">
                       <span className="text-muted-foreground block">Teor completo</span>
                       {m.teor}
                     </p>
@@ -544,7 +544,7 @@ function ConferenciaBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tam
         })}
       </ul>
       {tamanho !== 'M' && f.reforma.base > 0 && (
-        <div className="bg-raised rounded-[12px] px-3 py-2 text-xs">
+        <div className="bg-raised rounded-md px-3 py-2 text-xs">
           <span className="block text-sm">
             Reforma: CBS {brl(f.reforma.base * f.reforma.cbs)} · IBS {brl(f.reforma.base * f.reforma.ibs)} <span className="text-muted-foreground">destacados em {COMPETENCIA}</span>
           </span>
@@ -815,7 +815,7 @@ function CertidoesBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Taman
             const dias = diasAte(i.prazo)
             const pend = estado.pendentes[`intimacao:${i.id}`]
             return (
-              <div key={i.id} className="bg-raised flex flex-col gap-1.5 rounded-[12px] px-3 py-2">
+              <div key={i.id} className="bg-raised flex flex-col gap-1.5 rounded-md px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <GavelIcon className="text-muted-foreground size-4 shrink-0" />
                   <span className="min-w-0 grow basis-40 text-sm">
@@ -889,7 +889,7 @@ function ReinfBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoWi
   return (
     <div className="flex flex-col gap-1.5">
       {f.trimestresReinf.slice(tamanho === 'M' ? -2 : 0).map((t) => (
-        <div key={t.id} className="bg-raised rounded-[12px] px-3 py-1.5">
+        <div key={t.id} className="bg-raised rounded-md px-3 py-1.5">
           <div className="flex items-center gap-2 text-sm">
             <LockSimpleIcon className="size-4 shrink-0" aria-label="travado" />
             <span className="min-w-0 flex-1 truncate">{t.trimestre}</span>
@@ -922,7 +922,7 @@ function ComunicacaoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tam
   const pend = estado.pendentes['resumo']
   return (
     <div className="flex h-full flex-col gap-2">
-      <p className="bg-raised line-clamp-4 rounded-[12px] px-3 py-2 text-sm leading-relaxed">{texto}</p>
+      <p className="bg-raised line-clamp-4 rounded-md px-3 py-2 text-sm leading-relaxed">{texto}</p>
       {tamanho !== 'M' && (
         <div className="text-muted-foreground text-xs">
           Respostas recorrentes (FIS-044): “como pago o DAS?”, “o que é a DCTFWeb?”, “por que a guia mudou de valor?”
@@ -1074,7 +1074,7 @@ function CarneLeaoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Taman
         <ul className="grid grid-cols-2 gap-1.5 text-xs">
           <li className="text-muted-foreground col-span-2">Receita Saúde: {pf.receitaSaude ? 'recibos emitidos pelo app da Receita entram sozinhos' : 'não se aplica (não é profissional de saúde)'}</li>
           {pf.outros.map((o) => (
-            <li key={o.item} className="bg-raised flex items-center gap-2 rounded-[10px] px-2 py-1">
+            <li key={o.item} className="bg-raised flex items-center gap-2 rounded-sm px-2 py-1">
               <span className="min-w-0 flex-1">
                 <span className="block text-sm">{o.item}</span>
                 <span className="text-muted-foreground">{o.situacao}</span>

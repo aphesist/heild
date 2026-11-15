@@ -56,7 +56,7 @@ export function CaixaSelecao({ marcado, parcial, onMudar, rotulo, className }: {
         onMudar(e.shiftKey)
       }}
       className={cn(
-        'flex size-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[6px] border transition-colors',
+        'flex size-[18px] shrink-0 cursor-pointer items-center justify-center rounded-sm border transition-colors',
         marcado || parcial ? 'bg-foreground border-foreground text-background' : 'border-border bg-raised hover:border-foreground/40',
         className,
       )}

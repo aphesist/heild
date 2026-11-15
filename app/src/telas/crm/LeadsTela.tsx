@@ -61,7 +61,7 @@ export function LeadsTela({ leads: iniciais, onAbrirConversa }: { leads: Lead[];
       {vista === 'quadro' ? (
         <DndContext sensors={sensores} onDragStart={(e) => setArrastando(String(e.active.id))} onDragEnd={aoSoltar} onDragCancel={() => setArrastando(null)}>
           {/* O quadro é um painel de superfície (como a caixa de Conversas); as etapas são faixas divididas por linhas e os cartões ficam na camada elevada. */}
-          <AreaRolagem eixo="x" className="bg-surface shadow-painel divide-border/70 flex flex-1 snap-x snap-mandatory divide-x rounded-[24px] sm:snap-proximity sm:rounded-[34px]">
+          <AreaRolagem eixo="x" className="bg-surface shadow-painel divide-border/70 flex flex-1 snap-x snap-mandatory divide-x rounded-campo sm:snap-proximity sm:rounded-painel">
             {etapasLead.map((et) => (
               <Coluna key={et.id} id={et.id} rotulo={et.rotulo} itens={visiveis.filter((l) => l.etapa === et.id)} onAbrir={setAbertoId} arrastando={arrastando} />
             ))}
@@ -119,7 +119,7 @@ function Coluna({ id, rotulo, itens, onAbrir, arrastando }: { id: EtapaLead; rot
               </Arrastavel>
             </li>
           ))}
-          {!itens.length && <li className="text-muted-foreground border-border rounded-[16px] border border-dashed px-3 py-6 text-center text-xs">Solte aqui</li>}
+          {!itens.length && <li className="text-muted-foreground border-border rounded-lg border border-dashed px-3 py-6 text-center text-xs">Solte aqui</li>}
         </ul>
       </AreaRolagem>
     </section>
@@ -137,7 +137,7 @@ function Arrastavel({ id, escondido, children }: { id: string; escondido: boolea
 
 function CartaoLead({ lead: l, onClick, className }: { lead: Lead; onClick?: () => void; className?: string }) {
   return (
-    <button type="button" onClick={onClick} className={cn('bg-raised shadow-cartao flex w-full cursor-pointer flex-col gap-1.5 rounded-[16px] p-3 text-left', className)}>
+    <button type="button" onClick={onClick} className={cn('bg-raised shadow-cartao flex w-full cursor-pointer flex-col gap-1.5 rounded-lg p-3 text-left', className)}>
       <span className="flex items-start gap-2">
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{l.nome}</span>
         {l.prazoMin != null && (
@@ -253,7 +253,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
           <div className="flex flex-col gap-2 border-t pt-4">
             <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Qualificação pela conversa</h3>
             {l.qualificacaoProposta ? (
-              <div className="bg-primary/6 flex flex-col gap-2 rounded-[14px] p-3">
+              <div className="bg-primary/6 flex flex-col gap-2 rounded-md p-3">
                 <span className="text-muted-foreground flex items-center gap-1 text-xs">
                   <SparkleIcon className="size-3.5" /> O integrante de Atendimento preencheu pela conversa; confirme
                 </span>
@@ -292,7 +292,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
           <div className="flex flex-col gap-2 border-t pt-4">
             <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Documentos</h3>
             {[proposta, contrato].filter((d): d is NonNullable<typeof d> => !!d).map((d) => (
-              <div key={d.tipo} className="bg-raised shadow-contorno flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2">
+              <div key={d.tipo} className="bg-raised shadow-contorno flex flex-wrap items-center gap-2 rounded-md px-3 py-2">
                 <FileTextIcon className="text-muted-foreground size-4" />
                 <span className="min-w-0 grow basis-40 truncate">{d.nome}</span>
                 <Badge variant={d.situacao === 'assinado' || d.situacao === 'visto' ? 'sucesso' : d.situacao === 'rascunho' ? 'outline' : 'destaque'}>
@@ -335,13 +335,13 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
         )}
 
         {semContato && (
-          <div className="bg-warning/10 flex flex-col gap-2 rounded-[14px] p-3">
+          <div className="bg-warning/10 flex flex-col gap-2 rounded-md p-3">
             <span className="flex items-center gap-1.5 text-xs font-medium">
               <ArrowClockwiseIcon className="size-3.5" /> Sem contato {l.desde.replace('há ', 'há ')}: o integrante lembrou e preparou a retomada
             </span>
             {retomada ? (
               <>
-                <p className="bg-raised rounded-[12px] px-3 py-2">{retomada}</p>
+                <p className="bg-raised rounded-md px-3 py-2">{retomada}</p>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -370,7 +370,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
         {l.etapa !== 'implantacao' && (
           <div className="flex flex-col gap-2 border-t pt-4">
             {fundir ? (
-              <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3">
+              <div className="bg-sunken flex flex-col gap-2 rounded-md p-3">
                 <p className="text-xs">O integrante achou um cliente com o mesmo telefone ou nome. Fundir junta conversas e documentos no cliente; nunca é automático.</p>
                 {loja.clientes.slice(0, 4).map((k) => (
                   <Button
@@ -411,7 +411,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
           {l.etapa === 'proposta' && <Acao icone={<SignatureIcon />} titulo="Aceite recebido: gerar contrato" nivel="preparar · assinatura por fornecedor externo" onClick={() => onMover('contrato', { proxima: 'assinatura pendente', documentos: [...(l.documentos ?? []).filter((d) => d.tipo !== 'contrato'), { nome: `Contrato de prestação ${l.nome}.pdf`, tipo: 'contrato', situacao: 'rascunho' }] })} />}
           {l.etapa === 'contrato' &&
             (confirmando ? (
-              <div className="bg-sunken flex flex-col gap-2 rounded-[16px] p-3">
+              <div className="bg-sunken flex flex-col gap-2 rounded-lg p-3">
                 <p className="font-medium">Fechar contrato faz, de uma vez:</p>
                 <ul className="text-muted-foreground list-disc pl-4 text-xs">
                   <li>cria o cliente "{l.nome}" em implantação, com a primeira versão do perfil</li>
@@ -462,7 +462,7 @@ function DetalheLead({ lead: l, onMover, onAtualizar, onFechar, onAbrirConversa 
 
 function Acao({ icone, titulo, nivel, onClick }: { icone: ReactNode; titulo: string; nivel: string; onClick: () => void }) {
   return (
-    <Button variant="secondary" className="h-auto w-full justify-start gap-2.5 rounded-[14px] py-2 text-left whitespace-normal" onClick={onClick}>
+    <Button variant="secondary" className="h-auto w-full justify-start gap-2.5 rounded-md py-2 text-left whitespace-normal" onClick={onClick}>
       {icone}
       <span className="flex flex-col">
         <span className="text-sm">{titulo}</span>
@@ -514,8 +514,8 @@ function Metricas() {
             {m.conversao.map((c, i) => (
               <li key={c.etapa} className="grid grid-cols-[6.5rem_1fr_6rem] items-center gap-3 text-sm">
                 <span>{c.etapa}</span>
-                <span className="bg-sunken h-6 overflow-hidden rounded-[8px]">
-                  <span className="bg-foreground/70 block h-full rounded-[8px]" style={{ width: `${(c.n / topo) * 100}%` }} />
+                <span className="bg-sunken h-6 overflow-hidden rounded-sm">
+                  <span className="bg-foreground/70 block h-full rounded-sm" style={{ width: `${(c.n / topo) * 100}%` }} />
                 </span>
                 <span className="text-muted-foreground text-right text-xs tabular-nums">
                   {c.n}
@@ -532,7 +532,7 @@ function Metricas() {
 
 function Caixa({ titulo, children, className }: { titulo: string; children: ReactNode; className?: string }) {
   return (
-    <section className={cn('bg-surface shadow-cartao flex flex-col gap-2 rounded-[24px] p-4', className)}>
+    <section className={cn('bg-surface shadow-cartao flex flex-col gap-2 rounded-campo p-4', className)}>
       <h3 className="text-sm font-medium">{titulo}</h3>
       {children}
     </section>
@@ -613,7 +613,7 @@ function ListaLeads({ leads, onAbrir }: { leads: Lead[]; onAbrir: (id: string) =
   const responsaveis = [...new Set(leads.map((l) => l.responsavel).filter(Boolean))] as string[]
   const lista = leads.filter((l) => (origem === 'todas' || l.origem === origem) && (resp === 'todos' || (resp === 'sem' ? !l.responsavel : l.responsavel === resp)))
   return (
-    <div className="bg-surface shadow-painel flex min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] sm:rounded-[34px]">
+    <div className="bg-surface shadow-painel flex min-h-0 flex-1 flex-col overflow-hidden rounded-campo sm:rounded-painel">
       <div className="flex flex-wrap gap-2 border-b p-3">
         <CampoEscolha rotulo="Origem" valor={origem} onMudar={setOrigem} opcoes={[{ valor: 'todas', rotulo: 'Todas as origens' }, ...['whatsapp', 'site', 'indicação', 'instagram'].map((o) => ({ valor: o, rotulo: o }))]} />
         <CampoEscolha rotulo="Responsável" valor={resp} onMudar={setResp} opcoes={[{ valor: 'todos', rotulo: 'Todos os responsáveis' }, { valor: 'sem', rotulo: 'Sem responsável' }, ...responsaveis.map((r) => ({ valor: r, rotulo: r }))]} />

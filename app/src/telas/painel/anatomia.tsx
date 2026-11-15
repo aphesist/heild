@@ -63,7 +63,7 @@ export function FaixaEstado({ cliente }: { cliente?: Cliente }) {
       ? `Contrato aceito em ${desde}: a trilha de implantação começa quando o Gestor mudar para "em implantação".`
       : `Cliente ${rotuloEstado[e]} em ${desde}; retenção dos documentos até ${retencao}. A aba fica só para leitura.`
   return (
-    <div role="status" className={cn('flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm', soLeitura(e) ? 'bg-sunken' : 'bg-warning/10')}>
+    <div role="status" className={cn('flex items-center gap-2 rounded-md px-3 py-2 text-sm', soLeitura(e) ? 'bg-sunken' : 'bg-warning/10')}>
       {soLeitura(e) ? <LockSimpleIcon className="text-muted-foreground size-4 shrink-0" /> : <ArchiveIcon className="text-warning size-4 shrink-0" />}
       {texto}
     </div>
@@ -140,7 +140,7 @@ export function HistoricoPerfil({ clienteId, titulo, onFechar }: { clienteId?: s
         </span>
       </label>
       {naData ? (
-        <p className="bg-sunken rounded-[14px] px-3 py-2 text-sm">
+        <p className="bg-sunken rounded-md px-3 py-2 text-sm">
           Em {ddmm(em)}/{em.slice(0, 4)} valia a versão de {ddmm(naData.vigente_de)}: regime {naData.regime}, UF {naData.uf}, serviços {naData.servicos_contratados.join(', ') || 'contábil'}.
         </p>
       ) : (
@@ -174,7 +174,7 @@ export function CartoesPendentes({ setor, clienteId }: { setor: SetorIntegrante;
   return (
     <ul className="flex flex-col gap-1.5">
       {pendentes.slice(0, 3).map((c) => (
-        <li key={c.id} className="bg-sunken flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+        <li key={c.id} className="bg-sunken flex flex-wrap items-center gap-2 rounded-md px-3 py-2 text-sm">
           <RobotIcon className="text-muted-foreground size-4 shrink-0" />
           <span className="min-w-0 grow basis-40">
             <span className="block truncate">{c.resumo_humano}</span>

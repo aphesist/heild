@@ -34,7 +34,7 @@ export function EscolherPessoas({ escolhidas, onMudar, excluir = [], unica }: { 
                 type="button"
                 aria-pressed={sel}
                 onClick={() => onMudar(unica ? [u.id] : sel ? escolhidas.filter((x) => x !== u.id) : [...escolhidas, u.id])}
-                className={cn('flex w-full cursor-pointer items-center gap-2.5 rounded-[12px] px-2 py-1.5 text-left text-sm', sel ? 'bg-primary/10' : 'hover:bg-sunken')}
+                className={cn('flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm', sel ? 'bg-primary/10' : 'hover:bg-sunken')}
               >
                 <span className="relative inline-flex shrink-0">
                   <Avatar nome={u.nome} tamanho="sm" />
@@ -79,7 +79,7 @@ export function DialogoNovaConversa({ tipo, onFechar, onCriada }: { tipo: 'pesso
   }
   return (
     <Dialog open={!!tipo} onOpenChange={(v) => !v && fechar()}>
-      <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-md">
+      <DialogContent className="bg-surface rounded-campo border-0 p-5 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-medium">{tipo === 'pessoal' ? 'Nova conversa pessoal' : 'Novo grupo'}</DialogTitle>
           <DialogDescription>{tipo === 'pessoal' ? 'Fechada entre vocês dois. Se já existir, ela reabre com o histórico.' : 'Qualquer pessoa cria grupo. A entrada e a saída de cada um ficam registradas.'}</DialogDescription>

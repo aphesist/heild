@@ -252,7 +252,7 @@ function LinhaAdmissao({ id, a }: { id: string; a: EstadoDP['admissoes'][number]
     })
   const s2200 = a.etapas.find((x) => x.rotulo === 'S-2200')
   return (
-    <li className="bg-raised flex flex-col gap-2 rounded-[16px] p-3">
+    <li className="bg-raised flex flex-col gap-2 rounded-lg p-3">
       <div className="flex items-start gap-2">
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{a.nome}</span>
@@ -430,7 +430,7 @@ function Esocial({ id, t }: { id: string; t: TamanhoWidget }) {
     <ul className="flex flex-col gap-2">
       {!e.esocial.length && <li className="text-muted-foreground py-2 text-sm">Nenhum evento pendente no eSocial.</li>}
       {e.esocial.map((x) => (
-        <li key={x.evento} className={cn('flex items-start gap-3 rounded-[14px] px-3 py-2', x.situacao === 'rejeitado' ? 'bg-destructive/8' : 'bg-raised')}>
+        <li key={x.evento} className={cn('flex items-start gap-3 rounded-md px-3 py-2', x.situacao === 'rejeitado' ? 'bg-destructive/8' : 'bg-raised')}>
           {x.situacao === 'aceito' ? <CheckIcon weight="bold" className="text-success mt-0.5 size-4 shrink-0" /> : x.situacao === 'rejeitado' ? <XCircleIcon weight="fill" className="text-destructive mt-0.5 size-4 shrink-0" /> : <WarningIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />}
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">{x.evento}</span>
@@ -560,7 +560,7 @@ function Ferias({ id, t }: { id: string; t: TamanhoWidget }) {
             </div>
             {programando === f.nome && (
               <form
-                className="bg-raised flex flex-wrap items-center gap-2 rounded-[12px] p-2 text-xs"
+                className="bg-raised flex flex-wrap items-center gap-2 rounded-md p-2 text-xs"
                 onSubmit={(ev) => {
                   ev.preventDefault()
                   gravarDP(id, (x) => ({ ferias: x.ferias.map((y) => (y.nome === f.nome ? { ...y, alerta: false, programada: { inicio, dias: qtd, abono } } : y)) }))
@@ -652,7 +652,7 @@ function Convencoes({ id, t }: { id: string; t: TamanhoWidget }) {
           <span className="text-muted-foreground"> · vigência {e.cct.vigencia}</span>
         </p>
         {e.cct.nova && e.cct.resumo === 'pendente' && (
-          <div className="bg-warning/10 flex items-center gap-2 rounded-[12px] px-3 py-2 text-xs">
+          <div className="bg-warning/10 flex items-center gap-2 rounded-md px-3 py-2 text-xs">
             <ScalesIcon className="size-4" /> CCT 2026/2027 registrada no Mediador.
             <Mini className="ml-auto h-7 rounded-full" onClick={resumir}>
               Resumir CCT
@@ -660,7 +660,7 @@ function Convencoes({ id, t }: { id: string; t: TamanhoWidget }) {
           </div>
         )}
         {e.cct.texto && (
-          <div className="bg-raised flex flex-col gap-1 rounded-[12px] p-3 text-xs">
+          <div className="bg-raised flex flex-col gap-1 rounded-md p-3 text-xs">
             <span className="font-medium">Resumo da CCT {e.cct.resumo === 'publicado' ? '(publicado aos clientes)' : '(para revisar)'}</span>
             <ul className="list-disc pl-4">
               {e.cct.texto.map((l) => (
@@ -760,7 +760,7 @@ function Simulados({ id, t }: { id: string; t: TamanhoWidget }) {
     <div className="flex flex-col gap-2">
       <ul className={cn('flex flex-col gap-2', t === 'XL' && 'grid grid-cols-2')}>
         {e.simulados.map((s) => (
-          <li key={s.id} className="bg-raised flex flex-col gap-1.5 rounded-[14px] p-3 text-sm">
+          <li key={s.id} className="bg-raised flex flex-col gap-1.5 rounded-md p-3 text-sm">
             <div className="flex items-start gap-2">
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{s.nome}</span>
@@ -844,7 +844,7 @@ function Rescisoes({ id, t }: { id: string; t: TamanhoWidget }) {
     <ul className={cn('flex flex-col gap-2', t === 'XL' && 'grid grid-cols-2')}>
       {!e.rescisoes.length && <li className="text-muted-foreground py-2 text-sm">Nenhuma rescisão em andamento.</li>}
       {e.rescisoes.map((r) => (
-        <li key={r.id} className="bg-raised flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+        <li key={r.id} className="bg-raised flex flex-col gap-2 rounded-md p-3 text-sm">
           <div className="flex items-start gap-2">
             <span className="min-w-0 flex-1">
               <span className="block font-medium">{r.nome}</span>
@@ -864,7 +864,7 @@ function Rescisoes({ id, t }: { id: string; t: TamanhoWidget }) {
             </Selo>
           </div>
           {r.kit.seguro === 'conferir' && r.kit.divergencia && (
-            <p className="bg-warning/10 rounded-[10px] px-2 py-1 text-xs">
+            <p className="bg-warning/10 rounded-sm px-2 py-1 text-xs">
               Conferir: {r.kit.divergencia}{' '}
               <button type="button" className="cursor-pointer underline" onClick={() => atualizar(r.id, (x) => ({ kit: { ...x.kit, seguro: 'conferido' } }))}>
                 conferi

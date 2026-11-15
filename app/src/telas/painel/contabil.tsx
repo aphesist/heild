@@ -171,14 +171,14 @@ function FechamentoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
     )
   return (
     <div className="flex h-full flex-col gap-2">
-      {estado.reaberta && <p className="bg-warning/10 rounded-[10px] px-2 py-1 text-xs">Reaberta por {estado.reaberta.por} ({estado.reaberta.quando}): {estado.reaberta.motivo}</p>}
+      {estado.reaberta && <p className="bg-warning/10 rounded-sm px-2 py-1 text-xs">Reaberta por {estado.reaberta.por} ({estado.reaberta.quando}): {estado.reaberta.motivo}</p>}
       <ol className="grid flex-1 grid-cols-2 gap-2 @lg:grid-cols-5">
         {etapasFechamento.map((e, i) => {
           const s = situacao(i)
           const trava = b[e.id]
           return (
             <li key={e.id}>
-              <button type="button" onClick={() => setVer(ver === e.id ? null : e.id)} className={cn('flex h-full w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded-[14px] px-2.5 py-1.5 text-left', s === 'feito' ? 'bg-success/10' : s === 'andamento' ? 'bg-raised shadow-contorno' : 'bg-sunken/60')} aria-expanded={ver === e.id}>
+              <button type="button" onClick={() => setVer(ver === e.id ? null : e.id)} className={cn('flex h-full w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded-md px-2.5 py-1.5 text-left', s === 'feito' ? 'bg-success/10' : s === 'andamento' ? 'bg-raised shadow-contorno' : 'bg-sunken/60')} aria-expanded={ver === e.id}>
                 <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
                   {s === 'feito' ? <CheckIcon weight="bold" className="text-success size-3" /> : <span className="tabular-nums">{i + 1}</span>}
                   {s === 'feito' ? 'feito' : s === 'andamento' ? 'em andamento' : 'a fazer'}
@@ -191,7 +191,7 @@ function FechamentoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
         })}
       </ol>
       {ver && (
-        <div className="bg-sunken/60 rounded-[12px] px-3 py-2 text-xs">
+        <div className="bg-sunken/60 rounded-md px-3 py-2 text-xs">
           <strong className="font-medium">{etapasFechamento[ordemEtapa(ver)].rotulo}: </strong>
           {b[ver].length ? b[ver].join(' · ') : 'nada travando.'}
         </div>
@@ -392,7 +392,7 @@ function TriagemBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tamanho
       {tamanho === 'XL' && estado.extratos.length > 0 && (
         <ul className="flex flex-col gap-1 text-xs">
           {estado.extratos.map((x) => (
-            <li key={x.nome + x.quando} className="bg-raised rounded-[10px] px-2 py-1">
+            <li key={x.nome + x.quando} className="bg-raised rounded-sm px-2 py-1">
               <strong className="font-medium">{x.nome}</strong> · {x.formato} · {x.linhas} linhas{x.duplicadas ? ` · ${x.duplicadas} duplicadas descartadas` : ''} · sócios: {x.socios || '—'} · {x.quando}
             </li>
           ))}
@@ -575,7 +575,7 @@ function ConciliacaoBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tam
   return (
     <ul className={cn('grid gap-1.5', tamanho === 'XL' && 'grid-cols-2')}>
       {d.conciliacoes.map((c) => (
-        <li key={c.id} className={cn('flex items-center gap-3 rounded-[12px] px-3 py-1', c.diferenca === 0 ? 'bg-raised' : 'bg-warning/10')}>
+        <li key={c.id} className={cn('flex items-center gap-3 rounded-md px-3 py-1', c.diferenca === 0 ? 'bg-raised' : 'bg-warning/10')}>
           {c.diferenca === 0 ? <CheckIcon weight="bold" className="text-success size-4 shrink-0" aria-label="conciliada" /> : <WarningIcon weight="fill" className="text-warning size-4 shrink-0" aria-label="diferença" />}
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">{c.conta}</span>
@@ -646,7 +646,7 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
   return (
     <div className="flex flex-col gap-2">
       {alerta && (
-        <div role="alert" className="bg-warning/12 flex flex-wrap items-center gap-2 rounded-[12px] px-3 py-2 text-sm">
+        <div role="alert" className="bg-warning/12 flex flex-wrap items-center gap-2 rounded-md px-3 py-2 text-sm">
           <WarningIcon weight="fill" className="text-warning size-4 shrink-0" />
           <span className="min-w-0 grow basis-40">
             <strong className="font-medium">{alerta.socio}</strong> recebeu {brl(alerta.lucro)} de lucro em {alerta.mes}: acima de R$ 50 mil, retenção de 10% = <strong className="font-medium">{brl(alerta.lucro * 0.1)}</strong>, DARF até 20/{String(Number(alerta.mes.slice(0, 2)) + 1).padStart(2, '0')} (Lei 15.270/2025).
@@ -681,7 +681,7 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
       <div className="flex flex-col gap-1">
         <span className="text-muted-foreground text-xs">{duvidas.length ? `${duvidas.length} dúvida(s) do integrante` : 'Sem dúvidas: todas as saídas classificadas.'}</span>
         {duvidas.slice(0, tamanho === 'XL' ? 4 : 2).map((s) => (
-          <div key={s.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-[10px] px-2 py-1 text-sm">
+          <div key={s.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-sm px-2 py-1 text-sm">
             <span className="min-w-0 grow basis-40 truncate">
               {s.data} · {s.favorecido} · {brl(s.valor)}
             </span>
@@ -719,7 +719,7 @@ function LucrosBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: TamanhoW
         <GavetaFormulario aberta onFechar={() => setDuvida(null)} titulo="Dúvida da distribuição de lucros" descricao={`${duvida.data} · ${duvida.favorecido} · ${brl(duvida.valor)} · ${cliente.nome}. A resposta pode virar regra por favorecido (D-13).`} acao="Responder" onAcao={responder}>
           <div role="radiogroup" aria-label="O que é esta saída" className="flex flex-col gap-1.5">
             {perguntasLucro.map((q, i) => (
-              <button key={q.valor} type="button" role="radio" aria-checked={resposta === q.valor} onClick={() => setResposta(q.valor)} className={cn('flex cursor-pointer items-center gap-2 rounded-[12px] border px-3 py-2 text-left text-sm', resposta === q.valor ? 'border-foreground/30 bg-raised font-medium' : 'border-border text-muted-foreground')}>
+              <button key={q.valor} type="button" role="radio" aria-checked={resposta === q.valor} onClick={() => setResposta(q.valor)} className={cn('flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-left text-sm', resposta === q.valor ? 'border-foreground/30 bg-raised font-medium' : 'border-border text-muted-foreground')}>
                 <span className="tabular-nums">{i + 1}.</span> {q.rotulo}
               </button>
             ))}
@@ -878,7 +878,7 @@ function RelatoriosBloco({ cliente }: { cliente: Cliente }) {
   return (
     <div className="flex flex-col gap-2">
       {r.abertas.length > 0 && (
-        <p className="bg-destructive/10 flex items-center gap-2 rounded-[10px] px-2 py-1 text-xs">
+        <p className="bg-destructive/10 flex items-center gap-2 rounded-sm px-2 py-1 text-xs">
           <ShieldWarningIcon className="text-destructive size-4" /> {r.abertas.length} trava(s) aberta(s): balancete, DRE e comparativo não viram cartão (D-26).
         </p>
       )}
@@ -1026,7 +1026,7 @@ function FilaAssinaturaBloco({ cliente }: { cliente: Cliente }) {
           const [rot, tom] = rotuloSituacao[it.e!.situacao]
           const pend = r.estado.pendentes[`enviar:${it.id}`]
           return (
-            <li key={it.id} className="bg-raised flex flex-col gap-1.5 rounded-[12px] px-3 py-2">
+            <li key={it.id} className="bg-raised flex flex-col gap-1.5 rounded-md px-3 py-2">
               <div className="flex flex-wrap items-center gap-2">
                 <PenNibIcon className="text-muted-foreground size-4 shrink-0" />
                 <span className="min-w-0 grow basis-40 text-sm">
@@ -1183,11 +1183,11 @@ function Fase4Bloco({ cliente }: { cliente: Cliente }) {
   return (
     <div className="flex flex-col gap-2 text-sm">
       <dl className="grid grid-cols-2 gap-2">
-        <div className="bg-raised rounded-[12px] px-3 py-1.5">
+        <div className="bg-raised rounded-md px-3 py-1.5">
           <dt className="text-muted-foreground text-xs">Margem líquida {COMPETENCIA}</dt>
           <dd className="font-medium tabular-nums">{r.faturamento ? pct(margem) : '—'}</dd>
         </div>
-        <div className="bg-raised rounded-[12px] px-3 py-1.5">
+        <div className="bg-raised rounded-md px-3 py-1.5">
           <dt className="text-muted-foreground text-xs">Custo sobre receita</dt>
           <dd className="font-medium tabular-nums">{r.faturamento ? pct(r.custos / r.faturamento) : '—'}</dd>
         </div>

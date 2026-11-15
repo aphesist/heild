@@ -23,7 +23,7 @@ const marco = (texto: string): ItemConversa => ({ tipo: 'marco', id: `x${Date.no
 function Modal({ aberto, onFechar, titulo, descricao, children, rodape, largo }: { aberto: boolean; onFechar: () => void; titulo: string; descricao?: string; children: React.ReactNode; rodape?: React.ReactNode; largo?: boolean }) {
   return (
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className={cn('bg-surface rounded-[24px] border-0 p-5', largo ? 'sm:max-w-xl' : 'sm:max-w-md')}>
+      <DialogContent className={cn('bg-surface rounded-campo border-0 p-5', largo ? 'sm:max-w-xl' : 'sm:max-w-md')}>
         <DialogHeader>
           <DialogTitle className="font-medium">{titulo}</DialogTitle>
           {descricao && <DialogDescription>{descricao}</DialogDescription>}
@@ -95,7 +95,7 @@ export function DialogoAgendar({ c, aberto, onFechar, onAtualizar }: { c: Conver
     >
       <ul className="flex flex-col gap-1.5">
         {horarios.map((h) => (
-          <li key={h} className="bg-raised shadow-contorno rounded-[12px] px-3 py-2 text-sm">
+          <li key={h} className="bg-raised shadow-contorno rounded-md px-3 py-2 text-sm">
             {h} · livre na agenda de {quem.split(' ')[0]}
           </li>
         ))}
@@ -147,7 +147,7 @@ export function DialogoMover({ c, conversas, aberto, onFechar, onMover }: { c: C
           <AreaRolagem as="ul" className="flex max-h-64 flex-col gap-1">
             {doCliente.map((m) => (
               <li key={m.id}>
-                <label className="hover:bg-sunken flex cursor-pointer items-start gap-2 rounded-[12px] px-2 py-1.5 text-sm">
+                <label className="hover:bg-sunken flex cursor-pointer items-start gap-2 rounded-md px-2 py-1.5 text-sm">
                   <input type="checkbox" className="mt-1" checked={sel.includes(m.id)} onChange={(e) => setSel((x) => (e.target.checked ? [...x, m.id] : x.filter((y) => y !== m.id)))} />
                   <span className="min-w-0">
                     <span className="text-muted-foreground block text-[11px]">{m.hora}</span>
@@ -330,13 +330,13 @@ export function SimulacaoAtendimento({ aberto, onFechar }: { aberto: boolean; on
   const liberadas = categoriasAtendimento.filter((c) => cfg.categorias[c.id])
   return (
     <Modal aberto={aberto} onFechar={onFechar} largo titulo="Modo simulação do atendimento" descricao="Você faz o papel do cliente e vê como o integrante responderia. Nada é gravado nem enviado, e nenhuma conversa é aberta (D-30).">
-      <div className="bg-warning/12 flex items-start gap-2 rounded-[14px] px-3 py-2 text-xs">
+      <div className="bg-warning/12 flex items-start gap-2 rounded-md px-3 py-2 text-xs">
         <FlaskIcon className="text-warning mt-0.5 size-4 shrink-0" />
         <span>
           Simulação · categorias liberadas: {liberadas.length ? liberadas.map((c) => c.rotulo).join(', ') : 'nenhuma (o integrante só sugere; começa assim, D-33)'}.
         </span>
       </div>
-      <AreaRolagem as="ol" className="bg-sunken/60 flex max-h-80 min-h-48 flex-col gap-2 rounded-[16px] p-3">
+      <AreaRolagem as="ol" className="bg-sunken/60 flex max-h-80 min-h-48 flex-col gap-2 rounded-lg p-3">
         {falas.length === 0 && <li className="text-muted-foreground m-auto text-center text-xs">Escreva como um cliente escreveria. Ex.: "Manda a segunda via do DAS?", "Quanto custa a contabilidade?"</li>}
         {falas.map((f, i) => (
           <li key={i} className={cn('flex max-w-[85%] flex-col gap-1', f.de === 'cliente' ? 'self-start' : 'self-end items-end')}>
@@ -348,7 +348,7 @@ export function SimulacaoAtendimento({ aberto, onFechar }: { aberto: boolean; on
               )}
               {f.de === 'cliente' ? 'você, como cliente' : `${t.nome} (integrante)`}
             </span>
-            <span className={cn('rounded-[16px] px-3 py-2 text-sm', f.de === 'cliente' ? 'bg-raised shadow-contorno' : 'bg-secondary text-secondary-foreground')}>{f.texto}</span>
+            <span className={cn('rounded-lg px-3 py-2 text-sm', f.de === 'cliente' ? 'bg-raised shadow-contorno' : 'bg-secondary text-secondary-foreground')}>{f.texto}</span>
             {f.nota && (
               <Badge variant="outline" className="text-xs">
                 <ShieldWarningIcon /> {f.nota}

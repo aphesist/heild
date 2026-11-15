@@ -113,11 +113,11 @@ export function GavetaDivergencia({ clienteId, item, onFechar }: { clienteId: st
         onFechar()
       }}
     >
-      <div className="bg-sunken flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+      <div className="bg-sunken flex flex-col gap-1 rounded-md p-3 text-sm">
         <span className="text-muted-foreground text-xs">Alerta</span>
         {item.alerta}
       </div>
-      <div className="bg-sunken flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+      <div className="bg-sunken flex flex-col gap-1 rounded-md p-3 text-sm">
         <span className="text-muted-foreground flex items-center gap-1 text-xs">
           <SparkleIcon className="size-3.5" /> Sugestão do integrante · {item.regra}
         </span>
@@ -197,7 +197,7 @@ export function GavetaRegistrarNfse({ clienteId, onFechar }: { clienteId: string
       </Campo>
       {erro && <EstadoErro descricao={erro} onTentar={ler} className="py-4" />}
       {lido && (
-        <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+        <div className="bg-sunken flex flex-col gap-2 rounded-md p-3 text-sm">
           <div className="flex items-center justify-between gap-2">
             <span className="text-muted-foreground text-xs">Campos lidos · confiança {Math.round(lido.campos.confianca * 100)}%</span>
             <SeloDemonstracao fonte={lido.fonte} />
@@ -249,7 +249,7 @@ export function GavetaAbrirZip({ clienteId, onFechar }: { clienteId: string; onF
           const certo = corrigirNomeWindows(i)
           return (
             <li key={i}>
-              <label className="bg-sunken flex cursor-pointer items-start gap-2.5 rounded-[12px] px-3 py-2 text-sm">
+              <label className="bg-sunken flex cursor-pointer items-start gap-2.5 rounded-md px-3 py-2 text-sm">
                 <input type="checkbox" checked={ok} onChange={() => setMarcados((xs) => (ok ? xs.filter((x) => x !== i) : [...xs, i]))} className="mt-1" />
                 <FileZipIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
                 <span className="min-w-0 flex-1">

@@ -99,7 +99,7 @@ export function GavetaCadastrarCnpj({ onFechar }: { onFechar: () => void }) {
       )}
       {estado === 'erro' && <EstadoErro titulo="A consulta não respondeu" descricao={erro} onTentar={consultar} />}
       {estado === 'pronto' && dados && (
-        <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+        <div className="bg-sunken flex flex-col gap-2 rounded-md p-3 text-sm">
           <div className="flex items-center gap-2">
             <strong className="font-medium">{dados.razao_social}</strong>
             <SeloDemonstracao fonte="consulta CNPJ (API-12)" />
@@ -189,7 +189,7 @@ export function GavetaVersionar({ cliente, inicial, motivoInicial, onFechar }: {
       <Campo rotulo="Motivo" erro={motivo && motivo.trim().length < 4 ? 'Diga o motivo da mudança.' : undefined}>
         {(id) => <CampoArea id={id} linhas={2} valor={motivo} onMudar={setMotivo} placeholder="Ex.: alteração contratual registrada na JUCESP" />}
       </Campo>
-      <div className="bg-sunken rounded-[14px] p-3 text-sm">
+      <div className="bg-sunken rounded-md p-3 text-sm">
         <p className="mb-1 font-medium">O que muda</p>
         {diff.length ? (
           <ul className="flex flex-col gap-1">
@@ -319,7 +319,7 @@ export function GavetaPedirAcesso({ cliente, onFechar, registrarFora }: { client
       {registrarFora ? (
         <Campo rotulo="Validade (mês/ano)">{(id) => <CampoTexto id={id} tipo="month" valor={validade} onMudar={setValidade} />}</Campo>
       ) : (
-        <div className="bg-sunken rounded-[14px] p-3 text-sm">
+        <div className="bg-sunken rounded-md p-3 text-sm">
           <p className="mb-1 font-medium">Passo a passo que o cliente vê no app</p>
           <ol className="text-muted-foreground list-decimal pl-4">
             {o.passos.split(' › ').map((p) => (
@@ -406,7 +406,7 @@ export function GavetaAbrirProcesso({ cliente, onFechar }: { cliente: Cliente; o
         <Campo rotulo="Órgão">{(id) => <CampoTexto id={id} valor={orgao} onMudar={setOrgao} />}</Campo>
         <Campo rotulo="UF">{(id) => <CampoEscolha id={id} valor={uf} onMudar={setUf} opcoes={ufs.map((u) => ({ valor: u, rotulo: u }))} />}</Campo>
       </div>
-      <div className="bg-sunken rounded-[14px] p-3 text-sm">
+      <div className="bg-sunken rounded-md p-3 text-sm">
         <p className="mb-1 font-medium">Checklist ({uf})</p>
         <ul className="text-muted-foreground flex flex-col gap-0.5">
           {itens.map((i) => (
@@ -507,7 +507,7 @@ export function GavetaMudarEstado({ cliente, onFechar }: { cliente: Cliente; onF
       }}
     >
       <Campo rotulo="Novo estado">{(id) => <CampoEscolha id={id} valor={estado} onMudar={(v) => setEstado(v as EstadoCiclo)} opcoes={estadosOrdem.map((e) => ({ valor: e, rotulo: rotuloEstado[e] }))} />}</Campo>
-      {bloqueio && <p className="bg-warning/10 rounded-[12px] px-3 py-2 text-sm">{bloqueio}</p>}
+      {bloqueio && <p className="bg-warning/10 rounded-md px-3 py-2 text-sm">{bloqueio}</p>}
       <Campo rotulo="Motivo">{(id) => <CampoArea id={id} linhas={2} valor={motivo} onMudar={setMotivo} placeholder="Ex.: contrato assinado em 18/11" />}</Campo>
     </GavetaFormulario>
   )

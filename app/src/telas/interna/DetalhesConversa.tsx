@@ -71,7 +71,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
             )}
           </div>
           {adicionando && (
-            <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-2">
+            <div className="bg-sunken flex flex-col gap-2 rounded-md p-2">
               <EscolherPessoas escolhidas={novos} onMudar={setNovos} excluir={ativos.map((p) => p.usuario_id)} />
               <Button
                 size="sm"
@@ -133,7 +133,7 @@ export function DetalhesConversa({ conversa, onFechar }: { conversa: ConversaInt
             <ul className="flex flex-col gap-1">
               {anexos.map((a, i) => (
                 <li key={i}>
-                  <button type="button" onClick={() => docs.abrir(a.nome)} className="hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-[12px] px-2 py-1.5 text-left">
+                  <button type="button" onClick={() => docs.abrir(a.nome)} className="hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left">
                     <PaperclipIcon className="text-muted-foreground size-4" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{a.nome}</span>

@@ -340,7 +340,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
                 ['30 dias', trinta.length, 'text-foreground'],
               ] as const
             ).map(([r, n, c]) => (
-              <button key={r} type="button" onClick={() => irObrigacoes()} className="bg-raised hover:bg-sunken cursor-pointer rounded-[14px] px-2 py-1.5">
+              <button key={r} type="button" onClick={() => irObrigacoes()} className="bg-raised hover:bg-sunken cursor-pointer rounded-md px-2 py-1.5">
                 <span className={cn('font-heading block text-2xl font-light tabular-nums', c)}>{n}</span>
                 <span className="text-muted-foreground block text-xs">{r}</span>
               </button>
@@ -350,7 +350,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
             <ul className="flex flex-col gap-1">
               {urgentes.map((u) => (
                 <li key={u.id}>
-                  <button type="button" onClick={() => fluxos.abrirTarefa(u.id)} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1 text-left text-xs">
+                  <button type="button" onClick={() => fluxos.abrirTarefa(u.id)} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1 text-left text-xs">
                     {u.atrasada ? <WarningIcon className="text-destructive size-3.5 shrink-0" aria-label="atrasada" /> : <CircleIcon className="text-muted-foreground size-3.5 shrink-0" />}
                     <span className="min-w-0 flex-1 truncate">
                       {u.codigo} · {u.titulo}
@@ -380,7 +380,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
           <ul className="flex flex-col gap-1">
             {sla.map((c) => (
               <li key={c.id}>
-                <button type="button" onClick={() => nav.irPara({ modulo: 'crm', aba: 'conversas', conversa: c.id })} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm">
+                <button type="button" onClick={() => nav.irPara({ modulo: 'crm', aba: 'conversas', conversa: c.id })} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm">
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{c.pessoa.nome}</span>
                     <span className="text-muted-foreground block truncate text-xs">
@@ -438,7 +438,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
               const parado = loja.tarefas.find((t) => t.cliente === c.nome && /^SOC-01[14]/.test(t.codigo) && statusAberto(t.status))
               return (
                 <li key={c.id}>
-                  <button type="button" onClick={() => nav.irPara({ modulo: 'painel', aba: 'societario', cliente: c.id, trilha: c.id })} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm">
+                  <button type="button" onClick={() => nav.irPara({ modulo: 'painel', aba: 'societario', cliente: c.id, trilha: c.id })} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">{c.nome}</span>
                       <span className="text-muted-foreground block truncate text-xs">{parado ? `parado em ${parado.codigo} · ${parado.titulo}` : 'trilha andando'}</span>
@@ -466,7 +466,7 @@ export function useCatalogoVivo({ linhaExemplo = [], clienteNome, clienteId, avi
             <ol className="flex flex-wrap gap-2">
               {primeiros.map((p, i) => (
                 <li key={p.id} className="min-w-[12rem] flex-1">
-                  <div className={cn('bg-raised flex h-full items-center gap-2 rounded-[14px] px-3 py-2 text-sm', p.feito && 'opacity-60')}>
+                  <div className={cn('bg-raised flex h-full items-center gap-2 rounded-md px-3 py-2 text-sm', p.feito && 'opacity-60')}>
                     {p.feito ? <CheckCircleIcon className="text-success size-5 shrink-0" weight="fill" /> : <span className="bg-sunken flex size-5 shrink-0 items-center justify-center rounded-full text-xs tabular-nums">{i + 1}</span>}
                     <button type="button" onClick={() => nav.irPara(p.destino)} className="min-w-0 flex-1 cursor-pointer truncate text-left underline-offset-2 hover:underline">
                       {p.rotulo}

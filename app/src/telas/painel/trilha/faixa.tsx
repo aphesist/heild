@@ -46,7 +46,7 @@ export function FaixaCicloDeVida({ cliente, className }: { cliente: Cliente; cla
   const feitas = filhas.filter((t) => t.status === 'concluida').length
   const encerrado = c.estado_ciclo === 'encerrado'
   return (
-    <div role="status" aria-label="Ciclo de vida do cliente" className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[14px] px-3 py-2 text-sm', excecao ? 'bg-destructive/10' : encerrado ? 'bg-sunken' : 'bg-warning/10', className)}>
+    <div role="status" aria-label="Ciclo de vida do cliente" className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md px-3 py-2 text-sm', excecao ? 'bg-destructive/10' : encerrado ? 'bg-sunken' : 'bg-warning/10', className)}>
       {excecao ? <WarningOctagonIcon className="text-destructive size-4" /> : encerrado ? <LockSimpleIcon className="size-4" /> : <FlowArrowIcon className="text-warning size-4" />}
       {comFaixa.includes(c.estado_ciclo) && (
         <span>

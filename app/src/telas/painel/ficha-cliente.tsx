@@ -130,7 +130,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
       acaoDesabilitada={editaFicha && tentou && invalido}
       onAcao={editaFicha ? salvar : onFechar}
     >
-      <div ref={topo} role="tablist" aria-label="Partes da ficha" className="bg-sunken inset-shadow-trilho flex scroll-mt-4 flex-wrap gap-0.5 rounded-[18px] p-[3px]">
+      <div ref={topo} role="tablist" aria-label="Partes da ficha" className="bg-sunken inset-shadow-trilho flex scroll-mt-4 flex-wrap gap-0.5 rounded-lg p-[3px]">
         {abas.map((a) => (
           <button
             key={a.id}
@@ -156,7 +156,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
             {contatos.map((c, i) => {
               const e = tentou || c.nome ? errosDe(c) : { nome: undefined, whatsapp: undefined, email: undefined, contato: undefined }
               return (
-                <div key={i} className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3">
+                <div key={i} className="bg-sunken flex flex-col gap-2 rounded-md p-3">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{c.nome || 'Contato novo'}</span>
                     {c.principal && (
@@ -220,7 +220,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
             )}
           </fieldset>
           {semAssunto.length > 0 && (
-            <p className="bg-warning/10 flex items-start gap-2 rounded-[12px] px-3 py-2 text-xs">
+            <p className="bg-warning/10 flex items-start gap-2 rounded-md px-3 py-2 text-xs">
               <WarningIcon className="text-warning mt-0.5 size-3.5 shrink-0" />
               <span>
                 Sem ninguém: {semAssunto.map((a) => a.rotulo).join(', ')}. Esses assuntos vão ao {socio ? `${socio.papel} ${socio.nome}` : 'sócio'}.
@@ -318,7 +318,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
             )}
             <Campo rotulo="Observação">{(id) => <CampoArea id={id} linhas={3} valor={entrega.observacao ?? ''} onMudar={(observacao) => setEntrega({ ...entrega, observacao: observacao || undefined })} placeholder="O que vai por onde" />}</Campo>
           </fieldset>
-          <p className="bg-sunken rounded-[12px] px-3 py-2 text-sm">Fica assim: {resumoEntrega(entrega)}</p>
+          <p className="bg-sunken rounded-md px-3 py-2 text-sm">Fica assim: {resumoEntrega(entrega)}</p>
         </section>
       )}
 
@@ -326,7 +326,7 @@ export function FichaClienteGaveta({ clienteId, onFechar }: { clienteId: string;
       {aba === 'historico' && <HistoricoFicha clienteId={clienteId} />}
 
       {mudancas.length > 0 && editaFicha && (
-        <div className="bg-sunken rounded-[12px] px-3 py-2 text-xs">
+        <div className="bg-sunken rounded-md px-3 py-2 text-xs">
           <span className="font-medium">A salvar:</span> {mudancas.slice(0, 4).join('; ')}
           {mudancas.length > 4 ? `; e mais ${mudancas.length - 4}` : ''}
         </div>
@@ -364,7 +364,7 @@ function AlcadaProposta({ clienteId, contatos, edita }: { clienteId: string; con
         O escritório só propõe: a alçada nova vale depois que {aprovador ? aprovador.nome : 'o sócio aprovador'} aceitar no app. Quem propõe não confere nem aprova pagamento desta empresa.
       </p>
       {vigente && (
-        <p className="bg-sunken rounded-[12px] px-3 py-2 text-sm">
+        <p className="bg-sunken rounded-md px-3 py-2 text-sm">
           Vale hoje: até {brl(vigente.faixa1)} paga com uma aprovação; até {brl(vigente.faixa2)}, com o sócio; acima, reforçada (2 pessoas) · {vigente.janela}
         </p>
       )}
@@ -460,7 +460,7 @@ function ResumoRelacao({ clienteId, nome, pacotes }: { clienteId: string; nome: 
           { r: 'faturas em aberto', v: emAberto.length, alerta: emAberto.some((f) => f.situacao === 'vencida') },
           { r: 'pacotes', v: pacotes.length },
         ].map((x) => (
-          <div key={x.r} className="bg-sunken flex flex-col rounded-[14px] px-3 py-2">
+          <div key={x.r} className="bg-sunken flex flex-col rounded-md px-3 py-2">
             <span className={cn('font-heading text-2xl font-light tabular-nums', x.alerta && 'text-destructive-text')}>{x.v}</span>
             <span className="text-muted-foreground text-xs">{x.r}</span>
           </div>
@@ -493,7 +493,7 @@ function ResumoRelacao({ clienteId, nome, pacotes }: { clienteId: string; nome: 
         <ul className="divide-border/70 divide-y">
           {minhas.slice(0, 6).map((t) => (
             <li key={t.id}>
-              <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-[8px] py-1.5 text-left text-sm">
+              <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="hover:bg-sunken flex w-full cursor-pointer items-center gap-2 rounded-sm py-1.5 text-left text-sm">
                 <span className="min-w-0 flex-1 truncate">{t.titulo}</span>
                 <span className="text-muted-foreground shrink-0 text-xs">
                   {rotuloSetorCurto[t.setor] ?? t.setor} · {t.prazo}

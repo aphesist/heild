@@ -45,7 +45,7 @@ export function SegmentoPorTexto({ onUsar }: { onUsar: (descricao: string, predi
     return loja.clientes.filter((c) => !reg || c.regime === reg).length
   }, [resultado, loja.clientes])
   return (
-    <div className="bg-sunken/60 flex flex-col gap-2 rounded-[16px] p-3">
+    <div className="bg-sunken/60 flex flex-col gap-2 rounded-lg p-3">
       <div className="flex flex-wrap gap-2">
         <CampoTexto valor={texto} onMudar={setTexto} placeholder='ex.: "todos do Simples de SP com funcionários"' aria-label="Segmento em texto" className="min-w-0 grow basis-40" />
         <Button
@@ -127,7 +127,7 @@ export function ResultadoComunicado({ c, onFechar }: { c: Comunicado | null; onF
           {c?.status !== 'enviado' && <li className="text-muted-foreground p-6 text-center text-sm">Ainda não saiu: o resultado aparece depois do envio.</li>}
           {c?.status === 'enviado' &&
             destinatarios.map((d, i) => (
-              <li key={i} className="flex items-center gap-2 rounded-[12px] px-2 py-2 text-sm">
+              <li key={i} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate">{d.nome}</span>
                   <span className="text-muted-foreground block truncate text-xs">{d.cliente}</span>
@@ -171,7 +171,7 @@ export function BoletimMensal({ onAgendar }: { onAgendar: (c: Comunicado) => voi
     'Dúvidas? Responda esta mensagem.',
   ].join('\n')
   return (
-    <section className="bg-surface shadow-cartao flex flex-col gap-3 rounded-[24px] p-4">
+    <section className="bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4">
       <header className="flex items-start gap-2">
         <NewspaperIcon className="text-muted-foreground mt-0.5 size-5" />
         <div className="min-w-0 flex-1">
@@ -203,7 +203,7 @@ export function BoletimMensal({ onAgendar }: { onAgendar: (c: Comunicado) => voi
       </header>
       {estado !== 'nada' && (
         <>
-          <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={9} aria-label="Rascunho do boletim" className="bg-raised shadow-contorno w-full resize-y rounded-[14px] px-3 py-2 text-sm outline-none" readOnly={estado === 'escrevendo'} />
+          <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={9} aria-label="Rascunho do boletim" className="bg-raised shadow-contorno w-full resize-y rounded-md px-3 py-2 text-sm outline-none" readOnly={estado === 'escrevendo'} />
           {estado === 'pronto' && (
             <div className="flex flex-wrap items-center gap-2">
               <SeloDemonstracao fonte="Integrante (IA)" />
@@ -232,7 +232,7 @@ export function BoletimMensal({ onAgendar }: { onAgendar: (c: Comunicado) => voi
 export function ComunicadosDeData() {
   const [cfg, setCfg] = usePersistente('s05:crm:datas', { aniversario: false, fimDeAno: true })
   return (
-    <section className="bg-surface shadow-cartao flex flex-col gap-3 rounded-[24px] p-4">
+    <section className="bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4">
       <header className="flex items-start gap-2">
         <CakeIcon className="text-muted-foreground mt-0.5 size-5" />
         <div className="min-w-0 flex-1">
@@ -263,7 +263,7 @@ export function ReguasPorCliente({ reguas }: { reguas: Regua[] }) {
   const [lista, setLista] = usePersistente<ExcecaoRegua[]>('s05:crm:reguas-cliente', [{ id: 'rx1', cliente: 'Metalúrgica Andrade Ltda', regua: 'Documentos da competência', regra: 'manda o extrato só no dia 10; não cobrar antes' }])
   const [novo, setNovo] = useState<ExcecaoRegua | null>(null)
   return (
-    <section className="bg-surface shadow-cartao flex flex-col gap-3 rounded-[24px] p-4 lg:col-span-2">
+    <section className="bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4 lg:col-span-2">
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-medium">Régua própria por cliente</h3>
@@ -274,7 +274,7 @@ export function ReguasPorCliente({ reguas }: { reguas: Regua[] }) {
         </Button>
       </header>
       {novo && (
-        <div className="bg-sunken/60 grid gap-2 rounded-[14px] p-3 sm:grid-cols-[1fr_1fr_2fr_auto]">
+        <div className="bg-sunken/60 grid gap-2 rounded-md p-3 sm:grid-cols-[1fr_1fr_2fr_auto]">
           <CampoEscolha rotulo="Cliente" valor={novo.cliente} onMudar={(v) => setNovo({ ...novo, cliente: v })} opcoes={loja.clientes.map((c) => ({ valor: c.nome, rotulo: c.nome }))} />
           <CampoEscolha rotulo="Régua" valor={novo.regua} onMudar={(v) => setNovo({ ...novo, regua: v })} opcoes={reguas.map((r) => ({ valor: r.nome, rotulo: r.nome }))} />
           <CampoTexto valor={novo.regra} onMudar={(v) => setNovo({ ...novo, regra: v })} placeholder="ex.: manda o extrato só no dia 10" aria-label="Combinado" />

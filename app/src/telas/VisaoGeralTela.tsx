@@ -200,7 +200,7 @@ export function TimeAgora({ integrantes, compacto, onAbrir }: { integrantes: Int
           const t = aparencia(i)
           return (
             <li key={i.id}>
-              <button type="button" onClick={() => onAbrir?.(i.setor)} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2.5 rounded-[12px] px-1.5 py-0.5 text-left">
+              <button type="button" onClick={() => onAbrir?.(i.setor)} className="hover:bg-raised flex w-full cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-0.5 text-left">
                 <Orb cor={t.cor} corOlhos={t.corOlhos} estado={i.estado} tamanho={28} cutucavel={false} extras={false} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm">{t.nome}</span>

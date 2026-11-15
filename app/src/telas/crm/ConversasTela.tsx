@@ -159,7 +159,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
 
   return (
     <div className="h-full px-2 pb-2 sm:px-4 sm:pb-4">
-      <div className="bg-surface shadow-painel flex h-full overflow-hidden rounded-[24px] sm:rounded-[34px]">
+      <div className="bg-surface shadow-painel flex h-full overflow-hidden rounded-campo sm:rounded-painel">
         {/* Lista */}
         <section aria-label="Lista de conversas" className={cn('flex w-full shrink-0 flex-col border-r md:w-80 lg:w-96', aberta && !largo && 'hidden')}>
           <div className="flex flex-col gap-2 p-3 pb-2">
@@ -257,7 +257,7 @@ export function ConversasTela({ conversas: iniciais, clientes, clienteInicial, t
                     type="button"
                     onClick={() => setAbertaId(c.id)}
                     aria-current={aberta?.id === c.id || undefined}
-                    className={cn('flex w-full cursor-pointer flex-col gap-1 rounded-[16px] px-3 py-2.5 text-left transition-colors', aberta?.id === c.id ? 'bg-raised shadow-cartao' : 'hover:bg-raised/60')}
+                    className={cn('flex w-full cursor-pointer flex-col gap-1 rounded-lg px-3 py-2.5 text-left transition-colors', aberta?.id === c.id ? 'bg-raised shadow-cartao' : 'hover:bg-raised/60')}
                   >
                     <span className="flex items-center gap-2">
                       <span className={cn('min-w-0 flex-1 truncate text-sm', c.naoLidas ? 'font-semibold' : 'font-medium')}>{c.lead ? `Lead · ${c.pessoa.contato}` : c.cliente}</span>
@@ -753,7 +753,7 @@ function Conversa({
       <AreaRolagem className="flex-1 px-4 pt-4 pb-16 sm:px-5">
         <div className="mx-auto flex max-w-3xl flex-col gap-3">
           {c.resumo && (
-            <div className="bg-sunken/70 rounded-[14px] px-3 py-2 text-sm">
+            <div className="bg-sunken/70 rounded-md px-3 py-2 text-sm">
               <button type="button" onClick={() => setResumoAberto((v) => !v)} className="text-muted-foreground flex w-full cursor-pointer items-center gap-1.5 text-xs">
                 <SparkleIcon className="size-3.5" /> Resumo (gerado) <CaretDownIcon className={cn('ml-auto size-3 transition-transform', !resumoAberto && '-rotate-90')} />
               </button>
@@ -816,7 +816,7 @@ function Conversa({
           ))}
           {lojaConv.estado.digitando[c.id] && (
             <div role="status" className="flex items-end gap-2 self-start">
-              <div className="bg-surface shadow-cartao flex items-center gap-2 rounded-[18px] px-4 py-3 text-sm">
+              <div className="bg-surface shadow-cartao flex items-center gap-2 rounded-lg px-4 py-3 text-sm">
                 <span className="text-muted-foreground text-xs">{lojaConv.estado.digitando[c.id]} está digitando</span>
                 <span className="flex gap-1" aria-hidden>
                   {[0, 1, 2].map((i) => (
@@ -834,14 +834,14 @@ function Conversa({
       <div ref={refCampo} className="px-4 pb-3 sm:px-5 sm:pb-4">
         <div className="mx-auto max-w-3xl">
           {somenteLeitura ? (
-            <div className="bg-sunken flex items-start gap-2.5 rounded-[16px] px-4 py-3 text-sm">
+            <div className="bg-sunken flex items-start gap-2.5 rounded-lg px-4 py-3 text-sm">
               <ArrowBendUpRightIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
               <p>
                 <strong className="font-medium">Transferida para {c.transferidaPara}.</strong> As próximas mensagens do cliente sobre isto chegam lá, não aqui. Esta conversa fica só para leitura.
               </p>
             </div>
           ) : (
-            <div className={cn('bg-raised shadow-campo flex flex-col gap-2 rounded-[22px] p-2.5', modo === 'nota' && 'bg-warning/10 ring-warning/30 ring-1')}>
+            <div className={cn('bg-raised shadow-campo flex flex-col gap-2 rounded-cartao p-2.5', modo === 'nota' && 'bg-warning/10 ring-warning/30 ring-1')}>
               <div className="flex flex-wrap items-center gap-1.5 text-xs">
                 <div className="bg-sunken flex rounded-full p-0.5">
                   {(['responder', 'nota'] as const).map((m) => (
@@ -869,7 +869,7 @@ function Conversa({
               </div>
 
               {modo === 'responder' && foraDaJanela && (
-                <div className="flex flex-col gap-1.5 rounded-[14px] px-1 text-xs">
+                <div className="flex flex-col gap-1.5 rounded-md px-1 text-xs">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <WarningIcon className="text-warning size-3.5" /> {primeiroNome} não escreve há mais de 24 h: no WhatsApp, só modelo aprovado.
                   </span>
@@ -889,7 +889,7 @@ function Conversa({
               )}
 
               {cnpjErrado && (
-                <div role="alert" className="bg-destructive/10 text-foreground flex items-start gap-2 rounded-[14px] px-3 py-2 text-xs">
+                <div role="alert" className="bg-destructive/10 text-foreground flex items-start gap-2 rounded-md px-3 py-2 text-xs">
                   <WarningIcon weight="fill" className="mt-0.5 size-4 shrink-0" />
                   <span>
                     Envio bloqueado: {anexo} é de {lojaConv.clientes.find((k) => k.id === anexoDoc?.clienteId)?.nome} ({lojaConv.clientes.find((k) => k.id === anexoDoc?.clienteId)?.documento}), não de {c.cliente} ({lojaConv.clientes.find((k) => k.id === c.clienteId)?.documento}). Troque o anexo.
@@ -914,7 +914,7 @@ function Conversa({
                 className="placeholder:text-muted-foreground min-h-12 resize-none bg-transparent px-1.5 text-sm outline-none"
               />
               {modo === 'responder' && texto === '/' && (
-                <ul className="bg-popover flex flex-col rounded-[12px] border p-1 text-sm">
+                <ul className="bg-popover flex flex-col rounded-md border p-1 text-sm">
                   {respostasRapidas.map((r) => (
                     <li key={r.atalho}>
                       <button type="button" onClick={() => setTexto(r.texto)} className="hover:bg-accent flex w-full cursor-pointer gap-2 rounded-md px-2 py-1.5 text-left">
@@ -1080,7 +1080,7 @@ function Lateral({ c, tarefas, onAbrirLead, className }: { c: ConversaCrm; taref
             <ul className="flex flex-col gap-1">
               {abertas.slice(0, 4).map((t) => (
                 <li key={t.id}>
-                  <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="hover:bg-sunken/70 -mx-1 flex w-[calc(100%+0.5rem)] cursor-pointer items-center gap-2 rounded-[8px] px-1 py-0.5 text-left text-xs">
+                  <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="hover:bg-sunken/70 -mx-1 flex w-[calc(100%+0.5rem)] cursor-pointer items-center gap-2 rounded-sm px-1 py-0.5 text-left text-xs">
                     <code className="text-muted-foreground">{t.codigo}</code>
                     <span className="min-w-0 flex-1 truncate">{t.titulo}</span>
                   </button>

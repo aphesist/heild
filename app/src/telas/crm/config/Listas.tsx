@@ -147,7 +147,7 @@ export function RespostasRapidas() {
       <ul className="divide-border/70 flex flex-col divide-y">
         {lista.map((r) => (
           <li key={r.id}>
-            <button type="button" onClick={() => setEd(r)} className="hover:bg-sunken/60 flex w-full cursor-pointer gap-3 rounded-[12px] px-2 py-2.5 text-left text-sm">
+            <button type="button" onClick={() => setEd(r)} className="hover:bg-sunken/60 flex w-full cursor-pointer gap-3 rounded-md px-2 py-2.5 text-left text-sm">
               <code className="text-muted-foreground w-20 shrink-0">{r.atalho}</code>
               <span className="min-w-0 flex-1">{r.texto}</span>
               <span className="text-muted-foreground shrink-0 text-xs">{r.setor ? rotuloSetor[r.setor] : 'todos'}</span>

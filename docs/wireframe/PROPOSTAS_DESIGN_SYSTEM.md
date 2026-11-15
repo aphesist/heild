@@ -7,6 +7,7 @@
 - **Hoje:** `forma.md` dá os raios em pixels fixos (`raio-cartao` 20px, `raio-campo` 24px, `raio-painel` 34px). O app tem marca branca: o escritório troca o raio base (`raio_borda` no tema), e só `sm`, `md`, `lg`, `xl` e `2xl` acompanham; os outros ficavam soltos (`rounded-[24px]` no widget e na `Caixa`).
 - **No app (sem mudar a marca):** `rounded-cartao`, `rounded-campo` e `rounded-painel` em `index.css`, calculados do raio base (`20/17`, `24/17`, `2×`), que dão exatamente 20, 24 e 34px no tema da Heild.
 - **Proposta:** escrever em `forma.md` e no `tokens.json` que todo raio é proporção do `raio-lg` (como já são `sm`, `md` e `xl`), para que os temas de escritório escalem a forma inteira.
+- **Decidido no UI Lab (`wf-ui-lab`), sem mudar a marca:** os 284 raios em pixel solto do app viraram o token de `forma.md` mais próximo (6 a 10px → `sm`; 12 e 14 → `md`; 16 e 18 → `lg`; 20 e 22 → `cartao`; 24 a 28 → `campo`; 34 → `painel`), e `npm run build` barra raio solto novo (`scripts/regra-raios.cjs`). A exceção é a moldura do aparelho no app do cliente. O mapa está na página Raios do UI Lab. A proposta ao design system (escrever a proporção em `forma.md`) continua de pé.
 
 ## 2. Estilo `numero-medio`
 

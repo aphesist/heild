@@ -148,7 +148,7 @@ function PerguntasBloco({ cliente }: { cliente: Cliente }) {
                 <Rotulo tom={statusTom[x.status]}>{gerando === x.id ? 'rascunhando…' : x.status}</Rotulo>
               </div>
               {abst[x.id] && (
-                <p className="bg-sunken flex items-start gap-2 rounded-[10px] px-3 py-2 text-xs">
+                <p className="bg-sunken flex items-start gap-2 rounded-sm px-3 py-2 text-xs">
                   <WarningIcon className="text-warning mt-0.5 size-3.5 shrink-0" /> <span>Abstenção do Consultor: {abst[x.id]}</span>
                 </p>
               )}
@@ -230,7 +230,7 @@ function EditorParecer({ pergunta, cliente, onFechar }: { pergunta: PerguntaS03 
       }}
     >
       {semSuporte.length > 0 && (
-        <p className="bg-warning/12 flex items-center gap-2 rounded-[10px] px-3 py-2 text-xs">
+        <p className="bg-warning/12 flex items-center gap-2 rounded-sm px-3 py-2 text-xs">
           <WarningIcon weight="fill" className="text-warning size-4" /> {semSuporte.length} afirmação(ões) sem suporte. Cite uma norma ou um cálculo, ou reescreva.
         </p>
       )}
@@ -238,7 +238,7 @@ function EditorParecer({ pergunta, cliente, onFechar }: { pergunta: PerguntaS03 
         const trecho = par.fonte && par.fonte !== 'calculo' ? baseLegal[par.fonte] : undefined
         const sem = !par.fonte && !par.texto.startsWith('Pergunta') && !par.texto.startsWith('Data')
         return (
-          <div key={par.id} className={cn('flex flex-col gap-1.5 rounded-[12px] p-2', sem ? 'bg-warning/10 ring-warning/40 ring-1' : 'bg-sunken/50')}>
+          <div key={par.id} className={cn('flex flex-col gap-1.5 rounded-md p-2', sem ? 'bg-warning/10 ring-warning/40 ring-1' : 'bg-sunken/50')}>
             <CampoArea valor={par.texto} onMudar={(v) => setPars((xs) => xs.map((x, j) => (j === i ? { ...x, texto: v } : x)))} linhas={2} />
             <CampoEscolha rotulo={`Fonte do parágrafo ${i + 1}`} valor={par.fonte ?? ''} onMudar={(v) => setPars((xs) => xs.map((x, j) => (j === i ? { ...x, fonte: v || undefined } : x)))} opcoes={fontes} />
             {trecho && (
@@ -311,7 +311,7 @@ function VigilanciaBloco({ cliente, tamanho }: { cliente: Cliente; tamanho: Tama
       <p className="text-muted-foreground text-[11px]">Vigia todo dia às 7h e quando sai norma nova; revisa o enquadramento no dia 10.</p>
       <ul className="flex flex-col gap-2">
         {lista.map((v) => (
-          <li key={v.id} className={cn('flex items-start gap-2.5 rounded-[14px] px-3 py-2', v.nivel === 'atencao' ? 'bg-warning/10' : 'bg-raised')}>
+          <li key={v.id} className={cn('flex items-start gap-2.5 rounded-md px-3 py-2', v.nivel === 'atencao' ? 'bg-warning/10' : 'bg-raised')}>
             <IconeSituacao s={v.nivel} className="mt-0.5" />
             <span className="min-w-0 flex-1">
               <span className="block text-sm">{v.aviso}</span>
@@ -352,7 +352,7 @@ function SegundaOpiniaoBloco({ cliente }: { cliente: Cliente }) {
   return (
     <ul className="flex flex-col gap-2">
       {k.segundaOpiniao.map((s) => (
-        <li key={s.id} className={cn('rounded-[12px] px-3 py-2 text-sm', s.resultado === 'confere' ? 'bg-raised' : 'bg-warning/10')}>
+        <li key={s.id} className={cn('rounded-md px-3 py-2 text-sm', s.resultado === 'confere' ? 'bg-raised' : 'bg-warning/10')}>
           <span className="flex items-center gap-2">
             {s.resultado === 'confere' ? <CheckIcon weight="bold" className="text-success size-4" /> : <WarningIcon weight="fill" className="text-warning size-4" />}
             <span className="min-w-0 flex-1 truncate">{s.tarefa}</span>

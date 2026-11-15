@@ -108,12 +108,12 @@ export function PainelLab({
             setAberto(false)
             setEscondida(true)
           }}
-          className="bg-foreground text-background mb-px flex cursor-pointer items-center justify-center rounded-tl-[10px] px-1.5 py-1.5"
+          className="bg-foreground text-background mb-px flex cursor-pointer items-center justify-center rounded-tl-sm px-1.5 py-1.5"
         >
           <XIcon className="size-3.5" weight="bold" />
         </button>
         <PopoverTrigger asChild>
-          <button type="button" className="bg-foreground text-background flex cursor-pointer items-center gap-1.5 rounded-bl-[10px] px-1.5 py-3 text-xs font-medium shadow-lg [writing-mode:vertical-rl]">
+          <button type="button" className="bg-foreground text-background flex cursor-pointer items-center gap-1.5 rounded-bl-sm px-1.5 py-3 text-xs font-medium shadow-lg [writing-mode:vertical-rl]">
             <FlaskIcon className="size-3.5" weight="bold" /> Demonstração
             {visao === 'cliente' ? ` · app${pessoaApp ? ` · ${pessoaApp.replace('Dra. ', '').split(' ')[0]}` : ''}` : sessao?.usuario ? ` · ${sessao.usuario.nome.split(' ')[0]}` : ''}
           </button>
@@ -201,7 +201,7 @@ export function PainelLab({
                   sessao?.entrar(u.id)
                   setAberto(false)
                 }}
-                className={cn('hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left', sessao?.usuario?.id === u.id && 'bg-sunken')}
+                className={cn('hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left', sessao?.usuario?.id === u.id && 'bg-sunken')}
               >
                 <Avatar nome={u.nome} tamanho="sm" />
                 <span className="min-w-0 flex-1">
@@ -211,7 +211,7 @@ export function PainelLab({
               </button>
             ))}
             {sessao?.usuario && (
-              <div className="bg-sunken/60 mt-1 flex flex-col gap-1.5 rounded-[12px] p-2">
+              <div className="bg-sunken/60 mt-1 flex flex-col gap-1.5 rounded-md p-2">
                 <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
                   <EyeIcon className="size-3.5" /> Ver como (papel e setores de faz de conta)
                 </span>
@@ -219,7 +219,7 @@ export function PainelLab({
               </div>
             )}
             {sessao?.usuario && (
-              <button type="button" onClick={() => sessao.sair()} className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
+              <button type="button" onClick={() => sessao.sair()} className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
                 <SignOutIcon className="size-4" /> Voltar para a tela de login
               </button>
             )}
@@ -232,7 +232,7 @@ export function PainelLab({
                   setForaHorario(v)
                   window.dispatchEvent(new CustomEvent(EVENTO_SUPORTE_HORARIO, { detail: v }))
                 }}
-                className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+                className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm"
               >
                 <ClockIcon className="size-4 shrink-0" /> Suporte da plataforma: {foraHorario ? 'fora do horário' : 'no horário'} (alternar)
               </button>
@@ -244,7 +244,7 @@ export function PainelLab({
                   setAberto(false)
                   window.dispatchEvent(new Event(EVENTO_SIMULAR_ESPERA))
                 }}
-                className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+                className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm"
               >
                 <PauseCircleIcon className="size-4 shrink-0" /> Simular {escritorio.inatividadeMin} min parado (só no Painel com cliente e no CRM)
               </button>
@@ -269,7 +269,7 @@ export function PainelLab({
                   onPessoaApp(p.nome)
                   setAberto(false)
                 }}
-                className={cn('hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left', pessoaApp === p.nome && 'bg-sunken')}
+                className={cn('hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left', pessoaApp === p.nome && 'bg-sunken')}
               >
                 <Avatar nome={p.nome} tamanho="sm" />
                 <span className="min-w-0 flex-1">
@@ -279,7 +279,7 @@ export function PainelLab({
               </button>
             ))}
             {pessoaApp && (
-              <button type="button" onClick={() => onPessoaApp(null)} className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
+              <button type="button" onClick={() => onPessoaApp(null)} className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
                 <SignOutIcon className="size-4" /> Voltar para a entrada do app
               </button>
             )}
@@ -305,15 +305,15 @@ export function PainelLab({
             setInstavel(v)
             definirInstabilidade(v ? 0.5 : 0)
           }}
-          className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm"
+          className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm"
         >
           <WarningCircleIcon className="size-4 shrink-0" /> Serviços externos: {instavel ? 'falhando metade das vezes' : 'respondendo'} (alternar)
         </button>
         {sessao?.usuario && <SecaoLabS09 />}
-        <a href="#/kit" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
+        <a href="#/kit" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
           <SquaresFourIcon className="size-4 shrink-0" /> Kit de interação e serviços simulados
         </a>
-        <a href="#/lab/ui" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
+        <a href="#/lab/ui" onClick={() => setAberto(false)} className="text-muted-foreground hover:bg-sunken/70 hover:text-foreground flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
           <FlaskIcon className="size-4 shrink-0" /> UI Lab: componentes e regras, em todos os estados
         </a>
         <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
@@ -324,7 +324,7 @@ export function PainelLab({
             <ArrowCounterClockwiseIcon /> Resetar o ambiente (restaurar demonstração)
           </Button>
         ) : (
-          <div className="bg-sunken flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+          <div className="bg-sunken flex flex-col gap-2 rounded-md p-3 text-sm">
             <p>Volta {banco.escritorio.nome} aos dados de exemplo: o que foi criado, editado ou excluído na demonstração se perde (mensagens, tarefas, avisos, fichas, serviços e notas). Sai das contas do escritório e do app e volta ao tema padrão. Os outros escritórios de exemplo não mudam.</p>
             <div className="flex gap-2">
               <Button

@@ -132,7 +132,7 @@ function EditarVinculos({ u, contas, onFechar }: { u: UsuarioCfg; contas: Usuari
   const [motivo, setMotivo] = useState('')
   const setores: SetorIntegrante[] = ['societario', 'fiscal', 'notas', 'dp', 'contabil', 'consultor', 'gestao_atendimento', 'financeiro_escritorio', 'bpo_financeiro']
   return (
-    <div className="bg-raised flex flex-col gap-2 rounded-[12px] p-3 text-xs">
+    <div className="bg-raised flex flex-col gap-2 rounded-md p-3 text-xs">
       <div className="flex flex-wrap gap-1.5">
         {setores.map((s) => {
           const v = vinculos.find((x) => x.setor === s)
@@ -195,7 +195,7 @@ function PassarFila({ modo, contas, onFeito, executar }: { modo: 'ferias' | 'lot
   const abertas = tarefas.filter((t) => responsavelE(t)?.id === de && !['concluida', 'cancelada'].includes(t.status))
   const conversas = loja.conversas.filter((c) => c.responsavel === origem?.nome && c.status !== 'resolvida')
   return (
-    <div className="bg-raised flex flex-col gap-2 rounded-[12px] p-3 text-xs">
+    <div className="bg-raised flex flex-col gap-2 rounded-md p-3 text-xs">
       <div className="flex flex-wrap items-center gap-1.5">
         {modo === 'ferias' ? 'Quem sai de férias' : 'De'}
         <select aria-label="De" className="bg-popover h-7 rounded-md border px-1" value={de} onChange={(e) => setDe(e.target.value)}>
@@ -297,7 +297,7 @@ function Permissoes() {
       </Tabela>
       <p className="text-muted-foreground text-xs">E executa · L lê · · sem acesso. Calculado pela mesma função que autoriza (sem lógica própria na tela). Clique no nome: “o que Fulano vê?”.</p>
       {sel && (
-        <div className="bg-raised flex flex-col gap-1 rounded-[12px] p-3 text-xs" aria-label={`O que ${sel.nome} vê`}>
+        <div className="bg-raised flex flex-col gap-1 rounded-md p-3 text-xs" aria-label={`O que ${sel.nome} vê`}>
           <span className="text-sm font-medium">O que {sel.nome} vê</span>
           {(() => {
             const p = permissoesDoPerfil(perfilDe(sel, extra))
@@ -418,7 +418,7 @@ function Ia({ t }: { t: TamanhoWidget }) {
             <div className="flex flex-col gap-1">
               <span className="text-xs font-medium">Pedidos de promoção (30 cartões, 95% sem edição)</span>
               {g.promocoes.map((p) => (
-                <div key={p.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-[10px] px-2 py-1.5 text-xs">
+                <div key={p.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-sm px-2 py-1.5 text-xs">
                   <span className="min-w-0 grow basis-40">
                     {p.integrante}: {p.atividade} · {p.base}
                   </span>
@@ -530,7 +530,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
       <div className="flex flex-col gap-2">
         <ul className="flex flex-col gap-1.5">
           {g.processos.map((p) => (
-            <li key={p.id} className="bg-raised flex flex-col gap-1 rounded-[12px] px-3 py-2 text-sm">
+            <li key={p.id} className="bg-raised flex flex-col gap-1 rounded-md px-3 py-2 text-sm">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="min-w-0 grow basis-40">
                   <span className="block truncate">{p.nome}</span>
@@ -551,7 +551,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
         </ul>
         {novo ? (
           <form
-            className="bg-raised flex flex-col gap-1.5 rounded-[12px] p-3 text-xs"
+            className="bg-raised flex flex-col gap-1.5 rounded-md p-3 text-xs"
             onSubmit={(e) => {
               e.preventDefault()
               if (!nome.trim()) return
@@ -679,7 +679,7 @@ function Compliance() {
       <span className="text-xs font-medium">Incidentes</span>
       <ul className="flex flex-col gap-1">
         {g.incidentes.map((i) => (
-          <li key={i.id} className="bg-raised rounded-[10px] px-2.5 py-1.5 text-xs">
+          <li key={i.id} className="bg-raised rounded-sm px-2.5 py-1.5 text-xs">
             <span className="font-medium">
               {diaMes(i.quando)} · {i.cliente}
             </span>
@@ -808,7 +808,7 @@ function Auditoria() {
   )
 }
 const Kpi = ({ v, r }: { v: string; r: string }) => (
-  <div className="bg-raised flex flex-col rounded-[10px] px-2 py-1.5">
+  <div className="bg-raised flex flex-col rounded-sm px-2 py-1.5">
     <span className="font-heading text-lg font-light tabular-nums">{v}</span>
     <span className="text-muted-foreground">{r}</span>
   </div>

@@ -171,6 +171,29 @@ function Raios() {
           <div className="bg-raised rounded-md p-3 text-sm">Item (raio-md) dentro do bloco (raio-lg) dentro do cartão (raio-cartao)</div>
         </div>
       </Caixa>
+      <Caixa>
+        <TituloBloco>Mapa dos raios soltos (decidido no UI Lab)</TituloBloco>
+        <p className="text-muted-foreground text-sm">
+          Os 284 raios em pixel do protótipo viraram o token mais próximo, e o build barra raio solto novo (<code className="font-mono text-xs">npm run regra-raios</code>). Fica fixa só a moldura do aparelho no app do cliente, que desenha o hardware.
+        </p>
+        <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
+          {(
+            [
+              ['6 a 10px', 'rounded-sm (8,5px)'],
+              ['12 e 14px', 'rounded-md (12,75px)'],
+              ['16 e 18px', 'rounded-lg (17px)'],
+              ['20 e 22px', 'rounded-cartao (20px)'],
+              ['24 a 28px', 'rounded-campo (24px)'],
+              ['34px', 'rounded-painel (34px)'],
+            ] as const
+          ).map(([de, para]) => (
+            <div key={de} className="contents">
+              <dt className="text-muted-foreground tabular-nums">{de}</dt>
+              <dd className="font-mono text-xs leading-5">{para}</dd>
+            </div>
+          ))}
+        </dl>
+      </Caixa>
     </Pagina>
   )
 }

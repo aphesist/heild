@@ -267,7 +267,7 @@ function GavetaCobrar({ p, onFechar }: { p: PedidoCobrar; onFechar: () => void }
         )}
       </Campo>
       {p.anexo && (
-        <p className="bg-sunken/60 flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+        <p className="bg-sunken/60 flex items-center gap-2 rounded-md px-3 py-2 text-sm">
           <FileTextIcon className="size-4" /> {p.anexo}
         </p>
       )}
@@ -356,7 +356,7 @@ function GavetaTransmitir({ p, onFechar }: { p: PedidoTransmitir; onFechar: () =
         onFechar()
       }}
     >
-      <dl className="bg-sunken/60 grid grid-cols-2 gap-2 rounded-[14px] p-3 text-sm">
+      <dl className="bg-sunken/60 grid grid-cols-2 gap-2 rounded-md p-3 text-sm">
         <div>
           <dt className="text-muted-foreground text-xs">Órgão</dt>
           <dd>{p.orgao}</dd>

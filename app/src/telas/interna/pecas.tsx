@@ -122,7 +122,7 @@ export function CartaoCitacao({ c }: { c: Citacao }) {
       type="button"
       onClick={abrir}
       disabled={!pode}
-      className={cn('bg-raised shadow-contorno flex max-w-xs items-center gap-2.5 rounded-[14px] px-3 py-2 text-left text-xs', pode ? 'hover:bg-sunken cursor-pointer' : 'cursor-not-allowed opacity-80')}
+      className={cn('bg-raised shadow-contorno flex max-w-xs items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs', pode ? 'hover:bg-sunken cursor-pointer' : 'cursor-not-allowed opacity-80')}
     >
       <span className="bg-sunken text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-full">
         <Icone className="size-3.5" />
@@ -145,7 +145,7 @@ export function ListaAnexos({ m }: { m: MensagemInterna }) {
   return (
     <div className="flex flex-wrap gap-2">
       {anexos.map((a) => (
-        <button key={a.nome} type="button" onClick={() => docs.abrir(a.nome)} className="bg-raised shadow-contorno hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-xs">
+        <button key={a.nome} type="button" onClick={() => docs.abrir(a.nome)} className="bg-raised shadow-contorno hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-xs">
           <PaperclipIcon className="text-muted-foreground size-3.5" />
           <span className="max-w-48 truncate font-medium">{a.nome}</span>
           <span className="text-muted-foreground">{a.tamanho}</span>
@@ -203,19 +203,19 @@ export function DialogoVersoes({ m, onFechar }: { m: MensagemInterna | null; onF
   const { nomeDe } = useAcoesInternas()
   return (
     <Dialog open={!!m} onOpenChange={(v) => !v && onFechar()}>
-      <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-lg">
+      <DialogContent className="bg-surface rounded-campo border-0 p-5 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-medium">Histórico de versões</DialogTitle>
           <DialogDescription>Mensagens não se apagam: cada edição guarda a versão anterior, visível a quem participa da conversa.</DialogDescription>
         </DialogHeader>
         {m && (
           <ol className="flex flex-col gap-3">
-            <li className="bg-raised shadow-contorno rounded-[14px] p-3 text-sm">
+            <li className="bg-raised shadow-contorno rounded-md p-3 text-sm">
               <span className="text-muted-foreground mb-1 block text-xs">Versão atual · editada {m.editada_em ? quando(m.editada_em) : ''}</span>
               {m.corpo}
             </li>
             {[...m.versoes].reverse().map((v, i) => (
-              <li key={i} className="bg-sunken rounded-[14px] p-3 text-sm">
+              <li key={i} className="bg-sunken rounded-md p-3 text-sm">
                 <span className="text-muted-foreground mb-1 block text-xs">
                   Versão {m.versoes.length - i} · {nomeDe(v.por)} · até {quando(v.ate)}
                 </span>
@@ -340,7 +340,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
     }
   }
   return (
-    <li ref={ref} id={`mi-${m.id}`} className={cn('group relative flex gap-3 rounded-[16px] px-2 py-2 transition-colors', destaque ? 'bg-primary/8' : 'hover:bg-sunken/60', m.fixada && conversa.tipo === 'canal_geral' && 'ring-warning/40 ring-1')}>
+    <li ref={ref} id={`mi-${m.id}`} className={cn('group relative flex gap-3 rounded-lg px-2 py-2 transition-colors', destaque ? 'bg-primary/8' : 'hover:bg-sunken/60', m.fixada && conversa.tipo === 'canal_geral' && 'ring-warning/40 ring-1')}>
       <AvatarAutor m={m} tamanho={compacto ? 'sm' : 'md'} />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
@@ -374,7 +374,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
                 if (x.key === 'Escape') setEditando(false)
               }}
               rows={2}
-              className="bg-raised shadow-contorno w-full resize-y rounded-[12px] px-3 py-2 text-sm outline-none"
+              className="bg-raised shadow-contorno w-full resize-y rounded-md px-3 py-2 text-sm outline-none"
             />
             <div className="flex items-center gap-2 text-xs">
               <Button size="sm" className="rounded-full" onClick={salvar}>
@@ -406,7 +406,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
         {e.audio && <PlayerAudio m={m} onTentar={() => acoesInternas.transcreverDeNovo(m.id)} />}
         <ListaAnexos m={m} />
         {reuniao && (
-          <a href={reuniao} target="_blank" rel="noreferrer" className="bg-raised shadow-contorno hover:bg-sunken flex w-fit items-center gap-2 rounded-[12px] px-3 py-2 text-xs">
+          <a href={reuniao} target="_blank" rel="noreferrer" className="bg-raised shadow-contorno hover:bg-sunken flex w-fit items-center gap-2 rounded-md px-3 py-2 text-xs">
             <VideoCameraIcon className="text-primary size-4" /> Entrar na reunião <span className="text-muted-foreground max-w-40 truncate">{reuniao.replace(/^https?:\/\//, '')}</span>
           </a>
         )}
@@ -423,7 +423,7 @@ export function Mensagem({ m, conversa, respostas = [], destaque, vistoPor, acoe
           </button>
         )}
         {e.proposta && (
-          <div className="bg-raised shadow-contorno flex max-w-md flex-col gap-2 rounded-[14px] p-3 text-xs">
+          <div className="bg-raised shadow-contorno flex max-w-md flex-col gap-2 rounded-md p-3 text-xs">
             <span className="text-muted-foreground">Proposta de tarefa · {rotuloSetorCurto[e.proposta.setor as SetorIntegrante] ?? e.proposta.setor}</span>
             <span className="text-sm font-medium">{e.proposta.titulo}</span>
             {e.proposta.situacao === 'aberta' && !acoes.somenteLeitura ? (
@@ -618,11 +618,11 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
   return (
     <div className={cn('relative flex flex-col gap-2', compacto ? 'p-2' : 'p-3')}>
       {lista.length > 0 && (
-        <AreaRolagem as="ul" role="listbox" aria-label={gatilho?.[1] === '@' ? 'Mencionar' : 'Citar'} className="bg-popover shadow-lg absolute right-3 bottom-full left-3 z-20 mb-1 flex max-h-72 flex-col rounded-[16px] border p-1">
+        <AreaRolagem as="ul" role="listbox" aria-label={gatilho?.[1] === '@' ? 'Mencionar' : 'Citar'} className="bg-popover shadow-lg absolute right-3 bottom-full left-3 z-20 mb-1 flex max-h-72 flex-col rounded-lg border p-1">
           <li className="text-muted-foreground px-3 py-1 text-xs">{gatilho?.[1] === '@' ? 'Mencionar pessoa, equipe ou integrante' : 'Citar cliente, tarefa, obrigação ou documento'}</li>
           {lista.map((s, i) => (
             <li key={s.chave} role="option" aria-selected={i === sel}>
-              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => escolher(s)} className={cn('flex w-full cursor-pointer items-center gap-2.5 rounded-[12px] px-3 py-1.5 text-left text-sm', i === sel ? 'bg-sunken' : 'hover:bg-sunken')}>
+              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => escolher(s)} className={cn('flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-left text-sm', i === sel ? 'bg-sunken' : 'hover:bg-sunken')}>
                 <span className="text-muted-foreground flex size-5 items-center justify-center">{s.icone}</span>
                 <span className="min-w-0 flex-1 truncate">{s.rotulo}</span>
                 <span className="text-muted-foreground shrink-0 text-xs">{s.detalhe}</span>
@@ -632,7 +632,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
         </AreaRolagem>
       )}
       {aviso && (
-        <div role="alert" className="bg-warning/12 flex flex-col gap-2 rounded-[14px] p-3 text-sm">
+        <div role="alert" className="bg-warning/12 flex flex-col gap-2 rounded-md p-3 text-sm">
           <span className="flex items-start gap-2">
             <WarningIcon weight="fill" className="text-warning mt-0.5 size-4 shrink-0" />
             Parece haver {aviso} nesta mensagem, e este canal é amplo. Dados pessoais do cliente ficam melhor na tarefa dele.
@@ -670,7 +670,7 @@ export function CampoInterno({ conversa, respondeA, compacto, onEnviado, onMover
           <span className="text-muted-foreground self-center text-xs">vão para Arquivos e não se apagam</span>
         </div>
       )}
-      <div className="bg-raised shadow-contorno flex flex-col rounded-[18px]">
+      <div className="bg-raised shadow-contorno flex flex-col rounded-lg">
         {gravando !== null ? (
           <div className="flex items-center gap-3 px-4 py-3 text-sm">
             <span className="bg-destructive size-2.5 animate-pulse rounded-full" />

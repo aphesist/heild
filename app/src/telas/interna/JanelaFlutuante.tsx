@@ -33,7 +33,7 @@ export function JanelaFlutuante() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
-          className="bg-surface shadow-2xl absolute right-6 bottom-20 z-30 flex w-[380px] flex-col overflow-hidden rounded-[22px] border"
+          className="bg-surface shadow-2xl absolute right-6 bottom-20 z-30 flex w-[380px] flex-col overflow-hidden rounded-cartao border"
           style={{ height: janela.minimizada ? 'auto' : 'min(520px, calc(100% - 7rem))' }}
         >
           <div className="bg-sunken/60 flex items-center gap-2 px-3 py-1.5">

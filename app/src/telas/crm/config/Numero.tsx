@@ -84,7 +84,7 @@ export function ConectarNumero({ setorInicial, setoresLivres, onFechar, onConect
         <div className="flex flex-col gap-3 text-sm">
           <p>Abre a janela da Meta. Lá você entra com a conta do Facebook da empresa, escolhe o portfólio verificado e confirma o número com o código por SMS.</p>
           {numero ? (
-            <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2.5">
+            <p className="bg-success/10 flex items-center gap-2 rounded-md px-3 py-2.5">
               <CheckCircleIcon weight="fill" className="text-success size-5" /> Número verificado: <strong className="font-medium tabular-nums">{numero}</strong>
             </p>
           ) : (
@@ -103,7 +103,7 @@ export function ConectarNumero({ setorInicial, setoresLivres, onFechar, onConect
             rotulo="Manter o número no app do celular (coexistência)"
             detalhe="A equipe pode seguir usando o WhatsApp Business no celular; tudo aparece também no CRM. A Meta pede abrir o app a cada 14 dias: o sistema avisa antes."
           />
-          <p className="bg-sunken flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-xs">
+          <p className="bg-sunken flex items-start gap-2 rounded-md px-3 py-2.5 text-xs">
             <DeviceMobileIcon className="mt-0.5 size-4 shrink-0" />
             {coexistencia ? 'O histórico dos últimos 6 meses do app entra no CRM. Grupos não são sincronizados.' : 'Sem coexistência o número sai do app do celular e passa a existir só no CRM.'}
           </p>
@@ -148,7 +148,7 @@ export function DetalhesNumero({ canal, onFechar, onSalvar }: { canal: CanalSeto
   const [automatica, setAutomatica] = useState(true)
   return (
     <GavetaFormulario aberta onFechar={onFechar} titulo={`${rotuloSetor[c.setor]} · ${c.numero}`} descricao={c.conexao} acao="Salvar" onAcao={() => onSalvar(c)}>
-      <div className={cn('flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm', c.status === 'atencao' ? 'bg-warning/10' : 'bg-success/10')}>
+      <div className={cn('flex items-start gap-2 rounded-md px-3 py-2.5 text-sm', c.status === 'atencao' ? 'bg-warning/10' : 'bg-success/10')}>
         {c.status === 'atencao' ? <ShieldWarningIcon className="text-warning mt-0.5 size-4 shrink-0" /> : <CheckCircleIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" />}
         <span>{c.statusTexto}</span>
       </div>
@@ -183,7 +183,7 @@ export function LigarExperimental({ numeros, onFechar, onLigar }: { numeros: Can
       acaoDesabilitada={!ok || !setor}
       onAcao={() => onLigar(setor)}
     >
-      <ul className="bg-destructive/8 flex list-disc flex-col gap-1 rounded-[14px] py-3 pr-3 pl-7 text-sm">
+      <ul className="bg-destructive/8 flex list-disc flex-col gap-1 rounded-md py-3 pr-3 pl-7 text-sm">
         <li>O número pode ser banido pela Meta sem aviso.</li>
         <li>Viola os termos do WhatsApp; não há opt-in auditável.</li>
         <li>Nunca envia fora da janela de 24 h nem comunicado.</li>

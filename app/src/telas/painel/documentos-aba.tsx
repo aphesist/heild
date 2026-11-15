@@ -145,7 +145,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
       </VazioWidget>
     )
   const filaAviso = fila.length > 0 && (
-    <button type="button" onClick={() => setOrigem(fila[0])} className="bg-warning/10 flex w-full cursor-pointer items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-left text-xs">
+    <button type="button" onClick={() => setOrigem(fila[0])} className="bg-warning/10 flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs">
       <SealQuestionIcon className="text-warning size-4 shrink-0" /> {fila.length} {fila.length === 1 ? 'arquivo da nuvem sem origem' : 'arquivos da nuvem sem origem'}: confirmar quem enviou
     </button>
   )
@@ -157,7 +157,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
         <ul className="divide-border/70 flex flex-col divide-y">
           {itens.slice(0, limite).map((d) => (
             <li key={d.id} className="flex items-center gap-2.5 py-1.5 first:pt-0 last:pb-0">
-              <button type="button" className="hover:bg-sunken flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-[8px] text-left" onClick={() => abrir(d)}>
+              <button type="button" className="hover:bg-sunken flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-sm text-left" onClick={() => abrir(d)}>
                 <FileTextIcon weight="duotone" className="text-muted-foreground size-5 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm">{d.nome}</span>
@@ -280,7 +280,7 @@ function GavetaEntregas({ d, onFechar }: { d: Linha; onFechar: () => void }) {
       {lista.length ? (
         <ol className="flex flex-col gap-2 text-sm">
           {lista.map((e, i) => (
-            <li key={i} className="bg-sunken flex items-center gap-2 rounded-[12px] px-3 py-2">
+            <li key={i} className="bg-sunken flex items-center gap-2 rounded-md px-3 py-2">
               <span className="min-w-0 flex-1">
                 <strong className="font-medium">{e.quem}</strong> {e.acao === 'enviado' ? 'recebeu' : e.acao === 'visto' ? 'abriu' : e.acao === 'baixado' ? 'baixou' : 'confirmou'}
               </span>

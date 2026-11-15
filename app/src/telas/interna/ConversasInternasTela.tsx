@@ -48,7 +48,7 @@ export function ConversasInternasTela({ aba = 'conversas', conversaInicial }: { 
   return (
     <div className="h-full px-2 pb-2 sm:px-4 sm:pb-4">
       <AvisoPrimeiroUso />
-      <div className="bg-surface shadow-painel relative flex h-full overflow-hidden rounded-[24px] sm:rounded-[34px]">
+      <div className="bg-surface shadow-painel relative flex h-full overflow-hidden rounded-campo sm:rounded-painel">
         <section aria-label="Conversas internas" className={cn('flex w-full shrink-0 flex-col border-r md:w-80 lg:w-96', aberta && !largo && 'hidden')}>
           <div className="flex items-center gap-2 px-4 pt-4">
             <ChatsTeardropIcon className="text-muted-foreground size-5" />
@@ -129,7 +129,7 @@ function Preferencias({ onInvestigar }: { onInvestigar: (id: Id) => void }) {
         )}
       </Menu>
       <Dialog open={silencio} onOpenChange={setSilencio}>
-        <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-sm">
+        <DialogContent className="bg-surface rounded-campo border-0 p-5 sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-medium">Horário de silêncio</DialogTitle>
             <DialogDescription>Nesse horário, a comunicação interna não avisa no sistema nem no celular. As mensagens continuam chegando.</DialogDescription>
@@ -153,7 +153,7 @@ function Preferencias({ onInvestigar }: { onInvestigar: (id: Id) => void }) {
         </DialogContent>
       </Dialog>
       <Dialog open={investigar} onOpenChange={setInvestigar}>
-        <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-md">
+        <DialogContent className="bg-surface rounded-campo border-0 p-5 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-medium">Abrir conversa pessoal em investigação</DialogTitle>
             <DialogDescription>Só em caso sério. A abertura exige motivo escrito, fica registrada nos eventos e os participantes são avisados (11, 5). O conteúdo não aparece aqui antes da abertura.</DialogDescription>
@@ -163,7 +163,7 @@ function Preferencias({ onInvestigar }: { onInvestigar: (id: Id) => void }) {
             {alheias.map((c) => {
               const ja = investigacoes.find((i) => i.conversa === c.id)
               return (
-                <li key={c.id} className="flex items-center gap-2 rounded-[12px] px-2 py-1.5 text-sm">
+                <li key={c.id} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
                   <span className="min-w-0 flex-1 truncate">{rotulo(c)}</span>
                   <Button
                     size="sm"
@@ -231,7 +231,7 @@ function ArquivosInternos({ onAbrir }: { onAbrir: (conversa: Id, mensagem: Id) =
             ]}
           />
         </header>
-        <div className="bg-surface shadow-painel overflow-hidden rounded-[24px]">
+        <div className="bg-surface shadow-painel overflow-hidden rounded-campo">
           {anexos.length === 0 ? (
             <EstadoVazio icone={PaperclipIcon} titulo="Nenhum anexo ainda" descricao="O que a equipe anexar nas conversas aparece aqui." />
           ) : (

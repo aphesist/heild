@@ -66,7 +66,7 @@ export function BotaoNivel({
       </Tooltip>
     )
   return (
-    <Button size="sm" variant={variante ?? (nivel === 'preparar' ? 'outline' : 'secondary')} className={cn('h-auto flex-col items-start gap-0 rounded-[14px] py-1.5 text-left', className)} onClick={onClick} aria-label={rotuloAria}>
+    <Button size="sm" variant={variante ?? (nivel === 'preparar' ? 'outline' : 'secondary')} className={cn('h-auto flex-col items-start gap-0 rounded-md py-1.5 text-left', className)} onClick={onClick} aria-label={rotuloAria}>
       <span className="flex items-center gap-1.5 text-[13px]">
         {icone[nivel]} {children}
       </span>
@@ -98,7 +98,7 @@ export function SaudeConectores({ ids, className }: { ids: IdConector[]; classNa
   const erro = parados.some((c) => c.tom === 'erro')
   const um = parados.length === 1 ? parados[0] : undefined
   return (
-    <div role="status" className={cn('flex items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-xs', erro ? 'bg-destructive/10' : 'bg-warning/10', className)}>
+    <div role="status" className={cn('flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs', erro ? 'bg-destructive/10' : 'bg-warning/10', className)}>
       <PlugsIcon className={cn('size-4 shrink-0', erro ? 'text-destructive-text' : 'text-warning-text')} />
       <span className="min-w-0 flex-1">
         {um ? (

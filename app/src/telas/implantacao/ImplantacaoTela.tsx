@@ -52,7 +52,7 @@ export function ImplantacaoTela({ onFechar }: { onFechar: () => void }) {
           <ol className="flex flex-col gap-0.5" aria-label="Passos">
             {passosImplantacao.map((p, i) => (
               <li key={p.id}>
-                <button type="button" onClick={() => ir(i)} aria-current={i === e.atual ? 'step' : undefined} className={cn('hover:bg-sunken/60 flex w-full cursor-pointer items-start gap-2 rounded-[12px] px-2 py-1.5 text-left text-sm', i === e.atual && 'bg-sunken font-medium')}>
+                <button type="button" onClick={() => ir(i)} aria-current={i === e.atual ? 'step' : undefined} className={cn('hover:bg-sunken/60 flex w-full cursor-pointer items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm', i === e.atual && 'bg-sunken font-medium')}>
                   {feito(p.id) ? <CheckCircleIcon weight="fill" className="text-success mt-0.5 size-4 shrink-0" /> : e.pulados.includes(p.id) ? <SkipForwardIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" /> : <CircleIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />}
                   <span className="min-w-0 flex-1">
                     {i + 1}. {p.titulo}
@@ -509,7 +509,7 @@ function PassoMigracao({ e, setE, onFeito }: { e: EstadoImplantacao; setE: (f: (
       <p className="text-sm">Uma onda por ferramenta antiga, na ordem que fizer sentido. Cada onda roda em paralelo com a ferramenta antiga até a conferência bater (modo sombra).</p>
       <ol className="flex flex-col gap-2">
         {e.ondas.map((o, i) => (
-          <li key={o.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+          <li key={o.id} className="bg-sunken/50 flex flex-wrap items-center gap-2 rounded-md px-3 py-2 text-sm">
             <span className="bg-raised flex size-6 items-center justify-center rounded-full text-xs">{i + 1}</span>
             <span className="min-w-0 grow basis-40">
               <span className="block font-medium">{o.ferramenta}</span>

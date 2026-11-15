@@ -116,7 +116,7 @@ export function BuscaGlobal() {
   let indice = -1
   return (
     <Dialog open={aberta} onOpenChange={setAberta}>
-      <DialogContent className="bg-raised top-0 flex h-dvh max-h-dvh w-full max-w-full translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:top-[12vh] sm:h-auto sm:max-h-[72vh] sm:max-w-2xl sm:rounded-[24px] sm:shadow-painel" aria-describedby="busca-ajuda">
+      <DialogContent className="bg-raised top-0 flex h-dvh max-h-dvh w-full max-w-full translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:top-[12vh] sm:h-auto sm:max-h-[72vh] sm:max-w-2xl sm:rounded-campo sm:shadow-painel" aria-describedby="busca-ajuda">
         <DialogTitle className="sr-only">Busca global</DialogTitle>
         <div className="flex items-center gap-3 border-b px-4 py-1 pr-12">
           <MagnifyingGlassIcon className="text-muted-foreground size-5 shrink-0" />
@@ -172,7 +172,7 @@ export function BuscaGlobal() {
                   const aparenciaIntegrante = r.tipo === 'integrante' && r.setor ? aparencia({ setor: r.setor }) : null
                   return (
                     <li key={`${r.tipo}-${r.id}`} id={`busca-${i}`} data-indice={i} role="option" aria-selected={i === ativo}>
-                      <button type="button" onMouseMove={() => setAtivo(i)} onClick={() => escolher(r)} className={cn('flex w-full cursor-pointer items-center gap-3 rounded-[14px] px-3 py-2 text-left', i === ativo && 'bg-sunken')}>
+                      <button type="button" onMouseMove={() => setAtivo(i)} onClick={() => escolher(r)} className={cn('flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left', i === ativo && 'bg-sunken')}>
                         <span className="text-muted-foreground flex size-8 shrink-0 items-center justify-center">
                           {aparenciaIntegrante ? <Orb cor={aparenciaIntegrante.cor} corOlhos={aparenciaIntegrante.corOlhos} tamanho={24} extras={false} cutucavel={false} /> : <Icone className="size-[18px]" weight="duotone" />}
                         </span>

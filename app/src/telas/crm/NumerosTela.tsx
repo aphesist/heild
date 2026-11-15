@@ -62,7 +62,7 @@ export function NumerosTela() {
           )}
         </header>
 
-        <div className="bg-surface shadow-cartao flex flex-wrap items-center gap-x-6 gap-y-2 rounded-[20px] px-4 py-3 text-sm">
+        <div className="bg-surface shadow-cartao flex flex-wrap items-center gap-x-6 gap-y-2 rounded-cartao px-4 py-3 text-sm">
           <span className="flex items-center gap-2">
             <SealCheckIcon weight="fill" className="text-success size-5" /> Empresa verificada na Meta
           </span>
@@ -75,7 +75,7 @@ export function NumerosTela() {
           <span className="text-muted-foreground text-xs">próximo degrau: {empresaMeta.proximoLimite}</span>
         </div>
 
-        <section className="bg-surface shadow-cartao overflow-hidden rounded-[24px]">
+        <section className="bg-surface shadow-cartao overflow-hidden rounded-campo">
           <AreaRolagem eixo="x" className="">
             <table className="w-full min-w-[760px] text-sm">
               <thead>
@@ -149,7 +149,7 @@ export function NumerosTela() {
               </Button>
             ))}
           </AreaRolagem>
-          <div className="bg-surface shadow-cartao rounded-[24px] p-4 sm:p-5">
+          <div className="bg-surface shadow-cartao rounded-campo p-4 sm:p-5">
             {secao === 'modelos' && <Modelos />}
             {secao === 'automaticas' && <MensagensAutomaticas />}
             {secao === 'horario' && <Horario />}
@@ -165,7 +165,7 @@ export function NumerosTela() {
           </div>
         </section>
 
-        <section className="border-warning/40 flex flex-col gap-2 rounded-[24px] border border-dashed p-4 text-sm">
+        <section className="border-warning/40 flex flex-col gap-2 rounded-campo border border-dashed p-4 text-sm">
           <h2 className="flex items-center gap-2 font-medium">
             <WarningIcon className="text-warning size-4" /> Modo experimental (não oficial)
           </h2>

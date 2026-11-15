@@ -50,9 +50,9 @@ export function NomeQuemAtende() {
           ]}
         />
       )}
-      <div className="bg-sunken max-w-md rounded-[16px] p-3 text-sm">
+      <div className="bg-sunken max-w-md rounded-lg p-3 text-sm">
         <span className="text-muted-foreground mb-1 block text-xs">Prévia no WhatsApp</span>
-        <p className="bg-secondary text-secondary-foreground rounded-[14px] rounded-tr-[6px] px-3 py-2 whitespace-pre-wrap">{assinar('Oi, Rita! A guia do ISS já está no app.', usuario.nome, 'Fiscal', cfg.assinatura).replace(/\*/g, '')}</p>
+        <p className="bg-secondary text-secondary-foreground rounded-md rounded-tr-sm px-3 py-2 whitespace-pre-wrap">{assinar('Oi, Rita! A guia do ISS já está no app.', usuario.nome, 'Fiscal', cfg.assinatura).replace(/\*/g, '')}</p>
       </div>
     </div>
   )
@@ -125,7 +125,7 @@ export function CaixasEmail() {
         ))}
       </ul>
       <Dialog open={!!conectando} onOpenChange={(v) => !v && setConectando(null)}>
-        <DialogContent className="bg-surface rounded-[24px] border-0 p-5 sm:max-w-md">
+        <DialogContent className="bg-surface rounded-campo border-0 p-5 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-medium">Conectar a caixa do {rotuloSetor[(conectando?.setor ?? 'fiscal') as SetorIntegrante]}</DialogTitle>
             <DialogDescription>Autorização pelo provedor (OAuth), só leitura. A senha nunca passa pela Heild.</DialogDescription>
@@ -133,7 +133,7 @@ export function CaixasEmail() {
           <Passos passos={['Provedor', 'Autorizar', 'O que ler']} atual={conectando?.passo ?? 0} />
           {conectando?.passo === 0 && <p className="text-sm">A caixa {caixas.find((c) => c.setor === conectando.setor)?.endereco} é do {caixas.find((c) => c.setor === conectando.setor)?.provedor}. A janela de autorização abre a seguir.</p>}
           {conectando?.passo === 1 && (
-            <div className="bg-sunken rounded-[16px] p-4 text-sm">
+            <div className="bg-sunken rounded-lg p-4 text-sm">
               <p className="font-medium">Janela do provedor (simulada)</p>
               <p className="text-muted-foreground text-xs">A Heild quer: ler e-mails e anexos (entrada e enviados). Não envia nem apaga.</p>
               <SeloDemonstracao fonte="E-mail (Gmail, Microsoft Graph, IMAP)" />

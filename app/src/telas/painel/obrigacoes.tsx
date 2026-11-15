@@ -134,7 +134,7 @@ export function SeletorSetores() {
     </label>
   )
   return (
-    <div className="bg-surface shadow-contorno flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[18px] px-3 py-2">
+    <div className="bg-surface shadow-contorno flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg px-3 py-2">
       <span className="flex items-center gap-1.5 text-sm">
         <FunnelIcon className="text-muted-foreground size-4" /> Setores
       </span>
@@ -272,7 +272,7 @@ function GavetaReprogramar({ item, onFechar }: { item: ItemObrigacao; onFechar: 
       <Campo rotulo="Novo prazo interno" erro={f.erro('data')}>
         {(id) => <CampoTexto id={id} tipo="date" valor={f.valores.data} onMudar={(x) => f.definir('data', x)} />}
       </Campo>
-      {alemDoLegal && <p className="bg-warning/10 rounded-[12px] px-3 py-2 text-sm">Depois do prazo legal: ao salvar, pedimos confirmação com a multa estimada.</p>}
+      {alemDoLegal && <p className="bg-warning/10 rounded-md px-3 py-2 text-sm">Depois do prazo legal: ao salvar, pedimos confirmação com a multa estimada.</p>}
       <Campo rotulo="Motivo" erro={f.erro('motivo')}>
         {(id) => <CampoArea id={id} linhas={2} valor={f.valores.motivo} onMudar={(x) => f.definir('motivo', x)} placeholder="Ex.: cliente mandou o extrato só dia 20" />}
       </Campo>
@@ -435,7 +435,7 @@ function Faixas({ clienteId, tamanho }: { clienteId?: string; tamanho: TamanhoWi
             ['30', 'em 30 dias', ''],
           ] as const
         ).map(([f, rotulo, cor]) => (
-          <button key={f} type="button" aria-pressed={faixa === f} onClick={() => setFaixa(faixa === f ? null : f)} className={cn('flex min-w-20 cursor-pointer flex-col rounded-[14px] px-3 py-1.5 text-left transition-colors', faixa === f ? 'bg-raised shadow-cartao' : 'bg-sunken hover:bg-raised')}>
+          <button key={f} type="button" aria-pressed={faixa === f} onClick={() => setFaixa(faixa === f ? null : f)} className={cn('flex min-w-20 cursor-pointer flex-col rounded-md px-3 py-1.5 text-left transition-colors', faixa === f ? 'bg-raised shadow-cartao' : 'bg-sunken hover:bg-raised')}>
             <span className={cn('font-heading text-2xl font-light tabular-nums', cor)}>{conta(f)}</span>
             <span className="text-muted-foreground text-xs">{rotulo}</span>
           </button>

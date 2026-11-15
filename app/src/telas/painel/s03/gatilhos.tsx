@@ -17,7 +17,7 @@ export function SecaoS03({ onFeito }: { onFeito?: () => void }) {
   const integra = useEstadoConector('integra_contador')
   const clientes = loja.clientes.filter((c) => !c.servicos || c.servicos.includes('contabil'))
   const metal = clientes.find((c) => c.id === 'c1') ?? clientes[0]
-  const btn = 'text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm'
+  const btn = 'text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm'
   const feito = () => onFeito?.()
 
   const mensagemCaixa = () => {
@@ -86,7 +86,7 @@ export function SecaoS03({ onFeito }: { onFeito?: () => void }) {
   }
 
   return (
-    <div className="bg-sunken/60 flex flex-col gap-0.5 rounded-[12px] p-2">
+    <div className="bg-sunken/60 flex flex-col gap-0.5 rounded-md p-2">
       <span className="text-muted-foreground flex items-center gap-1.5 px-2 text-xs">
         <LightningIcon className="size-3.5" /> Gatilhos do Painel B (Fiscal, Contábil)
       </span>

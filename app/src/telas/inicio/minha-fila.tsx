@@ -71,7 +71,7 @@ export function MinhaFila({ className }: { className?: string }) {
           {lista.map((t) => {
             const a = aparencia({ setor: t.setor })
             return (
-              <li key={t.id} className="bg-surface shadow-contorno flex flex-col gap-2 rounded-[18px] p-3">
+              <li key={t.id} className="bg-surface shadow-contorno flex flex-col gap-2 rounded-lg p-3">
                 <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="flex cursor-pointer flex-col gap-0.5 text-left">
                   <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
                     <span className="size-2 rounded-full" style={{ background: a.cor }} aria-hidden />

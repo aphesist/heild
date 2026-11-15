@@ -173,7 +173,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
       </AreaRolagem>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-4 pb-3 sm:px-5 sm:pb-5 ultra:max-w-4xl">
         {limiteAtingido && !semIa && (
-          <p role="status" className="bg-sunken flex items-center gap-2 rounded-[16px] px-4 py-2.5 text-sm">
+          <p role="status" className="bg-sunken flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm">
             <HourglassMediumIcon weight="duotone" className="text-destructive size-5 shrink-0" />
             <span>
               <strong className="font-medium">Cheguei ao limite desta janela.</strong> O chat continua; os trabalhos automáticos esperam e voltam {limites[0]?.renova ?? 'na próxima janela'}.
@@ -181,7 +181,7 @@ export function AssistenteTela({ contexto, conversa, sugestoes, avisos, limites,
           </p>
         )}
         {semIa && (
-          <p role="status" className="bg-sunken flex items-center gap-2 rounded-[16px] px-4 py-2.5 text-sm">
+          <p role="status" className="bg-sunken flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm">
             <PlugsIcon weight="duotone" className="text-muted-foreground size-5 shrink-0" />
             <span className="flex-1">
               <strong className="font-medium">Sem plano de IA.</strong> A ajuda do sistema e o Suporte continuam.

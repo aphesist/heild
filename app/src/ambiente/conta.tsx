@@ -110,9 +110,9 @@ export function MinhaConta({ onFechar, onAlternarModo }: { onFechar: () => void;
     >
       <section className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">E-mail de acesso</span>
-        <span className="bg-sunken/60 rounded-[12px] px-3 py-2.5 text-sm">{usuario.email}</span>
+        <span className="bg-sunken/60 rounded-md px-3 py-2.5 text-sm">{usuario.email}</span>
         <span className="text-sm font-medium">Papel e setores</span>
-        <span className="bg-sunken/60 flex items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm">
+        <span className="bg-sunken/60 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm">
           <LockSimpleIcon className="text-muted-foreground size-4 shrink-0" />
           {papelExibido(usuario)} · {permissoes.resumo}
         </span>

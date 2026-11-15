@@ -93,7 +93,7 @@ function GerarTrilha({ c, tipo }: { c: ClienteE; tipo: 'entrada' | 'saida' }) {
         titulo={tipo === 'entrada' ? 'A trilha de implantação ainda não foi gerada' : 'Iniciar a saída'}
         descricao={tipo === 'entrada' ? 'O integrante Societário gera a raiz e as tarefas de cada setor a partir do molde (CIC-001). Nasce sozinha ao fechar o contrato no CRM ou ao mudar o cliente para em implantação.' : 'Motivo e datas; o integrante Societário gera a trilha de saída e as obrigações remanescentes até o corte.'}
       />
-      <div className="bg-raised mx-auto grid w-full max-w-xl gap-3 rounded-[16px] p-4 sm:grid-cols-2">
+      <div className="bg-raised mx-auto grid w-full max-w-xl gap-3 rounded-lg p-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm sm:col-span-2">
           Molde
           <select aria-label="Molde" className="bg-popover h-9 rounded-md border px-2" value={molde} onChange={(e) => setMolde(e.target.value as IdMolde)}>
@@ -240,7 +240,7 @@ function TrilhaEntrada({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
         <Marcos filhas={filhas} />
       </Secao>
       {gargalos.length > 0 && (
-        <div className="bg-warning/10 flex flex-col gap-1 rounded-[14px] px-3 py-2 text-sm">
+        <div className="bg-warning/10 flex flex-col gap-1 rounded-md px-3 py-2 text-sm">
           <span className="flex items-center gap-1.5 font-medium">
             <WarningIcon className="text-warning size-4" /> Gargalo humano
           </span>
@@ -290,10 +290,10 @@ function TrilhaEntrada({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
             </ul>
           )}
           {previa && (
-            <div className="border-border mt-1 flex flex-col gap-1.5 rounded-[18px] border-4 p-3" aria-label="Prévia do app do cliente">
+            <div className="border-border mt-1 flex flex-col gap-1.5 rounded-lg border-4 p-3" aria-label="Prévia do app do cliente">
               <span className="text-muted-foreground text-xs">Prévia do app de {c.nome} · Pendências</span>
               {pendentesCliente.map((i) => (
-                <span key={i.item} className="bg-raised flex items-center justify-between rounded-[12px] px-2.5 py-2 text-sm">
+                <span key={i.item} className="bg-raised flex items-center justify-between rounded-md px-2.5 py-2 text-sm">
                   {i.item}
                   <span className="text-primary text-xs">Enviar</span>
                 </span>
@@ -379,7 +379,7 @@ function PassarAtivo({ c, tarefas }: { c: ClienteE; tarefas: TarefaE[] }) {
   const b = bloqueiosDaMudanca(c, 'ativo', tarefas)
   const pendente = repos.cartoes.listar((x) => x.status === 'pendente' && x.extras?.acao === 'ciclo.mudar' && (x.extras?.dados as { cliente?: string })?.cliente === c.id).length > 0
   return (
-    <div className="bg-raised flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+    <div className="bg-raised flex flex-wrap items-center gap-2 rounded-md px-3 py-2 text-sm">
       <span className="min-w-0 grow basis-40">{b.length ? `Para passar a ativo: ${b.join('; ')}.` : 'O primeiro fechamento de cada setor terminou: o cliente pode passar a ativo (GES-106).'}</span>
       <Button size="sm" className="rounded-full" disabled={pendente} onClick={() => executar(() => pedirMudanca(c, 'ativo', b.length ? `com pendência: ${b.join('; ')}` : 'implantação concluída'), { sucesso: 'Cartão criado para o Gestor aprovar' })}>
         {pendente ? 'Cartão aguardando aprovação' : 'Passar a ativo'}
@@ -451,7 +451,7 @@ function TrilhaSaida({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
   }
   return (
     <>
-      <dl className="bg-sunken/60 grid grid-cols-2 gap-3 rounded-[14px] p-3 text-sm sm:grid-cols-5">
+      <dl className="bg-sunken/60 grid grid-cols-2 gap-3 rounded-md p-3 text-sm sm:grid-cols-5">
         <Dado rotulo="Molde" valor={moldes[estado.molde].nome} />
         <Dado rotulo="Motivo" valor={s.motivo} />
         <Dado rotulo="Data efetiva" valor={diaMes(s.data)} />
@@ -558,7 +558,7 @@ function TrilhaSaida({ c, estado }: { c: ClienteE; estado?: EstadoTrilha }) {
         <ListaTarefas tarefas={filhas} chave={`saida:${c.id}`} cliente={c.nome} visoes={['lista', 'responsavel']} compacta />
       </Secao>
       {gere && (
-        <div className="bg-raised flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+        <div className="bg-raised flex flex-wrap items-center gap-2 rounded-md px-3 py-2 text-sm">
           <span className="min-w-0 grow basis-40">{bloqueios.length ? `Encerrar bloqueado: ${bloqueios.join('; ')}.` : 'Sem remanescentes: pode encerrar. As abas ficam só leitura com a retenção.'}</span>
           <Button
             size="sm"
@@ -583,7 +583,7 @@ function PosDesligamento({ c }: { c: ClienteE }) {
   const executar = useAcao()
   const fluxos = useFluxos()
   return (
-    <div className="bg-sunken flex flex-wrap items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+    <div className="bg-sunken flex flex-wrap items-center gap-2 rounded-md px-3 py-2 text-sm">
       <span className="min-w-0 grow basis-40">
         Encerrado em {diaMes(c.estado_ciclo_desde)}; retenção até {Number(c.estado_ciclo_desde.slice(0, 4)) + 5}. Pedido do ex-cliente ou do sucessor vira tarefa sem reabrir o cliente (CIC-007).
       </span>

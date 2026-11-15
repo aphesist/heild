@@ -55,7 +55,7 @@ export function TimeTela({ nomeUsuario, contexto, integrantes: iniciais, selecio
   return (
     <EspelhoOrbs aberto={atual.id} dormeVivo={(conversas[atual.id] ?? []).length === 0}>
       <div className="h-full px-2 pb-2 sm:px-4 sm:pb-4">
-        <div className="bg-surface shadow-painel flex h-full overflow-hidden rounded-[24px] sm:rounded-[34px]">
+        <div className="bg-surface shadow-painel flex h-full overflow-hidden rounded-campo sm:rounded-painel">
           <ListaIntegrantes variante="coluna" className="hidden w-72 shrink-0 md:flex lg:w-80 2xl:w-[360px]" integrantes={integrantes} selecionado={atual.id} onSelecionar={(i) => onSelecionar(i.id)} onCriar={() => setCriando(true)} />
           {/* key: cada integrante tem histórico próprio; trocar remonta a conversa. */}
           <ChatIntegrante
@@ -146,7 +146,7 @@ function ChatIntegrante({
 
       {(pausado || limiteAtingido) && (
         <div className="px-4 sm:px-6">
-          <div className="bg-sunken mx-auto flex max-w-3xl items-center gap-3 rounded-[16px] px-4 py-3 text-sm ultra:max-w-4xl">
+          <div className="bg-sunken mx-auto flex max-w-3xl items-center gap-3 rounded-lg px-4 py-3 text-sm ultra:max-w-4xl">
             {limiteAtingido ? (
               <>
                 <HourglassMediumIcon weight="duotone" className="text-destructive size-5 shrink-0" />

@@ -102,7 +102,7 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
                 entrar()
               }}
             >
-              {senhaTrocada && <p className="bg-success/15 rounded-[12px] px-3 py-2 text-sm">Senha trocada. Entre com a senha nova.</p>}
+              {senhaTrocada && <p className="bg-success/15 rounded-md px-3 py-2 text-sm">Senha trocada. Entre com a senha nova.</p>}
               <Campo rotulo="E-mail">{(id) => <CampoTexto id={id} tipo="email" valor={email} onMudar={setEmail} placeholder={`voce@${dominio}`} />}</Campo>
               <Campo rotulo="Senha" erro={erro ?? undefined}>
                 {(id) => (
@@ -227,7 +227,7 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
                     }
                     onEntrar(conta.id)
                   }}
-                  className="bg-surface hover:bg-raised shadow-contorno flex cursor-pointer items-center gap-3 rounded-[18px] px-3 py-3 text-left"
+                  className="bg-surface hover:bg-raised shadow-contorno flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-left"
                 >
                   <BuildingsIcon className="text-muted-foreground size-6 shrink-0" weight="duotone" />
                   <span className="min-w-0 flex-1">
@@ -256,7 +256,7 @@ export function LoginTela({ onEntrar }: { onEntrar: (id: string) => void }) {
                     onClick={() => (u.situacao === 'convidado' ? setConvite(u) : preencher(u.id))}
                     aria-pressed={conta?.id === u.id}
                     className={cn(
-                      'bg-surface hover:bg-raised shadow-contorno flex w-full cursor-pointer items-center gap-3 rounded-[18px] px-3 py-2.5 text-left transition-colors',
+                      'bg-surface hover:bg-raised shadow-contorno flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
                       conta?.id === u.id && 'bg-raised ring-foreground/25 ring-1',
                       u.situacao === 'desativado' && 'opacity-70',
                     )}

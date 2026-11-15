@@ -85,7 +85,7 @@ export function LabS05({ onFeito }: { onFeito: () => void }) {
             }
             onFeito()
           }}
-          className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-left text-sm [&_svg]:size-4 [&_svg]:shrink-0"
+          className="text-muted-foreground hover:bg-sunken/70 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm [&_svg]:size-4 [&_svg]:shrink-0"
         >
           {icone} {rotulo}
         </button>

@@ -253,7 +253,7 @@ export function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: {
         </Celula>
       </LinhaColunas>
       {aberta && (
-        <div className="bg-sunken/50 mb-2 ml-6 grid gap-2 rounded-[12px] p-3 text-xs sm:grid-cols-2">
+        <div className="bg-sunken/50 mb-2 ml-6 grid gap-2 rounded-md p-3 text-xs sm:grid-cols-2">
           <span>
             <span className="text-muted-foreground">Atividade: </span>
             {t.atividade_id} · {nomeCurtoAtividade(t.atividade_id)}
@@ -338,7 +338,7 @@ export function PorResponsavel({ tarefas, setor, gere }: { tarefas: TarefaE[]; s
             void loja
           }}
           render={(t) => (
-            <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="bg-card flex w-full cursor-pointer flex-col gap-1 rounded-[12px] border px-2.5 py-2 text-left text-xs">
+            <button type="button" onClick={() => fluxos.abrirTarefa(t.id)} className="bg-card flex w-full cursor-pointer flex-col gap-1 rounded-md border px-2.5 py-2 text-left text-xs">
               <span className="line-clamp-2 text-sm">{t.titulo}</span>
               <span className="text-muted-foreground flex items-center gap-1">
                 <span className="font-mono">{t.atividade_id}</span> · {diaMes(prazoE(t))}
@@ -382,7 +382,7 @@ export function FilaRevisao({ tarefas }: { tarefas: TarefaE[] }) {
           </h4>
           <ul className="flex flex-col gap-1">
             {lista.map((t) => (
-              <li key={t.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-[12px] px-2.5 py-2 text-sm">
+              <li key={t.id} className="bg-raised flex flex-wrap items-center gap-2 rounded-md px-2.5 py-2 text-sm">
                 <CaixaSelecao rotulo={`Selecionar ${t.titulo}`} marcado={sel.marcado(t.id)} onMudar={(i) => sel.alternar(t.id, i)} />
                 <button type="button" className="min-w-0 grow basis-40 cursor-pointer text-left" onClick={() => fluxos.abrirTarefa(t.id)}>
                   <span className="block truncate">{t.titulo}</span>

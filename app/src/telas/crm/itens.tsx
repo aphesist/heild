@@ -59,7 +59,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
 
   if (item.tipo === 'nota')
     return (
-      <div className="bg-warning/10 mx-auto flex w-full max-w-[90%] gap-2.5 rounded-[14px] px-3 py-2 text-sm">
+      <div className="bg-warning/10 mx-auto flex w-full max-w-[90%] gap-2.5 rounded-md px-3 py-2 text-sm">
         <NotePencilIcon weight="duotone" className="text-warning mt-0.5 size-4 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="text-muted-foreground text-xs">
@@ -73,7 +73,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
   if (item.tipo === 'cartao') {
     const t = aparencia({ setor: item.setor })
     return (
-      <div className="bg-raised shadow-cartao mx-auto flex w-full max-w-[90%] flex-col gap-2 rounded-[16px] p-3">
+      <div className="bg-raised shadow-cartao mx-auto flex w-full max-w-[90%] flex-col gap-2 rounded-lg p-3">
         <div className="flex items-center gap-2">
           <Orb cor={t.cor} corOlhos={t.corOlhos} estado="precisa_de_voce" tamanho={22} cutucavel={false} extras={false} />
           <span className="text-sm font-medium">{t.nome} propõe</span>
@@ -125,8 +125,8 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
       <div
         className={cn(
           // Raio fixo de balão (não o do tema, que dobrado vira pílula e engole o texto).
-          'flex max-w-[85%] flex-col gap-2 rounded-[18px] px-4 py-3 text-sm leading-relaxed sm:max-w-[72%]',
-          doCliente ? 'bg-raised shadow-contorno rounded-tl-[6px]' : item.de === 'auto' ? 'bg-sunken/70 text-muted-foreground rounded-tr-[6px]' : 'bg-secondary text-secondary-foreground rounded-tr-[6px]',
+          'flex max-w-[85%] flex-col gap-2 rounded-lg px-4 py-3 text-sm leading-relaxed sm:max-w-[72%]',
+          doCliente ? 'bg-raised shadow-contorno rounded-tl-sm' : item.de === 'auto' ? 'bg-sunken/70 text-muted-foreground rounded-tr-sm' : 'bg-secondary text-secondary-foreground rounded-tr-sm',
         )}
       >
         {item.assunto && (
@@ -171,7 +171,7 @@ export function ItemHistorico({ item, onDecidir, onAbrirAnexo, onReenviar }: { i
           </div>
         )}
         {item.anexos?.map((a) => (
-          <button key={a.nome} type="button" onClick={() => onAbrirAnexo?.(a.nome)} className="bg-raised/70 hover:bg-raised flex w-fit cursor-pointer items-center gap-2 rounded-[10px] px-2.5 py-1.5 text-left text-xs">
+          <button key={a.nome} type="button" onClick={() => onAbrirAnexo?.(a.nome)} className="bg-raised/70 hover:bg-raised flex w-fit cursor-pointer items-center gap-2 rounded-sm px-2.5 py-1.5 text-left text-xs">
             <FileTextIcon weight="duotone" className="size-4" /> <span className="underline-offset-2 hover:underline">{a.nome}</span>
             <span className="text-muted-foreground">· {a.tipo}</span>
           </button>

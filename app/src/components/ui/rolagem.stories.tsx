@@ -18,7 +18,7 @@ const linhas = Array.from({ length: 40 }, (_, i) => `Linha ${i + 1} · Padaria P
 
 export const Vertical: StoryObj = {
   render: () => (
-    <AreaRolagem className="bg-card h-72 max-w-md rounded-[18px] p-4 text-sm">
+    <AreaRolagem className="bg-card h-72 max-w-md rounded-lg p-4 text-sm">
       {linhas.map((l) => (
         <p key={l} className="py-1">
           {l}
@@ -30,7 +30,7 @@ export const Vertical: StoryObj = {
 
 export const Horizontal: StoryObj = {
   render: () => (
-    <AreaRolagem eixo="x" className="bg-card max-w-md rounded-[18px] p-4">
+    <AreaRolagem eixo="x" className="bg-card max-w-md rounded-lg p-4">
       <div className="flex w-[1400px] gap-2">
         {linhas.slice(0, 20).map((l) => (
           <span key={l} className="bg-muted shrink-0 rounded-full px-3 py-1 text-xs">
@@ -45,7 +45,7 @@ export const Horizontal: StoryObj = {
 export const SemBarra: StoryObj = {
   name: 'Sem barra (faixas)',
   render: () => (
-    <AreaRolagem eixo="x" className="bg-card sem-barra max-w-md rounded-[18px] p-4">
+    <AreaRolagem eixo="x" className="bg-card sem-barra max-w-md rounded-lg p-4">
       <div className="flex w-[1400px] gap-2">
         {linhas.slice(0, 20).map((l) => (
           <span key={l} className="bg-muted shrink-0 rounded-full px-3 py-1 text-xs">

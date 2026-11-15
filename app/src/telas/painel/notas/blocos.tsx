@@ -46,7 +46,7 @@ function CapturaDoMes({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
         {cap.fonte && !rodando && <SeloDemonstracao fonte={cap.fonte} />}
       </div>
       {cap.erro?.clienteId === clienteId && (
-        <div role="alert" className="bg-destructive/12 text-foreground flex items-start gap-2 rounded-[12px] px-3 py-2 text-xs">
+        <div role="alert" className="bg-destructive/12 text-foreground flex items-start gap-2 rounded-md px-3 py-2 text-xs">
           <span className="flex-1">{cap.erro.texto}</span>
           <button type="button" className="cursor-pointer font-medium underline" onClick={() => cap.forcar([clienteId])}>
             tentar de novo
@@ -61,7 +61,7 @@ function CapturaDoMes({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
             const paridade = e.migracao_aberta ? (f.paridade === f.qtd ? 'paridade SIEG ok' : `SIEG achou ${fmt(f.paridade)} (${f.qtd - f.paridade > 0 ? '+' : ''}${f.qtd - f.paridade})`) : f.fonte
             const alerta = e.migracao_aberta && f.paridade !== f.qtd
             return t === 'L' ? (
-              <div key={f.tipo} className="bg-raised flex min-w-0 items-baseline gap-2 rounded-[12px] px-3 py-1.5">
+              <div key={f.tipo} className="bg-raised flex min-w-0 items-baseline gap-2 rounded-md px-3 py-1.5">
                 <span className="font-heading text-xl font-light tabular-nums">{fmt(f.qtd)}</span>
                 <span className="min-w-0 flex-1">
                   <span className="text-muted-foreground block truncate text-xs">{f.tipo}</span>
@@ -69,7 +69,7 @@ function CapturaDoMes({ clienteId, t }: { clienteId: string; t: TamanhoWidget })
                 </span>
               </div>
             ) : (
-              <div key={f.tipo} className="bg-raised flex min-w-0 flex-col justify-between rounded-[14px] px-3 py-2">
+              <div key={f.tipo} className="bg-raised flex min-w-0 flex-col justify-between rounded-md px-3 py-2">
                 <span className="text-muted-foreground truncate text-xs">{f.tipo}</span>
                 <span className="font-heading text-2xl font-light tabular-nums">{fmt(f.qtd)}</span>
                 <span className={cn('truncate text-xs', alerta ? 'text-warning-text font-medium' : 'text-muted-foreground')}>{e.migracao_aberta ? `${f.fonte} · ${paridade}` : f.fonte}</span>

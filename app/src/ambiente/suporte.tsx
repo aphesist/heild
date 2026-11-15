@@ -429,7 +429,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
             )}
             {secao === 'ajuda' &&
               ajuda.map((m, i) => (
-                <div key={i} className={cn('max-w-[88%] rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
+                <div key={i} className={cn('max-w-[88%] rounded-lg px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background self-end' : 'bg-surface shadow-cartao self-start')}>
                   {m.de === 'ajuda' && (
                     <span className="text-muted-foreground mb-0.5 flex items-center gap-1 text-xs">
                       <QuestionIcon className="size-3" /> Ajuda do sistema
@@ -477,7 +477,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
               </div>
             )}
             {secao === 'ajuda' && esgotado && (
-              <div className="bg-sunken/70 flex flex-col gap-2 rounded-[16px] p-3 text-sm">
+              <div className="bg-sunken/70 flex flex-col gap-2 rounded-lg p-3 text-sm">
                 <p>Você usou as {LIMITE_AJUDA} perguntas de novembro da ajuda do sistema. Renovam em 01/12. Até lá, a equipe responde por aqui, sem limite.</p>
                 <Button size="sm" className="w-fit rounded-full" onClick={() => passarParaEquipe()}>
                   <ChatsCircleIcon /> Falar com a equipe
@@ -501,7 +501,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
                   ) : (
                     <div key={i} className={cn('flex max-w-[88%] items-end gap-2', m.de === 'eu' ? 'self-end' : 'self-start')}>
                       {m.de === 'equipe' && <Avatar nome="Mariana Suporte" tamanho="sm" />}
-                      <div className={cn('rounded-[18px] px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background' : 'bg-surface shadow-cartao')}>
+                      <div className={cn('rounded-lg px-3.5 py-2.5 text-sm', m.de === 'eu' ? 'bg-foreground text-background' : 'bg-surface shadow-cartao')}>
                         {m.texto}
                         <span className="mt-0.5 block text-right text-xs opacity-60">{m.hora}</span>
                       </div>
@@ -509,7 +509,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
                   ),
                 )}
                 {pedidoTela === 'pedido' && (
-                  <div className="bg-surface shadow-cartao flex flex-col gap-2 self-stretch rounded-[16px] p-3 text-sm">
+                  <div className="bg-surface shadow-cartao flex flex-col gap-2 self-stretch rounded-lg p-3 text-sm">
                     <span className="flex items-center gap-2 font-medium">
                       <MonitorIcon className="size-4" /> Mariana pede para ver a sua tela
                     </span>
@@ -525,7 +525,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
                   </div>
                 )}
                 {pedidoTela === 'ativo' && (
-                  <div className="bg-sunken/70 flex items-center gap-2 self-stretch rounded-[14px] px-3 py-2 text-xs">
+                  <div className="bg-sunken/70 flex items-center gap-2 self-stretch rounded-md px-3 py-2 text-xs">
                     <EyeIcon className="size-4 shrink-0" /> <span className="flex-1">A Mariana está vendo a sua tela até {telaAte}.</span>
                     <Button size="sm" variant="outline" className="rounded-full" onClick={encerrarTela}>
                       Encerrar
@@ -581,7 +581,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
                 <>
                   <p className="text-muted-foreground text-xs">Conversas com a equipe. Perguntas à ajuda do sistema neste mês: {perguntas}.</p>
                   {historico.map((c) => (
-                    <button key={c.id} type="button" onClick={() => setVisto(c)} className="bg-surface shadow-cartao flex cursor-pointer flex-col rounded-[16px] px-3.5 py-3 text-left">
+                    <button key={c.id} type="button" onClick={() => setVisto(c)} className="bg-surface shadow-cartao flex cursor-pointer flex-col rounded-lg px-3.5 py-3 text-left">
                       <span className="text-sm">{c.assunto}</span>
                       <span className="text-muted-foreground text-xs">
                         {c.quando} · {c.com} · {c.situacao}
@@ -620,7 +620,7 @@ export function SuporteProvider({ children }: { children: ReactNode }) {
 function BlocoDiagnostico({ d, onDecidir }: { d: Diagnostico; onDecidir: (ok: boolean) => void }) {
   return (
     <div className="mt-2 flex flex-col gap-2">
-      <div className="bg-sunken/60 flex flex-col gap-1 rounded-[12px] px-3 py-2 text-xs">
+      <div className="bg-sunken/60 flex flex-col gap-1 rounded-md px-3 py-2 text-xs">
         <span className="flex items-center gap-1.5 font-medium">
           {d.estado === 'lendo' ? <span className="bg-foreground/50 size-2 animate-pulse rounded-full" /> : <MagnifyingGlassIcon className="size-3.5" />}
           {d.estado === 'lendo' ? 'Olhando as suas configurações (somente leitura)…' : `Olhei, só para leitura (${d.lendo.length} de ${MAX_LEITURAS} leituras):`}
@@ -643,7 +643,7 @@ function BlocoDiagnostico({ d, onDecidir }: { d: Diagnostico; onDecidir: (ok: bo
             ))}
           </ul>
           {d.correcao && (
-            <div className="border-border/70 flex flex-col gap-2 rounded-[12px] border p-2.5">
+            <div className="border-border/70 flex flex-col gap-2 rounded-md border p-2.5">
               <span className="text-xs font-medium">Correção proposta</span>
               <span>{d.correcao.texto}</span>
               {d.correcao.decisao ? (
@@ -688,7 +688,7 @@ function BlocoFaq({
   const lista = faq.filter((f) => (modulo === 'todos' || f.modulo === modulo) && (!q || `${f.p} ${f.r}`.toLowerCase().includes(q)))
   const modulos = ['todos', ...new Set(faq.map((f) => f.modulo))]
   return (
-    <details open={aberto} className="bg-surface shadow-cartao rounded-[16px] p-3 text-sm">
+    <details open={aberto} className="bg-surface shadow-cartao rounded-lg p-3 text-sm">
       <summary className="cursor-pointer font-medium select-none">Perguntas frequentes</summary>
       <div className="mt-2 flex flex-col gap-2">
         <label className="bg-raised shadow-contorno flex h-9 items-center gap-2 rounded-full px-3">

@@ -36,7 +36,7 @@ export function AceitarConvite({ conta, convite, escritorio, onVoltar, onAceito 
   if (expirado)
     return (
       <div className="flex flex-col gap-4 text-sm">
-        <p className="bg-warning/15 flex items-start gap-2 rounded-[14px] px-3 py-2.5">
+        <p className="bg-warning/15 flex items-start gap-2 rounded-md px-3 py-2.5">
           <WarningIcon className="text-warning mt-0.5 size-4 shrink-0" /> Este convite venceu em {new Date(convite!.expira_em).toLocaleDateString('pt-BR')}. Peça ao Administrador do escritório para reenviar: o novo vale mais 7 dias.
         </p>
         <Button variant="ghost" className="rounded-full" onClick={onVoltar}>
@@ -96,7 +96,7 @@ export function AceitarConvite({ conta, convite, escritorio, onVoltar, onAceito 
           <Interruptor ligado={fator} onMudar={(v) => conta.papel !== 'administrador' && setFator(v)} desabilitado={conta.papel === 'administrador'} rotulo="Segundo fator" detalhe={conta.papel === 'administrador' ? 'Obrigatório para Administrador.' : 'Recomendado. Dá para ligar depois em Minha conta.'} />
           {fator && (
             <>
-              <div className="bg-sunken flex items-center gap-3 rounded-[14px] p-3">
+              <div className="bg-sunken flex items-center gap-3 rounded-md p-3">
                 <QrCodeIcon className="size-16 shrink-0" weight="duotone" aria-label="QR code do app autenticador (simulado)" />
                 <span className="text-muted-foreground text-xs">Leia o código com o app autenticador (Google Authenticator, Authy, 1Password) e digite os 6 números que aparecerem.</span>
               </div>
@@ -109,7 +109,7 @@ export function AceitarConvite({ conta, convite, escritorio, onVoltar, onAceito 
       )}
       {passo === 3 && (
         <>
-          <ul className="bg-sunken/60 flex flex-col gap-2 rounded-[14px] p-3">
+          <ul className="bg-sunken/60 flex flex-col gap-2 rounded-md p-3">
             {termoEquipe.map((t) => (
               <li key={t} className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 size-3.5 shrink-0" /> {t}

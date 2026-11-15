@@ -289,7 +289,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
             </Badge>
           )}
         </div>
-        <dl className="bg-sunken/60 grid grid-cols-2 gap-x-4 gap-y-2 rounded-[14px] p-3 text-sm sm:grid-cols-3">
+        <dl className="bg-sunken/60 grid grid-cols-2 gap-x-4 gap-y-2 rounded-md p-3 text-sm sm:grid-cols-3">
           <Dado rotulo="Prazo interno" valor={<span className={cn(atrasadaE(t) && 'text-destructive-text font-medium')}>{diaMes(t.prazo_interno)}</span>} />
           <Dado rotulo="Prazo legal" valor={diaMes(t.prazo_legal)} />
           <Dado
@@ -335,22 +335,22 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
 
       {/* Evidência e motivos */}
       {t.status === 'concluida' && !!t.extras?.resultado && (
-        <p className="bg-success/10 flex items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+        <p className="bg-success/10 flex items-center gap-2 rounded-md px-3 py-2 text-sm">
           <CheckCircleIcon className="text-success size-4" weight="fill" />
           {t.extras?.concluida_por_evidencia ? 'Concluída por evidência' : 'Concluída'}: {String(t.extras.resultado)}
           {!!t.extras?.aprovada_por && <span className="text-muted-foreground">· aprovada por {String(t.extras.aprovada_por)}</span>}
         </p>
       )}
-      {t.status === 'cancelada' && <p className="bg-sunken rounded-[14px] px-3 py-2 text-sm">Cancelada: {t.cancelada_motivo}</p>}
+      {t.status === 'cancelada' && <p className="bg-sunken rounded-md px-3 py-2 text-sm">Cancelada: {t.cancelada_motivo}</p>}
       {(t.status === 'aguardando_cliente' || t.status === 'aguardando_terceiro') && t.aguardando_detalhe && (
-        <p className="bg-warning/10 rounded-[14px] px-3 py-2 text-sm">
+        <p className="bg-warning/10 rounded-md px-3 py-2 text-sm">
           {t.status === 'aguardando_terceiro' ? `Aguardando ${t.aguardando_detalhe.orgao ?? 'órgão'}: ` : 'O cliente precisa enviar: '}
           {t.aguardando_detalhe.itens?.join('; ')}
         </p>
       )}
-      {!!t.extras?.devolvida && t.status === 'em_andamento' && <p className="bg-warning/10 rounded-[14px] px-3 py-2 text-sm">Devolvida na revisão: {String(t.extras.devolvida)}</p>}
+      {!!t.extras?.devolvida && t.status === 'em_andamento' && <p className="bg-warning/10 rounded-md px-3 py-2 text-sm">Devolvida na revisão: {String(t.extras.devolvida)}</p>}
       {t.status === 'em_revisao' && !!t.extras?.segunda_opiniao && (
-        <p className="bg-raised rounded-[14px] px-3 py-2 text-sm">
+        <p className="bg-raised rounded-md px-3 py-2 text-sm">
           <SparkleIcon className="mr-1 inline size-4" />
           Segunda opinião · {String(t.extras.segunda_opiniao)}
         </p>
@@ -395,7 +395,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
           <ul className="flex flex-col gap-1">
             {lista.map((i, k) => (
               <li key={k}>
-                <label className={cn('hover:bg-accent/60 flex cursor-pointer items-start gap-2 rounded-[10px] px-2 py-1.5 text-sm', fechada && 'cursor-default')}>
+                <label className={cn('hover:bg-accent/60 flex cursor-pointer items-start gap-2 rounded-sm px-2 py-1.5 text-sm', fechada && 'cursor-default')}>
                   <input type="checkbox" className="accent-primary mt-0.5 size-4" checked={i.feito} disabled={fechada} onChange={(e) => fazer(() => acoesTarefa.marcarItem(t.id, k, e.target.checked))} />
                   <span className="min-w-0 flex-1">
                     <span className={cn(i.feito && 'text-muted-foreground line-through')}>{i.item}</span>
@@ -518,7 +518,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
 
         <Secao titulo="Conversa ligada">
           {conversa ? (
-            <div className="bg-raised flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+            <div className="bg-raised flex flex-col gap-1 rounded-md p-3 text-sm">
               <span className="font-medium">
                 {conversa.pessoa.nome} · {conversa.status.replace('_', ' ')}
               </span>
@@ -555,7 +555,7 @@ export function FichaTarefa({ id, onFechar, onCobrar, onFicha, onTrilha, onAbrir
           <ul className="flex flex-col gap-1 text-sm">
             {filhas.map((f) => (
               <li key={f.id}>
-                <button type="button" onClick={() => onAbrirTarefa(f.id)} className="hover:bg-accent/60 flex w-full cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1 text-left">
+                <button type="button" onClick={() => onAbrirTarefa(f.id)} className="hover:bg-accent/60 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1 text-left">
                   <span className="text-muted-foreground font-mono text-xs">{f.atividade_id}</span>
                   <span className="min-w-0 flex-1 truncate">{f.titulo}</span>
                   <StatusE t={f} />
@@ -721,7 +721,7 @@ export function CartaoNaTarefa({
   const [texto, setTexto] = useState('')
   const decidido = status !== 'pendente'
   return (
-    <div data-cartao={id} className={cn('flex flex-col gap-2 rounded-[14px] border p-3 text-sm', decidido ? 'bg-sunken/50' : 'bg-warning/8 border-warning/40')}>
+    <div data-cartao={id} className={cn('flex flex-col gap-2 rounded-md border p-3 text-sm', decidido ? 'bg-sunken/50' : 'bg-warning/8 border-warning/40')}>
       <span className="font-medium">{resumo}</span>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
         {Object.entries(args).map(([k, v]) => (
@@ -810,7 +810,7 @@ function PainelAcao({
   const exige = resultadoExigido(t)
   const outras = tarefas.filter((x) => x.id !== t.id && !['concluida', 'cancelada'].includes(x.status)).slice(0, 40)
   const caixa = (titulo: string, corpo: ReactNode, acao: ReactNode) => (
-    <div className="bg-raised flex flex-col gap-2 rounded-[14px] p-3" role="group" aria-label={titulo}>
+    <div className="bg-raised flex flex-col gap-2 rounded-md p-3" role="group" aria-label={titulo}>
       <span className="text-sm font-medium">{titulo}</span>
       {corpo}
       <div className="flex flex-wrap gap-1.5">

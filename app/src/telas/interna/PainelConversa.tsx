@@ -250,7 +250,7 @@ function Fio({ raiz, respostas, conversa, acoes, destaque, somenteLeitura, onFec
       </div>
       <AreaRolagem as="ol" className="flex flex-1 flex-col gap-1 px-2 py-3">
         {resumo && (
-          <li className="bg-primary/6 mb-2 flex flex-col gap-1 rounded-[14px] p-3 text-sm">
+          <li className="bg-primary/6 mb-2 flex flex-col gap-1 rounded-md p-3 text-sm">
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <span className="inline-flex size-4 shrink-0"><Orb cor={integrante('geral').cor} tamanho={16} extras={false} cutucavel={false} /></span> {integrante('geral').nome} · resumo do fio (IA)
             </span>
@@ -272,4 +272,4 @@ function Fio({ raiz, respostas, conversa, acoes, destaque, somenteLeitura, onFec
   )
 }
 
-export const classeCaixa = cn('bg-surface shadow-painel flex h-full overflow-hidden rounded-[24px] sm:rounded-[34px]')
+export const classeCaixa = cn('bg-surface shadow-painel flex h-full overflow-hidden rounded-campo sm:rounded-painel')

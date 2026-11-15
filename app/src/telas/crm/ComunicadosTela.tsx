@@ -92,7 +92,7 @@ export function ComunicadosTela({ clientes }: { clientes: { id: string; nome: st
           </header>
           <ul className="grid gap-3 lg:grid-cols-2">
             {reguas.map((r) => (
-              <li key={r.id} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-[24px] p-4', !r.ativa && 'opacity-70')}>
+              <li key={r.id} className={cn('bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4', !r.ativa && 'opacity-70')}>
                 <div className="flex items-start gap-3">
                   <button type="button" onClick={() => r.id !== 'r6' && setEditando(r)} className="min-w-0 flex-1 cursor-pointer text-left disabled:cursor-default" disabled={r.id === 'r6'}>
                     <h3 className="flex items-center gap-1.5 text-sm font-medium">
@@ -187,7 +187,7 @@ function EditorRegua({ inicial, onFechar, onSalvar }: { inicial: Regua; onFechar
         <span className="text-sm font-medium">Etapas</span>
         <p className="text-muted-foreground -mt-1 text-xs">Dia relativo ao gatilho (negativo = antes do vencimento).</p>
         {etapas.map((e, i) => (
-          <div key={i} className="bg-sunken/60 grid grid-cols-[4.5rem_1fr_auto] items-start gap-2 rounded-[14px] p-2.5 sm:grid-cols-[4.5rem_1fr_1fr_auto]">
+          <div key={i} className="bg-sunken/60 grid grid-cols-[4.5rem_1fr_auto] items-start gap-2 rounded-md p-2.5 sm:grid-cols-[4.5rem_1fr_1fr_auto]">
             <CampoTexto tipo="number" valor={String(e.dia)} onMudar={(v) => set(i, { dia: Number(v) || 0 })} className="tabular-nums" />
             <CampoTexto valor={e.descricao} onMudar={(v) => set(i, { descricao: v })} placeholder="o que diz" />
             <span className="col-span-2 row-start-2 sm:col-span-1 sm:row-start-1 sm:col-start-3">
@@ -230,7 +230,7 @@ const corStatus: Record<Comunicado['status'], 'sucesso' | 'outline' | 'destaque'
 function CartaoComunicado({ c, onResultado }: { c: Comunicado; onResultado: () => void }) {
   const pct = (n?: number) => (n != null ? Math.round((n / c.destinatarios) * 100) : 0)
   return (
-    <article className="bg-surface shadow-cartao flex flex-col gap-3 rounded-[24px] p-4">
+    <article className="bg-surface shadow-cartao flex flex-col gap-3 rounded-campo p-4">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-medium">{c.titulo}</h3>
@@ -316,7 +316,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
   const total = optIn + (emailSemOptIn ? pessoas - optIn : 0)
 
   return (
-    <section className="bg-surface shadow-painel flex flex-col gap-4 rounded-[28px] p-4 sm:p-5">
+    <section className="bg-surface shadow-painel flex flex-col gap-4 rounded-campo p-4 sm:p-5">
       <header className="flex items-center gap-2">
         <h2 className="text-base font-medium">Novo comunicado</h2>
         <Button size="icon-sm" variant="ghost" className="ml-auto rounded-full" onClick={onFechar} aria-label="Fechar">
@@ -362,7 +362,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
           <ul className="grid max-w-2xl gap-1 sm:grid-cols-2">
             {clientes.map((c) => (
               <li key={c.id}>
-                <label className="hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-[10px] px-2 py-1.5 text-sm">
+                <label className="hover:bg-sunken flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
                   <input type="checkbox" className="accent-foreground size-4" checked={escolhidos.includes(c.id)} onChange={(e) => setEscolhidos((xs) => (e.target.checked ? [...xs, c.id] : xs.filter((x) => x !== c.id)))} />
                   <span className="min-w-0 flex-1 truncate">{c.nome}</span>
                   <span className="text-muted-foreground text-xs">{c.regime}</span>
@@ -383,7 +383,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
           </Badge>
           <span className="text-muted-foreground text-xs">utilidade · WhatsApp</span>
         </p>
-        <p className="bg-sunken rounded-[12px] px-3 py-2 text-sm">{seg.texto}</p>
+        <p className="bg-sunken rounded-md px-3 py-2 text-sm">{seg.texto}</p>
       </Linha>
       <Linha rotulo="Canal">
         <div className="flex flex-col gap-1.5 text-sm">
@@ -418,7 +418,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
       {exemplos && (
         <div className="grid gap-2 sm:grid-cols-3">
           {seg.exemplos.map((e) => (
-            <div key={e.nome} className="bg-raised shadow-contorno rounded-[14px] px-3 py-2 text-sm">
+            <div key={e.nome} className="bg-raised shadow-contorno rounded-md px-3 py-2 text-sm">
               <div className="text-muted-foreground text-xs">para {e.nome}</div>
               {preencher(e)}
               {pdf && (
@@ -432,7 +432,7 @@ function NovoComunicado({ clientes, onFechar, onEnviar }: { clientes: { id: stri
       )}
 
       {aprovando ? (
-        <div className="bg-sunken flex flex-col gap-2 rounded-[18px] p-3 text-sm">
+        <div className="bg-sunken flex flex-col gap-2 rounded-lg p-3 text-sm">
           <p className="flex items-center gap-2 font-medium">
             <ShieldCheckIcon className="size-4" /> Enviar para {total} {total === 1 ? 'pessoa' : 'pessoas'}? Não dá para desfazer.
           </p>

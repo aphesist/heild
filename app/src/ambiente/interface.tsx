@@ -118,7 +118,7 @@ function Notificacao({ t, onAbrir, onFechar }: { t: Toast; onAbrir: () => void; 
       tabIndex={t.destino ? 0 : undefined}
       onClick={t.destino ? onAbrir : undefined}
       onKeyDown={(e) => t.destino && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onAbrir())}
-      className={cn('bg-raised shadow-campo group relative flex gap-3 rounded-[20px] p-3.5 pr-9 text-sm', t.destino && 'hover:bg-surface cursor-pointer transition-colors')}
+      className={cn('bg-raised shadow-campo group relative flex gap-3 rounded-cartao p-3.5 pr-9 text-sm', t.destino && 'hover:bg-surface cursor-pointer transition-colors')}
     >
       {pede && <span aria-hidden className="bg-highlight absolute top-4 left-0 h-6 w-[3px] rounded-r-full" />}
       {visual}

@@ -67,7 +67,7 @@ export function ModuloTela({ titulo, aba, cliente, tarefas, chat, children }: Pr
               <Lugar icone={<FileTextIcon />} titulo="Documentos da aba" texto="Índice único de documentos" />
             </div>
           )}
-          {tarefas && <BlocoTarefas className="bg-surface rounded-[24px]" setor={aba ?? titulo} cliente={cliente} tarefas={tarefas} />}
+          {tarefas && <BlocoTarefas className="bg-surface rounded-campo" setor={aba ?? titulo} cliente={cliente} tarefas={tarefas} />}
         </div>
       </AreaRolagem>
       {chat && <GavetaChat {...chat} contexto={cliente ?? 'Carteira'} />}
@@ -77,7 +77,7 @@ export function ModuloTela({ titulo, aba, cliente, tarefas, chat, children }: Pr
 
 function Lugar({ icone, titulo, texto }: { icone: ReactNode; titulo: string; texto: string }) {
   return (
-    <div className="border-foreground/15 bg-surface/60 flex min-h-32 flex-col gap-2 rounded-[24px] border border-dashed p-5">
+    <div className="border-foreground/15 bg-surface/60 flex min-h-32 flex-col gap-2 rounded-campo border border-dashed p-5">
       <span className="text-muted-foreground [&_svg]:size-5">{icone}</span>
       <span className="text-sm font-medium">{titulo}</span>
       <span className="text-muted-foreground text-xs">{texto}</span>

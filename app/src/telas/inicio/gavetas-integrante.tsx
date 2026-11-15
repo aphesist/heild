@@ -75,7 +75,7 @@ export function GavetaMemoria({ integrante, aberta, onFechar }: { integrante: In
   return (
     <GavetaFormulario aberta={aberta} onFechar={onFechar} titulo={`Memória de ${t.nome}`} descricao="O que ele guardou de você (privado) e o que vale para o setor inteiro (só leitura)." acao="Fechar" onAcao={onFechar}>
       {retorno && (
-        <p role="status" className="bg-sunken flex items-center gap-2 rounded-[12px] px-3 py-2 font-mono text-xs">
+        <p role="status" className="bg-sunken flex items-center gap-2 rounded-md px-3 py-2 font-mono text-xs">
           <CheckCircleIcon className="text-success size-4 shrink-0" /> {retorno}
         </p>
       )}
@@ -86,7 +86,7 @@ export function GavetaMemoria({ integrante, aberta, onFechar }: { integrante: In
         {itens.length === 0 && <EstadoVazio compacto titulo="Memória vazia" descricao="Diga no chat “lembre que...” e ele guarda aqui." />}
         <ul className="flex flex-col gap-2">
           {itens.map((m) => (
-            <li key={m.id} className="bg-surface shadow-contorno flex flex-col gap-1.5 rounded-[14px] p-3">
+            <li key={m.id} className="bg-surface shadow-contorno flex flex-col gap-1.5 rounded-md p-3">
               {editando === m.id ? (
                 <>
                   <CampoArea valor={texto} onMudar={setTexto} linhas={2} />
@@ -235,7 +235,7 @@ export function GavetaConfigurar({ integrante, aberta, onFechar }: { integrante:
       {celular && <AvisoEditeNoComputador />}
       <section className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">Instruções</h3>
-        <div className="bg-sunken/60 text-muted-foreground flex flex-col gap-1 rounded-[12px] px-3 py-2 text-xs">
+        <div className="bg-sunken/60 text-muted-foreground flex flex-col gap-1 rounded-md px-3 py-2 text-xs">
           <span className="flex items-center gap-1.5">
             <LockSimpleIcon className="size-3.5" /> Camada 1 (da plataforma): assina como assistente; nunca cita preço a lead; nunca opina sem contador; transmitir, pagar e assinar sempre com pessoa.
           </span>
@@ -265,7 +265,7 @@ export function GavetaConfigurar({ integrante, aberta, onFechar }: { integrante:
       </Campo>
       <section className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">Ferramentas e nível</h3>
-        <ul className="flex flex-col divide-y rounded-[14px] border">
+        <ul className="flex flex-col divide-y rounded-md border">
           {lista.map((f) => {
             const removida = !doDono(f)
             return (
@@ -333,7 +333,7 @@ export function GavetaJobs({ integrante, aberta, onFechar }: { integrante: Integ
         {meus.map((j) => {
           const ok = j.resultados.filter((r) => r.resultado === 'ok').length
           return (
-            <li key={j.id} className="bg-surface shadow-contorno flex flex-col gap-2 rounded-[14px] p-3">
+            <li key={j.id} className="bg-surface shadow-contorno flex flex-col gap-2 rounded-md p-3">
               <div className="flex items-start gap-3">
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
@@ -414,7 +414,7 @@ export function GavetaHistorico({ integrante, aberta, onFechar }: { integrante: 
     <GavetaFormulario aberta={aberta} onFechar={onFechar} titulo={`Histórico de ${t.nome}`} descricao="Sessões anteriores. O chat recomeça a cada mês e em marcos (troca de regime, saída de cliente); o que importa fica na memória." acao="Fechar" onAcao={onFechar}>
       <ul className="flex flex-col gap-2">
         {sessoes.map((s) => (
-          <li key={s.quando} className="bg-surface shadow-contorno flex flex-col gap-1 rounded-[14px] p-3">
+          <li key={s.quando} className="bg-surface shadow-contorno flex flex-col gap-1 rounded-md p-3">
             <span className="text-muted-foreground text-xs">{s.quando}</span>
             <span className="text-sm">{s.resumo}</span>
           </li>

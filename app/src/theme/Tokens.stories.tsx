@@ -37,14 +37,14 @@ function PaginaTokens() {
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Camadas</h2>
         <p className="text-muted-foreground text-sm">De baixo para cima. Todo o sistema usa só estas: mudar uma no tema muda todas as telas.</p>
-        <div className="from-background to-background-end flex flex-col gap-3 rounded-[24px] bg-gradient-to-b p-4">
+        <div className="from-background to-background-end flex flex-col gap-3 rounded-campo bg-gradient-to-b p-4">
           <span className="text-muted-foreground text-xs">fundo · bg-background → bg-background-end</span>
-          <div className="from-sunken to-sunken-end rounded-[20px] bg-gradient-to-b p-4">
+          <div className="from-sunken to-sunken-end rounded-cartao bg-gradient-to-b p-4">
             <span className="text-muted-foreground text-xs">rebaixada · bg-sunken (trilho das abas, busca, coluna) · {t.rebaixada ?? 'derivada'}</span>
           </div>
-          <div className="bg-surface flex flex-col gap-3 rounded-[20px] p-4 shadow-contorno">
+          <div className="bg-surface flex flex-col gap-3 rounded-cartao p-4 shadow-contorno">
             <span className="text-muted-foreground text-xs">superfície · bg-surface (painéis, widgets, área do chat) · {t.superficie ?? 'derivada'}</span>
-            <div className="bg-raised rounded-[16px] p-4 shadow-sm">
+            <div className="bg-raised rounded-lg p-4 shadow-sm">
               <span className="text-muted-foreground text-xs">elevada · bg-raised / bg-card (cartões, campo do chat, aba ativa) · {t.elevada ?? 'derivada'}</span>
             </div>
           </div>

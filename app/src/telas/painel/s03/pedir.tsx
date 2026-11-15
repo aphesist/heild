@@ -69,7 +69,7 @@ export function PedirAoIntegrante({ setor, cliente, sugestoes, compacto }: { set
           <div className="flex flex-col gap-1.5">
             <span className="text-muted-foreground text-xs">Sugestões</span>
             {sugestoes.map((s) => (
-              <button key={s.rotulo} type="button" onClick={() => pedir(s)} className="hover:bg-sunken cursor-pointer rounded-[10px] px-2 py-1.5 text-left text-sm">
+              <button key={s.rotulo} type="button" onClick={() => pedir(s)} className="hover:bg-sunken cursor-pointer rounded-sm px-2 py-1.5 text-left text-sm">
                 {s.rotulo}
               </button>
             ))}

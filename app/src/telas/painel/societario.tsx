@@ -130,7 +130,7 @@ function Ficha({ t }: { t: TamanhoWidget }) {
       {gaveta === 'fundir' && <GavetaFundir cliente={cliente} onFechar={() => setGaveta(null)} />}
       <div className="flex items-start gap-2">
         {div ? (
-          <div className="bg-warning/10 flex min-w-0 flex-1 items-start gap-2 rounded-[14px] px-3 py-2 text-sm">
+          <div className="bg-warning/10 flex min-w-0 flex-1 items-start gap-2 rounded-md px-3 py-2 text-sm">
             <IconeSituacao s="atencao" className="mt-0.5" />
             <span className="min-w-0 flex-1">
               <span className="block">Receita × cadastro: {div.campo}</span>
@@ -145,7 +145,7 @@ function Ficha({ t }: { t: TamanhoWidget }) {
             )}
           </div>
         ) : (
-          <div className="bg-success/10 flex min-w-0 flex-1 items-center gap-2 rounded-[14px] px-3 py-2 text-sm">
+          <div className="bg-success/10 flex min-w-0 flex-1 items-center gap-2 rounded-md px-3 py-2 text-sm">
             <IconeSituacao s="ok" /> Cadastro igual ao da Receita (conferido hoje às 06:10)
           </div>
         )}
@@ -380,7 +380,7 @@ function Certificados({ t }: { t: TamanhoWidget }) {
         <GavetaFormulario aberta onFechar={() => setTrilha(null)} titulo={`Trilha de uso · ${trilha.tipo}`} descricao="Quem usou o certificado, para quê e quando. O arquivo e a senha nunca aparecem." acao="Fechar" onAcao={() => setTrilha(null)}>
           <ol className="flex flex-col gap-1.5 text-sm">
             {trilha.trilha.map((x, i) => (
-              <li key={i} className="bg-sunken rounded-[12px] px-3 py-2">
+              <li key={i} className="bg-sunken rounded-md px-3 py-2">
                 <span className="text-muted-foreground block text-xs">
                   {new Date(x.quando).toLocaleString('pt-BR')} · {x.quem}
                 </span>
@@ -568,7 +568,7 @@ function Processos({ t }: { t: TamanhoWidget }) {
           const feitos = p.checklist.filter((c) => c.feito).length
           return (
             <li key={p.id}>
-              <button type="button" onClick={() => setAberto(p)} className={cn('flex w-full cursor-pointer items-start gap-3 rounded-[14px] px-3 py-2 text-left', p.situacao === 'exigencia' ? 'bg-warning/10' : 'bg-raised hover:bg-sunken')}>
+              <button type="button" onClick={() => setAberto(p)} className={cn('flex w-full cursor-pointer items-start gap-3 rounded-md px-3 py-2 text-left', p.situacao === 'exigencia' ? 'bg-warning/10' : 'bg-raised hover:bg-sunken')}>
                 <IconeSituacao s={p.situacao === 'concluido' ? 'ok' : p.situacao === 'exigencia' ? 'atencao' : 'neutro'} className="mt-0.5" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm">{p.titulo}</span>
@@ -880,7 +880,7 @@ function Repetidos() {
   return (
     <ul className="flex flex-col gap-2">
       {lista.map((r) => (
-        <li key={r.id} className="bg-sunken flex flex-col gap-1.5 rounded-[14px] px-3 py-2 text-sm">
+        <li key={r.id} className="bg-sunken flex flex-col gap-1.5 rounded-md px-3 py-2 text-sm">
           <span className="flex items-center gap-1.5">
             <CopyIcon className="text-muted-foreground size-4" /> Mesmo arquivo salvo duas vezes (hash {r.hash})
           </span>
@@ -982,7 +982,7 @@ function EstadosCarteira({ t }: { t: TamanhoWidget }) {
     <div className="flex h-full flex-col gap-2">
       <div className={cn('grid gap-2', t === 'M' ? 'grid-cols-4' : 'grid-cols-3 sm:grid-cols-4')}>
         {porEstado.slice(0, t === 'M' ? 4 : 8).map(([e, l]) => (
-          <button key={e} type="button" aria-pressed={aberto === e} onClick={() => setAberto(aberto === e ? null : e)} className={cn('flex min-w-0 cursor-pointer flex-col rounded-[12px] px-2 py-1 text-left', aberto === e ? 'bg-raised shadow-cartao' : 'hover:bg-sunken')}>
+          <button key={e} type="button" aria-pressed={aberto === e} onClick={() => setAberto(aberto === e ? null : e)} className={cn('flex min-w-0 cursor-pointer flex-col rounded-md px-2 py-1 text-left', aberto === e ? 'bg-raised shadow-cartao' : 'hover:bg-sunken')}>
             <span className="font-heading text-2xl font-light tabular-nums">{l.length}</span>
             <span className="text-muted-foreground truncate text-xs">{rotuloEstado[e]}</span>
           </button>

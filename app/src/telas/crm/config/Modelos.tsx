@@ -51,7 +51,7 @@ export function Modelos() {
       <ul className="divide-border/70 flex flex-col divide-y">
         {modelos.map((m) => (
           <li key={m.id}>
-            <button type="button" onClick={() => setEditando(m)} className="hover:bg-sunken/60 flex w-full cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-[12px] px-2 py-2.5 text-left">
+            <button type="button" onClick={() => setEditando(m)} className="hover:bg-sunken/60 flex w-full cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-2.5 text-left">
               <code className="text-sm">{m.nome}</code>
               <span className="text-muted-foreground text-xs">
                 {m.categoria} · v{m.versao}
@@ -135,7 +135,7 @@ function EditorModelo({
       }
     >
       {inicial.status === 'rejeitado' && inicial.motivo && (
-        <div className="bg-destructive/8 flex items-start gap-2 rounded-[14px] px-3 py-2.5 text-sm">
+        <div className="bg-destructive/8 flex items-start gap-2 rounded-md px-3 py-2.5 text-sm">
           <WarningIcon className="text-destructive mt-0.5 size-4 shrink-0" />
           <span>
             <strong className="font-medium">Rejeitado pela Meta:</strong> {inicial.motivo}
@@ -221,8 +221,8 @@ function EditorModelo({
       </Campo>
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Prévia</span>
-        <div className="bg-sunken flex flex-col items-start gap-1.5 rounded-[16px] p-3">
-          <div className="bg-raised shadow-contorno max-w-[90%] rounded-[16px] rounded-tl-[6px] px-3.5 py-2.5 text-sm leading-relaxed">
+        <div className="bg-sunken flex flex-col items-start gap-1.5 rounded-lg p-3">
+          <div className="bg-raised shadow-contorno max-w-[90%] rounded-lg rounded-tl-sm px-3.5 py-2.5 text-sm leading-relaxed">
             {previa || <span className="text-muted-foreground">O texto aparece aqui com os dados de exemplo.</span>}
           </div>
           {m.botoes.filter(Boolean).length > 0 && (

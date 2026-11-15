@@ -60,7 +60,7 @@ export function VitrineKit() {
 
 function Secao({ titulo, descricao, acao, children, className }: { titulo: string; descricao?: string; acao?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section aria-label={titulo} className={cn('bg-surface shadow-painel flex min-w-0 flex-col gap-3 rounded-[24px] p-4', className)}>
+    <section aria-label={titulo} className={cn('bg-surface shadow-painel flex min-w-0 flex-col gap-3 rounded-campo p-4', className)}>
       <header className="flex flex-wrap items-start gap-2">
         <div className="min-w-0 grow basis-40">
           <h2 className="text-base font-medium">{titulo}</h2>
@@ -246,7 +246,7 @@ function ConversaInterna() {
     <Secao titulo="Conversa interna · Geral" descricao="Mensagem interna nunca se apaga (nem pelo Administrador). Editar guarda a versão anterior, visível para quem participa.">
       <ul className="flex flex-col gap-2">
         {doGeral.map((m) => (
-          <li key={m.id} className="bg-raised shadow-cartao flex flex-col gap-1 rounded-[14px] p-2.5 text-sm">
+          <li key={m.id} className="bg-raised shadow-cartao flex flex-col gap-1 rounded-md p-2.5 text-sm">
             <div className="flex items-center gap-2 text-xs">
               <span className="font-medium">{nome(m.autor_id)}</span>
               {m.editada_em && (
@@ -305,7 +305,7 @@ function Obrigacoes() {
         desabilitado={!repos.obrigacoes.pode('atualizar', { gera_tarefa_para_setor: 'fiscal' })}
         onReordenar={(ids) => executar(() => repos.obrigacoes.reordenar(ids))}
         render={(o) => (
-          <div className={cn('bg-raised shadow-cartao flex items-center gap-2 rounded-[12px] px-3 py-2 text-sm', o.cancelada_em && 'opacity-60')}>
+          <div className={cn('bg-raised shadow-cartao flex items-center gap-2 rounded-md px-3 py-2 text-sm', o.cancelada_em && 'opacity-60')}>
             <span className="min-w-0 flex-1">
               <span className={cn('block', o.cancelada_em && 'line-through')}>{o.nome}</span>
               <span className="text-muted-foreground block text-xs">
@@ -359,7 +359,7 @@ function Convites() {
       {convites.length ? (
         <ul className="flex flex-col gap-1.5">
           {convites.map((c) => (
-            <li key={c.id} className="bg-raised shadow-cartao flex items-center gap-2 rounded-[12px] px-3 py-2 text-sm" data-convite={c.destino}>
+            <li key={c.id} className="bg-raised shadow-cartao flex items-center gap-2 rounded-md px-3 py-2 text-sm" data-convite={c.destino}>
               <span className="min-w-0 flex-1 truncate">{c.destino}</span>
               <Badge variant="outline">{c.setores_propostos?.map((s) => rotuloSetorCurto[s as SetorIntegrante] ?? s).join(', ') || 'sem setor'}</Badge>
               <SePode ferramenta="conta.usuario.salvar">
@@ -415,7 +415,7 @@ function Estados() {
           </button>
         ))}
       </div>
-      <div className="bg-raised/60 rounded-[16px]">
+      <div className="bg-raised/60 rounded-lg">
         {qual === 'vazio' && <EstadoVazio icone={TrayIcon} titulo="Nada por aqui" descricao="Quando houver itens, eles aparecem nesta lista." acao={<Button size="sm" variant="outline" className="rounded-full">Criar o primeiro</Button>} />}
         {qual === 'carregando' && <Carregando linhas={3} className="p-4" />}
         {qual === 'erro' && <EstadoErro descricao="O serviço não respondeu (falha simulada)." onTentar={() => setQual('carregando')} />}
@@ -461,7 +461,7 @@ function ServicosSimulados() {
         {catalogoServicos.map((s) => {
           const r = resultados[s.id]
           return (
-            <li key={s.id} className="bg-raised shadow-cartao flex flex-col gap-2 rounded-[16px] p-3 text-sm" data-servico={s.id}>
+            <li key={s.id} className="bg-raised shadow-cartao flex flex-col gap-2 rounded-lg p-3 text-sm" data-servico={s.id}>
               <div className="flex items-start gap-2">
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">{s.nome}</span>
@@ -477,7 +477,7 @@ function ServicosSimulados() {
               {r?.carregando && <Carregando rotulo="Chamando" className="py-2" />}
               {r?.erro && <p className="text-destructive-text text-xs">{r.erro}</p>}
               {r?.r && (
-                <div className="bg-sunken/70 flex flex-col gap-1 rounded-[10px] p-2">
+                <div className="bg-sunken/70 flex flex-col gap-1 rounded-sm p-2">
                   <div className="flex items-center gap-2">
                     {r.r.demonstracao && <SeloDemonstracao fonte={r.r.fonte} />}
                     <span className="text-muted-foreground text-xs">{r.r.latencia_ms} ms</span>

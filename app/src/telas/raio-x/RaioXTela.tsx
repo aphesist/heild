@@ -304,7 +304,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                 <TituloBloco descricao="Como cada departamento está organizado hoje, em % das pastas de cliente.">Estrutura por departamento</TituloBloco>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {estrutura.map((e) => (
-                    <li key={e.depto} className="bg-sunken/50 flex flex-col gap-1.5 rounded-[14px] p-3">
+                    <li key={e.depto} className="bg-sunken/50 flex flex-col gap-1.5 rounded-md p-3">
                       <span className="text-sm font-medium">{e.depto}</span>
                       {e.jeitos.map(([j, pct]) => (
                         <span key={j} className="flex flex-col gap-0.5 text-xs">
@@ -342,7 +342,7 @@ export function RaioXTela({ onFechar }: { onFechar: () => void }) {
                 <TituloBloco descricao="Pastas reconhecidas como de um órgão (pelo dicionário).">Órgãos</TituloBloco>
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {orgaos.map((o) => (
-                    <li key={o.nome} className="bg-sunken/50 flex justify-between gap-3 rounded-[12px] px-3 py-2 text-sm">
+                    <li key={o.nome} className="bg-sunken/50 flex justify-between gap-3 rounded-md px-3 py-2 text-sm">
                       {o.nome} <span className="text-muted-foreground tabular-nums">{o.pastas}</span>
                     </li>
                   ))}
@@ -394,7 +394,7 @@ function DicionarioEditavel({ d, podeEditar, onMudar }: { d: Dicionario; podeEdi
           <div key={g} className="flex flex-col gap-2">
             <span className="text-sm font-medium">{rotulo}</span>
             {d[g].map((item) => (
-              <div key={item.nome} className="bg-sunken/50 flex flex-col gap-1.5 rounded-[12px] p-2.5">
+              <div key={item.nome} className="bg-sunken/50 flex flex-col gap-1.5 rounded-md p-2.5">
                 <span className="flex items-center justify-between gap-2 text-sm">
                   {item.nome}
                   {podeEditar && (
