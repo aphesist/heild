@@ -184,7 +184,7 @@ function Alternar({ rotulo, ligado, onMudar }: { rotulo: string; ligado: boolean
 }
 
 /** Colunas da lista de tarefas: o texto trunca; prazo, origem e estado têm o tamanho do conteúdo (nada invade o vizinho). */
-const colunasTarefas: ColunaLista[] = [
+export const colunasTarefas: ColunaLista[] = [
   { largura: 'conteudo' },
   { rotulo: 'Tarefa', largura: 'fluida' },
   { rotulo: 'Atividade', largura: '9rem', largo: true },
@@ -195,7 +195,7 @@ const colunasTarefas: ColunaLista[] = [
 ]
 
 /** Linha com pré-visualização (não inicia o tempo) e ação de um toque. */
-function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: { t: TarefaE; cliente?: string; filhas: TarefaE[]; aberta: boolean; onPrevia: () => void; onAbrir: () => void }) {
+export function LinhaTarefa({ t, cliente, filhas, aberta, onPrevia, onAbrir }: { t: TarefaE; cliente?: string; filhas: TarefaE[]; aberta: boolean; onPrevia: () => void; onAbrir: () => void }) {
   const executar = useAcao()
   const fluxos = useFluxos()
   const cartao = cartaoPendenteE(t)

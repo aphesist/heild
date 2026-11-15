@@ -109,6 +109,8 @@ export function CampoTexto({
   min?: number
   max?: number
   'aria-label'?: string
+  disabled?: boolean
+  readOnly?: boolean
 }) {
   return <input id={id} type={tipo} value={valor} onChange={(e) => onMudar(e.target.value)} placeholder={placeholder} className={cn(baseControle, 'h-10', mono && 'font-mono', className)} {...resto} />
 }

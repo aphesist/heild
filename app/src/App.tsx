@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { LojaProvider } from '@/ambiente/loja'
 import { PainelLab, type Visao } from '@/ambiente/PainelLab'
 import { SessaoProvider, useSessaoBruta } from '@/ambiente/sessao'
@@ -15,6 +15,10 @@ import { ConfirmarProvider } from '@/components/kit/confirmar'
 import { irParaPagina, paginaDoHash, useHash } from '@/nucleo/rotas'
 import { VitrineKit } from '@/telas/VitrineKit'
 import { FaixaVerComo } from '@/ambiente/ver-como'
+import { lerParams } from '@/lab/parametros'
+
+// O UI Lab carrega à parte: não pesa no sistema.
+const UiLab = lazy(() => import('@/lab/UiLab').then((m) => ({ default: m.UiLab })))
 
 /**
  * `npm run app` e a página publicada: o escritório de demonstração inteiro.
@@ -36,7 +40,10 @@ function Escritorios({ modo, setModo }: { modo: ModoCor; setModo: (m: ModoCor | 
   const [temaEscolhido, setTemaId] = usePreferencia<string | null>(`ui-lab:tema:${escritorio.id}`, null)
   const temaId = temaEscolhido ?? (escritorio.id === 'esc-horizonte' ? 'horizonte' : temas[0].id)
   // A página sai do endereço: #/app é o app do cliente, #/kit a vitrine do kit, o resto é o sistema.
-  const pagina = paginaDoHash(useHash())
+  const hash = useHash()
+  const pagina = paginaDoHash(hash)
+  // No UI Lab, o tema e o modo vêm do endereço (cada quadro de largura tem os seus).
+  const lab = pagina === 'lab' ? lerParams(hash) : null
   const visao: Visao = pagina === 'app' ? 'cliente' : 'escritorio'
   const setVisao = (v: Visao) => irParaPagina(v === 'cliente' ? 'app' : 'sistema')
   const [pessoaApp, setPessoaApp] = useState<string | null>(null)
@@ -57,18 +64,23 @@ function Escritorios({ modo, setModo }: { modo: ModoCor; setModo: (m: ModoCor | 
     setTemaId(null)
     setGeracao((g) => g + 1)
   }
-  const tema = temas.find((t) => t.id === temaId) ?? temas[0]
+  const tema = temas.find((t) => t.id === (lab?.tema || temaId)) ?? temas[0]
+  const modoTela = lab ? lab.modo : modo
   // No app do cliente, quem age é a pessoa do cliente (as ferramentas expostas ao cliente).
   const contextoApp = useMemo<Contexto | null>(() => (visao === 'cliente' ? { ator: { tipo: 'pessoa_cliente', nome: pessoaApp ?? 'Cliente' }, origem: 'tela' } : null), [visao, pessoaApp])
 
   return (
-    <ThemeProvider tema={tema} modo={modo} onTema={setTemaId}>
+    <ThemeProvider tema={tema} modo={modoTela} onTema={setTemaId}>
       <SessaoProvider key={`${escritorio.id}-${geracao}`} contextoExterno={contextoApp}>
         <LojaProvider>
           <ConfirmarProvider>
-            {pagina === 'kit' ? <VitrineKit /> : visao === 'escritorio' ? <Escritorio onAlternarModo={() => setModo((m) => (m === 'claro' ? 'escuro' : 'claro'))} /> : <MolduraCliente pessoa={pessoaApp} onPessoa={setPessoaApp} onEscritorio={() => setVisao('escritorio')} />}
-            <FaixaVerComo />
-            <PainelLab temaId={temaId} onTema={setTemaId} modo={modo} onModo={setModo} visao={visao} onVisao={setVisao} pessoaApp={pessoaApp} onPessoaApp={setPessoaApp} onReiniciar={reiniciarTudo} />
+            {pagina === 'lab' ? (
+              <Suspense fallback={null}>
+                <UiLab />
+              </Suspense>
+            ) : pagina === 'kit' ? <VitrineKit /> : visao === 'escritorio' ? <Escritorio onAlternarModo={() => setModo((m) => (m === 'claro' ? 'escuro' : 'claro'))} /> : <MolduraCliente pessoa={pessoaApp} onPessoa={setPessoaApp} onEscritorio={() => setVisao('escritorio')} />}
+            {!lab && <FaixaVerComo />}
+            {!lab && <PainelLab temaId={temaId} onTema={setTemaId} modo={modo} onModo={setModo} visao={visao} onVisao={setVisao} pessoaApp={pessoaApp} onPessoaApp={setPessoaApp} onReiniciar={reiniciarTudo} />}
           </ConfirmarProvider>
         </LojaProvider>
       </SessaoProvider>

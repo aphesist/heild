@@ -17,13 +17,14 @@ import type { Destino, IdModulo } from '@/ambiente/loja'
  *   #/arquivos?pasta=c1:Fiscal/2026       a pasta (cliente:caminho)
  *   #/app                                 o app do cliente
  *   #/kit                                 a vitrine do kit de interação
+ *   #/lab/ui                              o UI Lab (componentes e regras, com controles)
  *
  * A Plataforma escreve a base (módulo, aba, cliente...) e as gavetas
  * escrevem o item aberto (tarefa, ficha); quem navega por link lê daqui.
  */
 
 const modulos: IdModulo[] = ['inicio', 'painel', 'clientes', 'crm', 'timesheet', 'financeiro', 'arquivos', 'bpo', 'config', 'interna']
-export type Pagina = 'sistema' | 'app' | 'kit'
+export type Pagina = 'sistema' | 'app' | 'kit' | 'lab'
 
 export function destinoParaHash(d: Destino): string {
   const q = new URLSearchParams()
@@ -69,6 +70,7 @@ export function hashParaDestino(hash: string): Destino | null {
 export function paginaDoHash(hash = typeof window === 'undefined' ? '' : window.location.hash): Pagina {
   if (/^#\/app(\/|$|\?)/.test(hash)) return 'app'
   if (/^#\/kit(\/|$|\?)/.test(hash)) return 'kit'
+  if (/^#\/lab(\/|$|\?)/.test(hash)) return 'lab'
   return 'sistema'
 }
 
