@@ -30,7 +30,7 @@ export const padroes: Record<string, ItemGrade[]> = {
   'notas-carteira': a('carteira-captura:XL manifestacao:M carteira-eventos:G obrigacoes-setor:G acoes:G tarefas:XL relatorios:M'),
   'fiscal-carteira': a('carteira-fiscal:XL guias:G caixas:G obrigacoes-setor:G irpf-carteira:G pedir:M relatorios:M acoes:G tarefas:XL'),
   'dp-carteira': a('dp-visao:L obrigacoes-setor:M carteira-folha:XL carteira-rescisao:XL acoes:G tarefas:XL relatorios:G'),
-  'contabil-carteira': a('kanban:XL minha-fila:G fila-assinatura:G carteira-fechamento:XL obrigacoes-setor:G pedir:M relatorios:M acoes:G tarefas:XL'),
+  'contabil-carteira': a('kanban:XL minha-fila:G fila-assinatura:G carteira-fechamento:XL obrigacoes-setor:G relatorios:M acoes:G tarefas:XL pedir:M'),
   'consultoria-carteira': a('carteira-consultoria:XL avulsos:G pedir:G acoes:G tarefas:XL relatorios:G'),
 }
 
