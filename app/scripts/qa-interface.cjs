@@ -4,7 +4,7 @@
 //   texto     texto que vaza do card, da tela ou é cortado sem reticências
 //   toque     alvo de toque menor que 44px (só celular e tablet, com toque)
 //   vazio     card vazio ou widget com mais da metade da área sem conteúdo
-//   buraco    vão grande na grade (célula vazia no meio, ou card bem mais baixo que a linha)
+//   buraco    vão grande na grade (célula vazia no meio, com widget embaixo; ou card bem mais baixo que a linha)
 //
 // Uso: app servido em http://localhost:6200/ (npx vite --port 6200 --strictPort) e
 //      node scripts/qa-interface.cjs <pasta-dos-prints> [filtro-de-rota] [larguras]
@@ -225,6 +225,10 @@ function medir(toque) {
     const gb = g.getBoundingClientRect()
     if (gb.height < 150) continue
     const rs = filhos.map((k) => k.getBoundingClientRect())
+    // Grade de widgets (altura pelo conteúdo, PADRAO_DE_INTERFACE.md, 5): a sobra da última faixa é o fim natural;
+    // só conta quando passa de uma célula (172px com o vão). Nas outras grades, qualquer vão acima de 64px.
+    const gradeWidgets = !!g.style.gridAutoRows
+    const limiteVao = gradeWidgets ? 172 : 64
     // Vão sob o card (linhas de alturas diferentes, sem nada abaixo na mesma coluna).
     filhos.forEach((k, i) => {
       const kb = rs[i]
@@ -233,7 +237,7 @@ function medir(toque) {
       const vizinhos = rs.filter((o, j) => j !== i && o.top < kb.bottom && o.bottom > kb.top)
       const fundoLinha = Math.max(kb.bottom, ...vizinhos.map((o) => o.bottom))
       const vao = Math.min(fundoLinha, gb.bottom) - kb.bottom
-      if (vao > 64 && kb.width > 100) r.buraco.push(`${Math.round(vao)}px sob ${desc(k)}`)
+      if (vao > limiteVao && kb.width > 100) r.buraco.push(`${Math.round(vao)}px sob ${desc(k)}`)
     })
     // Coluna esticada: o filho ocupa a linha toda, mas o conteúdo dele acaba bem antes (vão dentro da coluna ou do card).
     filhos.forEach((k, i) => {
@@ -247,9 +251,11 @@ function medir(toque) {
       const card = ehCard(k)
       if (card ? vao > 160 && vao > kb.height * 0.35 : vao > 96 && vao > kb.height * 0.25) r.buraco.push(`${Math.round(vao)}px vazios no fim de ${card ? 'card esticado' : 'coluna'} ${desc(k)}`)
     })
-    // Célula vazia no meio (grade de widgets): mede por faixas de 1 coluna × 1 linha.
+    // Célula vazia no meio (grade de widgets): mede por faixas de 1 coluna × 1 linha da grade; vazia no meio é a que
+    // tem widget embaixo na mesma coluna (a sobra do fim não conta). Com linhas de 4px, soma a área e conta em células
+    // de 156px de altura.
     const linhas = cs.gridTemplateRows.split(' ').filter((x) => /px$/.test(x)).map(parseFloat)
-    if (linhas.length >= 2 && g.style.gridAutoRows) {
+    if (linhas.length >= 2 && gradeWidgets) {
       const gap = parseFloat(cs.columnGap) || 0
       const rgap = parseFloat(cs.rowGap) || 0
       const xs = []
@@ -258,14 +264,15 @@ function medir(toque) {
       const ys = []
       let y = gb.top + parseFloat(cs.paddingTop)
       for (const l of linhas) { ys.push([y, y + l]); y += l + rgap }
-      const ultima = Math.max(...rs.map((q) => ys.findIndex(([a, z]) => q.bottom <= z + 2)))
-      let vazias = 0
-      ys.slice(0, ultima).forEach(([y0, y1]) => xs.forEach(([x0, x1]) => {
+      let area = 0
+      ys.forEach(([y0, y1]) => xs.forEach(([x0, x1]) => {
         const cx = (x0 + x1) / 2
         const cy = (y0 + y1) / 2
-        if (!rs.some((q) => cx > q.left && cx < q.right && cy > q.top && cy < q.bottom)) vazias++
+        if (rs.some((q) => cx > q.left && cx < q.right && cy > q.top && cy < q.bottom)) return
+        if (rs.some((q) => cx > q.left && cx < q.right && q.top >= y1 - 1)) area += (y1 - y0 + rgap) * (x1 - x0)
       }))
-      if (vazias) r.buraco.push(`${vazias} célula(s) vazia(s) no meio da grade de widgets`)
+      const vazias = Math.round(area / ((xs[0][1] - xs[0][0]) * 172) * 10) / 10
+      if (vazias >= 0.5) r.buraco.push(`${String(vazias).replace('.', ',')} célula(s) vazia(s) no meio da grade de widgets`)
     }
   }
   return r
