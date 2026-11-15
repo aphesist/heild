@@ -42,26 +42,34 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
       <article
         aria-label={def.titulo}
         className={cn(
-          'bg-surface shadow-cartao relative flex h-full min-h-0 flex-col gap-3 rounded-[24px] p-4 transition-shadow',
+          'group/widget bg-surface shadow-cartao rounded-cartao relative flex h-full min-h-0 flex-col gap-3 p-4 transition-shadow',
           editando && 'widget-tremendo cursor-grab touch-none select-none active:cursor-grabbing',
           arrastando && 'opacity-40',
           className,
         )}
         {...(editando ? alca : {})}
       >
-        {/* A ação do cabeçalho desce para a linha de baixo quando não cabe ao lado do título (celular). */}
-        <header className="flex min-h-6 shrink-0 flex-wrap items-center gap-x-2 gap-y-1">
-          {Icone && <Icone weight="duotone" className="text-muted-foreground size-[18px] shrink-0" />}
-          <h3 className="min-w-0 truncate text-sm font-medium" title={def.titulo}>
-            {def.titulo}
-          </h3>
-          <span className="min-w-0 flex-1 truncate">
-            {def.atividades && usado !== 'P' && !editando && <code className="text-muted-foreground hidden text-[11px] sm:inline">{def.atividades}</code>}
-          </span>
-          {!editando && def.acao}
-          {editando && <ArrowsOutCardinalIcon className="text-muted-foreground size-4" aria-hidden />}
+        {/*
+          Cabeçalho: ícone e título numa linha só (o título trunca, nunca empurra o ícone para cima);
+          a ação fica à direita e desce para a linha de baixo só quando não cabe (celular, P).
+          Os IDs do mapa são para quem revisa o wireframe: aparecem ao passar o mouse, não competem com o título.
+        */}
+        <header className="flex min-h-6 shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
+          <div className="flex min-w-0 flex-[1_1_9rem] items-center gap-2">
+            {Icone && <Icone className="text-muted-foreground size-[18px] shrink-0" aria-hidden />}
+            <h3 className="min-w-0 truncate text-sm font-medium" title={def.atividades ? `${def.titulo} · ${def.atividades}` : def.titulo}>
+              {def.titulo}
+            </h3>
+            {def.atividades && usado !== 'P' && !editando && (
+              <code className="text-muted-foreground hidden min-w-0 shrink-[100] truncate font-mono text-xs opacity-0 transition-opacity duration-200 group-hover/widget:opacity-100 group-focus-within/widget:opacity-100 sm:inline">
+                {def.atividades}
+              </code>
+            )}
+          </div>
+          {!editando && def.acao && <div className="ml-auto flex shrink-0 items-center">{def.acao}</div>}
+          {editando && <ArrowsOutCardinalIcon className="text-muted-foreground ml-auto size-4" aria-hidden />}
         </header>
-        <div className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-x-hidden overflow-y-auto', editando && 'pointer-events-none')}>{def.conteudo(usado)}</div>
+        <div data-corpo-widget className={cn('area-rolagem-dupla @container min-h-0 flex-1 overflow-x-hidden overflow-y-auto', editando && 'pointer-events-none')}>{def.conteudo(usado)}</div>
 
         {editando && (
           <>
@@ -89,7 +97,7 @@ export function Widget({ def, tamanho, conteudo, editando, arrastando, onRemover
                     aria-checked={t === tamanho}
                     title={dimensoes[t].rotulo}
                     onClick={() => onTamanho?.(t)}
-                    className={cn('h-6 min-w-7 cursor-pointer rounded-full px-1.5 text-[11px] font-medium', t === tamanho ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
+                    className={cn('h-6 min-w-7 cursor-pointer rounded-full px-1.5 text-xs font-medium', t === tamanho ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
                   >
                     {t}
                   </button>

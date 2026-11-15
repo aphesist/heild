@@ -15,6 +15,19 @@ export const dimensoes: Record<TamanhoWidget, { colunas: number; linhas: number;
   XL: { colunas: 4, linhas: 2, rotulo: 'Extra' },
 }
 
+/**
+ * A grade mede a altura em módulos de 4px (`--modulo-widget`, o `espaco-1` do
+ * design system), sem vão entre linhas: o vão de 16px entre widgets empilhados
+ * é o respiro embaixo de cada item da grade. Assim o card tem a altura do
+ * conteúdo (sobra no máximo 3px), e as alturas por tamanho continuam múltiplos
+ * de célula: uma célula (156px) e o vão são 43 módulos; em tela baixa (136px),
+ * 38. PADRAO_DE_INTERFACE.md, 3.
+ */
+export const MODULO_PX = 4
+export const VAO_PX = 16
+/** Módulos de uma célula com o vão de baixo. */
+export const modulosPorCelula = (celulaPx = 156) => Math.round((celulaPx + VAO_PX) / MODULO_PX)
+
 /** Definição de um widget do catálogo de uma tela. */
 export interface DefWidget {
   id: string
@@ -31,12 +44,14 @@ export interface DefWidget {
   /** Conteúdo; recebe o tamanho atual para se adaptar. */
   conteudo: (tamanho: TamanhoWidget) => ReactNode
   /**
-   * Área de trabalho (kanban, tabela grande, calendário): no tamanho XL, ocupa
-   * a largura inteira da grade (PADRAO_DE_INTERFACE.md, 3).
+   * Largura mínima do conteúdo no tamanho XL, em rem (kanban: colunas × 15rem;
+   * calendário da semana: 7 dias × 9rem). O widget ocupa as colunas da grade
+   * que precisar para chegar a ela, até a largura inteira: a largura inteira
+   * vem do conteúdo, não de uma regra (PADRAO_DE_INTERFACE.md, 4).
    */
-  larguraTotal?: boolean
-  /** Altura mínima em células no tamanho XL, para quem precisa de mais altura (ex.: kanban com 3). */
-  linhasMinimas?: number
+  larguraMinima?: number
+  /** Teto de altura em células no tamanho XL, para área de trabalho (kanban, calendário). Padrão: 2. */
+  linhasMaximas?: number
 }
 
 /** Um widget posto na grade: qual e em que tamanho. A ordem do array é a posição. */
@@ -53,59 +68,87 @@ export function tamanhoValido(def: Pick<DefWidget, 'tamanhos'>, pedido: TamanhoW
 }
 
 /**
- * Vão que o widget ocupa numa grade de `colunas`. Quando a grade é mais
- * estreita que o widget (L e XL no celular), ele ganha altura em vez de ficar
- * achatado: L vira 2×2, XL vira 2×3.
+ * Vão máximo do widget numa grade de `colunas`: colunas e teto de altura em
+ * módulos. Quando a grade é mais estreita que o widget (L e XL no celular),
+ * ele ganha altura em vez de ficar achatado: L vira 2×2 células, XL 2×3.
+ * `colunasMinimas` é o que a `larguraMinima` pede nesta grade (só no XL).
  */
-export function vao(tamanho: TamanhoWidget, colunas: number, def?: Pick<DefWidget, 'larguraTotal' | 'linhasMinimas'>) {
+export function vao(tamanho: TamanhoWidget, colunas: number, def?: Pick<DefWidget, 'linhasMaximas'>, colunasMinimas = 0, mpc = modulosPorCelula()) {
   const d = dimensoes[tamanho]
-  // Mais estreita que o widget (L e XL no celular): ganha uma linha por faixa extra de largura (L 2×2, XL 2×3).
   const v = d.colunas <= colunas ? { colunas: d.colunas, linhas: d.linhas } : { colunas, linhas: d.linhas + Math.ceil(d.colunas / colunas) - 1 }
-  if (tamanho === 'XL' && def?.larguraTotal) v.colunas = colunas
-  if (tamanho === 'XL' && def?.linhasMinimas) v.linhas = Math.max(v.linhas, def.linhasMinimas)
-  return v
+  if (tamanho === 'XL') {
+    v.colunas = Math.min(colunas, Math.max(v.colunas, colunasMinimas))
+    if (def?.linhasMaximas) v.linhas = Math.max(v.linhas, def.linhasMaximas)
+  }
+  return { colunas: v.colunas, linhas: v.linhas * mpc }
 }
 
-/** Posição de um widget na grade (base 0), com o tamanho que o conteúdo usa depois de preencher. */
+/** Posição de um widget na grade (base 0, linhas em módulos de 4px, com o vão de baixo) e o tamanho que o conteúdo usa. */
 export interface Posicao {
   coluna: number
   linha: number
   colunas: number
   linhas: number
-  /** Tamanho que o conteúdo recebe: o maior que o widget aceita e que cabe no espaço final. */
+  /** Tamanho que o conteúdo recebe: o escolhido, ou o maior aceito que cabe na largura (L e XL no celular). */
   efetivo: TamanhoWidget
 }
 
+/** O que a grade sabe medir para arranjar. */
+export interface Medidas {
+  /** Altura que o conteúdo de cada widget pede, em módulos (sem medida, vale o teto do tamanho). */
+  alturas?: ReadonlyMap<string, number>
+  /** Colunas que a `larguraMinima` de cada widget pede nesta grade. */
+  colunasMinimas?: ReadonlyMap<string, number>
+  /** Módulos de uma célula (43; 38 em tela baixa). */
+  modulosPorCelula?: number
+}
+
 /**
- * Arranjo da grade (regra anti-buraco, PADRAO_DE_INTERFACE.md, 5):
- * 1. coloca cada widget no primeiro lugar livre, na ordem (o `dense` do CSS);
- * 2. se `preencher`, as faixas de linhas que só têm widgets da mesma altura
- *    repartem as colunas que sobram entre eles (a linha fecha sem vão);
- * 3. o vão que restar é coberto pelo vizinho: o da esquerda cresce para a
- *    direita, o da direita para a esquerda, e o de cima desce quando ganha um
- *    tamanho que o widget aceita (M vira G, L vira XL);
- * 4. se ainda sobrar vão embaixo de um widget, ele desce até a linha seguinte
- *    ocupada (o espaço fica dentro do card, não como buraco na grade).
- * O conteúdo recebe o maior tamanho aceito que cabe no espaço final, então um
- * M que cresceu para 4 colunas mostra o seu L.
+ * Arranjo da grade (regra anti-buraco por ordem e empacotamento,
+ * PADRAO_DE_INTERFACE.md, 5). O tamanho do widget vem do conteúdo, nunca do
+ * vão a fechar:
+ * 1. a largura é a do tamanho escolhido (ou a que a `larguraMinima` pede);
+ *    a altura é a que o conteúdo pede, entre uma célula e o teto do tamanho;
+ *    o que passa do teto por até meia célula (a última linha de sugestões, o
+ *    rodapé de uma lista) ganha essa meia célula em vez de ser cortado; passou
+ *    mais que isso, o corpo rola por dentro;
+ * 2. cada widget vai para o primeiro lugar livre, de cima para baixo e da
+ *    esquerda para a direita, na ordem da lista (a ordem é a prioridade da
+ *    tarefa; o que vem depois e cabe num vão de cima sobe para ele, como o
+ *    `grid-auto-flow: dense`);
+ * 3. o widget que tem mais conteúdo do que o teto mostra (ele pede) desce
+ *    para o espaço livre logo abaixo dele, até a altura que pede;
+ * 4. acerto de faixa: se sob um widget sobra no máximo meia célula até o
+ *    próximo widget ou o fim da grade, ele desce essa sobra e o fundo fica
+ *    alinhado com o vizinho. Nunca mais que isso: sobra maior fica como está,
+ *    e a correção é a ordem do arranjo padrão.
+ * Nenhum widget cresce para o lado para fechar vão.
  */
-export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWidget }[], colunas: number, preencher: boolean): Map<string, Posicao> {
+export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWidget }[], colunas: number, medidas: Medidas = {}): Map<string, Posicao> {
   const grade: (string | null)[][] = []
   const linha = (r: number) => (grade[r] ??= Array<string | null>(colunas).fill(null))
   const livre = (r: number, c: number) => c >= 0 && c < colunas && linha(r)[c] === null
   const marcar = (p: Omit<Posicao, 'efetivo'>, id: string | null) => {
     for (let r = p.linha; r < p.linha + p.linhas; r++) for (let c = p.coluna; c < p.coluna + p.colunas; c++) linha(r)[c] = id
   }
+  const mpc = medidas.modulosPorCelula ?? modulosPorCelula()
+  // Meia célula: o quanto se dá a mais a quem passa pouco do teto e o quanto um widget desce para alinhar o fundo.
+  const meia = Math.floor(mpc / 2)
   const pos = new Map<string, Omit<Posicao, 'efetivo'>>()
+  const pede = new Map<string, number>()
   for (const it of itens) {
-    const v = vao(it.tamanho, colunas, it.def)
+    const v = vao(it.tamanho, colunas, it.def, medidas.colunasMinimas?.get(it.id), mpc)
     const w = Math.min(v.colunas, colunas)
+    const medida = medidas.alturas?.get(it.id)
+    const teto = medida !== undefined && medida <= v.linhas + meia ? medida : v.linhas
+    const h = medida === undefined ? v.linhas : Math.max(mpc, Math.min(teto, medida))
+    if (medida !== undefined) pede.set(it.id, medida)
     for (let r = 0; !pos.has(it.id); r++) {
       for (let c = 0; c + w <= colunas; c++) {
         let cabe = true
-        for (let rr = r; rr < r + v.linhas && cabe; rr++) for (let cc = c; cc < c + w && cabe; cc++) cabe = livre(rr, cc)
+        for (let rr = r; rr < r + h && cabe; rr++) for (let cc = c; cc < c + w && cabe; cc++) cabe = livre(rr, cc)
         if (cabe) {
-          const p = { coluna: c, linha: r, colunas: w, linhas: v.linhas }
+          const p = { coluna: c, linha: r, colunas: w, linhas: h }
           pos.set(it.id, p)
           marcar(p, it.id)
           break
@@ -114,91 +157,45 @@ export function arranjar(itens: { id: string; tamanho: TamanhoWidget; def: DefWi
     }
   }
   const ultima = Math.max(0, ...[...pos.values()].map((p) => p.linha + p.linhas))
-  if (preencher) {
-    // 2. Faixas uniformes: todos os widgets que tocam as linhas [r, r+h) começam em r e têm altura h.
-    for (let r = 0; r < ultima; ) {
-      const naLinha = [...new Set(linha(r).filter((x): x is string => !!x))].map((id) => ({ id, p: pos.get(id)! }))
-      const h = naLinha[0]?.p.linhas ?? 1
-      const uniforme = naLinha.length > 0 && naLinha.every(({ p }) => p.linha === r && p.linhas === h)
-      const tocam = new Set<string>()
-      for (let rr = r; rr < r + h; rr++) linha(rr).forEach((x) => x && tocam.add(x))
-      if (uniforme && tocam.size === naLinha.length) {
-        const ordem = naLinha.sort((a, b) => a.p.coluna - b.p.coluna)
-        let sobra = colunas - ordem.reduce((s, x) => s + x.p.colunas, 0)
-        for (let i = 0; sobra > 0; i = (i + 1) % ordem.length, sobra--) ordem[i].p.colunas++
-        let c = 0
-        for (const { id, p } of ordem) {
-          marcar(p, null)
-          p.coluna = c
-          c += p.colunas
-          marcar(p, id)
-        }
-      }
-      r += uniforme && tocam.size === naLinha.length ? h : 1
+  const linhaDeBaixoLivre = (p: Omit<Posicao, 'efetivo'>) => {
+    const r = p.linha + p.linhas
+    if (r >= ultima) return false
+    for (let c = p.coluna; c < p.coluna + p.colunas; c++) if (!livre(r, c)) return false
+    return true
+  }
+  // 3. Quem pede mais do que mostra desce para o espaço livre logo abaixo.
+  for (const it of itens) {
+    const p = pos.get(it.id)!
+    while ((pede.get(it.id) ?? 0) > p.linhas && linhaDeBaixoLivre(p)) {
+      p.linhas++
+      marcar(p, it.id)
     }
-    // 3. Vizinhos cobrem o que sobrou.
-    const colunaLivre = (p: Omit<Posicao, 'efetivo'>, c: number) => {
-      for (let r = p.linha; r < p.linha + p.linhas; r++) if (!livre(r, c)) return false
-      return true
-    }
-    for (let mudou = true; mudou; ) {
-      mudou = false
-      for (const [id, p] of pos) {
-        if (colunaLivre(p, p.coluna + p.colunas)) {
-          p.colunas++
-          marcar(p, id)
-          mudou = true
-        } else if (colunaLivre(p, p.coluna - 1)) {
-          p.coluna--
-          p.colunas++
-          marcar(p, id)
-          mudou = true
-        }
-      }
-    }
-    for (const it of itens) {
-      const p = pos.get(it.id)!
-      const embaixo = p.linha + p.linhas
-      if (embaixo >= ultima) continue
-      let tudoLivre = true
-      for (let c = p.coluna; c < p.coluna + p.colunas; c++) tudoLivre &&= livre(embaixo, c)
-      if (tudoLivre && tamanhoQueCabe(it.def, p.colunas, p.linhas + 1, it.tamanho) !== tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho)) {
-        p.linhas++
-        marcar(p, it.id)
-      }
-    }
-    // 4. O vão que ainda sobrar embaixo de um widget (nenhum vizinho cobre) vira altura dele: o espaço fica dentro do card, não na grade.
-    for (const it of itens) {
-      const p = pos.get(it.id)!
-      for (;;) {
-        const embaixo = p.linha + p.linhas
-        if (embaixo >= ultima) break
-        let tudoLivre = true
-        for (let c = p.coluna; c < p.coluna + p.colunas; c++) tudoLivre &&= livre(embaixo, c)
-        if (!tudoLivre) break
-        p.linhas++
-        marcar(p, it.id)
-      }
-    }
+  }
+  // 4. Acerto de faixa: até meia célula de sobra sob o widget vira altura dele.
+  for (const it of itens) {
+    const p = pos.get(it.id)!
+    let sobra = 0
+    while (sobra <= meia && linhaDeBaixoLivre({ ...p, linhas: p.linhas + sobra })) sobra++
+    if (sobra === 0 || sobra > meia) continue
+    p.linhas += sobra
+    marcar(p, it.id)
   }
   const final = new Map<string, Posicao>()
   for (const it of itens) {
     const p = pos.get(it.id)!
-    final.set(it.id, { ...p, efetivo: tamanhoQueCabe(it.def, p.colunas, p.linhas, it.tamanho) })
+    final.set(it.id, { ...p, efetivo: tamanhoQueCabe(it.def, p.colunas, it.tamanho) })
   }
   return final
 }
 
 /**
- * O maior tamanho aceito que cabe em colunas × linhas. Se só cabe um bem menor
- * que o espaço, fica o escolhido; mas se o escolhido nem cabe na largura (L no
- * celular), vale o que cabe: o conteúdo largo não vaza da grade estreita.
+ * O tamanho que o conteúdo recebe: o escolhido, se cabe na largura da grade;
+ * senão (L e XL no celular), o maior que o widget aceita e que cabe nela.
  */
-function tamanhoQueCabe(def: Pick<DefWidget, 'tamanhos'>, colunas: number, linhas: number, escolhido: TamanhoWidget): TamanhoWidget {
+function tamanhoQueCabe(def: Pick<DefWidget, 'tamanhos'>, colunas: number, escolhido: TamanhoWidget): TamanhoWidget {
+  if (dimensoes[escolhido].colunas <= colunas) return escolhido
   const area = (t: TamanhoWidget) => dimensoes[t].colunas * dimensoes[t].linhas
-  const cabem = def.tamanhos.filter((t) => dimensoes[t].colunas <= colunas && dimensoes[t].linhas <= linhas)
+  const cabem = def.tamanhos.filter((t) => dimensoes[t].colunas <= colunas)
   if (!cabem.length) return escolhido
-  const melhor = cabem.reduce((a, b) => (area(b) > area(a) || (area(b) === area(a) && b === escolhido) ? b : a))
-  if (area(melhor) < area(escolhido) && area(melhor) * 2 <= colunas * linhas && dimensoes[escolhido].colunas <= colunas) return escolhido
-  return melhor
+  return cabem.reduce((a, b) => (area(b) > area(a) ? b : a))
 }
