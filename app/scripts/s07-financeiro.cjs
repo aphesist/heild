@@ -347,7 +347,7 @@ const { chromium } = require('playwright')
   await p.getByRole('button', { name: 'Configurar' }).click()
   await p.getByRole('menuitem', { name: /Política de inadimplência/ }).click()
   await espera(300)
-  ok(await tem(/Aviso formal em D\+30/) && (await tem(/Pausa parcial em D\+45/)), 'S07-A47: política com aviso formal e pausa (nunca reter documento)')
+  ok(await tem(/Aviso formal\s*em D\+30/) && (await tem(/Pausa parcial\s*em D\+45/)), 'S07-A47: política com aviso formal e pausa (nunca reter documento)')
   await fecharGaveta()
 
   // Persistência: recarregar mantém o que foi feito

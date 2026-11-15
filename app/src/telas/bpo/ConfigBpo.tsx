@@ -1,14 +1,15 @@
-import { ArrowCounterClockwiseIcon, BankIcon, LockSimpleIcon, PencilSimpleIcon, PlugsConnectedIcon, ShieldCheckIcon } from '@phosphor-icons/react'
+import { ArrowCounterClockwiseIcon, BankIcon, LockSimpleIcon, PaperPlaneTiltIcon, PlugsConnectedIcon, ShieldCheckIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { useSessao } from '@/ambiente/sessao'
-import { EdicaoEmLinha, EstadoVazio, SePode, useAcao, useConfirmar, usePode } from '@/components/kit'
+import { EstadoVazio, SePode, useAcao, useConfirmar, usePode, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoEscolha, CampoTexto, GavetaFormulario } from '@/components/ui/formulario'
+import { Campo, CampoTexto, GavetaFormulario } from '@/components/ui/formulario'
 import { Orb } from '@/components/ui/orb'
 import { integrantes as integrantesBase } from '@/dados/exemplo'
 import { useAparencia } from '@/hooks/useAparencia'
 import { cn } from '@/lib/utils'
+import { banco } from '@/nucleo/banco'
 import type { BpoAlcada, BpoPerfil } from '@/nucleo/modelo/entidades'
 import { useTabela } from '@/nucleo/react'
 import { repos } from '@/nucleo/repositorios'
@@ -81,12 +82,20 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
   const edita = usePode('bpo.perfil.editar', { cliente_id: e.clienteId })
   const podeAlcada = usePode('alcada.alterar', { cliente_id: e.clienteId })
   const admin = usuario.papel === 'administrador'
-  const [gaveta, setGaveta] = useState<'erp' | 'banco' | 'alcadas' | 'escalonamento' | 'sla' | null>(null)
+  const [gaveta, setGaveta] = useState<'erp' | 'banco' | 'alcadas' | null>(null)
   const [modo, setModo] = useState<{ m: BpoPerfil['modo_pagamento']; teto: string } | null>(null)
   const tAlcada = useTabela('bpo_alcada')
   const historico = useMemo(() => tAlcada.filter((a) => a.cliente_id === e.clienteId).sort((a, b) => b.criado_em.localeCompare(a.criado_em)), [tAlcada, e.clienteId])
   const limites = limitesDa(e)
   const sla = regrasSlaDe(e)
+
+  /** SLA (10, 3.14): grava no perfil pelo mesmo caminho de antes, lendo o perfil atual (o "Desfazer" pode vir depois de outra mudança). */
+  const gravarSla = (patch: { meta?: number } & Partial<RegrasSla>, resumo: string) => {
+    const p = banco.obter('bpo_perfil', e.perfil.id) ?? e.perfil
+    const { meta, ...regras } = patch
+    const atuais = { ...slaPadrao, ...((p.extras?.s08c_sla ?? {}) as Partial<RegrasSla>) }
+    return repos.bpo.perfis.atualizar(p.id, { sla: { ...p.sla, meta: meta ?? p.sla.meta }, extras: { ...p.extras, s08c_sla: { ...atuais, ...regras } } }, { texto: `Atualizou o SLA de ${e.nome}: ${resumo}` })
+  }
 
   const proporModo = async (m: BpoPerfil['modo_pagamento'], teto?: number) => {
     const ok = await confirmar({ titulo: `Propor ${rotuloModoPagamento[m]}?`, descricao: 'O modo de pagamento só vale depois do aceite do sócio no app. Até lá, continua o atual. Quem propõe não confere nem aprova pagamentos desta empresa.', acao: 'Mandar para o aceite' })
@@ -108,7 +117,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
               edita && (
                 <SePode ferramenta="erp.conectar" alvo={{ cliente_id: e.clienteId }}>
                   <Button size="sm" variant="outline" className="rounded-full" onClick={() => setGaveta('erp')}>
-                    <PencilSimpleIcon /> Trocar
+                    <PlugsConnectedIcon /> Trocar
                   </Button>
                 </SePode>
               )
@@ -212,7 +221,7 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
             acao={
               podeAlcada && (
                 <Button size="sm" variant="outline" className="rounded-full" onClick={() => setGaveta('alcadas')}>
-                  <PencilSimpleIcon /> Propor
+                  <PaperPlaneTiltIcon /> Propor
                 </Button>
               )
             }
@@ -301,49 +310,28 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
           </div>
         </Caixa>
         <Caixa>
-          <TituloBloco
-            descricao="O relógio pausa quando a bola está com o cliente (cartão sem resposta, documento faltando) e volta na resposta."
-            acao={
-              edita && (
-                <Button size="sm" variant="outline" className="rounded-full" onClick={() => setGaveta('sla')}>
-                  <PencilSimpleIcon /> Editar
-                </Button>
-              )
-            }
-          >
-            SLA da empresa
-          </TituloBloco>
+          <TituloBloco descricao="O relógio pausa quando a bola está com o cliente (cartão sem resposta, documento faltando) e volta na resposta.">SLA da empresa</TituloBloco>
           <dl className="divide-border/70 divide-y">
-            <Propriedade rotulo="Meta do mês">{`${e.perfil.sla.meta}% no prazo · agora ${e.perfil.sla.mes}%`}</Propriedade>
-            <Propriedade rotulo="Captura">{`conta capturada em até ${sla.captura_h} h`}</Propriedade>
-            <Propriedade rotulo="Lote">{`enviado até ${sla.lote_antes_h} h antes do vencimento`}</Propriedade>
-            <Propriedade rotulo="Conciliação">{`até o dia ${sla.conciliacao_dia} útil do mês seguinte`}</Propriedade>
-            <Propriedade rotulo="Relatório">{`até o dia ${sla.relatorio_dia} do mês seguinte`}</Propriedade>
+            <Propriedade rotulo="Meta do mês">
+              <ValorEditavel rotulo="Meta de SLA do mês" valor={e.perfil.sla.meta} config={{ tipo: 'numero', min: 1, max: 100, unidade: '%' }} formatar={(n) => `${n}%`} desabilitado={!edita} className="tabular-nums" onMudar={(n) => gravarSla({ meta: n }, `meta ${n}% no prazo`)} /> no prazo · agora {e.perfil.sla.mes}%
+            </Propriedade>
+            <Propriedade rotulo="Captura">
+              conta capturada em até <ValorEditavel rotulo="Conta capturada em até" valor={sla.captura_h} config={{ tipo: 'numero', min: 1, unidade: 'h' }} desabilitado={!edita} className="tabular-nums" onMudar={(n) => gravarSla({ captura_h: n }, `conta capturada em até ${n} h`)} />
+            </Propriedade>
+            <Propriedade rotulo="Lote">
+              enviado até <ValorEditavel rotulo="Lote enviado antes do vencimento" valor={sla.lote_antes_h} config={{ tipo: 'numero', min: 1, unidade: 'h' }} desabilitado={!edita} className="tabular-nums" onMudar={(n) => gravarSla({ lote_antes_h: n }, `lote enviado até ${n} h antes do vencimento`)} /> antes do vencimento
+            </Propriedade>
+            <Propriedade rotulo="Conciliação">
+              até o dia <ValorEditavel rotulo="Conciliação até o dia útil" valor={sla.conciliacao_dia} config={{ tipo: 'numero', min: 1 }} desabilitado={!edita} className="tabular-nums" onMudar={(n) => gravarSla({ conciliacao_dia: n }, `conciliação até o dia ${n} útil`)} /> útil do mês seguinte
+            </Propriedade>
+            <Propriedade rotulo="Relatório">
+              até o dia <ValorEditavel rotulo="Relatório até o dia" valor={sla.relatorio_dia} config={{ tipo: 'numero', min: 1 }} desabilitado={!edita} className="tabular-nums" onMudar={(n) => gravarSla({ relatorio_dia: n }, `relatório até o dia ${n}`)} /> do mês seguinte
+            </Propriedade>
           </dl>
         </Caixa>
         <Caixa className="lg:col-span-2">
-          <TituloBloco
-            descricao="O que acontece com o lote sem resposta. Pagar nunca é automático: no fim da cadeia só há alerta."
-            acao={
-              edita && (
-                <Button size="sm" variant="outline" className="rounded-full" onClick={() => setGaveta('escalonamento')}>
-                  <PencilSimpleIcon /> Editar
-                </Button>
-              )
-            }
-          >
-            Janela e escalonamento do lote
-          </TituloBloco>
-          <ol className="grid gap-2 sm:grid-cols-5" aria-label="Passos do escalonamento">
-            {passosEscalonamento(e).map((p, i) => (
-              <li key={i} className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
-                <span className="text-muted-foreground text-xs">
-                  {i + 1}. {p.quando}
-                </span>
-                {p.texto}
-              </li>
-            ))}
-          </ol>
+          <TituloBloco descricao="O que acontece com o lote sem resposta. Pagar nunca é automático: no fim da cadeia só há alerta. O sócio e o Gestor do BPO sempre recebem o alerta da véspera e o do vencido.">Janela e escalonamento do lote</TituloBloco>
+          <PassosEscalonamento e={e} edita={edita} />
         </Caixa>
       </div>
       <ParametrosEscritorio />
@@ -351,8 +339,6 @@ function ConfigEmpresa({ e }: { e: EmpresaVista }) {
       {gaveta === 'erp' && <ConectarGaveta tipo="erp" perfil={e.perfil} nome={e.nome} onFechar={() => setGaveta(null)} />}
       {gaveta === 'banco' && <ConectarGaveta tipo="banco" perfil={e.perfil} nome={e.nome} onFechar={() => setGaveta(null)} />}
       {gaveta === 'alcadas' && <PropostaAlcadas e={e} onFechar={() => setGaveta(null)} usuario={usuario.nome} />}
-      {gaveta === 'escalonamento' && <Escalonamento e={e} onFechar={() => setGaveta(null)} />}
-      {gaveta === 'sla' && <SlaGaveta e={e} onFechar={() => setGaveta(null)} />}
       {modo && (
         <GavetaFormulario aberta onFechar={() => setModo(null)} titulo="M2 · pagamento por API após o cartão" descricao="O cartão aprovado agenda o pagamento no banco, com credencial de escopo só de pagamento e teto por pagamento. Conta acima do teto vai como M1." acao="Propor ao sócio" acaoDesabilitada={!(Number(modo.teto) > 0)} onAcao={() => void proporModo('M2', Number(modo.teto))}>
           <Campo rotulo="Teto por pagamento (R$)" erro={Number(modo.teto) > 0 ? undefined : 'Informe o teto.'}>
@@ -435,72 +421,107 @@ function PropostaAlcadas({ e, onFechar, usuario }: { e: EmpresaVista; onFechar: 
   )
 }
 
-/** Janela e escalonamento (S08-A37): abertura, prazos e substituto por empresa. */
-function Escalonamento({ e, onFechar }: { e: EmpresaVista; onFechar: () => void }) {
-  const executar = useAcao()
+/**
+ * Janela e escalonamento (S08-A37), por empresa: os passos do lote com a
+ * abertura, o aprovador, os prazos, o substituto e o sócio editáveis no lugar.
+ * O substituto nunca é alguém do BPO: é do cliente (10, Q4).
+ */
+function PassosEscalonamento({ e, edita }: { e: EmpresaVista; edita: boolean }) {
   const esc = e.perfil.escalonamento
   const contatos = e.ficha?.contatos ?? []
-  const [r, setR] = useState({ abertura: e.perfil.janela.abertura, lembrete: String(esc.lembrete_h), substituto_h: String(esc.substituto_h), aprovador: esc.aprovador || contatos[0]?.nome || '', substituto: esc.substituto ?? '', socio: esc.socio || '' })
-  const erro = !(Number(r.lembrete) > 0) || !(Number(r.substituto_h) > Number(r.lembrete)) ? 'O substituto entra depois do lembrete.' : undefined
-  const sub = contatos.find((c) => c.nome === r.substituto)
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo="Janela e escalonamento"
-      descricao="Vale só para esta empresa. O sócio e o Gestor do BPO sempre recebem o alerta da véspera e o do vencido."
-      acao="Salvar"
-      acaoDesabilitada={!!erro}
-      onAcao={() => {
-        const ok = executar(() => repos.bpo.perfis.atualizar(e.perfil.id, { janela: { ...e.perfil.janela, abertura: r.abertura }, escalonamento: { ...esc, aprovador: r.aprovador, substituto: r.substituto || null, socio: r.socio || esc.socio, lembrete_h: Number(r.lembrete), substituto_h: Number(r.substituto_h) } }, { texto: `Atualizou a janela e o escalonamento de ${e.nome}` }), { sucesso: 'Escalonamento do lote atualizado' })
-        if (ok) onFechar()
-      }}
-    >
-      <Campo rotulo="Abertura da janela">{(id) => <CampoTexto id={id} tipo="time" valor={r.abertura} onMudar={(v) => setR((x) => ({ ...x, abertura: v }))} />}</Campo>
-      <Campo rotulo="Aprovador designado">{(id) => <CampoEscolha id={id} valor={r.aprovador} onMudar={(v) => setR((x) => ({ ...x, aprovador: v }))} opcoes={contatos.map((c) => ({ valor: c.nome, rotulo: `${c.nome} (${c.papel})` }))} />}</Campo>
-      <Campo rotulo="Lembrete ao aprovador depois de (horas)">{(id) => <CampoTexto id={id} tipo="number" valor={r.lembrete} onMudar={(v) => setR((x) => ({ ...x, lembrete: v }))} />}</Campo>
-      <Campo rotulo="Vai ao substituto depois de (horas)" ajuda="Se passar do expediente, vai na abertura do dia útil seguinte." erro={erro}>
-        {(id) => <CampoTexto id={id} tipo="number" valor={r.substituto_h} onMudar={(v) => setR((x) => ({ ...x, substituto_h: v }))} />}
-      </Campo>
-      <Campo rotulo="Substituto do aprovador" ajuda={sub && !(sub.alcadaPagamento ?? 0) ? `${sub.nome} não tem alçada na ficha: recebe o cartão, mas não aprova.` : 'Nunca alguém do BPO: o substituto é do cliente (10, Q4).'}>
-        {(id) => <CampoEscolha id={id} valor={r.substituto} onMudar={(v) => setR((x) => ({ ...x, substituto: v }))} opcoes={[{ valor: '', rotulo: 'nenhum (alerta ao Gestor do BPO)' }, ...contatos.filter((c) => c.nome !== r.aprovador).map((c) => ({ valor: c.nome, rotulo: `${c.nome} (${c.papel})` }))]} />}
-      </Campo>
-      <Campo rotulo="Sócio que recebe os alertas">{(id) => <CampoEscolha id={id} valor={r.socio} onMudar={(v) => setR((x) => ({ ...x, socio: v }))} opcoes={[{ valor: '', rotulo: 'o sócio da ficha' }, ...contatos.map((c) => ({ valor: c.nome, rotulo: `${c.nome} (${c.papel})` }))]} />}</Campo>
-    </GavetaFormulario>
+  const passos = passosEscalonamento(e)
+  /** O horário que o passo calcula a partir da abertura, ex.: "(13:00)". */
+  const hora = (i: number) => passos[i].quando.match(/\(.*\)$/)?.[0] ?? ''
+  const pessoa = (c: (typeof contatos)[number]) => ({ valor: c.nome, rotulo: c.nome, detalhe: c.papel })
+  const sub = contatos.find((c) => c.nome === esc.substituto)
+  const gravar = (patch: { abertura?: string } & Partial<BpoPerfil['escalonamento']>, resumo: string) => {
+    // Lê o perfil atual: o "Desfazer" pode vir depois de outra mudança.
+    const p = banco.obter('bpo_perfil', e.perfil.id) ?? e.perfil
+    const { abertura, ...escalonamento } = patch
+    return repos.bpo.perfis.atualizar(p.id, { janela: { ...p.janela, abertura: abertura ?? p.janela.abertura }, escalonamento: { ...p.escalonamento, ...escalonamento } }, { texto: `Atualizou a janela e o escalonamento de ${e.nome}: ${resumo}` })
+  }
+  const aprovador = (
+    <ValorEditavel rotulo="Aprovador designado" valor={esc.aprovador} vazio="o aprovador da ficha" config={{ tipo: 'escolha', opcoes: contatos.map(pessoa), outra: false }} desabilitado={!edita} onMudar={(v) => gravar({ aprovador: v, substituto: esc.substituto === v ? null : esc.substituto }, `aprovador ${v}`)} />
   )
-}
-
-/** SLA da empresa (10, 3.14): captura, lote, conciliação e relatório; meta do mês. */
-function SlaGaveta({ e, onFechar }: { e: EmpresaVista; onFechar: () => void }) {
-  const executar = useAcao()
-  const atual = regrasSlaDe(e)
-  const [r, setR] = useState({ meta: String(e.perfil.sla.meta), ...Object.fromEntries(Object.entries(atual).map(([k, v]) => [k, String(v)])) } as Record<keyof RegrasSla | 'meta', string>)
-  const meta = Number(r.meta)
-  const erro = !(meta > 0 && meta <= 100) ? 'A meta vai de 1 a 100%.' : Object.keys(slaPadrao).some((k) => !(Number(r[k as keyof RegrasSla]) > 0)) ? 'Todos os prazos precisam ser maiores que zero.' : undefined
   return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo="SLA da empresa"
-      descricao="Vai para o contrato (item BPO) e mede os desvios em Entregas e SLA."
-      acao="Salvar"
-      acaoDesabilitada={!!erro}
-      onAcao={() => {
-        const regras = Object.fromEntries(Object.keys(slaPadrao).map((k) => [k, Number(r[k as keyof RegrasSla])]))
-        const ok = executar(() => repos.bpo.perfis.atualizar(e.perfil.id, { sla: { ...e.perfil.sla, meta }, extras: { ...e.perfil.extras, s08c_sla: regras } }, { texto: `Atualizou o SLA de ${e.nome}` }), { sucesso: 'SLA atualizado' })
-        if (ok) onFechar()
-      }}
-    >
-      <Campo rotulo="Meta do mês (% no prazo)" erro={erro?.startsWith('A meta') ? erro : undefined}>
-        {(id) => <CampoTexto id={id} tipo="number" valor={r.meta} onMudar={(v) => setR((x) => ({ ...x, meta: v }))} />}
-      </Campo>
-      <Campo rotulo="Conta capturada em até (horas)">{(id) => <CampoTexto id={id} tipo="number" valor={r.captura_h} onMudar={(v) => setR((x) => ({ ...x, captura_h: v }))} />}</Campo>
-      <Campo rotulo="Lote enviado até quantas horas antes do vencimento">{(id) => <CampoTexto id={id} tipo="number" valor={r.lote_antes_h} onMudar={(v) => setR((x) => ({ ...x, lote_antes_h: v }))} />}</Campo>
-      <Campo rotulo="Conciliação até o dia útil">{(id) => <CampoTexto id={id} tipo="number" valor={r.conciliacao_dia} onMudar={(v) => setR((x) => ({ ...x, conciliacao_dia: v }))} />}</Campo>
-      <Campo rotulo="Relatório até o dia" erro={erro && !erro.startsWith('A meta') ? erro : undefined}>
-        {(id) => <CampoTexto id={id} tipo="number" valor={r.relatorio_dia} onMudar={(v) => setR((x) => ({ ...x, relatorio_dia: v }))} />}
-      </Campo>
-    </GavetaFormulario>
+    <ol className="grid gap-2 sm:grid-cols-5" aria-label="Passos do escalonamento">
+      <li className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
+        <span className="text-muted-foreground text-xs">
+          1.{' '}
+          <ValorEditavel
+            rotulo="Abertura da janela"
+            valor={e.perfil.janela.abertura}
+            config={{ tipo: 'texto', placeholder: '09:00', validar: (v) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(v.trim()) ? null : 'Escreva a hora como 09:00.') }}
+            desabilitado={!edita}
+            className="tabular-nums"
+            onMudar={(v) => gravar({ abertura: v.trim() }, `abertura às ${v.trim()}`)}
+          />
+        </span>
+        <span>abre a janela; o cartão vai a {aprovador}</span>
+      </li>
+      <li className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
+        <span className="text-muted-foreground text-xs">
+          2.{' '}
+          <ValorEditavel
+            rotulo="Lembrete ao aprovador depois de"
+            valor={esc.lembrete_h}
+            config={{ tipo: 'numero', min: 1, max: Math.max(1, esc.substituto_h - 1), unidade: 'h' }}
+            formatar={(n) => `+${n} h`}
+            desabilitado={!edita}
+            className="tabular-nums"
+            onMudar={(n) => {
+              if (n >= esc.substituto_h) throw new Error('O substituto entra depois do lembrete.')
+              return gravar({ lembrete_h: n }, `lembrete depois de ${n} h`)
+            }}
+          />{' '}
+          {hora(1)}
+        </span>
+        <span>lembrete a {esc.aprovador || 'o aprovador da ficha'}</span>
+      </li>
+      <li className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
+        <span className="text-muted-foreground text-xs">
+          3.{' '}
+          <ValorEditavel
+            rotulo="Vai ao substituto depois de"
+            valor={esc.substituto_h}
+            config={{ tipo: 'numero', min: esc.lembrete_h + 1, unidade: 'h' }}
+            formatar={(n) => `+${n} h`}
+            desabilitado={!edita}
+            className="tabular-nums"
+            onMudar={(n) => {
+              if (n <= esc.lembrete_h) throw new Error('O substituto entra depois do lembrete.')
+              return gravar({ substituto_h: n }, `substituto depois de ${n} h`)
+            }}
+          />{' '}
+          {hora(2)}
+        </span>
+        <span>
+          {esc.substituto ? 'vai ao substituto, ' : 'sem substituto: '}
+          <ValorEditavel
+            rotulo="Substituto do aprovador"
+            valor={esc.substituto ?? ''}
+            vazio="alerta ao Gestor do BPO"
+            config={{ tipo: 'escolha', opcoes: [{ valor: '', rotulo: 'nenhum (alerta ao Gestor do BPO)' }, ...contatos.filter((c) => c.nome !== esc.aprovador).map(pessoa)], outra: false }}
+            formatar={(v) => v || 'alerta ao Gestor do BPO'}
+            desabilitado={!edita}
+            onMudar={(v) => gravar({ substituto: v || null }, v ? `substituto ${v}` : 'sem substituto')}
+          />
+        </span>
+        {sub && !(sub.alcadaPagamento ?? 0) && <span className="text-muted-foreground text-xs">{sub.nome} não tem alçada na ficha: recebe o cartão, mas não aprova.</span>}
+        <span className="text-muted-foreground text-xs">Se passar do expediente, vai na abertura do dia útil seguinte.</span>
+      </li>
+      <li className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
+        <span className="text-muted-foreground text-xs">4. {passos[3].quando}</span>
+        <span>
+          alerta ao Gestor do BPO e a{' '}
+          <ValorEditavel rotulo="Sócio que recebe os alertas" valor={esc.socio} vazio="o sócio da ficha" config={{ tipo: 'escolha', opcoes: contatos.map(pessoa), outra: false }} desabilitado={!edita} onMudar={(v) => gravar({ socio: v }, `alertas ao sócio ${v}`)} /> com a lista do que vence
+        </span>
+      </li>
+      <li className="bg-sunken/50 flex flex-col gap-1 rounded-lg p-3 text-sm">
+        <span className="text-muted-foreground text-xs">5. {passos[4].quando}</span>
+        {passos[4].texto}
+      </li>
+    </ol>
   )
 }
 
@@ -525,6 +546,8 @@ function PesosAudit() {
   const pode = usePode('bpo.audit_pesos')
   const pesos = { ...pesosPadrao, ...config?.pesos }
   const salvar = (patch: Partial<NonNullable<typeof config>>, texto = 'Ajustou os pesos da auditoria contínua do BPO') => config && executar(() => repos.bpo.configuracao.atualizar(config.id, patch, { texto }))
+  /** Limiares em linha: grava direto (o ValorEditavel mostra o aviso com Desfazer e o erro, se houver). */
+  const gravar = (patch: Partial<NonNullable<typeof config>>, texto: string) => config && repos.bpo.configuracao.atualizar(config.id, patch, { texto })
   const cores = { verde: empresas.filter((e) => e.audit.cor === 'verde').length, amarelo: empresas.filter((e) => e.audit.cor === 'amarelo').length, vermelho: empresas.filter((e) => e.audit.cor === 'vermelho').length }
   const amarelo = config?.limiar_amarelo ?? 3
   const vermelho = config?.limiar_vermelho ?? 8
@@ -543,16 +566,14 @@ function PesosAudit() {
         Pesos da auditoria contínua
       </TituloBloco>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-        <label className="flex items-center gap-2">
-          Atenção a partir de
-          <input type="number" min={1} max={vermelho - 1} value={amarelo} disabled={!pode} aria-label="Limiar de atenção" onChange={(ev) => Number(ev.target.value) >= 1 && Number(ev.target.value) < vermelho && salvar({ limiar_amarelo: Number(ev.target.value) }, 'Ajustou o limiar de atenção da auditoria')} className="bg-sunken w-16 rounded-md px-2 py-1 tabular-nums" />
-          pontos
-        </label>
-        <label className="flex items-center gap-2">
-          Agir hoje a partir de
-          <input type="number" min={amarelo + 1} max={60} value={vermelho} disabled={!pode} aria-label="Limiar de agir hoje" onChange={(ev) => Number(ev.target.value) > amarelo && salvar({ limiar_vermelho: Number(ev.target.value) }, 'Ajustou o limiar de agir hoje da auditoria')} className="bg-sunken w-16 rounded-md px-2 py-1 tabular-nums" />
-          pontos
-        </label>
+        <span>
+          Atenção a partir de{' '}
+          <ValorEditavel rotulo="Limiar de atenção" valor={amarelo} config={{ tipo: 'numero', min: 1, max: vermelho - 1, unidade: 'pontos' }} desabilitado={!pode || !config} className="tabular-nums" onMudar={(n) => gravar({ limiar_amarelo: n }, 'Ajustou o limiar de atenção da auditoria')} />
+        </span>
+        <span>
+          Agir hoje a partir de{' '}
+          <ValorEditavel rotulo="Limiar de agir hoje" valor={vermelho} config={{ tipo: 'numero', min: amarelo + 1, max: 60, unidade: 'pontos' }} desabilitado={!pode || !config} className="tabular-nums" onMudar={(n) => gravar({ limiar_vermelho: n }, 'Ajustou o limiar de agir hoje da auditoria')} />
+        </span>
       </div>
       <ul className="grid gap-x-6 gap-y-2 md:grid-cols-2" aria-label="Pesos da auditoria">
         {Object.entries(criteriosAudit).map(([k, c]) => (
@@ -576,7 +597,6 @@ function EquipeBpo() {
   const { contas } = useSessao()
   const { config } = useBpo()
   const pode = usePode('bpo.audit_pesos')
-  const executar = useAcao()
   const params = parametrosS08c(config)
   const equipe = contas.filter((u) => u.situacao !== 'desativado' && (u.papel === 'administrador' || u.vinculos.some((v) => v.setor === 'bpo_financeiro')))
   return (
@@ -600,21 +620,20 @@ function EquipeBpo() {
                 </span>
                 <span className="text-muted-foreground text-xs">confere até</span>
                 {pode && config ? (
-                  <span className="w-32">
-                    <EdicaoEmLinha
-                      rotulo={`Alçada de conferência de ${u.nome}`}
-                      valor={lim ? String(lim) : ''}
-                      placeholder="sem limite"
-                      validar={(t) => (t.trim() && !(Number(t) > 0) ? 'Valor maior que zero, ou vazio.' : null)}
-                      onSalvar={(t) => {
-                        const n = Number(t)
-                        const conferir_ate = { ...params.conferir_ate }
-                        if (t.trim() && n > 0) conferir_ate[u.id] = n
-                        else delete conferir_ate[u.id]
-                        executar(() => salvarParametrosS08c(config, { conferir_ate }, `Alçada de conferência de ${u.nome}: ${t.trim() ? brl(n) : 'sem limite próprio'}`), { sucesso: 'Alçada de conferência salva' })
-                      }}
-                    />
-                  </span>
+                  <ValorEditavel
+                    rotulo={`Alçada de conferência de ${u.nome}`}
+                    valor={lim || ''}
+                    vazio="sem limite"
+                    config={{ tipo: 'dinheiro', min: 1, limpar: 'Sem limite' }}
+                    className="tabular-nums"
+                    onMudar={(t) => {
+                      const n = Number(t)
+                      const conferir_ate = { ...params.conferir_ate }
+                      if (t !== '' && n > 0) conferir_ate[u.id] = n
+                      else delete conferir_ate[u.id]
+                      return salvarParametrosS08c(config, { conferir_ate }, `Alçada de conferência de ${u.nome}: ${t !== '' ? brl(n) : 'sem limite próprio'}`)
+                    }}
+                  />
                 ) : (
                   <span className="tabular-nums">{lim ? brl(lim) : 'sem limite'}</span>
                 )}
@@ -631,7 +650,6 @@ function EquipeBpo() {
 function AprovacaoWhatsapp() {
   const { config } = useBpo()
   const pode = usePode('bpo.audit_pesos')
-  const executar = useAcao()
   const teto = config?.teto_whatsapp ?? 3_000
   return (
     <Caixa>
@@ -639,14 +657,7 @@ function AprovacaoWhatsapp() {
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="text-muted-foreground">Teto por lote</span>
         {pode && config ? (
-          <span className="w-32">
-            <EdicaoEmLinha
-              rotulo="Teto do WhatsApp"
-              valor={String(teto)}
-              validar={(t) => (!(Number(t) >= 0) ? 'Informe um valor (0 desliga a aprovação pelo WhatsApp).' : Number(t) > 10_000 ? 'Teto baixo: até R$ 10.000.' : null)}
-              onSalvar={(t) => void executar(() => repos.bpo.configuracao.atualizar(config.id, { teto_whatsapp: Number(t) }, { texto: `Teto da aprovação pelo WhatsApp: ${brl(Number(t))}` }), { sucesso: 'Teto do WhatsApp salvo' })}
-            />
-          </span>
+          <ValorEditavel rotulo="Teto do WhatsApp" valor={teto} config={{ tipo: 'dinheiro', min: 0, max: 10_000 }} className="tabular-nums" onMudar={(t) => repos.bpo.configuracao.atualizar(config.id, { teto_whatsapp: t }, { texto: `Teto da aprovação pelo WhatsApp: ${brl(t)}` })} />
         ) : (
           <span className="tabular-nums">{brl(teto)}</span>
         )}

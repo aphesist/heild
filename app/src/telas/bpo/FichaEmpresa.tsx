@@ -1,11 +1,11 @@
-import { ArrowsClockwiseIcon, BankIcon, CheckIcon, PencilSimpleIcon, PlugsConnectedIcon, SignOutIcon, SparkleIcon, WarningIcon } from '@phosphor-icons/react'
+import { ArrowsClockwiseIcon, BankIcon, CheckIcon, PlugsConnectedIcon, SignOutIcon, SparkleIcon, WarningIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useContas, useLoja, useNavegacao } from '@/ambiente/loja'
 import { useSessao } from '@/ambiente/sessao'
-import { useAcao, useConfirmar, usePode, Carregando, EstadoErro, SeloDemonstracao } from '@/components/kit'
+import { useAcao, useConfirmar, usePode, Carregando, EstadoErro, SeloDemonstracao, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campo, CampoEscolha, CampoTexto, Fichas, GavetaFormulario } from '@/components/ui/formulario'
+import { Campo, CampoEscolha, CampoTexto, GavetaFormulario } from '@/components/ui/formulario'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { destinoConectores } from '@/dados/conectores'
 import { cn } from '@/lib/utils'
@@ -20,7 +20,7 @@ import { agoraBpo, contaAberta, dataCurta, dataHora, hojeBpo, quando, rotuloModo
 import { ImplantacaoBpo, passosImplantacao, SaidaBpo } from './ImplantacaoBpo'
 import { textoCaptura, usePedirBpo } from './integrantes'
 import { explicarAudit, usePedirS08a } from './integrantes-s08a'
-import { extrasS08a, gravarS08a, maisDias, slaPadrao } from './perfil-s08a'
+import { extrasS08a, gravarS08a, maisDias, slaPadrao, type SlaTermos } from './perfil-s08a'
 import { AreaRolagem } from '@/components/ui/area-rolagem'
 
 /** Passos da implantação (10, 3.3); a lista mora em `ImplantacaoBpo.tsx` (S08a). */
@@ -163,7 +163,8 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
   const pedir = usePedirS08a()
   const podeEditar = usePode('bpo.perfil.editar', { cliente_id: clienteId })
   const podeEncerrar = usePode('bpo.encerrar', { cliente_id: clienteId })
-  const [editar, setEditar] = useState(false)
+  const equipe = useEquipeBpo()
+  const { usuario } = useSessao()
   const [conectar, setConectar] = useState<'erp' | 'banco' | null>(null)
   const corpo = useRef<HTMLDivElement>(null)
   const irPara = (id: string) => corpo.current?.querySelector(`[data-secao="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -178,6 +179,13 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
   const saindo = perfil.situacao === 'encerrando' && !!perfil.encerramento
   const feitos = passosImplantacao.filter((p) => perfil.onboarding[p.id]).length
   const sla = { ...slaPadrao, ...x.sla_termos }
+  const editavel = podeEditar && perfil.situacao !== 'encerrado'
+  const pessoasBpo = equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))
+  /** Cada mudança do perfil (S08-A09) guarda a versão anterior e vira evento, como o formulário de antes. */
+  const gravarPerfil = (resumo: string, colunas: (p: BpoPerfil) => Partial<BpoPerfil> = () => ({}), prazos?: Partial<SlaTermos>) => {
+    const atual = banco.obter('bpo_perfil', perfil.id) ?? perfil
+    return gravarS08a(perfil.id, (s) => ({ ...s, ...(prazos ? { sla_termos: { ...slaPadrao, ...s.sla_termos, ...prazos } } : {}), versoes: [...(s.versoes ?? []), { versao: (s.versoes?.length ?? 0) + 1, em: agoraBpo(), por: usuario.nome, resumo }] }), colunas(atual), { texto: `Atualizou o perfil BPO de ${nome}: ${resumo}` })
+  }
 
   const encerrar = async () => {
     const motivo = await confirmar({ titulo: `Encerrar o BPO de ${nome}?`, descricao: 'Abre o offboarding (10, 3.14): concluir o mês, pacote de saída, revogar conexões, apagar o espelho e encerrar o serviço. Nada se apaga sem esses passos; a contabilidade, se houver, continua. Dá para desistir até concluir.', acao: 'Abrir o encerramento', perigo: true, exigirMotivo: true, rotuloMotivo: 'Motivo (vai para o evento)' })
@@ -307,34 +315,48 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
           )}
 
           <section data-secao="perfil" className="flex scroll-mt-32 flex-col gap-2">
-            <TituloBloco
-              descricao="Perfil BPO da empresa (10, 3.12), versionado."
-              acao={
-                podeEditar &&
-                perfil.situacao !== 'encerrado' && (
-                  <Button size="sm" variant="outline" className="rounded-full" onClick={() => setEditar(true)}>
-                    <PencilSimpleIcon /> Editar
-                  </Button>
-                )
-              }
-            >
-              Perfil BPO
-            </TituloBloco>
+            <TituloBloco descricao="Perfil BPO da empresa (10, 3.12), versionado: cada mudança guarda a versão anterior.">Perfil BPO</TituloBloco>
             <dl className="divide-border/70 divide-y">
-              <Propriedade rotulo="Escopo">{perfil.escopo.map((v) => rotuloEscopo[v]).join(', ')}</Propriedade>
+              <Propriedade rotulo="Escopo">
+                <ValorEditavel
+                  rotulo="Escopo do serviço"
+                  valor={perfil.escopo}
+                  config={{ tipo: 'multipla', opcoes: (Object.keys(rotuloEscopo) as BpoPerfil['escopo']).map((v) => ({ valor: v, rotulo: rotuloEscopo[v] })), outra: false }}
+                  desabilitado={!editavel}
+                  onMudar={(v) => {
+                    if (!v.length) throw new Error('Escolha ao menos um serviço.')
+                    return gravarPerfil(`escopo: ${v.map((k) => rotuloEscopo[k]).join(', ')}`, () => ({ escopo: v }))
+                  }}
+                />
+              </Propriedade>
               <Propriedade rotulo="Modo de execução">{e ? `${e.erp.provedor} · ${rotuloModoErp[e.erp.modo]}` : 'ERP ainda não conectado'}</Propriedade>
               <Propriedade rotulo="Modo de pagamento">{`${rotuloModoPagamento[perfil.modo_pagamento]}${perfil.modo_pagamento === 'M2' && perfil.teto_m2 ? ` · teto ${brl(perfil.teto_m2)}` : ''}`}</Propriedade>
               <Propriedade rotulo="Alçada">
                 {e?.alcada ? `faixa 1 até ${brl(e.alcada.faixa1)} · faixa 2 até ${brl(e.alcada.faixa2)} · aceita por ${e.alcada.aceito_por ?? 'sócio'}` : 'padrão do plano (faixa 1 até R$ 2.000, faixa 2 até R$ 20.000), sem aceite'}
                 {e?.proposta && <span className="text-muted-foreground block text-xs">proposta de {e.proposta.proposta_por_nome} aguardando o aceite do sócio no app</span>}
               </Propriedade>
-              <Propriedade rotulo="Responsável (confere)">{perfil.responsavel_nome}</Propriedade>
-              <Propriedade rotulo="Analista (faz)">{perfil.analista_nome}</Propriedade>
-              <Propriedade rotulo="Caixa mínimo">{brl(perfil.caixa_minimo)}</Propriedade>
-              <Propriedade rotulo="SLA">{`meta ${perfil.sla.meta}% no prazo · conta capturada em ${sla.captura_h} h · lote ${sla.lote_h_antes} h antes do vencimento · conciliação até o dia ${sla.conciliacao_dia} · relatório até o dia ${sla.relatorio_dia}`}</Propriedade>
+              <Propriedade rotulo="Responsável (confere)">
+                <ValorEditavel rotulo="Responsável (confere)" valor={perfil.responsavel_nome} config={{ tipo: 'entidade', opcoes: pessoasBpo, outra: false }} desabilitado={!editavel} onMudar={(v) => gravarPerfil(`responsável: ${v}`, () => ({ responsavel_nome: v }))} />
+              </Propriedade>
+              <Propriedade rotulo="Analista (faz)">
+                <ValorEditavel rotulo="Analista (faz)" valor={perfil.analista_nome} config={{ tipo: 'entidade', opcoes: pessoasBpo, outra: false }} desabilitado={!editavel} onMudar={(v) => gravarPerfil(`analista: ${v}`, () => ({ analista_nome: v }))} />
+                {perfil.analista_nome === perfil.responsavel_nome && <span className="text-muted-foreground block text-xs">BPO de uma pessoa: a conferência vai ao Gestor ou ao cliente.</span>}
+              </Propriedade>
+              <Propriedade rotulo="Caixa mínimo">
+                <ValorEditavel rotulo="Caixa mínimo" valor={perfil.caixa_minimo} config={{ tipo: 'dinheiro', min: 0 }} formatar={brl} desabilitado={!editavel} className="tabular-nums" onMudar={(n) => gravarPerfil(`caixa mínimo: ${brl(n)}`, () => ({ caixa_minimo: n }))} />
+              </Propriedade>
+              <Propriedade rotulo="SLA">
+                meta <ValorEditavel rotulo="Meta de SLA" valor={perfil.sla.meta} config={{ tipo: 'numero', min: 1, max: 100, unidade: '%' }} formatar={(n) => `${n}%`} desabilitado={!editavel} className="tabular-nums" onMudar={(n) => gravarPerfil(`meta de SLA: ${n}%`, (p) => ({ sla: { ...p.sla, meta: n } }))} /> no prazo · conta capturada em{' '}
+                <ValorEditavel rotulo="Conta capturada em até" valor={sla.captura_h} config={{ tipo: 'numero', min: 1, unidade: 'h' }} desabilitado={!editavel} className="tabular-nums" onMudar={(n) => gravarPerfil(`prazos do SLA: conta capturada em ${n} h`, undefined, { captura_h: n })} /> · lote{' '}
+                <ValorEditavel rotulo="Lote enviado antes do vencimento" valor={sla.lote_h_antes} config={{ tipo: 'numero', min: 1, unidade: 'h' }} desabilitado={!editavel} className="tabular-nums" onMudar={(n) => gravarPerfil(`prazos do SLA: lote ${n} h antes do vencimento`, undefined, { lote_h_antes: n })} /> antes do vencimento · conciliação até o dia{' '}
+                <ValorEditavel rotulo="Conciliação até o dia" valor={sla.conciliacao_dia} config={{ tipo: 'numero', min: 1, max: 28 }} desabilitado={!editavel} className="tabular-nums" onMudar={(n) => gravarPerfil(`prazos do SLA: conciliação até o dia ${n}`, undefined, { conciliacao_dia: n })} /> · relatório até o dia{' '}
+                <ValorEditavel rotulo="Relatório até o dia" valor={sla.relatorio_dia} config={{ tipo: 'numero', min: 1, max: 28 }} desabilitado={!editavel} className="tabular-nums" onMudar={(n) => gravarPerfil(`prazos do SLA: relatório até o dia ${n}`, undefined, { relatorio_dia: n })} />
+              </Propriedade>
               <Propriedade rotulo="Janela do lote">{`${perfil.janela.abertura} · ${perfil.janela.dias}`}</Propriedade>
               <Propriedade rotulo="Termo de dados">{perfil.termo_aceito_em ? `aceito em ${dataCurta(perfil.termo_aceito_em)}/${perfil.termo_aceito_em.slice(0, 4)}${x.termo?.aceito_por ? ` por ${x.termo.aceito_por}` : ''}` : x.termo ? 'enviado, aguardando o aceite' : 'pendente'}</Propriedade>
-              <Propriedade rotulo="Paralelo até">{perfil.paralelo_ate ? dataCurta(perfil.paralelo_ate) : 'fora do paralelo'}</Propriedade>
+              <Propriedade rotulo="Paralelo até">
+                <ValorEditavel rotulo="Paralelo até" valor={perfil.paralelo_ate ?? ''} vazio="fora do paralelo" config={{ tipo: 'data' }} formatar={(v) => (v ? dataCurta(v) : 'fora do paralelo')} desabilitado={!editavel} className="tabular-nums" onMudar={(v) => gravarPerfil(`paralelo até ${dataCurta(v)}`, () => ({ paralelo_ate: v }))} />
+              </Propriedade>
               <Propriedade rotulo="Bancos">{e?.bancos.map((b) => b.nome).join(', ') || 'nenhum conectado'}</Propriedade>
             </dl>
             <p className="text-muted-foreground text-xs">Modo de pagamento, alçadas e janela mudam na aba Configuração e só valem com o aceite do sócio no app.</p>
@@ -390,7 +412,6 @@ export function FichaEmpresa({ clienteId, onFechar, onIr, secao }: { clienteId: 
             </Button>
           )}
         </div>
-        {editar && <EditarPerfil perfil={perfil} nome={nome} onFechar={() => setEditar(false)} />}
         {conectar && <ConectarGaveta tipo={conectar} perfil={perfil} nome={nome} onFechar={() => setConectar(null)} />}
         </AreaRolagem>
       </SheetContent>
@@ -446,92 +467,6 @@ export function HistoricoEmpresa({ clienteId }: { clienteId: string }) {
         </Button>
       )}
     </>
-  )
-}
-
-/** Editar perfil BPO da empresa (S08-A09): escopo, responsável, analista, caixa mínimo, SLA e prazos, paralelo; cada salvar vira uma versão. */
-function EditarPerfil({ perfil, nome, onFechar }: { perfil: BpoPerfil; nome: string; onFechar: () => void }) {
-  const equipe = useEquipeBpo()
-  const executar = useAcao()
-  const { usuario } = useSessao()
-  const sla0 = { ...slaPadrao, ...extrasS08a(perfil).sla_termos }
-  const [r, setR] = useState({ escopo: perfil.escopo, responsavel: perfil.responsavel_nome, analista: perfil.analista_nome, caixa: String(perfil.caixa_minimo), meta: String(perfil.sla.meta), paralelo: perfil.paralelo_ate ?? '', captura: String(sla0.captura_h), lote: String(sla0.lote_h_antes), conciliacao: String(sla0.conciliacao_dia), relatorio: String(sla0.relatorio_dia) })
-  const erroCaixa = !(Number(r.caixa) >= 0) || r.caixa === '' ? 'Informe um valor (0 ou mais).' : undefined
-  const erroMeta = !(Number(r.meta) > 0 && Number(r.meta) <= 100) ? 'Entre 1 e 100.' : undefined
-  const erroHoras = !(Number(r.captura) > 0) || !(Number(r.lote) > 0) ? 'Horas maiores que zero.' : undefined
-  const erroDias = !(Number(r.conciliacao) >= 1 && Number(r.conciliacao) <= 28) || !(Number(r.relatorio) >= 1 && Number(r.relatorio) <= 28) ? 'Dia entre 1 e 28.' : undefined
-  const erroEscopo = r.escopo.length === 0 ? 'Escolha ao menos um serviço.' : undefined
-  return (
-    <GavetaFormulario
-      aberta
-      onFechar={onFechar}
-      titulo={`Perfil BPO · ${nome}`}
-      descricao="Modo de pagamento e alçadas ficam na Configuração (valem com o aceite do sócio). Cada salvar guarda a versão anterior."
-      acao="Salvar"
-      largura="lg"
-      acaoDesabilitada={!!erroCaixa || !!erroMeta || !!erroHoras || !!erroDias || !!erroEscopo}
-      onAcao={() => {
-        const mudou: string[] = []
-        if (r.escopo.join() !== perfil.escopo.join()) mudou.push(`escopo: ${r.escopo.map((v) => rotuloEscopo[v]).join(', ')}`)
-        if (r.responsavel !== perfil.responsavel_nome) mudou.push(`responsável: ${r.responsavel}`)
-        if (r.analista !== perfil.analista_nome) mudou.push(`analista: ${r.analista}`)
-        if (Number(r.caixa) !== perfil.caixa_minimo) mudou.push(`caixa mínimo: ${brl(Number(r.caixa))}`)
-        if (Number(r.meta) !== perfil.sla.meta) mudou.push(`meta de SLA: ${r.meta}%`)
-        if (Number(r.captura) !== sla0.captura_h || Number(r.lote) !== sla0.lote_h_antes || Number(r.conciliacao) !== sla0.conciliacao_dia || Number(r.relatorio) !== sla0.relatorio_dia) mudou.push('prazos do SLA')
-        if ((r.paralelo || null) !== (perfil.paralelo_ate ?? null)) mudou.push(r.paralelo ? `paralelo até ${dataCurta(r.paralelo)}` : 'fora do paralelo')
-        if (!mudou.length) return onFechar()
-        const ok = executar(
-          () =>
-            gravarS08a(
-              perfil.id,
-              (s) => ({ ...s, sla_termos: { captura_h: Number(r.captura), lote_h_antes: Number(r.lote), conciliacao_dia: Number(r.conciliacao), relatorio_dia: Number(r.relatorio) }, versoes: [...(s.versoes ?? []), { versao: (s.versoes?.length ?? 0) + 1, em: agoraBpo(), por: usuario.nome, resumo: mudou.join('; ') }] }),
-              { escopo: r.escopo, responsavel_nome: r.responsavel, analista_nome: r.analista, caixa_minimo: Number(r.caixa), sla: { ...perfil.sla, meta: Number(r.meta) }, paralelo_ate: r.paralelo || null },
-              { texto: `Atualizou o perfil BPO de ${nome}: ${mudou.join('; ')}` },
-            ),
-          { sucesso: 'Perfil BPO salvo' },
-        )
-        if (ok) onFechar()
-      }}
-    >
-      <Campo rotulo="Escopo do serviço" erro={erroEscopo}>
-        {() => (
-          <Fichas
-            rotulo="Escopo"
-            valores={r.escopo}
-            onMudar={(v) => setR((s) => ({ ...s, escopo: v }))}
-            opcoes={[
-              { valor: 'pagar', rotulo: 'Contas a pagar' },
-              { valor: 'receber', rotulo: 'Contas a receber' },
-              { valor: 'conciliacao', rotulo: 'Conciliação' },
-              { valor: 'gerencial', rotulo: 'Gerencial' },
-            ]}
-          />
-        )}
-      </Campo>
-      <div className="grid gap-x-3 sm:grid-cols-2">
-        <Campo rotulo="Responsável (confere)">{(id) => <CampoEscolha id={id} valor={r.responsavel} onMudar={(v) => setR((s) => ({ ...s, responsavel: v }))} opcoes={equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))} />}</Campo>
-        <Campo rotulo="Analista (faz)" ajuda="Igual ao responsável = BPO de uma pessoa: a conferência vai ao Gestor ou ao cliente.">
-          {(id) => <CampoEscolha id={id} valor={r.analista} onMudar={(v) => setR((s) => ({ ...s, analista: v }))} opcoes={equipe.map((u) => ({ valor: u.nome, rotulo: u.nome }))} />}
-        </Campo>
-        <Campo rotulo="Caixa mínimo (R$)" erro={erroCaixa}>
-          {(id) => <CampoTexto id={id} tipo="number" valor={r.caixa} onMudar={(v) => setR((s) => ({ ...s, caixa: v }))} />}
-        </Campo>
-        <Campo rotulo="Meta de SLA (% no prazo)" erro={erroMeta}>
-          {(id) => <CampoTexto id={id} tipo="number" valor={r.meta} onMudar={(v) => setR((s) => ({ ...s, meta: v }))} />}
-        </Campo>
-        <Campo rotulo="Conta capturada em até (horas)" erro={erroHoras}>
-          {(id) => <CampoTexto id={id} tipo="number" valor={r.captura} onMudar={(v) => setR((s) => ({ ...s, captura: v }))} />}
-        </Campo>
-        <Campo rotulo="Lote enviado antes do vencimento (horas)">{(id) => <CampoTexto id={id} tipo="number" valor={r.lote} onMudar={(v) => setR((s) => ({ ...s, lote: v }))} />}</Campo>
-        <Campo rotulo="Conciliação até o dia" erro={erroDias}>
-          {(id) => <CampoTexto id={id} tipo="number" valor={r.conciliacao} onMudar={(v) => setR((s) => ({ ...s, conciliacao: v }))} />}
-        </Campo>
-        <Campo rotulo="Relatório até o dia">{(id) => <CampoTexto id={id} tipo="number" valor={r.relatorio} onMudar={(v) => setR((s) => ({ ...s, relatorio: v }))} />}</Campo>
-      </div>
-      <Campo rotulo="Paralelo até" ajuda="Vazio: fora do paralelo. O relógio do SLA pausa com o cliente e volta na resposta.">
-        {(id) => <CampoTexto id={id} tipo="date" valor={r.paralelo} onMudar={(v) => setR((s) => ({ ...s, paralelo: v }))} />}
-      </Campo>
-    </GavetaFormulario>
   )
 }
 

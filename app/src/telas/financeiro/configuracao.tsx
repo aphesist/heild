@@ -1,11 +1,13 @@
-import { BankIcon, CheckCircleIcon, DownloadSimpleIcon, FileArrowUpIcon, PencilSimpleIcon, PlusIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react'
+import { BankIcon, CheckCircleIcon, DownloadSimpleIcon, FileArrowUpIcon, PlusIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { useLoja } from '@/ambiente/loja'
-import { EstadoErro, SeloDemonstracao, useAcao, useConfirmar } from '@/components/kit'
+import { Propriedade } from '@/components/compostos/blocos'
+import { EstadoErro, SeloDemonstracao, useAcao, useConfirmar, ValorEditavel } from '@/components/kit'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Campo, CampoArea, CampoEscolha, CampoTexto, Fichas, GavetaFormulario, Interruptor, Passos, Segmentado } from '@/components/ui/formulario'
 import { cn } from '@/lib/utils'
+import { banco as bancoDeDados } from '@/nucleo/banco'
 import type { PassoRegua, PoliticaFinanceira } from '@/nucleo/modelo/financeiro'
 import { repos } from '@/nucleo/repositorios'
 import { servicos } from '@/servicos'
@@ -275,28 +277,51 @@ export function EditarPassoRegua({ p, onFechar, onSalvar, onExcluir }: Fechar & 
   )
 }
 
-/** Lista da régua com editar (usada em Configurar e em Cobranças). */
-export function ListaRegua({ politica, editavel, onEditar }: { politica: PoliticaFinanceira; editavel: boolean; onEditar: (p?: PassoRegua) => void }) {
+const canaisRegua = ['WhatsApp', 'e-mail', 'WhatsApp e e-mail', 'app'] as const
+
+/** Grava a régua direto na política (versão nova, com evento), lendo a versão atual: o "Desfazer" pode vir depois de outra mudança. */
+function gravarRegua(politica: PoliticaFinanceira, mudar: (regua: PassoRegua[]) => PassoRegua[], texto: string) {
+  const atual = bancoDeDados.obter('politica_financeira', politica.id) ?? politica
+  return repos.politicasFinanceiras.atualizar(politica.id, { regua: mudar(atual.regua) }, { texto })
+}
+
+/**
+ * Lista da régua (usada em Configurar e em Cobranças): cada valor do passo se
+ * edita no lugar e grava na política; o interruptor liga e desliga o passo e a
+ * lixeira tira da régua (com "Desfazer"). Passo novo é no botão de quem usa.
+ */
+export function ListaRegua({ politica, editavel }: { politica: PoliticaFinanceira; editavel: boolean; /** Antigo (lápis por passo): sem uso, a edição agora é no lugar. */ onEditar?: (p?: PassoRegua) => void }) {
+  const executar = useAcao()
+  const mudar = (p: PassoRegua, patch: Partial<PassoRegua>, resumo: string) => gravarRegua(politica, (r) => r.map((x) => (x.id === p.id ? { ...x, ...patch } : x)), `Régua: passo ${rotuloDia(p.dias)} editado: ${resumo}`)
   return (
     <ol className="flex flex-col gap-1.5">
       {[...politica.regua]
         .sort((a, b) => a.dias - b.dias)
         .map((p) => (
           <li key={p.id} className={cn('flex items-start gap-3 rounded-md px-2 py-1.5 text-sm', !p.ativo && 'text-muted-foreground grayscale')}>
-            <span className="bg-sunken w-12 shrink-0 rounded-full py-0.5 text-center text-xs font-medium tabular-nums">{rotuloDia(p.dias)}</span>
+            <span className="bg-sunken w-12 shrink-0 rounded-full py-0.5 text-center text-xs font-medium tabular-nums">
+              <ValorEditavel rotulo="Dias em relação ao vencimento (negativo é antes)" valor={p.dias} config={{ tipo: 'numero', min: -10, max: 60, unidade: 'dias' }} formatar={rotuloDia} desabilitado={!editavel} onMudar={(n) => mudar(p, { dias: n }, `agora em ${rotuloDia(n)}`)} />
+            </span>
             <span className="min-w-0 flex-1">
               <span className="block">
-                {rotuloTom[p.tom]} · {p.canal}
+                <ValorEditavel rotulo="Tom" valor={p.tom} config={{ tipo: 'escolha', opcoes: (Object.keys(rotuloTom) as PassoRegua['tom'][]).map((x) => ({ valor: x, rotulo: rotuloTom[x] })), outra: false }} desabilitado={!editavel} onMudar={(v) => mudar(p, { tom: v }, `tom ${rotuloTom[v]}`)} />
+                {' · '}
+                <ValorEditavel rotulo="Canal" valor={p.canal} config={{ tipo: 'escolha', opcoes: canaisRegua.map((x) => ({ valor: x, rotulo: x })), outra: false }} desabilitado={!editavel} onMudar={(v) => mudar(p, { canal: v }, `canal ${v}`)} />
                 {!p.ativo && ' · desligado'}
               </span>
               <span className="text-muted-foreground block text-xs">
-                {rotuloQuem[p.quem]} · {p.texto}
+                <ValorEditavel rotulo="Quem age" valor={p.quem} config={{ tipo: 'escolha', opcoes: (Object.keys(rotuloQuem) as PassoRegua['quem'][]).map((x) => ({ valor: x, rotulo: rotuloQuem[x] })), outra: false }} desabilitado={!editavel} onMudar={(v) => mudar(p, { quem: v }, rotuloQuem[v])} />
+                {' · '}
+                <ValorEditavel rotulo="Mensagem" valor={p.texto} vazio="escrever a mensagem" config={{ tipo: 'texto', multilinha: true, validar: (v) => (v.trim() ? null : 'Escreva a mensagem.') }} desabilitado={!editavel} onMudar={(v) => mudar(p, { texto: v.trim() }, 'mensagem')} />
               </span>
             </span>
             {editavel && (
-              <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Editar o passo ${rotuloDia(p.dias)}`} onClick={() => onEditar(p)}>
-                <PencilSimpleIcon />
-              </Button>
+              <>
+                <Interruptor ocultarRotulo rotulo={`Passo ${rotuloDia(p.dias)} ativo`} ligado={p.ativo} onMudar={(v) => executar(() => mudar(p, { ativo: v }, v ? 'ligado' : 'desligado'))} />
+                <Button size="icon-sm" variant="ghost" className="text-destructive-text rounded-full" aria-label={`Tirar o passo ${rotuloDia(p.dias)} da régua`} onClick={() => executar(() => gravarRegua(politica, (r) => r.filter((x) => x.id !== p.id), `Régua: passo ${rotuloDia(p.dias)} retirado`), { sucesso: `Passo ${rotuloDia(p.dias)} tirado da régua`, desfazer: () => gravarRegua(politica, (r) => [...r, p], `Régua: passo ${rotuloDia(p.dias)} devolvido`) })}>
+                  <TrashIcon />
+                </Button>
+              </>
             )}
           </li>
         ))}
@@ -304,65 +329,68 @@ export function ListaRegua({ politica, editavel, onEditar }: { politica: Politic
   )
 }
 
-/** S07-A47 · Política de inadimplência: juros, multa, régua, aviso formal, pausa e acordo. Nunca reter documento. */
+/**
+ * S07-A47 · Política de inadimplência: juros, multa, régua, aviso formal,
+ * pausa e acordo. Nunca reter documento. Cada valor se edita no lugar e grava
+ * uma versão nova da política, com evento; passo novo abre a gaveta de criação.
+ */
 export function PoliticaInadimplencia({ onFechar }: Fechar) {
-  const { politica, salvar } = usePolitica()
-  const [d, setD] = useState(politica)
-  const [passo, setPasso] = useState<PassoRegua | 'novo' | null>(null)
-  if (!politica || !d) return null
-  const formal = d.regua.find((p) => p.tom === 'formal')
-  const pausa = d.regua.find((p) => p.tom === 'pausa')
-  const ajustar = (tom: 'formal' | 'pausa', dias: number) => setD({ ...d, regua: d.regua.map((p) => (p.tom === tom ? { ...p, dias } : p)) })
-  if (passo)
+  const { politica } = usePolitica()
+  const executar = useAcao()
+  const [novo, setNovo] = useState(false)
+  if (!politica) return null
+  const formal = politica.regua.find((p) => p.tom === 'formal')
+  const pausa = politica.regua.find((p) => p.tom === 'pausa')
+  const gravar = (patch: Partial<PoliticaFinanceira>, resumo: string) => repos.politicasFinanceiras.atualizar(politica.id, patch, { texto: `Política de inadimplência: ${resumo}` })
+  const dias = (tom: 'formal' | 'pausa', n: number) => gravarRegua(politica, (r) => r.map((p) => (p.tom === tom ? { ...p, dias: n } : p)), `Política de inadimplência: ${tom === 'formal' ? 'aviso formal' : 'pausa parcial'} em D+${n}`)
+  const pct = (n: number) => `${n.toLocaleString('pt-BR')}%`
+  if (novo)
     return (
-<EditarPassoRegua
-          p={passo === 'novo' ? undefined : passo}
-          onFechar={() => setPasso(null)}
-          onSalvar={(p) => {
-            setD({ ...d, regua: d.regua.some((x) => x.id === p.id) ? d.regua.map((x) => (x.id === p.id ? p : x)) : [...d.regua, p] })
-            setPasso(null)
-          }}
-          onExcluir={passo === 'novo' ? undefined : () => (setD({ ...d, regua: d.regua.filter((x) => x.id !== passo.id) }), setPasso(null))}
-        />
+      <EditarPassoRegua
+        onFechar={() => setNovo(false)}
+        onSalvar={(p) => {
+          if (executar(() => gravarRegua(politica, (r) => [...r, p], `Régua: passo ${rotuloDia(p.dias)} criado`), { sucesso: `Passo ${rotuloDia(p.dias)} na régua.` })) setNovo(false)
+        }}
+      />
     )
   return (
-    <GavetaFormulario
-      aberta
-      largura="lg"
-      onFechar={onFechar}
-      titulo="Política de inadimplência"
-      descricao="O que acontece, e quando, com quem não paga. Obrigação em curso, prazo legal, guia e documento já devido nunca são retidos: só pedidos novos e extras pausam."
-      acao="Salvar"
-      onAcao={() => salvar({ juros_mes: d.juros_mes, multa: d.multa, regua: d.regua, prazo_pago_dias: d.prazo_pago_dias, acordo_desconto_max: d.acordo_desconto_max, acordo_parcelas_max: d.acordo_parcelas_max }, `Política de inadimplência: juros ${d.juros_mes}%, multa ${d.multa}%, aviso formal em D+${formal?.dias}, pausa em D+${pausa?.dias}`) && onFechar()}
-    >
-      <div className="grid grid-cols-2 gap-3">
-        <Campo rotulo="Juros ao mês (%)">{(id) => <CampoTexto id={id} valor={String(d.juros_mes).replace('.', ',')} onMudar={(v) => setD({ ...d, juros_mes: numero(v) })} />}</Campo>
-        <Campo rotulo="Multa (%)">{(id) => <CampoTexto id={id} valor={String(d.multa).replace('.', ',')} onMudar={(v) => setD({ ...d, multa: numero(v) })} />}</Campo>
-      </div>
-      {formal && (
-        <Campo rotulo={`Aviso formal em D+${formal.dias}`}>{(id) => <input id={id} type="range" min={15} max={60} step={5} value={formal.dias} onChange={(e) => ajustar('formal', Number(e.target.value))} className="accent-foreground w-full" />}</Campo>
-      )}
-      {pausa && (
-        <Campo rotulo={`Pausa parcial em D+${pausa.dias}`} ajuda="Reativa sozinha quando o pagamento é confirmado.">
-          {(id) => <input id={id} type="range" min={30} max={90} step={5} value={pausa.dias} onChange={(e) => ajustar('pausa', Number(e.target.value))} className="accent-foreground w-full" />}
-        </Campo>
-      )}
-      <Campo rotulo={`"Pago" informado pausa a régua por ${d.prazo_pago_dias} dias úteis`} ajuda="O botão pago do app não baixa: só pausa até o extrato ou o webhook confirmar (09, 5.3).">
-        {(id) => <input id={id} type="range" min={1} max={7} value={d.prazo_pago_dias} onChange={(e) => setD({ ...d, prazo_pago_dias: Number(e.target.value) })} className="accent-foreground w-full" />}
-      </Campo>
-      <div className="grid grid-cols-2 gap-3">
-        <Campo rotulo={`Desconto máximo no acordo: ${d.acordo_desconto_max}%`}>{(id) => <input id={id} type="range" min={0} max={30} value={d.acordo_desconto_max} onChange={(e) => setD({ ...d, acordo_desconto_max: Number(e.target.value) })} className="accent-foreground w-full" />}</Campo>
-        <Campo rotulo={`Até ${d.acordo_parcelas_max} parcelas`}>{(id) => <input id={id} type="range" min={1} max={12} value={d.acordo_parcelas_max} onChange={(e) => setD({ ...d, acordo_parcelas_max: Number(e.target.value) })} className="accent-foreground w-full" />}</Campo>
-      </div>
-      <section className="flex flex-col gap-2">
-        <span className="flex items-center gap-2">
-          <h3 className="flex-1 text-sm font-medium">Régua de honorários</h3>
-          <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={() => setPasso('novo')}>
-            <PlusIcon /> Passo
-          </Button>
-        </span>
-        <ListaRegua politica={d} editavel onEditar={(p) => setPasso(p ?? 'novo')} />
-      </section>
+    <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo="Política de inadimplência" descricao="O que acontece, e quando, com quem não paga. Obrigação em curso, prazo legal, guia e documento já devido nunca são retidos: só pedidos novos e extras pausam." acao="Fechar" onAcao={onFechar}>
+        <dl className="divide-border/70 divide-y">
+          <Propriedade rotulo="Juros ao mês">
+            <ValorEditavel rotulo="Juros ao mês" valor={politica.juros_mes} config={{ tipo: 'numero', min: 0, unidade: '%' }} formatar={pct} className="tabular-nums" onMudar={(n) => gravar({ juros_mes: n }, `juros ${pct(n)} ao mês`)} />
+          </Propriedade>
+          <Propriedade rotulo="Multa">
+            <ValorEditavel rotulo="Multa" valor={politica.multa} config={{ tipo: 'numero', min: 0, unidade: '%' }} formatar={pct} className="tabular-nums" onMudar={(n) => gravar({ multa: n }, `multa ${pct(n)}`)} />
+          </Propriedade>
+          {formal && (
+            <Propriedade rotulo="Aviso formal">
+              em <ValorEditavel rotulo="Aviso formal em" valor={formal.dias} config={{ tipo: 'numero', min: 15, max: 60, passo: 5, unidade: 'dias' }} formatar={rotuloDia} className="tabular-nums" onMudar={(n) => dias('formal', n)} />
+            </Propriedade>
+          )}
+          {pausa && (
+            <Propriedade rotulo="Pausa parcial">
+              em <ValorEditavel rotulo="Pausa parcial em" valor={pausa.dias} config={{ tipo: 'numero', min: 30, max: 90, passo: 5, unidade: 'dias' }} formatar={rotuloDia} className="tabular-nums" onMudar={(n) => dias('pausa', n)} />
+              <span className="text-muted-foreground block text-xs">Reativa sozinha quando o pagamento é confirmado.</span>
+            </Propriedade>
+          )}
+          <Propriedade rotulo={'"Pago" informado'}>
+            pausa a régua por <ValorEditavel rotulo="Pago informado pausa a régua por" valor={politica.prazo_pago_dias} config={{ tipo: 'numero', min: 1, max: 7, unidade: 'dias úteis' }} className="tabular-nums" onMudar={(n) => gravar({ prazo_pago_dias: n }, `"pago" informado pausa a régua por ${n} dias úteis`)} />
+            <span className="text-muted-foreground block text-xs">O botão pago do app não baixa: só pausa até o extrato ou o webhook confirmar (09, 5.3).</span>
+          </Propriedade>
+          <Propriedade rotulo="Acordo">
+            desconto até <ValorEditavel rotulo="Desconto máximo no acordo" valor={politica.acordo_desconto_max} config={{ tipo: 'numero', min: 0, max: 30, unidade: '%' }} formatar={pct} className="tabular-nums" onMudar={(n) => gravar({ acordo_desconto_max: n }, `desconto máximo no acordo ${pct(n)}`)} /> em até{' '}
+            <ValorEditavel rotulo="Parcelas no acordo" valor={politica.acordo_parcelas_max} config={{ tipo: 'numero', min: 1, max: 12, unidade: 'parcelas' }} className="tabular-nums" onMudar={(n) => gravar({ acordo_parcelas_max: n }, `acordo em até ${n} parcelas`)} />
+          </Propriedade>
+        </dl>
+        <section className="flex flex-col gap-2">
+          <span className="flex items-center gap-2">
+            <h3 className="flex-1 text-sm font-medium">Régua de honorários</h3>
+            <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={() => setNovo(true)}>
+              <PlusIcon /> Passo
+            </Button>
+          </span>
+          <ListaRegua politica={politica} editavel />
+        </section>
     </GavetaFormulario>
   )
 }
@@ -559,41 +587,50 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
   const fin = useFin()
   const executar = useAcao()
   const confirmar = useConfirmar()
-  const [ed, setEd] = useState<{ id?: string; atividade_id: string; nome: string; valor: string; unidade: 'ocorrencia' | 'hora' | 'por_empregado'; exige_aceite: boolean } | null>(null)
+  const [ed, setEd] = useState<{ atividade_id: string; nome: string; valor: string; unidade: 'ocorrencia' | 'hora' | 'por_empregado'; exige_aceite: boolean } | null>(null)
   const unidade = { ocorrencia: 'por vez', hora: 'por hora', por_empregado: 'por empregado' }
+  const opcoesUnidade = (Object.keys(unidade) as (keyof typeof unidade)[]).map((x) => ({ valor: x, rotulo: unidade[x] }))
+  const opcoesAceite = [
+    { valor: 'sim', rotulo: 'exige aceite do cliente' },
+    { valor: 'nao', rotulo: 'sem aceite (cláusula do contrato)' },
+  ]
+  const naoVazio = (v: string) => (v.trim() ? null : 'Não pode ficar vazio.')
   return (
     <GavetaFormulario aberta largura="lg" onFechar={onFechar} titulo="Tabela de avulsos" descricao="O preço do escritório por atividade do catálogo (GES-002). O integrante usa para propor o serviço fora do contrato; sem aceite, não fatura." acao="Fechar" onAcao={onFechar}>
-      <ul className="divide-border/70 flex flex-col divide-y">
-        {fin.tabelaAvulsos.map((t) => (
-          <li key={t.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !t.ativo && 'text-muted-foreground grayscale')}>
-            <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs">{t.atividade_id}</span>
-            <span className="min-w-0 grow basis-40">
-              <span className="block">{t.nome}</span>
-              <span className="text-muted-foreground block text-xs">
-                {unidade[t.unidade]} · {t.exige_aceite ? 'exige aceite do cliente' : 'sem aceite (cláusula do contrato)'}
-                {t.atividade_id === 'C2-23' && ' · fase 3 (depois)'}
+        <ul className="divide-border/70 flex flex-col divide-y">
+          {fin.tabelaAvulsos.map((t) => (
+            <li key={t.id} className={cn('flex flex-wrap items-center gap-3 py-2 text-sm', !t.ativo && 'text-muted-foreground grayscale')}>
+              <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs">
+                <ValorEditavel rotulo={`Atividade de ${t.nome}`} valor={t.atividade_id} config={{ tipo: 'texto', placeholder: 'SOC-031', validar: naoVazio }} onMudar={(v) => repos.tabelaAvulsos.atualizar(t.id, { atividade_id: v.trim().toUpperCase() })} />
               </span>
-            </span>
-            <span className="tabular-nums">{brl(t.valor_padrao)}</span>
-            <Button size="icon-sm" variant="ghost" className="rounded-full" aria-label={`Editar ${t.nome}`} onClick={() => setEd({ id: t.id, atividade_id: t.atividade_id, nome: t.nome, valor: String(t.valor_padrao), unidade: t.unidade, exige_aceite: t.exige_aceite })}>
-              <PencilSimpleIcon />
-            </Button>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              className="text-destructive-text rounded-full"
-              aria-label={`Excluir ${t.nome}`}
-              onClick={async () => {
-                if (!(await confirmar({ titulo: `Excluir ${t.nome} da tabela?`, descricao: 'Os avulsos já propostos não mudam.', acao: 'Excluir', perigo: true }))) return
-                const antes = executar(() => repos.tabelaAvulsos.excluir(t.id))
-                if (antes) executar(() => undefined, { sucesso: 'Preço excluído.', desfazer: () => repos.tabelaAvulsos.reverter(antes) })
-              }}
-            >
-              <TrashIcon />
-            </Button>
-          </li>
-        ))}
-      </ul>
+              <span className="min-w-0 grow basis-40">
+                <span className="block">
+                  <ValorEditavel rotulo="Nome" valor={t.nome} config={{ tipo: 'texto', validar: naoVazio }} onMudar={(v) => repos.tabelaAvulsos.atualizar(t.id, { nome: v.trim() })} />
+                </span>
+                <span className="text-muted-foreground block text-xs">
+                  <ValorEditavel rotulo={`Unidade de ${t.nome}`} valor={t.unidade} config={{ tipo: 'escolha', opcoes: opcoesUnidade, outra: false }} onMudar={(v) => repos.tabelaAvulsos.atualizar(t.id, { unidade: v })} />
+                  {' · '}
+                  <ValorEditavel rotulo={`Aceite de ${t.nome}`} valor={t.exige_aceite ? 'sim' : 'nao'} config={{ tipo: 'escolha', opcoes: opcoesAceite, outra: false }} onMudar={(v) => repos.tabelaAvulsos.atualizar(t.id, { exige_aceite: v === 'sim' })} />
+                  {t.atividade_id === 'C2-23' && ' · fase 3 (depois)'}
+                </span>
+              </span>
+              <ValorEditavel rotulo={`Preço de ${t.nome}`} valor={t.valor_padrao} config={{ tipo: 'dinheiro', min: 0.01 }} className="tabular-nums" onMudar={(n) => repos.tabelaAvulsos.atualizar(t.id, { valor_padrao: n })} />
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className="text-destructive-text rounded-full"
+                aria-label={`Excluir ${t.nome}`}
+                onClick={async () => {
+                  if (!(await confirmar({ titulo: `Excluir ${t.nome} da tabela?`, descricao: 'Os avulsos já propostos não mudam.', acao: 'Excluir', perigo: true }))) return
+                  const antes = executar(() => repos.tabelaAvulsos.excluir(t.id))
+                  if (antes) executar(() => undefined, { sucesso: 'Preço excluído.', desfazer: () => repos.tabelaAvulsos.reverter(antes) })
+                }}
+              >
+                <TrashIcon />
+              </Button>
+            </li>
+          ))}
+        </ul>
       <Button type="button" variant="outline" className="w-fit rounded-full" onClick={() => setEd({ atividade_id: '', nome: '', valor: '', unidade: 'ocorrencia', exige_aceite: true })}>
         <PlusIcon /> Preço
       </Button>
@@ -605,7 +642,7 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Campo rotulo="Preço (R$)">{(id) => <CampoTexto id={id} valor={ed.valor} onMudar={(v) => setEd({ ...ed, valor: v })} />}</Campo>
-            <Campo rotulo="Unidade">{(id) => <CampoEscolha id={id} valor={ed.unidade} onMudar={(v) => setEd({ ...ed, unidade: v })} opcoes={(Object.keys(unidade) as (keyof typeof unidade)[]).map((x) => ({ valor: x, rotulo: unidade[x] }))} />}</Campo>
+            <Campo rotulo="Unidade">{(id) => <CampoEscolha id={id} valor={ed.unidade} onMudar={(v) => setEd({ ...ed, unidade: v })} opcoes={opcoesUnidade} />}</Campo>
           </div>
           <Interruptor ligado={ed.exige_aceite} onMudar={(v) => setEd({ ...ed, exige_aceite: v })} rotulo="Exige aceite do cliente" />
           <span className="flex gap-2">
@@ -615,7 +652,7 @@ export function TabelaAvulsos({ onFechar }: Fechar) {
               disabled={!ed.nome.trim() || numero(ed.valor) <= 0 || !ed.atividade_id.trim()}
               onClick={() => {
                 const dados = { atividade_id: ed.atividade_id, nome: ed.nome.trim(), valor_padrao: numero(ed.valor), unidade: ed.unidade, exige_aceite: ed.exige_aceite, ativo: true }
-                const ok = executar(() => (ed.id ? repos.tabelaAvulsos.atualizar(ed.id, dados) : repos.tabelaAvulsos.criar(dados)), { sucesso: 'Tabela de avulsos salva.' })
+                const ok = executar(() => repos.tabelaAvulsos.criar(dados), { sucesso: 'Preço na tabela de avulsos.' })
                 if (ok) setEd(null)
               }}
             >

@@ -59,6 +59,7 @@ export function ValorEditavel<V extends QualquerValor>({
   const [mostrado, setMostrado] = useState<V | null | undefined>(valor)
   const [erro, setErro] = useState<string | null>(null)
   const pendente = useRef(false)
+  const botao = useRef<HTMLButtonElement>(null)
   // O Desfazer chega depois de outras mudanças: usa sempre o onMudar mais recente (quem fecha sobre o estado não desfaz os outros campos).
   const ultimoOnMudar = useRef(onMudar)
   ultimoOnMudar.current = onMudar
@@ -97,6 +98,7 @@ export function ValorEditavel<V extends QualquerValor>({
 
   const gatilho = (
     <button
+      ref={botao}
       type="button"
       aria-label={`${rotulo}: ${texto || 'sem valor'}, alterar`}
       aria-haspopup="dialog"
@@ -117,7 +119,8 @@ export function ValorEditavel<V extends QualquerValor>({
         <>
           {gatilho}
           <Sheet open={aberto} onOpenChange={setAberto}>
-            <SheetContent lado="baixo" className="gap-0">
+            {/* Aberta por estado (não por Trigger), a folha não sabe para onde devolver o foco: devolve ao valor. */}
+            <SheetContent lado="baixo" className="gap-0" onCloseAutoFocus={(e) => (e.preventDefault(), botao.current?.focus())}>
               <SheetHeader className="pb-1">
                 <SheetTitle>{rotulo}</SheetTitle>
                 <SheetDescription className="sr-only">Escolha o novo valor de {rotulo.toLowerCase()}</SheetDescription>
