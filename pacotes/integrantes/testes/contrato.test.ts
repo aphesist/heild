@@ -60,7 +60,7 @@ describe('resposta padrão', () => {
     const r = resposta({ de, origem, tipo: 'aguardando_aprovacao', titulo: 'Pronto para aprovar', resumo: 'Enviar a guia de DAS.' })
     expect(RespostaPadrao.parse(r)).toEqual(r)
     expect(r.texto).toBe('Preparei e falta a sua aprovação: Enviar a guia de DAS.')
-    expect(r.formato).toBe('heild.resposta@1')
+    expect(r.formato).toBe('heild.resposta@2')
   })
 
   it('recusa campo a mais (formato estrito) e corta texto longo', () => {
