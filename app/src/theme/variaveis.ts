@@ -98,13 +98,14 @@ export function variaveisCss(tema: Tema, modo: ModoCor): Record<string, string> 
   const rebaixada = t.rebaixada ?? mix(t.fundo, t.texto, escuro ? 97 : 90)
   const rebaixadaFim = t.rebaixada_fim ?? mix(t.fundo, t.texto, escuro ? 99 : 85)
   const borda = t.borda ?? mix(t.fundo, t.texto, modo === 'escuro' ? 82 : 88)
-  // Camadas em hexadecimal, para garantir o contraste do que é derivado (temas de escritório).
-  const camadasTexto = [t.fundo, camada(t.superficie, t.fundo, t.texto, escuro ? 94 : 97), camada(t.elevada, t.fundo, t.texto, escuro ? 89 : 100), camada(t.rebaixada, t.fundo, t.texto, escuro ? 97 : 90)]
-  const textoSuave = t.texto_suave ?? comContraste(camada(undefined, t.texto, t.fundo, 60), camadasTexto, t.texto)
-  const atencao = t.atencao ?? (escuro ? '#e2a845' : '#b7791f')
-  const fundoFim = t.fundo_fim ?? mix(t.fundo, t.texto, modo === 'escuro' ? 92 : 90)
   const lateral = t.lateral ?? mix(t.fundo, t.texto, modo === 'escuro' ? 92 : 93)
   const lateralFim = t.lateral_fim ?? mix(t.fundo, t.texto, modo === 'escuro' ? 86 : 80)
+  const fundoFim = t.fundo_fim ?? mix(t.fundo, t.texto, modo === 'escuro' ? 92 : 90)
+  // Camadas em hexadecimal, para garantir o contraste do que é derivado (temas de escritório).
+  // Inclui a barra lateral (o texto suave dos rótulos e ícones dela) e o fim do gradiente do fundo.
+  const camadasTexto = [t.fundo, camada(t.superficie, t.fundo, t.texto, escuro ? 94 : 97), camada(t.elevada, t.fundo, t.texto, escuro ? 89 : 100), camada(t.rebaixada, t.fundo, t.texto, escuro ? 97 : 90), ...[fundoFim, lateral, lateralFim].filter((c) => /^#[0-9a-f]{6}$/i.test(c))]
+  const textoSuave = t.texto_suave ?? comContraste(camada(undefined, t.texto, t.fundo, 60), camadasTexto, t.texto)
+  const atencao = t.atencao ?? (escuro ? '#e2a845' : '#b7791f')
 
   return {
     '--background': t.fundo,

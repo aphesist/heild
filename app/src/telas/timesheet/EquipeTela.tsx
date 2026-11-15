@@ -236,7 +236,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
 
         {!regs.length && <EstadoVazio compacto titulo="Nenhuma hora neste filtro" descricao="Troque o período, o setor ou limpe os filtros." />}
 
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid items-start gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
             <Caixa>
               <Pergunta>Quanto cada pessoa registrou, e quanto foi automático?</Pergunta>
@@ -269,7 +269,7 @@ export function EquipeTela({ papel, clienteNome, clienteId }: { papel: 'gestor' 
               </p>
             </Caixa>
             {/* T-3: de lg a xl a coluna é a tela inteira; o gráfico de três semanas fica ao lado do diagnóstico. */}
-            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-1">
+            <div className="grid items-start gap-4 lg:grid-cols-2 xl:grid-cols-1">
               <Caixa>
                 <Pergunta>A captura está melhorando? (% das horas por semana)</Pergunta>
                 {semanas.length ? <ColunasEmpilhadas unidade="%" altura={120} dados={semanas} /> : <p className="text-muted-foreground text-sm">Sem semanas com dados.</p>}

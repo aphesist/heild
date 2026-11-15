@@ -128,7 +128,7 @@ export function ArmazenamentoTela() {
           )}
         </Caixa>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <Caixa>
             <TituloBloco descricao="Vale para clientes novos; dá para ajustar por cliente. Marcar uma pasta vale para tudo dentro dela, por qualquer caminho que o arquivo chegue.">Árvore-modelo e o que o cliente vê</TituloBloco>
             <ul className="flex flex-col">

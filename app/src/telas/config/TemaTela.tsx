@@ -158,7 +158,7 @@ export function TemaTela() {
 
         <EstadoComplemento />
         <SeletorTema />
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
           <div className="flex min-w-0 flex-col gap-4">
             <Caixa>
               <TituloBloco>Identidade</TituloBloco>
@@ -295,7 +295,7 @@ export function TemaTela() {
             <NomeWhatsapp />
           </div>
 
-          <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0">
             <Previa tema={r} modo={modo} />
             <Caixa>
               <TituloBloco descricao="Nome e cor do orb de cada setor. Cada pessoa pode dar outro nome ao seu. O Assistente é sempre o contraste do tema.">Integrantes padrão</TituloBloco>

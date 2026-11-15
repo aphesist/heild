@@ -142,7 +142,7 @@ export function ResultadoTela() {
         </AreaRolagem>
       </Caixa>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Fechamentos fin={fin} admin={admin} podeFechar={podeFechar} onFechar={fecharMes} atualAberto={atual?.situacao !== 'fechado'} />
         <Caixa>
           <Pergunta descricao={`Gastos do mês ÷ ${custoHora.horasProdutivas} horas produtivas; centros marcados "entra no custo-hora".`}>Custo-hora de {rotuloCompetencia(COMPETENCIA_ATUAL)}</Pergunta>
@@ -245,7 +245,7 @@ export function ResultadoTela() {
         </Caixa>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Caixa>
           <Pergunta descricao="Consultas pagas, mensagens e certidões por cliente (GES-010). Repassar vira extra na próxima fatura, pela cláusula do contrato.">Absorver ou repassar os custos variáveis?</Pergunta>
           <ul className="divide-border/70 flex flex-col divide-y text-sm">

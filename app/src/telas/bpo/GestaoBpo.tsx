@@ -885,7 +885,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
       )}
       {lista.length === 0 && <EstadoVazio icone={ChartLineIcon} titulo="Sem empresas no BPO" descricao="A margem aparece quando houver empresa ativa e horas no Timesheet." />}
       {lista.length > 0 && (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <Caixa className="gap-0">
             <TituloBloco descricao={base === 'faturado' ? 'Honorário do BPO no mês menos as horas da equipe e os custos variáveis.' : 'O que já entrou no caixa do escritório (fatura de novembro paga) menos os mesmos custos.'}>Margem por empresa</TituloBloco>
             <div className="text-muted-foreground mt-2 hidden grid-cols-[minmax(0,1fr)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(5rem,max-content)_minmax(4rem,max-content)_minmax(3.5rem,max-content)] gap-3 text-xs sm:grid">
@@ -934,7 +934,7 @@ export function RentabilidadeBpoTela({ empresa }: PropsBpo) {
           </Caixa>
         </div>
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Caixa>
           <TituloBloco descricao={`Fila pelo prazo, rotinas pela periodicidade e, no BPO entre escritórios, folha no início do mês, DCTFWeb e EFD-Reinf no meio, Simples no dia 20. Linha: capacidade da equipe por semana (${Math.round(capSemanal)} h).`}>Carga por semana</TituloBloco>
           <div className="relative flex h-36 items-end gap-3" role="img" aria-label={`Carga por semana: ${semanas.map((s) => `${s.rotulo} ${s.total} h`).join('; ')}; capacidade ${Math.round(capSemanal)} h`}>

@@ -161,7 +161,8 @@ function SecaoHoje({ e, onSecao, onEscolher }: { e: EmpresaVista; onSecao: (s: S
             {cadencias.map((c) => {
               const rs = ativas.filter((r) => r.cadencia === c)
               return (
-                <div key={c} className="flex min-w-0 flex-col gap-1">
+                // Cada cadência é uma pilha com a altura das suas rotinas (como a DuasPilhas): o fim da mais curta é o desenho.
+                <div key={c} data-pilha className="flex min-w-0 flex-col gap-1">
                   <span className="text-muted-foreground text-xs font-medium capitalize">
                     {c} · {rs.filter((r) => r.feita_em).length}/{rs.length}
                   </span>

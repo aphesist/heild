@@ -44,6 +44,8 @@ function detectar(opcoes) {
   const visivel = (el) => {
     const b = el.getBoundingClientRect()
     if (b.width < 1 || b.height < 1) return false
+    // Fora da tela pelos lados (gaveta fechada, empurrada para fora): não aparece.
+    if (b.right <= 0 || b.left >= window.innerWidth) return false
     const s = cs(el)
     if (s.visibility === 'hidden' || s.display === 'none' || parseFloat(s.opacity) < 0.05) return false
     for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
@@ -166,7 +168,8 @@ function detectar(opcoes) {
 
   // 2. Sobreposição entre irmãos: a caixa de cada um soma o conteúdo que vaza dele (sem os absolutos e sem o que é cortado).
   const tinta = new Map()
-  const fluxo = (el) => !/(absolute|fixed)/.test(cs(el).position)
+  // Fora do fluxo: absoluto, fixo e a barra sticky (que flutua sobre o conteúdo ao rolar, de propósito).
+  const fluxo = (el) => !/(absolute|fixed|sticky)/.test(cs(el).position)
   // Caixa de tinta: a do elemento somada à dos filhos em fluxo que não são cortados. Elemento sem caixa
   // (display: contents, vazio) não conta o ponto (0,0) que o navegador devolve; filho invisível não conta.
   const tintaDe = (el) => {
@@ -402,7 +405,8 @@ function detectar(opcoes) {
   // Fora da grade de widgets: card esticado bem além do conteúdo e vão sob a coluna mais curta (PADRAO_DE_INTERFACE.md, 5).
   for (const g of todos) {
     const sg = cs(g)
-    if (sg.display !== 'grid' || g.style.gridAutoRows || !visivel(g)) continue
+    // Linha de lista (li, tr) em grade não é composição de página: a célula alta de uma linha não é vão.
+    if (sg.display !== 'grid' || g.style.gridAutoRows || !visivel(g) || /^(LI|TR)$/.test(g.tagName) || g.getAttribute('role') === 'row') continue
     const colsG = sg.gridTemplateColumns.split(' ').filter((x) => /px$/.test(x))
     if (colsG.length < 2) continue
     const filhosG = [...g.children].filter((k) => visivel(k) && cs(k).position !== 'absolute')
@@ -415,7 +419,8 @@ function detectar(opcoes) {
       if (kb.width < 100) return
       const abaixo = rsG.some((o, j) => j !== i && o.top >= kb.bottom - 2 && o.left < kb.right - 4 && o.right > kb.left + 4)
       // Coluna lateral sticky (DuasPilhas, CCT no XL): fica parada enquanto a outra rola; o vão é de propósito.
-      if (!abaixo && cs(k).position !== 'sticky') {
+      // Pilha da DuasPilhas: cada coluna tem a altura do que carrega; o fim da mais curta é o desenho do padrão.
+      if (!abaixo && cs(k).position !== 'sticky' && !k.hasAttribute('data-pilha')) {
         const vizinhos = rsG.filter((o, j) => j !== i && o.top < kb.bottom && o.bottom > kb.top)
         const vao = Math.min(Math.max(kb.bottom, ...vizinhos.map((o) => o.bottom)), gbG.bottom) - kb.bottom
         if (vao > 96) add('vao', `${Math.round(vao)}px vazios sob ${desc(k)}`, k)

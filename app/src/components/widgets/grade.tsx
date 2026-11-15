@@ -225,7 +225,7 @@ export function GradeWidgets({ chave, catalogo, padrao, titulo, className }: Pro
             </Button>
           </>
         ) : (
-          <Button size="sm" variant="ghost" className="text-muted-foreground rounded-full" onClick={() => setEditando(true)}>
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setEditando(true)}>
             <PencilSimpleIcon /> Editar painel
           </Button>
         )}

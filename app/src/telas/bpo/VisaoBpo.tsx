@@ -227,6 +227,8 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
       </Caixa>
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        {/* Duas pilhas (como a DuasPilhas): cada coluna tem a altura do que carrega, alinhadas pelo topo. */}
+        <div data-pilha className="flex min-w-0 flex-col gap-4">
         <Caixa>
           <TituloBloco descricao="Só o que pede uma pessoa; captura, conciliação e lembretes o integrante faz sozinho.">Precisa de decisão</TituloBloco>
           {decisoes.length === 0 && (
@@ -262,7 +264,8 @@ export function VisaoBpoTela({ empresa, onEscolher }: PropsBpo) {
             </Button>
           )}
         </Caixa>
-        <div className="flex flex-col gap-4">
+        </div>
+        <div data-pilha className="flex min-w-0 flex-col gap-4">
           {empresa ? (
             <Caixa>
               <TituloBloco descricao="Por que a empresa está nesta cor (critérios e pesos).">Auditoria contínua</TituloBloco>

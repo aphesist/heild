@@ -99,7 +99,7 @@ export function ContasPagarTela() {
 
       <CartoesDaAba fin={fin} aba="pagar" />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Caixa>
           <Pergunta descricao={limite === Infinity ? `Você aprova qualquer valor; acima de ${brl(dois)} também o segundo sócio.` : limite > 0 ? `Você aprova até ${brl(limite)}; acima disso, o cartão vai ao Administrador.` : 'Você vê a fila; aprovar é do Gestor do Financeiro e do Administrador.'}>Fila por estado</Pergunta>
           <div className="flex flex-wrap items-center gap-2">

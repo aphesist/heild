@@ -833,7 +833,7 @@ function EntregasContratantes({ contratantes }: { contratantes: ContratanteVista
   return (
     <PaginaBpo>
       <CabecalhoBpo integrante={umSo ? 'i-atendimento' : null} titulo="Entregas e SLA" sub="Relatório mensal do contratante, com a marca dele: entregas com recibo, guias, pendências e o SLA, com cada desvio explicado (do contratante ou do BPO)" />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 md:grid-cols-2">
         {contratantes.map((c) => {
           const rel = c.entregas.find((e) => e.tipo === 'relatorio_contratante' && e.competencia === COMPETENCIA_FECHAR)
           const rascunho = !!rel?.extras?.rascunho

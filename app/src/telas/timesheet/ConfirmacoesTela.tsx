@@ -60,7 +60,7 @@ export function ConfirmacoesTela({ papel, clienteNome, clienteId }: { papel: Pap
     <AreaRolagem className="h-full px-4 pb-10 sm:px-5 md:pb-24">
       <div className="pagina flex flex-col gap-4 pt-1">
         <CabecalhoTs titulo="Confirmações" sub={`${pendentes.length} pendentes · leva uns 2 min · o que não for confirmado em 7 dias fica como sem classificação, sem cobrança`} papel={papel} />
-        <div className={cn('grid gap-4', gestor && 'lg:grid-cols-[minmax(0,1fr)_20rem]')}>
+        <div className={cn('grid items-start gap-4', gestor && 'lg:grid-cols-[minmax(0,1fr)_20rem]')}>
           <div className="flex min-w-0 flex-col gap-4">
             {dias.map((dia) => {
               const { mostrar, fora } = doDia(dia)

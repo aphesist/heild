@@ -134,7 +134,7 @@ export function RentabilidadeTela({ papel, clienteId }: { papel: 'gestor' | 'adm
                 </Caixa>
 
                 {escolhido && (
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                  <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
                     <Caixa>
                       <Pergunta
                         acao={
