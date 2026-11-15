@@ -255,7 +255,7 @@ export function AcoesAba({ itens, carteira }: { itens: AcaoCfg[]; carteira?: num
                 disabled={!!a.falta}
                 onClick={() => executar(a)}
                 title={a.falta ? `${a.rotulo}: falta ${a.falta}` : `${a.rotulo} · ${a.nivel}`}
-                className="hover:bg-accent/60 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed"
+                className="hover:bg-accent/60 flex w-full cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed"
               >
                 <span className="text-muted-foreground shrink-0 [&_svg]:size-4">{a.falta ? <WarningIcon className="text-warning" /> : iconeNivel[a.nivel]}</span>
                 <span className="min-w-0 grow basis-40">
@@ -303,7 +303,7 @@ export function RelatoriosAba({ itens, compacto }: { itens: string[]; compacto?:
     )
   if (compacto)
     return (
-      <ul className="-mx-2 flex flex-col">
+      <ul className="flex flex-col">
         {gaveta}
         {itens.slice(0, 3).map((r) => (
           <li key={r} className="hover:bg-sunken flex h-7 items-center gap-1 rounded-sm px-2 text-sm">

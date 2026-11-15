@@ -585,7 +585,7 @@ export const fichasComponentes: FichaLab[] = [
     nome: 'Um widget, em todos os estados',
     grupo: 'Widgets reais',
     descricao: 'Um widget real por vez, no tamanho escolhido, com o cenário de dados: 0, 1, 3, 15, 50 ou 200 itens; texto curto, longo ou sem espaço; valores e datas extremos; opcionais ausentes; serviços falhando; sem permissão.',
-    eixos: { estados: ['padrao', 'erro', 'sem-permissao'], tamanhos: ['P', 'M', 'G', 'L', 'XL'], cenario: true },
+    eixos: { estados: ['padrao', 'carregando', 'erro', 'sem-permissao'], tamanhos: ['P', 'M', 'G', 'L', 'XL'], cenario: true },
     render: (p) => <FichaWidget p={p} />,
   },
 ]

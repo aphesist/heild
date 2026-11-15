@@ -188,7 +188,7 @@ export function DocumentosDaAba({ itens: fixos, compacto, limite }: { itens: Doc
     <div className="flex flex-col gap-2">
       {gavetas}
       {filaAviso}
-      <AreaRolagem eixo="x" className="-mx-1 px-1">
+      <AreaRolagem eixo="x">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="text-muted-foreground text-left text-xs">
